@@ -533,9 +533,10 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       final List<Contact> matchedContacts = [];
 
       for (final contact in contacts) {
-        final bool matches = fuzzy
-            ? contact.name.toLowerCase().contains(name.toLowerCase())
-            : contact.name == name;
+        final bool matches =
+            fuzzy
+                ? contact.name.toLowerCase().contains(name.toLowerCase())
+                : contact.name == name;
 
         if (matches) {
           matchedContacts.add(contact);
@@ -600,7 +601,8 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       }
 
       if (findAll) {
-        final interactionsJson = matchedInteractions.map((i) => i.toJson()).toList();
+        final interactionsJson =
+            matchedInteractions.map((i) => i.toJson()).toList();
 
         // 检查是否需要分页
         if (offset != null || count != null) {
@@ -632,8 +634,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       }
 
       final interactions = await _controller.getAllInteractions();
-      final interaction =
-          interactions.where((i) => i.id == id).firstOrNull;
+      final interaction = interactions.where((i) => i.id == id).firstOrNull;
 
       return jsonEncode(interaction?.toJson());
     } catch (e) {
@@ -652,102 +653,64 @@ class ContactMainView extends StatefulWidget {
 // ... (imports and other code remain the same until ContactMainViewState)
 
 class ContactMainViewState extends State<ContactMainView> {
-
-
-
   late ContactPlugin _plugin;
 
   late ContactController _controller;
 
-
-
   @override
-
   void initState() {
-
     super.initState();
 
     _plugin = PluginManager().getPlugin('contact') as ContactPlugin;
 
     _controller = _plugin._controller;
-
   }
 
-
-
   Future<void> _showFilterDialog() async {
-
     final currentFilter = await _controller.getFilterConfig();
 
     final tags = await _controller.getAllTags();
 
-
-
     if (!mounted) return;
 
-
-
     await showDialog<void>(
-
       context: context,
 
       builder:
           (context) => FilterDialog(
-
             initialFilter: currentFilter,
 
             availableTags: tags,
 
             onApply: (filter) async {
-
               await _controller.saveFilterConfig(filter);
 
               if (mounted) {
-
                 setState(() {});
-
               }
-
             },
-
           ),
-
     );
-
   }
 
-
-
   Future<void> _showSortMenu() async {
-
     final currentSort = await _controller.getSortConfig();
 
     if (!mounted) return;
 
     // ... (rest of the _showSortMenu method is the same)
-
   }
 
-
-
-
   Future<void> _addOrEditContact([Contact? contact]) async {
-
     final formStateKey = GlobalKey<ContactFormState>();
 
     Contact? savedContact;
 
-
-
     await Navigator.of(context).push(
-
       MaterialPageRoute<void>(
-
         builder:
             (context) => Scaffold(
-
               appBar: AppBar(
-
                 leading: TextButton(
                   child: Text(ContactLocalizations.of(context).cancel),
 
@@ -757,27 +720,20 @@ class ContactMainViewState extends State<ContactMainView> {
                 leadingWidth: 80,
 
                 title: Text(
-
                   contact == null
-
                       ? ContactLocalizations.of(context).addContact
-
                       : ContactLocalizations.of(context).editContact,
-
                 ),
 
                 actions: [
-
                   TextButton(
                     child: Text(
                       ContactLocalizations.of(context).done,
 
                       style: const TextStyle(fontWeight: FontWeight.bold),
-
                     ),
 
                     onPressed: () async {
-
                       formStateKey.currentState?.saveContact();
 
                       // a small delay to allow savedContact to be set
@@ -785,78 +741,48 @@ class ContactMainViewState extends State<ContactMainView> {
                       await Future.delayed(const Duration(milliseconds: 50));
 
                       if (savedContact != null) {
-
                         try {
-
                           if (contact == null) {
-
                             await _controller.addContact(savedContact!);
-
                           } else {
-
                             await _controller.updateContact(savedContact!);
                           }
 
                           if (mounted) {
-
                             Navigator.of(context).pop();
 
                             setState(() {});
                           }
-
                         } catch (e) {
-
                           if (mounted) {
-
                             ScaffoldMessenger.of(context).showSnackBar(
-
                               SnackBar(
-
                                 content: Text(
-
                                   ContactLocalizations.of(
                                     context,
                                   ).saveFailedMessage,
-
                                 ),
-
                               ),
-
                             );
                           }
-
                         }
-
                       } else {
-
                         ScaffoldMessenger.of(context).showSnackBar(
-
                           SnackBar(
-
                             content: Text(
-
                               ContactLocalizations.of(
                                 context,
                               ).formValidationMessage,
-
                             ),
-
                           ),
-
                         );
-
                       }
-
                     },
-
                   ),
-
                 ],
-
               ),
 
               body: ContactForm(
-
                 key: formStateKey,
 
                 formStateKey: formStateKey,
@@ -866,41 +792,30 @@ class ContactMainViewState extends State<ContactMainView> {
                 contact: contact,
 
                 onSave: (updatedContact) {
-
                   savedContact = updatedContact;
-
                 },
-
               ),
-
             ),
-
       ),
-
     );
-
   }
-
-
 
   Future<void> _deleteContact(Contact contact) async {
-
     // ... (this method is the same)
-
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: (Platform.isAndroid || Platform.isIOS)
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => PluginManager.toHomeScreen(context),
-              ),
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
         title: Text(ContactLocalizations.of(context).contacts),
         actions: [
           IconButton(
@@ -938,7 +853,9 @@ class ContactMainViewState extends State<ContactMainView> {
                   const SizedBox(height: 16),
                   Text(
                     ContactLocalizations.of(context).noContacts,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.grey),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleLarge?.copyWith(color: Colors.grey),
                   ),
                 ],
               ),
@@ -963,7 +880,4 @@ class ContactMainViewState extends State<ContactMainView> {
       ),
     );
   }
-
 }
-
-

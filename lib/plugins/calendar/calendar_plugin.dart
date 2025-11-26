@@ -286,7 +286,9 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     final tomorrow = today.add(const Duration(days: 1));
 
     return controller.getAllEvents().where((event) {
-      return event.startTime.isAfter(today.subtract(const Duration(seconds: 1))) &&
+      return event.startTime.isAfter(
+            today.subtract(const Duration(seconds: 1)),
+          ) &&
           event.startTime.isBefore(tomorrow);
     }).length;
   }
@@ -298,7 +300,9 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     final weekEnd = weekStart.add(const Duration(days: 7));
 
     return controller.getAllEvents().where((event) {
-      return event.startTime.isAfter(weekStart.subtract(const Duration(seconds: 1))) &&
+      return event.startTime.isAfter(
+            weekStart.subtract(const Duration(seconds: 1)),
+          ) &&
           event.startTime.isBefore(weekEnd);
     }).length;
   }
@@ -532,10 +536,13 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
 
-    final events = controller.getAllEvents().where((event) {
-      return event.startTime.isAfter(today.subtract(const Duration(seconds: 1))) &&
-          event.startTime.isBefore(tomorrow);
-    }).toList();
+    final events =
+        controller.getAllEvents().where((event) {
+          return event.startTime.isAfter(
+                today.subtract(const Duration(seconds: 1)),
+              ) &&
+              event.startTime.isBefore(tomorrow);
+        }).toList();
 
     final eventsJson = events.map((e) => e.toJson()).toList();
 
@@ -573,10 +580,13 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     final startDate = DateTime.parse(startDateStr);
     final endDate = DateTime.parse(endDateStr);
 
-    final events = controller.getAllEvents().where((event) {
-      return event.startTime.isAfter(startDate.subtract(const Duration(seconds: 1))) &&
-          event.startTime.isBefore(endDate.add(const Duration(seconds: 1)));
-    }).toList();
+    final events =
+        controller.getAllEvents().where((event) {
+          return event.startTime.isAfter(
+                startDate.subtract(const Duration(seconds: 1)),
+              ) &&
+              event.startTime.isBefore(endDate.add(const Duration(seconds: 1)));
+        }).toList();
 
     final eventsJson = events.map((e) => e.toJson()).toList();
 
@@ -630,9 +640,10 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
       description: description,
       startTime: startTime,
       endTime: endTime,
-      icon: iconCodePoint != null
-          ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
-          : Icons.event,
+      icon:
+          iconCodePoint != null
+              ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
+              : Icons.event,
       color: colorValue != null ? Color(colorValue) : color,
       source: 'default',
       reminderMinutes: reminderMinutes,
@@ -671,9 +682,10 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
       description: description,
       startTime: startTimeStr != null ? DateTime.parse(startTimeStr) : null,
       endTime: endTimeStr != null ? DateTime.parse(endTimeStr) : null,
-      icon: iconCodePoint != null
-          ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
-          : null,
+      icon:
+          iconCodePoint != null
+              ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
+              : null,
       color: colorValue != null ? Color(colorValue) : null,
       reminderMinutes: reminderMinutes,
     );
@@ -905,12 +917,14 @@ class _CalendarMainViewState extends State<CalendarMainView> {
       builder: (context, child) {
         return Scaffold(
           appBar: AppBar(
-            leading: (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => PluginManager.toHomeScreen(context),
-                  ),
+            automaticallyImplyLeading: false,
+            leading:
+                (Platform.isAndroid || Platform.isIOS)
+                    ? null
+                    : IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => PluginManager.toHomeScreen(context),
+                    ),
             title: Text(CalendarLocalizations.of(context).calendar),
             actions: [
               // 跳转到今天按钮

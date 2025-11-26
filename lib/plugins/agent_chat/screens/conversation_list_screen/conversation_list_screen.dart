@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import '../../agent_chat_plugin.dart';
 import '../../controllers/conversation_controller.dart';
@@ -14,8 +17,7 @@ class ConversationListScreen extends StatefulWidget {
   const ConversationListScreen({super.key});
 
   @override
-  State<ConversationListScreen> createState() =>
-      _ConversationListScreenState();
+  State<ConversationListScreen> createState() => _ConversationListScreenState();
 }
 
 class _ConversationListScreenState extends State<ConversationListScreen> {
@@ -83,12 +85,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: const Text('设置'),
-          ),
-          body: AgentChatSettingsScreen(plugin: AgentChatPlugin.instance),
-        ),
+        builder:
+            (context) => Scaffold(
+              appBar: AppBar(title: const Text('设置')),
+              body: AgentChatSettingsScreen(plugin: AgentChatPlugin.instance),
+            ),
       ),
     );
   }
@@ -104,9 +105,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const ToolManagementScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const ToolManagementScreen()),
     );
   }
 
@@ -122,10 +121,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ToolTemplateScreen(
-          templateService: _templateService,
-          // 不传递 onUseTemplate，隐藏"使用"按钮
-        ),
+        builder:
+            (context) => ToolTemplateScreen(
+              templateService: _templateService,
+              // 不传递 onUseTemplate，隐藏"使用"按钮
+            ),
       ),
     );
   }
@@ -134,35 +134,43 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-                controller: _searchController,
-                focusNode: _searchFocusNode,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: '搜索会话...',
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
+        title:
+            _isSearching
+                ? TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: '搜索会话...',
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onPrimary.withValues(alpha: 0.7),
+                    ),
                   ),
-                ),
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  fontSize: 16,
-                ),
-                cursorColor: Theme.of(context).colorScheme.onPrimary,
-                onChanged: (query) {
-                  _controller.setSearchQuery(query);
-                },
-              )
-            : const Text('Agent Chat'),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontSize: 16,
+                  ),
+                  cursorColor: Theme.of(context).colorScheme.onPrimary,
+                  onChanged: (query) {
+                    _controller.setSearchQuery(query);
+                  },
+                )
+                : const Text('Agent Chat'),
         actions: [
           // 搜索按钮
           IconButton(
-            icon: Icon(
-              _isSearching ? Icons.close : Icons.search,
-              size: 24,
-            ),
+            icon: Icon(_isSearching ? Icons.close : Icons.search, size: 24),
             onPressed: _toggleSearch,
           ),
           // 工具管理按钮
@@ -184,9 +192,10 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
           ),
         ],
       ),
-      body: _controller.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _controller.conversations.isEmpty
+      body:
+          _controller.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _controller.conversations.isEmpty
               ? _buildEmptyState()
               : _buildConversationList(),
       floatingActionButton: FloatingActionButton(
@@ -203,26 +212,16 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.chat_bubble_outline,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.chat_bubble_outline, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             '还没有任何会话',
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
           Text(
             '点击右下角的 + 按钮创建新会话',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],
       ),
@@ -260,29 +259,21 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
             Expanded(
               child: Text(
                 conversation.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             if (conversation.unreadCount > 0)
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 2,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: Colors.red,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '${conversation.unreadCount}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
                 ),
               ),
           ],
@@ -302,52 +293,50 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
             const SizedBox(height: 4),
             Text(
               _formatDateTime(conversation.lastMessageAt),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
             ),
           ],
         ),
         trailing: PopupMenuButton<String>(
-          onSelected: (value) => _onConversationMenuSelected(
-            value,
-            conversation,
-          ),
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'pin',
-              child: Row(
-                children: [
-                  Icon(
-                    conversation.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
+          onSelected:
+              (value) => _onConversationMenuSelected(value, conversation),
+          itemBuilder:
+              (context) => [
+                PopupMenuItem(
+                  value: 'pin',
+                  child: Row(
+                    children: [
+                      Icon(
+                        conversation.isPinned
+                            ? Icons.push_pin_outlined
+                            : Icons.push_pin,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(conversation.isPinned ? '取消置顶' : '置顶'),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Text(conversation.isPinned ? '取消置顶' : '置顶'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit),
-                  SizedBox(width: 8),
-                  Text('编辑'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('删除', style: TextStyle(color: Colors.red)),
-                ],
-              ),
-            ),
-          ],
+                ),
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit),
+                      SizedBox(width: 8),
+                      Text('编辑'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('删除', style: TextStyle(color: Colors.red)),
+                    ],
+                  ),
+                ),
+              ],
         ),
         onTap: () => _openConversation(conversation),
       ),
@@ -383,12 +372,13 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ChatScreen(
-            conversation: latestConversation,
-            storage: _controller.storage,
-            conversationService: _controller.conversationService,
-            getSettings: () => AgentChatPlugin.instance.settings,
-          ),
+          builder:
+              (context) => ChatScreen(
+                conversation: latestConversation,
+                storage: _controller.storage,
+                conversationService: _controller.conversationService,
+                getSettings: () => AgentChatPlugin.instance.settings,
+              ),
         ),
       );
     }
@@ -421,56 +411,55 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     try {
       final result = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('新建会话'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: '会话标题',
-                  hintText: '输入会话标题',
+        builder:
+            (context) => AlertDialog(
+              title: const Text('新建会话'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: titleController,
+                    decoration: const InputDecoration(
+                      labelText: '会话标题',
+                      hintText: '输入会话标题',
+                    ),
+                    autofocus: true,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    '提示：可以在会话中选择Agent进行对话',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('取消'),
                 ),
-                autofocus: true,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                '提示：可以在会话中选择Agent进行对话',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('取消'),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('创建'),
+                ),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('创建'),
-            ),
-          ],
-        ),
       );
 
       if (result == true && titleController.text.isNotEmpty) {
         try {
           // 创建会话时不需要指定agentId，可以在聊天时选择
-          await _controller.createConversation(
-            title: titleController.text,
-          );
+          await _controller.createConversation(title: titleController.text);
 
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('会话创建成功')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('会话创建成功')));
           }
         } catch (e) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('创建失败: $e')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('创建失败: $e')));
           }
         }
       }
@@ -487,26 +476,25 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     try {
       final result = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('编辑会话'),
-          content: TextField(
-            controller: titleController,
-            decoration: const InputDecoration(
-              labelText: '会话标题',
+        builder:
+            (context) => AlertDialog(
+              title: const Text('编辑会话'),
+              content: TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: '会话标题'),
+                autofocus: true,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('取消'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('保存'),
+                ),
+              ],
             ),
-            autofocus: true,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('取消'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('保存'),
-            ),
-          ],
-        ),
       );
 
       if (result == true && titleController.text.isNotEmpty) {
@@ -514,9 +502,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         await _controller.updateConversation(updated);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('会话已更新')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('会话已更新')));
         }
       }
     } finally {
@@ -529,32 +517,33 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   Future<void> _showDeleteConfirmDialog(Conversation conversation) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除会话 "${conversation.title}" 吗？\n\n此操作将同时删除所有消息记录，且不可恢复。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('确认删除'),
+            content: Text(
+              '确定要删除会话 "${conversation.title}" 吗？\n\n此操作将同时删除所有消息记录，且不可恢复。',
             ),
-            child: const Text('删除'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('取消'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('删除'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (result == true) {
       await _controller.deleteConversation(conversation.id);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('会话已删除')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('会话已删除')));
       }
     }
   }

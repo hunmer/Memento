@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -25,7 +27,6 @@ class _NotesMainViewState extends NotesMainViewState
         FolderSelectionDialog,
         FolderItem,
         NoteItem {
-
   bool _fabExpanded = false;
   String? _selectedTag;
   DateTime? _selectedDate;
@@ -36,19 +37,16 @@ class _NotesMainViewState extends NotesMainViewState
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
         elevation: 0,
         backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: theme.iconTheme.color,
-          ),
-          onPressed:
-              () =>
-                  currentFolder?.parentId != null
-                      ? navigateBack()
-                      : PluginManager.toHomeScreen(context),
-        ),
         title:
             isSearching
                 ? TextField(
@@ -154,10 +152,7 @@ class _NotesMainViewState extends NotesMainViewState
     return FloatingActionButton.extended(
       onPressed: onPressed,
       icon: Icon(icon, size: 20),
-      label: Text(
-        label,
-        style: const TextStyle(fontSize: 14),
-      ),
+      label: Text(label, style: const TextStyle(fontSize: 14)),
       backgroundColor: Colors.white,
       foregroundColor: const Color(0xFF607AFB),
       elevation: 4,
@@ -194,9 +189,10 @@ class _NotesMainViewState extends NotesMainViewState
                   const SizedBox(width: 8),
                   _buildFilterChip(
                     icon: Icons.calendar_today,
-                    label: _selectedDate != null
-                        ? DateFormat('yyyy/MM/dd').format(_selectedDate!)
-                        : DateFormat('yyyy/MM/dd').format(DateTime.now()),
+                    label:
+                        _selectedDate != null
+                            ? DateFormat('yyyy/MM/dd').format(_selectedDate!)
+                            : DateFormat('yyyy/MM/dd').format(DateTime.now()),
                     onTap: () {
                       _showDatePicker();
                     },
@@ -206,7 +202,7 @@ class _NotesMainViewState extends NotesMainViewState
             ),
           ),
         ),
-        
+
         // Subfolders Horizontal List (if any)
         if (subFolders.isNotEmpty)
           SliverToBoxAdapter(
@@ -225,7 +221,9 @@ class _NotesMainViewState extends NotesMainViewState
                     label: Text(folder.name),
                     onPressed: () => navigateToFolder(folder),
                     backgroundColor: Theme.of(context).cardColor,
-                    side: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                    side: BorderSide(
+                      color: Theme.of(context).dividerColor.withOpacity(0.1),
+                    ),
                   );
                 },
               ),
@@ -268,16 +266,16 @@ class _NotesMainViewState extends NotesMainViewState
                         ? NotesLocalizations.of(context).noSearchResults
                         : NotesLocalizations.of(context).emptyFolder,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).disabledColor,
-                        ),
+                      color: Theme.of(context).disabledColor,
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          
-          // Bottom padding for FAB
-          const SliverToBoxAdapter(child: SizedBox(height: 80)),
+
+        // Bottom padding for FAB
+        const SliverToBoxAdapter(child: SizedBox(height: 80)),
       ],
     );
   }
@@ -294,7 +292,10 @@ class _NotesMainViewState extends NotesMainViewState
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7), // Zinc 800 / 200
+          color:
+              isDark
+                  ? const Color(0xFF27272A)
+                  : const Color(0xFFE4E4E7), // Zinc 800 / 200
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -342,10 +343,7 @@ class _NotesMainViewState extends NotesMainViewState
               itemBuilder: (context, index) {
                 final folder = allFolders[index];
                 return ListTile(
-                  leading: Icon(
-                    folder.icon,
-                    color: folder.color,
-                  ),
+                  leading: Icon(folder.icon, color: folder.color),
                   title: Text(folder.name),
                   onTap: () {
                     setState(() {
@@ -395,40 +393,42 @@ class _NotesMainViewState extends NotesMainViewState
           content: SizedBox(
             width: double.maxFinite,
             height: 300,
-            child: tagsList.isEmpty
-                ? Center(child: Text('暂无标签'))
-                : ListView.builder(
-                    itemCount: tagsList.length + 1, // +1 for "All Tags" option
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        // "All Tags" option
+            child:
+                tagsList.isEmpty
+                    ? Center(child: Text('暂无标签'))
+                    : ListView.builder(
+                      itemCount:
+                          tagsList.length + 1, // +1 for "All Tags" option
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          // "All Tags" option
+                          return ListTile(
+                            leading: Icon(Icons.label),
+                            title: Text('All Tags'),
+                            onTap: () {
+                              setState(() {
+                                _selectedTag = null;
+                                // 这里可以添加清除标签过滤的逻辑
+                              });
+                              Navigator.pop(context);
+                            },
+                          );
+                        }
+
+                        final tag = tagsList[index - 1];
                         return ListTile(
-                          leading: Icon(Icons.label),
-                          title: Text('All Tags'),
+                          leading: Icon(Icons.label_outline),
+                          title: Text(tag),
                           onTap: () {
                             setState(() {
-                              _selectedTag = null;
-                              // 这里可以添加清除标签过滤的逻辑
+                              _selectedTag = tag;
+                              // 这里可以添加按标签过滤的逻辑
                             });
                             Navigator.pop(context);
                           },
                         );
-                      }
-
-                      final tag = tagsList[index - 1];
-                      return ListTile(
-                        leading: Icon(Icons.label_outline),
-                        title: Text(tag),
-                        onTap: () {
-                          setState(() {
-                            _selectedTag = tag;
-                            // 这里可以添加按标签过滤的逻辑
-                          });
-                          Navigator.pop(context);
-                        },
-                      );
-                    },
-                  ),
+                      },
+                    ),
           ),
           actions: [
             TextButton(

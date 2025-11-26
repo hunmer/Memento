@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:flutter/material.dart';
@@ -51,10 +52,15 @@ class _TimerMainViewState extends State<TimerMainView> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F6F8), // Light background
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => PluginManager.toHomeScreen(context),
-          ),
+          automaticallyImplyLeading: false,
+          leading:
+              (Platform.isAndroid || Platform.isIOS)
+                  ? null
+                  : IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => PluginManager.toHomeScreen(context),
+                  ),
+
           title: Text(_plugin.getPluginName(context)!),
           bottom: TabBar(
             isScrollable: true,
@@ -74,7 +80,8 @@ class _TimerMainViewState extends State<TimerMainView> {
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: tasksInGroup.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 16),
+                  separatorBuilder:
+                      (context, index) => const SizedBox(height: 16),
                   itemBuilder: (context, index) {
                     final task = tasksInGroup[index];
                     return _TimerTaskCard(
@@ -226,7 +233,7 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
   Widget build(BuildContext context) {
     final task = widget.task;
     final bool useGridLayout = task.timerItems.length >= 3;
-    
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -293,9 +300,10 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
             // Body
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: useGridLayout 
-                  ? _buildGridLayout(task)
-                  : _buildListLayout(task),
+              child:
+                  useGridLayout
+                      ? _buildGridLayout(task)
+                      : _buildListLayout(task),
             ),
           ],
         ),
@@ -306,18 +314,18 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
   Widget _buildActionButton(TimerTask task) {
     if (task.isRunning) {
       // Active state with timer
-       final activeTimer = task.activeTimer;
-       String timerText = "Running";
-       if (activeTimer != null) {
-          timerText = activeTimer.formattedRemainingTime;
-       }
+      final activeTimer = task.activeTimer;
+      String timerText = "Running";
+      if (activeTimer != null) {
+        timerText = activeTimer.formattedRemainingTime;
+      }
 
       return Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-             task.pause();
-             setState(() {});
+            task.pause();
+            setState(() {});
           },
           borderRadius: BorderRadius.circular(24),
           child: Container(
@@ -329,17 +337,17 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                 const Icon(Icons.pause, size: 18, color: Color(0xFF1E293B)),
-                 const SizedBox(width: 6),
-                 Text(
-                    timerText,
-                    style: const TextStyle(
-                       fontFamily: 'Monospace',
-                       fontWeight: FontWeight.bold,
-                       fontSize: 14,
-                       color: Color(0xFF1E293B),
-                    ),
-                 ),
+                const Icon(Icons.pause, size: 18, color: Color(0xFF1E293B)),
+                const SizedBox(width: 6),
+                Text(
+                  timerText,
+                  style: const TextStyle(
+                    fontFamily: 'Monospace',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
               ],
             ),
           ),
@@ -369,9 +377,11 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                   task.isCompleted ? Icons.replay : Icons.play_arrow, 
-                   size: 18, 
-                   color: Colors.white // Assuming dark text on primary as per HTML, but usually white on primary
+                  task.isCompleted ? Icons.replay : Icons.play_arrow,
+                  size: 18,
+                  color:
+                      Colors
+                          .white, // Assuming dark text on primary as per HTML, but usually white on primary
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -403,22 +413,29 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
   }
 
   Widget _buildGridItem(TimerItem item) {
-    final progress = item.duration.inSeconds > 0 
-        ? item.completedDuration.inSeconds / item.duration.inSeconds 
-        : 0.0;
-    // Determine color based on type or order? 
+    final progress =
+        item.duration.inSeconds > 0
+            ? item.completedDuration.inSeconds / item.duration.inSeconds
+            : 0.0;
+    // Determine color based on type or order?
     // HTML uses specific colors. We'll use type mapping or random/hash.
     Color itemColor;
-    switch(item.type) {
-      case TimerType.pomodoro: itemColor = Colors.red; break;
-      case TimerType.countUp: itemColor = Colors.blue; break;
-      case TimerType.countDown: itemColor = Colors.green; break;
+    switch (item.type) {
+      case TimerType.pomodoro:
+        itemColor = Colors.red;
+        break;
+      case TimerType.countUp:
+        itemColor = Colors.blue;
+        break;
+      case TimerType.countDown:
+        itemColor = Colors.green;
+        break;
     }
     if (item.name.toLowerCase().contains('break')) {
-       itemColor = Colors.blue;
-       if (item.duration.inMinutes > 10) itemColor = Colors.green; // Long break
+      itemColor = Colors.blue;
+      if (item.duration.inMinutes > 10) itemColor = Colors.green; // Long break
     } else {
-       itemColor = Colors.red;
+      itemColor = Colors.red;
     }
 
     return Container(
@@ -443,7 +460,10 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
                   width: double.infinity,
                   height: double.infinity,
                   child: CircularProgressIndicator(
-                    value: progress > 0 ? progress : 0.001, // Show at least a dot? No.
+                    value:
+                        progress > 0
+                            ? progress
+                            : 0.001, // Show at least a dot? No.
                     color: itemColor,
                     strokeWidth: 8,
                     strokeCap: StrokeCap.round,
@@ -463,10 +483,13 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (item.type == TimerType.pomodoro)
-                       Text(
-                          '${item.currentCycle}/${item.cycles}',
-                          style: TextStyle(fontSize: 10, color: itemColor.withValues(alpha: 0.7)),
-                       ),
+                      Text(
+                        '${item.currentCycle}/${item.cycles}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: itemColor.withValues(alpha: 0.7),
+                        ),
+                      ),
                     const SizedBox(height: 4),
                     Text(
                       '${item.duration.inMinutes} min',
@@ -488,9 +511,9 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              item.type == TimerType.pomodoro 
-                 ? (item.isWorkPhase == true ? 'Work' : 'Rest') 
-                 : (item.name.contains('Break') ? 'Relax' : 'Work'),
+              item.type == TimerType.pomodoro
+                  ? (item.isWorkPhase == true ? 'Work' : 'Rest')
+                  : (item.name.contains('Break') ? 'Relax' : 'Work'),
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
@@ -505,15 +528,19 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
 
   Widget _buildListLayout(TimerTask task) {
     return Column(
-      children: task.timerItems.map((item) => _buildListItem(item, task.color)).toList(),
+      children:
+          task.timerItems
+              .map((item) => _buildListItem(item, task.color))
+              .toList(),
     );
   }
 
   Widget _buildListItem(TimerItem item, Color taskColor) {
-    final progress = item.duration.inSeconds > 0 
-        ? item.completedDuration.inSeconds / item.duration.inSeconds 
-        : 0.0;
-        
+    final progress =
+        item.duration.inSeconds > 0
+            ? item.completedDuration.inSeconds / item.duration.inSeconds
+            : 0.0;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -531,43 +558,43 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
                 ),
               ),
               if (item.type == TimerType.pomodoro)
-                 Text(
-                    '${item.currentCycle}/${item.cycles} cycles',
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
-                 ),
+                Text(
+                  '${item.currentCycle}/${item.cycles} cycles',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF94A3B8),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 8),
           Stack(
-             children: [
-                Container(
-                   height: 8,
-                   decoration: BoxDecoration(
-                      color: const Color(0xFFE2E8F0),
-                      borderRadius: BorderRadius.circular(4),
-                   ),
+            children: [
+              Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE2E8F0),
+                  borderRadius: BorderRadius.circular(4),
                 ),
-                FractionallySizedBox(
-                   widthFactor: progress.clamp(0.0, 1.0),
-                   child: Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                         color: taskColor,
-                         borderRadius: BorderRadius.circular(4),
-                      ),
-                   ),
+              ),
+              FractionallySizedBox(
+                widthFactor: progress.clamp(0.0, 1.0),
+                child: Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: taskColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
-             ],
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Align(
             alignment: Alignment.centerRight,
             child: Text(
               item.formattedRemainingTime, // Or total duration? HTML shows total duration e.g. "50 min"
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF94A3B8),
-              ),
+              style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
             ),
           ),
         ],

@@ -110,12 +110,14 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
         builder: (context, controller, child) {
           return Scaffold(
             appBar: AppBar(
-              leading: (Platform.isAndroid || Platform.isIOS)
-                  ? null
-                  : IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => PluginManager.toHomeScreen(context),
-                    ),
+              automaticallyImplyLeading: false,
+              leading:
+                  (Platform.isAndroid || Platform.isIOS)
+                      ? null
+                      : IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () => PluginManager.toHomeScreen(context),
+                      ),
               title: Text(DayLocalizations.of(context).memorialDays),
               actions: [
                 // 排序菜单

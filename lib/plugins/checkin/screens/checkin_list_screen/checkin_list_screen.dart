@@ -48,12 +48,14 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
                 ? null
                 : Colors.grey[50],
         scrolledUnderElevation: 0,
-        leading: (Platform.isAndroid || Platform.isIOS)
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => PluginManager.toHomeScreen(context),
-              ),
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
         title: Text(CheckinLocalizations.of(context).name),
         actions: [
           // 排序按钮

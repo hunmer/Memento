@@ -305,11 +305,12 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   Future<String> _jsGetAccounts(Map<String, dynamic> params) async {
     final accounts = _billController.accounts;
     // 只返回账户基本信息,移除 bills 字段
-    final accountsJson = accounts.map((a) {
-      final json = a.toJson();
-      json.remove('bills');
-      return json;
-    }).toList();
+    final accountsJson =
+        accounts.map((a) {
+          final json = a.toJson();
+          json.remove('bills');
+          return json;
+        }).toList();
 
     // 检查是否需要分页
     final int? offset = params['offset'];
@@ -346,9 +347,10 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     final account = Account(
       id: id,
       title: title,
-      icon: iconCodePoint != null
-          ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
-          : Icons.account_balance_wallet,
+      icon:
+          iconCodePoint != null
+              ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
+              : Icons.account_balance_wallet,
       backgroundColor:
           backgroundColor != null ? Color(backgroundColor) : Colors.green,
     );
@@ -616,7 +618,11 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       }
 
       await _billController.deleteBill(accountId, billId);
-      return jsonEncode({'success': true, 'accountId': accountId, 'billId': billId});
+      return jsonEncode({
+        'success': true,
+        'accountId': accountId,
+        'billId': billId,
+      });
     } catch (e) {
       return jsonEncode({'success': false, 'error': e.toString()});
     }
@@ -776,11 +782,12 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     }
 
     if (findAll) {
-      final accountsJson = matchedAccounts.map((a) {
-        final json = a.toJson();
-        json.remove('bills');
-        return json;
-      }).toList();
+      final accountsJson =
+          matchedAccounts.map((a) {
+            final json = a.toJson();
+            json.remove('bills');
+            return json;
+          }).toList();
 
       // 检查是否需要分页
       if (offset != null || count != null) {
@@ -813,12 +820,13 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
     final account = _billController.accounts.firstWhere(
       (a) => a.id == id,
-      orElse: () => Account(
-        id: '',
-        title: '',
-        icon: Icons.error,
-        backgroundColor: Colors.transparent,
-      ),
+      orElse:
+          () => Account(
+            id: '',
+            title: '',
+            icon: Icons.error,
+            backgroundColor: Colors.transparent,
+          ),
     );
 
     if (account.id.isEmpty) {
@@ -865,11 +873,12 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     }
 
     if (findAll) {
-      final accountsJson = matchedAccounts.map((a) {
-        final json = a.toJson();
-        json.remove('bills');
-        return json;
-      }).toList();
+      final accountsJson =
+          matchedAccounts.map((a) {
+            final json = a.toJson();
+            json.remove('bills');
+            return json;
+          }).toList();
 
       // 检查是否需要分页
       if (offset != null || count != null) {
@@ -923,7 +932,9 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
     for (final bill in allBills) {
       // 如果指定了 accountId，先过滤账户
-      if (accountId != null && accountId.isNotEmpty && bill.accountId != accountId) {
+      if (accountId != null &&
+          accountId.isNotEmpty &&
+          bill.accountId != accountId) {
         continue;
       }
 
@@ -973,7 +984,9 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     Bill? foundBill;
     for (final bill in allBills) {
       if (bill.id == id) {
-        if (accountId == null || accountId.isEmpty || bill.accountId == accountId) {
+        if (accountId == null ||
+            accountId.isEmpty ||
+            bill.accountId == accountId) {
           foundBill = bill;
           break;
         }
@@ -1011,7 +1024,9 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
     for (final bill in allBills) {
       // 如果指定了 accountId，先过滤账户
-      if (accountId != null && accountId.isNotEmpty && bill.accountId != accountId) {
+      if (accountId != null &&
+          accountId.isNotEmpty &&
+          bill.accountId != accountId) {
         continue;
       }
 
@@ -1096,17 +1111,20 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     );
 
     // 过滤账单
-    final matchedBills = allBills.where((bill) {
-      // 匹配分类
-      if (bill.category != category) return false;
+    final matchedBills =
+        allBills.where((bill) {
+          // 匹配分类
+          if (bill.category != category) return false;
 
-      // 如果指定了 accountId，过滤账户
-      if (accountId != null && accountId.isNotEmpty && bill.accountId != accountId) {
-        return false;
-      }
+          // 如果指定了 accountId，过滤账户
+          if (accountId != null &&
+              accountId.isNotEmpty &&
+              bill.accountId != accountId) {
+            return false;
+          }
 
-      return true;
-    }).toList();
+          return true;
+        }).toList();
 
     final billsJson = matchedBills.map((b) => b.toJson()).toList();
 
@@ -1197,12 +1215,14 @@ class _BillMainViewState extends State<BillMainView>
 
     return Scaffold(
       appBar: AppBar(
-        leading: (Platform.isAndroid || Platform.isIOS)
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => PluginManager.toHomeScreen(context),
-              ),
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
         title: Text(
           billPlugin.selectedAccount?.title ??
               BillLocalizations.of(context).accountTitle,
@@ -1288,21 +1308,21 @@ class _BillMainViewState extends State<BillMainView>
               controller: _tabController,
               dragStartBehavior: DragStartBehavior.down,
               physics: const BouncingScrollPhysics(),
-          children: [
-            BillListScreen(
-              billPlugin: billPlugin,
-              accountId: billPlugin.selectedAccount?.id ?? '',
+              children: [
+                BillListScreen(
+                  billPlugin: billPlugin,
+                  accountId: billPlugin.selectedAccount?.id ?? '',
+                ),
+                BillStatsScreen(
+                  billPlugin: billPlugin,
+                  accountId: billPlugin.selectedAccount?.id ?? '',
+                  startDate: DateTime.now().subtract(
+                    const Duration(days: 30),
+                  ), // 默认显示最近30天
+                  endDate: DateTime.now(),
+                ),
+              ],
             ),
-            BillStatsScreen(
-              billPlugin: billPlugin,
-              accountId: billPlugin.selectedAccount?.id ?? '',
-              startDate: DateTime.now().subtract(
-                const Duration(days: 30),
-              ), // 默认显示最近30天
-              endDate: DateTime.now(),
-            ),
-          ],
-        ),
         child: Stack(
           alignment: Alignment.center,
           clipBehavior: Clip.none,

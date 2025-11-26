@@ -136,12 +136,14 @@ class _CalendarScreenState extends State<CalendarScreen>
 
   AppBar _buildAppBar(BuildContext context, dynamic l10n) {
     return AppBar(
-      leading: (Platform.isAndroid || Platform.isIOS)
-          ? null
-          : IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => PluginManager.toHomeScreen(context),
-            ),
+      automaticallyImplyLeading: false,
+      leading:
+          (Platform.isAndroid || Platform.isIOS)
+              ? null
+              : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => PluginManager.toHomeScreen(context),
+              ),
       title: Text(
         CalendarAlbumLocalizations.of(context).calendarDiary,
         style: const TextStyle(fontSize: 18),

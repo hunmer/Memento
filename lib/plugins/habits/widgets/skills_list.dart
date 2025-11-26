@@ -59,12 +59,14 @@ class _SkillsListState extends State<SkillsList> {
   AppBar _buildAppBar(BuildContext context, HabitsLocalizations l10n) {
     return AppBar(
       title: Text(l10n.skills),
-      leading: (Platform.isAndroid || Platform.isIOS)
-          ? null
-          : IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () => PluginManager.toHomeScreen(context),
-            ),
+      automaticallyImplyLeading: false,
+      leading:
+          (Platform.isAndroid || Platform.isIOS)
+              ? null
+              : IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () => PluginManager.toHomeScreen(context),
+              ),
       actions: [
         IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
         IconButton(
@@ -118,7 +120,8 @@ class _SkillsListState extends State<SkillsList> {
                         leading:
                             skill.icon != null
                                 ? CircleAvatar(
-                                  backgroundColor: Theme.of(context).primaryColor,
+                                  backgroundColor:
+                                      Theme.of(context).primaryColor,
                                   child: Icon(
                                     IconData(
                                       int.parse(skill.icon!),
@@ -257,8 +260,7 @@ class _SkillsListState extends State<SkillsList> {
                                                           ColorFilter.mode(
                                                             Colors.black
                                                                 .withValues(
-                                                                  alpha: 
-                                                                  0.3,
+                                                                  alpha: 0.3,
                                                                 ),
                                                             BlendMode.darken,
                                                           ),
