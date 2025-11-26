@@ -133,6 +133,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
                     ),
                 ],
               ),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               body: HabitForm(
                 initialHabit: habit,
                 onSave: (habit) async {

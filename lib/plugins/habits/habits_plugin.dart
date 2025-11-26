@@ -20,7 +20,10 @@ class HabitsMainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HabitsBottomBar(plugin: HabitsPlugin.instance);
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: HabitsBottomBar(plugin: HabitsPlugin.instance),
+    );
   }
 }
 

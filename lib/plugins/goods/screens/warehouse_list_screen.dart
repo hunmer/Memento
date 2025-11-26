@@ -8,7 +8,9 @@ import '../widgets/warehouse_card.dart';
 import '../widgets/warehouse_form.dart';
 
 class WarehouseListScreen extends StatefulWidget {
-  const WarehouseListScreen({super.key});
+  const WarehouseListScreen({super.key, this.onWarehouseTap});
+
+  final Function(String warehouseId)? onWarehouseTap;
 
   @override
   State<WarehouseListScreen> createState() => _WarehouseListScreenState();
@@ -67,21 +69,25 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
           return WarehouseCard(
             warehouse: warehouse,
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder:
-                      (context) =>
-                          WarehouseDetailScreen(warehouse: warehouse),
-                ),
-              );
+              if (widget.onWarehouseTap != null) {
+                widget.onWarehouseTap!(warehouse.id);
+              } else {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder:
+                        (context) =>
+                            WarehouseDetailScreen(warehouse: warehouse),
+                  ),
+                );
+              }
             },
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddWarehouseDialog,
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _showAddWarehouseDialog,
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 }

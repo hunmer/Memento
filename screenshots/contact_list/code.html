@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Contacts</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
+      font-size: 20px;
+    }
+  </style>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#0A7AFF", // Updated primary color from user request
+            "background-light": "#F7F7F8",
+            "background-dark": "#101922",
+            "text-primary-light": "#1C1C1E",
+            "text-primary-dark": "#F2F2F7",
+            "text-secondary-light": "#8A8A8E",
+            "text-secondary-dark": "#8E8E93",
+            "card-light": "#FFFFFF",
+            "card-dark": "#1C1C1E",
+            "chip-light": "#EFEFF4",
+            "chip-dark": "#2C2C2E"
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="w-full max-w-md mx-auto min-h-screen">
+<div class="flex flex-col p-4 space-y-4">
+<div class="flex flex-col p-4 space-y-4 bg-card-light dark:bg-card-dark rounded-xl">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0">
+<div class="w-16 h-16 bg-center bg-no-repeat bg-cover rounded-full" data-alt="Profile picture of Alaina H." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA39B-BUY7VUP43WJPvBDJHgUM52IJxkzhTXl2ovzudN2tJ8UxOzajOH9iFCQEEW3h-xwGIEXob8slbnUKf0pR0Nwsx9MdZcqwAIWfqyX522skhr-m9bqcWgO1AERR5rZD56jBqF2OxXIjEsQZo4JwyjIR-CLSCkxpWh9V-c7nyKxn6fV4zWeyBPFzC9sCIr0pUFnOv-QfwfxdKie_QAzXg18PBDn4LAg7FTRoByDmQwP5UjPXnRupMuA2jc6_pIgz2tAp6OUR22OqI");'></div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-lg font-semibold truncate text-text-primary-light dark:text-text-primary-dark">Alaina H. Thompson</p>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">+1 (555) 345-6789</p>
+<div class="flex items-center mt-1 text-sm text-pink-500 dark:text-pink-400">
+<span class="material-symbols-outlined !text-base mr-1.5" style="font-variation-settings: 'wght' 300;">female</span>
+<span>Female</span>
+</div>
+</div>
+<button class="flex items-center justify-center w-10 h-10 -mt-1 -mr-1 rounded-full text-primary hover:bg-primary/10">
+<span class="material-symbols-outlined !text-3xl" style="font-variation-settings: 'wght' 300;">add_circle</span>
+</button>
+</div>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">A creative graphic designer I met at the design conference last year. Passionate about typography and minimalist art.</p>
+<div class="flex flex-wrap items-center gap-2">
+<div class="flex h-7 items-center justify-center gap-x-2 rounded-full bg-chip-light dark:bg-chip-dark px-3">
+<p class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark">Work</p>
+</div>
+<div class="flex h-7 items-center justify-center gap-x-2 rounded-full bg-chip-light dark:bg-chip-dark px-3">
+<p class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark">Designer</p>
+</div>
+</div>
+<div class="pt-2 border-t border-gray-200 dark:border-gray-700">
+<div class="flex items-center justify-between text-sm text-text-primary-light dark:text-text-primary-dark">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-green-500"></div>
+<span>Meeting on Monday</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col p-4 space-y-4 bg-card-light dark:bg-card-dark rounded-xl">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0">
+<div class="w-16 h-16 bg-center bg-no-repeat bg-cover rounded-full" data-alt="Profile picture of Brandon M." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDTDtLL5_nPiC0gwyhJc54JktkAyv6DjMaJ6EToOOOlcxVlVZD6RM0OnOpE-b9u1okpeH03ZlSsgVz8Nq3KDv7WGSZL13Y7-632yCTMv380UjSJxHOIlgqWn_l4iTPx5RrVK4FZRDHqW7LfmR2J_mODfLOMqER9kixf_MqibYF9UG0l-tbRkoW-x_OVl09PNT26mSkzOtG27B8oCoiqwCDE4511ozoSXLN2jzetBTvz4Eo354IfYTcQApU1GqjAfE0SvwFgko6AVMQj");'></div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-lg font-semibold truncate text-text-primary-light dark:text-text-primary-dark">Brandon Mitchell</p>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">+1 (555) 987-6543</p>
+<div class="flex items-center mt-1 text-sm text-blue-500 dark:text-blue-400">
+<span class="material-symbols-outlined !text-base mr-1.5" style="font-variation-settings: 'wght' 300;">male</span>
+<span>Male</span>
+</div>
+</div>
+<button class="flex items-center justify-center w-10 h-10 -mt-1 -mr-1 rounded-full text-primary hover:bg-primary/10">
+<span class="material-symbols-outlined !text-3xl" style="font-variation-settings: 'wght' 300;">add_circle</span>
+</button>
+</div>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">My cousin from San Diego. He's a software engineer and an avid hiker. We're planning a trip to Yosemite.</p>
+<div class="flex flex-wrap items-center gap-2">
+<div class="flex h-7 items-center justify-center gap-x-2 rounded-full bg-chip-light dark:bg-chip-dark px-3">
+<p class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark">Family</p>
+</div>
+</div>
+<div class="pt-2 border-t border-gray-200 dark:border-gray-700">
+<div class="flex items-center justify-between text-sm text-text-primary-light dark:text-text-primary-dark">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-blue-500"></div>
+<span>Traveling together</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col p-4 space-y-4 bg-card-light dark:bg-card-dark rounded-xl">
+<div class="flex items-start space-x-4">
+<div class="flex-shrink-0">
+<div class="w-16 h-16 bg-center bg-no-repeat bg-cover rounded-full" data-alt="Profile picture of Chloe Davis." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAxJIuOpaK5InmsDbNNHHHZFoZRKNc_whvX2JzuKb13iAqQ32UxxJ5e0xJc1Ri46c-4h9FqdlDrejsuzNDMH_gDaVfPTKZxeRadn72OjBB5oUp0Y2WYhl9MaDXA2ET-Q4hnXREMyjxDhxMKfLr8i7lAQP0TBNLbeboecqIj05nfhTo2FsvNt4EI_hPnWecgmoBggNa73eL0uJuLwCyVarpvj3P-qteMK-3Rjsysj7JKnPbVYZhfudrGXnlyaq5b3r6xjDS6Qp2b_mWi");'></div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-lg font-semibold truncate text-text-primary-light dark:text-text-primary-dark">Chloe Davis</p>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">+1 (555) 111-2222</p>
+<div class="flex items-center mt-1 text-sm text-pink-500 dark:text-pink-400">
+<span class="material-symbols-outlined !text-base mr-1.5" style="font-variation-settings: 'wght' 300;">female</span>
+<span>Female</span>
+</div>
+</div>
+<button class="flex items-center justify-center w-10 h-10 -mt-1 -mr-1 rounded-full text-primary hover:bg-primary/10">
+<span class="material-symbols-outlined !text-3xl" style="font-variation-settings: 'wght' 300;">add_circle</span>
+</button>
+</div>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">College friend and fellow literature enthusiast. We share recommendations on the latest sci-fi novels.</p>
+<div class="flex flex-wrap items-center gap-2">
+<div class="flex h-7 items-center justify-center gap-x-2 rounded-full bg-chip-light dark:bg-chip-dark px-3">
+<p class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark">Friend</p>
+</div>
+<div class="flex h-7 items-center justify-center gap-x-2 rounded-full bg-chip-light dark:bg-chip-dark px-3">
+<p class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark">Book Club</p>
+</div>
+</div>
+<div class="pt-2 border-t border-gray-200 dark:border-gray-700">
+<div class="flex items-center justify-between text-sm text-text-primary-light dark:text-text-primary-dark">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-purple-500"></div>
+<span>Book Club meeting</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

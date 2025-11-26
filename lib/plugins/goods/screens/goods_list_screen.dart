@@ -8,7 +8,9 @@ import '../widgets/goods_item_list_tile.dart';
 import '../widgets/goods_item_form/goods_item_form.dart';
 
 class GoodsListScreen extends StatefulWidget {
-  const GoodsListScreen({super.key});
+  const GoodsListScreen({super.key, this.initialFilterWarehouseId});
+
+  final String? initialFilterWarehouseId;
 
   @override
   State<GoodsListScreen> createState() => _GoodsListScreenState();
@@ -25,6 +27,7 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
   @override
   void initState() {
     super.initState();
+    _filterWarehouseId = widget.initialFilterWarehouseId;
     GoodsPlugin.instance.addListener(_onDataChanged);
   }
 
@@ -304,25 +307,31 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
           allItems.isEmpty
               ? Center(child: Text(GoodsLocalizations.of(context).noItems))
               : _isGridView
-              ? GridView.builder(
+              ? Padding(
                 padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: List.generate(allItems.length, (index) {
+                        final item = allItems[index]['item'] as GoodsItem;
+                        final warehouse = allItems[index]['warehouse'] as Warehouse;
+                        final cardWidth = (constraints.maxWidth - 16) / 2; // 2列布局，减去一个spacing
+
+                        return SizedBox(
+                          width: cardWidth,
+                          child: GoodsItemCard(
+                            item: item,
+                            warehouseTitle: warehouse.title,
+                            warehouseId: warehouse.id,
+                            onTap: () => _showEditItemDialog(item, warehouse),
+                          ),
+                        );
+                      }),
+                    );
+                  },
                 ),
-                itemCount: allItems.length,
-                itemBuilder: (context, index) {
-                  final item = allItems[index]['item'] as GoodsItem;
-                  final warehouse = allItems[index]['warehouse'] as Warehouse;
-                  return GoodsItemCard(
-                    item: item,
-                    warehouseTitle: warehouse.title,
-                    warehouseId: warehouse.id,
-                    onTap: () => _showEditItemDialog(item, warehouse),
-                  );
-                },
               )
               : ListView.builder(
                 itemCount: allItems.length,

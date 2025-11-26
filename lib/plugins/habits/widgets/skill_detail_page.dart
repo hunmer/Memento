@@ -88,6 +88,7 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
         builder:
             (context) => Scaffold(
               appBar: AppBar(title: Text(l10n.editSkill)),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               body: SkillForm(
                 initialSkill: widget.skill,
                 onSave: (skill) async {
