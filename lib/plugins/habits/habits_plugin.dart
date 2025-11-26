@@ -14,6 +14,15 @@ import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/widgets/habits_bottom_bar.dart';
 
+/// 习惯追踪插件主视图
+class HabitsMainView extends StatelessWidget {
+  const HabitsMainView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return HabitsBottomBar(plugin: HabitsPlugin.instance);
+  }
+}
 
 class HabitsPlugin extends PluginBase with JSBridgePlugin {
   late final HabitController _habitController;
@@ -42,7 +51,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return HabitsBottomBar(plugin: this);
+    return const HabitsMainView();
   }
 
   @override

@@ -147,6 +147,11 @@ abstract class StoreLocalizations {
   String get pointsAdded;
   String get add;
   String get viewRedeemHistory;
+
+  // 新增页面相关
+  String get filterConditions;
+  String get notSelected;
+  String get noProducts;
 }
 
 class _StoreLocalizationsDelegate
