@@ -85,8 +85,6 @@ class _HabitsListState extends State<HabitsList> {
       children: [
         HabitsAppBar(
           l10n: l10n,
-          isCardView: _isCardView,
-          onViewChanged: () => setState(() => _isCardView = !_isCardView),
           onAddPressed: () => _showHabitForm(context),
           onBackPressed: () => PluginManager.toHomeScreen(context),
         ),
