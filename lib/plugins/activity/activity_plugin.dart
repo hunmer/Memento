@@ -2,14 +2,17 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
+import '../../main.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
+import '../../core/event/event.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'l10n/activity_localizations.dart';
 import 'screens/activity_timeline_screen/activity_timeline_screen.dart';
 import 'screens/activity_statistics_screen.dart';
 import 'screens/activity_edit_screen.dart';
+import 'screens/activity_settings_screen.dart';
 import 'services/activity_service.dart';
 import 'services/activity_notification_service.dart';
 import 'models/activity_record.dart';
@@ -74,6 +77,30 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   ) async {
     // 初始化插件
     await initialize();
+
+    // 监听通知点击事件
+    eventManager.subscribe('activity_notification_tapped', _handleNotificationTapped);
+  }
+
+  /// 处理通知点击事件
+  void _handleNotificationTapped(EventArgs args) {
+    debugPrint('[ActivityPlugin] 收到通知点击事件，正在打开活动编辑界面...');
+
+    // 使用全局导航器打开活动编辑界面
+    final navigator = navigatorKey.currentState;
+    if (navigator != null) {
+      navigator.push(
+        MaterialPageRoute(
+          builder: (context) => ActivityEditScreen(
+            activityService: activityService,
+            selectedDate: DateTime.now(),
+          ),
+        ),
+      );
+      debugPrint('[ActivityPlugin] 活动编辑界面已打开');
+    } else {
+      debugPrint('[ActivityPlugin] 导航器未初始化，无法打开界面');
+    }
   }
 
   @override
@@ -87,6 +114,17 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     await _notificationService.initialize();
 
     _isInitialized = true;
+
+    // 自动恢复通知栏显示（如果之前是开启的）
+    try {
+      final settings = await storage.read('activity/notification_settings.json');
+      if (settings.isNotEmpty && settings['isEnabled'] == true) {
+        debugPrint('[ActivityPlugin] 检测到之前开启了通知栏显示，正在自动恢复...');
+        await enableActivityNotification();
+      }
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 恢复通知栏显示失败: $e');
+    }
 
     // 注册 JS API
     await registerJSAPI();
@@ -531,8 +569,12 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   Future<void> enableActivityNotification() async {
     try {
       await _notificationService.enable();
+      // 保存设置
+      await storage.write('activity/notification_settings.json', {'isEnabled': true});
+      debugPrint('[ActivityPlugin] 通知栏显示已启用并保存');
     } catch (e) {
       debugPrint('[ActivityPlugin] 启用活动通知失败: $e');
+      rethrow;
     }
   }
 
@@ -540,8 +582,12 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   Future<void> disableActivityNotification() async {
     try {
       await _notificationService.disable();
+      // 保存设置
+      await storage.write('activity/notification_settings.json', {'isEnabled': false});
+      debugPrint('[ActivityPlugin] 通知栏显示已禁用并保存');
     } catch (e) {
       debugPrint('[ActivityPlugin] 禁用活动通知失败: $e');
+      rethrow;
     }
   }
 
@@ -719,6 +765,11 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   @override
   Widget buildMainView(BuildContext context) {
     return const ActivityMainView();
+  }
+
+  @override
+  Widget buildSettingsView(BuildContext context) {
+    return const ActivitySettingsScreen();
   }
 }
 

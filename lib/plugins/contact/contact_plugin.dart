@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:flutter/material.dart';
@@ -891,145 +892,76 @@ class ContactMainViewState extends State<ContactMainView> {
 
 
   @override
-
   Widget build(BuildContext context) {
-
     return Scaffold(
-
       appBar: AppBar(
-
-        leading: IconButton(
-
-          icon: const Icon(Icons.arrow_back),
-
-          onPressed: () => PluginManager.toHomeScreen(context),
-
-        ),
-
+        leading: (Platform.isAndroid || Platform.isIOS)
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => PluginManager.toHomeScreen(context),
+              ),
         title: Text(ContactLocalizations.of(context).contacts),
-
         actions: [
-
           IconButton(
-
             icon: const Icon(Icons.filter_list),
-
             onPressed: _showFilterDialog,
-
           ),
-
           IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
-
         ],
-
       ),
-
       body: FutureBuilder<List<Contact>>(
-
         future: _controller.getFilteredAndSortedContacts(),
-
         builder: (context, snapshot) {
-
           if (snapshot.connectionState == ConnectionState.waiting) {
-
             return const Center(child: CircularProgressIndicator());
-
           }
-
-
 
           if (snapshot.hasError) {
-
             return Center(
-
               child: Text(ContactLocalizations.of(context).errorMessage),
-
             );
-
           }
-
-
 
           final contacts = snapshot.data ?? [];
 
-
-
           if (contacts.isEmpty) {
-
             return Center(
-
               child: Column(
-
                 mainAxisAlignment: MainAxisAlignment.center,
-
                 children: [
-
                   const Icon(
-
                     Icons.person_outline,
-
                     size: 64,
-
                     color: Colors.grey,
-
                   ),
-
                   const SizedBox(height: 16),
-
                   Text(
-
                     ContactLocalizations.of(context).noContacts,
-
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleLarge?.copyWith(color: Colors.grey),
-
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.grey),
                   ),
-
                 ],
-
               ),
-
             );
-
           }
 
-
-
           return ListView.builder(
-
             itemCount: contacts.length,
-
             itemBuilder: (context, index) {
-
               return ContactCard(
-
                 contact: contacts[index],
-
                 controller: _controller,
-
                 onTap: () => _addOrEditContact(contacts[index]),
-
               );
-
             },
-
           );
-
         },
-
       ),
-
       floatingActionButton: FloatingActionButton(
-
         onPressed: () => _addOrEditContact(),
-
         child: const Icon(Icons.add),
-
       ),
-
     );
-
   }
 
 }

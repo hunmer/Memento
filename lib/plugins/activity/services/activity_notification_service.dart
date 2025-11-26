@@ -15,7 +15,9 @@ class ActivityNotificationService {
   bool _isInitialized = false;
   bool _isEnabled = false;
   Timer? _updateTimer;
-  static const MethodChannel _activityChannel = MethodChannel('github.hunmer.memento/activity_notification');
+  static const MethodChannel _activityChannel = MethodChannel(
+    'github.hunmer.memento/activity_notification',
+  );
 
   static const String _notificationChannelKey = 'activity_reminder';
   static const String _notificationChannelGroupKey = 'activity_reminder_group';
@@ -100,12 +102,13 @@ class ActivityNotificationService {
           channelKey: _notificationChannelKey,
           channelName: '活动提醒',
           channelDescription: '显示距离上次活动的时间和内容',
-          importance: NotificationImportance.Max,
+          channelShowBadge: false,
+          importance: NotificationImportance.Low, // 低重要性即可
           playSound: false,
           enableVibration: false,
           enableLights: false,
-          criticalAlerts: false,
-          onlyAlertOnce: true,
+          locked: true, // 关键：锁住通知渠道
+          defaultPrivacy: NotificationPrivacy.Private,
         ),
       ],
       channelGroups: [
@@ -162,16 +165,22 @@ class ActivityNotificationService {
 
       debugPrint('[ActivityNotificationService] 更新通知: $body');
 
-      // 创建Flutter通知
+      // 创建真正的常驻通知
       await AwesomeNotifications().createNotification(
         content: NotificationContent(
-          id: _notificationId,
+          id: _notificationId, // 固定ID，用于更新同一通知
           channelKey: _notificationChannelKey,
           title: title,
           body: body,
           notificationLayout: NotificationLayout.Default,
           largeIcon: 'asset://assets/icon/icon.png',
           showWhen: false,
+          locked: true, // 关键1：锁住通知
+          autoDismissible: false, // 关键2：禁止手动关闭
+          wakeUpScreen: false,
+          category: NotificationCategory.Service, // 标记为服务类别
+          displayOnForeground: true,
+          displayOnBackground: true,
           payload: {
             'action': 'open_activity_form',
             'timestamp': DateTime.now().toIso8601String(),

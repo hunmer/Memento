@@ -166,4 +166,20 @@ class ActivityLocalizationsZh extends ActivityLocalizations {
 
   @override
   String get duration => '持续时间';
+
+  // 设置页面
+  String get settings => '设置';
+  String get notificationSettings => '通知栏设置';
+  String get enableNotificationBar => '启用通知栏显示';
+  String get lastActivity => '最后记录的活动';
+  String get timeSinceLastActivity => '距离上次记录已经过了多久';
+  String get quickActions => '快捷操作';
+  String get addRecord => '添加记录';
+  String get functionDescription => '功能说明';
+  String get notificationEnabled => '活动通知已启用';
+  String get notificationDisabled => '活动通知已禁用';
+  String get failedToLoadSettings => '加载设置失败';
+  String get operationFailed => '操作失败';
+  String get recentActivityInfo => '最近活动信息';
+  String get onlySupportsAndroid => '通知栏显示功能仅支持 Android 平台';
 }

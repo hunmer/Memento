@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/diary/l10n/diary_localizations.dart';
 import 'package:flutter/material.dart';
@@ -21,10 +22,12 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       // 添加返回按钮
-      leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => PluginManager.toHomeScreen(context),
-        ),
+      leading: (Platform.isAndroid || Platform.isIOS)
+          ? null
+          : IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => PluginManager.toHomeScreen(context),
+            ),
       title: Text(viewModeController.isGridMode && viewModeController.selectedMinutes > 0
             ? DiaryLocalizations.of(context).minutesSelected.replaceAll(
               '{minutes}',
