@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../activity_plugin.dart';
 import '../l10n/activity_localizations.dart';
-import '../screens/activity_edit_screen.dart';
 import '../models/activity_record.dart';
 
 /// 活动插件设置页面

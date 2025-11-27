@@ -158,18 +158,32 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
   String get contentHint => 'Enter activity description';
 
   // Settings page
+  @override
   String get settings => 'Settings';
+  @override
   String get notificationSettings => 'Notification Bar Settings';
+  @override
   String get enableNotificationBar => 'Enable Notification Bar';
+  @override
   String get lastActivity => 'Last Activity';
+  @override
   String get timeSinceLastActivity => 'Time Since Last Activity';
+  @override
   String get quickActions => 'Quick Actions';
+  @override
   String get addRecord => 'Add Record';
+  @override
   String get functionDescription => 'Function Description';
+  @override
   String get notificationEnabled => 'Activity notification enabled';
+  @override
   String get notificationDisabled => 'Activity notification disabled';
+  @override
   String get failedToLoadSettings => 'Failed to load settings';
+  @override
   String get operationFailed => 'Operation failed';
+  @override
   String get recentActivityInfo => 'Recent Activity Info';
+  @override
   String get onlySupportsAndroid => 'Notification bar display is only supported on Android';
 }

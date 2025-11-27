@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import '../l10n/contact_localizations.dart';
 import '../../../widgets/image_picker_dialog.dart';
 import '../../../utils/image_utils.dart';
 import '../models/contact_model.dart';

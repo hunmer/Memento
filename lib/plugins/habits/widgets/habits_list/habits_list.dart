@@ -16,7 +16,7 @@ class HabitsList extends StatefulWidget {
 }
 
 class _HabitsListState extends State<HabitsList> {
-  bool _isCardView = false;
+  final bool _isCardView = false;
 
   @override
   void initState() {
