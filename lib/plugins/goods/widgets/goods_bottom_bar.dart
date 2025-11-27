@@ -25,6 +25,8 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
   late TabController _tabController;
   late int _currentPage;
   String? _filterWarehouseId;
+  double _bottomBarHeight = 60; // 默认底部栏高度
+  final GlobalKey _bottomBarKey = GlobalKey();
 
   // 使用插件主题色和辅助色
   final List<Color> _colors = [
@@ -51,6 +53,21 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// 调度底部栏高度测量
+  void _scheduleBottomBarHeightMeasurement() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _bottomBarKey.currentContext != null) {
+        final RenderBox renderBox = _bottomBarKey.currentContext!.findRenderObject() as RenderBox;
+        final newHeight = renderBox.size.height;
+        if (_bottomBarHeight != newHeight) {
+          setState(() {
+            _bottomBarHeight = newHeight;
+          });
+        }
+      }
+    });
   }
 
   /// 创建新仓库
@@ -155,10 +172,12 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
 
   @override
   Widget build(BuildContext context) {
+    _scheduleBottomBarHeightMeasurement();
     final Color unselectedColor =
         _colors[_currentPage].computeLuminance() < 0.5
             ? Colors.black.withOpacity(0.6)
             : Colors.white.withOpacity(0.6);
+    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
 
     return BottomBar(
       fit: StackFit.expand,
@@ -226,21 +245,40 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
       onBottomBarHidden: () {},
       onBottomBarShown: () {},
       body:
-          (context, controller) => TabBarView(
-            controller: _tabController,
-            dragStartBehavior: DragStartBehavior.start,
-            physics: const NeverScrollableScrollPhysics(),
+          (context, controller) => Stack(
             children: [
-              // Tab0: 仓库视图
-              WarehouseListScreen(onWarehouseTap: _handleWarehouseTap),
-              // Tab1: 物品视图
-              GoodsListScreen(
-                key: ValueKey('goods_list_${_filterWarehouseId ?? "all"}'),
-                initialFilterWarehouseId: _filterWarehouseId,
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: _bottomBarHeight),
+                  child: TabBarView(
+                    controller: _tabController,
+                    dragStartBehavior: DragStartBehavior.start,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      // Tab0: 仓库视图
+                      WarehouseListScreen(onWarehouseTap: _handleWarehouseTap),
+                      // Tab1: 物品视图
+                      GoodsListScreen(
+                        key: ValueKey('goods_list_${_filterWarehouseId ?? "all"}'),
+                        initialFilterWarehouseId: _filterWarehouseId,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  height: _bottomBarHeight,
+                  color: bottomAreaColor,
+                ),
               ),
             ],
           ),
       child: Stack(
+        key: _bottomBarKey,
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [

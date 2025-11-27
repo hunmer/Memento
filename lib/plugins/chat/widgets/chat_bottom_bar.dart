@@ -23,6 +23,8 @@ class _ChatBottomBarState extends State<ChatBottomBar>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late int _currentPage;
+  double _bottomBarHeight = 60; // 默认底部栏高度
+  final GlobalKey _bottomBarKey = GlobalKey();
 
   // 使用插件主题色和辅助色
   final List<Color> _colors = [
@@ -49,6 +51,21 @@ class _ChatBottomBarState extends State<ChatBottomBar>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// 调度底部栏高度测量
+  void _scheduleBottomBarHeightMeasurement() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _bottomBarKey.currentContext != null) {
+        final RenderBox renderBox = _bottomBarKey.currentContext!.findRenderObject() as RenderBox;
+        final newHeight = renderBox.size.height;
+        if (_bottomBarHeight != newHeight) {
+          setState(() {
+            _bottomBarHeight = newHeight;
+          });
+        }
+      }
+    });
   }
 
   /// 创建新频道
@@ -135,10 +152,12 @@ class _ChatBottomBarState extends State<ChatBottomBar>
 
   @override
   Widget build(BuildContext context) {
+    _scheduleBottomBarHeightMeasurement();
     final Color unselectedColor =
         _colors[_currentPage].computeLuminance() < 0.5
             ? Colors.black.withOpacity(0.6)
             : Colors.white.withOpacity(0.6);
+    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
 
     return BottomBar(
       fit: StackFit.expand,
@@ -206,21 +225,40 @@ class _ChatBottomBarState extends State<ChatBottomBar>
       onBottomBarHidden: () {},
       onBottomBarShown: () {},
       body:
-          (context, controller) => TabBarView(
-            controller: _tabController,
-            dragStartBehavior: DragStartBehavior.start,
-            physics: const NeverScrollableScrollPhysics(),
+          (context, controller) => Stack(
             children: [
-              // Tab0: 频道列表
-              ChannelListScreen(
-                channels: widget.plugin.channelService.channels,
-                chatPlugin: widget.plugin,
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: _bottomBarHeight),
+                  child: TabBarView(
+                    controller: _tabController,
+                    dragStartBehavior: DragStartBehavior.start,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      // Tab0: 频道列表
+                      ChannelListScreen(
+                        channels: widget.plugin.channelService.channels,
+                        chatPlugin: widget.plugin,
+                      ),
+                      // Tab1: 时间线
+                      TimelineScreen(chatPlugin: widget.plugin),
+                    ],
+                  ),
+                ),
               ),
-              // Tab1: 时间线
-              TimelineScreen(chatPlugin: widget.plugin),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  height: _bottomBarHeight,
+                  color: bottomAreaColor,
+                ),
+              ),
             ],
           ),
       child: Stack(
+        key: _bottomBarKey,
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
