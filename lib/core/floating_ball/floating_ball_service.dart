@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'floating_ball_widget.dart';
 import 'floating_ball_manager.dart';
+import 'models/floating_ball_gesture.dart';
 
 /// 悬浮球服务
 class FloatingBallService {
