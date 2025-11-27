@@ -886,7 +886,7 @@ class _ActivityMainViewState extends State<ActivityMainView>
           (context, controller) => TabBarView(
             controller: _tabController,
             dragStartBehavior: DragStartBehavior.down,
-            physics: const BouncingScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             children: [
               const ActivityTimelineScreen(),
               ActivityStatisticsScreen(

@@ -276,14 +276,26 @@ class _ActivityGridViewState extends State<ActivityGridView> {
           ? _lastEnteredTime!
           : _selectionStart!;
 
-      // 由于网格时间从每小时的05分钟开始，我们需要将开始时间向前调整5分钟
-      // 同时也要将结束时间向前调整5分钟，保持时间段的完整性
-      // 例如：如果选择了8:05-10:05，实际应该是8:00-10:00
-      final start = rawStart.subtract(const Duration(minutes: 5));
-      final end = rawEnd.subtract(const Duration(minutes: 5));
+      // 检查选择的时间范围是否足够长（至少5分钟）
+      final durationInMinutes = rawEnd.difference(rawStart).inMinutes;
 
-      // 调用回调函数，传入调整后的开始时间和结束时间
-      widget.onUnrecordedTimeTap(start, end);
+      // 检查选择的时间是否包含未来时间
+      final now = DateTime.now();
+      final adjustedStart = rawStart.subtract(const Duration(minutes: 5));
+      final adjustedEnd = rawEnd.subtract(const Duration(minutes: 5));
+
+      // 只有当选择时间范围达到最小阈值且不包含未来时间时才创建活动
+      if (durationInMinutes >= 5 &&
+          adjustedEnd.isBefore(now)) {
+        // 由于网格时间从每小时的05分钟开始，我们需要将开始时间向前调整5分钟
+        // 同时也要将结束时间向前调整5分钟，保持时间段的完整性
+        // 例如：如果选择了8:05-10:05，实际应该是8:00-10:00
+        final start = adjustedStart;
+        final end = adjustedEnd;
+
+        // 调用回调函数，传入调整后的开始时间和结束时间
+        widget.onUnrecordedTimeTap(start, end);
+      }
     }
     setState(() {
       _isDragging = false;
@@ -294,9 +306,6 @@ class _ActivityGridViewState extends State<ActivityGridView> {
     });
 
     // 通知选择范围清空
-    if (widget.onSelectionChanged != null) {
-      widget.onSelectionChanged!(null, null);
-    }
     if (widget.onSelectionChanged != null) {
       widget.onSelectionChanged!(null, null);
     }
@@ -313,7 +322,12 @@ class _ActivityGridViewState extends State<ActivityGridView> {
       if (_isTimeOverlapping(time)) {
         return; // 如果时间点已经有活动，不允许选择
       }
-      
+
+      // 检查是否为未来时间，未来时间不允许选择
+      if (time.isAfter(DateTime.now())) {
+        return; // 如果是未来时间，不允许选择
+      }
+
       if (!_isDragging) {
         // 第一次进入拖动状态，设置起始时间
         setState(() {
@@ -326,25 +340,25 @@ class _ActivityGridViewState extends State<ActivityGridView> {
         // 已经在拖动状态，更新最后进入的时间块
         final now = DateTime.now();
         final currentTime = time.isAfter(now) ? now : time;
-        
+
         // 检查当前选择范围是否与现有活动重叠
         if (_selectionStart != null) {
           DateTime start = _selectionStart!.isBefore(currentTime) ? _selectionStart! : currentTime;
           DateTime end = _selectionStart!.isBefore(currentTime) ? currentTime : _selectionStart!;
-          
+
           // 如果选择范围与现有活动重叠，不更新选择范围
           if (_isRangeOverlapping(start, end)) {
             return;
           }
         }
-        
+
         // 只有当进入新的时间块时才更新
         if (_lastEnteredTime != currentTime) {
           setState(() {
             _lastEnteredTime = currentTime;
             _selectionEnd = currentTime;
           });
-          
+
           // 通知选择范围变化
           if (widget.onSelectionChanged != null) {
             widget.onSelectionChanged!(_selectionStart, _selectionEnd);

@@ -160,179 +160,180 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Back Button
-            if (!(Platform.isAndroid || Platform.isIOS))
-              Padding(
-                padding: const EdgeInsets.only(left: 8, top: 4),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back, color: textColor),
-                    onPressed: () => PluginManager.toHomeScreen(context),
-                    tooltip: DiaryLocalizations.of(context).myDiary,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Back Button
+              if (!(Platform.isAndroid || Platform.isIOS))
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, top: 4),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back, color: textColor),
+                      onPressed: () => PluginManager.toHomeScreen(context),
+                      tooltip: DiaryLocalizations.of(context).myDiary,
+                    ),
                   ),
                 ),
-              ),
-            // Month Selector
-            MonthSelector(
-              selectedMonth: _focusedDay,
-              onMonthSelected: (month) {
-                setState(() {
-                  _focusedDay = DateTime(
-                    month.year,
-                    month.month,
-                    _focusedDay.day,
-                  );
-                });
-              },
-              getMonthStats: (month) {
-                // For diary plugin, we'll show entry count instead of financial stats
-                final monthEntries =
-                    _diaryEntries.entries.where((entry) {
-                      return entry.key.year == month.year &&
-                          entry.key.month == month.month;
-                    }).toList();
-
-                final entryCount = monthEntries.length;
-                final totalWords = monthEntries.fold(
-                  0,
-                  (sum, entry) => sum + entry.value.content.length,
-                );
-
-                return {
-                  'income': entryCount.toDouble(), // Use income for entry count
-                  'expense':
-                      totalWords.toDouble(), // Use expense for word count
-                };
-              },
-              primaryColor: primaryColor,
-            ),
-
-            // Calendar
-            TableCalendar<DiaryEntry>(
-              firstDay: DateTime.utc(2020, 1, 1),
-              lastDay: DateTime.now(),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              onDaySelected: _onDayClicked,
-              calendarFormat: _calendarFormat,
-              onFormatChanged: (format) {
-                setState(() {
-                  _calendarFormat = format;
-                });
-              },
-              onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
-              },
-              eventLoader: (day) {
-                final normalizedDay = DateTime(day.year, day.month, day.day);
-                if (_diaryEntries.containsKey(normalizedDay)) {
-                  return [_diaryEntries[normalizedDay]!];
-                }
-                return [];
-              },
-              rowHeight: 70, // Matches h-16 (approx 64px) + gap
-              daysOfWeekHeight: 40,
-              headerVisible: false, // We use custom header
-              daysOfWeekStyle: DaysOfWeekStyle(
-                weekdayStyle: TextStyle(
-                  color: textColor.withValues(alpha: 0.6),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-                weekendStyle: TextStyle(
-                  color: textColor.withValues(alpha: 0.6),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-                dowTextFormatter:
-                    (date, locale) =>
-                        DateFormat.E(locale).format(date)[0], // S M T ...
-              ),
-              calendarStyle: CalendarStyle(
-                outsideDaysVisible: false,
-                cellMargin: const EdgeInsets.all(4),
-                todayDecoration: BoxDecoration(
-                  color: Colors.transparent,
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: primaryColor, width: 2),
-                ),
-                selectedDecoration: BoxDecoration(
-                  color: Colors.transparent,
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: primaryColor, width: 2),
-                ),
-                defaultDecoration: BoxDecoration(
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                weekendDecoration: BoxDecoration(
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              calendarBuilders: CalendarBuilders<DiaryEntry>(
-                defaultBuilder: (context, day, focusedDay) {
-                  return _buildCalendarCell(day, textColor, null, isDark);
+              // Month Selector
+              MonthSelector(
+                selectedMonth: _focusedDay,
+                onMonthSelected: (month) {
+                  setState(() {
+                    _focusedDay = DateTime(
+                      month.year,
+                      month.month,
+                      _focusedDay.day,
+                    );
+                  });
                 },
-                todayBuilder: (context, day, focusedDay) {
-                  return _buildCalendarCell(
-                    day,
-                    textColor,
-                    primaryColor,
-                    isDark,
-                    isToday: true,
+                getMonthStats: (month) {
+                  // For diary plugin, we'll show entry count instead of financial stats
+                  final monthEntries =
+                      _diaryEntries.entries.where((entry) {
+                        return entry.key.year == month.year &&
+                            entry.key.month == month.month;
+                      }).toList();
+
+                  final entryCount = monthEntries.length;
+                  final totalWords = monthEntries.fold(
+                    0,
+                    (sum, entry) => sum + entry.value.content.length,
                   );
+
+                  return {
+                    'income': entryCount.toDouble(), // Use income for entry count
+                    'expense':
+                        totalWords.toDouble(), // Use expense for word count
+                  };
                 },
-                selectedBuilder: (context, day, focusedDay) {
-                  return _buildCalendarCell(
-                    day,
-                    textColor,
-                    primaryColor,
-                    isDark,
-                    isSelected: true,
-                  );
+                primaryColor: primaryColor,
+              ),
+
+              // Calendar
+              TableCalendar<DiaryEntry>(
+                firstDay: DateTime.utc(2020, 1, 1),
+                lastDay: DateTime.now(),
+                focusedDay: _focusedDay,
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                onDaySelected: _onDayClicked,
+                calendarFormat: _calendarFormat,
+                onFormatChanged: (format) {
+                  setState(() {
+                    _calendarFormat = format;
+                  });
                 },
-                markerBuilder: (context, date, events) {
-                  if (events.isEmpty) return null;
-                  final entry = events.first;
-                  return Positioned(
-                    top: 4,
-                    right: 4,
-                    child:
-                        entry.mood != null
-                            ? Text(
-                              entry.mood!,
-                              style: const TextStyle(fontSize: 14),
-                            )
-                            : Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: primaryColor,
-                                shape: BoxShape.circle,
+                onPageChanged: (focusedDay) {
+                  _focusedDay = focusedDay;
+                },
+                eventLoader: (day) {
+                  final normalizedDay = DateTime(day.year, day.month, day.day);
+                  if (_diaryEntries.containsKey(normalizedDay)) {
+                    return [_diaryEntries[normalizedDay]!];
+                  }
+                  return [];
+                },
+                rowHeight: 70, // Matches h-16 (approx 64px) + gap
+                daysOfWeekHeight: 40,
+                headerVisible: false, // We use custom header
+                daysOfWeekStyle: DaysOfWeekStyle(
+                  weekdayStyle: TextStyle(
+                    color: textColor.withValues(alpha: 0.6),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  weekendStyle: TextStyle(
+                    color: textColor.withValues(alpha: 0.6),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  dowTextFormatter:
+                      (date, locale) =>
+                          DateFormat.E(locale).format(date)[0], // S M T ...
+                ),
+                calendarStyle: CalendarStyle(
+                  outsideDaysVisible: false,
+                  cellMargin: const EdgeInsets.all(4),
+                  todayDecoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: primaryColor, width: 2),
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: Colors.transparent,
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: primaryColor, width: 2),
+                  ),
+                  defaultDecoration: BoxDecoration(
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  weekendDecoration: BoxDecoration(
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                calendarBuilders: CalendarBuilders<DiaryEntry>(
+                  defaultBuilder: (context, day, focusedDay) {
+                    return _buildCalendarCell(day, textColor, null, isDark);
+                  },
+                  todayBuilder: (context, day, focusedDay) {
+                    return _buildCalendarCell(
+                      day,
+                      textColor,
+                      primaryColor,
+                      isDark,
+                      isToday: true,
+                    );
+                  },
+                  selectedBuilder: (context, day, focusedDay) {
+                    return _buildCalendarCell(
+                      day,
+                      textColor,
+                      primaryColor,
+                      isDark,
+                      isSelected: true,
+                    );
+                  },
+                  markerBuilder: (context, date, events) {
+                    if (events.isEmpty) return null;
+                    final entry = events.first;
+                    return Positioned(
+                      top: 4,
+                      right: 4,
+                      child:
+                          entry.mood != null
+                              ? Text(
+                                entry.mood!,
+                                style: const TextStyle(fontSize: 14),
+                              )
+                              : Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: primaryColor,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                            ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // Selected Day Details
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_selectedDay != null) ...[
+              // Selected Day Details
+              if (_selectedDay != null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  margin: const EdgeInsets.only(bottom: 80), // Add padding for FAB
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       // 日期和编辑按钮行
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -429,25 +430,27 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                             );
                           },
                         ),
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color:
-                                    isDark
-                                        ? Colors.grey.shade700
-                                        : Colors.grey.shade300,
-                              ),
+                        Container(
+                          constraints: BoxConstraints(
+                            minHeight: 200, // Minimum height for better UX
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color:
+                                  isDark
+                                      ? Colors.grey.shade700
+                                      : Colors.grey.shade300,
                             ),
-                            child: QuillViewer(
-                              data: selectedEntry.content,
-                              selectable: true,
-                            ),
+                          ),
+                          child: QuillViewer(
+                            data: selectedEntry.content,
+                            selectable: true,
                           ),
                         ),
                       ] else ...[
-                        Expanded(
+                        Container(
+                          height: 200,
                           child: Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -470,11 +473,10 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                         ),
                       ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
