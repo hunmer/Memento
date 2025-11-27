@@ -28,6 +28,8 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late int _currentPage;
+  double _bottomBarHeight = 60; // 默认底部栏高度
+  final GlobalKey _bottomBarKey = GlobalKey();
 
   // 使用插件主题色和辅助色
   final List<Color> _colors = [
@@ -63,6 +65,22 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// 调度底部栏高度测量
+  void _scheduleBottomBarHeightMeasurement() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _bottomBarKey.currentContext != null) {
+        final RenderBox renderBox =
+            _bottomBarKey.currentContext!.findRenderObject() as RenderBox;
+        final newHeight = renderBox.size.height;
+        if (_bottomBarHeight != newHeight) {
+          setState(() {
+            _bottomBarHeight = newHeight;
+          });
+        }
+      }
+    });
   }
 
   /// 添加习惯
@@ -111,11 +129,13 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
 
   @override
   Widget build(BuildContext context) {
+    _scheduleBottomBarHeightMeasurement();
     final theme = Theme.of(context);
     final Color unselectedColor =
         theme.brightness == Brightness.dark
             ? Colors.white.withOpacity(0.6)
             : Colors.black.withOpacity(0.6);
+    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
 
     return BottomBar(
       fit: StackFit.expand,
@@ -182,25 +202,44 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
       onBottomBarHidden: () {},
       onBottomBarShown: () {},
       body:
-          (context, controller) => TabBarView(
-            controller: _tabController,
-            dragStartBehavior: DragStartBehavior.start,
-            physics: const NeverScrollableScrollPhysics(),
+          (context, controller) => Stack(
             children: [
-              // Tab0: 习惯列表
-              KeepAliveWrapper(
-                child: CombinedHabitsView(controller: _habitController),
-              ),
-              // Tab1: 技能列表
-              KeepAliveWrapper(
-                child: SkillsList(
-                  skillController: _skillController,
-                  recordController: _recordController,
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: _bottomBarHeight),
+                  child: TabBarView(
+                    controller: _tabController,
+                    dragStartBehavior: DragStartBehavior.start,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      // Tab0: 习惯列表
+                      KeepAliveWrapper(
+                        child: CombinedHabitsView(controller: _habitController),
+                      ),
+                      // Tab1: 技能列表
+                      KeepAliveWrapper(
+                        child: SkillsList(
+                          skillController: _skillController,
+                          recordController: _recordController,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  height: _bottomBarHeight,
+                  color: bottomAreaColor,
+                ),
+              )
             ],
           ),
       child: Stack(
+        key: _bottomBarKey,
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [

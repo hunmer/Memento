@@ -8,7 +8,8 @@
       "Bash(dart analyze:*)",
       "Bash(flutter clean:*)",
       "Bash(flutter pub get:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

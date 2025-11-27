@@ -510,6 +510,8 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late int _currentPage;
+  double _bottomBarHeight = 60; // 默认底部栏高度
+  final GlobalKey _bottomBarKey = GlobalKey();
   final List<Color> _colors = [
     Colors.deepOrange,
     Colors.blue,
@@ -536,6 +538,21 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// 调度底部栏高度测量
+  void _scheduleBottomBarHeightMeasurement() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _bottomBarKey.currentContext != null) {
+        final RenderBox renderBox = _bottomBarKey.currentContext!.findRenderObject() as RenderBox;
+        final newHeight = renderBox.size.height;
+        if (_bottomBarHeight != newHeight) {
+          setState(() {
+            _bottomBarHeight = newHeight;
+          });
+        }
+      }
+    });
   }
 
   void _showPresetEditDialog() async {
@@ -624,10 +641,12 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
 
   @override
   Widget build(BuildContext context) {
+    _scheduleBottomBarHeightMeasurement();
     final Color unselectedColor =
         _colors[_currentPage].computeLuminance() < 0.5
             ? Colors.black.withOpacity(0.6)
             : Colors.white.withOpacity(0.6);
+    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
 
     return BottomBar(
       fit: StackFit.expand,
@@ -691,13 +710,32 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
       onBottomBarHidden: () {},
       onBottomBarShown: () {},
       body:
-          (context, controller) => TabBarView(
-            controller: _tabController,
-            dragStartBehavior: DragStartBehavior.down,
-            physics: const NeverScrollableScrollPhysics(),
-            children: const [AgentListScreen(), PromptPresetScreen()],
+          (context, controller) => Stack(
+            children: [
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: _bottomBarHeight),
+                  child: TabBarView(
+                    controller: _tabController,
+                    dragStartBehavior: DragStartBehavior.down,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: const [AgentListScreen(), PromptPresetScreen()],
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  height: _bottomBarHeight,
+                  color: bottomAreaColor,
+                ),
+              ),
+            ],
           ),
       child: Stack(
+        key: _bottomBarKey,
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
