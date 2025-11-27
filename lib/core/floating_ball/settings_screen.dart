@@ -1,5 +1,6 @@
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'floating_ball_manager.dart';
 import 'floating_ball_service.dart';
 import 'overlay_window_manager.dart';
@@ -170,8 +171,8 @@ class _FloatingBallSettingsScreenState
                               _showCoexistModeWarning();
                             }
                           });
-                          // TODO: 保存到配置
-                          await _saveOverlayWindowConfig(_enableOverlayWindow, value);
+                          // 保存到配置 - 使用当前状态的值
+                          await _saveOverlayWindowConfig(_enableOverlayWindow, _coexistMode);
                         },
                       ),
                     ],
@@ -256,7 +257,12 @@ class _FloatingBallSettingsScreenState
                     l10n.resetPosition,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
+                  Text(
+                    '应用内悬浮球',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: () {
                       _manager.resetPosition();
@@ -265,6 +271,21 @@ class _FloatingBallSettingsScreenState
                       );
                     },
                     child: Text(l10n.resetPosition),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '全局悬浮球',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    onPressed: _resetOverlayFloatingBallPosition,
+                    icon: const Icon(Icons.refresh),
+                    label: Text(l10n.resetOverlayPosition),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -412,12 +433,11 @@ class _FloatingBallSettingsScreenState
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // 确认禁用overlay窗口
+                // 确认禁用共存模式，但保持overlay窗口启用
                 setState(() {
-                  _enableOverlayWindow = false;
                   _coexistMode = false;
                 });
-                _saveOverlayWindowConfig(false, false);
+                _saveOverlayWindowConfig(_enableOverlayWindow, false);
               },
               child: Text('确认'),
             ),
@@ -425,5 +445,40 @@ class _FloatingBallSettingsScreenState
         );
       },
     );
+  }
+
+  /// 重置全局悬浮球位置
+  void _resetOverlayFloatingBallPosition() async {
+    final l10n = FloatingBallLocalizations.of(context);
+    try {
+      debugPrint('🔄 开始重置全局悬浮球位置');
+
+      // 发送重置位置消息到全局悬浮球
+      await FlutterOverlayWindow.shareData({
+        'action': 'reset_position',
+        'data': {
+          'reset_to_center': true,
+        },
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'source': 'settings_screen',
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n!.overlayPositionReset),
+          backgroundColor: Theme.of(context).primaryColor,
+        ),
+      );
+
+      debugPrint('✅ 已发送全局悬浮球位置重置命令');
+    } catch (e) {
+      debugPrint('❌ 重置全局悬浮球位置失败: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('重置失败: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

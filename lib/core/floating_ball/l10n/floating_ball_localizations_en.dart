@@ -48,4 +48,10 @@ class FloatingBallLocalizationsEn extends FloatingBallLocalizations {
 
   @override
   String get swipeRightGesture => 'Swipe Right';
+
+  @override
+  String get resetOverlayPosition => 'Reset Global Floating Ball Position';
+
+  @override
+  String get overlayPositionReset => 'Global floating ball position has been reset';
 }

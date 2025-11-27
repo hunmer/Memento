@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'dart:math' as math;
 import '../models/floating_ball_gesture.dart';
 
 /// 悬浮球平台适配器抽象基类
@@ -144,9 +146,27 @@ class OverlayPlatformAdapter extends FloatingBallPlatformAdapter {
 class OverlayWindowPlatformAdapter extends FloatingBallPlatformAdapter {
   @override
   Size getScreenSize(BuildContext context) {
-    // 在overlay环境中，需要获取实际的屏幕尺寸
-    return WidgetsBinding.instance.platformDispatcher.views.first.physicalSize /
-           WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+    // 在overlay环境中，返回overlay窗口的实际可用尺寸
+    // 使用MediaQuery获取真实尺寸，如果没有context则返回默认尺寸
+    try {
+      if (context.mounted) {
+        final size = MediaQuery.of(context).size;
+        debugPrint('🎯 Overlay窗口实际尺寸: ${size.width}x${size.height}');
+        return size;
+      }
+    } catch (e) {
+      debugPrint('无法获取overlay窗口尺寸，使用默认值: $e');
+    }
+
+    // 如果无法获取真实尺寸，返回基于屏幕尺寸的合理默认值
+    final screenSize = WidgetsBinding.instance.window;
+    final screenWidth = screenSize.physicalSize.width / screenSize.devicePixelRatio;
+    final screenHeight = screenSize.physicalSize.height / screenSize.devicePixelRatio;
+
+    // 返回一个合理的overlay窗口尺寸（约屏幕的40%）
+    final overlaySize = math.min(screenWidth, screenHeight) * 0.4;
+    debugPrint('🎯 使用计算的overlay窗口尺寸: ${overlaySize}x$overlaySize');
+    return Size(overlaySize, overlaySize);
   }
 
   @override
