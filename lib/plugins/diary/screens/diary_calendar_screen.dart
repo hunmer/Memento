@@ -449,7 +449,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                           ),
                         ),
                       ] else ...[
-                        Container(
+                        SizedBox(
                           height: 200,
                           child: Center(
                             child: Column(

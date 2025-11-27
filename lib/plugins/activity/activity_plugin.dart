@@ -841,6 +841,7 @@ class _ActivityMainViewState extends State<ActivityMainView>
         _colors[_currentPage].computeLuminance() < 0.5
             ? Colors.black.withOpacity(0.6)
             : Colors.white.withOpacity(0.6);
+    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
     final mediaQuery = MediaQuery.of(context);
 
     return BottomBar(
@@ -906,19 +907,34 @@ class _ActivityMainViewState extends State<ActivityMainView>
       onBottomBarHidden: () {},
       onBottomBarShown: () {},
       body:
-          (context, controller) => Padding(
-            padding: EdgeInsets.only(bottom: _bottomBarHeight),
-            child: TabBarView(
-              controller: _tabController,
-              dragStartBehavior: DragStartBehavior.down,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                const ActivityTimelineScreen(),
-                ActivityStatisticsScreen(
-                  activityService: ActivityPlugin.instance.activityService,
+          (context, controller) => Stack(
+            children: [
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: _bottomBarHeight),
+                  child: TabBarView(
+                    controller: _tabController,
+                    dragStartBehavior: DragStartBehavior.down,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      const ActivityTimelineScreen(),
+                      ActivityStatisticsScreen(
+                        activityService: ActivityPlugin.instance.activityService,
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  height: _bottomBarHeight,
+                  color: bottomAreaColor,
+                ),
+              ),
+            ],
           ),
       child: Stack(
         key: _bottomBarKey,

@@ -205,7 +205,9 @@ class _TagStatisticsScreenState extends State<TagStatisticsScreen> {
 
   Map<int, double> _getWeeklyAverage() {
     final Map<int, List<int>> weekdayDurations = {};
-    for (int i = 1; i <= 7; i++) weekdayDurations[i] = [];
+    for (int i = 1; i <= 7; i++) {
+      weekdayDurations[i] = [];
+    }
 
     final dailyData = _getDailyDurations();
     dailyData.forEach((date, minutes) {
@@ -366,7 +368,7 @@ class _TagStatisticsScreenState extends State<TagStatisticsScreen> {
 
     return _buildCard(
       title:
-          '${ActivityLocalizations.of(context).timeDistributionTitle} (${_selectedRange})', // Using available key roughly
+          '${ActivityLocalizations.of(context).timeDistributionTitle} ($_selectedRange)', // Using available key roughly
       child: SizedBox(
         height: 200,
         child: LineChart(

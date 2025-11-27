@@ -1,11 +1,9 @@
-import 'dart:io';
 
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/widgets/habit_form.dart';
-import 'package:Memento/plugins/habits/widgets/habits_list/habits_history_list.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/goods_item.dart';
 import '../models/usage_record.dart';
-import '../goods_plugin.dart';
-import '../models/warehouse.dart';
 
 class GoodsItemHistoryPage extends StatefulWidget {
   final GoodsItem item;

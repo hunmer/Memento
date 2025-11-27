@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
@@ -11,7 +10,6 @@ import '../../core/js_bridge/js_bridge_plugin.dart';
 import 'controllers/contact_controller.dart';
 import 'models/contact_model.dart';
 import 'models/interaction_record_model.dart';
-import 'models/filter_sort_config.dart';
 import 'widgets/contact_card.dart';
 import 'widgets/contact_form.dart';
 import 'widgets/filter_dialog.dart';

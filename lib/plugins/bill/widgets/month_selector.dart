@@ -172,7 +172,7 @@ class _MonthSelectorState extends State<MonthSelector> {
   /// 格式化月份显示为 "25年/6月" 格式
   String _formatMonth(DateTime month) {
     final year = month.year.toString().substring(2); // 取后两位
-    return '${year}年/${month.month}月';
+    return '$year年/${month.month}月';
   }
 
   @override
