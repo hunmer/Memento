@@ -162,10 +162,24 @@ class ActivityController {
     // 加载最近使用的心情和标签
     await loadRecentMoodsAndTags();
 
-    return showDialog(
+    return showModalBottomSheet(
       context: context,
-      builder:
-          (context) => ActivityForm(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9, // 初始高度为屏幕高度的90%
+        maxChildSize: 0.95, // 最大高度为屏幕高度的95%
+        minChildSize: 0.5,  // 最小高度为屏幕高度的50%
+        expand: false,
+        builder: (context, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: ActivityForm(
             selectedDate: selectedDate,
             initialStartTime: initialStartTime,
             initialEndTime: initialEndTime,
@@ -184,8 +198,11 @@ class ActivityController {
               // 发送活动添加事件
               _notifyEvent('added', activity);
               await loadActivities(selectedDate);
+              Navigator.of(context).pop();
             },
           ),
+        ),
+      ),
     );
   }
 
@@ -193,10 +210,24 @@ class ActivityController {
     // 加载最近使用的心情和标签
     loadRecentMoodsAndTags().then((_) {
       if (!context.mounted) return;
-      showDialog(
+      showModalBottomSheet(
         context: context,
-        builder:
-            (context) => ActivityForm(
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => DraggableScrollableSheet(
+          initialChildSize: 0.9, // 初始高度为屏幕高度的90%
+          maxChildSize: 0.95, // 最大高度为屏幕高度的95%
+          minChildSize: 0.5,  // 最小高度为屏幕高度的50%
+          expand: false,
+          builder: (context, scrollController) => Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: ActivityForm(
               activity: activity,
               recentMoods: recentMoods,
               recentTags: recentTags,
@@ -210,9 +241,12 @@ class ActivityController {
                   await _updateRecentMood(updatedActivity.mood!);
                 }
                 await loadActivities(activity.startTime);
+                Navigator.of(context).pop();
               },
               selectedDate: activity.startTime,
             ),
+          ),
+        ),
       );
     });
   }

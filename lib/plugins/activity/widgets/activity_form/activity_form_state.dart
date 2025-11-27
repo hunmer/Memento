@@ -26,293 +26,310 @@ class ActivityFormState extends State<ActivityFormWidget> {
     final cardColor = isDark ? const Color(0xFF27272A) : Colors.white;
     final primaryColor = Theme.of(context).primaryColor;
 
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Container(
-          width: 40,
-          height: 6,
-          decoration: BoxDecoration(
-            color: isDark ? Colors.grey[700] : Colors.grey[300],
-            borderRadius: BorderRadius.circular(3),
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-              children: [
-                // Title Card
-                _buildCard(
-                  context,
-                  cardColor,
-                  icon: Icons.edit,
-                  child: TextField(
-                    controller: _titleController,
-                    style: const TextStyle(fontSize: 16),
-                    decoration: InputDecoration(
-                      hintText: l10n.activityName,
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                      isDense: true,
+    return Column(
+      children: [
+        // 顶部拖动指示器和关闭按钮
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              // 拖动指示器
+              Expanded(
+                child: Center(
+                  child: Container(
+                    width: 40,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[700] : Colors.grey[300],
+                      borderRadius: BorderRadius.circular(3),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+              ),
+              // 关闭按钮
+              IconButton(
+                icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black),
+                onPressed: () => Navigator.of(context).pop(),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+        ),
 
-                // Time Card
-                _buildCard(
-                  context,
-                  cardColor,
-                  icon: Icons.schedule,
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildTimeBox(
-                              context,
-                              label: appL10n.startTime,
-                              time: _startTime,
-                              onTap: () => _selectTime(context, true),
-                              isDark: isDark,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildTimeBox(
-                              context,
-                              label: appL10n.endTime,
-                              time: _endTime,
-                              onTap: () => _selectTime(context, false),
-                              isDark: isDark,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      // Duration Box
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color:
-                              isDark ? Colors.black26 : const Color(0xFFF5F7F8),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              l10n.duration,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _calculateDurationString(context),
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+        // 表单内容
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            children: [
+              // Title Card
+              _buildCard(
+                context,
+                cardColor,
+                icon: Icons.edit,
+                child: TextField(
+                  controller: _titleController,
+                  style: const TextStyle(fontSize: 16),
+                  decoration: InputDecoration(
+                    hintText: l10n.activityName,
+                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    isDense: true,
                   ),
                 ),
-                const SizedBox(height: 16),
+              ),
+              const SizedBox(height: 16),
 
-                // Mood Card
-                _buildCard(
-                  context,
-                  cardColor,
-                  icon: Icons.mood,
-                  child: MoodSelector(
-                    selectedMood: _selectedMood,
-                    onMoodSelected: _selectMood,
-                    recentMoods: widget.recentMoods,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Tags Card
-                _buildCard(
-                  context,
-                  cardColor,
-                  icon: Icons.local_offer, // sell icon
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Stack(
-                        alignment: Alignment.centerRight,
-                        children: [
-                          TextField(
-                            controller: _tagsController,
-                            decoration: InputDecoration(
-                              hintText: appL10n.tags,
-                              hintStyle: TextStyle(color: Colors.grey[400]),
-                              border: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.grey[300]!,
-                                ),
-                              ),
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.grey[300]!,
-                                ),
-                              ),
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: primaryColor),
-                              ),
-                              contentPadding: const EdgeInsets.only(
-                                right: 24,
-                                bottom: 8,
-                              ),
-                              isDense: true,
-                            ),
+              // Time Card
+              _buildCard(
+                context,
+                cardColor,
+                icon: Icons.schedule,
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTimeBox(
+                            context,
+                            label: appL10n.startTime,
+                            time: _startTime,
+                            onTap: () => _selectTime(context, true),
+                            isDark: isDark,
                           ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Icon(
-                              Icons.tag,
-                              color: Colors.grey[400],
-                              size: 20,
-                            ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildTimeBox(
+                            context,
+                            label: appL10n.endTime,
+                            time: _endTime,
+                            onTap: () => _selectTime(context, false),
+                            isDark: isDark,
                           ),
-                        ],
-                      ),
-                      if (widget.recentTags != null &&
-                          widget.recentTags!.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children:
-                              widget.recentTags!.map((tag) {
-                                // Check if tag is selected
-                                // Note: _selectedTags comes from controller parsing in current logic
-                                // We need to keep that logic synced.
-                                final isSelected = _selectedTags.contains(tag);
-                                return InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      if (_selectedTags.contains(tag)) {
-                                        _selectedTags.remove(tag);
-                                      } else {
-                                        _selectedTags.add(tag);
-                                      }
-                                      _tagsController.text = _selectedTags.join(
-                                        ', ',
-                                      );
-                                    });
-                                  },
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          isSelected
-                                              ? primaryColor.withOpacity(0.2)
-                                              : (isDark
-                                                  ? primaryColor.withOpacity(
-                                                    0.1,
-                                                  )
-                                                  : primaryColor.withOpacity(
-                                                    0.1,
-                                                  )),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      tag,
-                                      style: TextStyle(
-                                        color:
-                                            isSelected
-                                                ? primaryColor
-                                                : (isDark
-                                                    ? Colors.purple[200]
-                                                    : primaryColor),
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
                         ),
                       ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Description Card
-                _buildCard(
-                  context,
-                  cardColor,
-                  icon: Icons.description,
-                  child: TextField(
-                    controller: _descriptionController,
-                    style: const TextStyle(fontSize: 16),
-                    decoration: InputDecoration(
-                      hintText: l10n.contentHint,
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
                     ),
-                    maxLines: 4,
-                  ),
+                    const SizedBox(height: 12),
+                    // Duration Box
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color:
+                            isDark ? Colors.black26 : const Color(0xFFF5F7F8),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            l10n.duration,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _calculateDurationString(context),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
+              const SizedBox(height: 16),
+
+              // Mood Card
+              _buildCard(
+                context,
+                cardColor,
+                icon: Icons.mood,
+                child: MoodSelector(
+                  selectedMood: _selectedMood,
+                  onMoodSelected: _selectMood,
+                  recentMoods: widget.recentMoods,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Tags Card
+              _buildCard(
+                context,
+                cardColor,
+                icon: Icons.local_offer, // sell icon
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Stack(
+                      alignment: Alignment.centerRight,
+                      children: [
+                        TextField(
+                          controller: _tagsController,
+                          decoration: InputDecoration(
+                            hintText: appL10n.tags,
+                            hintStyle: TextStyle(color: Colors.grey[400]),
+                            border: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.grey[300]!,
+                              ),
+                            ),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.grey[300]!,
+                              ),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: primaryColor),
+                            ),
+                            contentPadding: const EdgeInsets.only(
+                              right: 24,
+                              bottom: 8,
+                            ),
+                            isDense: true,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Icon(
+                            Icons.tag,
+                            color: Colors.grey[400],
+                            size: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (widget.recentTags != null &&
+                        widget.recentTags!.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children:
+                            widget.recentTags!.map((tag) {
+                              // Check if tag is selected
+                              // Note: _selectedTags comes from controller parsing in current logic
+                              // We need to keep that logic synced.
+                              final isSelected = _selectedTags.contains(tag);
+                              return InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    if (_selectedTags.contains(tag)) {
+                                      _selectedTags.remove(tag);
+                                    } else {
+                                      _selectedTags.add(tag);
+                                    }
+                                    _tagsController.text = _selectedTags.join(
+                                      ', ',
+                                    );
+                                  });
+                                },
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        isSelected
+                                            ? primaryColor.withOpacity(0.2)
+                                            : (isDark
+                                                ? primaryColor.withOpacity(
+                                                  0.1,
+                                                )
+                                                : primaryColor.withOpacity(
+                                                  0.1,
+                                                )),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    tag,
+                                    style: TextStyle(
+                                      color:
+                                          isSelected
+                                              ? primaryColor
+                                              : (isDark
+                                                  ? Colors.purple[200]
+                                                  : primaryColor),
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Description Card
+              _buildCard(
+                context,
+                cardColor,
+                icon: Icons.description,
+                child: TextField(
+                  controller: _descriptionController,
+                  style: const TextStyle(fontSize: 16),
+                  decoration: InputDecoration(
+                    hintText: l10n.contentHint,
+                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  maxLines: 4,
+                ),
+              ),
+
+              // 底部保存按钮的间距
+              const SizedBox(height: 80),
+            ],
+          ),
+        ),
+
+        // 底部保存按钮（固定在底部）
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            border: Border(
+              top: BorderSide(
+                color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+              ),
             ),
           ),
-          // Bottom Save Button
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+          child: SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: _handleSave,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                appL10n.save,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            child: SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _handleSave,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  appL10n.save,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
