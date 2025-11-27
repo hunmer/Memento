@@ -181,10 +181,10 @@ class FloatingBallConfig {
   /// 获取默认配置
   static FloatingBallConfig get defaultConfig => FloatingBallConfig(
     isInOverlay: false,
-    sizeScale: 0.6,
+    sizeScale: 1.0,
     position: const Offset(21, 99),
     enabled: true,
-    color: Colors.blue,
+    color: Color(0xFF2196F3), // 与全局保持一致的Material Blue
     iconPath: 'assets/icon/icon.png',
     actionMappings: {
       FloatingBallGesture.tap: '打开上次插件',
@@ -199,10 +199,10 @@ class FloatingBallConfig {
   static FloatingBallConfig get overlayWindowDefaultConfig => FloatingBallConfig(
     isInOverlay: true,
     sizeScale: 1.0,
-    position: const Offset(0, 0), // 将由系统自动定位
+    position: const Offset(100, 100), // 默认位置
     enabled: true,
-    color: Colors.blue,
-    iconPath: 'assets/icon/icon.png',
+    color: Color(0xFF2196F3), // 与应用内保持一致的Material Blue
+    iconPath: 'home', // 使用内置图标而不是assets图片
     autoStart: false,
     showNotification: false,
     windowAlignment: 'topRight',
@@ -214,6 +214,8 @@ class FloatingBallConfig {
       FloatingBallGesture.tap: '展开选项',
       FloatingBallGesture.swipeUp: '打开聊天',
       FloatingBallGesture.swipeDown: '打开日记',
+      FloatingBallGesture.swipeLeft: '打开日历',
+      FloatingBallGesture.swipeRight: '打开设置',
     },
   );
 

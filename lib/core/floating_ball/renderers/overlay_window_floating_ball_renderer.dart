@@ -4,7 +4,6 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'abstract_floating_ball_renderer.dart';
 import '../config/floating_ball_config.dart';
 import '../adapters/floating_ball_platform_adapter.dart';
-import '../models/floating_ball_gesture.dart';
 
 /// OverlayWindow悬浮球渲染器
 ///
@@ -41,32 +40,52 @@ class OverlayWindowFloatingBallRenderer extends BaseFloatingBallRenderer {
 
   @override
   Future<void> show(BuildContext context) async {
+    debugPrint('🎯 OverlayWindowFloatingBallRenderer.show() 开始');
+
     if (!_isInitialized) {
+      debugPrint('初始化渲染器...');
       await initialize();
     }
 
-    if (isVisible()) return;
+    if (isVisible()) {
+      debugPrint('悬浮球已经在显示中');
+      return;
+    }
 
     try {
-      // 显示overlay窗口，使用较大的初始尺寸以容纳悬浮球和可能的展开选项
+      debugPrint('准备调用 FlutterOverlayWindow.showOverlay...');
+      final screenHeight = MediaQuery.of(context).size.height;
+      final overlayHeight = (screenHeight * 0.4).toInt();
+      debugPrint('屏幕高度: $screenHeight, overlay高度: $overlayHeight');
+
+      // 使用较大的窗口尺寸以容纳展开的选项球
       await FlutterOverlayWindow.showOverlay(
-        height: 300, // 足够大的初始尺寸
-        width: 300,
-        alignment: OverlayAlignment.topRight,
         enableDrag: true,
-        overlayContent: "overlayMain", // 对应 @pragma("vm:entry-point") 的函数名
+        overlayTitle: "Memento悬浮球",
+        overlayContent: '悬浮球已启用',
+        flag: OverlayFlag.defaultFlag,
+        visibility: NotificationVisibility.visibilityPublic,
+        positionGravity: PositionGravity.auto,
+        height: 400, // 增大窗口高度以容纳选项球
+        width: 400, // 增大窗口宽度以容纳选项球
+        startPosition: const OverlayPosition(0, 100), // 调整起始位置，让悬浮球更可见
       );
 
+      debugPrint('✅ FlutterOverlayWindow.showOverlay() 调用成功');
+
       // 发送显示消息到overlay
+      debugPrint('发送显示消息到overlay...');
       await _sendOverlayMessage('show', {
         'config': config.toJson(),
         'rendererType': rendererType,
       });
 
       setVisible(true);
-      debugPrint('Overlay window floating ball shown');
+      debugPrint('✅ Overlay window floating ball shown successfully');
     } catch (e) {
-      debugPrint('Failed to show overlay window floating ball: $e');
+      debugPrint('❌ Failed to show overlay window floating ball: $e');
+      debugPrint('错误类型: ${e.runtimeType}');
+      debugPrint('错误详情: ${e.toString()}');
       rethrow;
     }
   }

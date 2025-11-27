@@ -80,34 +80,43 @@ class OverlayWindowManager {
 
   /// 显示overlay窗口悬浮球
   Future<void> showFloatingBall(BuildContext context) async {
+    debugPrint('=== 开始显示悬浮球 ===');
+
     if (!_isInitialized) {
+      debugPrint('初始化 OverlayWindowManager...');
       await initialize();
     }
 
     if (!_hasPermissions) {
+      debugPrint('没有权限，请求权限中...');
       final granted = await requestPermissions();
       if (!granted) {
+        debugPrint('权限被拒绝');
         _showPermissionDialog(context);
         return;
       }
       _hasPermissions = true;
+      debugPrint('权限获取成功，重新初始化...');
       await initialize();
     }
 
     try {
       if (_renderer == null) {
+        debugPrint('准备渲染器...');
         await _prepareRenderer();
       }
 
       if (_renderer == null) {
+        debugPrint('错误：渲染器不可用');
         _showErrorDialog(context, '全局悬浮球渲染器不可用');
         return;
       }
 
+      debugPrint('调用渲染器显示悬浮球...');
       await _renderer!.show(context);
-      debugPrint('Overlay window floating ball shown');
+      debugPrint('✅ 悬浮球显示成功');
     } catch (e) {
-      debugPrint('Failed to show overlay window floating ball: $e');
+      debugPrint('❌ 显示悬浮球失败: $e');
       _showErrorDialog(context, 'Failed to show overlay window: $e');
     }
   }

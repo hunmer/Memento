@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'models/floating_ball_gesture.dart';
+import 'widgets/shared_floating_ball_widget.dart';
+import 'config/floating_ball_config.dart';
+import 'adapters/floating_ball_platform_adapter.dart';
 
 /// Overlay窗口主应用
 ///
@@ -14,6 +17,8 @@ class OverlayWindowApp extends StatefulWidget {
 
 class _OverlayWindowAppState extends State<OverlayWindowApp> {
   bool _isLoading = true;
+  FloatingBallConfig _config = FloatingBallConfig.overlayWindowDefaultConfig;
+  final GlobalKey _floatingBallKey = GlobalKey();
 
   @override
   void initState() {
@@ -22,29 +27,45 @@ class _OverlayWindowAppState extends State<OverlayWindowApp> {
   }
 
   Future<void> _initialize() async {
+    debugPrint('🚀 OverlayWindowApp 初始化开始');
     try {
       // 监听overlay窗口消息
+      debugPrint('设置消息监听器...');
       FlutterOverlayWindow.overlayListener.listen(_handleMainAppMessage);
 
       // 加载配置
+      debugPrint('加载配置...');
       await _loadConfiguration();
 
       if (mounted) {
+        debugPrint('设置加载状态为 false');
         setState(() {
           _isLoading = false;
         });
 
         // 通知主应用overlay窗口已准备好
+        debugPrint('发送 ready 消息到主应用...');
         await _sendMessageToMainApp('ready', null);
       }
     } catch (e) {
-      debugPrint('Error initializing overlay window app: $e');
+      debugPrint('❌ Error initializing overlay window app: $e');
     }
   }
 
   Future<void> _loadConfiguration() async {
-    // TODO: 加载overlay窗口特定的配置
-    // 暂时使用默认配置
+    try {
+      // 加载overlay窗口特定的配置
+      final config = await FloatingBallConfigManager.loadConfig(isInOverlay: true);
+      if (mounted) {
+        setState(() {
+          _config = config;
+        });
+      }
+      debugPrint('✅ 悬浮球配置加载成功: ${config.color}');
+    } catch (e) {
+      debugPrint('❌ 加载悬浮球配置失败，使用默认配置: $e');
+      // 继续使用默认配置
+    }
   }
 
   /// 处理从主应用收到的消息
@@ -59,7 +80,12 @@ class _OverlayWindowAppState extends State<OverlayWindowApp> {
             break;
           case 'update_config':
             debugPrint('Overlay window received config update');
-            // TODO: 更新配置
+            _updateConfigFromMessage(data['data'] as Map<String, dynamic>?);
+            break;
+          case 'reset_position':
+            debugPrint('Overlay window received reset position command');
+            _resetPosition();
+            _clearPersistentPosition();
             break;
           default:
             debugPrint('Unknown main app message: $action');
@@ -99,11 +125,47 @@ class _OverlayWindowAppState extends State<OverlayWindowApp> {
     });
   }
 
-  /// 发送大小变化消息到主应用
-  Future<void> _sendSizeMessage(double scale) async {
-    await _sendMessageToMainApp('size_changed', {
-      'scale': scale,
-    });
+  /// 更新配置
+  Future<void> _updateConfigFromMessage(Map<String, dynamic>? configData) async {
+    if (configData != null) {
+      try {
+        final newConfig = FloatingBallConfig.fromJson(configData);
+        if (mounted) {
+          setState(() {
+            _config = newConfig;
+          });
+          debugPrint('✅ 配置更新成功: ${newConfig.color}');
+        }
+      } catch (e) {
+        debugPrint('❌ 配置更新失败: $e');
+      }
+    }
+  }
+
+  /// 重置悬浮球位置到中心
+  void _resetPosition() {
+    debugPrint('🔄 开始重置悬浮球位置到中心');
+    // 通过消息机制让悬浮球重置位置
+    // 由于无法直接访问widget的state，我们通过清除持久化位置并重建来实现重置
+    if (mounted) {
+      setState(() {
+        // 强制重建会触发SharedFloatingBallWidget的重新初始化
+        // 但不会清除持久化位置，所以我们需要在SharedFloatingBallWidget中处理重置逻辑
+      });
+      debugPrint('✅ 悬浮球位置重置完成');
+    }
+  }
+
+  /// 清除全局持久化位置
+  void _clearPersistentPosition() {
+    debugPrint('清除全局悬浮球位置缓存');
+    // 调用静态重置方法，标记需要重置位置
+    SharedFloatingBallWidget.resetGlobalPosition();
+
+    // 强制重建来应用重置
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   /// 获取手势名称
@@ -124,7 +186,10 @@ class _OverlayWindowAppState extends State<OverlayWindowApp> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('🎨 OverlayWindowApp.build() called, _isLoading: $_isLoading');
+
     if (_isLoading) {
+      debugPrint('显示加载中状态...');
       return const Scaffold(
         backgroundColor: Colors.transparent,
         body: Center(
@@ -133,15 +198,38 @@ class _OverlayWindowAppState extends State<OverlayWindowApp> {
       );
     }
 
+    debugPrint('显示悬浮球主内容...');
+    debugPrint('悬浮球配置: 颜色=${_config.color}, 大小比例=${_config.sizeScale}, 位置=${_config.position}');
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 360),
-          child: OverlayDemoWidget(
-            onGesture: _sendGestureMessage,
-            onPositionChanged: _sendPositionMessage,
-          ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.transparent, // 确保容器透明
+        child: Stack(
+          children: [
+            // 调试背景 - 临时添加半透明背景来确认窗口位置
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.black.withOpacity(0.1), // 半透明黑色背景
+            ),
+            // 使用统一的悬浮球组件
+            SharedFloatingBallWidget(
+              key: _floatingBallKey,
+              isInOverlay: true, // 在OverlayWindow环境中
+              baseSize: 80.0, // 增大悬浮球尺寸，使其更显眼
+              color: Colors.red, // 临时使用红色确保可见性
+              iconPath: _config.iconPath,
+              platformAdapter: OverlayWindowPlatformAdapter(),
+              onGesture: _sendGestureMessage,
+              onPositionChanged: _sendPositionMessage,
+              onConfigChanged: () {
+                // 配置变更时可以重新加载
+                debugPrint('🎯 悬浮球配置变更');
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -154,169 +242,3 @@ class _OverlayWindowAppState extends State<OverlayWindowApp> {
   }
 }
 
-/// 模仿 doc/overlay_demo 的 TrueCallerOverlay，用于验证 overlay UI
-class OverlayDemoWidget extends StatefulWidget {
-  final ValueChanged<FloatingBallGesture>? onGesture;
-  final ValueChanged<Offset>? onPositionChanged;
-
-  const OverlayDemoWidget({
-    super.key,
-    this.onGesture,
-    this.onPositionChanged,
-  });
-
-  @override
-  State<OverlayDemoWidget> createState() => _OverlayDemoWidgetState();
-}
-
-class _OverlayDemoWidgetState extends State<OverlayDemoWidget> {
-  bool _isGold = true;
-
-  static const _goldColors = [
-    Color(0xFFa2790d),
-    Color(0xFFebd197),
-    Color(0xFFa2790d),
-  ];
-
-  static const _silverColors = [
-    Color(0xFFAEB2B8),
-    Color(0xFFC7C9CB),
-    Color(0xFFD7D7D8),
-    Color(0xFFAEB2B8),
-  ];
-
-  Offset _position = const Offset(0, 0);
-
-  void _toggleTheme() {
-    setState(() {
-      _isGold = !_isGold;
-    });
-    widget.onGesture?.call(FloatingBallGesture.tap);
-  }
-
-  void _handlePanUpdate(DragUpdateDetails details) {
-    final size = MediaQuery.of(context).size;
-    final childWidth = size.width.clamp(0, 360);
-    final childHeight = size.height * 0.4;
-    final newPosition = Offset(
-      (_position.dx + details.delta.dx).clamp(0, size.width - childWidth),
-      (_position.dy + details.delta.dy).clamp(0, size.height - childHeight),
-    );
-
-    setState(() {
-      _position = newPosition;
-    });
-    widget.onPositionChanged?.call(newPosition);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final height = constraints.maxHeight;
-        final cardWidth = width;
-        final cardHeight = height.clamp(180.0, 400.0);
-
-        return Stack(
-          children: [
-            Positioned(
-              left: _position.dx,
-              top: _position.dy,
-              right: (width - cardWidth - _position.dx).clamp(0, width),
-              child: GestureDetector(
-                onPanUpdate: _handlePanUpdate,
-                child: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    height: cardHeight,
-                    width: cardWidth,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: _isGold ? _goldColors : _silverColors,
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 12,
-                          offset: const Offset(2, 6),
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        Column(
-                          children: [
-                            ListTile(
-                              leading: Container(
-                                height: 64,
-                                width: 64,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.black45),
-                                  image: const DecorationImage(
-                                    image: NetworkImage('https://api.multiavatar.com/x-slayer.png'),
-                                  ),
-                                ),
-                              ),
-                              title: const Text(
-                                'X-SLAYER',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: const Text('Sousse, Tunisia'),
-                            ),
-                            const Spacer(),
-                            const Divider(color: Colors.black54),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('+216 21065826'),
-                                      Text('Last call - 1 min ago'),
-                                    ],
-                                  ),
-                                  Text(
-                                    'Flutter Overlay',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.color_lens_outlined, color: Colors.black),
-                                onPressed: _toggleTheme,
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.close, color: Colors.black),
-                                onPressed: () => FlutterOverlayWindow.closeOverlay(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}

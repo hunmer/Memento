@@ -52,6 +52,8 @@ abstract class FloatingBallLocalizations {
   String get swipeDownGesture;
   String get swipeLeftGesture;
   String get swipeRightGesture;
+  String get resetOverlayPosition;
+  String get overlayPositionReset;
 }
 
 class _FloatingBallLocalizationsDelegate
