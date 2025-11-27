@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import '../../main.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
@@ -791,6 +792,9 @@ class _ActivityMainViewState extends State<ActivityMainView>
     Colors.blue,
     Colors.orange,
   ];
+  static const double _bottomBarOffset = 12.0;
+  final GlobalKey _bottomBarKey = GlobalKey(debugLabel: 'activity_bottom_bar');
+  double _bottomBarHeight = kBottomNavigationBarHeight + _bottomBarOffset * 2;
 
   @override
   void initState() {
@@ -813,12 +817,31 @@ class _ActivityMainViewState extends State<ActivityMainView>
     super.dispose();
   }
 
+  void _scheduleBottomBarHeightMeasurement() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final renderObject = _bottomBarKey.currentContext?.findRenderObject();
+      if (renderObject is RenderBox) {
+        final safeAreaBottom = MediaQuery.of(context).padding.bottom;
+        final newHeight =
+            renderObject.size.height + _bottomBarOffset * 2 + safeAreaBottom;
+        if ((newHeight - _bottomBarHeight).abs() > 0.5) {
+          setState(() {
+            _bottomBarHeight = newHeight;
+          });
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    _scheduleBottomBarHeightMeasurement();
     final Color unselectedColor =
         _colors[_currentPage].computeLuminance() < 0.5
             ? Colors.black.withOpacity(0.6)
             : Colors.white.withOpacity(0.6);
+    final mediaQuery = MediaQuery.of(context);
 
     return BottomBar(
       fit: StackFit.expand,
@@ -847,14 +870,14 @@ class _ActivityMainViewState extends State<ActivityMainView>
       duration: const Duration(milliseconds: 300),
       curve: Curves.decelerate,
       showIcon: true,
-      width: MediaQuery.of(context).size.width * 0.85,
+      width: mediaQuery.size.width * 0.85,
       barColor:
           _colors[_currentPage].computeLuminance() > 0.5
               ? Colors.black
               : Colors.white,
       start: 2,
       end: 0,
-      offset: 12,
+      offset: _bottomBarOffset,
       barAlignment: Alignment.bottomCenter,
       iconHeight: 35,
       iconWidth: 35,
@@ -883,18 +906,22 @@ class _ActivityMainViewState extends State<ActivityMainView>
       onBottomBarHidden: () {},
       onBottomBarShown: () {},
       body:
-          (context, controller) => TabBarView(
-            controller: _tabController,
-            dragStartBehavior: DragStartBehavior.down,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              const ActivityTimelineScreen(),
-              ActivityStatisticsScreen(
-                activityService: ActivityPlugin.instance.activityService,
-              ),
-            ],
+          (context, controller) => Padding(
+            padding: EdgeInsets.only(bottom: _bottomBarHeight),
+            child: TabBarView(
+              controller: _tabController,
+              dragStartBehavior: DragStartBehavior.down,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                const ActivityTimelineScreen(),
+                ActivityStatisticsScreen(
+                  activityService: ActivityPlugin.instance.activityService,
+                ),
+              ],
+            ),
           ),
       child: Stack(
+        key: _bottomBarKey,
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
