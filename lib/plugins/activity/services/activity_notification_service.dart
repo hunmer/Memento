@@ -68,8 +68,8 @@ class ActivityNotificationService {
       debugPrint('[ActivityNotificationService] 启动Android前台服务失败: $e');
     }
 
-    // 立即更新一次通知
-    _updateNotification();
+    // 注释掉立即更新通知，避免与定时器的第一次更新重复
+    // _updateNotification();
     debugPrint('[ActivityNotificationService] 通知服务已启用');
   }
 
@@ -128,8 +128,12 @@ class ActivityNotificationService {
       _updateNotification();
     });
 
-    // 立即更新一次
-    _updateNotification();
+    // 延迟30秒后第一次更新，避免与启用时的通知重复
+    Future.delayed(const Duration(seconds: 30), () {
+      if (_isEnabled) {
+        _updateNotification();
+      }
+    });
   }
 
   /// 更新通知内容
