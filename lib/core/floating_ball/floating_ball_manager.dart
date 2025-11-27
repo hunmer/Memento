@@ -14,15 +14,7 @@ import '../../plugins/agent_chat/agent_chat_plugin.dart';
 import '../../plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
 import '../../plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
 import 'plugin_overlay_manager.dart';
-
-/// 悬浮球手势动作类型
-enum FloatingBallGesture {
-  tap, // 单击
-  swipeUp, // 上滑
-  swipeDown, // 下滑
-  swipeLeft, // 左滑
-  swipeRight, // 右滑
-}
+import 'models/floating_ball_gesture.dart';
 
 /// 动作信息类，包含动作标题和回调函数
 class ActionInfo {
@@ -448,5 +440,55 @@ class FloatingBallManager {
 
     // 通知悬浮球服务更新位置
     FloatingBallService().updatePosition(defaultPosition);
+  }
+
+  // Overlay窗口配置管理
+
+  /// 保存overlay窗口配置
+  Future<void> saveOverlayWindowConfig({
+    required bool enableOverlayWindow,
+    required bool coexistMode,
+  }) async {
+    final data = await _readData();
+    data['enable_overlay_window'] = enableOverlayWindow;
+    data['coexist_mode'] = coexistMode;
+    await _writeDataSafe(data);
+  }
+
+  /// 获取overlay窗口配置
+  Future<Map<String, dynamic>> getOverlayWindowConfig() async {
+    final data = await _readData();
+    return {
+      'enableOverlayWindow': data['enable_overlay_window'] as bool? ?? false,
+      'coexistMode': data['coexist_mode'] as bool? ?? false,
+    };
+  }
+
+  /// 检查是否启用overlay窗口
+  Future<bool> isOverlayWindowEnabled() async {
+    final data = await _readData();
+    return data['enable_overlay_window'] as bool? ?? false;
+  }
+
+  /// 设置overlay窗口启用状态
+  Future<void> setOverlayWindowEnabled(bool enabled) async {
+    await saveOverlayWindowConfig(
+      enableOverlayWindow: enabled,
+      coexistMode: await isCoexistModeEnabled(),
+    );
+  }
+
+  /// 检查是否启用共存模式
+  Future<bool> isCoexistModeEnabled() async {
+    final data = await _readData();
+    return data['coexist_mode'] as bool? ?? false;
+  }
+
+  /// 设置共存模式
+  Future<void> setCoexistModeEnabled(bool enabled) async {
+    await saveOverlayWindowConfig(
+      enableOverlayWindow: await isOverlayWindowEnabled(),
+      coexistMode: enabled,
+    );
   }
 }

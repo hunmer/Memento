@@ -9,7 +9,10 @@
       "Bash(flutter clean:*)",
       "Bash(flutter pub get:*)",
       "Bash(timeout:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "mcp__context7__resolve-library-id",
+      "WebSearch",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

@@ -9,6 +9,7 @@ import 'package:Memento/screens/js_console/js_console_screen.dart';
 import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart';
 import 'package:Memento/screens/notification_test/notification_test_page.dart';
 import 'package:Memento/screens/super_cupertino_test_screen/super_cupertino_test_screen.dart';
+import 'package:Memento/screens/settings_screen/screens/overlay_test_screen.dart';
 
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
@@ -49,6 +50,7 @@ class AppRoutes extends NavigatorObserver {
   static const String jsonDynamicTest = '/json_dynamic_test';
   static const String notificationTest = '/notification_test';
   static const String superCupertinoTest = '/super_cupertino_test';
+  static const String overlayTest = '/overlay_test';
 
   // 插件路由路径
   static const String agentChat = '/agent_chat';
@@ -174,6 +176,9 @@ class AppRoutes extends NavigatorObserver {
       case '/super_cupertino_test':
       case 'super_cupertino_test':
         return _createRoute(const SuperCupertinoTestScreen());
+      case '/overlay_test':
+      case 'overlay_test':
+        return _createRoute(const OverlayTestScreen());
       case '/chat':
       case 'chat':
         // 支持通过 channelId 参数直接打开指定频道
@@ -217,6 +222,7 @@ class AppRoutes extends NavigatorObserver {
     jsonDynamicTest: (context) => const JsonDynamicTestScreen(),
     notificationTest: (context) => const NotificationTestPage(),
     superCupertinoTest: (context) => const SuperCupertinoTestScreen(),
+    overlayTest: (context) => const OverlayTestScreen(),
   };
 
   static String get initialRoute => home;

@@ -319,6 +319,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pushNamed(context, '/notification_test');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.picture_in_picture),
+            title: const Text('悬浮窗测试'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/overlay_test');
+            },
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.info),

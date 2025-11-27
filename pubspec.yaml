@@ -92,6 +92,7 @@ dependencies:
   wheel_picker: ^0.2.2  # Wheel picker for time selection
   flutter_floating_bottom_bar: ^1.3.0  # Floating bottom bar for bill plugin
   super_cupertino_navigation_bar: ^2.0.0  # Super Cupertino Navigation Bar
+  flutter_overlay_window: ^0.5.0  # Overlay window support for global floating ball
 
 dev_dependencies:
   flutter_test:
