@@ -136,19 +136,6 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
         normalizedSelectedDay != null
             ? _diaryEntries[normalizedSelectedDay]
             : null;
-
-    // Debug output (可以移除这些调试代码)
-    debugPrint('=== Calendar Screen Debug ===');
-    debugPrint('Looking for entry: $normalizedSelectedDay');
-    debugPrint(
-      'Has entry: ${normalizedSelectedDay != null ? _diaryEntries.containsKey(normalizedSelectedDay) : false}',
-    );
-    if (selectedEntry != null) {
-      debugPrint('Found entry: title="${selectedEntry.title}"');
-    } else {
-      debugPrint('No entry found for selected date');
-    }
-
     // Check if current theme is dark
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor =
@@ -158,24 +145,22 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
         isDark ? Theme.of(context).colorScheme.primary : _primaryColor;
 
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
+        title: Text(DiaryLocalizations.of(context).myDiary),
+      ),
       backgroundColor: bgColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // Back Button
-              if (!(Platform.isAndroid || Platform.isIOS))
-                Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 4),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back, color: textColor),
-                      onPressed: () => PluginManager.toHomeScreen(context),
-                      tooltip: DiaryLocalizations.of(context).myDiary,
-                    ),
-                  ),
-                ),
               // Month Selector
               MonthSelector(
                 selectedMonth: _focusedDay,
@@ -209,6 +194,34 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                   };
                 },
                 primaryColor: primaryColor,
+                customStatsBuilder: (stats) {
+                  final entryCount = stats['income']?.toInt() ?? 0;
+                  final wordCount = stats['expense']?.toInt() ?? 0;
+
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '$entryCount篇日记',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Color(0xFF2ECC71), // 绿色
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        wordCount >= 1000
+                            ? '${(wordCount / 1000).toStringAsFixed(1)}k字'
+                            : '$wordCount字',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Color(0xFF3498DB), // 蓝色
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
 
               // Calendar

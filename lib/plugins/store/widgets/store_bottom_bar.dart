@@ -90,7 +90,8 @@ class _StoreBottomBarState extends State<StoreBottomBar>
             : Colors.white.withOpacity(0.6);
     final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
 
-    return BottomBar(
+    return Scaffold(
+      body: BottomBar(
       fit: StackFit.expand,
       icon:
           (width, height) => Center(
@@ -246,6 +247,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
             ),
           ),
         ],
+      ),
       ),
     );
   }
