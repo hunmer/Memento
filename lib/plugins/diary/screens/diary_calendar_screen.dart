@@ -434,15 +434,6 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                           constraints: BoxConstraints(
                             minHeight: 200, // Minimum height for better UX
                           ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color:
-                                  isDark
-                                      ? Colors.grey.shade700
-                                      : Colors.grey.shade300,
-                            ),
-                          ),
                           child: QuillViewer(
                             data: selectedEntry.content,
                             selectable: true,
@@ -528,12 +519,6 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
               ),
             ),
           ),
-          if (entry?.mood != null)
-            Positioned(
-              top: 2,
-              right: 2,
-              child: Text(entry!.mood!, style: const TextStyle(fontSize: 12)),
-            ),
         ],
       ),
     );

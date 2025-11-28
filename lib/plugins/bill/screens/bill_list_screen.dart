@@ -54,7 +54,16 @@ class _BillListScreenState extends State<BillListScreen> {
       }
     };
     widget.billPlugin.addListener(_billPluginListener);
-    _loadMonthBills();
+
+    // 使用 WidgetsBinding 确保在第一帧渲染后再加载数据
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 添加额外延迟确保插件完全初始化
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          _loadMonthBills();
+        }
+      });
+    });
   }
 
   @override
@@ -68,11 +77,20 @@ class _BillListScreenState extends State<BillListScreen> {
   void _loadMonthBills() {
     if (!mounted) return;
 
+    // 检查账户数据是否可用
+    if (widget.billPlugin.accounts.isEmpty) {
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          _loadMonthBills();
+        }
+      });
+      return;
+    }
+
     try {
       final currentAccount = widget.billPlugin.accounts.firstWhere(
         (account) => account.id == widget.accountId,
       );
-
       // Calculate month start and end
       final monthStart = DateTime(_focusedDay.year, _focusedDay.month, 1);
       final monthEnd = DateTime(
@@ -86,10 +104,10 @@ class _BillListScreenState extends State<BillListScreen> {
 
       final filteredBills = currentAccount.bills.where(
         (bill) =>
-            bill.createdAt.isAfter(
+            bill.date.isAfter(
               monthStart.subtract(const Duration(seconds: 1)),
             ) &&
-            bill.createdAt.isBefore(monthEnd.add(const Duration(seconds: 1))),
+            bill.date.isBefore(monthEnd.add(const Duration(seconds: 1))),
       );
 
       final bills =
@@ -99,7 +117,7 @@ class _BillListScreenState extends State<BillListScreen> {
                   id: bill.id,
                   title: bill.title,
                   amount: bill.absoluteAmount,
-                  date: bill.createdAt,
+                  date: bill.date,
                   icon: bill.icon,
                   color: bill.iconColor,
                   category: bill.tag ?? '未分类',
@@ -131,6 +149,13 @@ class _BillListScreenState extends State<BillListScreen> {
           _allMonthBills = bills;
           _dailyStats = stats;
         });
+
+        // 强制刷新日历显示
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) {
+            setState(() {});
+          }
+        });
       }
     } catch (e) {
       debugPrint('加载账单失败: $e');
@@ -148,10 +173,10 @@ class _BillListScreenState extends State<BillListScreen> {
 
       final bills = currentAccount.bills.where(
         (bill) =>
-            bill.createdAt.isAfter(
+            bill.date.isAfter(
               monthStart.subtract(const Duration(seconds: 1)),
             ) &&
-            bill.createdAt.isBefore(monthEnd.add(const Duration(seconds: 1))),
+            bill.date.isBefore(monthEnd.add(const Duration(seconds: 1))),
       );
 
       double income = 0;
@@ -284,6 +309,7 @@ class _BillListScreenState extends State<BillListScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = BillLocalizations.of(context);
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -381,7 +407,8 @@ class _BillListScreenState extends State<BillListScreen> {
   }
 
   Widget _buildCalendarCell(DateTime day, bool isSelected) {
-    final stats = _dailyStats[DateTime(day.year, day.month, day.day)];
+    final dateKey = DateTime(day.year, day.month, day.day);
+    final stats = _dailyStats[dateKey];
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
