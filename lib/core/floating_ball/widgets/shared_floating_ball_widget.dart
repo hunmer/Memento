@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import '../adapters/floating_ball_platform_adapter.dart';
 import '../models/floating_ball_gesture.dart';
+import '../constants/overlay_window_constants.dart';
 
 /// 可复用的悬浮球组件
 ///
@@ -78,6 +80,11 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
   final double _sizeScale = 1.0;
   bool _pointerDown = false;
   final GlobalKey _ballKey = GlobalKey();
+  Size _currentWindowSize = const Size(
+    OverlayWindowDimensions.collapsedWidthDouble,
+    OverlayWindowDimensions.collapsedHeightDouble,
+  );
+  Offset? _preExpandPosition;
 
   // 圆球选项展开相关
   List<Map<String, dynamic>> _optionBalls = [];
@@ -121,16 +128,13 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
         debugPrint('🎯 清除持久化位置，重置到默认位置');
       }
 
-      // 获取真实的屏幕尺寸
+      // 获取真实的窗口尺寸
       final screenSize = _adapter.getScreenSize(context);
+      _currentWindowSize = screenSize;
 
       // 优先使用持久化位置，如果没有则使用默认位置
       final savedPosition = _persistentPosition;
-      // 使用左上角的可见位置，确保在所有屏幕尺寸下都可见
-      final defaultPosition = Offset(
-        20.0, // 距离左边缘20px
-        20.0, // 距离上边缘20px
-      );
+      final defaultPosition = savedPosition ?? _centerPositionForSize(screenSize);
 
       // 确保位置在有效范围内
       final validPosition = _clampPosition(savedPosition ?? defaultPosition);
@@ -166,7 +170,7 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
 
   /// 确保位置在有效范围内
   Offset _clampPosition(Offset position) {
-    final screenSize = _adapter.getScreenSize(context);
+    final screenSize = _effectiveScreenSize();
     return Offset(
       position.dx.clamp(0, screenSize.width - _currentSize),
       position.dy.clamp(0, screenSize.height - _currentSize),
@@ -289,7 +293,7 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
   }
 
   // 展开/收起选项
-  void _toggleExpandOptions() {
+  Future<void> _toggleExpandOptions() async {
     // 双击保护：如果正在动画中，忽略点击
     if (_isAnimating) {
       debugPrint('🎯 动画进行中，忽略点击');
@@ -297,8 +301,9 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
     }
 
     debugPrint('🎯 _toggleExpandOptions() - 当前状态: $_isExpanded');
+    final willExpand = !_isExpanded;
     setState(() {
-      _isExpanded = !_isExpanded;
+      _isExpanded = willExpand;
       _isAnimating = true;
     });
 
@@ -309,6 +314,10 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
     } else {
       debugPrint('🎯 开始收起动画');
       _expandController?.reverse();
+    }
+
+    if (widget.isInOverlay) {
+      unawaited(_applyOverlayWindowResize(expand: willExpand));
     }
   }
 
@@ -521,23 +530,20 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
           _handleTap();
         },
         onPanStart: (details) {
-          debugPrint('🎯 全局悬浮球开始拖拽');
           if (_position == null) return;
-          setState(() {
-            _isDragging = true;
-            _dragStartPosition = details.globalPosition;
-          });
+          _dragStartPosition = details.globalPosition;
         },
         onPanUpdate: (details) {
-          if (!_isDragging || _position == null) return;
+          if (_position == null) return;
 
-          final screenSize = _adapter.getScreenSize(context);
+          final screenSize = _effectiveScreenSize();
           final newPosition = Offset(
             (_position!.dx + details.delta.dx).clamp(0, screenSize.width - _currentSize),
             (_position!.dy + details.delta.dy).clamp(0, screenSize.height - _currentSize),
           );
 
-          debugPrint('🎯 拖拽更新位置: $_position -> $newPosition');
+          if (newPosition == _position) return;
+
           setState(() {
             _position = newPosition;
           });
@@ -548,20 +554,11 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
           widget.onPositionChanged?.call(newPosition);
         },
         onPanEnd: (details) {
-          if (!_isDragging) return;
-          debugPrint('🎯 全局悬浮球拖拽结束');
-
-          setState(() {
-            _isDragging = false;
-            _dragStartPosition = null;
-          });
-
-          // 检测滑动手势
-          if (_dragStartPosition != null) {
-            final velocity = details.globalPosition - _dragStartPosition!;
-            if (velocity.distance > 10) {
-              _handleSwipe(velocity);
-            }
+          if (_dragStartPosition == null) return;
+          final velocity = details.globalPosition - _dragStartPosition!;
+          _dragStartPosition = null;
+          if (velocity.distance > 10) {
+            _handleSwipe(velocity);
           }
         },
         child: Container(
@@ -701,13 +698,15 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
     final centerX = _position!.dx + _currentSize / 2;
     final centerY = _position!.dy + _currentSize / 2;
 
-    // 根据400x400窗口尺寸和主球大小优化展开半径和选项球大小
-    final screenSize = _adapter.getScreenSize(context);
+    final screenSize = _effectiveScreenSize();
 
     // 动态调整选项球大小：根据窗口大小计算合适的尺寸
-    final optionBallSize = math.min(40.0, screenSize.width * 0.1); // 最大40px，或屏幕宽度的10%
-    final maxRadius = math.min(screenSize.width, screenSize.height) / 2 - _currentSize / 2 - optionBallSize - 20; // 留足边距
-    final radius = math.min(80.0, maxRadius); // 适中的展开半径
+    final optionBallSize = _resolveOptionBallSize(screenSize);
+    final maxRadius = math.min(screenSize.width, screenSize.height) / 2 -
+        _currentSize / 2 -
+        optionBallSize -
+        OverlayWindowDimensions.outerPadding;
+    final radius = math.max(optionBallSize, maxRadius);
 
     debugPrint('🎯 主球中心位置: ($centerX, $centerY), 主球尺寸: $_currentSize');
     debugPrint('🎯 屏幕尺寸: ${screenSize.width}x${screenSize.height}, 选项球尺寸: $optionBallSize, 半径: $radius');
@@ -776,5 +775,85 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
         ),
       ),
     );
+  }
+
+  Size _effectiveScreenSize() {
+    if (widget.isInOverlay) {
+      return _currentWindowSize;
+    }
+    return _adapter.getScreenSize(context);
+  }
+
+  Offset _centerPositionForSize(Size windowSize) {
+    final dx = (windowSize.width - _currentSize) / 2;
+    final dy = (windowSize.height - _currentSize) / 2;
+    return Offset(
+      dx.clamp(0, math.max(0.0, windowSize.width - _currentSize)),
+      dy.clamp(0, math.max(0.0, windowSize.height - _currentSize)),
+    );
+  }
+
+  double _resolveOptionBallSize(Size screenSize) {
+    final baseSize = _currentSize * 0.55;
+    final adaptive = screenSize.shortestSide * 0.2;
+    return math.max(
+      32.0,
+      math.min(48.0, math.min(baseSize, adaptive)),
+    );
+  }
+
+  Size _calculateExpandedWindowSize() {
+    final targetSide = math.max(
+      OverlayWindowDimensions.minExpandedSize,
+      math.max(_currentWindowSize.width, _currentWindowSize.height),
+    );
+    final virtualSize = Size(targetSide, targetSide);
+    final optionBallSize = _resolveOptionBallSize(virtualSize);
+    const spacingRatio = 1.3;
+    final circumference = _optionBalls.length * (optionBallSize * spacingRatio);
+    final radius = math.max(optionBallSize, circumference / (2 * math.pi));
+    final diameter = _currentSize +
+        (radius * 2) +
+        (optionBallSize * 2) +
+        OverlayWindowDimensions.outerPadding * 2;
+    final finalSide = math.max(
+      diameter,
+      OverlayWindowDimensions.minExpandedSize,
+    );
+    return Size(finalSide, finalSide);
+  }
+
+  Future<void> _applyOverlayWindowResize({required bool expand}) async {
+    if (!widget.isInOverlay) return;
+
+    if (expand) {
+      _preExpandPosition ??= _position;
+      final targetSize = _calculateExpandedWindowSize();
+      setState(() {
+        _currentWindowSize = targetSize;
+        _position = _centerPositionForSize(targetSize);
+      });
+      await FlutterOverlayWindow.resizeOverlay(
+        targetSize.width.round(),
+        targetSize.height.round(),
+        false,
+      );
+    } else {
+      const collapsedSize = Size(
+        OverlayWindowDimensions.collapsedWidthDouble,
+        OverlayWindowDimensions.collapsedHeightDouble,
+      );
+      await FlutterOverlayWindow.resizeOverlay(
+        OverlayWindowDimensions.collapsedWidth,
+        OverlayWindowDimensions.collapsedHeight,
+        true,
+      );
+      setState(() {
+        _currentWindowSize = collapsedSize;
+        final fallback = _preExpandPosition ?? _centerPositionForSize(collapsedSize);
+        _position = _clampPosition(fallback);
+        _preExpandPosition = null;
+      });
+    }
   }
 }

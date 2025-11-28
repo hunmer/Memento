@@ -4,6 +4,7 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'abstract_floating_ball_renderer.dart';
 import '../config/floating_ball_config.dart';
 import '../adapters/floating_ball_platform_adapter.dart';
+import '../constants/overlay_window_constants.dart';
 
 /// OverlayWindow悬浮球渲染器
 ///
@@ -58,17 +59,17 @@ class OverlayWindowFloatingBallRenderer extends BaseFloatingBallRenderer {
       final overlayHeight = (screenHeight * 0.4).toInt();
       debugPrint('屏幕高度: $screenHeight, overlay高度: $overlayHeight');
 
-      // 使用较大的窗口尺寸以容纳展开的选项球
+      // 折叠状态下使用较小窗口，实际位置由拖拽控制
       await FlutterOverlayWindow.showOverlay(
         enableDrag: true,
         overlayTitle: "Memento悬浮球",
         overlayContent: '悬浮球已启用',
         flag: OverlayFlag.defaultFlag,
         visibility: NotificationVisibility.visibilityPublic,
-        positionGravity: PositionGravity.auto,
-        height: 400, // 增大窗口高度以容纳选项球
-        width: 400, // 增大窗口宽度以容纳选项球
-        startPosition: const OverlayPosition(0, 100), // 调整起始位置，让悬浮球更可见
+        positionGravity: PositionGravity.none,
+        height: OverlayWindowDimensions.collapsedHeight,
+        width: OverlayWindowDimensions.collapsedWidth,
+        startPosition: const OverlayPosition(0, 100),
       );
 
       debugPrint('✅ FlutterOverlayWindow.showOverlay() 调用成功');
