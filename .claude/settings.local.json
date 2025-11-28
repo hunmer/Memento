@@ -12,7 +12,9 @@
       "Bash(cat:*)",
       "mcp__context7__resolve-library-id",
       "WebSearch",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(./gradlew:*)",
+      "Bash(gradle:*)"
     ],
     "deny": [],
     "ask": []
