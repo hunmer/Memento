@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Daily Schedule</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#f472b6", // A vibrant pink similar to the screenshot
+            "background-light": "#ffffff",
+            "background-dark": "#1c1c1e",
+            "surface-light": "#f3f4f6",
+            "surface-dark": "#2c2c2e",
+            "text-primary-light": "#1f2937",
+            "text-primary-dark": "#ffffff",
+            "text-secondary-light": "#6b7280",
+            "text-secondary-dark": "#8e8e93",
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "0.75rem",
+          },
+        },
+      },
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      min-height: max(884px, 100dvh);
+    }
+    .dashed-timeline {
+        background-image: repeating-linear-gradient(to bottom, 
+            #e5e7eb 0, 
+            #e5e7eb 6px, 
+            transparent 6px, 
+            transparent 12px);
+    }
+    .dark .dashed-timeline {
+        background-image: repeating-linear-gradient(to bottom, 
+            #4b5563 0, 
+            #4b5563 6px, 
+            transparent 6px, 
+            transparent 12px);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="max-w-md mx-auto min-h-screen bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark p-4 pt-8">
+<header class="mb-6">
+<div class="flex justify-between text-center text-sm font-semibold">
+<div class="flex flex-col items-center space-y-2 opacity-60">
+<span class="text-text-secondary-light dark:text-text-secondary-dark">Sun</span>
+<span class="w-8 h-8 flex items-center justify-center rounded-full">12</span>
+<div class="flex space-x-1">
+<div class="w-2 h-2 rounded-full bg-pink-300"></div>
+<div class="w-2 h-2 rounded-full bg-blue-300"></div>
+</div>
+</div>
+<div class="flex flex-col items-center space-y-2">
+<span class="text-text-secondary-light dark:text-text-secondary-dark">Mon</span>
+<span class="w-8 h-8 flex items-center justify-center rounded-full bg-text-primary-light dark:bg-text-primary-dark text-background-light dark:text-background-dark">13</span>
+<div class="flex space-x-1">
+<div class="w-2 h-2 rounded-full bg-pink-300"></div>
+<div class="w-2 h-2 rounded-full bg-fuchsia-300"></div>
+<div class="w-2 h-2 rounded-full bg-purple-300"></div>
+</div>
+</div>
+<div class="flex flex-col items-center space-y-2 opacity-60">
+<span class="text-text-secondary-light dark:text-text-secondary-dark">Tue</span>
+<span class="w-8 h-8 flex items-center justify-center rounded-full">14</span>
+<div class="flex space-x-1">
+<div class="w-2 h-2 rounded-full bg-pink-300"></div>
+<div class="w-2 h-2 rounded-full bg-blue-300"></div>
+</div>
+</div>
+<div class="flex flex-col items-center space-y-2 opacity-60">
+<span class="text-text-secondary-light dark:text-text-secondary-dark">Wed</span>
+<span class="w-8 h-8 flex items-center justify-center rounded-full">15</span>
+<div class="flex space-x-1">
+<div class="w-2 h-2 rounded-full bg-pink-300"></div>
+<div class="w-2 h-2 rounded-full bg-blue-300"></div>
+</div>
+</div>
+<div class="flex flex-col items-center space-y-2 opacity-60">
+<span class="text-text-secondary-light dark:text-text-secondary-dark">Thu</span>
+<span class="w-8 h-8 flex items-center justify-center rounded-full">16</span>
+<div class="flex space-x-1">
+<div class="w-2 h-2 rounded-full bg-pink-300"></div>
+<div class="w-2 h-2 rounded-full bg-blue-300"></div>
+</div>
+</div>
+<div class="flex flex-col items-center space-y-2 opacity-60">
+<span class="text-text-secondary-light dark:text-text-secondary-dark">Fri</span>
+<span class="w-8 h-8 flex items-center justify-center rounded-full">17</span>
+<div class="flex space-x-1">
+<div class="w-2 h-2 rounded-full bg-pink-300"></div>
+<div class="w-2 h-2 rounded-full bg-blue-300"></div>
+</div>
+</div>
+<div class="flex flex-col items-center space-y-2 opacity-60">
+<span class="text-text-secondary-light dark:text-text-secondary-dark">Sat</span>
+<span class="w-8 h-8 flex items-center justify-center rounded-full">18</span>
+<div class="flex space-x-1">
+<div class="w-2 h-2 rounded-full bg-pink-300"></div>
+<div class="w-2 h-2 rounded-full bg-blue-300"></div>
+</div>
+</div>
+</div>
+</header>
+<main class="relative pb-16">
+<div class="absolute top-6 left-[calc(4.5rem-2px)] w-1 h-[calc(100%-2rem)] dashed-timeline"></div>
+<div class="space-y-4">
+<div class="grid grid-cols-[auto,1fr,auto] gap-x-4 items-start">
+<div class="text-right text-xs text-text-secondary-light dark:text-text-secondary-dark pt-3">
+<p>5:45</p>
+</div>
+<div class="flex items-start space-x-4">
+<div class="relative z-10 w-12 h-12 rounded-full bg-surface-light dark:bg-surface-dark flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-size: 28px;">alarm</span>
+</div>
+<div class="pt-2">
+<p class="font-bold text-lg">Rise and Shine</p>
+</div>
+</div>
+<div class="flex items-center h-12">
+<div class="w-6 h-6 rounded-full border-2 border-primary"></div>
+</div>
+</div>
+<div class="grid grid-cols-[auto,1fr,auto] gap-x-4 items-start">
+<div class="text-right text-xs text-text-secondary-light dark:text-text-secondary-dark pt-3">
+<p>5:50</p>
+</div>
+<div class="flex items-start space-x-4">
+<div class="relative z-10 w-12 h-20 rounded-full bg-surface-light dark:bg-surface-dark flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-size: 28px;">health_cross</span>
+</div>
+<div class="pt-2">
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">5:50–6:20 (30 mins)</p>
+<p class="font-bold text-lg">Bible before phone</p>
+</div>
+</div>
+<div class="flex items-center h-12">
+<div class="w-6 h-6 rounded-full border-2 border-primary"></div>
+</div>
+</div>
+<div class="grid grid-cols-[auto,1fr,auto] gap-x-4 items-start">
+<div class="text-right text-xs text-text-secondary-light dark:text-text-secondary-dark pt-3">
+<p>6:20</p>
+</div>
+<div class="flex items-start space-x-4">
+<div class="relative z-10 w-12 h-16 rounded-full bg-surface-light dark:bg-surface-dark flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-size: 28px;">fitness_center</span>
+</div>
+<div class="pt-2">
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">6:20–6:35 (15 mins)</p>
+<p class="font-bold text-lg">Workout</p>
+</div>
+</div>
+<div class="flex items-center h-12">
+<div class="w-6 h-6 rounded-full border-2 border-primary"></div>
+</div>
+</div>
+<div class="grid grid-cols-[auto,1fr,auto] gap-x-4 items-start">
+<div class="text-right text-xs text-text-secondary-light dark:text-text-secondary-dark pt-3">
+<p>6:35</p>
+</div>
+<div class="flex items-start space-x-4">
+<div class="relative z-10 w-12 h-16 rounded-full bg-surface-light dark:bg-surface-dark flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-size: 28px;">bed</span>
+</div>
+<div class="pt-2">
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">6:35–6:50 (15 mins)</p>
+<p class="font-bold text-lg">Clean room</p>
+</div>
+</div>
+<div class="flex items-center h-12">
+<div class="w-6 h-6 rounded-full border-2 border-primary"></div>
+</div>
+</div>
+<div class="grid grid-cols-[auto,1fr,auto] gap-x-4 items-start">
+<div class="text-right text-xs text-text-secondary-light dark:text-text-secondary-dark pt-3">
+<p>7:05</p>
+</div>
+<div class="flex items-start space-x-4">
+<div class="relative z-10 w-12 h-20 rounded-full bg-surface-light dark:bg-surface-dark flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-size: 28px;">shower</span>
+</div>
+<div class="pt-2">
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">7:05–7:35 (30 mins)</p>
+<p class="font-bold text-lg">Take a shower</p>
+</div>
+</div>
+<div class="flex items-center h-12">
+<div class="w-6 h-6 rounded-full border-2 border-primary"></div>
+</div>
+</div>
+<div class="grid grid-cols-[auto,1fr,auto] gap-x-4 items-start">
+<div class="text-right text-xs text-text-secondary-light dark:text-text-secondary-dark pt-3">
+<p>7:45</p>
+</div>
+<div class="flex items-start space-x-4">
+<div class="relative z-10 w-12 h-16 rounded-full bg-surface-light dark:bg-surface-dark flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-size: 28px;">restaurant</span>
+</div>
+<div class="pt-2">
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">7:45–8:00 (15 mins)</p>
+<p class="font-bold text-lg">Eat breakfast</p>
+</div>
+</div>
+<div class="flex items-center h-12">
+<div class="w-6 h-6 rounded-full border-2 border-primary"></div>
+</div>
+</div>
+<div class="grid grid-cols-[auto,1fr] gap-x-4 items-start pt-6 pb-4">
+<div class="text-right text-xs text-text-secondary-light dark:text-text-secondary-dark pt-1">
+<p>8:00</p>
+</div>
+<div class="flex items-center space-x-2 pl-[calc(1.5rem-4px)]">
+<span class="material-symbols-outlined text-text-secondary-light dark:text-text-secondary-dark text-lg" style="font-variation-settings: 'FILL' 0;">schedule</span>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Spare 1h? Plan a breather.</p>
+</div>
+</div>
+<div class="grid grid-cols-[auto,1fr,auto] gap-x-4 items-start">
+<div class="text-right text-xs text-text-secondary-light dark:text-text-secondary-dark pt-3">
+<p>9:00</p>
+</div>
+<div class="flex items-start space-x-4">
+<div class="relative z-10 w-12 h-20 rounded-full bg-surface-light dark:bg-surface-dark flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-size: 28px;">school</span>
+</div>
+<div class="pt-2">
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">9:00–9:15 (15 mins)</p>
+<p class="font-bold text-lg">School</p>
+<div class="flex items-center space-x-1.5 text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<span>0/4</span>
+</div>
+</div>
+</div>
+<div class="flex items-center h-12">
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
