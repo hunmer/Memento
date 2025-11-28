@@ -1,9 +1,17 @@
 import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 
+/// 图片类型枚举
+enum ImageType {
+  network, // 网络图片
+  asset, // Asset图片
+  file, // 本地文件图片
+  unknown, // 未知类型
+}
+  
 class ImageUtils {
   /// 缓存的应用文档目录路径，用于同步方法
   static String? _appDocumentDirectoryPath;
@@ -274,5 +282,103 @@ class ImageUtils {
 
     // 最后的回退方案，返回原路径
     return absolutePath;
+  }
+
+
+
+  /// 根据文件路径判断图片类型
+  static ImageType getImageType(String? imagePath) {
+    if (imagePath == null || imagePath.isEmpty) {
+      return ImageType.unknown;
+    }
+
+    // 网络图片
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return ImageType.network;
+    }
+
+    // Asset图片 - 以 assets/ 开头或包含 lib/plugins/*/assets/
+    if (imagePath.startsWith('assets/') ||
+        imagePath.contains('lib/plugins/') && imagePath.contains('/assets/')) {
+      return ImageType.asset;
+    }
+
+    // 绝对路径的本地文件
+    if (path.isAbsolute(imagePath)) {
+      return ImageType.file;
+    }
+
+    // 相对路径的本地文件（以 ./ 开头或没有协议前缀）
+    if (imagePath.startsWith('./') ||
+        (!imagePath.startsWith('http://') &&
+            !imagePath.startsWith('https://'))) {
+      return ImageType.file;
+    }
+
+    return ImageType.unknown;
+  }
+
+  /// 根据图片路径智能创建对应的 ImageProvider
+  static ImageProvider createImageProvider(String? imagePath) {
+    final imageType = getImageType(imagePath);
+
+    switch (imageType) {
+      case ImageType.network:
+        return NetworkImage(imagePath!);
+      case ImageType.asset:
+        // 对于 asset 路径，需要转换为正确的格式
+        String assetPath = imagePath!;
+        if (assetPath.contains('lib/plugins/') &&
+            assetPath.contains('/assets/')) {
+          // 从 lib/plugins/calendar_album/assets/images/bg.png 转换为 assets/plugins/calendar_album/bg.png
+          final pluginMatch = RegExp(
+            r'lib/plugins/([^/]+)/assets/(.+)',
+          ).firstMatch(assetPath);
+          if (pluginMatch != null) {
+            final pluginName = pluginMatch.group(1)!;
+            final relativePath = pluginMatch.group(2)!;
+            assetPath = 'assets/plugins/$pluginName/$relativePath';
+          }
+        } else if (assetPath.startsWith('assets/')) {
+          // 已经是正确的 asset 格式
+          assetPath = assetPath.substring(7); // 移除 'assets/' 前缀
+        }
+        return AssetImage(assetPath);
+      case ImageType.file:
+        // 对于文件路径，需要转换为绝对路径
+        String filePath = imagePath!;
+        if (!path.isAbsolute(filePath)) {
+          // 尝试获取绝对路径
+          try {
+            filePath = getAbsolutePathSync(filePath);
+          } catch (e) {
+            // 如果获取绝对路径失败，使用相对路径
+            if (filePath.startsWith('./')) {
+              filePath = filePath.substring(2);
+            }
+          }
+        }
+        return FileImage(File(filePath));
+      case ImageType.unknown:
+        // 返回一个空的占位图片
+        return const AssetImage('assets/images/placeholder.png');
+    }
+  }
+
+  /// 获取显示用的图片路径（用于调试和日志）
+  static String getDisplayPath(String? imagePath) {
+    if (imagePath == null || imagePath.isEmpty) {
+      return '空路径';
+    }
+
+    final imageType = getImageType(imagePath);
+    final typeLabel = switch (imageType) {
+      ImageType.network => '网络',
+      ImageType.asset => 'Asset',
+      ImageType.file => '文件',
+      ImageType.unknown => '未知',
+    };
+
+    return '[$typeLabel] $imagePath';
   }
 }

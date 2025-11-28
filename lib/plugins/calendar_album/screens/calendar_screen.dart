@@ -3,6 +3,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart' hide isSameDay;
+import 'package:Memento/widgets/enhanced_calendar/index.dart';
 import '../controllers/calendar_controller.dart';
 import '../controllers/tag_controller.dart';
 import '../l10n/calendar_album_localizations.dart';
@@ -26,58 +27,54 @@ class _CalendarScreenState extends State<CalendarScreen>
   final ScrollController _scrollController = ScrollController();
   bool _isInitialized = false;
 
-  Widget _dayCellBuilder(BuildContext context, DateTime date, _) {
-    final calendarController = Provider.of<CalendarController>(context);
-    final entries = calendarController.getEntriesForDate(date);
-    final isSelected = isSameDay(date, calendarController.selectedDate);
-    final isCurrentMonth = date.month == _focusedDay.month;
-
-    return Container(
-      margin: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color:
-            isSelected
-                ? Theme.of(context).primaryColor.withValues(alpha: 0.3)
-                : null,
-      ),
-      child: Stack(
-        children: [
-          Center(
-            child: Text(
-              date.day.toString(),
-              style: TextStyle(
-                color: isCurrentMonth ? Colors.black : Colors.grey,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-          ),
-          if (entries.isNotEmpty)
-            Positioned(
-              top: 2,
-              right: 2,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(context).primaryColor,
-                ),
-                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                child: Center(
-                  child: Text(
-                    entries.length.toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
+  /// 获取日历日期数据
+  Map<DateTime, CalendarDayData> _getCalendarDayData() {
+    final calendarController = Provider.of<CalendarController>(
+      context,
+      listen: false,
     );
+    final selectedDate = calendarController.selectedDate;
+    final Map<DateTime, CalendarDayData> dayData = {};
+
+    // 获取当月所有条目
+    final currentMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
+    final nextMonth = DateTime(_focusedDay.year, _focusedDay.month + 1, 1);
+
+    // 为有日记的日期创建数据
+    calendarController.entries.forEach((date, entries) {
+      if (date.isAfter(currentMonth.subtract(const Duration(days: 1))) &&
+          date.isBefore(nextMonth)) {
+        // 获取当天日记的第一张图片作为背景
+        String? backgroundImage;
+
+        // 优先获取第一张图片作为背景
+        for (var entry in entries) {
+          // 首先检查直接的图片URLs
+          if (entry.imageUrls.isNotEmpty) {
+            backgroundImage = entry.imageUrls.first;
+            break;
+          }
+
+          // 然后检查Markdown中提取的图片
+          final markdownImages = entry.extractImagesFromMarkdown();
+          if (markdownImages.isNotEmpty) {
+            backgroundImage = markdownImages.first;
+            break;
+          }
+        }
+
+        dayData[date] = CalendarDayData(
+          date: date,
+          backgroundImage: backgroundImage,
+          count: entries.length,
+          isSelected: isSameDay(date, selectedDate),
+          isToday: isSameDay(date, DateTime.now()),
+          isCurrentMonth: date.month == _focusedDay.month,
+        );
+      }
+    });
+
+    return dayData;
   }
 
   @override
@@ -170,63 +167,65 @@ class _CalendarScreenState extends State<CalendarScreen>
     CalendarController calendarController,
     DateTime selectedDate,
   ) {
-    return SizedBox(
-      height: 360, // 固定高度
-      child: Scrollbar(
-        controller: _scrollController,
-        thumbVisibility: true,
-        child: TableCalendar(
-          firstDay: DateTime(_focusedDay.year, _focusedDay.month, 1),
-          lastDay: DateTime(_focusedDay.year, _focusedDay.month + 1, 0),
-          focusedDay: _focusedDay,
-          headerVisible: true,
-          calendarFormat: CalendarFormat.month,
-          availableCalendarFormats: const {CalendarFormat.month: 'Month'},
-          calendarStyle: CalendarStyle(
-            outsideDaysVisible: true,
-            markersAutoAligned: true,
-          ),
-          selectedDayPredicate: (day) => isSameDay(day, selectedDate),
-          onDaySelected: (selectedDay, focusedDay) {
-            Provider.of<CalendarController>(
-              context,
-              listen: false,
-            ).selectDate(selectedDay);
-            setState(() => _focusedDay = focusedDay);
-          },
-          onHeaderTapped: (_) => _showDatePicker(context, calendarController),
-          headerStyle: HeaderStyle(
-            formatButtonVisible: false,
-            leftChevronIcon: IconButton(
-              icon: Icon(Icons.chevron_left),
-              onPressed: () {
-                setState(() {
-                  _focusedDay = DateTime(
-                    _focusedDay.year,
-                    _focusedDay.month - 1,
-                  );
-                });
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 计算动态高度，考虑屏幕大小和可用空间
+        final availableHeight = constraints.maxHeight;
+        final calendarHeight = (availableHeight * 0.6).clamp(280.0, 400.0);
+
+        return SizedBox(
+          height: calendarHeight,
+          child: Scrollbar(
+            controller: _scrollController,
+            thumbVisibility: true,
+            child: EnhancedCalendarWidget(
+              dayData: _getCalendarDayData(),
+              focusedMonth: _focusedDay,
+              selectedDate: selectedDate,
+              onDaySelected: (selectedDay) {
+                calendarController.selectDate(selectedDay);
+                setState(() => _focusedDay = selectedDay);
               },
-            ),
-            rightChevronIcon: IconButton(
-              icon: Icon(Icons.chevron_right),
-              onPressed: () {
-                setState(() {
-                  _focusedDay = DateTime(
-                    _focusedDay.year,
-                    _focusedDay.month + 1,
-                  );
-                });
+              onDayLongPressed: (pressedDay) {
+                // 长按可以选择日期并打开编辑器
+                calendarController.selectDate(pressedDay);
+                setState(() => _focusedDay = pressedDay);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => MultiProvider(
+                          providers: [
+                            ChangeNotifierProvider.value(
+                              value: calendarController,
+                            ),
+                            ChangeNotifierProvider.value(
+                              value: Provider.of<TagController>(
+                                context,
+                                listen: false,
+                              ),
+                            ),
+                          ],
+                          child: EntryEditorScreen(
+                            initialDate: pressedDay,
+                            isEditing: false,
+                          ),
+                        ),
+                  ),
+                );
               },
+              onHeaderTapped: (focusedMonth) {
+                _showDatePicker(context, calendarController);
+              },
+              calendarFormat: CalendarFormat.month,
+              enableNavigation: true,
+              enableTodayButton: true,
+              enableDateSelection: true,
+              locale: 'zh_CN',
             ),
-            titleCentered: true,
           ),
-          calendarBuilders: CalendarBuilders(
-            defaultBuilder: _dayCellBuilder,
-            selectedBuilder: _dayCellBuilder,
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
