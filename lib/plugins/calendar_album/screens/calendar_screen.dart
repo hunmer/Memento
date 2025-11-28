@@ -1,8 +1,11 @@
 import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart' hide isSameDay;
+import 'package:flutter_virtual_scroll/flutter_virtual_scroll.dart'
+    as virtual_scroll;
 import 'package:Memento/widgets/enhanced_calendar/index.dart';
 import '../controllers/calendar_controller.dart';
 import '../controllers/tag_controller.dart';
@@ -12,6 +15,10 @@ import 'entry_editor_screen.dart';
 import 'entry_detail_screen.dart';
 import '../utils/date_utils.dart';
 import 'package:intl/intl.dart';
+
+final DateTime _calendarMinMonth = DateTime(2010, 1, 1);
+final DateTime _calendarMaxMonth = DateTime(2030, 12, 31);
+const int _calendarLoadBatchSize = 3;
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -541,8 +548,8 @@ class _CalendarScreenState extends State<CalendarScreen>
     final selectedDate = await showDatePicker(
       context: context,
       initialDate: _focusedDay,
-      firstDate: DateTime(2010),
-      lastDate: DateTime(2030),
+      firstDate: _calendarMinMonth,
+      lastDate: _calendarMaxMonth,
       initialEntryMode: DatePickerEntryMode.calendarOnly,
       initialDatePickerMode: DatePickerMode.year,
       helpText: '选择年月',
@@ -623,53 +630,57 @@ class _MultiMonthCalendarViewState extends State<_MultiMonthCalendarView>
   }
 
   /// 加载更多月份（向前或向后）
-  void _loadMoreMonths(bool isBefore) {
-    final shouldRemove = _months.length >= _maxCalendarCount;
-    DateTime? removedMonth;
-    DateTime? addedMonth;
+  bool _loadMoreMonths(bool isBefore) {
+    if (_months.isEmpty) return false;
+
+    final removedMonths = <DateTime>[];
+    final addedMonths = <DateTime>[];
     bool hasChanges = false;
 
-    // 移除不再需要的月份，保持最多显示12个
-    if (shouldRemove) {
-      if (isBefore) {
-        removedMonth = _months.last;
-        _months.removeLast(); // 移除最后一个
-        hasChanges = true;
-      } else {
-        removedMonth = _months.first;
-        _months.removeAt(0); // 移除第一个
-        hasChanges = true;
+    for (int i = 0; i < _calendarLoadBatchSize; i++) {
+      final referenceMonth = isBefore ? _months.first : _months.last;
+      final candidateMonth = DateTime(
+        referenceMonth.year,
+        referenceMonth.month + (isBefore ? -1 : 1),
+        1,
+      );
+
+      if (candidateMonth.isBefore(_calendarMinMonth) ||
+          candidateMonth.isAfter(_calendarMaxMonth)) {
+        break;
       }
+
+      if (_months.length >= _maxCalendarCount) {
+        final removedMonth =
+            isBefore ? _months.removeLast() : _months.removeAt(0);
+        removedMonths.add(removedMonth);
+      }
+
+      if (isBefore) {
+        _months.insert(0, candidateMonth);
+      } else {
+        _months.add(candidateMonth);
+      }
+      addedMonths.add(candidateMonth);
+      hasChanges = true;
     }
 
-    if (isBefore) {
-      final firstMonth = _months.first;
-      addedMonth = DateTime(firstMonth.year, firstMonth.month - 1);
-      _months.insert(0, addedMonth);
-      hasChanges = true;
-    } else {
-      final lastMonth = _months.last;
-      addedMonth = DateTime(lastMonth.year, lastMonth.month + 1);
-      _months.add(addedMonth);
-      hasChanges = true;
-    }
-
-    // 只在有实际变化时更新状态
-    if (hasChanges && mounted) {
+    if (!hasChanges) return false;
+    if (mounted) {
       setState(() {});
     }
 
-    // 清理不再需要的缓存数据
-    if (removedMonth != null) {
-      _cachedDayData.remove(_getMonthKey(removedMonth));
+    for (final removed in removedMonths) {
+      _cachedDayData.remove(_getMonthKey(removed));
     }
 
-    // 预加载新月份的数据
-    if (addedMonth != null) {
+    for (final added in addedMonths) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _getCalendarDayData(addedMonth!); // 触发数据缓存
+        _getCalendarDayData(added); // 触发数据缓存
       });
     }
+
+    return true;
   }
 
   /// 生成月份的唯一key
@@ -829,14 +840,16 @@ class _MultiMonthCalendarViewState extends State<_MultiMonthCalendarView>
         if (notification is ScrollUpdateNotification) {
           final metrics = notification.metrics;
           // 当滚动到左侧边界附近时，加载更多月份
-          if (metrics.pixels <= 100 && _months.first.month > 1) {
-            _loadMoreMonths(true);
-            // 调整滚动位置，避免跳跃
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_horizontalController.hasClients) {
-                _horizontalController.jumpTo(350);
-              }
-            });
+          if (metrics.pixels <= 100) {
+            final loaded = _loadMoreMonths(true);
+            if (loaded) {
+              // 调整滚动位置，避免跳跃
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (_horizontalController.hasClients) {
+                  _horizontalController.jumpTo(350);
+                }
+              });
+            }
           }
           // 当滚动到右侧边界附近时，加载更多月份
           else if (metrics.pixels >= metrics.maxScrollExtent - 100) {
@@ -941,10 +954,16 @@ class _VerticalCalendarView extends StatefulWidget {
 
 class _VerticalCalendarViewState extends State<_VerticalCalendarView>
     with AutomaticKeepAliveClientMixin {
-  late ScrollController _verticalController;
+  late virtual_scroll.VirtualScrollController _verticalController;
   final List<DateTime> _months = [];
   final int _maxCalendarCount = 12;
   final Map<String, Map<DateTime, CalendarDayData>> _cachedDayData = {};
+  bool _isLoadingPrevious = false;
+  bool _isLoadingNext = false;
+  bool _edgeProbeScheduled = false;
+  DateTime? _lastPreviousLoad;
+  DateTime? _lastNextLoad;
+  static const Duration _edgeLoadCooldown = Duration(milliseconds: 250);
 
   @override
   bool get wantKeepAlive => true;
@@ -953,11 +972,13 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
   void initState() {
     super.initState();
     _initializeMonths();
-    _verticalController = ScrollController();
+    _verticalController = virtual_scroll.VirtualScrollController();
+    _verticalController.addListener(_handleScroll);
   }
 
   @override
   void dispose() {
+    _verticalController.removeListener(_handleScroll);
     _verticalController.dispose();
     super.dispose();
   }
@@ -975,77 +996,155 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
   }
 
   /// 加载更多月份（向下）
-  void _loadMoreMonths() {
-    final shouldRemove = _months.length >= _maxCalendarCount;
-    DateTime? removedMonth;
-    DateTime? addedMonth;
+  bool _loadMoreMonths() {
+    if (_months.isEmpty) return false;
+
+    final removedMonths = <DateTime>[];
+    final addedMonths = <DateTime>[];
     bool hasChanges = false;
 
-    // 移除不再需要的月份，保持最多显示12个
-    if (shouldRemove) {
-      removedMonth = _months.first;
-      _months.removeAt(0); // 移除第一个月份
+    for (int i = 0; i < _calendarLoadBatchSize; i++) {
+      final lastMonth = _months.last;
+      final nextMonth = DateTime(lastMonth.year, lastMonth.month + 1, 1);
+      if (nextMonth.isAfter(_calendarMaxMonth)) {
+        break;
+      }
+
+      if (_months.length >= _maxCalendarCount) {
+        removedMonths.add(_months.removeAt(0));
+      }
+
+      _months.add(nextMonth);
+      addedMonths.add(nextMonth);
       hasChanges = true;
     }
 
-    final lastMonth = _months.last;
-    addedMonth = DateTime(lastMonth.year, lastMonth.month + 1);
-    _months.add(addedMonth);
-    hasChanges = true;
-
-    // 只在有实际变化时更新状态
-    if (hasChanges && mounted) {
+    if (!hasChanges) return false;
+    if (mounted) {
       setState(() {});
     }
 
-    // 清理不再需要的缓存数据
-    if (removedMonth != null) {
-      _cachedDayData.remove(_getMonthKey(removedMonth));
+    for (final removed in removedMonths) {
+      _cachedDayData.remove(_getMonthKey(removed));
     }
 
-    // 预加载新月份的数据
-    if (addedMonth != null) {
+    for (final added in addedMonths) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _getCalendarDayData(addedMonth!); // 触发数据缓存
+        _getCalendarDayData(added); // 触发数据缓存
       });
     }
+
+    return true;
   }
 
   /// 加载更多月份（向上）
-  void _loadMoreMonthsBefore() {
-    final shouldRemove = _months.length >= _maxCalendarCount;
-    DateTime? removedMonth;
-    DateTime? addedMonth;
+  bool _loadMoreMonthsBefore() {
+    if (_months.isEmpty) return false;
+
+    final removedMonths = <DateTime>[];
+    final addedMonths = <DateTime>[];
     bool hasChanges = false;
 
-    // 移除不再需要的月份，保持最多显示12个
-    if (shouldRemove) {
-      removedMonth = _months.last;
-      _months.removeLast(); // 移除最后一个月份
+    for (int i = 0; i < _calendarLoadBatchSize; i++) {
+      final firstMonth = _months.first;
+      final previousMonth = DateTime(firstMonth.year, firstMonth.month - 1, 1);
+      if (previousMonth.isBefore(_calendarMinMonth)) {
+        break;
+      }
+
+      if (_months.length >= _maxCalendarCount) {
+        removedMonths.add(_months.removeLast());
+      }
+
+      _months.insert(0, previousMonth);
+      addedMonths.add(previousMonth);
       hasChanges = true;
     }
 
-    final firstMonth = _months.first;
-    addedMonth = DateTime(firstMonth.year, firstMonth.month - 1);
-    _months.insert(0, addedMonth);
-    hasChanges = true;
-
-    // 只在有实际变化时更新状态
-    if (hasChanges && mounted) {
+    if (!hasChanges) return false;
+    if (mounted) {
       setState(() {});
     }
 
-    // 清理不再需要的缓存数据
-    if (removedMonth != null) {
-      _cachedDayData.remove(_getMonthKey(removedMonth));
+    for (final removed in removedMonths) {
+      _cachedDayData.remove(_getMonthKey(removed));
     }
 
-    // 预加载新月份的数据
-    if (addedMonth != null) {
+    for (final added in addedMonths) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _getCalendarDayData(addedMonth!); // 触发数据缓存
+        _getCalendarDayData(added); // 触发数据缓存
       });
     }
+
+    return true;
+  }
+
+  void _handleScroll() {
+    if (!_verticalController.hasClients) return;
+    const threshold = 120.0;
+    final position = _verticalController.position;
+
+    if (position.pixels <= threshold && !_isLoadingNext) {
+      _triggerLoadMoreNext();
+    } else if (position.maxScrollExtent > 0 &&
+        (position.maxScrollExtent - position.pixels) <= threshold &&
+        !_isLoadingPrevious) {
+      _triggerLoadMorePrevious();
+    }
+  }
+
+  void _triggerLoadMorePrevious() {
+    if (_isLoadingPrevious) return;
+    final now = DateTime.now();
+    if (_lastPreviousLoad != null &&
+        now.difference(_lastPreviousLoad!) < _edgeLoadCooldown) {
+      return;
+    }
+    _lastPreviousLoad = now;
+    setState(() => _isLoadingPrevious = true);
+    final loaded = _loadMoreMonthsBefore();
+    if (!loaded) {
+      setState(() => _isLoadingPrevious = false);
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() => _isLoadingPrevious = false);
+        _scheduleEdgeProbe();
+      }
+    });
+  }
+
+  void _triggerLoadMoreNext() {
+    if (_isLoadingNext) return;
+    final now = DateTime.now();
+    if (_lastNextLoad != null &&
+        now.difference(_lastNextLoad!) < _edgeLoadCooldown) {
+      return;
+    }
+    _lastNextLoad = now;
+    setState(() => _isLoadingNext = true);
+    final loaded = _loadMoreMonths();
+    if (!loaded) {
+      setState(() => _isLoadingNext = false);
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() => _isLoadingNext = false);
+        _scheduleEdgeProbe();
+      }
+    });
+  }
+
+  void _scheduleEdgeProbe() {
+    if (_edgeProbeScheduled) return;
+    _edgeProbeScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _edgeProbeScheduled = false;
+      if (!mounted) return;
+      _handleScroll();
+    });
   }
 
   /// 生成月份的唯一key
@@ -1149,83 +1248,136 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification is ScrollUpdateNotification) {
-          final metrics = notification.metrics;
-          // 当滚动到底部时，加载更多月份
-          if (metrics.pixels >= metrics.maxScrollExtent - 100) {
-            _loadMoreMonths();
-          }
-          // 当滚动到顶部时，加载前面的月份
-          else if (metrics.pixels <= 100 && _months.first.month > 1) {
-            _loadMoreMonthsBefore();
-            // 调整滚动位置，避免跳跃
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_verticalController.hasClients) {
-                final currentScrollPosition = _verticalController.offset;
-                _verticalController.jumpTo(currentScrollPosition + 400);
-              }
-            });
-          }
-        }
-        return false;
-      },
-      child: Column(
-        children: [
-          // 顶部标题
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.keyboard_arrow_up),
-                  onPressed: () {
-                    if (_verticalController.hasClients) {
-                      _verticalController.animateTo(
-                        0,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    }
-                  },
-                  tooltip: '回到顶部',
+    super.build(context);
+    final visibleMonths = _months.take(_maxCalendarCount).toList();
+    final displayMonths = visibleMonths.reversed.toList();
+    final totalItemCount = displayMonths.length + 2;
+
+    return Column(
+      children: [
+        // 顶部标题
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.keyboard_arrow_up),
+                onPressed: () {
+                  if (_verticalController.hasClients) {
+                    _verticalController.animateTo(
+                      _verticalController.position.maxScrollExtent,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+                tooltip: '回到顶部',
+              ),
+              Text(
+                '垂直日历视图',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
-                Text(
-                  '垂直日历视图',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+              Text(
+                '${_months.length}/${_maxCalendarCount} 个月',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-                Text(
-                  '${_months.length}/${_maxCalendarCount} 个月',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          // 垂直滚动的日历列表
-          Expanded(
-            child: ListView(
-              controller: _verticalController,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                const SizedBox(height: 8),
-                // 显示所有月份
-                ..._months.take(_maxCalendarCount).map((month) {
-                  return KeyedSubtree(
-                    key: ValueKey('vertical_${_getMonthKey(month)}'),
-                    child: _buildMonthCalendar(month),
+        ),
+        // 垂直滚动的日历列表
+        Expanded(
+          child: Stack(
+            children: [
+              _ReversedVirtualListView(
+                controller: _verticalController,
+                reverse: true,
+                padding: EdgeInsets.zero,
+                itemCount: totalItemCount,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return const SizedBox(height: 100);
+                  }
+                  if (index == totalItemCount - 1) {
+                    return const SizedBox(height: 8);
+                  }
+                  final month = displayMonths[index - 1];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: KeyedSubtree(
+                      key: ValueKey('vertical_${_getMonthKey(month)}'),
+                      child: _buildMonthCalendar(month),
+                    ),
                   );
-                }).toList(),
-                const SizedBox(height: 100), // 底部留白
-              ],
-            ),
+                },
+              ),
+              if (_isLoadingPrevious)
+                _buildLoadingIndicator(isTop: true),
+              if (_isLoadingNext) _buildLoadingIndicator(isTop: false),
+            ],
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoadingIndicator({required bool isTop}) {
+    return Positioned(
+      top: isTop ? 16 : null,
+      bottom: isTop ? null : 16,
+      left: 0,
+      right: 0,
+      child: const Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReversedVirtualListView extends virtual_scroll.VirtualListView {
+  final bool reverse;
+  const _ReversedVirtualListView({
+    required super.itemCount,
+    required super.itemBuilder,
+    super.key,
+    super.controller,
+    super.physics,
+    super.padding,
+    super.itemExtent,
+    super.cacheExtent,
+    this.reverse = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final optimizedCacheExtent =
+        kIsWeb ? cacheExtent * 1.5 : cacheExtent;
+
+    return Semantics(
+      label: 'Virtual list with $itemCount items',
+      hint: 'Scroll to navigate through the list',
+      child: ListView.builder(
+        reverse: reverse,
+        controller: controller,
+        physics: physics ?? const ClampingScrollPhysics(),
+        padding: padding,
+        itemCount: itemCount,
+        itemExtent: itemExtent,
+        cacheExtent: optimizedCacheExtent,
+        itemBuilder: (context, index) {
+          return Semantics(
+            label: 'Item ${index + 1} of $itemCount',
+            child: itemBuilder(context, index),
+          );
+        },
       ),
     );
   }

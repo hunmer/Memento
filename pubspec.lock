@@ -625,6 +625,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.8.5"
+  flutter_virtual_scroll:
+    dependency: "direct main"
+    description:
+      name: flutter_virtual_scroll
+      sha256: "14fa05e9fb795d5f9e2dbf96e194a0c7fdb03f935708c85f5cbd385b8fada063"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.1.1"
   flutter_web_plugins:
     dependency: transitive
     description: flutter

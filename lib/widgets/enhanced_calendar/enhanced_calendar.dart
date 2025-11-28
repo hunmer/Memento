@@ -340,6 +340,7 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
           (day) => _selectedDay != null && isSameDay(day, _selectedDay!),
       calendarFormat: widget.config.calendarFormat,
       locale: widget.config.locale,
+      pageAnimationEnabled: false,
 
       // 样式配置
       calendarStyle: const CalendarStyle(
