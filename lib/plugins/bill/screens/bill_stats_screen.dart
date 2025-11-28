@@ -35,15 +35,16 @@ class _BillStatsScreenState extends State<BillStatsScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedMonth = DateTime(widget.startDate.year, widget.startDate.month);
+    // 默认显示当前月份，而不是 startDate 的月份
+    final now = DateTime.now();
+    _selectedMonth = DateTime(now.year, now.month);
   }
 
   @override
   void didUpdateWidget(BillStatsScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.startDate != widget.startDate) {
-      _selectedMonth = DateTime(widget.startDate.year, widget.startDate.month);
-    }
+    // 不再根据 startDate 更新选中月份，保持用户当前选择的月份
+    // 这样用户在浏览不同月份时不会因为组件更新而被重置
   }
 
   List<BillModel> _getBillsForMonth(DateTime month) {

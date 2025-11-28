@@ -1160,6 +1160,9 @@ class _BillMainViewState extends State<BillMainView>
     Colors.orange,
     Colors.purple,
   ];
+  static const double _bottomBarOffset = 12.0;
+  final GlobalKey _bottomBarKey = GlobalKey(debugLabel: 'bill_bottom_bar');
+  double _bottomBarHeight = kBottomNavigationBarHeight + _bottomBarOffset * 2;
 
   @override
   void initState() {
@@ -1201,8 +1204,27 @@ class _BillMainViewState extends State<BillMainView>
     super.dispose();
   }
 
+  void _scheduleBottomBarHeightMeasurement() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final renderObject = _bottomBarKey.currentContext?.findRenderObject();
+      if (renderObject is RenderBox) {
+        final safeAreaBottom = MediaQuery.of(context).padding.bottom;
+        final newHeight =
+            renderObject.size.height + _bottomBarOffset * 2 + safeAreaBottom;
+        if ((newHeight - _bottomBarHeight).abs() > 0.5) {
+          setState(() {
+            _bottomBarHeight = newHeight;
+          });
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    _scheduleBottomBarHeightMeasurement();
+
     // 如果没有账户，显示加载指示器
     if (billPlugin.accounts.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -1212,166 +1234,187 @@ class _BillMainViewState extends State<BillMainView>
         _colors[_currentPage].computeLuminance() < 0.5
             ? Colors.black.withOpacity(0.6)
             : Colors.white.withOpacity(0.6);
+    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
+    final mediaQuery = MediaQuery.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        title: Text(
-          billPlugin.selectedAccount?.title ??
-              BillLocalizations.of(context).accountTitle,
+    return BottomBar(
+      fit: StackFit.expand,
+      icon:
+          (width, height) => Center(
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                // 滚动到顶部功能
+                if (_tabController.indexIsChanging) return;
+
+                // 这里可以添加滚动到顶部的逻辑
+                // 由于我们使用的是TabBarView，可以考虑切换到第一个tab
+                if (_currentPage != 0) {
+                  _tabController.animateTo(0);
+                }
+              },
+              icon: Icon(
+                Icons.keyboard_arrow_up,
+                color: _colors[_currentPage],
+                size: width,
+              ),
+            ),
+          ),
+      borderRadius: BorderRadius.circular(25),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.decelerate,
+      showIcon: true,
+      width: mediaQuery.size.width * 0.85,
+      barColor:
+          _colors[_currentPage].computeLuminance() > 0.5
+              ? Colors.black
+              : Colors.white,
+      start: 2,
+      end: 0,
+      offset: _bottomBarOffset,
+      barAlignment: Alignment.bottomCenter,
+      iconHeight: 35,
+      iconWidth: 35,
+      reverse: false,
+      barDecoration: BoxDecoration(
+        color: _colors[_currentPage].withOpacity(0.1),
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(
+          color: _colors[_currentPage].withOpacity(0.3),
+          width: 1,
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.list),
-            onPressed: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder:
-                      (context) => AccountListScreen(billPlugin: billPlugin),
-                ),
-              );
-            },
+      ),
+      iconDecoration: BoxDecoration(
+        color: _colors[_currentPage].withOpacity(0.8),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: _colors[_currentPage].withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      body: BottomBar(
-        fit: StackFit.expand,
-        icon:
-            (width, height) => Center(
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                onPressed: () {
-                  // 滚动到顶部功能
-                  if (_tabController.indexIsChanging) return;
-
-                  // 这里可以添加滚动到顶部的逻辑
-                  // 由于我们使用的是TabBarView，可以考虑切换到第一个tab
-                  if (_currentPage != 0) {
-                    _tabController.animateTo(0);
-                  }
-                },
-                icon: Icon(
-                  Icons.keyboard_arrow_up,
-                  color: _colors[_currentPage],
-                  size: width,
-                ),
-              ),
-            ),
-        borderRadius: BorderRadius.circular(25),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.decelerate,
-        showIcon: true,
-        width: MediaQuery.of(context).size.width * 0.85,
-        barColor:
-            _colors[_currentPage].computeLuminance() > 0.5
-                ? Colors.black
-                : Colors.white,
-        start: 2,
-        end: 0,
-        offset: 12,
-        barAlignment: Alignment.bottomCenter,
-        iconHeight: 35,
-        iconWidth: 35,
-        reverse: false,
-        barDecoration: BoxDecoration(
-          color: _colors[_currentPage].withOpacity(0.1),
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(
-            color: _colors[_currentPage].withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        iconDecoration: BoxDecoration(
-          color: _colors[_currentPage].withOpacity(0.8),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: _colors[_currentPage].withOpacity(0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        hideOnScroll: true,
-        scrollOpposite: false,
-        onBottomBarHidden: () {},
-        onBottomBarShown: () {},
-        body:
-            (context, controller) => TabBarView(
-              controller: _tabController,
-              dragStartBehavior: DragStartBehavior.down,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                BillListScreen(
-                  billPlugin: billPlugin,
-                  accountId: billPlugin.selectedAccount?.id ?? '',
-                ),
-                BillStatsScreen(
-                  billPlugin: billPlugin,
-                  accountId: billPlugin.selectedAccount?.id ?? '',
-                  startDate: DateTime.now().subtract(
-                    const Duration(days: 30),
-                  ), // 默认显示最近30天
-                  endDate: DateTime.now(),
-                ),
-              ],
-            ),
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            TabBar(
-              controller: _tabController,
-              dividerColor: Colors.transparent,
-              overlayColor: WidgetStateProperty.all(Colors.transparent),
-              indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
-              indicator: UnderlineTabIndicator(
-                borderSide: BorderSide(
-                  color:
-                      _currentPage < 2
-                          ? _colors[_currentPage]
-                          : unselectedColor,
-                  width: 4,
-                ),
-                insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              ),
-              labelColor:
-                  _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
-              unselectedLabelColor: unselectedColor,
-              tabs: const [
-                Tab(icon: Icon(Icons.receipt_long), text: '账单列表'),
-                Tab(icon: Icon(Icons.bar_chart), text: '统计分析'),
-              ],
-            ),
-            Positioned(
-              top: -25,
-              child: FloatingActionButton(
-                backgroundColor: Color(0xFF3498DB),
-                elevation: 4,
-                shape: const CircleBorder(),
-                child: const Icon(Icons.add, color: Colors.white, size: 32),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder:
-                          (context) => BillEditScreen(
-                            billPlugin: billPlugin,
-                            accountId: billPlugin.selectedAccount?.id ?? '',
-                          ),
+      hideOnScroll: true,
+      scrollOpposite: false,
+      onBottomBarHidden: () {},
+      onBottomBarShown: () {},
+      body:
+          (context, controller) => Stack(
+            children: [
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: _bottomBarHeight),
+                  child: Scaffold(
+                    appBar: AppBar(
+                      automaticallyImplyLeading: false,
+                      leading:
+                          (Platform.isAndroid || Platform.isIOS)
+                              ? null
+                              : IconButton(
+                                icon: const Icon(Icons.arrow_back),
+                                onPressed: () => PluginManager.toHomeScreen(context),
+                              ),
+                      title: Text(
+                        billPlugin.selectedAccount?.title ??
+                            BillLocalizations.of(context).accountTitle,
+                      ),
+                      actions: [
+                        IconButton(
+                          icon: const Icon(Icons.list),
+                          onPressed: () {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => AccountListScreen(billPlugin: billPlugin),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                  );
-                },
+                    body: TabBarView(
+                      controller: _tabController,
+                      dragStartBehavior: DragStartBehavior.down,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        BillListScreen(
+                          billPlugin: billPlugin,
+                          accountId: billPlugin.selectedAccount?.id ?? '',
+                        ),
+                        BillStatsScreen(
+                          billPlugin: billPlugin,
+                          accountId: billPlugin.selectedAccount?.id ?? '',
+                          startDate: DateTime.now().subtract(
+                            const Duration(days: 30),
+                          ), // 默认显示最近30天
+                          endDate: DateTime.now(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  height: _bottomBarHeight,
+                  color: bottomAreaColor,
+                ),
+              ),
+            ],
+          ),
+      child: Stack(
+        key: _bottomBarKey,
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          TabBar(
+            controller: _tabController,
+            dividerColor: Colors.transparent,
+            overlayColor: WidgetStateProperty.all(Colors.transparent),
+            indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+            indicator: UnderlineTabIndicator(
+              borderSide: BorderSide(
+                color:
+                    _currentPage < 2
+                        ? _colors[_currentPage]
+                        : unselectedColor,
+                width: 4,
+              ),
+              insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             ),
-          ],
-        ),
+            labelColor:
+                _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
+            unselectedLabelColor: unselectedColor,
+            tabs: const [
+              Tab(icon: Icon(Icons.receipt_long), text: '账单列表'),
+              Tab(icon: Icon(Icons.bar_chart), text: '统计分析'),
+            ],
+          ),
+          Positioned(
+            top: -25,
+            child: FloatingActionButton(
+              backgroundColor: Color(0xFF3498DB),
+              elevation: 4,
+              shape: const CircleBorder(),
+              child: const Icon(Icons.add, color: Colors.white, size: 32),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder:
+                        (context) => BillEditScreen(
+                          billPlugin: billPlugin,
+                          accountId: billPlugin.selectedAccount?.id ?? '',
+                        ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
