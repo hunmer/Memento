@@ -109,6 +109,7 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
   @override
   void didUpdateWidget(EnhancedCalendar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // 当外部传入的 focusedDay 改变时，更新内部状态
     if (oldWidget.config.focusedDay != widget.config.focusedDay) {
       _focusedDay = widget.config.focusedDay;
     }
@@ -288,6 +289,8 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
         setState(() {
           _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
         });
+        // 可选：通知外部组件 focusedDay 已改变
+        widget.config.onFormatChanged?.call(_focusedDay);
       },
     );
   }
@@ -302,6 +305,8 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
         setState(() {
           _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
         });
+        // 可选：通知外部组件 focusedDay 已改变
+        widget.config.onFormatChanged?.call(_focusedDay);
       },
     );
   }
@@ -348,15 +353,15 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
         markersAutoAligned: true,
       ),
 
-      // 头部配置
-      headerStyle: HeaderStyle(
+      // 头部配置 - 隐藏默认头部
+      headerStyle: const HeaderStyle(
         formatButtonVisible: false,
         titleCentered: true,
-        titleTextFormatter: (date, locale) {
-          return DateFormat.yMMMM(locale ?? 'zh_CN').format(date);
-        },
-        leftChevronIcon: _buildLeftChevron(),
-        rightChevronIcon: _buildRightChevron(),
+        titleTextStyle: TextStyle(fontSize: 0), // 隐藏标题
+        leftChevronVisible: false, // 隐藏左侧导航
+        rightChevronVisible: false, // 隐藏右侧导航
+        headerPadding: EdgeInsets.zero, // 移除头部padding
+        decoration: BoxDecoration(), // 移除默认装饰
       ),
 
       // 事件处理
