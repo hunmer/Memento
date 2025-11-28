@@ -1,7 +1,7 @@
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
-import 'package:Memento/plugins/store/widgets/store_view/product_list_page.dart';
-import 'package:Memento/plugins/store/widgets/store_view/user_items_page.dart';
-import 'package:Memento/plugins/store/widgets/store_view/points_history_page.dart';
+import 'package:Memento/plugins/store/widgets/store_view/product_list.dart';
+import 'package:Memento/plugins/store/widgets/store_view/user_items.dart';
+import 'package:Memento/plugins/store/widgets/store_view/points_history.dart';
 import 'package:Memento/plugins/store/widgets/add_product_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -166,12 +166,12 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                     dragStartBehavior: DragStartBehavior.start,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
-                      // Tab0: 商品列表
-                      ProductListContent(controller: widget.plugin.controller),
-                      // Tab1: 用户物品
-                      UserItemsContent(controller: widget.plugin.controller),
-                      // Tab2: 积分历史
-                      PointsHistoryContent(controller: widget.plugin.controller),
+                      // Tab0: 商品列表 - 使用完整页面组件
+                      ProductList(controller: widget.plugin.controller),
+                      // Tab1: 用户物品 - 使用完整页面组件
+                      UserItems(controller: widget.plugin.controller),
+                      // Tab2: 积分历史 - 使用完整页面组件
+                      PointsHistory(controller: widget.plugin.controller),
                     ],
                   ),
                 ),
