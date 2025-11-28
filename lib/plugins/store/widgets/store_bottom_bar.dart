@@ -225,6 +225,10 @@ class _StoreBottomBarState extends State<StoreBottomBar>
           ),
           Positioned(
             top: -25,
+              right:
+                  MediaQuery.of(context).size.width *
+                  0.15 *
+                  0.25, // 向右偏移底部栏宽度的1/4
             child: FloatingActionButton(
               backgroundColor: widget.plugin.color, // 使用插件主题色
               elevation: 4,

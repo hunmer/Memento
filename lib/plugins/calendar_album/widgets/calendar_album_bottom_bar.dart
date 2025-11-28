@@ -28,6 +28,8 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late int _currentPage;
+  double _bottomBarHeight = 60; // 默认底部栏高度
+  final GlobalKey _bottomBarKey = GlobalKey();
 
   // 使用插件主题色和辅助色
   final List<Color> _colors = [
@@ -56,6 +58,22 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
     // 获取控制器
     _calendarController = widget.plugin.calendarController;
     _tagController = widget.plugin.tagController;
+  }
+
+  /// 测量底部栏高度
+  void _scheduleBottomBarHeightMeasurement() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _bottomBarKey.currentContext != null) {
+        final RenderBox renderBox =
+            _bottomBarKey.currentContext!.findRenderObject() as RenderBox;
+        final newHeight = renderBox.size.height;
+        if (_bottomBarHeight != newHeight) {
+          setState(() {
+            _bottomBarHeight = newHeight;
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -167,10 +185,9 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
 
   @override
   Widget build(BuildContext context) {
-    final Color unselectedColor =
-        _colors[_currentPage].computeLuminance() < 0.5
-            ? Colors.black.withOpacity(0.6)
-            : Colors.white.withOpacity(0.6);
+    _scheduleBottomBarHeightMeasurement();
+    final Color unselectedColor = Colors.black.withOpacity(0.6);
+    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
 
     return BottomBar(
       fit: StackFit.expand,
@@ -199,10 +216,7 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
       curve: Curves.decelerate,
       showIcon: true,
       width: MediaQuery.of(context).size.width * 0.85,
-      barColor:
-          _colors[_currentPage].computeLuminance() > 0.5
-              ? Colors.black
-              : Colors.white,
+      barColor: Colors.white,
       start: 2,
       end: 0,
       offset: 12,
@@ -238,38 +252,65 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
       onBottomBarHidden: () {},
       onBottomBarShown: () {},
       body:
-          (context, controller) => TabBarView(
-            controller: _tabController,
-            dragStartBehavior: DragStartBehavior.start,
-            physics: const NeverScrollableScrollPhysics(),
+          (context, controller) => Stack(
             children: [
-              // Tab0: 日历视图
-              MultiProvider(
-                providers: [
-                  ChangeNotifierProvider.value(value: _calendarController),
-                  ChangeNotifierProvider.value(value: _tagController),
-                ],
-                child: CalendarScreen(key: const PageStorageKey('calendar')),
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: _bottomBarHeight),
+                  child: TabBarView(
+                    controller: _tabController,
+                    dragStartBehavior: DragStartBehavior.start,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      // Tab0: 日历视图
+                      MultiProvider(
+                        providers: [
+                          ChangeNotifierProvider.value(
+                            value: _calendarController,
+                          ),
+                          ChangeNotifierProvider.value(value: _tagController),
+                        ],
+                        child: CalendarScreen(
+                          key: const PageStorageKey('calendar'),
+                        ),
+                      ),
+                      // Tab1: 标签视图
+                      MultiProvider(
+                        providers: [
+                          ChangeNotifierProvider.value(
+                            value: _calendarController,
+                          ),
+                          ChangeNotifierProvider.value(value: _tagController),
+                        ],
+                        child: TagScreen(key: const PageStorageKey('tags')),
+                      ),
+                      // Tab2: 相册视图
+                      MultiProvider(
+                        providers: [
+                          ChangeNotifierProvider.value(
+                            value: _calendarController,
+                          ),
+                          ChangeNotifierProvider.value(value: _tagController),
+                        ],
+                        child: AlbumScreen(key: const PageStorageKey('album')),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              // Tab1: 标签视图
-              MultiProvider(
-                providers: [
-                  ChangeNotifierProvider.value(value: _calendarController),
-                  ChangeNotifierProvider.value(value: _tagController),
-                ],
-                child: TagScreen(key: const PageStorageKey('tags')),
-              ),
-              // Tab2: 相册视图
-              MultiProvider(
-                providers: [
-                  ChangeNotifierProvider.value(value: _calendarController),
-                  ChangeNotifierProvider.value(value: _tagController),
-                ],
-                child: AlbumScreen(key: const PageStorageKey('album')),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  height: _bottomBarHeight,
+                  color: bottomAreaColor,
+                ),
               ),
             ],
           ),
       child: Stack(
+        key: _bottomBarKey,
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
@@ -306,6 +347,10 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
           ),
           Positioned(
             top: -25,
+            right:
+                MediaQuery.of(context).size.width *
+                0.15 *
+                0.25, // 向右偏移底部栏宽度的1/4
             child: FloatingActionButton(
               backgroundColor: widget.plugin.color, // 使用插件主题色
               elevation: 4,
