@@ -17,12 +17,17 @@ class MonthSelector extends StatefulWidget {
   /// 主题色
   final Color primaryColor;
 
+  /// 自定义显示文本构建器
+  /// 如果提供此参数，将覆盖默认的收入/支出显示
+  final Widget Function(Map<String, double> stats)? customStatsBuilder;
+
   const MonthSelector({
     super.key,
     this.selectedMonth,
     required this.onMonthSelected,
     required this.getMonthStats,
     this.primaryColor = const Color(0xFF3498DB),
+    this.customStatsBuilder,
   });
 
   @override
@@ -34,6 +39,8 @@ class _MonthSelectorState extends State<MonthSelector> {
   late DateTime _selectedMonth;
   List<DateTime> _allMonths = [];
   bool _isLoading = false;
+  bool _shouldScrollOnNextBuild = false;
+  bool _isInitialized = false; // 标记是否已完成初始化滚动
 
   // 每次加载的月份数量
   static const int _loadCount = 25;
@@ -48,10 +55,8 @@ class _MonthSelectorState extends State<MonthSelector> {
     // 添加滚动监听器
     _scrollController.addListener(_onScroll);
 
-    // 延迟滚动到选中的月份
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToSelectedMonth();
-    });
+    // 滚动到选中的月份
+    _scrollToSelectedMonth();
   }
 
   @override
@@ -60,8 +65,11 @@ class _MonthSelectorState extends State<MonthSelector> {
     if (widget.selectedMonth != oldWidget.selectedMonth && widget.selectedMonth != null) {
       setState(() {
         _selectedMonth = widget.selectedMonth!;
+        // 重新初始化月份列表以包含新的选中月份
+        _initializeMonths();
+        // 标记需要在下次构建时滚动
+        _shouldScrollOnNextBuild = true;
       });
-      _scrollToSelectedMonth();
     }
   }
 
@@ -77,8 +85,18 @@ class _MonthSelectorState extends State<MonthSelector> {
     final now = DateTime.now();
     final months = <DateTime>[];
 
-    // 生成前后各 _loadCount 个月的月份
-    for (int i = -_loadCount; i <= _loadCount; i++) {
+    // 确保 _selectedMonth 在列表范围内
+    final selectedMonth = widget.selectedMonth ?? DateTime.now();
+    final monthDiff = (selectedMonth.year - now.year) * 12 + (selectedMonth.month - now.month);
+
+    // 如果选中月份超出初始范围，调整加载范围
+    final startOffset = monthDiff > _loadCount ? monthDiff - _loadCount :
+                       monthDiff < -_loadCount ? monthDiff + _loadCount : -_loadCount;
+    final endOffset = monthDiff > _loadCount ? _loadCount :
+                      monthDiff < -_loadCount ? -monthDiff - _loadCount : _loadCount;
+
+    // 生成月份列表，确保选中月份在中间位置
+    for (int i = startOffset; i <= endOffset; i++) {
       months.add(DateTime(now.year, now.month + i));
     }
 
@@ -87,7 +105,8 @@ class _MonthSelectorState extends State<MonthSelector> {
 
   /// 滚动事件监听
   void _onScroll() {
-    if (!_scrollController.hasClients || _isLoading) return;
+    // 只有在初始化完成后才允许自动加载更多月份
+    if (!_isInitialized || !_scrollController.hasClients || _isLoading) return;
 
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
@@ -148,25 +167,74 @@ class _MonthSelectorState extends State<MonthSelector> {
 
   /// 滚动到选中的月份
   void _scrollToSelectedMonth() {
-    final selectedIndex = _allMonths.indexWhere(
-      (month) =>
-          month.year == _selectedMonth.year &&
-          month.month == _selectedMonth.month,
-    );
+    // 确保月份列表已初始化
+    if (_allMonths.isEmpty) return;
 
-    if (selectedIndex != -1 && _scrollController.hasClients) {
-      // 计算滚动位置，让选中月份居中显示
-      final itemWidth = 80.0 + 12; // 卡片宽度 + 间距
+    // 使用多重延迟确保滚动可靠性
+    _performScrollWithRetry(0);
+  }
+
+  /// 带重试机制的滚动执行
+  void _performScrollWithRetry(int attempt) {
+    const maxAttempts = 5;
+
+    // 根据尝试次数增加延迟时间
+    final delay = Duration(milliseconds: 100 * (attempt + 1));
+
+    Future.delayed(delay, () {
+      if (!mounted || !_scrollController.hasClients) {
+        // 如果条件不满足且未超过最大尝试次数，继续重试
+        if (attempt < maxAttempts) {
+          _performScrollWithRetry(attempt + 1);
+        } else {
+          // 重试次数用尽，标记初始化完成以允许正常使用
+          _isInitialized = true;
+        }
+        return;
+      }
+
+      final selectedIndex = _allMonths.indexWhere(
+        (month) =>
+            month.year == _selectedMonth.year &&
+            month.month == _selectedMonth.month,
+      );
+
+      if (selectedIndex == -1) {
+        // 如果找不到选中的月份，仍然标记初始化完成
+        _isInitialized = true;
+        return;
+      }
+
+      // 检查视口宽度是否有效
       final viewportWidth = _scrollController.position.viewportDimension;
+      if (viewportWidth <= 0) {
+        // 视口宽度无效，继续重试
+        if (attempt < maxAttempts) {
+          _performScrollWithRetry(attempt + 1);
+        } else {
+          // 重试次数用尽，标记初始化完成以允许正常使用
+          _isInitialized = true;
+        }
+        return;
+      }
+
+      // 计算滚动位置，让选中月份居中显示
+      const itemWidth = 80.0 + 12; // 卡片宽度 + 间距
       final targetOffset =
           (selectedIndex * itemWidth) - (viewportWidth / 2) + (itemWidth / 2);
 
+      // 执行滚动
       _scrollController.animateTo(
         targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
-      );
-    }
+      ).then((_) {
+        // 滚动完成后标记初始化完成
+        if (mounted) {
+          _isInitialized = true;
+        }
+      });
+    });
   }
 
   /// 格式化月份显示为 "25年/6月" 格式
@@ -178,6 +246,14 @@ class _MonthSelectorState extends State<MonthSelector> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // 如果需要在构建后滚动
+    if (_shouldScrollOnNextBuild) {
+      _shouldScrollOnNextBuild = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToSelectedMonth();
+      });
+    }
 
     return Listener(
       onPointerSignal: (event) {
@@ -242,22 +318,30 @@ class _MonthSelectorState extends State<MonthSelector> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      '+${_formatCompact(stats['income'] ?? 0)}',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Color(0xFF2ECC71), // 收入颜色
-                        fontWeight: FontWeight.w500,
+                    // 使用自定义构建器或默认的统计数据显示
+                    if (widget.customStatsBuilder != null)
+                      widget.customStatsBuilder!(stats)
+                    else
+                      Column(
+                        children: [
+                          Text(
+                            '+${_formatCompact(stats['income'] ?? 0)}',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF2ECC71), // 收入颜色
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            '-${_formatCompact(stats['expense'] ?? 0)}',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFFE74C3C), // 支出颜色
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    Text(
-                      '-${_formatCompact(stats['expense'] ?? 0)}',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Color(0xFFE74C3C), // 支出颜色
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
                   ],
                 ),
               ),
