@@ -402,6 +402,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.66.2"
+  floating_ball_plugin:
+    dependency: "direct main"
+    description:
+      path: floating_ball_plugin
+      relative: true
+    source: path
+    version: "0.0.1"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -1813,5 +1820,5 @@ packages:
     source: hosted
     version: "1.1.4+10"
 sdks:
-  dart: ">=3.9.0 <4.0.0"
+  dart: ">=3.10.0 <4.0.0"
   flutter: ">=3.35.0"

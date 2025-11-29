@@ -9,6 +9,7 @@ import 'package:Memento/screens/js_console/js_console_screen.dart';
 import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart';
 import 'package:Memento/screens/notification_test/notification_test_page.dart';
 import 'package:Memento/screens/super_cupertino_test_screen/super_cupertino_test_screen.dart';
+import 'package:Memento/screens/floating_ball_screen/floating_ball_screen.dart';
 
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
@@ -70,6 +71,7 @@ class AppRoutes extends NavigatorObserver {
   static const String timer = '/timer';
   static const String todo = '/todo';
   static const String tracker = '/tracker';
+  static const String floatingBall = '/floating_ball';
 
   // Agent Chat 子页面路由
   static const String toolTemplate = '/tool_template';
@@ -163,6 +165,9 @@ class AppRoutes extends NavigatorObserver {
       case '/tracker':
       case 'tracker':
         return _createRoute(const TrackerMainView());
+      case '/floating_ball':
+      case 'floating_ball':
+        return _createRoute(const FloatingBallScreen());
       case '/js_console':
       case 'js_console':
         return _createRoute(const JSConsoleScreen());
@@ -214,6 +219,7 @@ class AppRoutes extends NavigatorObserver {
     timer: (context) => const TimerMainView(),
     todo: (context) => const TodoMainView(),
     tracker: (context) => const TrackerMainView(),
+    floatingBall: (context) => const FloatingBallScreen(),
     jsConsole: (context) => const JSConsoleScreen(),
     jsonDynamicTest: (context) => const JsonDynamicTestScreen(),
     notificationTest: (context) => const NotificationTestPage(),
