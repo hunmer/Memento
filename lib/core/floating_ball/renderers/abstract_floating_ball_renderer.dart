@@ -10,9 +10,6 @@ abstract class AbstractFloatingBallRenderer {
   /// 渲染器类型标识
   String get rendererType;
 
-  /// 是否为OverlayWindow环境
-  bool get isInOverlay;
-
   /// 初始化渲染器
   Future<void> initialize();
 

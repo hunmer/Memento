@@ -48,9 +48,4 @@ class FloatingBallLocalizationsZh extends FloatingBallLocalizations {
   @override
   String get tapGesture => '点击手势';
 
-  @override
-  String get resetOverlayPosition => '重置全局悬浮球位置';
-
-  @override
-  String get overlayPositionReset => '全局悬浮球位置已重置';
-}
+  }

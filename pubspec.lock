@@ -556,14 +556,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.7+1"
-  flutter_overlay_window:
-    dependency: "direct main"
-    description:
-      name: flutter_overlay_window
-      sha256: "17988420249da68e421d1b44b511e6113d3de7a9e52c3fbd6d99730508af4580"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -625,14 +617,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.8.5"
-  flutter_virtual_scroll:
-    dependency: "direct main"
-    description:
-      name: flutter_virtual_scroll
-      sha256: "14fa05e9fb795d5f9e2dbf96e194a0c7fdb03f935708c85f5cbd385b8fada063"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.1"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
