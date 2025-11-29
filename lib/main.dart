@@ -33,7 +33,6 @@ import 'package:universal_platform/universal_platform.dart';
 
 import 'package:flutter/material.dart';
 import 'core/services/system_widget_service.dart';
-import 'core/floating_ball/overlay_window_main.dart';
 import 'core/services/plugin_widget_sync_helper.dart';
 import 'package:flutter/services.dart';
 import 'package:Memento/l10n/app_localizations.dart';
@@ -564,14 +563,4 @@ class _MyAppState extends State<MyApp> {
           ),
     );
   }
-}
-
-/// Overlay窗口入口点
-///
-/// 当flutter_overlay_window创建overlay窗口时会调用这个函数
-@pragma("vm:entry-point")
-void overlayMain() {
-  WidgetsFlutterBinding.ensureInitialized();
-  DartPluginRegistrant.ensureInitialized();
-  runApp(const MaterialApp(debugShowCheckedModeBanner: false, home: OverlayWindowApp()));
 }

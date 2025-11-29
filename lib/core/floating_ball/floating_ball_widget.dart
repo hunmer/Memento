@@ -5,10 +5,10 @@ import 'floating_ball_manager.dart';
 import 'widgets/shared_floating_ball_widget.dart';
 import 'models/floating_ball_gesture.dart';
 
-/// 浮浮球Widget (Overlay环境的实现)
+/// 浮浮球Widget
 ///
 /// 这个类现在使用SharedFloatingBallWidget来提供核心功能，
-/// 专注于Overlay环境特定的配置和集成。
+/// 专注于应用内悬浮球的配置和集成。
 class FloatingBallWidget extends StatefulWidget {
   final double baseSize;
   final Color color;
@@ -80,7 +80,6 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
     _manager.setActionContext(context);
 
     return SharedFloatingBallWidget(
-      isInOverlay: false, // 这是Overlay环境的实现
       baseSize: widget.baseSize,
       color: widget.color,
       iconPath: widget.iconPath,

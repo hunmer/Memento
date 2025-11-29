@@ -13,7 +13,6 @@ import '../../widgets/route_history_dialog/route_history_dialog.dart';
 import '../../plugins/agent_chat/agent_chat_plugin.dart';
 import '../../plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
 import '../../plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
-import 'plugin_overlay_manager.dart';
 import 'models/floating_ball_gesture.dart';
 
 /// 动作信息类，包含动作标题和回调函数
@@ -51,9 +50,6 @@ class FloatingBallManager {
 
   // 大小变化回调列表
   final List<SizeChangeCallback> _sizeChangeCallbacks = [];
-
-  // Overlay 窗口大小变化回调列表
-  final List<SizeChangeCallback> _overlaySizeChangeCallbacks = [];
 
   // 预定义的动作映射表
   static final Map<String, Function(BuildContext)> _predefinedActionCreators = {
@@ -127,24 +123,19 @@ class FloatingBallManager {
             if (lastPage != null) {
               await _reopenPage(context, lastPage);
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('没有历史记录'),
-                ),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('没有历史记录')));
             }
-          }
-        },
-    '选择打开插件小窗口':
-        (context) => () {
-          if (context.mounted) {
-            PluginOverlayManager().showPluginOverlayFromSelection(context);
           }
         },
   };
 
   /// 根据页面记录重新打开页面
-  static Future<void> _reopenPage(BuildContext context, dynamic lastPage) async {
+  static Future<void> _reopenPage(
+    BuildContext context,
+    dynamic lastPage,
+  ) async {
     if (!context.mounted) return;
 
     // 记录访问历史
@@ -159,25 +150,24 @@ class FloatingBallManager {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ToolTemplateScreen(
-              templateService: AgentChatPlugin.instance.templateService,
-            ),
+            builder:
+                (context) => ToolTemplateScreen(
+                  templateService: AgentChatPlugin.instance.templateService,
+                ),
           ),
         );
         break;
       case 'tool_management':
         await Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const ToolManagementScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const ToolManagementScreen()),
         );
         break;
       default:
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('未知页面类型: ${lastPage.pageId}')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('未知页面类型: ${lastPage.pageId}')));
         }
     }
   }
@@ -208,7 +198,6 @@ class FloatingBallManager {
     return {
       'actions': {},
       'size_scale': 0.6,
-      'overlay_size_scale': 1.0,
       'position': {'x': 21.0, 'y': 99.0},
       'enabled': true,
     };
@@ -218,7 +207,6 @@ class FloatingBallManager {
   bool _isConfigValid(Map<String, dynamic> config) {
     return config.containsKey('actions') &&
         config.containsKey('size_scale') &&
-        config.containsKey('overlay_size_scale') &&
         config.containsKey('position') &&
         config.containsKey('enabled');
   }
@@ -229,7 +217,6 @@ class FloatingBallManager {
     return {
       'actions': config['actions'] ?? defaults['actions'],
       'size_scale': config['size_scale'] ?? defaults['size_scale'],
-      'overlay_size_scale': config['overlay_size_scale'] ?? defaults['overlay_size_scale'],
       'position': config['position'] ?? defaults['position'],
       'enabled': config['enabled'] ?? defaults['enabled'],
     };
@@ -294,7 +281,6 @@ class FloatingBallManager {
     }
   }
 
-
   // 加载保存的动作
   Future<void> _loadActions() async {
     final data = await _readData();
@@ -304,6 +290,13 @@ class FloatingBallManager {
       if (actionTitle != null) {
         _actions[gesture] = ActionInfo(actionTitle.toString(), () {});
       }
+    }
+
+    // 为tap手势设置默认动作（如果没有配置的话）
+    if (!_actions.containsKey(FloatingBallGesture.tap)) {
+      _actions[FloatingBallGesture.tap] = ActionInfo('选择打开插件', () {
+        // 这个回调会在setActionContext中被正确设置
+      });
     }
   }
 
@@ -343,24 +336,6 @@ class FloatingBallManager {
 
     // 通知所有注册的回调
     _notifySizeChange(scale);
-  }
-
-  // 获取 Overlay 窗口悬浮球大小比例
-  Future<double> getOverlaySizeScale() async {
-    await _ensureInitialized();
-    final data = await _readData();
-    return (data['overlay_size_scale'] as num?)?.toDouble() ?? 1.0;
-  }
-
-  // 保存 Overlay 窗口悬浮球大小比例
-  Future<void> saveOverlaySizeScale(double scale) async {
-    await _ensureInitialized();
-    final data = await _readData();
-    data['overlay_size_scale'] = scale;
-    await _writeDataSafe(data);
-
-    // 通知所有注册的回调
-    _notifyOverlaySizeChange(scale);
   }
 
   // 获取悬浮球启用状态
@@ -475,56 +450,6 @@ class FloatingBallManager {
     FloatingBallService().updatePosition(defaultPosition);
   }
 
-  // Overlay窗口配置管理
-
-  /// 保存overlay窗口配置
-  Future<void> saveOverlayWindowConfig({
-    required bool enableOverlayWindow,
-    required bool coexistMode,
-  }) async {
-    final data = await _readData();
-    data['enable_overlay_window'] = enableOverlayWindow;
-    data['coexist_mode'] = coexistMode;
-    await _writeDataSafe(data);
-  }
-
-  /// 获取overlay窗口配置
-  Future<Map<String, dynamic>> getOverlayWindowConfig() async {
-    final data = await _readData();
-    return {
-      'enableOverlayWindow': data['enable_overlay_window'] as bool? ?? false,
-      'coexistMode': data['coexist_mode'] as bool? ?? false,
-    };
-  }
-
-  /// 检查是否启用overlay窗口
-  Future<bool> isOverlayWindowEnabled() async {
-    final data = await _readData();
-    return data['enable_overlay_window'] as bool? ?? false;
-  }
-
-  /// 设置overlay窗口启用状态
-  Future<void> setOverlayWindowEnabled(bool enabled) async {
-    await saveOverlayWindowConfig(
-      enableOverlayWindow: enabled,
-      coexistMode: await isCoexistModeEnabled(),
-    );
-  }
-
-  /// 检查是否启用共存模式
-  Future<bool> isCoexistModeEnabled() async {
-    final data = await _readData();
-    return data['coexist_mode'] as bool? ?? false;
-  }
-
-  /// 设置共存模式
-  Future<void> setCoexistModeEnabled(bool enabled) async {
-    await saveOverlayWindowConfig(
-      enableOverlayWindow: await isOverlayWindowEnabled(),
-      coexistMode: enabled,
-    );
-  }
-
   // 添加大小变化回调
   void addSizeChangeCallback(SizeChangeCallback callback) {
     _sizeChangeCallbacks.add(callback);
@@ -542,27 +467,6 @@ class FloatingBallManager {
         callback(newScale);
       } catch (e) {
         debugPrint('Error in size change callback: $e');
-      }
-    }
-  }
-
-  // 添加 Overlay 窗口大小变化回调
-  void addOverlaySizeChangeCallback(SizeChangeCallback callback) {
-    _overlaySizeChangeCallbacks.add(callback);
-  }
-
-  // 移除 Overlay 窗口大小变化回调
-  void removeOverlaySizeChangeCallback(SizeChangeCallback callback) {
-    _overlaySizeChangeCallbacks.remove(callback);
-  }
-
-  // 通知所有 Overlay 窗口大小变化回调
-  void _notifyOverlaySizeChange(double newScale) {
-    for (var callback in _overlaySizeChangeCallbacks) {
-      try {
-        callback(newScale);
-      } catch (e) {
-        debugPrint('Error in overlay size change callback: $e');
       }
     }
   }
