@@ -92,7 +92,13 @@ class FloatingBallService {
 
   /// 通知悬浮球大小变化
   void notifySizeChange(double scale) {
+    debugPrint('🎯 FloatingBallService 通知大小变化: $scale');
     _sizeChangeController.add(scale);
+
+    // 强制重新构建悬浮球
+    if (_overlayEntry != null) {
+      _overlayEntry!.markNeedsBuild();
+    }
   }
 
   /// 更新悬浮球位置

@@ -96,6 +96,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
+          // 界面设置
+          Text(
+            '界面设置',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.language),
             title: Text(SettingsScreenLocalizations.of(context).languageTitle),
@@ -116,6 +126,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const Divider(),
+
+          // 数据管理
+          Text(
+            '数据管理',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.upload),
             title: Text(
@@ -197,6 +218,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           const Divider(),
+
+          // 应用设置
+          Text(
+            '应用设置',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          const SizedBox(height: 8),
           FutureBuilder<bool>(
             future: FloatingBallManager().isEnabled(),
             builder: (context, snapshot) {
@@ -227,7 +259,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
-          const Divider(),
           ListTile(
             leading: const Icon(Icons.schedule),
             title: Text(
@@ -238,7 +269,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             onTap: _backupService.showBackupScheduleDialog,
           ),
-          const Divider(),
           ListTile(
             leading: const Icon(Icons.play_circle),
             title: Text(
@@ -257,7 +287,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   }),
             ),
           ),
-          const Divider(),
           ListTile(
             leading: const Icon(Icons.system_update),
             title: Text(
@@ -284,6 +313,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             onTap: _controller.checkForUpdates,
           ),
+          const Divider(),
+
+          // 开发者测试
+          Text(
+            '开发者测试',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.code),
             title: const Text('JS Console'),
@@ -328,6 +369,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           const Divider(),
+
+          // 关于
+          Text(
+            '关于',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.info),
             title: Text(AppLocalizations.of(context)!.aboutTitle),

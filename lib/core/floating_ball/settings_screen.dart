@@ -23,6 +23,9 @@ class _FloatingBallSettingsScreenState
   bool _coexistMode = false;
   final Map<FloatingBallGesture, String?> _selectedActions = {};
 
+  // Overlay 窗口悬浮球大小比例
+  double _overlaySizeScale = 1.0;
+
   // 从FloatingBallManager获取预定义动作列表
   List<String> get _availableActions => _manager.getAllPredefinedActionTitles();
 
@@ -44,6 +47,9 @@ class _FloatingBallSettingsScreenState
     final enableOverlayWindow = overlayConfig['enableOverlayWindow'] as bool;
     final coexistMode = overlayConfig['coexistMode'] as bool;
 
+    // 加载 Overlay 窗口悬浮球大小
+    final overlayScale = await _manager.getOverlaySizeScale();
+
     // 加载当前设置的动作
     for (var gesture in FloatingBallGesture.values) {
       final actionTitle = _manager.getActionTitle(gesture);
@@ -56,6 +62,7 @@ class _FloatingBallSettingsScreenState
         _isEnabled = enabled;
         _enableOverlayWindow = enableOverlayWindow;
         _coexistMode = coexistMode;
+        _overlaySizeScale = overlayScale;
       });
     }
   }
@@ -151,6 +158,31 @@ class _FloatingBallSettingsScreenState
                           }
                         },
                       ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Overlay 悬浮球大小设置
+                  Row(
+                    children: [
+                      Text('小'),
+                      Expanded(
+                        child: Slider(
+                          value: _overlaySizeScale,
+                          min: 0.5,
+                          max: 1.5,
+                          divisions: 10,
+                          label: '${(_overlaySizeScale * 100).round()}%',
+                          onChanged: (value) {
+                            setState(() {
+                              _overlaySizeScale = value;
+                            });
+                            _manager.saveOverlaySizeScale(value);
+                          },
+                        ),
+                      ),
+                      Text('大'),
                     ],
                   ),
 

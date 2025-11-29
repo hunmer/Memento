@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import '../adapters/floating_ball_platform_adapter.dart';
 import '../models/floating_ball_gesture.dart';
 import '../constants/overlay_window_constants.dart';
+import '../floating_ball_manager.dart';
 
 /// 可复用的悬浮球组件
 ///
@@ -77,7 +78,6 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
   Offset? _lastLongPressDragUpdate;
   Offset? _panStartPosition;
   DateTime? _panStartTime;
-  final double _sizeScale = 1.0;
   bool _pointerDown = false;
   final GlobalKey _ballKey = GlobalKey();
   Size _currentWindowSize = const Size(
@@ -98,10 +98,22 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
   static Offset? _persistentPosition;
   static bool _shouldResetPosition = false;
 
+  // 大小相关
+  double _sizeScale = 1.0;
+  bool _sizeLoaded = false;
+
   @override
   void initState() {
     super.initState();
     _initialize();
+
+    // 注册大小变化回调
+    final manager = FloatingBallManager();
+    if (widget.isInOverlay) {
+      manager.addOverlaySizeChangeCallback(_onSizeChanged);
+    } else {
+      manager.addSizeChangeCallback(_onSizeChanged);
+    }
   }
 
   Future<void> _initialize() async {
@@ -111,6 +123,7 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
 
     await _adapter.initialize();
 
+    await _loadSizeScale();
     _initializePosition();
     _initializeAnimations();
     _initializeOptionBalls();
@@ -171,9 +184,12 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
   /// 确保位置在有效范围内
   Offset _clampPosition(Offset position) {
     final screenSize = _effectiveScreenSize();
+    // 确保屏幕尺寸有效，避免出现0.0的情况
+    final safeWidth = screenSize.width > 0 ? screenSize.width : 400.0;
+    final safeHeight = screenSize.height > 0 ? screenSize.height : 400.0;
     return Offset(
-      position.dx.clamp(0, screenSize.width - _currentSize),
-      position.dy.clamp(0, screenSize.height - _currentSize),
+      position.dx.clamp(0, safeWidth - _currentSize),
+      position.dy.clamp(0, safeHeight - _currentSize),
     );
   }
 
@@ -270,7 +286,30 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
     _longPressTimer?.cancel();
     _expandController?.dispose();
     _adapter.dispose();
+
+    // 移除大小变化回调
+    final manager = FloatingBallManager();
+    if (widget.isInOverlay) {
+      manager.removeOverlaySizeChangeCallback(_onSizeChanged);
+    } else {
+      manager.removeSizeChangeCallback(_onSizeChanged);
+    }
+
     super.dispose();
+  }
+
+  // 大小变化回调
+  void _onSizeChanged(double newScale) {
+    if (!mounted || newScale == _sizeScale) return;
+
+    debugPrint('🎯 悬浮球大小变化回调: $_sizeScale -> $newScale');
+
+    setState(() {
+      _sizeScale = newScale;
+    });
+
+    // 通知父组件
+    widget.onSizeChanged?.call(newScale);
   }
 
   // 长按开始 - 仅应用内模式需要
@@ -476,7 +515,14 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('🎯 SharedFloatingBallWidget.build() - isLoading: $_isLoading, position: $_position, isInOverlay: ${widget.isInOverlay}');
+    // 在每次构建时检查大小配置是否有更新
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_sizeLoaded) {
+        _loadSizeScale();
+      }
+    });
+
+    debugPrint('🎯 SharedFloatingBallWidget.build() - isLoading: $_isLoading, position: $_position, isInOverlay: ${widget.isInOverlay}, sizeScale: $_sizeScale');
 
     if (_isLoading) {
       debugPrint('🎯 显示加载中状态');
@@ -504,7 +550,7 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
       );
     }
 
-    debugPrint('🎯 构建悬浮球，当前位置: $_position, 当前尺寸: $_currentSize');
+    debugPrint('🎯 构建悬浮球，当前位置: $_position, 当前尺寸: $_currentSize, 大小比例: $_sizeScale');
 
     return Stack(
       children: [
@@ -791,6 +837,48 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
       dx.clamp(0, math.max(0.0, windowSize.width - _currentSize)),
       dy.clamp(0, math.max(0.0, windowSize.height - _currentSize)),
     );
+  }
+
+  // 加载大小比例配置
+  Future<void> _loadSizeScale() async {
+    if (_sizeLoaded) return;
+
+    try {
+      final manager = FloatingBallManager();
+      final scale = widget.isInOverlay
+          ? await manager.getOverlaySizeScale()
+          : await manager.getSizeScale();
+      if (mounted) {
+        setState(() {
+          _sizeScale = scale;
+          _sizeLoaded = true;
+        });
+      }
+      debugPrint('🎯 加载${widget.isInOverlay ? 'Overlay' : '应用内'}悬浮球大小比例: $_sizeScale');
+    } catch (e) {
+      debugPrint('🎯 加载悬浮球大小比例失败: $e');
+      // 使用默认大小
+      if (mounted) {
+        setState(() {
+          _sizeScale = 1.0;
+          _sizeLoaded = true;
+        });
+      }
+    }
+  }
+
+  // 更新大小比例
+  void _updateSizeScale(double newScale) {
+    if (!mounted || newScale == _sizeScale) return;
+
+    setState(() {
+      _sizeScale = newScale;
+    });
+
+    debugPrint('🎯 更新悬浮球大小比例: $_sizeScale');
+
+    // 通知外部大小变化
+    widget.onSizeChanged?.call(newScale);
   }
 
   double _resolveOptionBallSize(Size screenSize) {

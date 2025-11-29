@@ -34,9 +34,12 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
   void initState() {
     super.initState();
 
-    // 监听大小变化（虽然SharedFloatingBallWidget内部处理，但保留接口以兼容现有服务）
+    // 监听大小变化并传递给SharedFloatingBallWidget
     _sizeSubscription = FloatingBallService().sizeChangeStream.listen((scale) {
-      // 大小变化由SharedFloatingBallWidget内部处理
+      // 通过setState触发SharedFloatingBallWidget重新构建以应用新的大小
+      if (mounted) {
+        setState(() {});
+      }
     });
 
     // 监听位置更新（虽然SharedFloatingBallWidget内部处理，但保留接口以兼容现有服务）

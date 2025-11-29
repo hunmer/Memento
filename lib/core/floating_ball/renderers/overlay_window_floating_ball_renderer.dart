@@ -41,17 +41,15 @@ class OverlayWindowFloatingBallRenderer extends BaseFloatingBallRenderer {
 
   @override
   Future<void> show(BuildContext context) async {
-    debugPrint('🎯 OverlayWindowFloatingBallRenderer.show() 开始');
-
     if (!_isInitialized) {
       debugPrint('初始化渲染器...');
       await initialize();
     }
 
-    if (isVisible()) {
-      debugPrint('悬浮球已经在显示中');
-      return;
-    }
+    // if (isVisible()) {
+    //   debugPrint('悬浮球已经在显示中');
+    //   return;
+    // }
 
     try {
       debugPrint('准备调用 FlutterOverlayWindow.showOverlay...');
@@ -75,7 +73,6 @@ class OverlayWindowFloatingBallRenderer extends BaseFloatingBallRenderer {
       debugPrint('✅ FlutterOverlayWindow.showOverlay() 调用成功');
 
       // 发送显示消息到overlay
-      debugPrint('发送显示消息到overlay...');
       await _sendOverlayMessage('show', {
         'config': config.toJson(),
         'rendererType': rendererType,

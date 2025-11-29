@@ -24,6 +24,9 @@ class ActionInfo {
   ActionInfo(this.title, this.callback);
 }
 
+/// 悬浮球大小变化回调
+typedef SizeChangeCallback = void Function(double newSize);
+
 /// 悬浮球管理器
 class FloatingBallManager {
   static final FloatingBallManager _instance = FloatingBallManager._internal();
@@ -45,6 +48,12 @@ class FloatingBallManager {
 
   // 写入锁，防止并发写入导致数据覆盖
   bool _isWriting = false;
+
+  // 大小变化回调列表
+  final List<SizeChangeCallback> _sizeChangeCallbacks = [];
+
+  // Overlay 窗口大小变化回调列表
+  final List<SizeChangeCallback> _overlaySizeChangeCallbacks = [];
 
   // 预定义的动作映射表
   static final Map<String, Function(BuildContext)> _predefinedActionCreators = {
@@ -199,6 +208,7 @@ class FloatingBallManager {
     return {
       'actions': {},
       'size_scale': 0.6,
+      'overlay_size_scale': 1.0,
       'position': {'x': 21.0, 'y': 99.0},
       'enabled': true,
     };
@@ -208,6 +218,7 @@ class FloatingBallManager {
   bool _isConfigValid(Map<String, dynamic> config) {
     return config.containsKey('actions') &&
         config.containsKey('size_scale') &&
+        config.containsKey('overlay_size_scale') &&
         config.containsKey('position') &&
         config.containsKey('enabled');
   }
@@ -218,6 +229,7 @@ class FloatingBallManager {
     return {
       'actions': config['actions'] ?? defaults['actions'],
       'size_scale': config['size_scale'] ?? defaults['size_scale'],
+      'overlay_size_scale': config['overlay_size_scale'] ?? defaults['overlay_size_scale'],
       'position': config['position'] ?? defaults['position'],
       'enabled': config['enabled'] ?? defaults['enabled'],
     };
@@ -328,6 +340,27 @@ class FloatingBallManager {
 
     // 通知悬浮球大小变化
     FloatingBallService().notifySizeChange(scale);
+
+    // 通知所有注册的回调
+    _notifySizeChange(scale);
+  }
+
+  // 获取 Overlay 窗口悬浮球大小比例
+  Future<double> getOverlaySizeScale() async {
+    await _ensureInitialized();
+    final data = await _readData();
+    return (data['overlay_size_scale'] as num?)?.toDouble() ?? 1.0;
+  }
+
+  // 保存 Overlay 窗口悬浮球大小比例
+  Future<void> saveOverlaySizeScale(double scale) async {
+    await _ensureInitialized();
+    final data = await _readData();
+    data['overlay_size_scale'] = scale;
+    await _writeDataSafe(data);
+
+    // 通知所有注册的回调
+    _notifyOverlaySizeChange(scale);
   }
 
   // 获取悬浮球启用状态
@@ -490,5 +523,47 @@ class FloatingBallManager {
       enableOverlayWindow: await isOverlayWindowEnabled(),
       coexistMode: enabled,
     );
+  }
+
+  // 添加大小变化回调
+  void addSizeChangeCallback(SizeChangeCallback callback) {
+    _sizeChangeCallbacks.add(callback);
+  }
+
+  // 移除大小变化回调
+  void removeSizeChangeCallback(SizeChangeCallback callback) {
+    _sizeChangeCallbacks.remove(callback);
+  }
+
+  // 通知所有大小变化回调
+  void _notifySizeChange(double newScale) {
+    for (var callback in _sizeChangeCallbacks) {
+      try {
+        callback(newScale);
+      } catch (e) {
+        debugPrint('Error in size change callback: $e');
+      }
+    }
+  }
+
+  // 添加 Overlay 窗口大小变化回调
+  void addOverlaySizeChangeCallback(SizeChangeCallback callback) {
+    _overlaySizeChangeCallbacks.add(callback);
+  }
+
+  // 移除 Overlay 窗口大小变化回调
+  void removeOverlaySizeChangeCallback(SizeChangeCallback callback) {
+    _overlaySizeChangeCallbacks.remove(callback);
+  }
+
+  // 通知所有 Overlay 窗口大小变化回调
+  void _notifyOverlaySizeChange(double newScale) {
+    for (var callback in _overlaySizeChangeCallbacks) {
+      try {
+        callback(newScale);
+      } catch (e) {
+        debugPrint('Error in overlay size change callback: $e');
+      }
+    }
   }
 }
