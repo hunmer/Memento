@@ -15,7 +15,8 @@
       "mcp__ide__getDiagnostics",
       "Bash(./gradlew:*)",
       "Bash(gradle:*)",
-      "Bash(r:*)"
+      "Bash(r:*)",
+      "Bash(flutter create:*)"
     ],
     "deny": [],
     "ask": []

@@ -361,6 +361,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.touch_app),
+            title: const Text('悬浮球设置'),
+            subtitle: const Text('管理系统级悬浮球功能'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/floating_ball');
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.picture_in_picture),
             title: const Text('悬浮窗测试'),
             trailing: const Icon(Icons.arrow_forward_ios),
