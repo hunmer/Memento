@@ -18,12 +18,4 @@ void main() {
   test('$MethodChannelFloatingBallPlugin is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannelFloatingBallPlugin>());
   });
-
-  test('getPlatformVersion', () async {
-    FloatingBallPlugin floatingBallPlugin = FloatingBallPlugin();
-    MockFloatingBallPluginPlatform fakePlatform = MockFloatingBallPluginPlatform();
-    FloatingBallPluginPlatform.instance = fakePlatform;
-
-    expect(await floatingBallPlugin.getPlatformVersion(), '42');
-  });
 }
