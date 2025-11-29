@@ -9,7 +9,7 @@ import 'package:Memento/screens/js_console/js_console_screen.dart';
 import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart';
 import 'package:Memento/screens/notification_test/notification_test_page.dart';
 import 'package:Memento/screens/super_cupertino_test_screen/super_cupertino_test_screen.dart';
-import 'package:Memento/screens/floating_ball_screen/floating_ball_screen.dart';
+import 'package:Memento/screens/floating_widget_screen/floating_widget_screen.dart';
 
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
