@@ -361,6 +361,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.widgets),
+            title: const Text('小组件配置'),
+            subtitle: const Text('配置和管理桌面小组件'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/widgets_config');
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.touch_app),
             title: const Text('悬浮球设置'),
             subtitle: const Text('管理系统级悬浮球功能'),

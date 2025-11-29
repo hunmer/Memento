@@ -75,6 +75,7 @@ import 'plugins/scripts_center/scripts_center_plugin.dart'; // 脚本中心插�
 import 'plugins/agent_chat/agent_chat_plugin.dart'; // Agent Chat插件
 import 'plugins/tts/tts_plugin.dart'; // TTS语音朗读插件
 import 'utils/image_utils.dart'; // 图片工具类
+import 'package:memento_widgets/memento_widgets.dart'; // memento_widgets 插件
 
 
 // 主页小组件注册
@@ -306,6 +307,15 @@ Future<void> _setupWidgetClickListener() async {
   if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
     debugPrint('跳过小组件点击监听器设置（当前平台不支持 home_widget 插件）');
     return;
+  }
+
+  // 初始化 memento_widgets 插件的 MyWidgetManager
+  try {
+    final widgetManager = MyWidgetManager();
+    await widgetManager.init(null); // Android 不需要 App Group ID
+    debugPrint('memento_widgets 插件初始化成功');
+  } catch (e) {
+    debugPrint('memento_widgets 插件初始化失败: $e');
   }
 
   // 初始化 HomeWidget (必须在监听前调用)
