@@ -14,7 +14,8 @@
       "WebSearch",
       "mcp__ide__getDiagnostics",
       "Bash(./gradlew:*)",
-      "Bash(gradle:*)"
+      "Bash(gradle:*)",
+      "Bash(r:*)"
     ],
     "deny": [],
     "ask": []
