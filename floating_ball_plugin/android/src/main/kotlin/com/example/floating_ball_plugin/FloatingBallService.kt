@@ -20,16 +20,21 @@ class FloatingBallService : Service() {
 
     companion object {
         var isRunning = false
-        private var eventSink: EventChannel.EventSink? = null
+        private var positionSink: EventChannel.EventSink? = null
+        private var buttonSink: EventChannel.EventSink? = null
         @Volatile
         private var instance: FloatingBallService? = null
 
-        fun setEventSink(sink: EventChannel.EventSink?) {
-            eventSink = sink
+        fun setPositionSink(sink: EventChannel.EventSink?) {
+            positionSink = sink
+        }
+
+        fun setButtonSink(sink: EventChannel.EventSink?) {
+            buttonSink = sink
         }
 
         fun sendPosition(x: Int, y: Int) {
-            eventSink?.success(mapOf("x" to x, "y" to y))
+            positionSink?.success(mapOf("x" to x, "y" to y))
         }
 
         /// 更新配置（静态方法，供插件主类调用）
@@ -57,7 +62,8 @@ class FloatingBallService : Service() {
     private var startX: Int = 0
     private var startY: Int = 0
     private var snapThreshold: Int = 50
-    private var subButtonCount: Int = 3 // 子按钮数量
+    private var buttonData: List<Map<String, Any>>? = null // 按钮数据数组
+    private var customImageBytes: ByteArray? = null // 持久化存储自定义图片
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -92,7 +98,8 @@ class FloatingBallService : Service() {
                 startX = (cfg["startX"] as? Double)?.toInt() ?: (screenWidth - ballSize)
                 startY = (cfg["startY"] as? Double)?.toInt() ?: (screenHeight / 2)
                 snapThreshold = (cfg["snapThreshold"] as? Double)?.toInt() ?: 50
-                subButtonCount = (cfg["subButtonCount"] as? Double)?.toInt() ?: 3
+                // 获取按钮数据数组
+                buttonData = cfg["buttonData"] as? List<Map<String, Any>>
             }
         }
 
@@ -106,12 +113,22 @@ class FloatingBallService : Service() {
     private fun initFloatingView() {
         // 创建悬浮球视图
         floatingView = ImageView(this).apply {
-            // 根据 iconName 设置图标
-            val iconResId = iconName?.let { name ->
-                resources.getIdentifier(name, "drawable", packageName)
-            } ?: android.R.drawable.ic_menu_add
-
-            setImageDrawable(ContextCompat.getDrawable(this@FloatingBallService, iconResId))
+            // 优先使用自定义图片
+            customImageBytes?.let { bytes ->
+                try {
+                    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    if (bitmap != null) {
+                        setImageBitmap(bitmap)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    // 还原到默认图标
+                    setDefaultIcon()
+                }
+            } ?: run {
+                // 没有自定义图片，使用默认图标
+                setDefaultIcon()
+            }
             setOnTouchListener(touchListener)
         }
 
@@ -131,6 +148,20 @@ class FloatingBallService : Service() {
         windowManager.addView(floatingView, params)
     }
 
+    /// 设置默认图标
+    private fun ImageView.setDefaultIcon() {
+        val iconResId = iconName?.let { name ->
+            resources.getIdentifier(name, "drawable", packageName)
+        } ?: android.R.drawable.ic_menu_add
+        setImageDrawable(ContextCompat.getDrawable(this@FloatingBallService, iconResId))
+    }
+
+    private var initialX: Int = 0
+    private var initialY: Int = 0
+    private var initialTouchX: Float = 0f
+    private var initialTouchY: Float = 0f
+    private var hasMoved = false // 标记是否发生移动
+
     private val touchListener = View.OnTouchListener { v, event ->
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -138,6 +169,7 @@ class FloatingBallService : Service() {
                 initialY = params!!.y
                 initialTouchX = event.rawX
                 initialTouchY = event.rawY
+                hasMoved = false
             }
             MotionEvent.ACTION_MOVE -> {
                 params!!.x = initialX + (event.rawX - initialTouchX).toInt()
@@ -146,15 +178,30 @@ class FloatingBallService : Service() {
 
                 // 发送位置更新
                 sendPosition(params!!.x, params!!.y)
+
+                // 检查是否发生了实质性移动
+                val deltaX = event.rawX - initialTouchX
+                val deltaY = event.rawY - initialTouchY
+                val distance = Math.sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())
+
+                if (distance > 10 && !hasMoved) {
+                    hasMoved = true
+                    // 如果正在展开，移动时关闭展开
+                    if (isExpanded) {
+                        closeExpandedButtons()
+                        isExpanded = false
+                    }
+                }
             }
             MotionEvent.ACTION_UP -> {
                 // 检查是否需要自动吸附
                 checkAndSnapToEdge()
 
-                // 判断是否为点击（移动距离小）
-                if (Math.abs(event.rawX - initialTouchX) < 10 && Math.abs(event.rawY - initialTouchY) < 10) {
+                // 判断是否为点击（移动距离小且之前没有移动）
+                if (!hasMoved && Math.abs(event.rawX - initialTouchX) < 10 && Math.abs(event.rawY - initialTouchY) < 10) {
                     toggleExpand()
                 }
+                hasMoved = false
             }
         }
         true
@@ -180,11 +227,6 @@ class FloatingBallService : Service() {
             sendPosition(params!!.x, params!!.y)
         }
     }
-
-    private var initialX: Int = 0
-    private var initialY: Int = 0
-    private var initialTouchX: Float = 0f
-    private var initialTouchY: Float = 0f
 
     // 展开/关闭多个按钮
     private fun toggleExpand() {
@@ -252,8 +294,14 @@ class FloatingBallService : Service() {
             adjustedRadius = minSpace.toInt()
         }
 
-        // 计算按钮数量（最多10个）
-        val buttonCount = subButtonCount.coerceIn(1, 10)
+        // 获取按钮数组，如果没有则使用默认按钮
+        val buttons = buttonData ?: listOf(
+            mapOf("title" to "按钮1", "icon" to "ic_menu_info_details"),
+            mapOf("title" to "按钮2", "icon" to "ic_menu_info_details"),
+            mapOf("title" to "按钮3", "icon" to "ic_menu_info_details")
+        )
+
+        val buttonCount = buttons.size
 
         // 计算角度
         val angleStep = if (isHalfCircle) {
@@ -263,20 +311,41 @@ class FloatingBallService : Service() {
         }
 
         // 创建圆形布局的按钮
-        for (i in 0 until buttonCount) {
-            val angle = startAngle + (i * angleStep)
+        buttons.forEachIndexed { index, button ->
+            val angle = startAngle + (index * angleStep)
             val radians = Math.toRadians(angle.toDouble())
 
             // 计算按钮位置
             val buttonX = ballX + (adjustedRadius * Math.cos(radians)).toInt()
             val buttonY = ballY + (adjustedRadius * Math.sin(radians)).toInt()
 
+            // 获取按钮图标和标题
+            val buttonIcon = button["icon"] as? String ?: "ic_menu_info_details"
+            val buttonTitle = button["title"] as? String ?: "按钮${index + 1}"
+            val buttonData = button["data"] as? Map<String, Any>
+
+            // 从资源中获取图标
+            val iconResId = resources.getIdentifier(buttonIcon, "drawable", packageName)
+
             val buttonView = ImageView(this).apply {
-                setImageDrawable(ContextCompat.getDrawable(this@FloatingBallService, android.R.drawable.ic_menu_info_details))
+                setImageDrawable(
+                    ContextCompat.getDrawable(
+                        this@FloatingBallService,
+                        if (iconResId != 0) iconResId else android.R.drawable.ic_menu_info_details
+                    )
+                )
                 setOnClickListener {
-                    Toast.makeText(this@FloatingBallService, "按钮 ${i + 1} 被点击", Toast.LENGTH_SHORT).show()
+                    // 通过EventChannel回传按钮点击事件
+                    val event = hashMapOf<String, Any>(
+                        "index" to index,
+                        "title" to buttonTitle,
+                        "data" to (buttonData ?: hashMapOf<String, Any>())
+                    )
+                    buttonSink?.success(event)
                     toggleExpand()
                 }
+                // 设置内容描述（无障碍）
+                contentDescription = buttonTitle
             }
 
             val buttonParams = WindowManager.LayoutParams(
@@ -306,6 +375,8 @@ class FloatingBallService : Service() {
         if (!::floatingView.isInitialized || !floatingView.isAttachedToWindow) {
             return
         }
+
+        var needsButtonRecreation = false
 
         // 更新配置参数
         config["size"]?.let {
@@ -340,15 +411,31 @@ class FloatingBallService : Service() {
             }
         }
 
-        // 更新子按钮数量
-        config["subButtonCount"]?.let { newCount ->
-            val count = (newCount as? Double)?.toInt() ?: 3
-            subButtonCount = count.coerceIn(1, 10)
+        // 更新按钮数据
+        config["buttonData"]?.let { newButtonData ->
+            val buttons = newButtonData as? List<Map<String, Any>>
+            if (buttons != null && buttons != buttonData) {
+                buttonData = buttons
+                needsButtonRecreation = true
+            }
+        }
+
+        // 如果按钮数据改变了，重新创建按钮
+        if (needsButtonRecreation) {
+            // 关闭现有按钮
+            closeExpandedButtons()
+            // 如果之前是展开状态，重新展开
+            if (isExpanded) {
+                showExpandedButtons()
+            }
         }
     }
 
     /// 内部图片更新方法
     private fun updateImageInternal(imageBytes: ByteArray) {
+        // 保存图片数据以供重启后恢复
+        customImageBytes = imageBytes
+
         if (!::floatingView.isInitialized || !floatingView.isAttachedToWindow) {
             return
         }

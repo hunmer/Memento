@@ -3,6 +3,31 @@ import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/services.dart';
 
+/// 悬浮球按钮数据
+class FloatingBallButtonData {
+  /// 按钮标题
+  final String title;
+  /// 按钮图标资源名称（android R.drawable 中的图标名）
+  final String icon;
+  /// 自定义数据，会在点击时回传
+  final Map<String, dynamic>? data;
+
+  const FloatingBallButtonData({
+    required this.title,
+    required this.icon,
+    this.data,
+  });
+
+  /// 转换为 Map 传递给原生端
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'icon': icon,
+      'data': data,
+    };
+  }
+}
+
 /// 悬浮球配置类
 class FloatingBallConfig {
   /// 图标资源名称（放在 android/app/src/main/res/drawable/ 目录）
@@ -15,8 +40,8 @@ class FloatingBallConfig {
   final int? startY;
   /// 靠近边缘的阈值（px），小于此值会吸附
   final int? snapThreshold;
-  /// 子按钮数量（最多10个）
-  final int? subButtonCount;
+  /// 子按钮数组（替代 subButtonCount）
+  final List<FloatingBallButtonData>? buttonData;
 
   const FloatingBallConfig({
     this.iconName,
@@ -24,7 +49,7 @@ class FloatingBallConfig {
     this.startX,
     this.startY,
     this.snapThreshold,
-    this.subButtonCount,
+    this.buttonData,
   });
 
   /// 转换为 Map 传递给原生端
@@ -35,7 +60,7 @@ class FloatingBallConfig {
       'startX': startX,
       'startY': startY,
       'snapThreshold': snapThreshold,
-      'subButtonCount': subButtonCount,
+      'buttonData': buttonData?.map((button) => button.toMap()).toList(),
     };
   }
 }
@@ -49,17 +74,43 @@ class FloatingBallPosition {
 
   factory FloatingBallPosition.fromMap(Map<String, dynamic> map) {
     return FloatingBallPosition(
-      map['x']?.toInt() ?? 0,
-      map['y']?.toInt() ?? 0,
+      (map['x'] as num?)?.toInt() ?? 0,
+      (map['y'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+/// 悬浮球按钮点击事件数据
+class FloatingBallButtonEvent {
+  /// 按钮索引
+  final int index;
+  /// 按钮标题
+  final String title;
+  /// 按钮自定义数据
+  final Map<String, dynamic>? data;
+
+  const FloatingBallButtonEvent({
+    required this.index,
+    required this.title,
+    this.data,
+  });
+
+  factory FloatingBallButtonEvent.fromMap(Map<String, dynamic> map) {
+    return FloatingBallButtonEvent(
+      index: (map['index'] as num?)?.toInt() ?? 0,
+      title: map['title']?.toString() ?? '',
+      data: map['data'] as Map<String, dynamic>?,
     );
   }
 }
 
 typedef FloatingBallPositionCallback = void Function(FloatingBallPosition position);
+typedef FloatingBallButtonCallback = void Function(FloatingBallButtonEvent event);
 
 class FloatingBallPlugin {
   static const MethodChannel _channel = MethodChannel('floating_ball_plugin');
-  static const EventChannel _eventChannel = EventChannel('floating_ball_plugin/events');
+  static const EventChannel _positionChannel = EventChannel('floating_ball_plugin/position');
+  static const EventChannel _buttonChannel = EventChannel('floating_ball_plugin/button');
 
   /// 启动悬浮球
   static Future<String?> startFloatingBall({
@@ -98,11 +149,21 @@ class FloatingBallPlugin {
 
   /// 监听位置变更
   static Stream<FloatingBallPosition> listenPositionChanges() {
-    return _eventChannel.receiveBroadcastStream().map(
-      (dynamic data) {
-        final map = data as Map<dynamic, dynamic>;
+    return _positionChannel.receiveBroadcastStream().cast<Map>().map(
+      (Map map) {
         return FloatingBallPosition.fromMap(
-          map.map((key, value) => MapEntry(key.toString(), value)),
+          map.map((key, value) => MapEntry(key.toString(), value as dynamic)),
+        );
+      },
+    );
+  }
+
+  /// 监听按钮点击事件
+  static Stream<FloatingBallButtonEvent> listenButtonEvents() {
+    return _buttonChannel.receiveBroadcastStream().cast<Map>().map(
+      (Map map) {
+        return FloatingBallButtonEvent.fromMap(
+          map.map((key, value) => MapEntry(key.toString(), value as dynamic)),
         );
       },
     );

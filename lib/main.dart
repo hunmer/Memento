@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
+import 'package:Memento/core/floating_ball/floating_widget_controller.dart';
 import 'package:Memento/core/services/shortcut_manager.dart';
 import 'package:Memento/core/notification_controller.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
@@ -241,6 +241,9 @@ void main() async {
     await SystemWidgetService.instance.initialize();
     await PluginWidgetSyncHelper.instance.syncAllPlugins();
 
+    // 恢复悬浮球状态（在权限检查之前）
+    await _restoreFloatingBallState();
+
     // 延迟备份服务初始化到Widget构建完成后
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final context = navigatorKey.currentContext;
@@ -422,6 +425,27 @@ void _handleWidgetClick(String url) {
     });
   } catch (e, stack) {
     debugPrint('处理小组件点击失败: $e');
+    debugPrint('堆栈: $stack');
+  }
+}
+
+/// 恢复悬浮球状态
+Future<void> _restoreFloatingBallState() async {
+  try {
+    // 仅在 Android 平台恢复悬浮球
+    if (!UniversalPlatform.isAndroid) {
+      debugPrint('跳过悬浮球恢复（非 Android 平台）');
+      return;
+    }
+
+    // 初始化悬浮球控制器
+    final controller = FloatingWidgetController();
+    await controller.initialize();
+    await controller.performAutoRestore();
+
+    debugPrint('悬浮球状态已恢复');
+  } catch (e, stack) {
+    debugPrint('恢复悬浮球状态失败: $e');
     debugPrint('堆栈: $stack');
   }
 }

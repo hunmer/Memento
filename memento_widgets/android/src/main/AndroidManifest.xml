@@ -1,0 +1,32 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.example.memento_widgets">
+
+  <application>
+    <!-- 文本小组件 -->
+    <receiver
+      android:name=".MyWidgetProvider"
+      android:exported="false"
+      android:label="文本小组件">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/text_widget_info" />
+    </receiver>
+
+    <!-- 图像小组件 -->
+    <receiver
+      android:name=".MyWidgetProvider"
+      android:exported="false"
+      android:label="图像小组件">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/image_widget_info" />
+    </receiver>
+  </application>
+</manifest>
+
