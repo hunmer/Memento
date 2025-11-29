@@ -94,6 +94,8 @@ dependencies:
   super_cupertino_navigation_bar: ^2.0.0  # Super Cupertino Navigation Bar
   floating_ball_plugin:
     path: ./floating_ball_plugin
+  memento_widgets:
+    path: ./memento_widgets
 
 dev_dependencies:
   flutter_test:

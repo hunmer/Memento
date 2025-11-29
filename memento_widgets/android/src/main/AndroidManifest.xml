@@ -4,7 +4,7 @@
   <application>
     <!-- 文本小组件 -->
     <receiver
-      android:name=".MyWidgetProvider"
+      android:name=".TextWidgetProvider"
       android:exported="false"
       android:label="文本小组件">
       <intent-filter>
@@ -17,7 +17,7 @@
 
     <!-- 图像小组件 -->
     <receiver
-      android:name=".MyWidgetProvider"
+      android:name=".ImageWidgetProvider"
       android:exported="false"
       android:label="图像小组件">
       <intent-filter>
