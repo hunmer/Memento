@@ -369,14 +369,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pushNamed(context, '/floating_ball');
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.picture_in_picture),
-            title: const Text('悬浮窗测试'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.pushNamed(context, '/overlay_test');
-            },
-          ),
           const Divider(),
 
           // 关于
