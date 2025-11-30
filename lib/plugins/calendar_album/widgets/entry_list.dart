@@ -62,6 +62,7 @@ class EntryList extends StatelessWidget {
   final Function(CalendarEntry) onTap;
   final Function(CalendarEntry) onEdit;
   final Function(CalendarEntry) onDelete;
+  final VoidCallback? onCreateNew;
 
   const EntryList({
     super.key,
@@ -69,6 +70,7 @@ class EntryList extends StatelessWidget {
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
+    this.onCreateNew,
   });
 
   @override
@@ -76,7 +78,34 @@ class EntryList extends StatelessWidget {
     final l10n = CalendarAlbumLocalizations.of(context);
 
     if (entries.isEmpty) {
-      return Center(child: Text(l10n.noEntries));
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              l10n.noEntries,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            if (onCreateNew != null) ...[
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: onCreateNew,
+                icon: const Icon(Icons.add),
+                label: const Text('新建日记'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
     }
 
     return ListView.builder(

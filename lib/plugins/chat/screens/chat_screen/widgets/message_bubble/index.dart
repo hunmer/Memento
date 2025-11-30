@@ -224,6 +224,12 @@ class _MessageBubbleState extends State<MessageBubble> {
           mainAxisAlignment:
               _isCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start,
           children: [
+            // 左侧复选框（当前用户的消息在多选模式下显示）
+            if (_isCurrentUser && widget.isMultiSelectMode)
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0, top: 12.0),
+                child: _buildCheckbox(context),
+              ),
             if (!_isCurrentUser && widget.showAvatar)
               MessageAvatar(
                 user: _currentMessage.user,
@@ -315,9 +321,41 @@ class _MessageBubbleState extends State<MessageBubble> {
               )
             else if (_isCurrentUser && !widget.showAvatar)
               const SizedBox(width: 0),
+            // 右侧复选框（其他用户的消息在多选模式下显示）
+            if (!_isCurrentUser && widget.isMultiSelectMode)
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0, top: 12.0),
+                child: _buildCheckbox(context),
+              ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildCheckbox(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: widget.isSelected
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.outline,
+          width: 2,
+        ),
+        color: widget.isSelected
+            ? Theme.of(context).colorScheme.primary
+            : Colors.transparent,
+      ),
+      child: widget.isSelected
+          ? Icon(
+              Icons.check,
+              size: 16,
+              color: Theme.of(context).colorScheme.onPrimary,
+            )
+          : null,
     );
   }
 }

@@ -11,7 +11,7 @@ import '../../../../../widgets/file_preview/index.dart';
 class MessageList extends StatefulWidget {
   final List<dynamic> items;
   final bool isMultiSelectMode;
-  final Set<String> selectedMessageIds;
+  final ValueNotifier<Set<String>> selectedMessageIds;
   final void Function(Message) onMessageEdit;
   final Future<void> Function(Message) onMessageDelete;
   final void Function(Message) onMessageCopy;
@@ -132,71 +132,76 @@ class _MessageListState extends State<MessageList> {
                     initiallyShowFixedSymbolDialog: true, // 直接显示固态符号编辑对话框
                   );
                 },
-                child: MessageBubble(
-                  message: item,
-                  isSelected: widget.selectedMessageIds.contains(item.id),
-                  isMultiSelectMode: widget.isMultiSelectMode,
-                  onEdit: () => widget.onMessageEdit(item),
-                  onDelete: () => widget.onMessageDelete(item),
-                  onCopy: () => widget.onMessageCopy(item),
-                  onSetFixedSymbol:
-                      (symbol) => widget.onSetFixedSymbol(item, symbol),
-                  onLongPress: null, // 移除重复的长按处理
-                  onTap:
-                      widget.isMultiSelectMode
-                          ? () => widget.onToggleMessageSelection(item.id)
-                          : () {
-                            if ((item.type == MessageType.file ||
-                                    item.type == MessageType.video ||
-                                    item.type == MessageType.image) &&
-                                item.metadata != null &&
-                                item.metadata![Message.metadataKeyFileInfo] !=
-                                    null) {
-                              try {
-                                final fileInfo = FileMessage.fromJson(
-                                  Map<String, dynamic>.from(
-                                    item.metadata![Message.metadataKeyFileInfo],
-                                  ),
-                                );
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => FilePreviewScreen(
-                                          filePath: fileInfo.filePath,
-                                          fileName: fileInfo.fileName,
-                                          mimeType:
-                                              fileInfo.mimeType ??
-                                              'application/octet-stream',
-                                          fileSize: fileInfo.fileSize,
+                child: ValueListenableBuilder<Set<String>>(
+                  valueListenable: widget.selectedMessageIds,
+                  builder: (context, selectedIds, _) {
+                    return MessageBubble(
+                      message: item,
+                      isSelected: selectedIds.contains(item.id),
+                      isMultiSelectMode: widget.isMultiSelectMode,
+                      onEdit: () => widget.onMessageEdit(item),
+                      onDelete: () => widget.onMessageDelete(item),
+                      onCopy: () => widget.onMessageCopy(item),
+                      onSetFixedSymbol:
+                          (symbol) => widget.onSetFixedSymbol(item, symbol),
+                      onLongPress: null, // 移除重复的长按处理
+                      onTap:
+                          widget.isMultiSelectMode
+                              ? () => widget.onToggleMessageSelection(item.id)
+                              : () {
+                                if ((item.type == MessageType.file ||
+                                        item.type == MessageType.video ||
+                                        item.type == MessageType.image) &&
+                                    item.metadata != null &&
+                                    item.metadata![Message.metadataKeyFileInfo] !=
+                                        null) {
+                                  try {
+                                    final fileInfo = FileMessage.fromJson(
+                                      Map<String, dynamic>.from(
+                                        item.metadata![Message.metadataKeyFileInfo],
+                                      ),
+                                    );
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => FilePreviewScreen(
+                                              filePath: fileInfo.filePath,
+                                              fileName: fileInfo.fileName,
+                                              mimeType:
+                                                  fileInfo.mimeType ??
+                                                  'application/octet-stream',
+                                              fileSize: fileInfo.fileSize,
+                                            ),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          ChatLocalizations.of(
+                                            context,
+                                          ).errorFilePreviewFailed,
                                         ),
-                                  ),
-                                );
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      ChatLocalizations.of(
-                                        context,
-                                      ).errorFilePreviewFailed,
-                                    ),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                  onAvatarTap:
-                      widget.onAvatarTap != null
-                          ? () => widget.onAvatarTap!(item)
-                          : null,
-                  showAvatar: widget.showAvatar,
-                  currentUserId: widget.currentUserId ?? '',
-                  isHighlighted:
-                      widget.shouldHighlight &&
-                      widget.highlightedMessage != null &&
-                      item.id == widget.highlightedMessage?.id,
-                  onToggleFavorite: () => widget.onToggleFavorite(item),
-                  onReplyTap: widget.onReplyTap,
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                      onAvatarTap:
+                          widget.onAvatarTap != null
+                              ? () => widget.onAvatarTap!(item)
+                              : null,
+                      showAvatar: widget.showAvatar,
+                      currentUserId: widget.currentUserId ?? '',
+                      isHighlighted:
+                          widget.shouldHighlight &&
+                          widget.highlightedMessage != null &&
+                          item.id == widget.highlightedMessage?.id,
+                      onToggleFavorite: () => widget.onToggleFavorite(item),
+                      onReplyTap: widget.onReplyTap,
+                    );
+                  },
                 ),
               ),
             ],

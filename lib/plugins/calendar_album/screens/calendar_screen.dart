@@ -116,12 +116,12 @@ class _CalendarScreenState extends State<CalendarScreen>
       child: Scaffold(
         appBar: _buildAppBar(context, l10n),
         body: _buildCalendarListView(calendarController, selectedDate),
-        floatingActionButton: _buildFloatingActionButton(
-          context,
-          calendarController,
-          tagController,
-          selectedDate,
-        ),
+        // floatingActionButton: _buildFloatingActionButton(
+        //   context,
+        //   calendarController,
+        //   tagController,
+        //   selectedDate,
+        // ),
       ),
     );
   }
@@ -154,8 +154,40 @@ class _CalendarScreenState extends State<CalendarScreen>
           },
           tooltip: '回到当前月份',
         ),
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () => _navigateToNewEntry(context),
+          tooltip: '新建日记',
+        ),
       ],
     );
+  }
+
+  void _navigateToNewEntry(BuildContext context) {
+    final calendarController = Provider.of<CalendarController>(
+      context,
+      listen: false,
+    );
+    final tagController = Provider.of<TagController>(context, listen: false);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => MultiProvider(
+              providers: [
+                ChangeNotifierProvider.value(value: calendarController),
+                ChangeNotifierProvider.value(value: tagController),
+              ],
+              child: EntryEditorScreen(
+                initialDate: calendarController.selectedDate,
+                isEditing: false,
+              ),
+            ),
+      ),
+    ).then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   Widget _buildCalendarListView(
@@ -202,79 +234,6 @@ class _CalendarScreenState extends State<CalendarScreen>
     );
   }
 
-  Widget _buildEntryList(
-    BuildContext context,
-    CalendarController calendarController,
-    TagController tagController,
-    DateTime selectedDate,
-    dynamic l10n,
-  ) {
-    return Expanded(
-      child: EntryList(
-        entries: calendarController.getEntriesForDate(selectedDate),
-        onTap: (entry) async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (context) => MultiProvider(
-                    providers: [
-                      ChangeNotifierProvider.value(value: calendarController),
-                      ChangeNotifierProvider.value(value: tagController),
-                    ],
-                    child: EntryDetailScreen(entry: entry),
-                  ),
-            ),
-          );
-          if (mounted) setState(() {});
-        },
-        onEdit: (entry) async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (context) => MultiProvider(
-                    providers: [
-                      ChangeNotifierProvider.value(value: calendarController),
-                      ChangeNotifierProvider.value(value: tagController),
-                    ],
-                    child: EntryEditorScreen(entry: entry, isEditing: true),
-                  ),
-            ),
-          );
-          if (mounted) {
-            calendarController.selectDate(selectedDate);
-            setState(() {});
-          }
-        },
-        onDelete:
-            (entry) => showDialog(
-              context: context,
-              builder:
-                  (context) => AlertDialog(
-                    title: Text(l10n.get('delete')),
-                    content: Text('${l10n.get('delete')} "${entry.title}"?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(l10n.get('cancel')),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          calendarController.deleteEntry(entry);
-                          Navigator.pop(context);
-                          setState(() {});
-                        },
-                        child: Text(l10n.get('delete')),
-                      ),
-                    ],
-                  ),
-            ),
-      ),
-    );
-  }
-
-  
   void _showEntryDrawer(
     BuildContext context,
     CalendarController calendarController,
@@ -332,6 +291,35 @@ class _CalendarScreenState extends State<CalendarScreen>
                                   style: Theme.of(context).textTheme.titleMedium
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context); // 关闭抽屉
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => MultiProvider(
+                                            providers: [
+                                              ChangeNotifierProvider.value(
+                                                value: calendarController,
+                                              ),
+                                              ChangeNotifierProvider.value(
+                                                value: tagController,
+                                              ),
+                                            ],
+                                            child: EntryEditorScreen(
+                                              initialDate: selectedDate,
+                                              isEditing: false,
+                                            ),
+                                          ),
+                                    ),
+                                  ).then((_) {
+                                    if (mounted) setState(() {});
+                                  });
+                                },
+                                icon: const Icon(Icons.add),
+                                tooltip: '新建日记',
                               ),
                               IconButton(
                                 onPressed: () => Navigator.pop(context),
@@ -432,18 +420,9 @@ class _CalendarScreenState extends State<CalendarScreen>
                   ],
                 ),
           ),
-    );
-  }
-
-  Widget _buildFloatingActionButton(
-    BuildContext context,
-    CalendarController calendarController,
-    TagController tagController,
-    DateTime selectedDate,
-  ) {
-    return FloatingActionButton(
-      onPressed: () async {
-        await Navigator.push(
+      onCreateNew: () {
+        Navigator.pop(context); // 关闭抽屉
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder:
@@ -458,13 +437,10 @@ class _CalendarScreenState extends State<CalendarScreen>
                   ),
                 ),
           ),
-        );
-        if (mounted) {
-          calendarController.selectDate(selectedDate);
-          setState(() {});
-        }
+        ).then((_) {
+          if (mounted) setState(() {});
+        });
       },
-      child: const Icon(Icons.add),
     );
   }
 
@@ -494,7 +470,6 @@ class _CalendarScreenState extends State<CalendarScreen>
     }
   }
 }
-
 
 /// 垂直日历视图（默认视图）
 class _VerticalCalendarView extends StatefulWidget {
@@ -534,12 +509,25 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
     _initializeMonths();
     _scrollController = ScrollController();
     _scrollController.addListener(_handleScroll);
+
+    // 监听 CalendarController 的变化，数据更新时清除缓存
+    widget.calendarController.addListener(_onCalendarDataChanged);
+  }
+
+  void _onCalendarDataChanged() {
+    // 清除所有缓存，强制重新加载数据
+    if (mounted) {
+      setState(() {
+        _cachedDayData.clear();
+      });
+    }
   }
 
   @override
   void dispose() {
     _scrollController.removeListener(_handleScroll);
     _scrollController.dispose();
+    widget.calendarController.removeListener(_onCalendarDataChanged);
     super.dispose();
   }
 

@@ -26,7 +26,7 @@ class ChatScreenController extends ChangeNotifier {
 
   List<Message> messages = [];
   bool isMultiSelectMode = false;
-  Set<String> selectedMessageIds = <String>{};
+  final ValueNotifier<Set<String>> selectedMessageIds = ValueNotifier(<String>{});
   DateTime? selectedDate;
   bool isLoading = false;
   static const int pageSize = 50;
@@ -214,18 +214,20 @@ class ChatScreenController extends ChangeNotifier {
   void toggleMultiSelectMode() {
     isMultiSelectMode = !isMultiSelectMode;
     if (!isMultiSelectMode) {
-      selectedMessageIds.clear();
+      selectedMessageIds.value = {};
     }
     notifyListeners();
   }
 
   void toggleMessageSelection(String messageId) {
-    if (selectedMessageIds.contains(messageId)) {
-      selectedMessageIds.remove(messageId);
+    final newSet = Set<String>.from(selectedMessageIds.value);
+    if (newSet.contains(messageId)) {
+      newSet.remove(messageId);
     } else {
-      selectedMessageIds.add(messageId);
+      newSet.add(messageId);
     }
-    notifyListeners();
+    selectedMessageIds.value = newSet;
+    // 不调用 notifyListeners()，只更新 selectedMessageIds
   }
 
   // 滚动到指定消息
@@ -458,6 +460,7 @@ class ChatScreenController extends ChangeNotifier {
     draftController.dispose();
     scrollController.dispose();
     focusNode.dispose();
+    selectedMessageIds.dispose();
     super.dispose();
   }
 }
