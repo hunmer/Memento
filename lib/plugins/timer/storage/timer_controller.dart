@@ -41,11 +41,7 @@ class TimerController {
 
   // 同步小组件数据
   Future<void> _syncWidget() async {
-    try {
-      await PluginWidgetSyncHelper.instance.syncTimer();
-    } catch (e) {
-      debugPrint('Failed to sync timer widget: $e');
-    }
+    await PluginWidgetSyncHelper.instance.syncTimer();
   }
 
   // 获取所有任务的分组名称（去重）

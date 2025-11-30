@@ -17,6 +17,7 @@ import 'screens/activity_settings_screen.dart';
 import 'services/activity_service.dart';
 import 'services/activity_notification_service.dart';
 import 'models/activity_record.dart';
+import 'widgets/activity_form.dart';
 import 'dart:io';
 
 class ActivityPlugin extends BasePlugin with JSBridgePlugin {
@@ -80,7 +81,10 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     await initialize();
 
     // 监听通知点击事件
-    eventManager.subscribe('activity_notification_tapped', _handleNotificationTapped);
+    eventManager.subscribe(
+      'activity_notification_tapped',
+      _handleNotificationTapped,
+    );
   }
 
   /// 处理通知点击事件
@@ -92,10 +96,11 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     if (navigator != null) {
       navigator.push(
         MaterialPageRoute(
-          builder: (context) => ActivityEditScreen(
-            activityService: activityService,
-            selectedDate: DateTime.now(),
-          ),
+          builder:
+              (context) => ActivityEditScreen(
+                activityService: activityService,
+                selectedDate: DateTime.now(),
+              ),
         ),
       );
       debugPrint('[ActivityPlugin] 活动编辑界面已打开');
@@ -118,7 +123,9 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
 
     // 自动恢复通知栏显示（如果之前是开启的）
     try {
-      final settings = await storage.read('activity/notification_settings.json');
+      final settings = await storage.read(
+        'activity/notification_settings.json',
+      );
       if (settings.isNotEmpty && settings['isEnabled'] == true) {
         debugPrint('[ActivityPlugin] 检测到之前开启了通知栏显示，正在自动恢复...');
         await enableActivityNotification();
@@ -129,7 +136,6 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
 
     // 注册 JS API
     await registerJSAPI();
-
   }
 
   @override
@@ -233,7 +239,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
           !params.containsKey('title')) {
         return jsonEncode({
           'success': false,
-          'error': '缺少必需参数: startTime, endTime, title'
+          'error': '缺少必需参数: startTime, endTime, title',
         });
       }
 
@@ -247,17 +253,19 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
 
       // 检查自定义ID是否已存在
       if (id != null && id.isNotEmpty) {
-        final activities = await _activityService.getActivitiesForDate(startTime);
-        final existingActivity = activities.where((a) => a.id == id).firstOrNull;
+        final activities = await _activityService.getActivitiesForDate(
+          startTime,
+        );
+        final existingActivity =
+            activities.where((a) => a.id == id).firstOrNull;
         if (existingActivity != null) {
           return jsonEncode({'success': false, 'error': '活动ID已存在: $id'});
         }
       }
 
       // 解析标签
-      final List<String> tags = params['tags'] != null
-          ? List<String>.from(params['tags'])
-          : [];
+      final List<String> tags =
+          params['tags'] != null ? List<String>.from(params['tags']) : [];
 
       final description = params['description'] as String?;
       final mood = params['mood'] as String?;
@@ -298,7 +306,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
           !params.containsKey('title')) {
         return jsonEncode({
           'success': false,
-          'error': '缺少必需参数: activityId, startTime, endTime, title'
+          'error': '缺少必需参数: activityId, startTime, endTime, title',
         });
       }
 
@@ -311,9 +319,8 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       final endTime = DateTime.parse(endTimeStr);
 
       // 解析标签
-      final List<String> tags = params['tags'] != null
-          ? List<String>.from(params['tags'])
-          : [];
+      final List<String> tags =
+          params['tags'] != null ? List<String>.from(params['tags']) : [];
 
       final description = params['description'] as String?;
       final mood = params['mood'] as String?;
@@ -354,7 +361,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       if (!params.containsKey('activityId') || !params.containsKey('date')) {
         return jsonEncode({
           'success': false,
-          'error': '缺少必需参数: activityId, date'
+          'error': '缺少必需参数: activityId, date',
         });
       }
 
@@ -428,22 +435,13 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   Future<String> _jsEnableNotification(Map<String, dynamic> params) async {
     try {
       if (!Platform.isAndroid) {
-        return jsonEncode({
-          'success': false,
-          'error': '仅支持Android平台'
-        });
+        return jsonEncode({'success': false, 'error': '仅支持Android平台'});
       }
 
       await _notificationService.enable();
-      return jsonEncode({
-        'success': true,
-        'message': '活动通知已启用'
-      });
+      return jsonEncode({'success': true, 'message': '活动通知已启用'});
     } catch (e) {
-      return jsonEncode({
-        'success': false,
-        'error': '启用通知失败: $e'
-      });
+      return jsonEncode({'success': false, 'error': '启用通知失败: $e'});
     }
   }
 
@@ -452,15 +450,9 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   Future<String> _jsDisableNotification(Map<String, dynamic> params) async {
     try {
       await _notificationService.disable();
-      return jsonEncode({
-        'success': true,
-        'message': '活动通知已禁用'
-      });
+      return jsonEncode({'success': true, 'message': '活动通知已禁用'});
     } catch (e) {
-      return jsonEncode({
-        'success': false,
-        'error': '禁用通知失败: $e'
-      });
+      return jsonEncode({'success': false, 'error': '禁用通知失败: $e'});
     }
   }
 
@@ -469,15 +461,9 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   Future<String> _jsGetNotificationStatus(Map<String, dynamic> params) async {
     try {
       final stats = _notificationService.getStats();
-      return jsonEncode({
-        'success': true,
-        'status': stats
-      });
+      return jsonEncode({'success': true, 'status': stats});
     } catch (e) {
-      return jsonEncode({
-        'success': false,
-        'error': '获取通知状态失败: $e'
-      });
+      return jsonEncode({'success': false, 'error': '获取通知状态失败: $e'});
     }
   }
 
@@ -520,9 +506,10 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   // 更新缓存
   void _updateCache(DateTime date, int? count, int? duration) {
     final today = DateTime(date.year, date.month, date.day);
-    final cachedDay = _cacheDate != null
-        ? DateTime(_cacheDate!.year, _cacheDate!.month, _cacheDate!.day)
-        : null;
+    final cachedDay =
+        _cacheDate != null
+            ? DateTime(_cacheDate!.year, _cacheDate!.month, _cacheDate!.day)
+            : null;
 
     // 如果是新的一天，重置缓存
     if (cachedDay == null || !cachedDay.isAtSameMomentAs(today)) {
@@ -571,7 +558,9 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     try {
       await _notificationService.enable();
       // 保存设置
-      await storage.write('activity/notification_settings.json', {'isEnabled': true});
+      await storage.write('activity/notification_settings.json', {
+        'isEnabled': true,
+      });
       debugPrint('[ActivityPlugin] 通知栏显示已启用并保存');
     } catch (e) {
       debugPrint('[ActivityPlugin] 启用活动通知失败: $e');
@@ -584,7 +573,9 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     try {
       await _notificationService.disable();
       // 保存设置
-      await storage.write('activity/notification_settings.json', {'isEnabled': false});
+      await storage.write('activity/notification_settings.json', {
+        'isEnabled': false,
+      });
       debugPrint('[ActivityPlugin] 通知栏显示已禁用并保存');
     } catch (e) {
       debugPrint('[ActivityPlugin] 禁用活动通知失败: $e');
@@ -604,9 +595,10 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     // 检查缓存是否是今天的
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final cachedDay = _cacheDate != null
-        ? DateTime(_cacheDate!.year, _cacheDate!.month, _cacheDate!.day)
-        : null;
+    final cachedDay =
+        _cacheDate != null
+            ? DateTime(_cacheDate!.year, _cacheDate!.month, _cacheDate!.day)
+            : null;
 
     if (cachedDay != null && cachedDay.isAtSameMomentAs(today)) {
       return _cachedTodayActivityCount;
@@ -625,9 +617,10 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     // 检查缓存是否是今天的
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final cachedDay = _cacheDate != null
-        ? DateTime(_cacheDate!.year, _cacheDate!.month, _cacheDate!.day)
-        : null;
+    final cachedDay =
+        _cacheDate != null
+            ? DateTime(_cacheDate!.year, _cacheDate!.month, _cacheDate!.day)
+            : null;
 
     if (cachedDay != null && cachedDay.isAtSameMomentAs(today)) {
       return _cachedTodayActivityDuration;
@@ -919,7 +912,8 @@ class _ActivityMainViewState extends State<ActivityMainView>
                     children: [
                       const ActivityTimelineScreen(),
                       ActivityStatisticsScreen(
-                        activityService: ActivityPlugin.instance.activityService,
+                        activityService:
+                            ActivityPlugin.instance.activityService,
                       ),
                     ],
                   ),
@@ -975,16 +969,56 @@ class _ActivityMainViewState extends State<ActivityMainView>
               elevation: 4,
               shape: const CircleBorder(),
               child: const Icon(Icons.add, color: Colors.white, size: 32),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder:
-                        (context) => ActivityEditScreen(
-                          activityService:
-                              ActivityPlugin.instance.activityService,
-                          selectedDate: DateTime.now(),
-                        ),
-                  ),
+              onPressed: () async {
+                final activityService = ActivityPlugin.instance.activityService;
+                final recentMoods = await activityService.getRecentMoods();
+                final recentTags = await activityService.getRecentTags();
+
+                // 获取今天的最后一个活动的结束时间
+                final today = DateTime.now();
+                final todayActivities = await activityService
+                    .getActivitiesForDate(today);
+                DateTime? lastActivityEndTime;
+                if (todayActivities.isNotEmpty) {
+                  // 按结束时间排序，获取最后一个活动
+                  todayActivities.sort(
+                    (a, b) => a.endTime.compareTo(b.endTime),
+                  );
+                  lastActivityEndTime = todayActivities.last.endTime;
+                }
+
+                if (!context.mounted) return;
+
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder:
+                      (context) => DraggableScrollableSheet(
+                        initialChildSize: 0.9,
+                        minChildSize: 0.5,
+                        maxChildSize: 0.95,
+                        expand: false,
+                        builder:
+                            (context, scrollController) => Container(
+                              decoration: BoxDecoration(
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor,
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(20),
+                                ),
+                              ),
+                              child: ActivityForm(
+                                selectedDate: today,
+                                recentMoods: recentMoods,
+                                recentTags: recentTags,
+                                lastActivityEndTime: lastActivityEndTime,
+                                onSave: (activity) async {
+                                  await activityService.saveActivity(activity);
+                                },
+                              ),
+                            ),
+                      ),
                 );
               },
             ),

@@ -6,10 +6,7 @@ class ScriptInputEditDialog extends StatefulWidget {
   /// 如果为null则为创建模式，否则为编辑模式
   final ScriptInput? input;
 
-  const ScriptInputEditDialog({
-    super.key,
-    this.input,
-  });
+  const ScriptInputEditDialog({super.key, this.input});
 
   @override
   State<ScriptInputEditDialog> createState() => _ScriptInputEditDialogState();
@@ -48,12 +45,15 @@ class _ScriptInputEditDialogState extends State<ScriptInputEditDialog> {
     final input = widget.input;
     _labelController = TextEditingController(text: input?.label ?? '');
     _keyController = TextEditingController(text: input?.key ?? '');
-    _descriptionController =
-        TextEditingController(text: input?.description ?? '');
-    _placeholderController =
-        TextEditingController(text: input?.placeholder ?? '');
-    _defaultValueController =
-        TextEditingController(text: input?.defaultValue?.toString() ?? '');
+    _descriptionController = TextEditingController(
+      text: input?.description ?? '',
+    );
+    _placeholderController = TextEditingController(
+      text: input?.placeholder ?? '',
+    );
+    _defaultValueController = TextEditingController(
+      text: input?.defaultValue?.toString() ?? '',
+    );
     _optionsController = TextEditingController(
       text: input?.options?.join(', ') ?? '',
     );
@@ -87,16 +87,18 @@ class _ScriptInputEditDialogState extends State<ScriptInputEditDialog> {
     if (_selectedType == 'select') {
       final optionsText = _optionsController.text.trim();
       if (optionsText.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('选择类型必须提供选项列表')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('选择类型必须提供选项列表')));
         return;
       }
-      options = optionsText
-          .split(',')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
-          .toList();
+      options =
+          optionsText
+              .replaceAll('，', ',')
+              .split(',')
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .toList();
     }
 
     // 处理默认值
@@ -123,12 +125,14 @@ class _ScriptInputEditDialogState extends State<ScriptInputEditDialog> {
       required: _required,
       defaultValue: defaultValue,
       options: options,
-      description: _descriptionController.text.trim().isEmpty
-          ? null
-          : _descriptionController.text.trim(),
-      placeholder: _placeholderController.text.trim().isEmpty
-          ? null
-          : _placeholderController.text.trim(),
+      description:
+          _descriptionController.text.trim().isEmpty
+              ? null
+              : _descriptionController.text.trim(),
+      placeholder:
+          _placeholderController.text.trim().isEmpty
+              ? null
+              : _placeholderController.text.trim(),
     );
 
     Navigator.of(context).pop(input);
@@ -219,8 +223,9 @@ class _ScriptInputEditDialogState extends State<ScriptInputEditDialog> {
                           if (value == null || value.trim().isEmpty) {
                             return '请输入变量名';
                           }
-                          if (!RegExp(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
-                              .hasMatch(value)) {
+                          if (!RegExp(
+                            r'^[a-zA-Z_][a-zA-Z0-9_]*$',
+                          ).hasMatch(value)) {
                             return '变量名只能包含字母、数字和下划线，且不能以数字开头';
                           }
                           return null;
@@ -236,18 +241,19 @@ class _ScriptInputEditDialogState extends State<ScriptInputEditDialog> {
                           prefixIcon: Icon(Icons.category),
                           border: OutlineInputBorder(),
                         ),
-                        items: _availableTypes.map((typeOption) {
-                          return DropdownMenuItem(
-                            value: typeOption.value,
-                            child: Row(
-                              children: [
-                                Icon(typeOption.icon, size: 20),
-                                const SizedBox(width: 8),
-                                Text(typeOption.label),
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                        items:
+                            _availableTypes.map((typeOption) {
+                              return DropdownMenuItem(
+                                value: typeOption.value,
+                                child: Row(
+                                  children: [
+                                    Icon(typeOption.icon, size: 20),
+                                    const SizedBox(width: 8),
+                                    Text(typeOption.label),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
                         onChanged: (value) {
                           setState(() {
                             _selectedType = value!;
@@ -324,9 +330,7 @@ class _ScriptInputEditDialogState extends State<ScriptInputEditDialog> {
                           });
                         },
                         title: const Text('必填参数'),
-                        subtitle: Text(
-                          _required ? '用户必须填写此参数' : '此参数可选',
-                        ),
+                        subtitle: Text(_required ? '用户必须填写此参数' : '此参数可选'),
                         secondary: Icon(
                           _required
                               ? Icons.error_outline
@@ -345,9 +349,7 @@ class _ScriptInputEditDialogState extends State<ScriptInputEditDialog> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.grey[100],
-                border: Border(
-                  top: BorderSide(color: Colors.grey[300]!),
-                ),
+                border: Border(top: BorderSide(color: Colors.grey[300]!)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,

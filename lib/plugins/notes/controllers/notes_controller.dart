@@ -344,10 +344,6 @@ class NotesController {
 
   // 同步小组件数据
   Future<void> _syncWidget() async {
-    try {
-      await PluginWidgetSyncHelper.instance.syncNotes();
-    } catch (e) {
-      debugPrint('Failed to sync notes widget: $e');
-    }
+    await PluginWidgetSyncHelper.instance.syncNotes();
   }
 }

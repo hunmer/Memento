@@ -4,6 +4,8 @@ import 'dart:async';
 import 'dart:math' as math;
 import '../adapters/floating_ball_platform_adapter.dart';
 import '../models/floating_ball_gesture.dart';
+import '../floating_ball_manager.dart';
+import '../floating_ball_service.dart';
 
 /// 可复用的悬浮球组件
 class SharedFloatingBallWidget extends StatefulWidget {
@@ -51,6 +53,7 @@ class SharedFloatingBallWidget extends StatefulWidget {
 class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
     with TickerProviderStateMixin {
   late FloatingBallPlatformAdapter _adapter;
+  final FloatingBallManager _manager = FloatingBallManager();
   Offset? _position;
   bool _isDragging = false;
   Timer? _longPressTimer;
@@ -63,13 +66,39 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
   bool _pointerDown = false;
   final GlobalKey _ballKey = GlobalKey();
 
-  // 大小相关（固定为1.0，不再动态调整）
-  static const double _fixedSizeScale = 1.0;
+  // 大小缩放（从配置加载）
+  double _sizeScale = 1.0;
+
+  // 监听大小和位置变化的订阅
+  StreamSubscription<double>? _sizeSubscription;
+  StreamSubscription<Offset>? _positionSubscription;
 
   @override
   void initState() {
     super.initState();
     _initialize();
+
+    // 监听大小变化
+    _sizeSubscription = FloatingBallService().sizeChangeStream.listen((scale) {
+      if (mounted && !_isDragging) {
+        // 只在非拖动状态下响应大小变化
+        setState(() {
+          _sizeScale = scale;
+        });
+      }
+    });
+
+    // 监听位置变化（重置位置）
+    _positionSubscription =
+        FloatingBallService().positionChangeStream.listen((position) async {
+      // 只在非拖动状态下响应位置变化（用于重置位置功能）
+      if (mounted && !_isDragging) {
+        final newPosition = await _manager.getPosition();
+        setState(() {
+          _position = _clampPosition(newPosition);
+        });
+      }
+    });
   }
 
   Future<void> _initialize() async {
@@ -79,6 +108,15 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
         FloatingBallAdapterFactory.create(isInOverlay: false);
 
     await _adapter.initialize();
+
+    // 加载大小缩放
+    final scale = await _manager.getSizeScale();
+
+    if (mounted) {
+      setState(() {
+        _sizeScale = scale;
+      });
+    }
 
     _initializePosition();
 
@@ -110,8 +148,8 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
 
   Future<void> _loadPositionFromConfig() async {
     try {
-      // TODO: 从配置管理器加载位置
-      final position = const Offset(21, 99); // 默认位置
+      // 从 FloatingBallManager 加载位置
+      final position = await _manager.getPosition();
 
       if (!mounted) return;
 
@@ -130,8 +168,9 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
         _isLoading = false;
       });
 
+      // 只在初始化时，如果位置被调整了才保存
       if (safePosition != position) {
-        widget.onPositionChanged?.call(safePosition);
+        await _manager.savePosition(safePosition);
       }
     } catch (e) {
       if (mounted) {
@@ -143,7 +182,7 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
     }
   }
 
-  double get _currentSize => widget.baseSize * _fixedSizeScale;
+  double get _currentSize => widget.baseSize * _sizeScale;
 
   /// 根据路径获取图标
   IconData _getIconFromPath(String iconPath) {
@@ -171,6 +210,8 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
   @override
   void dispose() {
     _longPressTimer?.cancel();
+    _sizeSubscription?.cancel();
+    _positionSubscription?.cancel();
     _adapter.dispose();
     super.dispose();
   }
@@ -192,11 +233,9 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
   // 显示子菜单（简化版）
   Future<void> _showSubmenu() async {
     if (_position == null) {
-      debugPrint('🎯 位置未初始化，无法显示子菜单');
       return;
     }
 
-    debugPrint('🎯 简化版显示子菜单');
     // 简化版：直接发送 tap 手势，主应用会处理子菜单显示
     widget.onGesture?.call(FloatingBallGesture.tap);
   }
@@ -240,7 +279,7 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
       _position = newPosition;
     });
 
-    widget.onPositionChanged?.call(newPosition);
+    // 拖动过程中不触发回调，避免频繁保存和重构
 
     // 检查指针是否移出悬浮球
     if (_pointerDown &&
@@ -277,6 +316,7 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
     if (_position == null) return;
 
     if (_isDragging && _canDrag) {
+      // 只在拖动结束时保存位置并触发回调
       widget.onPositionChanged?.call(_position!);
 
       if (_dragStartPosition != null) {
@@ -338,21 +378,13 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
 
   // 处理点击
   void _handleTap() {
-    debugPrint('🔥 _handleTap() called');
-
     // 执行tap手势动作
-    debugPrint('执行tap手势动作');
     widget.onGesture?.call(FloatingBallGesture.tap);
   }
 
   @override
   Widget build(BuildContext context) {
-    debugPrint(
-      '🎯 SharedFloatingBallWidget.build() - isLoading: $_isLoading, position: $_position',
-    );
-
     if (_isLoading) {
-      debugPrint('🎯 显示加载中状态');
       return const Positioned(
         left: 170, // (400-60)/2 = 170，在400x400窗口内居中
         top: 170,
@@ -365,7 +397,6 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
     }
 
     if (_position == null) {
-      debugPrint('🎯 位置为空，使用默认位置');
       return const Positioned(
         left: 170,
         top: 170,
@@ -376,8 +407,6 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
         ),
       );
     }
-
-    debugPrint('🎯 构建悬浮球，当前位置: $_position, 当前尺寸: $_currentSize');
 
     // 简化的构建：只显示主悬浮球，不再包含展开的选项球
     return Positioned(

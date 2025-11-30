@@ -518,9 +518,8 @@ class ChannelService {
     if (_channels[channelIndex].lastMessage?.id == message.id) {
       if (_channels[channelIndex].messages.isNotEmpty) {
         // 找出最新的消息
-        _channels[channelIndex].lastMessage = _channels[channelIndex].messages.reduce(
-          (curr, next) => curr.date.isAfter(next.date) ? curr : next,
-        );
+        _channels[channelIndex].lastMessage = _channels[channelIndex].messages
+            .reduce((curr, next) => curr.date.isAfter(next.date) ? curr : next);
       } else {
         _channels[channelIndex].lastMessage = null;
       }
@@ -693,10 +692,6 @@ class ChannelService {
 
   // 同步小组件数据
   Future<void> _syncWidget() async {
-    try {
-      await PluginWidgetSyncHelper.instance.syncChat();
-    } catch (e) {
-      debugPrint('Failed to sync chat widget: $e');
-    }
+    await PluginWidgetSyncHelper.instance.syncChat();
   }
 }

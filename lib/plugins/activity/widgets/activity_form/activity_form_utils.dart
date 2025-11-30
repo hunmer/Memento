@@ -46,7 +46,8 @@ TimeOfDay getInitialTime({
   }
 
   if (isStartTime) {
-    return TimeOfDay.fromDateTime(selectedDate);
+    // 如果没有上一个活动，从00:00开始
+    return const TimeOfDay(hour: 0, minute: 0);
   }
 
   // 如果是结束时间，确保不超过23:59

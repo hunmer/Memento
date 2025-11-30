@@ -72,9 +72,7 @@ class _ChannelDialogState extends State<ChannelDialog> {
   @override
   Widget build(BuildContext context) {
     final title =
-        widget.isEditMode
-            ? '编辑频道'
-            : (ChatLocalizations.of(context).newChannel);
+        widget.isEditMode ? '编辑频道' : (ChatLocalizations.of(context).newChannel);
 
     return AlertDialog(
       title: Text(title),
@@ -136,6 +134,7 @@ class _ChannelDialogState extends State<ChannelDialog> {
                   _groupController.text.isEmpty
                       ? []
                       : _groupController.text
+                          .replaceAll('，', ',')
                           .split(',')
                           .map((e) => e.trim())
                           .where((e) => e.isNotEmpty)

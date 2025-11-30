@@ -60,7 +60,8 @@ class _CheckinMainViewState extends State<CheckinMainView>
   void _scheduleBottomBarHeightMeasurement() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _bottomBarKey.currentContext != null) {
-        final RenderBox renderBox = _bottomBarKey.currentContext!.findRenderObject() as RenderBox;
+        final RenderBox renderBox =
+            _bottomBarKey.currentContext!.findRenderObject() as RenderBox;
         final newHeight = renderBox.size.height;
         if (_bottomBarHeight != newHeight) {
           setState(() {
@@ -349,11 +350,7 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
 
   // 同步小组件数据
   Future<void> _syncWidget() async {
-    try {
-      await PluginWidgetSyncHelper.instance.syncCheckin();
-    } catch (e) {
-      debugPrint('Failed to sync checkin widget: $e');
-    }
+    await PluginWidgetSyncHelper.instance.syncCheckin();
   }
 
   @override

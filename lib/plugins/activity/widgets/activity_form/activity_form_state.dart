@@ -48,7 +48,10 @@ class ActivityFormState extends State<ActivityFormWidget> {
               ),
               // 关闭按钮
               IconButton(
-                icon: Icon(Icons.close, color: isDark ? Colors.white : Colors.black),
+                icon: Icon(
+                  Icons.close,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
                 onPressed: () => Navigator.of(context).pop(),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -112,7 +115,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    // Duration Box
+                    // Duration Slider Section
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
@@ -122,20 +125,60 @@ class ActivityFormState extends State<ActivityFormWidget> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            l10n.duration,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
+                          // 标题和当前时长
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                l10n.duration,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                              Text(
+                                _calculateDurationString(context),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          // Slider
+                          SliderTheme(
+                            data: SliderThemeData(
+                              activeTrackColor: primaryColor,
+                              inactiveTrackColor: primaryColor.withOpacity(0.2),
+                              thumbColor: primaryColor,
+                              overlayColor: primaryColor.withOpacity(0.2),
+                              trackHeight: 4,
+                            ),
+                            child: Slider(
+                              min: 1,
+                              max: _getMaxDuration().toDouble(),
+                              value: _getCurrentDuration().toDouble().clamp(
+                                1.0,
+                                _getMaxDuration().toDouble(),
+                              ),
+                              divisions:
+                                  _getMaxDuration() > 1
+                                      ? _getMaxDuration() - 1
+                                      : 1,
+                              onChanged: (value) {
+                                _updateDurationFromSlider(value.toInt());
+                              },
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _calculateDurationString(context),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
+                          const SizedBox(height: 12),
+                          // 快捷时长按钮
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: _buildDurationButtons(primaryColor),
                             ),
                           ),
                         ],
@@ -176,14 +219,10 @@ class ActivityFormState extends State<ActivityFormWidget> {
                             hintText: appL10n.tags,
                             hintStyle: TextStyle(color: Colors.grey[400]),
                             border: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.grey[300]!,
-                              ),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
                             enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.grey[300]!,
-                              ),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
                             focusedBorder: UnderlineInputBorder(
                               borderSide: BorderSide(color: primaryColor),
@@ -241,9 +280,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
                                         isSelected
                                             ? primaryColor.withOpacity(0.2)
                                             : (isDark
-                                                ? primaryColor.withOpacity(
-                                                  0.1,
-                                                )
+                                                ? primaryColor.withOpacity(0.1)
                                                 : primaryColor.withOpacity(
                                                   0.1,
                                                 )),
@@ -446,6 +483,148 @@ class ActivityFormState extends State<ActivityFormWidget> {
     return '${hours}h ${minutes}m';
   }
 
+  /// 获取当前持续时间（分钟）
+  int _getCurrentDuration() {
+    final startDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      _startTime.hour,
+      _startTime.minute,
+    );
+    var endDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      _endTime.hour,
+      _endTime.minute,
+    );
+
+    if (endDateTime.isBefore(startDateTime)) {
+      endDateTime = endDateTime.add(const Duration(days: 1));
+    }
+
+    final duration = endDateTime.difference(startDateTime).inMinutes;
+    // 确保至少为1分钟
+    return duration > 0 ? duration : 1;
+  }
+
+  /// 获取最大持续时间（分钟）
+  /// 最大值为当前时间 - 开始时间，但不超过当天结束时间
+  int _getMaxDuration() {
+    final startDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      _startTime.hour,
+      _startTime.minute,
+    );
+
+    final now = DateTime.now();
+    final dayEnd = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      23,
+      59,
+    );
+
+    // 如果选择的日期是今天，则限制为当前时间
+    // 否则限制为当天结束时间
+    final maxEndTime =
+        widget.selectedDate.year == now.year &&
+                widget.selectedDate.month == now.month &&
+                widget.selectedDate.day == now.day
+            ? (now.isBefore(dayEnd) ? now : dayEnd)
+            : dayEnd;
+
+    final maxDuration = maxEndTime.difference(startDateTime).inMinutes;
+
+    // 确保最小值为1分钟
+    return maxDuration > 1 ? maxDuration : 1;
+  }
+
+  /// 从Slider更新持续时间
+  void _updateDurationFromSlider(int durationMinutes) {
+    final startDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      _startTime.hour,
+      _startTime.minute,
+    );
+
+    final newEndDateTime = startDateTime.add(
+      Duration(minutes: durationMinutes),
+    );
+
+    setState(() {
+      _endTime = TimeOfDay(
+        hour: newEndDateTime.hour,
+        minute: newEndDateTime.minute,
+      );
+      _syncDurationWithTimes();
+    });
+  }
+
+  /// 构建快捷时长按钮
+  List<Widget> _buildDurationButtons(Color primaryColor) {
+    // 定义常用时长（分钟）
+    final durations = [15, 30, 60, 90, 120, 180, 240, 300, 360, 480];
+
+    final maxDuration = _getMaxDuration();
+    final currentDuration = _getCurrentDuration();
+
+    return durations.where((duration) => duration <= maxDuration).map((
+      duration,
+    ) {
+      final isSelected = currentDuration == duration;
+      final hours = duration ~/ 60;
+      final minutes = duration % 60;
+
+      String label;
+      if (hours > 0 && minutes > 0) {
+        label = '${hours}h${minutes}m';
+      } else if (hours > 0) {
+        label = '${hours}h';
+      } else {
+        label = '${minutes}m';
+      }
+
+      return Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _updateDurationFromSlider(duration),
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color:
+                    isSelected ? primaryColor : primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color:
+                      isSelected ? primaryColor : primaryColor.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : primaryColor,
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }).toList();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -490,6 +669,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
   void _onTagsChanged() {
     final inputTags =
         _tagsController.text
+            .replaceAll('，', ',')
             .split(',')
             .map((tag) => tag.trim())
             .where((tag) => tag.isNotEmpty)
@@ -603,6 +783,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
     // 处理标签
     final inputTags =
         _tagsController.text
+            .replaceAll('，', ',')
             .split(',')
             .map((tag) => tag.trim())
             .where((tag) => tag.isNotEmpty)

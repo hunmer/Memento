@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/services/foreground_timer_service.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 
 class HabitTimerEventArgs extends EventArgs {
@@ -90,6 +91,8 @@ class TimerController {
   void clearTimerData(String habitId) {
     _timers[habitId]?.dispose();
     _timers.remove(habitId);
+    // 确保停止前台通知服务
+    ForegroundTimerService.stopService(id: habitId);
   }
 
   void updateTimerData(String habitId, Map<String, dynamic> data) {
@@ -138,7 +141,19 @@ class TimerState {
       if (_isDisposed) return;
       elapsedSeconds++;
       onUpdate(elapsedSeconds);
+      // 更新前台通知
+      _updateForegroundNotification();
     });
+
+    // 启动前台通知服务
+    ForegroundTimerService.startService(
+      id: habit.id,
+      name: habit.title,
+      elapsedSeconds: elapsedSeconds,
+      totalSeconds: isCountdown ? habit.durationMinutes * 60 : null,
+      isCountdown: isCountdown,
+    );
+
     EventManager.instance.broadcast(
       'habit_timer_started',
       HabitTimerEventArgs(
@@ -155,6 +170,10 @@ class TimerState {
     _isDisposed = true;
     _timer?.cancel();
     _timer = null;
+
+    // 停止前台通知服务
+    ForegroundTimerService.stopService(id: habit.id);
+
     EventManager.instance.broadcast(
       'habit_timer_stopped',
       HabitTimerEventArgs(
@@ -168,5 +187,16 @@ class TimerState {
 
   void dispose() {
     stop();
+  }
+
+  /// 更新前台通知
+  void _updateForegroundNotification() {
+    ForegroundTimerService.updateService(
+      id: habit.id,
+      name: habit.title,
+      elapsedSeconds: elapsedSeconds,
+      totalSeconds: isCountdown ? habit.durationMinutes * 60 : null,
+      isCompleted: false,
+    );
   }
 }

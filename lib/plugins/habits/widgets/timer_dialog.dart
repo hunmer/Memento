@@ -94,7 +94,7 @@ class _TimerDialogState extends State<TimerDialog> {
                 alignment: Alignment.centerRight,
                 child: IconButton(
                   icon: Icon(Icons.close, color: subTextColor),
-                  onPressed: () => _completeTimer(context), // Save and close
+                  onPressed: () => _closeDialog(context), // 仅关闭对话框，保持计时器运行
                 ),
               ),
 
@@ -270,6 +270,80 @@ class _TimerDialogState extends State<TimerDialog> {
                   ],
                 ),
               ),
+
+              const SizedBox(height: 24),
+
+              // Action Buttons Row
+              Row(
+                children: [
+                  // Cancel Button
+                  Expanded(
+                    child: SizedBox(
+                      height: 48,
+                      child: OutlinedButton(
+                        onPressed: () => _cancelTimer(context),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: isDark ? Colors.white70 : Colors.grey[700],
+                          side: BorderSide(
+                            color: isDark ? Colors.white24 : Colors.grey[300]!,
+                            width: 1.5,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.cancel_outlined, size: 22, color: isDark ? Colors.white70 : Colors.grey[700]),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Cancel',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white70 : Colors.grey[700],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Complete Button
+                  Expanded(
+                    child: SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () => _completeTimer(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _themeColor,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.check_circle, size: 22),
+                            SizedBox(width: 8),
+                            Text(
+                              'Complete',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -340,22 +414,118 @@ class _TimerDialogState extends State<TimerDialog> {
     });
   }
 
-  Future<void> _completeTimer(BuildContext context) async {
+  /// 仅关闭对话框，不停止计时器
+  void _closeDialog(BuildContext context) {
     _timer?.cancel();
 
-    final record = CompletionRecord(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      parentId: widget.habit.id,
-      date: DateTime.now(),
-      duration: _elapsed,
-      notes: _notesController.text,
+    // 保存当前状态（笔记和已过时间）
+    widget.controller.timerController.updateTimerData(widget.habit.id, {
+      'notes': _notesController.text,
+      'elapsedSeconds': _elapsed.inSeconds,
+      'isRunning': _isRunning,
+      'isCountdown': _isCountdown,
+    });
+
+    Navigator.pop(context, false); // false表示未完成
+  }
+
+  /// 取消计时器（不保存记录）
+  Future<void> _cancelTimer(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('取消计时'),
+        content: Text(
+          '确定要取消计时吗？\n'
+          '已计时: ${_formatDuration(_elapsed)}\n\n'
+          '⚠️ 本次计时记录将不会保存',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('继续计时'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('确定取消'),
+          ),
+        ],
+      ),
     );
 
-    final recordController =
-        (PluginManager.instance.getPlugin('habits') as HabitsPlugin?)
-            ?.getRecordController();
-    await recordController.saveCompletionRecord(widget.habit.id, record);
+    if (confirmed == true) {
+      _timer?.cancel();
 
-    Navigator.pop(context, true);
+      // 停止并清除计时器状态
+      widget.controller.timerController.stopTimer(widget.habit.id);
+      widget.controller.timerController.clearTimerData(widget.habit.id);
+
+      if (context.mounted) {
+        Navigator.pop(context, false); // false表示未完成
+      }
+    }
+  }
+
+  /// 完成计时并保存记录
+  Future<void> _completeTimer(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('完成计时'),
+        content: Text(
+          '确定要完成计时并保存记录吗？\n'
+          '已计时: ${_formatDuration(_elapsed)}\n'
+          '${_notesController.text.isNotEmpty ? '备注: ${_notesController.text}\n' : ''}\n'
+          '✅ 本次计时将保存到历史记录',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('继续调整'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+              foregroundColor: _themeColor,
+            ),
+            child: const Text('确定完成'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      _timer?.cancel();
+
+      // 1. 先保存记录（在触发停止事件之前）
+      final record = CompletionRecord(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        parentId: widget.habit.id,
+        date: DateTime.now(),
+        duration: _elapsed,
+        notes: _notesController.text,
+      );
+
+      final recordController =
+          (PluginManager.instance.getPlugin('habits') as HabitsPlugin?)
+              ?.getRecordController();
+      await recordController.saveCompletionRecord(widget.habit.id, record);
+
+      // 2. 然后停止计时器并清理前台通知服务（触发事件）
+      if (_isRunning) {
+        widget.controller.timerController.stopTimer(widget.habit.id);
+      } else {
+        // 即使暂停状态也要清理前台通知
+        widget.controller.timerController.clearTimerData(widget.habit.id);
+      }
+
+      // 3. 关闭对话框
+      if (context.mounted) {
+        Navigator.pop(context, true); // true表示已完成
+      }
+    }
   }
 }

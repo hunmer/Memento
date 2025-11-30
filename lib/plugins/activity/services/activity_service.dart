@@ -274,6 +274,7 @@ class ActivityService {
     try {
       await PluginWidgetSyncHelper.instance.syncActivity();
     } catch (e) {
+      // 静默处理小组件同步错误，不影响主要功能
       debugPrint('Failed to sync activity widget: $e');
     }
   }

@@ -186,7 +186,6 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
     // 加载排序偏好
     await _loadSortPreferences();
 
-
     // 注册 JS API（最后一步）
     await registerJSAPI();
   }
@@ -442,13 +441,21 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
     int count = 0;
     for (var warehouse in _warehouses) {
-      count += _countTodayUsageRecursively(warehouse.items, startOfDay, endOfDay);
+      count += _countTodayUsageRecursively(
+        warehouse.items,
+        startOfDay,
+        endOfDay,
+      );
     }
     return count;
   }
 
   // 递归统计今日使用记录（包含子物品）
-  int _countTodayUsageRecursively(List<GoodsItem> items, DateTime startOfDay, DateTime endOfDay) {
+  int _countTodayUsageRecursively(
+    List<GoodsItem> items,
+    DateTime startOfDay,
+    DateTime endOfDay,
+  ) {
     int count = 0;
     for (var item in items) {
       // 统计当前物品的今日使用记录
@@ -459,7 +466,11 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       }
       // 递归统计子物品
       if (item.subItems.isNotEmpty) {
-        count += _countTodayUsageRecursively(item.subItems, startOfDay, endOfDay);
+        count += _countTodayUsageRecursively(
+          item.subItems,
+          startOfDay,
+          endOfDay,
+        );
       }
     }
     return count;
@@ -594,7 +605,6 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   @override
   Map<String, Function> defineJSAPI() {
     return {
-
       // 仓库相关
       'getWarehouses': _jsGetWarehouses,
       'getWarehouse': _jsGetWarehouse,
@@ -649,12 +659,13 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   /// 支持分页参数: offset, count
   /// 返回: JSON数组，包含所有仓库信息（不含物品）
   Future<String> _jsGetWarehouses(Map<String, dynamic> params) async {
-    final warehousesJson = _warehouses.map((w) {
-      final json = w.toJson();
-      // 不返回物品列表，减少数据量
-      json.remove('items');
-      return json;
-    }).toList();
+    final warehousesJson =
+        _warehouses.map((w) {
+          final json = w.toJson();
+          // 不返回物品列表，减少数据量
+          json.remove('items');
+          return json;
+        }).toList();
 
     // 检查是否需要分页
     final int? offset = params['offset'];
@@ -704,7 +715,8 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       final int? colorValue = params['colorValue'];
 
       // 生成ID（如果没有提供）
-      String warehouseId = id ?? DateTime.now().millisecondsSinceEpoch.toString();
+      String warehouseId =
+          id ?? DateTime.now().millisecondsSinceEpoch.toString();
 
       // 检查ID是否已存在
       if (getWarehouse(warehouseId) != null) {
@@ -714,9 +726,10 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       final warehouse = Warehouse(
         id: warehouseId,
         title: title,
-        icon: iconCode != null
-            ? IconData(iconCode, fontFamily: 'MaterialIcons')
-            : Icons.inventory_2,
+        icon:
+            iconCode != null
+                ? IconData(iconCode, fontFamily: 'MaterialIcons')
+                : Icons.inventory_2,
         iconColor: colorValue != null ? Color(colorValue) : color,
       );
 
@@ -871,7 +884,8 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       }
 
       // 生成ID（如果没有提供）
-      data['id'] = data['id'] ?? DateTime.now().millisecondsSinceEpoch.toString();
+      data['id'] =
+          data['id'] ?? DateTime.now().millisecondsSinceEpoch.toString();
 
       // 检查ID是否已存在（跨所有仓库）
       final existingItem = findGoodsItemById(data['id']);
@@ -999,10 +1013,6 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
   // 同步小组件数据
   Future<void> _syncWidget() async {
-    try {
-      await PluginWidgetSyncHelper.instance.syncGoods();
-    } catch (e) {
-      debugPrint('Failed to sync goods widget: $e');
-    }
+    await PluginWidgetSyncHelper.instance.syncGoods();
   }
 }
