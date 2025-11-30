@@ -48,14 +48,16 @@ class RouteHistoryManager {
       final data = await _storage!.read(_storageKey);
       if (data != null) {
         // StorageManager.read() 返回的是已经解析过的数据（Map）
-        final json = data as Map<String, dynamic>;
+        // 使用 Map.from() 进行安全的类型转换
+        final json = Map<String, dynamic>.from(data as Map);
         final historyList = json['history'] as List<dynamic>?;
 
         if (historyList != null) {
           _history.clear();
           for (final item in historyList) {
             try {
-              final record = PageVisitRecord.fromJson(item as Map<String, dynamic>);
+              // 使用 Map.from() 进行安全的类型转换
+              final record = PageVisitRecord.fromJson(Map<String, dynamic>.from(item as Map));
               _history.add(record);
             } catch (e) {
               debugPrint('解析历史记录失败: $e');

@@ -17,15 +17,18 @@ class MobileJSEngine implements JSEngine {
     String? confirmText,
     String? cancelText,
     bool showCancel,
-  })? _onAlert;
+  })?
+  _onAlert;
   Future<dynamic> Function(
     String? title,
     String? content,
     List<Map<String, dynamic>> actions,
-  )? _onDialog;
+  )?
+  _onDialog;
 
   // 插件分析回调函数（由 OpenAI 插件注入）
-  Future<String> Function(String methodName, Map<String, dynamic> params)? _onPluginAnalysis;
+  Future<String> Function(String methodName, Map<String, dynamic> params)?
+  _onPluginAnalysis;
 
   // Location 回调函数（用于获取位置）
   Future<Map<String, dynamic>?> Function(String mode)? _onLocation;
@@ -47,19 +50,15 @@ class MobileJSEngine implements JSEngine {
       String? cancelText,
       bool showCancel,
     })
-        handler,
+    handler,
   ) {
     _onAlert = handler;
   }
 
   /// 设置 Dialog 回调
   void setDialogHandler(
-    Future<dynamic> Function(
-      String?,
-      String?,
-      List<Map<String, dynamic>>,
-    )
-        handler,
+    Future<dynamic> Function(String?, String?, List<Map<String, dynamic>>)
+    handler,
   ) {
     _onDialog = handler;
   }
@@ -295,10 +294,13 @@ class MobileJSEngine implements JSEngine {
         final message = config['message'] as String;
         // duration 可以是字符串 ('short', 'long') 或数字 (毫秒数)
         final durationValue = config['duration'];
-        final duration = durationValue is String ? durationValue : durationValue.toString();
+        final duration =
+            durationValue is String ? durationValue : durationValue.toString();
         final gravity = config['gravity'] as String;
 
-        print('[JS Bridge] Toast: $message (duration: $duration, gravity: $gravity)');
+        print(
+          '[JS Bridge] Toast: $message (duration: $duration, gravity: $gravity)',
+        );
 
         // 调用 Flutter Toast（需要在 UI 线程执行）
         _showToast(message, duration, gravity);
@@ -372,11 +374,7 @@ class MobileJSEngine implements JSEngine {
       } catch (e) {
         print('[JS Bridge] 插件分析错误: $e');
         // 返回错误
-        _returnPluginAnalysisResult(
-          data['callId'],
-          null,
-          error: '调用失败: $e',
-        );
+        _returnPluginAnalysisResult(data['callId'], null, error: '调用失败: $e');
       }
     });
 
@@ -451,8 +449,6 @@ class MobileJSEngine implements JSEngine {
 
       // 执行包装后的代码
       await _runtime.evaluateAsync(wrappedCode);
-      print('[JS Debug] 代码已提交执行，等待结果...');
-
       // 初始处理：密集执行微任务并处理待处理调用
       for (int i = 0; i < 50; i++) {
         // 处理待处理的 Promise 调用
@@ -566,16 +562,12 @@ class MobileJSEngine implements JSEngine {
 
       // 清理结果存储
       try {
-        _runtime.evaluate("delete globalThis.__EVAL_RESULTS__['$executionId'];");
+        _runtime.evaluate(
+          "delete globalThis.__EVAL_RESULTS__['$executionId'];",
+        );
       } catch (e) {
         // 忽略清理错误
       }
-
-      print('[JS Debug] ========== 最终结果 ==========');
-      print('[JS Debug] 轮询次数: ${retryCount + 1}');
-      print('[JS Debug] 结果内容: $resultStr');
-      print('[JS Debug] ====================================');
-
       // 处理超时
       if (resultStr == null) {
         return JSResult.error('执行超时：代码未在 5 秒内返回结果');
@@ -692,18 +684,16 @@ class MobileJSEngine implements JSEngine {
 
           try {
             _runtime.evaluate(
-              'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }'
+              'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
             );
 
             // 先将结果设置到临时全局变量（避免转义问题）
-            _runtime.evaluate(
-              'globalThis.__TEMP_RESULT__ = $jsonResult;'
-            );
+            _runtime.evaluate('globalThis.__TEMP_RESULT__ = $jsonResult;');
 
             // 然后移动到目标位置
             _runtime.evaluate(
               "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
-              "delete globalThis.__TEMP_RESULT__;"
+              "delete globalThis.__TEMP_RESULT__;",
             );
 
             print('[JS Bridge] ✓ 结果已写入: $resultKey');
@@ -715,16 +705,18 @@ class MobileJSEngine implements JSEngine {
 
         // 处理结果（同步或异步）
         if (result is Future) {
-          result.then((value) {
-            // 总是 JSON 编码,确保在 JavaScript 中能正确解析
-            final jsonResult = jsonEncode(value);
-            print('[JS Bridge] Future 结果: $jsonResult');
-            setJsResult(jsonResult);
-          }).catchError((e) {
-            print('[JS Bridge] Future 错误: $e');
-            final errorJson = jsonEncode({'error': e.toString()});
-            setJsResult(errorJson);
-          });
+          result
+              .then((value) {
+                // 总是 JSON 编码,确保在 JavaScript 中能正确解析
+                final jsonResult = jsonEncode(value);
+                print('[JS Bridge] Future 结果: $jsonResult');
+                setJsResult(jsonResult);
+              })
+              .catchError((e) {
+                print('[JS Bridge] Future 错误: $e');
+                final errorJson = jsonEncode({'error': e.toString()});
+                setJsResult(errorJson);
+              });
         } else {
           // 总是 JSON 编码,确保在 JavaScript 中能正确解析
           final jsonResult = jsonEncode(result);
@@ -742,7 +734,7 @@ class MobileJSEngine implements JSEngine {
           _runtime.evaluate('globalThis.__TEMP_RESULT__ = $errorJson;');
           _runtime.evaluate(
             "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
-            "delete globalThis.__TEMP_RESULT__;"
+            "delete globalThis.__TEMP_RESULT__;",
           );
         } catch (writeError) {
           print('[JS Bridge] 写入错误失败: $writeError');
@@ -796,7 +788,9 @@ class MobileJSEngine implements JSEngine {
           'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
         );
         // 将 JSON 字符串存储，JavaScript 端会用 JSON.parse 解析
-        _runtime.evaluate('globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(resultJson)};');
+        _runtime.evaluate(
+          'globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(resultJson)};',
+        );
 
         print('[JS Bridge] Alert 结果已返回: $resultJson');
       } catch (e) {
@@ -827,7 +821,9 @@ class MobileJSEngine implements JSEngine {
           'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
         );
         // 将 JSON 字符串存储，JavaScript 端会用 JSON.parse 解析
-        _runtime.evaluate('globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(resultJson)};');
+        _runtime.evaluate(
+          'globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(resultJson)};',
+        );
 
         print('[JS Bridge] Dialog 结果已返回: $resultJson');
       } catch (e) {
@@ -852,7 +848,9 @@ class MobileJSEngine implements JSEngine {
           'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
         );
         // 将 JSON 字符串存储，JavaScript 端会用 JSON.parse 解析
-        _runtime.evaluate('globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(resultJson)};');
+        _runtime.evaluate(
+          'globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(resultJson)};',
+        );
 
         print('[JS Bridge] Location 结果已返回: $resultJson');
       } catch (e) {
@@ -865,7 +863,9 @@ class MobileJSEngine implements JSEngine {
           'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
         );
         // 将 JSON 字符串存储，JavaScript 端会用 JSON.parse 解析
-        _runtime.evaluate('globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(errorJson)};');
+        _runtime.evaluate(
+          'globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(errorJson)};',
+        );
       }
     } else {
       print('[JS Bridge] Location 未设置处理器');
@@ -877,7 +877,9 @@ class MobileJSEngine implements JSEngine {
         'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
       );
       // 将 JSON 字符串存储，JavaScript 端会用 JSON.parse 解析
-      _runtime.evaluate('globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(errorJson)};');
+      _runtime.evaluate(
+        'globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(errorJson)};',
+      );
     }
   }
 
@@ -904,7 +906,11 @@ class MobileJSEngine implements JSEngine {
   }
 
   /// 返回插件分析结果给 JavaScript
-  void _returnPluginAnalysisResult(String callId, String? result, {String? error}) {
+  void _returnPluginAnalysisResult(
+    String callId,
+    String? result, {
+    String? error,
+  }) {
     try {
       final resultKey = '_callPluginAnalysis_callback_$callId';
 
@@ -920,9 +926,13 @@ class MobileJSEngine implements JSEngine {
         'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
       );
       // 将 JSON 字符串存储，JavaScript 端会用 JSON.parse 解析
-      _runtime.evaluate('globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(resultJson)};');
+      _runtime.evaluate(
+        'globalThis.__DART_RESULTS__["$resultKey"] = ${jsonEncode(resultJson)};',
+      );
 
-      print('[JS Bridge] 插件分析结果已返回: ${resultJson.substring(0, resultJson.length > 100 ? 100 : resultJson.length)}...');
+      print(
+        '[JS Bridge] 插件分析结果已返回: ${resultJson.substring(0, resultJson.length > 100 ? 100 : resultJson.length)}...',
+      );
     } catch (e) {
       print('[JS Bridge] 返回插件分析结果错误: $e');
     }

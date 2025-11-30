@@ -21,7 +21,9 @@ class _WidgetsConfigScreenState extends State<WidgetsConfigScreen> {
   void initState() {
     super.initState();
     _widgetManager.init(null);
-    _widgetClickSubscription = HomeWidget.widgetClicked.listen(_handleWidgetClick);
+    _widgetClickSubscription = HomeWidget.widgetClicked.listen(
+      _handleWidgetClick,
+    );
   }
 
   @override
@@ -54,7 +56,9 @@ class _WidgetsConfigScreenState extends State<WidgetsConfigScreen> {
       }
 
       // 指定文本小组件名称进行更新
-      final success = await _widgetManager.updateWidget(widgetName: 'TextWidgetProvider');
+      final success = await _widgetManager.updateWidget(
+        widgetName: 'TextWidgetProvider',
+      );
 
       setState(() {
         _statusMessage = success ? '文本小组件已更新!' : '更新失败';
@@ -86,11 +90,7 @@ class _WidgetsConfigScreenState extends State<WidgetsConfigScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.widgets,
-                  size: 80,
-                  color: Colors.white,
-                ),
+                const Icon(Icons.widgets, size: 80, color: Colors.white),
                 const SizedBox(height: 16),
                 Text(
                   _textValue,
@@ -117,7 +117,9 @@ class _WidgetsConfigScreenState extends State<WidgetsConfigScreen> {
       }
 
       // 指定图像小组件名称进行更新
-      final updated = await _widgetManager.updateWidget(widgetName: 'ImageWidgetProvider');
+      final updated = await _widgetManager.updateWidget(
+        widgetName: 'ImageWidgetProvider',
+      );
 
       setState(() {
         _statusMessage = updated ? '图像小组件已更新!' : '更新失败';
@@ -132,10 +134,7 @@ class _WidgetsConfigScreenState extends State<WidgetsConfigScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('小组件配置'),
-        elevation: 2,
-      ),
+      appBar: AppBar(title: const Text('小组件配置'), elevation: 2),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -148,10 +147,7 @@ class _WidgetsConfigScreenState extends State<WidgetsConfigScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
                   _statusMessage,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.blue.shade900,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.blue.shade900),
                   textAlign: TextAlign.center,
                 ),
               ),

@@ -42,10 +42,11 @@ class ChatWidgetService {
       await HomeWidget.saveWidgetData('channel_count', channels.length);
       await HomeWidget.saveWidgetData('last_update', DateTime.now().toIso8601String());
 
-      // 更新小组件
+      // 更新小组件（使用完整的包名）
       await HomeWidget.updateWidget(
-        androidName: 'ChatQuickWidgetProvider', // 对应 Android AppWidgetProvider 类名
-        iOSName: 'ChatQuickWidget', // 对应 iOS Widget 名称
+        name: 'ChatQuickWidget',
+        qualifiedAndroidName: 'github.hunmer.memento.widgets.quick.ChatQuickWidgetProvider',
+        iOSName: 'ChatQuickWidget',
       );
 
       _logger.info('频道小组件已更新: ${recentChannels.length} 个频道');

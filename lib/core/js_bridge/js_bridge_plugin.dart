@@ -65,7 +65,6 @@ mixin JSBridgePlugin on PluginBase {
       }
 
       await JSBridgeManager.instance.registerPlugin(this, apis);
-      print('[$id] 成功注册 ${apis.length} 个 JS API');
     } catch (e) {
       print('[$id] JS API 注册失败: $e');
     }
