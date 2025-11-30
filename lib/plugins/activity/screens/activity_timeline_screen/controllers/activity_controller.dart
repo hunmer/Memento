@@ -135,6 +135,34 @@ class ActivityController {
         endTime.hour,
         endTime.minute,
       );
+
+      // 智能调整开始时间，避免与已有活动重叠
+      // 确保已加载当天活动数据
+      if (activities.isEmpty) {
+        await loadActivities(selectedDate);
+      }
+
+      // 按开始时间排序活动
+      final sortedActivities = List<ActivityRecord>.from(activities)
+        ..sort((a, b) => a.startTime.compareTo(b.startTime));
+
+      // 查找与初始时间段重叠的最后一个活动
+      ActivityRecord? lastOverlappingActivity;
+      for (final activity in sortedActivities) {
+        // 如果活动结束时间 > 初始开始时间，说明可能重叠
+        if (activity.endTime.isAfter(initialStartTime)) {
+          // 检查是否真的重叠（活动开始时间 < 初始结束时间）
+          if (activity.startTime.isBefore(initialEndTime)) {
+            lastOverlappingActivity = activity;
+          }
+        }
+      }
+
+      // 如果找到重叠的活动，调整开始时间为该活动的结束时间
+      if (lastOverlappingActivity != null) {
+        initialStartTime = lastOverlappingActivity.endTime;
+        lastActivityEndTime = lastOverlappingActivity.endTime;
+      }
     } else {
       // 设置默认时间：开始时间为最后一个活动的结束时间，结束时间为当前时间
       final now = DateTime.now();
@@ -153,7 +181,8 @@ class ActivityController {
       }
 
       // 设置开始时间为最后一个活动的结束时间，如果没有活动则为当前时间前1小时
-      initialStartTime = lastActivityEndTime ?? now.subtract(const Duration(hours: 1));
+      initialStartTime =
+          lastActivityEndTime ?? now.subtract(const Duration(hours: 1));
 
       // 设置结束时间为当前时间
       initialEndTime = now;
@@ -166,43 +195,44 @@ class ActivityController {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.9, // 初始高度为屏幕高度的90%
-        maxChildSize: 0.95, // 最大高度为屏幕高度的95%
-        minChildSize: 0.5,  // 最小高度为屏幕高度的50%
-        expand: false,
-        builder: (context, scrollController) => Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
+      builder:
+          (context) => DraggableScrollableSheet(
+            initialChildSize: 0.9, // 初始高度为屏幕高度的90%
+            maxChildSize: 0.95, // 最大高度为屏幕高度的95%
+            minChildSize: 0.5, // 最小高度为屏幕高度的50%
+            expand: false,
+            builder:
+                (context, scrollController) => Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: ActivityForm(
+                    selectedDate: selectedDate,
+                    initialStartTime: initialStartTime,
+                    initialEndTime: initialEndTime,
+                    lastActivityEndTime: lastActivityEndTime,
+                    recentMoods: recentMoods,
+                    recentTags: recentTags,
+                    onSave: (ActivityRecord activity) async {
+                      await activityService.saveActivity(activity);
+                      if (activity.tags.isNotEmpty) {
+                        onTagsUpdated(activity.tags);
+                        await _updateRecentTags(activity.tags);
+                      }
+                      if (activity.mood != null && activity.mood!.isNotEmpty) {
+                        await _updateRecentMood(activity.mood!);
+                      }
+                      // 发送活动添加事件
+                      _notifyEvent('added', activity);
+                      await loadActivities(selectedDate);
+                    },
+                  ),
+                ),
           ),
-          child: ActivityForm(
-            selectedDate: selectedDate,
-            initialStartTime: initialStartTime,
-            initialEndTime: initialEndTime,
-            lastActivityEndTime: lastActivityEndTime,
-            recentMoods: recentMoods,
-            recentTags: recentTags,
-            onSave: (ActivityRecord activity) async {
-              await activityService.saveActivity(activity);
-              if (activity.tags.isNotEmpty) {
-                onTagsUpdated(activity.tags);
-                await _updateRecentTags(activity.tags);
-              }
-              if (activity.mood != null && activity.mood!.isNotEmpty) {
-                await _updateRecentMood(activity.mood!);
-              }
-              // 发送活动添加事件
-              _notifyEvent('added', activity);
-              await loadActivities(selectedDate);
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
-      ),
     );
   }
 
@@ -214,39 +244,43 @@ class ActivityController {
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (context) => DraggableScrollableSheet(
-          initialChildSize: 0.9, // 初始高度为屏幕高度的90%
-          maxChildSize: 0.95, // 最大高度为屏幕高度的95%
-          minChildSize: 0.5,  // 最小高度为屏幕高度的50%
-          expand: false,
-          builder: (context, scrollController) => Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
+        builder:
+            (context) => DraggableScrollableSheet(
+              initialChildSize: 0.9, // 初始高度为屏幕高度的90%
+              maxChildSize: 0.95, // 最大高度为屏幕高度的95%
+              minChildSize: 0.5, // 最小高度为屏幕高度的50%
+              expand: false,
+              builder:
+                  (context, scrollController) => Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
+                      ),
+                    ),
+                    child: ActivityForm(
+                      activity: activity,
+                      recentMoods: recentMoods,
+                      recentTags: recentTags,
+                      onSave: (ActivityRecord updatedActivity) async {
+                        await activityService.updateActivity(
+                          activity,
+                          updatedActivity,
+                        );
+                        if (updatedActivity.tags.isNotEmpty) {
+                          await _updateRecentTags(updatedActivity.tags);
+                        }
+                        if (updatedActivity.mood != null &&
+                            updatedActivity.mood!.isNotEmpty) {
+                          await _updateRecentMood(updatedActivity.mood!);
+                        }
+                        await loadActivities(activity.startTime);
+                      },
+                      selectedDate: activity.startTime,
+                    ),
+                  ),
             ),
-            child: ActivityForm(
-              activity: activity,
-              recentMoods: recentMoods,
-              recentTags: recentTags,
-              onSave: (ActivityRecord updatedActivity) async {
-                await activityService.updateActivity(activity, updatedActivity);
-                if (updatedActivity.tags.isNotEmpty) {
-                  await _updateRecentTags(updatedActivity.tags);
-                }
-                if (updatedActivity.mood != null &&
-                    updatedActivity.mood!.isNotEmpty) {
-                  await _updateRecentMood(updatedActivity.mood!);
-                }
-                await loadActivities(activity.startTime);
-                Navigator.of(context).pop();
-              },
-              selectedDate: activity.startTime,
-            ),
-          ),
-        ),
       );
     });
   }

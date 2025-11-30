@@ -514,10 +514,6 @@ class StoreController with ChangeNotifier {
 
   // 同步小组件数据
   Future<void> _syncWidget() async {
-    try {
-      await PluginWidgetSyncHelper.instance.syncStore();
-    } catch (e) {
-      debugPrint('Failed to sync store widget: $e');
-    }
+    await PluginWidgetSyncHelper.instance.syncStore();
   }
 }

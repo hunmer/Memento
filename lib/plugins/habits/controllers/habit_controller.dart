@@ -62,10 +62,7 @@ class HabitController {
       habits.add(habit);
     }
 
-    await storage.writeJson(
-      _habitsKey,
-      habits.map((h) => h.toMap()).toList(),
-    );
+    await storage.writeJson(_habitsKey, habits.map((h) => h.toMap()).toList());
 
     // 同步到小组件
     await _syncWidget();
@@ -74,10 +71,7 @@ class HabitController {
   Future<void> deleteHabit(String id) async {
     final habits = getHabits();
     habits.removeWhere((h) => h.id == id);
-    await storage.writeJson(
-      _habitsKey,
-      habits.map((h) => h.toMap()).toList(),
-    );
+    await storage.writeJson(_habitsKey, habits.map((h) => h.toMap()).toList());
 
     // 同步到小组件
     await _syncWidget();
@@ -99,10 +93,6 @@ class HabitController {
 
   // 同步小组件数据
   Future<void> _syncWidget() async {
-    try {
-      await PluginWidgetSyncHelper.instance.syncHabits();
-    } catch (e) {
-      debugPrint('Failed to sync habits widget: $e');
-    }
+    await PluginWidgetSyncHelper.instance.syncHabits();
   }
 }

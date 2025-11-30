@@ -429,10 +429,6 @@ class TaskController extends ChangeNotifier {
 
   // 同步小组件数据
   Future<void> _syncWidget() async {
-    try {
-      await PluginWidgetSyncHelper.instance.syncTodo();
-    } catch (e) {
-      debugPrint('Failed to sync todo widget: $e');
-    }
+    await PluginWidgetSyncHelper.instance.syncTodo();
   }
 }

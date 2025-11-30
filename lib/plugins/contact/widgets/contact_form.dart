@@ -41,7 +41,7 @@ class ContactFormState extends State<ContactForm> {
 
   List<CustomActivityEvent> _customActivityEvents = [];
   List<MapEntry<TextEditingController, TextEditingController>>
-      _customFieldControllers = [];
+  _customFieldControllers = [];
   List<MapEntry<TextEditingController, Color>> _customEventControllers = [];
 
   @override
@@ -63,22 +63,31 @@ class ContactFormState extends State<ContactForm> {
     _phoneController = TextEditingController(text: contact?.phone ?? '');
     _addressController = TextEditingController(text: contact?.address ?? '');
     _notesController = TextEditingController(text: contact?.notes ?? '');
-    _tagsController = TextEditingController(text: contact?.tags.join(', ') ?? '');
+    _tagsController = TextEditingController(
+      text: contact?.tags.join(', ') ?? '',
+    );
     _avatarUrl = contact?.avatar;
     _gender = contact?.gender;
 
     if (contact?.customFields != null) {
-      _customFieldControllers = contact!.customFields.entries
-          .map((e) => MapEntry(
-              TextEditingController(text: e.key),
-              TextEditingController(text: e.value)))
-          .toList();
+      _customFieldControllers =
+          contact!.customFields.entries
+              .map(
+                (e) => MapEntry(
+                  TextEditingController(text: e.key),
+                  TextEditingController(text: e.value),
+                ),
+              )
+              .toList();
     }
     if (contact?.customActivityEvents != null) {
       _customActivityEvents = List.from(contact!.customActivityEvents);
-      _customEventControllers = contact.customActivityEvents
-          .map((e) => MapEntry(TextEditingController(text: e.title), e.color))
-          .toList();
+      _customEventControllers =
+          contact.customActivityEvents
+              .map(
+                (e) => MapEntry(TextEditingController(text: e.title), e.color),
+              )
+              .toList();
     }
   }
 
@@ -103,24 +112,35 @@ class ContactFormState extends State<ContactForm> {
   void saveContact() {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final name = '${_firstNameController.text} ${_lastNameController.text}'.trim();
-      final tags = _tagsController.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
-      
+      final name =
+          '${_firstNameController.text} ${_lastNameController.text}'.trim();
+      final tags =
+          _tagsController.text
+              .replaceAll('，', ',')
+              .split(',')
+              .map((s) => s.trim())
+              .where((s) => s.isNotEmpty)
+              .toList();
+
       final customFields = {
         for (var entry in _customFieldControllers)
-          if(entry.key.text.isNotEmpty)
-            entry.key.text: entry.value.text
+          if (entry.key.text.isNotEmpty) entry.key.text: entry.value.text,
       };
 
       final customEvents = <CustomActivityEvent>[];
-      for(int i=0; i < _customEventControllers.length; i++){
-        if(_customEventControllers[i].key.text.isNotEmpty) {
-           final id = i < _customActivityEvents.length ? _customActivityEvents[i].id : const Uuid().v4();
-           customEvents.add(CustomActivityEvent(
-            id: id,
-            title: _customEventControllers[i].key.text,
-            color: _customEventControllers[i].value,
-           ));
+      for (int i = 0; i < _customEventControllers.length; i++) {
+        if (_customEventControllers[i].key.text.isNotEmpty) {
+          final id =
+              i < _customActivityEvents.length
+                  ? _customActivityEvents[i].id
+                  : const Uuid().v4();
+          customEvents.add(
+            CustomActivityEvent(
+              id: id,
+              title: _customEventControllers[i].key.text,
+              color: _customEventControllers[i].value,
+            ),
+          );
         }
       }
 
@@ -143,15 +163,16 @@ class ContactFormState extends State<ContactForm> {
       widget.onSave(contact);
     }
   }
-  
+
   void _pickAvatar() async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => const ImagePickerDialog(
-        saveDirectory: 'contacts/images',
-        enableCrop: true,
-        cropAspectRatio: 1 / 1,
-      ),
+      builder:
+          (context) => const ImagePickerDialog(
+            saveDirectory: 'contacts/images',
+            enableCrop: true,
+            cropAspectRatio: 1 / 1,
+          ),
     );
 
     if (result != null && result['url'] != null) {
@@ -175,13 +196,26 @@ class ContactFormState extends State<ContactForm> {
               const SizedBox(height: 24),
               _buildGenderPicker(),
               const SizedBox(height: 24),
-              _buildTextFieldWithIcon(_phoneController, 'Phone', Icons.add_circle),
+              _buildTextFieldWithIcon(
+                _phoneController,
+                'Phone',
+                Icons.add_circle,
+              ),
               const SizedBox(height: 16),
               _buildNotesField(),
               const SizedBox(height: 16),
-              _buildTextFieldWithIcon(_tagsController, 'Add Tags (e.g., Work, Family)', null, iconOnLeft: false),
+              _buildTextFieldWithIcon(
+                _tagsController,
+                'Add Tags (e.g., Work, Family)',
+                null,
+                iconOnLeft: false,
+              ),
               const SizedBox(height: 16),
-              _buildTextFieldWithIcon(_addressController, 'Address', Icons.add_circle),
+              _buildTextFieldWithIcon(
+                _addressController,
+                'Address',
+                Icons.add_circle,
+              ),
               const SizedBox(height: 24),
               _buildCustomEventsSection(),
               const SizedBox(height: 24),
@@ -203,20 +237,28 @@ class ContactFormState extends State<ContactForm> {
               width: 80,
               height: 80,
               child: ClipOval(
-                child: _avatarUrl != null
-                    ? FutureBuilder<String>(
-                        future: ImageUtils.getAbsolutePath(_avatarUrl!),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            return Image.file(File(snapshot.data!), fit: BoxFit.cover);
-                          }
-                          return const CircularProgressIndicator();
-                        },
-                      )
-                    : Container(
-                        color: Colors.grey[200],
-                        child: Icon(Icons.person, size: 50, color: Colors.grey[400]),
-                      ),
+                child:
+                    _avatarUrl != null
+                        ? FutureBuilder<String>(
+                          future: ImageUtils.getAbsolutePath(_avatarUrl!),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return Image.file(
+                                File(snapshot.data!),
+                                fit: BoxFit.cover,
+                              );
+                            }
+                            return const CircularProgressIndicator();
+                          },
+                        )
+                        : Container(
+                          color: Colors.grey[200],
+                          child: Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.grey[400],
+                          ),
+                        ),
               ),
             ),
             Positioned(
@@ -231,7 +273,11 @@ class ContactFormState extends State<ContactForm> {
                     color: theme.primaryColor,
                     border: Border.all(color: theme.cardColor, width: 2),
                   ),
-                  child: const Icon(Icons.photo_camera, color: Colors.white, size: 16),
+                  child: const Icon(
+                    Icons.photo_camera,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ),
               ),
             ),
@@ -250,15 +296,22 @@ class ContactFormState extends State<ContactForm> {
     );
   }
 
-  Widget _buildBorderlessTextField(TextEditingController controller, String placeholder) {
+  Widget _buildBorderlessTextField(
+    TextEditingController controller,
+    String placeholder,
+  ) {
     final theme = Theme.of(context);
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         hintText: placeholder,
         border: InputBorder.none,
-        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: theme.dividerColor)),
-        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: theme.primaryColor)),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: theme.dividerColor),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: theme.primaryColor),
+        ),
       ),
     );
   }
@@ -285,14 +338,31 @@ class ContactFormState extends State<ContactForm> {
                 decoration: BoxDecoration(
                   color: _gender == ContactGender.male ? selectedColor : null,
                   borderRadius: BorderRadius.circular(6),
-                  boxShadow: _gender == ContactGender.male ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))] : [],
+                  boxShadow:
+                      _gender == ContactGender.male
+                          ? [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                          : [],
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.male, color: Colors.blue.shade400),
                     const SizedBox(width: 8),
-                    Text('Male', style: TextStyle(fontWeight: _gender == ContactGender.male ? FontWeight.bold : FontWeight.normal)),
+                    Text(
+                      'Male',
+                      style: TextStyle(
+                        fontWeight:
+                            _gender == ContactGender.male
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -306,14 +376,31 @@ class ContactFormState extends State<ContactForm> {
                 decoration: BoxDecoration(
                   color: _gender == ContactGender.female ? selectedColor : null,
                   borderRadius: BorderRadius.circular(6),
-                   boxShadow: _gender == ContactGender.female ? [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))] : [],
+                  boxShadow:
+                      _gender == ContactGender.female
+                          ? [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                          : [],
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.female, color: Colors.pink.shade400),
                     const SizedBox(width: 8),
-                    Text('Female', style: TextStyle(fontWeight: _gender == ContactGender.female ? FontWeight.bold : FontWeight.normal)),
+                    Text(
+                      'Female',
+                      style: TextStyle(
+                        fontWeight:
+                            _gender == ContactGender.female
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -323,13 +410,21 @@ class ContactFormState extends State<ContactForm> {
       ),
     );
   }
-  
-  Widget _buildTextFieldWithIcon(TextEditingController controller, String placeholder, IconData? icon, {bool iconOnLeft = true}) {
+
+  Widget _buildTextFieldWithIcon(
+    TextEditingController controller,
+    String placeholder,
+    IconData? icon, {
+    bool iconOnLeft = true,
+  }) {
     final theme = Theme.of(context);
-    final iconWidget = icon != null ? Icon(icon, color: Colors.green) : const SizedBox(width: 24);
-    
+    final iconWidget =
+        icon != null
+            ? Icon(icon, color: Colors.green)
+            : const SizedBox(width: 24);
+
     List<Widget> children = [
-       Expanded(child: _buildBorderlessTextField(controller, placeholder)),
+      Expanded(child: _buildBorderlessTextField(controller, placeholder)),
     ];
 
     if (iconOnLeft) {
@@ -339,10 +434,10 @@ class ContactFormState extends State<ContactForm> {
       children.add(const SizedBox(width: 8));
       children.add(iconWidget);
     }
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: children
+      children: children,
     );
   }
 
@@ -350,11 +445,14 @@ class ContactFormState extends State<ContactForm> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final bgColor = isDark ? Colors.grey[800] : Colors.grey[200];
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Annotation / Introduction', style: TextStyle(fontSize: 12, color: Colors.grey)),
+        const Text(
+          'Annotation / Introduction',
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
         const SizedBox(height: 4),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -386,9 +484,16 @@ class ContactFormState extends State<ContactForm> {
           var controller = entry.value;
           return Row(
             children: [
-              Expanded(child: _buildBorderlessTextField(controller.key, 'Field Name (e.g., Birthday)')),
+              Expanded(
+                child: _buildBorderlessTextField(
+                  controller.key,
+                  'Field Name (e.g., Birthday)',
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _buildBorderlessTextField(controller.value, 'Value')),
+              Expanded(
+                child: _buildBorderlessTextField(controller.value, 'Value'),
+              ),
               IconButton(
                 icon: const Icon(Icons.remove_circle, color: Colors.red),
                 onPressed: () {
@@ -408,10 +513,12 @@ class ContactFormState extends State<ContactForm> {
           label: const Text('Add custom field'),
           onPressed: () {
             setState(() {
-              _customFieldControllers.add(MapEntry(TextEditingController(), TextEditingController()));
+              _customFieldControllers.add(
+                MapEntry(TextEditingController(), TextEditingController()),
+              );
             });
           },
-        )
+        ),
       ],
     );
   }
@@ -429,7 +536,9 @@ class ContactFormState extends State<ContactForm> {
             children: [
               _buildColorPickerButton(idx),
               const SizedBox(width: 16),
-              Expanded(child: _buildBorderlessTextField(controller.key, 'Event Title')),
+              Expanded(
+                child: _buildBorderlessTextField(controller.key, 'Event Title'),
+              ),
               IconButton(
                 icon: const Icon(Icons.remove_circle, color: Colors.red),
                 onPressed: () {
@@ -437,7 +546,7 @@ class ContactFormState extends State<ContactForm> {
                     controller.key.dispose();
                     _customEventControllers.removeAt(idx);
                     if (idx < _customActivityEvents.length) {
-                       _customActivityEvents.removeAt(idx);
+                      _customActivityEvents.removeAt(idx);
                     }
                   });
                 },
@@ -451,49 +560,52 @@ class ContactFormState extends State<ContactForm> {
           label: const Text('Add custom event'),
           onPressed: () {
             setState(() {
-              _customEventControllers.add(MapEntry(TextEditingController(), Colors.green));
+              _customEventControllers.add(
+                MapEntry(TextEditingController(), Colors.green),
+              );
             });
           },
-        )
+        ),
       ],
     );
   }
-  
+
   Widget _buildColorPickerButton(int index) {
     Color currentColor = _customEventControllers[index].value;
     return GestureDetector(
       onTap: () {
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Pick a color'),
-            content: SingleChildScrollView(
-              child: ColorPicker(
-                pickerColor: currentColor,
-                onColorChanged: (color) {
-                   setState(() {
-                      _customEventControllers[index] = MapEntry(_customEventControllers[index].key, color);
-                   });
-                },
-                pickerAreaHeightPercent: 0.8,
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Pick a color'),
+                content: SingleChildScrollView(
+                  child: ColorPicker(
+                    pickerColor: currentColor,
+                    onColorChanged: (color) {
+                      setState(() {
+                        _customEventControllers[index] = MapEntry(
+                          _customEventControllers[index].key,
+                          color,
+                        );
+                      });
+                    },
+                    pickerAreaHeightPercent: 0.8,
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    child: const Text('Done'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
               ),
-            ),
-            actions: [
-              TextButton(
-                child: const Text('Done'),
-                onPressed: () => Navigator.of(context).pop(),
-              )
-            ],
-          ),
         );
       },
       child: Container(
         width: 28,
         height: 28,
-        decoration: BoxDecoration(
-          color: currentColor,
-          shape: BoxShape.circle,
-        ),
+        decoration: BoxDecoration(color: currentColor, shape: BoxShape.circle),
       ),
     );
   }

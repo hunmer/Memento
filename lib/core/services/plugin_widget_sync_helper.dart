@@ -206,6 +206,12 @@ class PluginWidgetSyncHelper {
 
   /// 同步活动记录插件
   Future<void> syncActivity() async {
+    // 检查平台是否支持小组件
+    if (!SystemWidgetService.instance.isWidgetSupported()) {
+      debugPrint('Widget not supported on this platform, skipping update for activity');
+      return;
+    }
+
     try {
       final plugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
       if (plugin == null) return;
@@ -287,6 +293,12 @@ class PluginWidgetSyncHelper {
 
   /// 同步习惯插件
   Future<void> syncHabits() async {
+    // 检查平台是否支持小组件
+    if (!SystemWidgetService.instance.isWidgetSupported()) {
+      debugPrint('Widget not supported on this platform, skipping update for habits');
+      return;
+    }
+
     try {
       final plugin = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
       if (plugin == null) return;
@@ -311,6 +323,12 @@ class PluginWidgetSyncHelper {
 
   /// 同步日记插件
   Future<void> syncDiary() async {
+    // 检查平台是否支持小组件
+    if (!SystemWidgetService.instance.isWidgetSupported()) {
+      debugPrint('Widget not supported on this platform, skipping update for diary');
+      return;
+    }
+
     try {
       final plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
       if (plugin == null) return;
@@ -355,6 +373,12 @@ class PluginWidgetSyncHelper {
 
   /// 同步签到插件
   Future<void> syncCheckin() async {
+    // 检查平台是否支持小组件
+    if (!SystemWidgetService.instance.isWidgetSupported()) {
+      debugPrint('Widget not supported on this platform, skipping update for checkin');
+      return;
+    }
+
     try {
       final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
       if (plugin == null) return;
@@ -814,6 +838,12 @@ class PluginWidgetSyncHelper {
     }
   }
   Future<void> syncChat() async {
+    // 检查平台是否支持小组件
+    if (!SystemWidgetService.instance.isWidgetSupported()) {
+      debugPrint('Widget not supported on this platform, skipping update for chat');
+      return;
+    }
+
     try {
       final plugin = PluginManager.instance.getPlugin('chat') as ChatPlugin?;
       if (plugin == null) return;

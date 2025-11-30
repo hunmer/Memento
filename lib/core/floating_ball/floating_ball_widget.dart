@@ -85,10 +85,9 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
       iconPath: widget.iconPath,
       onGesture: _handleGesture,
       onPositionChanged: (position) {
-        // 保存位置到管理器
+        // 只保存位置到管理器，不触发 Stream 通知
+        // Stream 通知仅在重置位置时使用
         _manager.savePosition(position);
-        // 通知服务层
-        FloatingBallService().updatePosition(position);
       },
       onSizeChanged: (scale) {
         // 保存大小到管理器

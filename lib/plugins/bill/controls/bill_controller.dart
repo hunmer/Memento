@@ -267,10 +267,16 @@ class BillController with ChangeNotifier {
     return allBills.where((bill) {
       bool match = true;
       if (startDate != null) {
-        match = match && bill.createdAt.isAfter(startDate.subtract(const Duration(seconds: 1)));
+        match =
+            match &&
+            bill.createdAt.isAfter(
+              startDate.subtract(const Duration(seconds: 1)),
+            );
       }
       if (endDate != null) {
-        match = match && bill.createdAt.isBefore(endDate.add(const Duration(days: 1)));
+        match =
+            match &&
+            bill.createdAt.isBefore(endDate.add(const Duration(days: 1)));
       }
       return match;
     }).toList();
@@ -513,10 +519,6 @@ class BillController with ChangeNotifier {
 
   // 同步小组件数据
   Future<void> _syncWidget() async {
-    try {
-      await PluginWidgetSyncHelper.instance.syncBill();
-    } catch (e) {
-      debugPrint('Failed to sync bill widget: $e');
-    }
+    await PluginWidgetSyncHelper.instance.syncBill();
   }
 }

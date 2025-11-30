@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
@@ -35,6 +36,7 @@ class _HabitCardState extends State<HabitCard> {
   bool _isTiming = false;
   String _timerText = "00:00";
   late TimerController _timerController;
+  Timer? _uiUpdateTimer;
 
   @override
   void initState() {
@@ -60,6 +62,7 @@ class _HabitCardState extends State<HabitCard> {
 
   @override
   void dispose() {
+    _stopUIUpdateTimer();
     EventManager.instance.unsubscribe(
       'habit_timer_started',
       _onTimerStateChanged,
@@ -76,11 +79,17 @@ class _HabitCardState extends State<HabitCard> {
       if (mounted) {
         setState(() {
           _isTiming = args.isRunning;
+          // 更新计时器文本
+          _timerText = _formatDuration(args.elapsedSeconds);
+
           if (!_isTiming) {
-            _loadStats(); // Reload stats when timer stops (habit completed?)
+            // 停止UI更新定时器
+            // 注意: 统计数据的加载由 _handleTimerAction 根据对话框返回值决定
+            _stopUIUpdateTimer();
+          } else {
+            _startUIUpdateTimer(); // 启动UI更新定时器
           }
         });
-        _checkTimerStatus(); // Refresh timer text
       }
     }
   }
@@ -97,6 +106,37 @@ class _HabitCardState extends State<HabitCard> {
         }
       });
     }
+
+    // 启动或停止实时更新定时器
+    if (isTiming) {
+      _startUIUpdateTimer();
+    } else {
+      _stopUIUpdateTimer();
+    }
+  }
+
+  /// 启动UI更新定时器(每秒更新一次)
+  void _startUIUpdateTimer() {
+    _stopUIUpdateTimer();
+    _uiUpdateTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      final timerData = _timerController.getTimerData(widget.habit.id);
+      if (timerData != null) {
+        final elapsed = timerData['elapsedSeconds'] ?? 0;
+        final newText = _formatDuration(elapsed);
+        if (mounted) {
+          setState(() {
+            _timerText = newText;
+          });
+        }
+      }
+    });
+  }
+
+  /// 停止UI更新定时器
+  void _stopUIUpdateTimer() {
+    _uiUpdateTimer?.cancel();
+    _uiUpdateTimer = null;
   }
 
   String _formatDuration(int seconds) {
@@ -453,32 +493,21 @@ class _HabitCardState extends State<HabitCard> {
   }
 
   Future<void> _handleTimerAction() async {
-    if (_isTiming) {
-      _timerController.stopTimer(widget.habit.id);
-    } else {
-      // Use the start timer logic from the parent or replicate it here.
-      // Since we need context for dialogs, and the logic is slightly complex,
-      // it's better to expose a callback or replicate the logic.
-      // I'll replicate the minimal logic or use a callback property if I added one.
-      // For now, I'll assume I can call the start logic directly if I had access to _startTimer from view.
-      // Or I can implement a simple start here.
+    // 无论计时器是否运行,都显示对话框
+    // 对话框内可以暂停、恢复或停止计时器
+    final result = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => _TimerDialogWrapper(
+            habit: widget.habit,
+            controller: widget.controller,
+            timerController: _timerController,
+          ),
+    );
 
-      // Ideally, we emit an event or call a passed callback.
-      // But to keep it simple within this refactor:
-      final result = await showDialog<bool>(
-        context: context,
-        builder:
-            (context) => _TimerDialogWrapper(
-              habit: widget.habit,
-              controller: widget.controller,
-              timerController: _timerController,
-            ),
-      );
-
-      if (result == true) {
-        // Timer stopped via dialog
-        _timerController.stopTimer(widget.habit.id);
-      }
+    if (result == true) {
+      // 计时已完成并保存记录，重新加载统计数据
+      await _loadStats();
     }
   }
 }

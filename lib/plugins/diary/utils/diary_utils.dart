@@ -336,10 +336,6 @@ class DiaryUtils {
 
   /// 同步小组件数据
   static Future<void> _syncWidget() async {
-    try {
-      await PluginWidgetSyncHelper.instance.syncDiary();
-    } catch (e) {
-      debugPrint('Failed to sync diary widget: $e');
-    }
+    await PluginWidgetSyncHelper.instance.syncDiary();
   }
 }
