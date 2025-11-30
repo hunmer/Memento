@@ -63,6 +63,7 @@ class PluginWidgetSyncHelper {
       syncAgentChat(),
       syncCalendarAlbum(),
       syncChat(),
+      syncCheckinItemWidget(),
     ]);
   }
 
@@ -837,6 +838,29 @@ class PluginWidgetSyncHelper {
       debugPrint('Failed to sync calendar_album widget: $e');
     }
   }
+
+  /// 同步自定义签到项小组件
+  Future<void> syncCheckinItemWidget() async {
+    try {
+      // For now, using mock data. Later, this should be fetched from the CheckinPlugin.
+      final checkinCount = 3;
+      final weekState = "1,1,1,1,1,0,0"; // 5 days checked
+
+      await _updateWidget(
+        pluginId: 'checkin_item',
+        pluginName: '打卡',
+        iconCodePoint: Icons.task_alt.codePoint, // Example icon
+        colorValue: const Color(0xFF68A9A4).value, // Example color
+        stats: [
+          WidgetStatItem(id: 'checkin_count', label: '连续打卡', value: '$checkinCount'),
+          WidgetStatItem(id: 'week_state', label: '本周', value: weekState),
+        ],
+      );
+    } catch (e) {
+      debugPrint('Failed to sync checkin_item widget: $e');
+    }
+  }
+
   Future<void> syncChat() async {
     // 检查平台是否支持小组件
     if (!SystemWidgetService.instance.isWidgetSupported()) {

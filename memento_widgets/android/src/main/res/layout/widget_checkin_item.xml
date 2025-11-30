@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_checkin_background"
+    android:padding="16dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="打卡"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/widget_add_button"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_add_circle"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/widget_checkin_count"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="3"
+        android:textColor="@android:color/white"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:gravity="center_vertical" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/week_days"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="一" android:gravity="center" android:textColor="@android:color/white" />
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="二" android:gravity="center" android:textColor="@android:color/white" />
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="三" android:gravity="center" android:textColor="@android:color/white" />
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="四" android:gravity="center" android:textColor="@android:color/white" />
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="五" android:gravity="center" android:textColor="@android:color/white" />
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="六" android:gravity="center" android:textColor="@android:color/white" android:alpha="0.5"/>
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="日" android:gravity="center" android:textColor="@android:color/white" android:alpha="0.5"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/week_checks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp"
+            android:gravity="center">
+             <ImageView android:id="@+id/week_checks_1" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" />
+             <ImageView android:id="@+id/week_checks_2" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" />
+             <ImageView android:id="@+id/week_checks_3" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" />
+             <ImageView android:id="@+id/week_checks_4" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" />
+             <ImageView android:id="@+id/week_checks_5" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" />
+             <ImageView android:id="@+id/week_checks_6" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" android:visibility="invisible" />
+             <ImageView android:id="@+id/week_checks_7" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" android:visibility="invisible" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
