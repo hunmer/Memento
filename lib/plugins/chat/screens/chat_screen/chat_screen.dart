@@ -256,7 +256,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void _copySelectedMessages() {
     final selectedMessages =
         _controller.messages
-            .where((msg) => _controller.selectedMessageIds.contains(msg.id))
+            .where((msg) => _controller.selectedMessageIds.value.contains(msg.id))
             .toList();
 
     if (selectedMessages.isEmpty) return;
@@ -287,7 +287,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _deleteSelectedMessages() async {
     final selectedMessages =
         _controller.messages
-            .where((msg) => _controller.selectedMessageIds.contains(msg.id))
+            .where((msg) => _controller.selectedMessageIds.value.contains(msg.id))
             .toList();
 
     for (var message in selectedMessages) {
@@ -436,7 +436,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       appBar: ChatAppBar(
                         channel: widget.channel,
                         isMultiSelectMode: _controller.isMultiSelectMode,
-                        selectedCount: _controller.selectedMessageIds.length,
+                        selectedCount: _controller.selectedMessageIds.value.length,
                         onShowDatePicker: _showDatePickerDialog,
                         onCopySelected: _copySelectedMessages,
                         onDeleteSelected: _deleteSelectedMessages,

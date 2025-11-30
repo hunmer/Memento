@@ -44,7 +44,8 @@ class EntryEditorController {
       context,
       listen: false,
     );
-    if (titleController.text.isEmpty) {
+    // 如果标题为空且没有图片,则提示错误
+    if (titleController.text.isEmpty && imageUrls.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(ChatLocalizations.of(context).titleCannotBeEmpty),
