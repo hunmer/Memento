@@ -347,14 +347,15 @@ class StoreController with ChangeNotifier {
     _pointsLogs.clear();
     _userItems.clear();
     try {
-      final productsData = storedProducts as Map<String, dynamic>;
-      final productsList =
-          productsData['products'] is List
-              ? productsData['products'] as List
-              : [];
-      for (final productData in productsList) {
-        if (productData is Map<String, dynamic>) {
-          addProductFromJson(productData);
+      if (storedProducts is Map<String, dynamic>) {
+        final productsList =
+            storedProducts['products'] is List
+                ? storedProducts['products'] as List
+                : [];
+        for (final productData in productsList) {
+          if (productData is Map<String, dynamic>) {
+            addProductFromJson(productData);
+          }
         }
       }
 

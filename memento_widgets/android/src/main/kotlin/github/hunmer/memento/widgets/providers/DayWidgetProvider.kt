@@ -1,0 +1,19 @@
+package github.hunmer.memento.widgets.providers
+
+import github.hunmer.memento.widgets.BasePluginWidgetProvider
+
+/**
+ * 纪念日小组件 - 1x1 尺寸
+ */
+class DayWidgetProvider : BasePluginWidgetProvider() {
+    override val pluginId: String = "day"
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_1X1
+}
+
+/**
+ * 纪念日小组件 - 2x2 尺寸
+ */
+class DayWidget2x1Provider : BasePluginWidgetProvider() {
+    override val pluginId: String = "day"
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
+}

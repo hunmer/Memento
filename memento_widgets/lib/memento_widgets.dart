@@ -1,7 +1,15 @@
 
+import 'dart:convert';
 import 'package:home_widget/home_widget.dart';
 import 'package:flutter/material.dart';
 import 'memento_widgets_platform_interface.dart';
+
+// 导出数据模型
+export 'models/plugin_widget_data.dart';
+export 'models/widget_stat_item.dart';
+
+// 导入数据模型
+import 'models/plugin_widget_data.dart';
 
 class MementoWidgets {
   Future<String?> getPlatformVersion() {
@@ -141,6 +149,95 @@ class MyWidgetManager {
   /// 获取初始 Uri（用于应用启动时）
   Future<Uri?> getInitialUri() async {
     return await HomeWidget.initiallyLaunchedFromHomeWidget();
+  }
+
+  // ========== 插件小组件相关方法 ==========
+
+  /// 更新插件小组件数据
+  Future<void> updatePluginWidgetData(
+    String pluginId,
+    PluginWidgetData data,
+  ) async {
+    try {
+      final jsonData = jsonEncode(data.toJson());
+      await saveString('${pluginId}_widget_data', jsonData);
+      await updatePluginWidget(pluginId);
+    } catch (e) {
+      debugPrint('Failed to update plugin widget data for $pluginId: $e');
+    }
+  }
+
+  /// 更新指定插件的小组件
+  Future<void> updatePluginWidget(String pluginId) async {
+    final providerName = _getProviderName(pluginId);
+    if (providerName != null) {
+      await updateWidget(widgetName: providerName);
+    }
+  }
+
+  /// 更新所有插件小组件
+  Future<void> updateAllPluginWidgets() async {
+    final providers = _getAllProviderNames();
+    for (final provider in providers) {
+      try {
+        await updateWidget(widgetName: provider);
+      } catch (e) {
+        debugPrint('Failed to update widget $provider: $e');
+      }
+    }
+  }
+
+  /// 插件ID 到 Provider 名称的映射
+  String? _getProviderName(String pluginId) {
+    const providerMap = {
+      'todo': 'TodoWidgetProvider',
+      'timer': 'TimerWidgetProvider',
+      'bill': 'BillWidgetProvider',
+      'calendar': 'CalendarWidgetProvider',
+      'activity': 'ActivityWidgetProvider',
+      'tracker': 'TrackerWidgetProvider',
+      'habits': 'HabitsWidgetProvider',
+      'diary': 'DiaryWidgetProvider',
+      'checkin': 'CheckinWidgetProvider',
+      'nodes': 'NodesWidgetProvider',
+      'database': 'DatabaseWidgetProvider',
+      'contact': 'ContactWidgetProvider',
+      'day': 'DayWidgetProvider',
+      'goods': 'GoodsWidgetProvider',
+      'notes': 'NotesWidgetProvider',
+      'store': 'StoreWidgetProvider',
+      'openai': 'OpenaiWidgetProvider',
+      'agent_chat': 'AgentChatWidgetProvider',
+      'calendar_album': 'CalendarAlbumWidgetProvider',
+      'chat': 'ChatWidgetProvider',
+    };
+    return providerMap[pluginId];
+  }
+
+  /// 获取所有 Provider 名称
+  List<String> _getAllProviderNames() {
+    return [
+      'TodoWidgetProvider',
+      'TimerWidgetProvider',
+      'BillWidgetProvider',
+      'CalendarWidgetProvider',
+      'ActivityWidgetProvider',
+      'TrackerWidgetProvider',
+      'HabitsWidgetProvider',
+      'DiaryWidgetProvider',
+      'CheckinWidgetProvider',
+      'NodesWidgetProvider',
+      'DatabaseWidgetProvider',
+      'ContactWidgetProvider',
+      'DayWidgetProvider',
+      'GoodsWidgetProvider',
+      'NotesWidgetProvider',
+      'StoreWidgetProvider',
+      'OpenaiWidgetProvider',
+      'AgentChatWidgetProvider',
+      'CalendarAlbumWidgetProvider',
+      'ChatWidgetProvider',
+    ];
   }
 }
 

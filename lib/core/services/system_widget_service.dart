@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:universal_platform/universal_platform.dart';
-import 'dart:convert';
+import 'package:memento_widgets/memento_widgets.dart';
+
+// 重新导出数据模型，供其他文件使用
+export 'package:memento_widgets/memento_widgets.dart' show PluginWidgetData, WidgetStatItem;
 
 /// 系统桌面小组件数据同步服务
 ///
@@ -36,11 +39,8 @@ class SystemWidgetService {
     }
 
     try {
-      final jsonData = jsonEncode(data.toJson());
-      await HomeWidget.saveWidgetData<String>('${pluginId}_widget_data', jsonData);
-
-      // 触发小组件更新
-      await updateWidget(pluginId);
+      // 改为调用 memento_widgets 的 API
+      await MyWidgetManager().updatePluginWidgetData(pluginId, data);
     } catch (e) {
       debugPrint('Failed to update widget data for $pluginId: $e');
     }
@@ -53,16 +53,10 @@ class SystemWidgetService {
       return;
     }
 
-    final providerName = _getProviderName(pluginId);
-    if (providerName != null) {
-      try {
-        await HomeWidget.updateWidget(
-          androidName: providerName,
-          iOSName: providerName,
-        );
-      } catch (e) {
-        debugPrint('Failed to update widget $pluginId: $e');
-      }
+    try {
+      await MyWidgetManager().updatePluginWidget(pluginId);
+    } catch (e) {
+      debugPrint('Failed to update widget $pluginId: $e');
     }
   }
 
@@ -74,66 +68,11 @@ class SystemWidgetService {
       return;
     }
 
-    final providers = [
-      'TodoWidgetProvider',
-      'TimerWidgetProvider',
-      'BillWidgetProvider',
-      'CalendarWidgetProvider',
-      'ActivityWidgetProvider',
-      'TrackerWidgetProvider',
-      'HabitsWidgetProvider',
-      'DiaryWidgetProvider',
-      'CheckinWidgetProvider',
-      'NodesWidgetProvider',
-      'DatabaseWidgetProvider',
-      'ContactWidgetProvider',
-      'DayWidgetProvider',
-      'GoodsWidgetProvider',
-      'NotesWidgetProvider',
-      'StoreWidgetProvider',
-      'OpenaiWidgetProvider',
-      'AgentChatWidgetProvider',
-      'CalendarAlbumWidgetProvider',
-      'ChatWidgetProvider',
-    ];
-
-    for (final provider in providers) {
-      try {
-        await HomeWidget.updateWidget(
-          androidName: provider,
-          iOSName: provider,
-        );
-      } catch (e) {
-        debugPrint('Failed to update widget $provider: $e');
-      }
+    try {
+      await MyWidgetManager().updateAllPluginWidgets();
+    } catch (e) {
+      debugPrint('Failed to update all widgets: $e');
     }
-  }
-
-  /// 获取插件对应的 WidgetProvider 名称
-  String? _getProviderName(String pluginId) {
-    final providerMap = {
-      'todo': 'TodoWidgetProvider',
-      'timer': 'TimerWidgetProvider',
-      'bill': 'BillWidgetProvider',
-      'calendar': 'CalendarWidgetProvider',
-      'activity': 'ActivityWidgetProvider',
-      'tracker': 'TrackerWidgetProvider',
-      'habits': 'HabitsWidgetProvider',
-      'diary': 'DiaryWidgetProvider',
-      'checkin': 'CheckinWidgetProvider',
-      'nodes': 'NodesWidgetProvider',
-      'database': 'DatabaseWidgetProvider',
-      'contact': 'ContactWidgetProvider',
-      'day': 'DayWidgetProvider',
-      'goods': 'GoodsWidgetProvider',
-      'notes': 'NotesWidgetProvider',
-      'store': 'StoreWidgetProvider',
-      'openai': 'OpenaiWidgetProvider',
-      'agent_chat': 'AgentChatWidgetProvider',
-      'calendar_album': 'CalendarAlbumWidgetProvider',
-      'chat': 'ChatWidgetProvider',
-    };
-    return providerMap[pluginId];
   }
 
   /// 处理小组件点击事件
@@ -174,101 +113,5 @@ class SystemWidgetService {
   /// 检查当前平台是否支持小组件（私有方法）
   bool _isWidgetSupported() {
     return isWidgetSupported();
-  }
-}
-
-/// 插件小组件数据模型
-class PluginWidgetData {
-  /// 插件ID
-  final String pluginId;
-
-  /// 插件名称
-  final String pluginName;
-
-  /// 图标 codePoint
-  final int iconCodePoint;
-
-  /// 主题色值
-  final int colorValue;
-
-  /// 统计项列表
-  final List<WidgetStatItem> stats;
-
-  /// 最后更新时间
-  final DateTime lastUpdated;
-
-  PluginWidgetData({
-    required this.pluginId,
-    required this.pluginName,
-    required this.iconCodePoint,
-    required this.colorValue,
-    required this.stats,
-    DateTime? lastUpdated,
-  }) : lastUpdated = lastUpdated ?? DateTime.now();
-
-  Map<String, dynamic> toJson() => {
-    'pluginId': pluginId,
-    'pluginName': pluginName,
-    'iconCodePoint': iconCodePoint,
-    'colorValue': colorValue,
-    'stats': stats.map((s) => s.toJson()).toList(),
-    'lastUpdated': lastUpdated.toIso8601String(),
-  };
-
-  factory PluginWidgetData.fromJson(Map<String, dynamic> json) {
-    return PluginWidgetData(
-      pluginId: json['pluginId'] as String,
-      pluginName: json['pluginName'] as String,
-      iconCodePoint: json['iconCodePoint'] as int,
-      colorValue: json['colorValue'] as int,
-      stats: (json['stats'] as List)
-          .map((s) => WidgetStatItem.fromJson(s as Map<String, dynamic>))
-          .toList(),
-      lastUpdated: DateTime.parse(json['lastUpdated'] as String),
-    );
-  }
-}
-
-/// 小组件统计项
-class WidgetStatItem {
-  /// 统计项ID
-  final String id;
-
-  /// 显示标签
-  final String label;
-
-  /// 统计值
-  final String value;
-
-  /// 是否高亮
-  final bool highlight;
-
-  /// 自定义颜色 (可选)
-  final int? colorValue;
-
-  WidgetStatItem({
-    required this.id,
-    required this.label,
-    required this.value,
-    this.highlight = false,
-    this.colorValue,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'label': label,
-    'value': value,
-    'highlight': highlight,
-    if (colorValue != null) 'colorValue': colorValue,
-  };
-
-  factory WidgetStatItem.fromJson(Map<String, dynamic> json) {
-    return WidgetStatItem(
-      id: json['id'] as String,
-      label: json['label'] as String,
-      value: json['value'] as String,
-      highlight: json['highlight'] as bool? ?? false,
-      colorValue: json['colorValue'] as int?,
-    );
   }
 }

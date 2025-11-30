@@ -73,7 +73,8 @@ class JSBridgeManager {
   ///
   /// 用于在 JS 中调用 callPluginAnalysis() 时执行插件的数据分析方法
   void registerPluginAnalysisHandler(
-    Future<String> Function(String methodName, Map<String, dynamic> params) handler,
+    Future<String> Function(String methodName, Map<String, dynamic> params)
+    handler,
   ) {
     if (!_initialized || _engine == null) {
       print('警告: JS Bridge 未初始化，无法注册插件分析处理器');
@@ -91,7 +92,9 @@ class JSBridgeManager {
 
   /// 注册插件的 JS API
   Future<void> registerPlugin(
-      PluginBase plugin, Map<String, Function> apis) async {
+    PluginBase plugin,
+    Map<String, Function> apis,
+  ) async {
     if (!_initialized || _engine == null) {
       throw StateError('JS Bridge not initialized');
     }
@@ -127,8 +130,13 @@ class JSBridgeManager {
 
       // 包装函数：直接返回原始结果或 Future
       // 集成字段过滤器，支持 mode/fields/excludeFields 参数
-      dynamic wrappedFunction(
-          [dynamic a, dynamic b, dynamic c, dynamic d, dynamic e]) {
+      dynamic wrappedFunction([
+        dynamic a,
+        dynamic b,
+        dynamic c,
+        dynamic d,
+        dynamic e,
+      ]) {
         try {
           final args = [a, b, c, d, e].where((arg) => arg != null).toList();
 
@@ -153,21 +161,26 @@ class JSBridgeManager {
 
           // 如果是 Future，包装为返回序列化结果的 Future
           if (result is Future) {
-            return result.then((awaitedResult) {
-              // 应用字段过滤器
-              final filtered = FieldFilterService.filterFromParams(
-                awaitedResult,
-                originalParams,
-              );
-              return _serializeResult(filtered);
-            }).catchError((e) {
-              print('JS API Error [${plugin.id}.$apiName]: $e');
-              return jsonEncode({'error': e.toString()});
-            });
+            return result
+                .then((awaitedResult) {
+                  // 应用字段过滤器
+                  final filtered = FieldFilterService.filterFromParams(
+                    awaitedResult,
+                    originalParams,
+                  );
+                  return _serializeResult(filtered);
+                })
+                .catchError((e) {
+                  print('JS API Error [${plugin.id}.$apiName]: $e');
+                  return jsonEncode({'error': e.toString()});
+                });
           }
 
           // 同步结果：应用过滤器后序列化
-          final filtered = FieldFilterService.filterFromParams(result, originalParams);
+          final filtered = FieldFilterService.filterFromParams(
+            result,
+            originalParams,
+          );
           return _serializeResult(filtered);
         } catch (e) {
           print('JS API Error [${plugin.id}.$apiName]: $e');
@@ -176,8 +189,10 @@ class JSBridgeManager {
       }
 
       // 注册包装后的函数
-      await _engine!
-          .registerFunction('Memento_${plugin.id}_$apiName', wrappedFunction);
+      await _engine!.registerFunction(
+        'Memento_${plugin.id}_$apiName',
+        wrappedFunction,
+      );
 
       // 在插件命名空间下创建代理
       // 直接返回内层 Promise，不使用 await（避免事件循环阻塞）
@@ -206,8 +221,6 @@ class JSBridgeManager {
         })();
       ''');
     }
-
-    print('插件 [${plugin.id}] 注册了 ${apis.length} 个 JS API');
   }
 
   /// 执行 JS 代码
@@ -253,7 +266,9 @@ class JSBridgeManager {
     if (_engine == null) return;
 
     // 1. 获取当前时间
-    await _engine!.registerFunction('Memento_system_getCurrentTime', ([dynamic a]) async {
+    await _engine!.registerFunction('Memento_system_getCurrentTime', ([
+      dynamic a,
+    ]) async {
       try {
         final now = DateTime.now();
         final weekdayNames = ['一', '二', '三', '四', '五', '六', '日'];
@@ -278,7 +293,9 @@ class JSBridgeManager {
     });
 
     // 2. 获取设备信息
-    await _engine!.registerFunction('Memento_system_getDeviceInfo', ([dynamic a]) async {
+    await _engine!.registerFunction('Memento_system_getDeviceInfo', ([
+      dynamic a,
+    ]) async {
       try {
         // 导入 device_info_plus 包以获取详细设备信息
         // 这里先返回基础信息，后续可以扩展
@@ -296,7 +313,9 @@ class JSBridgeManager {
     });
 
     // 3. 获取应用信息
-    await _engine!.registerFunction('Memento_system_getAppInfo', ([dynamic a]) async {
+    await _engine!.registerFunction('Memento_system_getAppInfo', ([
+      dynamic a,
+    ]) async {
       try {
         // 导入 package_info_plus 包以获取详细应用信息
         // 这里先返回基础信息
@@ -314,7 +333,10 @@ class JSBridgeManager {
     });
 
     // 4. 格式化日期时间
-    await _engine!.registerFunction('Memento_system_formatDate', ([dynamic a, dynamic b]) async {
+    await _engine!.registerFunction('Memento_system_formatDate', ([
+      dynamic a,
+      dynamic b,
+    ]) async {
       try {
         final dateInput = a;
         final format = b ?? 'yyyy-MM-dd HH:mm:ss';
@@ -336,7 +358,9 @@ class JSBridgeManager {
     });
 
     // 5. 获取当前时间戳
-    await _engine!.registerFunction('Memento_system_getTimestamp', ([dynamic a]) async {
+    await _engine!.registerFunction('Memento_system_getTimestamp', ([
+      dynamic a,
+    ]) async {
       try {
         return DateTime.now().millisecondsSinceEpoch;
       } catch (e) {
@@ -345,7 +369,9 @@ class JSBridgeManager {
     });
 
     // 6. 获取自定义日期（解决时区问题的核心 API）
-    await _engine!.registerFunction('Memento_system_getCustomDate', ([dynamic options]) async {
+    await _engine!.registerFunction('Memento_system_getCustomDate', ([
+      dynamic options,
+    ]) async {
       try {
         // 解析参数
         Map<String, dynamic> opts = {};
@@ -379,25 +405,29 @@ class JSBridgeManager {
         // 处理增加时间
         if (opts['add'] != null) {
           final add = Map<String, dynamic>.from(opts['add'] as Map);
-          date = date.add(Duration(
-            days: (add['days'] as num?)?.toInt() ?? 0,
-            hours: (add['hours'] as num?)?.toInt() ?? 0,
-            minutes: (add['minutes'] as num?)?.toInt() ?? 0,
-            seconds: (add['seconds'] as num?)?.toInt() ?? 0,
-            milliseconds: (add['milliseconds'] as num?)?.toInt() ?? 0,
-          ));
+          date = date.add(
+            Duration(
+              days: (add['days'] as num?)?.toInt() ?? 0,
+              hours: (add['hours'] as num?)?.toInt() ?? 0,
+              minutes: (add['minutes'] as num?)?.toInt() ?? 0,
+              seconds: (add['seconds'] as num?)?.toInt() ?? 0,
+              milliseconds: (add['milliseconds'] as num?)?.toInt() ?? 0,
+            ),
+          );
         }
 
         // 处理减少时间
         if (opts['subtract'] != null) {
           final sub = Map<String, dynamic>.from(opts['subtract'] as Map);
-          date = date.subtract(Duration(
-            days: (sub['days'] as num?)?.toInt() ?? 0,
-            hours: (sub['hours'] as num?)?.toInt() ?? 0,
-            minutes: (sub['minutes'] as num?)?.toInt() ?? 0,
-            seconds: (sub['seconds'] as num?)?.toInt() ?? 0,
-            milliseconds: (sub['milliseconds'] as num?)?.toInt() ?? 0,
-          ));
+          date = date.subtract(
+            Duration(
+              days: (sub['days'] as num?)?.toInt() ?? 0,
+              hours: (sub['hours'] as num?)?.toInt() ?? 0,
+              minutes: (sub['minutes'] as num?)?.toInt() ?? 0,
+              seconds: (sub['seconds'] as num?)?.toInt() ?? 0,
+              milliseconds: (sub['milliseconds'] as num?)?.toInt() ?? 0,
+            ),
+          );
         }
 
         // 处理相对位置（使用 dart_date 扩展方法）
@@ -547,7 +577,9 @@ class JSBridgeManager {
     if (_engine == null) return;
 
     // 1. setResult - 设置结果
-    await _engine!.registerFunction('Memento_toolCall_setResult', ([dynamic a]) async {
+    await _engine!.registerFunction('Memento_toolCall_setResult', ([
+      dynamic a,
+    ]) async {
       try {
         final params = a as Map<String, dynamic>?;
         if (params == null) {
@@ -570,7 +602,9 @@ class JSBridgeManager {
     });
 
     // 2. getResult - 获取结果
-    await _engine!.registerFunction('Memento_toolCall_getResult', ([dynamic a]) async {
+    await _engine!.registerFunction('Memento_toolCall_getResult', ([
+      dynamic a,
+    ]) async {
       try {
         final params = a as Map<String, dynamic>?;
         if (params == null) {
@@ -664,13 +698,25 @@ class JSBridgeManager {
     String result = format;
 
     // 替换占位符
-    result = result.replaceAll('yyyy', dateTime.year.toString().padLeft(4, '0'));
+    result = result.replaceAll(
+      'yyyy',
+      dateTime.year.toString().padLeft(4, '0'),
+    );
     result = result.replaceAll('MM', dateTime.month.toString().padLeft(2, '0'));
     result = result.replaceAll('dd', dateTime.day.toString().padLeft(2, '0'));
     result = result.replaceAll('HH', dateTime.hour.toString().padLeft(2, '0'));
-    result = result.replaceAll('hh', (dateTime.hour % 12).toString().padLeft(2, '0'));
-    result = result.replaceAll('mm', dateTime.minute.toString().padLeft(2, '0'));
-    result = result.replaceAll('ss', dateTime.second.toString().padLeft(2, '0'));
+    result = result.replaceAll(
+      'hh',
+      (dateTime.hour % 12).toString().padLeft(2, '0'),
+    );
+    result = result.replaceAll(
+      'mm',
+      dateTime.minute.toString().padLeft(2, '0'),
+    );
+    result = result.replaceAll(
+      'ss',
+      dateTime.second.toString().padLeft(2, '0'),
+    );
     result = result.replaceAll('E', weekdayNames[dateTime.weekday - 1]);
 
     return result;

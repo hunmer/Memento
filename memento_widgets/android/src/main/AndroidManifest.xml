@@ -2,31 +2,514 @@
   package="com.example.memento_widgets">
 
   <application>
-    <!-- 文本小组件 -->
+    <!-- ========== 快速小组件 ========== -->
+
+    <!-- 频道快速发送 -->
     <receiver
-      android:name=".TextWidgetProvider"
-      android:exported="false"
-      android:label="文本小组件">
+      android:name="github.hunmer.memento.widgets.quick.ChatQuickWidgetProvider"
+      android:exported="true">
       <intent-filter>
         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/text_widget_info" />
+        android:resource="@xml/widget_chat_info" />
     </receiver>
 
-    <!-- 图像小组件 -->
+    <!-- AI 语音快捷 -->
     <receiver
-      android:name=".ImageWidgetProvider"
-      android:exported="false"
-      android:label="图像小组件">
+      android:name="github.hunmer.memento.widgets.quick.AgentVoiceWidgetProvider"
+      android:exported="true">
       <intent-filter>
         <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/image_widget_info" />
+        android:resource="@xml/widget_agent_voice_info" />
+    </receiver>
+
+    <!-- ========== 插件小组件 1x1 尺寸 ========== -->
+
+    <!-- 待办事项 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.TodoWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 计时器 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.TimerWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 账单 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.BillWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 日历 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.CalendarWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 活动记录 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.ActivityWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 目标追踪 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.TrackerWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 习惯 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.HabitsWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 日记 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.DiaryWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 签到 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.CheckinWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 节点 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.NodesWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 数据库 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.DatabaseWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 联系人 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.ContactWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 纪念日 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.DayWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 物品 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.GoodsWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 笔记 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.NotesWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 商店 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.StoreWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- OpenAI 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.OpenaiWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- AI对话 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.AgentChatWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 日记相册 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.CalendarAlbumWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- 聊天 1x1 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.ChatWidgetProvider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_1x1_info" />
+    </receiver>
+
+    <!-- ========== 插件小组件 2x2 尺寸 ========== -->
+
+    <!-- 待办事项 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.TodoWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 计时器 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.TimerWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 账单 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.BillWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 日历 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.CalendarWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 活动记录 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.ActivityWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 目标追踪 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.TrackerWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 习惯 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.HabitsWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 日记 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.DiaryWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 签到 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.CheckinWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 节点 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.NodesWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 数据库 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.DatabaseWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 联系人 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.ContactWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 纪念日 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.DayWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 物品 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.GoodsWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 笔记 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.NotesWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 商店 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.StoreWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- OpenAI 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.OpenaiWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- AI对话 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.AgentChatWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 日记相册 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.CalendarAlbumWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
+    </receiver>
+
+    <!-- 聊天 2x2 -->
+    <receiver
+      android:name="github.hunmer.memento.widgets.providers.ChatWidget2x1Provider"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_plugin_2x1_info" />
     </receiver>
   </application>
 </manifest>
-
