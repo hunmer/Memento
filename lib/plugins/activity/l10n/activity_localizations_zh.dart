@@ -196,4 +196,19 @@ class ActivityLocalizationsZh extends ActivityLocalizations {
   String get recentActivityInfo => '最近活动信息';
   @override
   String get onlySupportsAndroid => '通知栏显示功能仅支持 Android 平台';
+
+  @override
+  String get minimumReminderInterval => '最小提醒间隔';
+
+  @override
+  String get minimumReminderIntervalDesc => '距离上次活动至少多久后才显示提醒';
+
+  @override
+  String get updateInterval => '通知更新频率';
+
+  @override
+  String get updateIntervalDesc => '通知内容更新的时间间隔';
+
+  @override
+  String minutesUnit(int minutes) => '$minutes 分钟';
 }

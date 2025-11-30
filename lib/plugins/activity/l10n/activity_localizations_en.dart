@@ -186,4 +186,19 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
   String get recentActivityInfo => 'Recent Activity Info';
   @override
   String get onlySupportsAndroid => 'Notification bar display is only supported on Android';
+
+  @override
+  String get minimumReminderInterval => 'Minimum Reminder Interval';
+
+  @override
+  String get minimumReminderIntervalDesc => 'Show reminder only after this duration since last activity';
+
+  @override
+  String get updateInterval => 'Update Frequency';
+
+  @override
+  String get updateIntervalDesc => 'How often to update notification content';
+
+  @override
+  String minutesUnit(int minutes) => '$minutes min';
 }

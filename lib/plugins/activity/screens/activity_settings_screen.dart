@@ -21,6 +21,10 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
   ActivityRecord? _lastActivity;
   String _timeSinceLast = '';
 
+  // 通知设置
+  int _minimumReminderInterval = 30; // 默认30分钟
+  int _updateInterval = 1; // 默认1分钟
+
   @override
   void initState() {
     super.initState();
@@ -37,9 +41,14 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
     try {
       final plugin = ActivityPlugin.instance;
       final isEnabled = plugin.isNotificationEnabled();
+      final minInterval = await plugin.getMinimumReminderInterval();
+      final updateInt = await plugin.getUpdateInterval();
+
       if (mounted) {
         setState(() {
           _isNotificationEnabled = isEnabled;
+          _minimumReminderInterval = minInterval;
+          _updateInterval = updateInt;
           _isLoading = false;
         });
       }
@@ -169,6 +178,28 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
     }
   }
 
+  Future<void> _updateMinimumReminderInterval(int value) async {
+    try {
+      await ActivityPlugin.instance.setMinimumReminderInterval(value);
+      setState(() {
+        _minimumReminderInterval = value;
+      });
+    } catch (e) {
+      debugPrint('更新最小提醒间隔失败: $e');
+    }
+  }
+
+  Future<void> _updateUpdateInterval(int value) async {
+    try {
+      await ActivityPlugin.instance.setUpdateInterval(value);
+      setState(() {
+        _updateInterval = value;
+      });
+    } catch (e) {
+      debugPrint('更新通知更新频率失败: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -254,6 +285,103 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                                   ),
                                 ],
                               ),
+                            ),
+                          ],
+
+                          // 通知时间设置
+                          if (_isNotificationEnabled && Platform.isAndroid) ...[
+                            const SizedBox(height: 24),
+                            const Divider(),
+                            const SizedBox(height: 16),
+
+                            // 最小提醒间隔
+                            Text(
+                              l10n.minimumReminderInterval,
+                              style: theme.textTheme.titleSmall,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.minimumReminderIntervalDesc,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.textTheme.bodySmall?.color,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Slider(
+                                    value: _minimumReminderInterval.toDouble(),
+                                    min: 5,
+                                    max: 120,
+                                    divisions: 23,
+                                    label: l10n.minutesUnit(
+                                      _minimumReminderInterval,
+                                    ),
+                                    activeColor: ActivityPlugin.instance.color,
+                                    onChanged: (value) {
+                                      _updateMinimumReminderInterval(
+                                        value.round(),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    l10n.minutesUnit(_minimumReminderInterval),
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: ActivityPlugin.instance.color,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // 通知更新频率
+                            Text(
+                              l10n.updateInterval,
+                              style: theme.textTheme.titleSmall,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.updateIntervalDesc,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.textTheme.bodySmall?.color,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Slider(
+                                    value: _updateInterval.toDouble(),
+                                    min: 1,
+                                    max: 10,
+                                    divisions: 9,
+                                    label: l10n.minutesUnit(_updateInterval),
+                                    activeColor: ActivityPlugin.instance.color,
+                                    onChanged: (value) {
+                                      _updateUpdateInterval(value.round());
+                                    },
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 80,
+                                  child: Text(
+                                    l10n.minutesUnit(_updateInterval),
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: ActivityPlugin.instance.color,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ],
