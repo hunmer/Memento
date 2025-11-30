@@ -12,6 +12,12 @@ class AgentChatWidgetService {
 
   /// 更新小组件数据
   static Future<void> updateWidget() async {
+    // 统一平台检查
+    if (!SystemWidgetService.instance.isWidgetSupported()) {
+      _logger.fine('Widget not supported on this platform, skipping AgentChat widget update');
+      return;
+    }
+
     try {
       final plugin = AgentChatPlugin.instance;
       final conversations = plugin.conversationController.conversations;
@@ -68,18 +74,20 @@ class AgentChatWidgetService {
     return '${message.substring(0, maxLength)}...';
   }
 
-  /// 初始化小组件
+  /// 初始化小组件服务
   static Future<void> initialize() async {
-    try {
-      // 确保系统小组件服务已初始化
-      await SystemWidgetService.instance.initialize();
+    if (!SystemWidgetService.instance.isWidgetSupported()) {
+      _logger.fine('Widget not supported on this platform, skipping AgentChatWidgetService initialization');
+      return;
+    }
 
+    try {
       // 初次更新小组件
       await updateWidget();
 
-      _logger.info('AI对话小组件服务已初始化');
+      _logger.info('AgentChatWidgetService 已初始化');
     } catch (e, stack) {
-      _logger.severe('初始化AI对话小组件服务失败', e, stack);
+      _logger.severe('初始化 AgentChatWidgetService 失败', e, stack);
     }
   }
 }

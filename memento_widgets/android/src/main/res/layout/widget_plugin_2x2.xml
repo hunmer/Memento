@@ -16,14 +16,12 @@
         android:layout_marginBottom="8dp">
 
         <!-- 插件图标 -->
-        <TextView
+        <ImageView
             android:id="@+id/widget_icon"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:gravity="center"
-            android:textSize="24sp"
-            android:textColor="@android:color/white"
-            android:fontFamily="sans-serif" />
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/app_name" />
 
         <!-- 插件名称 -->
         <TextView

@@ -71,32 +71,46 @@ class FloatingWidgetController {
   Future<void> initialize({
     List<FloatingBallButtonData>? defaultButtons,
   }) async {
-    if (defaultButtons != null && defaultButtons.isNotEmpty) {
-      _buttonData = defaultButtons;
-    } else {
-      _buttonData = [
-        FloatingBallButtonData(
-          title: '首页',
-          icon: 'ic_menu_home',
-          data: {'action': 'home'},
-        ),
-        FloatingBallButtonData(
-          title: '设置',
-          icon: 'ic_menu_preferences',
-          data: {'action': 'settings'},
-        ),
-        FloatingBallButtonData(
-          title: '搜索',
-          icon: 'ic_menu_search',
-          data: {'action': 'search'},
-        ),
-      ];
+    await _loadSettings();
+
+    // 从本地存储加载按钮数据
+    await _loadButtonData();
+
+    // 如果本地没有数据，使用默认按钮
+    if (_buttonData.isEmpty) {
+      if (defaultButtons != null && defaultButtons.isNotEmpty) {
+        _buttonData = defaultButtons;
+      } else {
+        _buttonData = _getDefaultButtons();
+      }
+      // 保存默认按钮数据
+      await _saveButtonData();
     }
 
-    await _loadSettings();
     await _checkStatus();
     // 确保按钮事件监听器始终被设置
     _startListeningButtonEvents();
+  }
+
+  /// 获取默认按钮
+  List<FloatingBallButtonData> _getDefaultButtons() {
+    return [
+      FloatingBallButtonData(
+        title: '聊天',
+        icon: 'ic_menu_send',
+        data: {'action': 'openPlugin', 'args': {'plugin': 'chat'}},
+      ),
+      FloatingBallButtonData(
+        title: '日记',
+        icon: 'ic_menu_edit',
+        data: {'action': 'openPlugin', 'args': {'plugin': 'diary'}},
+      ),
+      FloatingBallButtonData(
+        title: '设置',
+        icon: 'ic_menu_preferences',
+        data: {'action': 'openSettings'},
+      ),
+    ];
   }
 
   /// 清理资源
@@ -127,6 +141,37 @@ class FloatingWidgetController {
     if (imageBase64 != null && imageBase64.isNotEmpty) {
       _customImageBytes = Uint8List.fromList(base64Decode(imageBase64));
     }
+  }
+
+  /// 加载按钮数据
+  Future<void> _loadButtonData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final buttonDataJson = prefs.getString('floating_ball_buttons');
+    if (buttonDataJson != null && buttonDataJson.isNotEmpty) {
+      try {
+        final List<dynamic> dataList = jsonDecode(buttonDataJson);
+        _buttonData = dataList.map((item) {
+          final map = item as Map<String, dynamic>;
+          return FloatingBallButtonData(
+            title: map['title'] as String? ?? '',
+            icon: map['icon'] as String? ?? 'ic_menu_info_details',
+            data: map['data'] as Map<String, dynamic>?,
+            image: map['image'] as String?,
+          );
+        }).toList();
+      } catch (e) {
+        print('加载按钮数据失败: $e');
+        _buttonData = [];
+      }
+    }
+  }
+
+  /// 保存按钮数据
+  Future<void> _saveButtonData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final dataList = _buttonData.map((button) => button.toMap()).toList();
+    final buttonDataJson = jsonEncode(dataList);
+    await prefs.setString('floating_ball_buttons', buttonDataJson);
   }
 
   /// 保存设置
@@ -204,7 +249,10 @@ class FloatingWidgetController {
     _buttonSubscription = FloatingBallPlugin.listenButtonEvents().listen(
       (event) {
         try {
-          print("FloatingWidgetController: 收到按钮事件 - title: ${event.title}, data: ${event.data}"); _buttonController.add(event);
+          print(
+            "FloatingWidgetController: 收到按钮事件 - title: ${event.title}, data: ${event.data}",
+          );
+          _buttonController.add(event);
         } catch (e) {
           // 忽略错误，避免崩溃
         }
@@ -379,8 +427,9 @@ class FloatingWidgetController {
   }
 
   /// 更新按钮数据
-  void updateButtonData(List<FloatingBallButtonData> buttons) {
+  Future<void> updateButtonData(List<FloatingBallButtonData> buttons) async {
     _buttonData = buttons;
+    await _saveButtonData();
   }
 
   /// 自动恢复悬浮球状态（用于应用启动时）

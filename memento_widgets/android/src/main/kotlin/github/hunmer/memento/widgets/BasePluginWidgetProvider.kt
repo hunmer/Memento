@@ -5,10 +5,15 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.content.res.ResourcesCompat
 import com.example.memento_widgets.R
 import org.json.JSONObject
 
@@ -74,13 +79,13 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
             // views.setInt(R.id.widget_container, "setBackgroundColor", colorValue)
 
             when (widgetSize) {
-                WidgetSize.SIZE_1X1 -> setup1x1Widget(views, data)
-                WidgetSize.SIZE_2X1 -> setup2x1Widget(views, data)
-                WidgetSize.SIZE_2X2 -> setup2x2Widget(views, data)
+                WidgetSize.SIZE_1X1 -> setup1x1Widget(views, data, context)
+                WidgetSize.SIZE_2X1 -> setup2x1Widget(views, data, context)
+                WidgetSize.SIZE_2X2 -> setup2x2Widget(views, data, context)
             }
         } else {
             // 没有数据时显示默认内容
-            setupDefaultWidget(views)
+            setupDefaultWidget(views, context)
         }
 
         // 设置点击跳转
@@ -93,15 +98,13 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
     /**
      * 设置 1x1 小组件内容
      */
-    private fun setup1x1Widget(views: RemoteViews, data: JSONObject) {
+    private fun setup1x1Widget(views: RemoteViews, data: JSONObject, context: Context) {
         // 设置图标
         val iconCodePoint = data.optInt("iconCodePoint", 0xE87C) // default: check_box
-        val iconChar = try {
-            String(Character.toChars(iconCodePoint))
-        } catch (e: Exception) {
-            "·"
+        val iconBitmap = createIconBitmap(context, iconCodePoint, 96, Color.WHITE)
+        if (iconBitmap != null) {
+            views.setImageViewBitmap(R.id.widget_icon, iconBitmap)
         }
-        views.setTextViewText(R.id.widget_icon, iconChar)
 
         // 设置统计值和标签
         val stats = data.optJSONArray("stats")
@@ -118,15 +121,13 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
     /**
      * 设置 2x1 小组件内容
      */
-    private fun setup2x1Widget(views: RemoteViews, data: JSONObject) {
+    private fun setup2x1Widget(views: RemoteViews, data: JSONObject, context: Context) {
         // 设置图标
         val iconCodePoint = data.optInt("iconCodePoint", 0xE87C)
-        val iconChar = try {
-            String(Character.toChars(iconCodePoint))
-        } catch (e: Exception) {
-            "·"
+        val iconBitmap = createIconBitmap(context, iconCodePoint, 120, Color.WHITE)
+        if (iconBitmap != null) {
+            views.setImageViewBitmap(R.id.widget_icon, iconBitmap)
         }
-        views.setTextViewText(R.id.widget_icon, iconChar)
 
         // 设置标题
         views.setTextViewText(R.id.widget_title, data.optString("pluginName", pluginId))
@@ -156,15 +157,13 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
     /**
      * 设置 2x2 小组件内容
      */
-    private fun setup2x2Widget(views: RemoteViews, data: JSONObject) {
+    private fun setup2x2Widget(views: RemoteViews, data: JSONObject, context: Context) {
         // 设置图标
         val iconCodePoint = data.optInt("iconCodePoint", 0xE87C)
-        val iconChar = try {
-            String(Character.toChars(iconCodePoint))
-        } catch (e: Exception) {
-            "·"
+        val iconBitmap = createIconBitmap(context, iconCodePoint, 96, Color.WHITE)
+        if (iconBitmap != null) {
+            views.setImageViewBitmap(R.id.widget_icon, iconBitmap)
         }
-        views.setTextViewText(R.id.widget_icon, iconChar)
 
         // 设置标题
         views.setTextViewText(R.id.widget_title, data.optString("pluginName", pluginId))
@@ -199,21 +198,37 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
     /**
      * 设置默认显示内容
      */
-    private fun setupDefaultWidget(views: RemoteViews) {
+    private fun setupDefaultWidget(views: RemoteViews, context: Context) {
+        // 使用默认图标 (help_outline)
+        val defaultIconBitmap = createIconBitmap(context, 0xE8FD,
+            when(widgetSize) {
+                WidgetSize.SIZE_1X1 -> 96
+                WidgetSize.SIZE_2X1 -> 120
+                WidgetSize.SIZE_2X2 -> 96
+            },
+            Color.WHITE
+        )
+
         when (widgetSize) {
             WidgetSize.SIZE_1X1 -> {
-                views.setTextViewText(R.id.widget_icon, "·")
+                if (defaultIconBitmap != null) {
+                    views.setImageViewBitmap(R.id.widget_icon, defaultIconBitmap)
+                }
                 views.setTextViewText(R.id.widget_value, "-")
                 views.setTextViewText(R.id.widget_label, pluginId)
             }
             WidgetSize.SIZE_2X1 -> {
-                views.setTextViewText(R.id.widget_icon, "·")
+                if (defaultIconBitmap != null) {
+                    views.setImageViewBitmap(R.id.widget_icon, defaultIconBitmap)
+                }
                 views.setTextViewText(R.id.widget_title, pluginId)
                 views.setViewVisibility(R.id.stat_item_1, View.GONE)
                 views.setViewVisibility(R.id.stat_item_2, View.GONE)
             }
             WidgetSize.SIZE_2X2 -> {
-                views.setTextViewText(R.id.widget_icon, "·")
+                if (defaultIconBitmap != null) {
+                    views.setImageViewBitmap(R.id.widget_icon, defaultIconBitmap)
+                }
                 views.setTextViewText(R.id.widget_title, pluginId)
                 views.setViewVisibility(R.id.stat_item_1, View.GONE)
                 views.setViewVisibility(R.id.stat_item_2, View.GONE)
@@ -251,6 +266,45 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
 
         return try {
             JSONObject(jsonString)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * 将 Material Icon 字符转换为 Bitmap
+     */
+    private fun createIconBitmap(context: Context, iconCodePoint: Int, size: Int, color: Int): Bitmap? {
+        return try {
+            // 加载 Material Icons 字体
+            val typeface = ResourcesCompat.getFont(context, R.font.material_icons_regular)
+                ?: return null
+
+            // 创建画笔
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                this.typeface = typeface
+                textSize = size.toFloat()
+                this.color = color
+                textAlign = Paint.Align.CENTER
+            }
+
+            // 获取图标字符
+            val iconChar = String(Character.toChars(iconCodePoint))
+
+            // 测量文本边界
+            val bounds = android.graphics.Rect()
+            paint.getTextBounds(iconChar, 0, iconChar.length, bounds)
+
+            // 创建 Bitmap
+            val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+
+            // 绘制图标(居中)
+            val x = size / 2f
+            val y = size / 2f - (paint.descent() + paint.ascent()) / 2f
+            canvas.drawText(iconChar, x, y, paint)
+
+            bitmap
         } catch (e: Exception) {
             null
         }
