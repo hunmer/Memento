@@ -73,6 +73,7 @@ class MyWidgetManager {
     'AgentChatWidget2x1Provider': 'github.hunmer.memento.widgets.providers.AgentChatWidget2x1Provider',
     'CalendarAlbumWidget2x1Provider': 'github.hunmer.memento.widgets.providers.CalendarAlbumWidget2x1Provider',
     'ChatWidget2x1Provider': 'github.hunmer.memento.widgets.providers.ChatWidget2x1Provider',
+    'CheckinItemWidgetProvider': 'github.hunmer.memento.widgets.providers.CheckinItemWidgetProvider',
 
     // 快速小组件
     'ChatQuickWidgetProvider': 'github.hunmer.memento.widgets.quick.ChatQuickWidgetProvider',
@@ -245,6 +246,9 @@ class MyWidgetManager {
 
   /// 插件ID 到 Provider 名称列表的映射（包含1x1和2x2尺寸）
   List<String> _getProviderNames(String pluginId) {
+    if (pluginId == 'checkin_item') {
+      return ['CheckinItemWidgetProvider'];
+    }
     const provider1x1Map = {
       'todo': 'TodoWidgetProvider',
       'timer': 'TimerWidgetProvider',
@@ -346,6 +350,8 @@ class MyWidgetManager {
       'AgentChatWidget2x1Provider',
       'CalendarAlbumWidget2x1Provider',
       'ChatWidget2x1Provider',
+      // 自定义小组件
+      'CheckinItemWidgetProvider',
     ];
   }
 }
