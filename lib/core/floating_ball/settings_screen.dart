@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'floating_ball_manager.dart';
 import 'floating_ball_service.dart';
 import 'models/floating_ball_gesture.dart';
+import 'screens/floating_button_manager_screen.dart';
 
 class FloatingBallSettingsScreen extends StatefulWidget {
   const FloatingBallSettingsScreen({super.key});
@@ -151,6 +152,37 @@ class _FloatingBallSettingsScreenState
 
                   // 为每种手势创建下拉选择框
                   ..._buildGestureActionSelectors(),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // 悬浮按钮管理
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '悬浮按钮',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FloatingButtonManagerScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.touch_app),
+                    label: const Text('管理悬浮按钮'),
+                  ),
                 ],
               ),
             ),

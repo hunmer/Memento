@@ -1,26 +1,29 @@
 import 'dart:convert';
 import 'package:home_widget/home_widget.dart';
-import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/core/services/system_widget_service.dart';
 import 'package:logging/logging.dart';
 
 /// 频道消息小组件服务
 ///
 /// 负责将频道数据同步到原生桌面小组件
+/// 包括:
+/// 1. ChatQuickWidget - 快速小组件(显示最近3个频道)
+/// 2. ChatWidget - 常规插件小组件(通过 PluginWidgetSyncHelper 管理)
 class ChatWidgetService {
   static final Logger _logger = Logger('ChatWidgetService');
   static const int _maxRecentChannels = 3; // 小组件最多显示3个频道
 
-  /// 更新小组件数据
+  /// 更新快速小组件(ChatQuickWidget)
   static Future<void> updateWidget() async {
-    try {
-      // home_widget 插件只支持 Android 和 iOS 平台
-      if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
-        _logger.info('跳过小组件更新（当前平台不支持 home_widget 插件）');
-        return;
-      }
+    // 统一平台检查
+    if (!SystemWidgetService.instance.isWidgetSupported()) {
+      _logger.fine('Widget not supported on this platform, skipping ChatQuickWidget update');
+      return;
+    }
 
+    try {
       final plugin = ChatPlugin.instance;
       final channels = plugin.channelService.channels;
 
@@ -42,16 +45,16 @@ class ChatWidgetService {
       await HomeWidget.saveWidgetData('channel_count', channels.length);
       await HomeWidget.saveWidgetData('last_update', DateTime.now().toIso8601String());
 
-      // 更新小组件（使用完整的包名）
+      // 更新快速小组件（使用完整的包名）
       await HomeWidget.updateWidget(
         name: 'ChatQuickWidget',
         qualifiedAndroidName: 'github.hunmer.memento.widgets.quick.ChatQuickWidgetProvider',
         iOSName: 'ChatQuickWidget',
       );
 
-      _logger.info('频道小组件已更新: ${recentChannels.length} 个频道');
+      _logger.info('ChatQuickWidget 已更新: ${recentChannels.length} 个频道');
     } catch (e, stack) {
-      _logger.severe('更新频道小组件失败', e, stack);
+      _logger.severe('更新 ChatQuickWidget 失败', e, stack);
     }
   }
 
@@ -76,13 +79,11 @@ class ChatWidgetService {
   ///
   /// 从 home_widget 回调中获取点击的数据
   static Future<Map<String, String?>?> getWidgetData() async {
-    try {
-      // home_widget 插件只支持 Android 和 iOS 平台
-      if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
-        _logger.info('跳过获取小组件数据（当前平台不支持 home_widget 插件）');
-        return null;
-      }
+    if (!SystemWidgetService.instance.isWidgetSupported()) {
+      return null;
+    }
 
+    try {
       // 获取小组件传递的数据
       final data = await HomeWidget.getWidgetData<String>('widget_action');
       if (data == null) return null;
@@ -98,50 +99,44 @@ class ChatWidgetService {
 
   /// 注册小组件点击事件监听
   static void registerWidgetClickListener(Function(String? channelId) callback) {
-    // home_widget 插件只支持 Android 和 iOS 平台
-    if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
-      _logger.info('跳过注册小组件点击监听（当前平台不支持 home_widget 插件）');
+    if (!SystemWidgetService.instance.isWidgetSupported()) {
       return;
     }
 
-    HomeWidget.widgetClicked.listen((uri) {
-      if (uri == null) return;
+    try {
+      HomeWidget.widgetClicked.listen((uri) {
+        if (uri == null) return;
 
-      _logger.info('小组件被点击: $uri');
+        _logger.info('小组件被点击: $uri');
 
-      // 解析 URI: memento://widget/chat?channelId=xxx
-      if (uri.host == 'widget') {
-        final pathSegments = uri.pathSegments;
-        if (pathSegments.isNotEmpty && pathSegments[0] == 'chat') {
-          final channelId = uri.queryParameters['channelId'];
-          callback(channelId);
+        // 解析 URI: memento://widget/chat?channelId=xxx
+        if (uri.host == 'widget') {
+          final pathSegments = uri.pathSegments;
+          if (pathSegments.isNotEmpty && pathSegments[0] == 'chat') {
+            final channelId = uri.queryParameters['channelId'];
+            callback(channelId);
+          }
         }
-      }
-    });
+      });
+    } catch (e, stack) {
+      _logger.warning('注册小组件点击监听失败', e, stack);
+    }
   }
 
-  /// 初始化小组件
+  /// 初始化小组件服务
   static Future<void> initialize() async {
+    if (!SystemWidgetService.instance.isWidgetSupported()) {
+      _logger.fine('Widget not supported on this platform, skipping ChatWidgetService initialization');
+      return;
+    }
+
     try {
-      // home_widget 插件只支持 Android 和 iOS 平台
-      if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
-        _logger.info('跳过小组件初始化（当前平台不支持 home_widget 插件）');
-        return;
-      }
-
-      // 只在 iOS 平台上设置 App Group ID
-      // setAppGroupId 只在 iOS 上有效，在 Android/Web/Windows 上会抛出 MissingPluginException
-      // 使用 UniversalPlatform 检查平台类型
-      if (UniversalPlatform.isIOS) {
-        await HomeWidget.setAppGroupId('group.github.hunmer.memento'); // iOS App Group
-      }
-
-      // 初次更新小组件
+      // 初次更新快速小组件
       await updateWidget();
 
-      _logger.info('频道小组件服务已初始化');
+      _logger.info('ChatWidgetService 已初始化');
     } catch (e, stack) {
-      _logger.severe('初始化频道小组件服务失败', e, stack);
+      _logger.severe('初始化 ChatWidgetService 失败', e, stack);
     }
   }
 }

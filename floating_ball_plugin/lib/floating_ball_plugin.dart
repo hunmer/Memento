@@ -11,11 +11,14 @@ class FloatingBallButtonData {
   final String icon;
   /// 自定义数据，会在点击时回传
   final Map<String, dynamic>? data;
+  /// 按钮背景图片（base64 编码），有此字段时优先使用图片而非 icon
+  final String? image;
 
   const FloatingBallButtonData({
     required this.title,
     required this.icon,
     this.data,
+    this.image,
   });
 
   /// 转换为 Map 传递给原生端
@@ -24,6 +27,7 @@ class FloatingBallButtonData {
       'title': title,
       'icon': icon,
       'data': data,
+      'image': image,
     };
   }
 }

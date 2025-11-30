@@ -22,9 +22,61 @@ class MementoWidgets {
 class MyWidgetManager {
   // 单例模式
   static MyWidgetManager? _instance;
+
+  /// Android Provider 完整包名映射
+  /// 格式: '简单类名' -> '完整包名'
   static const Map<String, String> _androidProviders = {
+    // 示例小组件
     'TextWidgetProvider': 'com.example.memento_widgets.TextWidgetProvider',
     'ImageWidgetProvider': 'com.example.memento_widgets.ImageWidgetProvider',
+
+    // 插件小组件 - 1x1 尺寸
+    'TodoWidgetProvider': 'github.hunmer.memento.widgets.providers.TodoWidgetProvider',
+    'TimerWidgetProvider': 'github.hunmer.memento.widgets.providers.TimerWidgetProvider',
+    'BillWidgetProvider': 'github.hunmer.memento.widgets.providers.BillWidgetProvider',
+    'CalendarWidgetProvider': 'github.hunmer.memento.widgets.providers.CalendarWidgetProvider',
+    'ActivityWidgetProvider': 'github.hunmer.memento.widgets.providers.ActivityWidgetProvider',
+    'TrackerWidgetProvider': 'github.hunmer.memento.widgets.providers.TrackerWidgetProvider',
+    'HabitsWidgetProvider': 'github.hunmer.memento.widgets.providers.HabitsWidgetProvider',
+    'DiaryWidgetProvider': 'github.hunmer.memento.widgets.providers.DiaryWidgetProvider',
+    'CheckinWidgetProvider': 'github.hunmer.memento.widgets.providers.CheckinWidgetProvider',
+    'NodesWidgetProvider': 'github.hunmer.memento.widgets.providers.NodesWidgetProvider',
+    'DatabaseWidgetProvider': 'github.hunmer.memento.widgets.providers.DatabaseWidgetProvider',
+    'ContactWidgetProvider': 'github.hunmer.memento.widgets.providers.ContactWidgetProvider',
+    'DayWidgetProvider': 'github.hunmer.memento.widgets.providers.DayWidgetProvider',
+    'GoodsWidgetProvider': 'github.hunmer.memento.widgets.providers.GoodsWidgetProvider',
+    'NotesWidgetProvider': 'github.hunmer.memento.widgets.providers.NotesWidgetProvider',
+    'StoreWidgetProvider': 'github.hunmer.memento.widgets.providers.StoreWidgetProvider',
+    'OpenaiWidgetProvider': 'github.hunmer.memento.widgets.providers.OpenaiWidgetProvider',
+    'AgentChatWidgetProvider': 'github.hunmer.memento.widgets.providers.AgentChatWidgetProvider',
+    'CalendarAlbumWidgetProvider': 'github.hunmer.memento.widgets.providers.CalendarAlbumWidgetProvider',
+    'ChatWidgetProvider': 'github.hunmer.memento.widgets.providers.ChatWidgetProvider',
+
+    // 插件小组件 - 2x2 尺寸
+    'TodoWidget2x1Provider': 'github.hunmer.memento.widgets.providers.TodoWidget2x1Provider',
+    'TimerWidget2x1Provider': 'github.hunmer.memento.widgets.providers.TimerWidget2x1Provider',
+    'BillWidget2x1Provider': 'github.hunmer.memento.widgets.providers.BillWidget2x1Provider',
+    'CalendarWidget2x1Provider': 'github.hunmer.memento.widgets.providers.CalendarWidget2x1Provider',
+    'ActivityWidget2x1Provider': 'github.hunmer.memento.widgets.providers.ActivityWidget2x1Provider',
+    'TrackerWidget2x1Provider': 'github.hunmer.memento.widgets.providers.TrackerWidget2x1Provider',
+    'HabitsWidget2x1Provider': 'github.hunmer.memento.widgets.providers.HabitsWidget2x1Provider',
+    'DiaryWidget2x1Provider': 'github.hunmer.memento.widgets.providers.DiaryWidget2x1Provider',
+    'CheckinWidget2x1Provider': 'github.hunmer.memento.widgets.providers.CheckinWidget2x1Provider',
+    'NodesWidget2x1Provider': 'github.hunmer.memento.widgets.providers.NodesWidget2x1Provider',
+    'DatabaseWidget2x1Provider': 'github.hunmer.memento.widgets.providers.DatabaseWidget2x1Provider',
+    'ContactWidget2x1Provider': 'github.hunmer.memento.widgets.providers.ContactWidget2x1Provider',
+    'DayWidget2x1Provider': 'github.hunmer.memento.widgets.providers.DayWidget2x1Provider',
+    'GoodsWidget2x1Provider': 'github.hunmer.memento.widgets.providers.GoodsWidget2x1Provider',
+    'NotesWidget2x1Provider': 'github.hunmer.memento.widgets.providers.NotesWidget2x1Provider',
+    'StoreWidget2x1Provider': 'github.hunmer.memento.widgets.providers.StoreWidget2x1Provider',
+    'OpenaiWidget2x1Provider': 'github.hunmer.memento.widgets.providers.OpenaiWidget2x1Provider',
+    'AgentChatWidget2x1Provider': 'github.hunmer.memento.widgets.providers.AgentChatWidget2x1Provider',
+    'CalendarAlbumWidget2x1Provider': 'github.hunmer.memento.widgets.providers.CalendarAlbumWidget2x1Provider',
+    'ChatWidget2x1Provider': 'github.hunmer.memento.widgets.providers.ChatWidget2x1Provider',
+
+    // 快速小组件
+    'ChatQuickWidgetProvider': 'github.hunmer.memento.widgets.quick.ChatQuickWidgetProvider',
+    'AgentVoiceWidgetProvider': 'github.hunmer.memento.widgets.quick.AgentVoiceWidgetProvider',
   };
 
   /// 获取单例实例
@@ -167,11 +219,15 @@ class MyWidgetManager {
     }
   }
 
-  /// 更新指定插件的小组件
+  /// 更新指定插件的小组件（同时更新1x1和2x2尺寸）
   Future<void> updatePluginWidget(String pluginId) async {
-    final providerName = _getProviderName(pluginId);
-    if (providerName != null) {
-      await updateWidget(widgetName: providerName);
+    final providerNames = _getProviderNames(pluginId);
+    for (final providerName in providerNames) {
+      try {
+        await updateWidget(widgetName: providerName);
+      } catch (e) {
+        debugPrint('Failed to update widget $providerName: $e');
+      }
     }
   }
 
@@ -187,9 +243,9 @@ class MyWidgetManager {
     }
   }
 
-  /// 插件ID 到 Provider 名称的映射
-  String? _getProviderName(String pluginId) {
-    const providerMap = {
+  /// 插件ID 到 Provider 名称列表的映射（包含1x1和2x2尺寸）
+  List<String> _getProviderNames(String pluginId) {
+    const provider1x1Map = {
       'todo': 'TodoWidgetProvider',
       'timer': 'TimerWidgetProvider',
       'bill': 'BillWidgetProvider',
@@ -211,12 +267,44 @@ class MyWidgetManager {
       'calendar_album': 'CalendarAlbumWidgetProvider',
       'chat': 'ChatWidgetProvider',
     };
-    return providerMap[pluginId];
+
+    const provider2x1Map = {
+      'todo': 'TodoWidget2x1Provider',
+      'timer': 'TimerWidget2x1Provider',
+      'bill': 'BillWidget2x1Provider',
+      'calendar': 'CalendarWidget2x1Provider',
+      'activity': 'ActivityWidget2x1Provider',
+      'tracker': 'TrackerWidget2x1Provider',
+      'habits': 'HabitsWidget2x1Provider',
+      'diary': 'DiaryWidget2x1Provider',
+      'checkin': 'CheckinWidget2x1Provider',
+      'nodes': 'NodesWidget2x1Provider',
+      'database': 'DatabaseWidget2x1Provider',
+      'contact': 'ContactWidget2x1Provider',
+      'day': 'DayWidget2x1Provider',
+      'goods': 'GoodsWidget2x1Provider',
+      'notes': 'NotesWidget2x1Provider',
+      'store': 'StoreWidget2x1Provider',
+      'openai': 'OpenaiWidget2x1Provider',
+      'agent_chat': 'AgentChatWidget2x1Provider',
+      'calendar_album': 'CalendarAlbumWidget2x1Provider',
+      'chat': 'ChatWidget2x1Provider',
+    };
+
+    final providers = <String>[];
+    final provider1x1 = provider1x1Map[pluginId];
+    final provider2x1 = provider2x1Map[pluginId];
+
+    if (provider1x1 != null) providers.add(provider1x1);
+    if (provider2x1 != null) providers.add(provider2x1);
+
+    return providers;
   }
 
-  /// 获取所有 Provider 名称
+  /// 获取所有 Provider 名称（包含1x1和2x2尺寸）
   List<String> _getAllProviderNames() {
     return [
+      // 1x1 尺寸小组件
       'TodoWidgetProvider',
       'TimerWidgetProvider',
       'BillWidgetProvider',
@@ -237,6 +325,27 @@ class MyWidgetManager {
       'AgentChatWidgetProvider',
       'CalendarAlbumWidgetProvider',
       'ChatWidgetProvider',
+      // 2x2 尺寸小组件
+      'TodoWidget2x1Provider',
+      'TimerWidget2x1Provider',
+      'BillWidget2x1Provider',
+      'CalendarWidget2x1Provider',
+      'ActivityWidget2x1Provider',
+      'TrackerWidget2x1Provider',
+      'HabitsWidget2x1Provider',
+      'DiaryWidget2x1Provider',
+      'CheckinWidget2x1Provider',
+      'NodesWidget2x1Provider',
+      'DatabaseWidget2x1Provider',
+      'ContactWidget2x1Provider',
+      'DayWidget2x1Provider',
+      'GoodsWidget2x1Provider',
+      'NotesWidget2x1Provider',
+      'StoreWidget2x1Provider',
+      'OpenaiWidget2x1Provider',
+      'AgentChatWidget2x1Provider',
+      'CalendarAlbumWidget2x1Provider',
+      'ChatWidget2x1Provider',
     ];
   }
 }

@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.PixelFormat
 import android.os.IBinder
+import android.util.Base64
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -154,6 +155,17 @@ class FloatingBallService : Service() {
             resources.getIdentifier(name, "drawable", packageName)
         } ?: android.R.drawable.ic_menu_add
         setImageDrawable(ContextCompat.getDrawable(this@FloatingBallService, iconResId))
+    }
+
+    /// 为按钮设置默认图标
+    private fun ImageView.setDefaultIconForButton(iconName: String) {
+        val iconResId = resources.getIdentifier(iconName, "drawable", packageName)
+        setImageDrawable(
+            ContextCompat.getDrawable(
+                this@FloatingBallService,
+                if (iconResId != 0) iconResId else android.R.drawable.ic_menu_info_details
+            )
+        )
     }
 
     private var initialX: Int = 0
@@ -323,17 +335,30 @@ class FloatingBallService : Service() {
             val buttonIcon = button["icon"] as? String ?: "ic_menu_info_details"
             val buttonTitle = button["title"] as? String ?: "按钮${index + 1}"
             val buttonData = button["data"] as? Map<String, Any>
-
-            // 从资源中获取图标
-            val iconResId = resources.getIdentifier(buttonIcon, "drawable", packageName)
+            val buttonImageBase64 = button["image"] as? String
 
             val buttonView = ImageView(this).apply {
-                setImageDrawable(
-                    ContextCompat.getDrawable(
-                        this@FloatingBallService,
-                        if (iconResId != 0) iconResId else android.R.drawable.ic_menu_info_details
-                    )
-                )
+                // 优先使用 base64 图片
+                if (buttonImageBase64 != null && buttonImageBase64.isNotEmpty()) {
+                    try {
+                        val imageBytes = Base64.decode(buttonImageBase64, Base64.DEFAULT)
+                        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                        if (bitmap != null) {
+                            setImageBitmap(bitmap)
+                        } else {
+                            // 解码失败，使用默认图标
+                            setDefaultIconForButton(buttonIcon)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        // base64 解析失败，使用默认图标
+                        setDefaultIconForButton(buttonIcon)
+                    }
+                } else {
+                    // 没有 image 字段，使用图标
+                    setDefaultIconForButton(buttonIcon)
+                }
+
                 setOnClickListener {
                     // 通过EventChannel回传按钮点击事件
                     val event = hashMapOf<String, Any>(
