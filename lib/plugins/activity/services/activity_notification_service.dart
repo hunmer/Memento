@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
 import '../../../core/notification_controller.dart';
 import 'activity_service.dart';
 
@@ -19,9 +18,11 @@ class ActivityNotificationService {
     'github.hunmer.memento/activity_notification',
   );
 
-  static const String _notificationChannelKey = 'activity_reminder';
-  static const String _notificationChannelGroupKey = 'activity_reminder_group';
-  static const int _notificationId = 1001; // 固定ID，用于更新同一通知
+  static const int _notificationId = 2001; // Android前台服务通知ID
+
+  // 通知配置
+  int _minimumReminderInterval = 30; // 最小提醒间隔（分钟）
+  int _updateInterval = 1; // 通知更新频率（分钟）
 
   /// 初始化通知服务
   Future<void> initialize() async {
@@ -33,9 +34,6 @@ class ActivityNotificationService {
         debugPrint('[ActivityNotificationService] 非Android平台，跳过初始化');
         return;
       }
-
-      // 注册通知渠道
-      await _registerNotificationChannel();
 
       // 启动定期更新
       _startPeriodicUpdate();
@@ -92,41 +90,45 @@ class ActivityNotificationService {
   /// 获取是否已启用
   bool get isEnabled => _isEnabled;
 
-  /// 注册活动提醒专用通知渠道
-  Future<void> _registerNotificationChannel() async {
-    await AwesomeNotifications().initialize(
-      null, // 使用默认图标
-      [
-        NotificationChannel(
-          channelGroupKey: _notificationChannelGroupKey,
-          channelKey: _notificationChannelKey,
-          channelName: '活动提醒',
-          channelDescription: '显示距离上次活动的时间和内容',
-          channelShowBadge: false,
-          importance: NotificationImportance.Low, // 低重要性即可
-          playSound: false,
-          enableVibration: false,
-          enableLights: false,
-          locked: true, // 关键：锁住通知渠道
-          defaultPrivacy: NotificationPrivacy.Private,
-        ),
-      ],
-      channelGroups: [
-        NotificationChannelGroup(
-          channelGroupKey: _notificationChannelGroupKey,
-          channelGroupName: '活动提醒',
-        ),
-      ],
-    );
+  /// 更新通知设置
+  void updateSettings({
+    int? minimumReminderInterval,
+    int? updateInterval,
+  }) {
+    bool needsRestart = false;
+
+    if (minimumReminderInterval != null &&
+        minimumReminderInterval != _minimumReminderInterval) {
+      _minimumReminderInterval = minimumReminderInterval;
+      debugPrint(
+        '[ActivityNotificationService] 最小提醒间隔已更新为 $_minimumReminderInterval 分钟',
+      );
+    }
+
+    if (updateInterval != null && updateInterval != _updateInterval) {
+      _updateInterval = updateInterval;
+      needsRestart = true;
+      debugPrint(
+        '[ActivityNotificationService] 通知更新频率已更新为 $_updateInterval 分钟',
+      );
+    }
+
+    // 如果更新频率改变，需要重启定时器
+    if (needsRestart && _isEnabled) {
+      _startPeriodicUpdate();
+    }
   }
 
   /// 启动定期更新定时器
   void _startPeriodicUpdate() {
-    // 每分钟更新一次通知
+    // 根据配置的更新频率更新通知
     _updateTimer?.cancel();
-    _updateTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      _updateNotification();
-    });
+    _updateTimer = Timer.periodic(
+      Duration(minutes: _updateInterval),
+      (timer) {
+        _updateNotification();
+      },
+    );
 
     // 延迟30秒后第一次更新，避免与启用时的通知重复
     Future.delayed(const Duration(seconds: 30), () {
@@ -134,6 +136,10 @@ class ActivityNotificationService {
         _updateNotification();
       }
     });
+
+    debugPrint(
+      '[ActivityNotificationService] 定时器已启动，更新频率: $_updateInterval 分钟',
+    );
   }
 
   /// 更新通知内容
@@ -154,6 +160,22 @@ class ActivityNotificationService {
       }
 
       final timeSinceLast = DateTime.now().difference(lastActivityTime);
+      final minutesSinceLastTotal = timeSinceLast.inMinutes;
+
+      // 检查是否满足最小提醒间隔
+      if (minutesSinceLastTotal < _minimumReminderInterval) {
+        debugPrint(
+          '[ActivityNotificationService] 距离上次活动仅 $minutesSinceLastTotal 分钟，'
+          '小于最小提醒间隔 $_minimumReminderInterval 分钟，不显示提醒',
+        );
+        // 显示默认消息
+        await _activityChannel.invokeMethod('updateActivityNotification', {
+          'title': '活动记录提醒',
+          'content': '距离上次活动还不到 $_minimumReminderInterval 分钟，继续保持！',
+        });
+        return;
+      }
+
       final hoursSinceLast = timeSinceLast.inHours;
       final minutesSinceLast = timeSinceLast.inMinutes % 60;
 
@@ -169,45 +191,7 @@ class ActivityNotificationService {
 
       debugPrint('[ActivityNotificationService] 更新通知: $body');
 
-      // 创建真正的常驻通知
-      await AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: _notificationId, // 固定ID，用于更新同一通知
-          channelKey: _notificationChannelKey,
-          title: title,
-          body: body,
-          notificationLayout: NotificationLayout.Default,
-          largeIcon: 'asset://assets/icon/icon.png',
-          showWhen: false,
-          locked: true, // 关键1：锁住通知
-          autoDismissible: false, // 关键2：禁止手动关闭
-          wakeUpScreen: false,
-          category: NotificationCategory.Service, // 标记为服务类别
-          displayOnForeground: true,
-          displayOnBackground: true,
-          payload: {
-            'action': 'open_activity_form',
-            'timestamp': DateTime.now().toIso8601String(),
-            'type': 'activity_reminder',
-          },
-        ),
-        actionButtons: [
-          NotificationActionButton(
-            key: 'open_form',
-            label: '记录活动',
-            actionType: ActionType.Default,
-            color: Colors.pink,
-          ),
-          NotificationActionButton(
-            key: 'dismiss',
-            label: '忽略',
-            actionType: ActionType.Default,
-            color: Colors.grey,
-          ),
-        ],
-      );
-
-      // 同时更新Android前台服务通知
+      // 只使用Android前台服务通知，避免重复通知
       try {
         await _activityChannel.invokeMethod('updateActivityNotification', {
           'title': title,
@@ -283,40 +267,14 @@ class ActivityNotificationService {
   /// 关闭通知
   Future<void> _dismissNotification() async {
     try {
-      await AwesomeNotifications().cancel(_notificationId);
-      debugPrint('[ActivityNotificationService] 通知已关闭');
+      // 当没有活动记录时，更新通知显示默认消息而不是完全关闭
+      await _activityChannel.invokeMethod('updateActivityNotification', {
+        'title': '活动记录提醒',
+        'content': '还没有活动记录，快来记录第一条活动吧！',
+      });
+      debugPrint('[ActivityNotificationService] 通知已更新为默认消息');
     } catch (e) {
-      debugPrint('[ActivityNotificationService] 关闭通知失败: $e');
-    }
-  }
-
-  /// 处理通知点击事件
-  static void handleNotificationAction(ReceivedAction receivedAction) {
-    debugPrint(
-      '[ActivityNotificationService] 通知动作接收: ID=${receivedAction.id}, ButtonKey=${receivedAction.buttonKeyPressed}',
-    );
-
-    if (receivedAction.buttonKeyPressed == 'open_form') {
-      // 点击"记录活动"按钮
-      _broadcastOpenActivityForm();
-    } else if (receivedAction.buttonKeyPressed == 'dismiss') {
-      // 点击"忽略"按钮
-      debugPrint('[ActivityNotificationService] 用户点击了忽略按钮');
-    } else if (receivedAction.buttonKeyPressed == null) {
-      // 点击通知本体
-      _broadcastOpenActivityForm();
-    }
-  }
-
-  /// 广播打开活动表单事件
-  static void _broadcastOpenActivityForm() {
-    try {
-      // 发送全局事件通知UI层打开活动表单
-      // 注意：这里需要使用全局事件管理器，但由于循环依赖问题，
-      // 我们在ActivityPlugin中处理这个事件
-      debugPrint('[ActivityNotificationService] 广播打开活动表单事件');
-    } catch (e) {
-      debugPrint('[ActivityNotificationService] 广播事件失败: $e');
+      debugPrint('[ActivityNotificationService] 更新通知失败: $e');
     }
   }
 
@@ -364,7 +322,6 @@ class ActivityNotificationService {
   void dispose() {
     _updateTimer?.cancel();
     _updateTimer = null;
-    _dismissNotification();
     _isInitialized = false;
     _isEnabled = false;
     debugPrint('[ActivityNotificationService] 资源已清理');

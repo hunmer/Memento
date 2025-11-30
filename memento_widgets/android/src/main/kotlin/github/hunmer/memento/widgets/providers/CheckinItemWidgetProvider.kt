@@ -23,12 +23,21 @@ class CheckinItemWidgetProvider : BasePluginWidgetProvider() {
         if (data != null) {
             setupCustomWidget(views, data)
         } else {
-            // Handle no data case if necessary, maybe show default UI
+            setupDefaultWidget(views)
         }
         
         setupClickIntent(context, views)
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
+
+    private fun setupDefaultWidget(views: RemoteViews) {
+        views.setTextViewText(R.id.widget_checkin_count, "0")
+        val checkIds = listOf(R.id.week_checks_1, R.id.week_checks_2, R.id.week_checks_3, R.id.week_checks_4, R.id.week_checks_5, R.id.week_checks_6, R.id.week_checks_7)
+        for (id in checkIds) {
+            views.setViewVisibility(id, View.INVISIBLE)
+        }
+    }
+
 
     private fun setupCustomWidget(views: RemoteViews, data: JSONObject) {
         val stats = data.optJSONArray("stats")

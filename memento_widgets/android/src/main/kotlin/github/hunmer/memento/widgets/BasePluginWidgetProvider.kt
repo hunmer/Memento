@@ -241,7 +241,7 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
     /**
      * 设置点击跳转
      */
-    private fun setupClickIntent(context: Context, views: RemoteViews) {
+    protected fun setupClickIntent(context: Context, views: RemoteViews) {
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = Uri.parse("memento://widget/$pluginId")
         intent.setPackage("github.hunmer.memento")
@@ -260,7 +260,7 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
     /**
      * 从 SharedPreferences 加载小组件数据
      */
-    private fun loadWidgetData(context: Context): JSONObject? {
+    protected fun loadWidgetData(context: Context): JSONObject? {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val jsonString = prefs.getString("${pluginId}_widget_data", null) ?: return null
 

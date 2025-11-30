@@ -129,6 +129,13 @@ abstract class ActivityLocalizations {
   String get operationFailed;
   String get recentActivityInfo;
   String get onlySupportsAndroid;
+
+  // Notification timing settings
+  String get minimumReminderInterval;
+  String get minimumReminderIntervalDesc;
+  String get updateInterval;
+  String get updateIntervalDesc;
+  String minutesUnit(int minutes);
 }
 
 class _ActivityLocalizationsDelegate

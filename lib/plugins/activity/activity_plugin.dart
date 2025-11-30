@@ -556,10 +556,20 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// 启用活动通知服务
   Future<void> enableActivityNotification() async {
     try {
+      // 加载并应用配置
+      final minInterval = await getMinimumReminderInterval();
+      final updateInt = await getUpdateInterval();
+      _notificationService.updateSettings(
+        minimumReminderInterval: minInterval,
+        updateInterval: updateInt,
+      );
+
       await _notificationService.enable();
       // 保存设置
       await storage.write('activity/notification_settings.json', {
         'isEnabled': true,
+        'minimumReminderInterval': minInterval,
+        'updateInterval': updateInt,
       });
       debugPrint('[ActivityPlugin] 通知栏显示已启用并保存');
     } catch (e) {
@@ -586,6 +596,72 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取通知服务状态
   bool isNotificationEnabled() {
     return _notificationService.isEnabled;
+  }
+
+  /// 获取最小提醒间隔（分钟）
+  Future<int> getMinimumReminderInterval() async {
+    try {
+      final settings = await storage.read(
+        'activity/notification_settings.json',
+      );
+      return settings['minimumReminderInterval'] as int? ?? 30; // 默认30分钟
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 读取最小提醒间隔失败: $e');
+      return 30;
+    }
+  }
+
+  /// 设置最小提醒间隔（分钟）
+  Future<void> setMinimumReminderInterval(int minutes) async {
+    try {
+      final settings = await storage.read(
+        'activity/notification_settings.json',
+      );
+      settings['minimumReminderInterval'] = minutes;
+      await storage.write('activity/notification_settings.json', settings);
+      debugPrint('[ActivityPlugin] 最小提醒间隔已设置为 $minutes 分钟');
+
+      // 更新通知服务
+      _notificationService.updateSettings(
+        minimumReminderInterval: minutes,
+      );
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 设置最小提醒间隔失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 获取通知更新频率（分钟）
+  Future<int> getUpdateInterval() async {
+    try {
+      final settings = await storage.read(
+        'activity/notification_settings.json',
+      );
+      return settings['updateInterval'] as int? ?? 1; // 默认1分钟
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 读取通知更新频率失败: $e');
+      return 1;
+    }
+  }
+
+  /// 设置通知更新频率（分钟）
+  Future<void> setUpdateInterval(int minutes) async {
+    try {
+      final settings = await storage.read(
+        'activity/notification_settings.json',
+      );
+      settings['updateInterval'] = minutes;
+      await storage.write('activity/notification_settings.json', settings);
+      debugPrint('[ActivityPlugin] 通知更新频率已设置为 $minutes 分钟');
+
+      // 更新通知服务
+      _notificationService.updateSettings(
+        updateInterval: minutes,
+      );
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 设置通知更新频率失败: $e');
+      rethrow;
+    }
   }
 
   // 同步获取今日活动数（从缓存）
