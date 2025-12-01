@@ -536,6 +536,20 @@
             android:resource="@xml/widget_checkin_month_info" />
     </receiver>
 
+    <!-- 日历月视图 4x2 (自定义) -->
+    <receiver
+        android:name="github.hunmer.memento.widgets.providers.CalendarMonthWidgetProvider"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            <action android:name="github.hunmer.memento.widgets.CALENDAR_PREVIOUS_MONTH" />
+            <action android:name="github.hunmer.memento.widgets.CALENDAR_NEXT_MONTH" />
+        </intent-filter>
+        <meta-data
+            android:name="android.appwidget.provider"
+            android:resource="@xml/widget_calendar_month_info" />
+    </receiver>
+
     <!-- 待办列表 2x2 (自定义) -->
     <receiver
         android:name="github.hunmer.memento.widgets.providers.TodoListWidgetProvider"

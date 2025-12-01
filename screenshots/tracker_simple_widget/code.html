@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Counting Widget Card Spaced Buttons</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#e53e3e",
+              "background-light": "#f3f4f6", // A light gray for the overall page background
+              "background-dark": "#111827", // A dark gray for the overall page background
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"], // Using Inter as a modern, clean font
+            },
+            borderRadius: {
+              DEFAULT: "1rem", // 16px as a default
+            },
+          },
+        },
+      };
+    </script>
+<style>
+        .material-icons {
+          font-family: 'Material Icons';
+          font-weight: normal;
+          font-style: normal;
+          font-size: 24px;
+          line-height: 1;
+          letter-spacing: normal;
+          text-transform: none;
+          display: inline-block;
+          white-space: nowrap;
+          word-wrap: normal;
+          direction: ltr;
+          -webkit-font-feature-settings: 'liga';
+          -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark flex items-center justify-center min-h-screen font-display p-4">
+<div class="w-1/2 aspect-square bg-white dark:bg-zinc-800 rounded-3xl shadow-lg flex flex-col justify-between p-4">
+<div>
+<p class="text-primary font-bold text-lg">计数</p>
+<div class="text-black dark:text-white mt-1 tracking-tight flex items-baseline">
+<span class="text-6xl font-bold">12</span><span class="text-4xl text-slate-400 dark:text-slate-500 font-normal">/18</span>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<button class="flex-1 h-16 bg-gray-300 dark:bg-zinc-600 rounded-full flex items-center justify-center">
+<span class="material-icons text-white text-4xl">remove</span>
+</button>
+<button class="flex-1 h-16 bg-primary rounded-full flex items-center justify-center">
+<span class="material-icons text-white text-4xl">add</span>
+</button>
+</div>
+</div>
+
+</body></html>

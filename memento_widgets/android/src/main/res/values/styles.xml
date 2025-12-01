@@ -65,4 +65,50 @@
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
     </style>
+
+    <!-- ========== 日历月视图小组件样式 ========== -->
+
+    <!-- 星期标题文字 -->
+    <style name="CalendarWeekdayText">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">#6B7280</item>
+    </style>
+
+    <!-- 日期格子容器 (FrameLayout) -->
+    <style name="CalendarDayCell">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <!-- 日期数字文字 (新版) -->
+    <style name="CalendarDayTextNew">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">#1F2937</item>
+    </style>
+
+    <!-- 日期下方事件指示点 -->
+    <style name="CalendarDayDot">
+        <item name="android:layout_width">4dp</item>
+        <item name="android:layout_height">4dp</item>
+        <item name="android:layout_gravity">bottom|center_horizontal</item>
+        <item name="android:layout_marginBottom">2dp</item>
+        <item name="android:background">@drawable/calendar_event_dot</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <!-- 今日圆形背景 -->
+    <style name="CalendarTodayBackground">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:background">@drawable/calendar_today_circle</item>
+    </style>
 </resources>
