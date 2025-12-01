@@ -118,10 +118,10 @@ class TencentASRService implements SpeechRecognitionService {
       return;
     }
 
-    try {
-      // 更新状态为处理中
-      _updateState(SpeechRecognitionState.processing);
+    // 立即更新状态为处理中（优先更新 UI）
+    _updateState(SpeechRecognitionState.processing);
 
+    try {
       // 停止音频录制
       await _stopAudioRecording();
 
@@ -130,16 +130,13 @@ class TencentASRService implements SpeechRecognitionService {
 
       // 等待最终结果（最多等待 2 秒）
       await Future.delayed(const Duration(seconds: 2));
-
-      // 关闭 WebSocket
-      await _closeWebSocket();
-
-      // 更新状态为空闲
-      _updateState(SpeechRecognitionState.idle);
     } catch (e) {
       debugPrint('停止录音失败: $e');
       _handleError('停止录音失败: $e');
-      await _cleanup();
+    } finally {
+      // 无论成功或失败，都要清理资源并更新状态
+      await _closeWebSocket();
+      _updateState(SpeechRecognitionState.idle);
     }
   }
 
