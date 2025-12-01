@@ -367,6 +367,14 @@ void _handleWidgetClick(String url) {
 
     debugPrint('处理后的路由路径: $routePath');
 
+    // 特殊处理：打卡小组件配置路由
+    // 从 /checkin_item/config?widgetId=xxx 转换为 /checkin_item_selector?widgetId=xxx
+    if (routePath == '/checkin_item/config') {
+      final widgetId = uri.queryParameters['widgetId'];
+      routePath = '/checkin_item_selector${widgetId != null ? '?widgetId=$widgetId' : ''}';
+      debugPrint('打卡小组件配置路由转换为: $routePath');
+    }
+
     // 提取参数
     final queryParams = uri.queryParameters;
     String? argument;
