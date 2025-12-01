@@ -5,13 +5,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@android:color/white"
-    android:padding="12dp">
+    android:padding="8dp">
 
     <!-- 标题栏 -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp">
+        android:layout_marginBottom="4dp">
 
         <TextView
             android:id="@+id/month_widget_title"
@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:text="跑步"
             android:textColor="#8a4bde"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true" />
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:text="11月"
             android:textColor="#1f2937"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true" />
 
@@ -62,7 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="4dp">
+            android:layout_marginBottom="2dp">
 
             <TextView
                 android:layout_width="0dp"
@@ -70,7 +70,7 @@
                 android:layout_weight="1"
                 android:text="一"
                 android:textColor="#9ca3af"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:gravity="center" />
 
             <TextView
@@ -79,7 +79,7 @@
                 android:layout_weight="1"
                 android:text="二"
                 android:textColor="#9ca3af"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:gravity="center" />
 
             <TextView
@@ -88,7 +88,7 @@
                 android:layout_weight="1"
                 android:text="三"
                 android:textColor="#9ca3af"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:gravity="center" />
 
             <TextView
@@ -97,7 +97,7 @@
                 android:layout_weight="1"
                 android:text="四"
                 android:textColor="#9ca3af"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:gravity="center" />
 
             <TextView
@@ -106,7 +106,7 @@
                 android:layout_weight="1"
                 android:text="五"
                 android:textColor="#9ca3af"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:gravity="center" />
 
             <TextView
@@ -115,7 +115,7 @@
                 android:layout_weight="1"
                 android:text="六"
                 android:textColor="#9ca3af"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:gravity="center" />
 
             <TextView
@@ -124,7 +124,7 @@
                 android:layout_weight="1"
                 android:text="日"
                 android:textColor="#9ca3af"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:gravity="center" />
 
         </LinearLayout>

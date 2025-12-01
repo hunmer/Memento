@@ -39,7 +39,8 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
         SIZE_1X1,
         SIZE_2X1,
         SIZE_2X2,
-        SIZE_2X4
+        SIZE_2X4,
+        SIZE_4X2
     }
 
     /**
@@ -69,6 +70,8 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
             WidgetSize.SIZE_1X1 -> RemoteViews(context.packageName, R.layout.widget_plugin_1x1)
             WidgetSize.SIZE_2X1 -> RemoteViews(context.packageName, R.layout.widget_plugin_2x1)
             WidgetSize.SIZE_2X2 -> RemoteViews(context.packageName, R.layout.widget_plugin_2x2)
+            WidgetSize.SIZE_2X4 -> RemoteViews(context.packageName, R.layout.widget_plugin_2x2) // 使用 2x2 布局作为占位符
+            WidgetSize.SIZE_4X2 -> RemoteViews(context.packageName, R.layout.widget_plugin_2x2) // 使用 2x2 布局作为占位符
         }
 
         // 读取插件数据
@@ -83,6 +86,8 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
                 WidgetSize.SIZE_1X1 -> setup1x1Widget(views, data, context)
                 WidgetSize.SIZE_2X1 -> setup2x1Widget(views, data, context)
                 WidgetSize.SIZE_2X2 -> setup2x2Widget(views, data, context)
+                WidgetSize.SIZE_2X4 -> {} // 2x4 小组件由子类自行处理
+                WidgetSize.SIZE_4X2 -> {} // 4x2 小组件由子类自行处理
             }
         } else {
             // 没有数据时显示默认内容
@@ -206,6 +211,8 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
                 WidgetSize.SIZE_1X1 -> 96
                 WidgetSize.SIZE_2X1 -> 120
                 WidgetSize.SIZE_2X2 -> 96
+                WidgetSize.SIZE_2X4 -> 96
+                WidgetSize.SIZE_4X2 -> 96
             },
             Color.WHITE
         )
@@ -236,6 +243,12 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
                 views.setViewVisibility(R.id.stat_item_3, View.GONE)
                 views.setViewVisibility(R.id.stat_item_4, View.GONE)
             }
+            WidgetSize.SIZE_2X4 -> {
+                // 2x4 小组件由子类自行处理，这里留空
+            }
+            WidgetSize.SIZE_4X2 -> {
+                // 4x2 小组件由子类自行处理，这里留空
+            }
         }
     }
 
@@ -260,8 +273,9 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
 
     /**
      * 从 SharedPreferences 加载小组件数据
+     * 子类可以覆盖此方法以自定义数据加载逻辑
      */
-    protected fun loadWidgetData(context: Context): JSONObject? {
+    protected open fun loadWidgetData(context: Context): JSONObject? {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val jsonString = prefs.getString("${pluginId}_widget_data", null) ?: return null
 

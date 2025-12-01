@@ -15,12 +15,35 @@ import java.util.*
 
 class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
     override val pluginId: String = "checkin_month"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X4
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_4X2
 
     companion object {
         // 复用签到项的配置键前缀
         private const val PREF_KEY_PREFIX = "checkin_item_id_"
         private const val TAG = "CheckinMonthWidget"
+    }
+
+    /**
+     * 覆盖 loadWidgetData 方法，读取 checkin_item 的数据
+     * 因为打卡月份视图和打卡项使用相同的数据源
+     */
+    override fun loadWidgetData(context: Context): JSONObject? {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        // 读取 checkin_item_widget_data 而不是 checkin_month_widget_data
+        val jsonString = prefs.getString("checkin_item_widget_data", null)
+        if (jsonString == null) {
+            Log.w(TAG, "未找到 checkin_item_widget_data 数据")
+            return null
+        }
+
+        return try {
+            val data = JSONObject(jsonString)
+            Log.d(TAG, "成功加载数据: $jsonString")
+            data
+        } catch (e: Exception) {
+            Log.e(TAG, "解析数据失败", e)
+            null
+        }
     }
 
     override fun updateAppWidget(
