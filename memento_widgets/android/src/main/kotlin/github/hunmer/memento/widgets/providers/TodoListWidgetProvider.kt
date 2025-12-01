@@ -64,6 +64,23 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
         }
     }
 
+    /**
+     * 重写 onUpdate 方法，确保 ListView 数据也被刷新
+     */
+    override fun onUpdate(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray
+    ) {
+        // 调用父类方法更新小组件 UI
+        super.onUpdate(context, appWidgetManager, appWidgetIds)
+
+        // 通知 ListView 数据已更改，触发 RemoteViewsFactory.onDataSetChanged()
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.task_list_view)
+
+        Log.d(TAG, "onUpdate: notified ListView data changed for ${appWidgetIds.size} widgets")
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
 
