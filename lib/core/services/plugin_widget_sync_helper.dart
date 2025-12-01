@@ -6,6 +6,7 @@ import '../plugin_manager.dart';
 
 // 导入所有插件
 import '../../plugins/todo/todo_plugin.dart';
+import '../../plugins/todo/models/task.dart';
 import '../../plugins/timer/timer_plugin.dart';
 import '../../plugins/bill/bill_plugin.dart';
 import '../../plugins/calendar/calendar_plugin.dart';
@@ -66,6 +67,7 @@ class PluginWidgetSyncHelper {
       syncCalendarAlbum(),
       syncChat(),
       syncCheckinItemWidget(),
+      syncTodoListWidget(),
     ]);
   }
 
@@ -903,6 +905,46 @@ class PluginWidgetSyncHelper {
       debugPrint('Synced checkin widgets (item & month) with ${items.length} items');
     } catch (e) {
       debugPrint('Failed to sync checkin_item widget: $e');
+    }
+  }
+
+  /// 同步待办列表自定义小组件
+  Future<void> syncTodoListWidget() async {
+    try {
+      // 获取待办插件数据
+      final plugin = PluginManager.instance.getPlugin('todo') as TodoPlugin?;
+      if (plugin == null) {
+        debugPrint('Todo plugin not found, skipping todo_list widget sync');
+        return;
+      }
+
+      // 获取所有未完成任务
+      final allTasks = plugin.taskController.tasks
+          .where((task) => task.status != TaskStatus.done)
+          .toList();
+
+      // 构建任务列表数据（只包含基本信息）
+      final items = allTasks.map((task) {
+        return {
+          'id': task.id,
+          'title': task.title,
+          'completed': task.status == TaskStatus.done,
+          'startDate': task.startDate?.toIso8601String(),
+          'dueDate': task.dueDate?.toIso8601String(),
+        };
+      }).toList();
+
+      // 保存为 JSON 格式到 SharedPreferences
+      final data = {'tasks': items, 'total': items.length};
+      final jsonString = jsonEncode(data);
+      await MyWidgetManager().saveString('todo_list_widget_data', jsonString);
+
+      // 更新待办列表小组件
+      await SystemWidgetService.instance.updateWidget('todo_list');
+
+      debugPrint('Synced todo_list widget with ${items.length} tasks');
+    } catch (e) {
+      debugPrint('Failed to sync todo_list widget: $e');
     }
   }
 

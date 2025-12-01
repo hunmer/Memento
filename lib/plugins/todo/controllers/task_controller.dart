@@ -194,7 +194,90 @@ class TaskController extends ChangeNotifier {
 
       _sortTasks();
       notifyListeners();
+    } else {
+      // 首次初始化，创建默认任务
+      await _createDefaultTasks();
     }
+  }
+
+  // 创建默认任务
+  Future<void> _createDefaultTasks() async {
+    final now = DateTime.now();
+
+    // 任务1：欢迎任务
+    final welcomeTask = Task(
+      id: const Uuid().v4(),
+      title: '欢迎使用待办事项',
+      description: '这是你的第一个任务！点击任务可以查看详情、编辑或标记完成。',
+      createdAt: now,
+      dueDate: now.add(const Duration(days: 1)),
+      priority: TaskPriority.high,
+      status: TaskStatus.todo,
+      tags: ['入门'],
+    );
+
+    // 任务2：带子任务的示例
+    final projectTask = Task(
+      id: const Uuid().v4(),
+      title: '完成项目计划',
+      description: '制定本周的工作计划，包含多个子任务',
+      createdAt: now,
+      startDate: now,
+      dueDate: now.add(const Duration(days: 3)),
+      priority: TaskPriority.medium,
+      status: TaskStatus.todo,
+      tags: ['工作', '计划'],
+      subtasks: [
+        Subtask(
+          id: const Uuid().v4(),
+          title: '收集需求',
+          isCompleted: false,
+        ),
+        Subtask(
+          id: const Uuid().v4(),
+          title: '设计方案',
+          isCompleted: false,
+        ),
+        Subtask(
+          id: const Uuid().v4(),
+          title: '评审确认',
+          isCompleted: false,
+        ),
+      ],
+    );
+
+    // 任务3：日常任务
+    final dailyTask = Task(
+      id: const Uuid().v4(),
+      title: '每日锻炼30分钟',
+      description: '保持健康的生活习惯',
+      createdAt: now,
+      dueDate: now,
+      priority: TaskPriority.medium,
+      status: TaskStatus.todo,
+      tags: ['健康', '日常'],
+    );
+
+    // 任务4：低优先级任务
+    final readingTask = Task(
+      id: const Uuid().v4(),
+      title: '阅读《Flutter实战》',
+      description: '学习Flutter高级特性',
+      createdAt: now,
+      startDate: now,
+      dueDate: now.add(const Duration(days: 7)),
+      priority: TaskPriority.low,
+      status: TaskStatus.todo,
+      tags: ['学习', '阅读'],
+    );
+
+    // 添加所有默认任务
+    _tasks.addAll([welcomeTask, projectTask, dailyTask, readingTask]);
+
+    // 排序并保存
+    _sortTasks();
+    await _saveTasks();
+    notifyListeners();
   }
 
   // 保存任务

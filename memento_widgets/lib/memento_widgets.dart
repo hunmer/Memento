@@ -75,6 +75,7 @@ class MyWidgetManager {
     'ChatWidget2x1Provider': 'github.hunmer.memento.widgets.providers.ChatWidget2x1Provider',
     'CheckinItemWidgetProvider': 'github.hunmer.memento.widgets.providers.CheckinItemWidgetProvider',
     'CheckinMonthWidgetProvider': 'github.hunmer.memento.widgets.providers.CheckinMonthWidgetProvider',
+    'TodoListWidgetProvider': 'github.hunmer.memento.widgets.providers.TodoListWidgetProvider',
 
     // 快速小组件
     'ChatQuickWidgetProvider': 'github.hunmer.memento.widgets.quick.ChatQuickWidgetProvider',
@@ -253,6 +254,9 @@ class MyWidgetManager {
     if (pluginId == 'checkin_month') {
       return ['CheckinMonthWidgetProvider'];
     }
+    if (pluginId == 'todo_list') {
+      return ['TodoListWidgetProvider'];
+    }
     const provider1x1Map = {
       'todo': 'TodoWidgetProvider',
       'timer': 'TimerWidgetProvider',
@@ -357,6 +361,7 @@ class MyWidgetManager {
       // 自定义小组件
       'CheckinItemWidgetProvider',
       'CheckinMonthWidgetProvider',
+      'TodoListWidgetProvider',
     ];
   }
 }
