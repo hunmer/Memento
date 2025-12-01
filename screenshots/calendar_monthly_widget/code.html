@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Daily Planner Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#34D399", // A vibrant green similar to the screenshot
+                        "background-light": "#F9FAFB", // Light grey background
+                        "background-dark": "#111827", // Dark blue-grey background
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1F2937",
+                        "text-light-primary": "#1F2937",
+                        "text-dark-primary": "#F9FAFB",
+                        "text-light-secondary": "#6B7280",
+                        "text-dark-secondary": "#9CA3AF",
+                    },
+                    fontFamily: {
+                        display: ["Noto Sans SC", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem", // Default border radius for cards
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        .material-icons-outlined {
+            font-size: 20px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display flex items-center justify-center min-h-screen p-4">
+<div class="w-4/5 aspect-square">
+<div class="bg-card-light dark:bg-card-dark rounded-3xl p-4 shadow-lg flex space-x-4 h-full">
+<div class="w-1/2">
+<div class="flex items-center justify-between mb-3">
+<span class="material-icons-outlined text-text-light-secondary dark:text-text-dark-secondary">chevron_left</span>
+<h2 class="text-primary font-bold">九月</h2>
+<span class="material-icons-outlined text-text-light-secondary dark:text-text-dark-secondary">chevron_right</span>
+</div>
+<div class="grid grid-cols-7 text-center text-xs text-text-light-secondary dark:text-text-dark-secondary mb-2">
+<span>一</span>
+<span>二</span>
+<span>三</span>
+<span>四</span>
+<span>五</span>
+<span>六</span>
+<span>日</span>
+</div>
+<div class="grid grid-cols-7 text-center text-sm gap-y-2 text-text-light-primary dark:text-text-dark-primary">
+<div></div>
+<div></div>
+<div></div>
+<div></div>
+<div class="relative">1<div class="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div></div>
+<div>2</div>
+<div>3</div>
+<div class="relative">4<div class="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div></div>
+<div class="relative">5<div class="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div></div>
+<div class="relative flex justify-center items-center">
+<div class="absolute w-6 h-6 bg-primary rounded-full"></div>
+<span class="relative text-white font-bold">6</span>
+</div>
+<div>7</div>
+<div>8</div>
+<div>9</div>
+<div>10</div>
+<div>11</div>
+<div class="relative">12<div class="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div></div>
+<div>13</div>
+<div>14</div>
+<div class="relative">15<div class="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div></div>
+<div>16</div>
+<div class="relative">17<div class="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div></div>
+<div>18</div>
+<div>19</div>
+<div class="relative">20<div class="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div></div>
+<div>21</div>
+<div class="relative">22<div class="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div></div>
+<div>23</div>
+<div>24</div>
+<div>25</div>
+<div>26</div>
+<div>27</div>
+<div>28</div>
+<div>29</div>
+<div>30</div>
+</div>
+</div>
+<div class="w-1/2 flex flex-col justify-around text-xs sm:text-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<div class="w-3 h-3 sm:w-4 sm:h-4 border border-gray-300 dark:border-gray-600 rounded"></div>
+<span class="text-text-light-primary dark:text-text-dark-primary">晨跑</span>
+</div>
+<span class="text-primary font-medium">07:00</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<div class="w-3 h-3 sm:w-4 sm:h-4 border border-gray-300 dark:border-gray-600 rounded"></div>
+<span class="text-text-light-primary dark:text-text-dark-primary">回邮件</span>
+</div>
+<span class="text-primary font-medium">09:00</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<div class="w-3 h-3 sm:w-4 sm:h-4 border border-gray-300 dark:border-gray-600 rounded"></div>
+<span class="text-text-light-primary dark:text-text-dark-primary truncate">和客户沟通...</span>
+</div>
+<span class="text-primary font-medium">10:00</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<div class="w-3 h-3 sm:w-4 sm:h-4 border border-gray-300 dark:border-gray-600 rounded"></div>
+<span class="text-text-light-primary dark:text-text-dark-primary">去超市买东西</span>
+</div>
+<span class="text-primary font-medium">11:00</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<div class="w-3 h-3 sm:w-4 sm:h-4 border border-gray-300 dark:border-gray-600 rounded"></div>
+<span class="text-text-light-primary dark:text-text-dark-primary">拿快递</span>
+</div>
+<span class="text-primary font-medium">18:00</span>
+</div>
+</div>
+</div>
+</div>
+</body></html>

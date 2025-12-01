@@ -407,6 +407,8 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
     await PluginWidgetSyncHelper.instance.syncCheckin();
     // 同步打卡项目小组件（支持配置特定打卡项的小组件）
     await PluginWidgetSyncHelper.instance.syncCheckinItemWidget();
+    // 同步打卡周视图小组件
+    await PluginWidgetSyncHelper.instance.syncCheckinWeeklyWidget();
   }
 
   @override
