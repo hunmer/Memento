@@ -34,6 +34,133 @@ class TrackerController with ChangeNotifier {
     } catch (e) {
       debugPrint('加载记录数据失败: $e');
     }
+
+    // 如果没有数据，插入默认数据
+    if (_goals.isEmpty) {
+      await _insertDefaultData();
+    }
+  }
+
+  /// 插入默认数据
+  Future<void> _insertDefaultData() async {
+    final now = DateTime.now();
+    final today = tracker_date_utils.DateUtils.startOfDay(now);
+
+    // 创建默认目标
+    final defaultGoals = [
+      Goal(
+        id: now.millisecondsSinceEpoch.toString(),
+        name: '每日阅读',
+        icon: '57455', // book icon
+        iconColor: 0xFF2196F3, // 蓝色
+        unitType: '分钟',
+        targetValue: 30,
+        currentValue: 15,
+        dateSettings: DateSettings(type: 'daily'),
+        reminderTime: '09:00',
+        isLoopReset: true,
+        createdAt: today,
+        group: '学习',
+        progressColor: 0xFF2196F3,
+      ),
+      Goal(
+        id: (now.millisecondsSinceEpoch + 1).toString(),
+        name: '每日运动',
+        icon: '58718', // fitness icon
+        iconColor: 0xFF4CAF50, // 绿色
+        unitType: '分钟',
+        targetValue: 30,
+        currentValue: 0,
+        dateSettings: DateSettings(type: 'daily'),
+        reminderTime: '18:00',
+        isLoopReset: true,
+        createdAt: today,
+        group: '健康',
+        progressColor: 0xFF4CAF50,
+      ),
+      Goal(
+        id: (now.millisecondsSinceEpoch + 2).toString(),
+        name: '每日喝水',
+        icon: '59817', // water drop icon
+        iconColor: 0xFF00BCD4, // 青色
+        unitType: '杯',
+        targetValue: 8,
+        currentValue: 3,
+        dateSettings: DateSettings(type: 'daily'),
+        isLoopReset: true,
+        createdAt: today,
+        group: '健康',
+        progressColor: 0xFF00BCD4,
+      ),
+      Goal(
+        id: (now.millisecondsSinceEpoch + 3).toString(),
+        name: '每周跑步',
+        icon: '58718', // directions run icon
+        iconColor: 0xFFFF9800, // 橙色
+        unitType: '公里',
+        targetValue: 10,
+        currentValue: 3.5,
+        dateSettings: DateSettings(
+          type: 'weekly',
+          selectedDays: ['Monday', 'Wednesday', 'Friday'],
+        ),
+        isLoopReset: true,
+        createdAt: today,
+        group: '健康',
+        progressColor: 0xFFFF9800,
+      ),
+    ];
+
+    _goals = defaultGoals;
+
+    // 创建默认记录
+    final defaultRecords = [
+      // 阅读记录
+      Record(
+        id: now.millisecondsSinceEpoch.toString(),
+        goalId: defaultGoals[0].id,
+        value: 15,
+        note: '阅读技术文档',
+        recordedAt: today.add(const Duration(hours: 9, minutes: 30)),
+      ),
+      // 喝水记录
+      Record(
+        id: (now.millisecondsSinceEpoch + 1).toString(),
+        goalId: defaultGoals[2].id,
+        value: 1,
+        note: '早晨第一杯水',
+        recordedAt: today.add(const Duration(hours: 7)),
+      ),
+      Record(
+        id: (now.millisecondsSinceEpoch + 2).toString(),
+        goalId: defaultGoals[2].id,
+        value: 1,
+        recordedAt: today.add(const Duration(hours: 10)),
+      ),
+      Record(
+        id: (now.millisecondsSinceEpoch + 3).toString(),
+        goalId: defaultGoals[2].id,
+        value: 1,
+        recordedAt: today.add(const Duration(hours: 14)),
+      ),
+      // 跑步记录
+      Record(
+        id: (now.millisecondsSinceEpoch + 4).toString(),
+        goalId: defaultGoals[3].id,
+        value: 3.5,
+        note: '晨跑',
+        recordedAt: today.add(const Duration(hours: 6, minutes: 30)),
+        durationSeconds: 1800, // 30分钟
+      ),
+    ];
+
+    _records = defaultRecords;
+
+    // 保存到存储
+    await _saveGoals();
+    await _saveRecords();
+
+    debugPrint('已插入默认数据: ${_goals.length} 个目标, ${_records.length} 条记录');
   }
 
   Future<void> _saveGoals() async {

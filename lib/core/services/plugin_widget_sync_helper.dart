@@ -112,6 +112,7 @@ class PluginWidgetSyncHelper {
       _checkinSyncer.syncCheckinItemWidget(),
       _todoSyncer.syncTodoListWidget(),
       _checkinSyncer.syncCheckinWeeklyWidget(),
+      _trackerSyncer.syncTrackerGoalWidget(),
     ]);
   }
 
@@ -194,4 +195,11 @@ class PluginWidgetSyncHelper {
 
   /// 同步打卡周视图小组件
   Future<void> syncCheckinWeeklyWidget() => _checkinSyncer.syncCheckinWeeklyWidget();
+
+  /// 同步目标进度自定义小组件
+  Future<void> syncTrackerGoalWidget() => _trackerSyncer.syncTrackerGoalWidget();
+
+  /// 应用启动或恢复时同步待处理的目标变更
+  /// 在 main.dart 中调用，确保用户在小组件上增减的进度能立即同步到应用
+  Future<void> syncPendingGoalChangesOnStartup() => _trackerSyncer.syncPendingGoalChangesOnStartup();
 }

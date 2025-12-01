@@ -1445,6 +1445,18 @@ adb logcat | grep -E "TodoListWidget|RemoteViewsFactory"
 │  清除标志 → 完成 ✓                                               │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
+示例同步更新：
+[用户切换回 App]
+           ↓
+  main.dart: didChangeAppLifecycleState(resumed) 触发
+           ↓
+  PluginWidgetSyncHelper: syncPendingCalendarEventsOnStartup()
+           ↓
+  CalendarSyncer: 读取队列并执行 controller.completeEvent()
+           ↓
+  日历 UI 更新 ✓
+
+  现在无论 App 是首次启动还是从后台恢复，都会同步小组件上完成的日历事件。
 ```
 
 ### 完整示例代码位置
