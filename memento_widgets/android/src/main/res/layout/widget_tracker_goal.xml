@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 目标追踪进度增减小组件布局 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_tracker_goal_background"
+    android:padding="12dp"
+    android:gravity="top">
+
+    <!-- 标题 -->
+    <TextView
+        android:id="@+id/widget_goal_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="计数"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- 提示文本(未配置时显示) -->
+    <TextView
+        android:id="@+id/widget_hint_text"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="点击设置小组件"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:visibility="gone" />
+
+    <!-- 进度容器 -->
+    <LinearLayout
+        android:id="@+id/widget_progress_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical|start"
+        android:layout_marginTop="8dp"
+        android:visibility="visible">
+
+        <!-- 当前值 -->
+        <TextView
+            android:id="@+id/widget_current_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12"
+            android:textColor="@android:color/white"
+            android:textSize="48sp"
+            android:textStyle="bold"
+            android:includeFontPadding="false"
+            android:lineSpacingMultiplier="1.0" />
+
+        <!-- 目标值 -->
+        <TextView
+            android:id="@+id/widget_target_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="/18"
+            android:textColor="@android:color/white"
+            android:textSize="24sp"
+            android:alpha="0.7"
+            android:layout_marginStart="4dp"
+            android:includeFontPadding="false"
+            android:lineSpacingMultiplier="1.0" />
+
+    </LinearLayout>
+
+    <!-- 按钮容器 -->
+    <LinearLayout
+        android:id="@+id/widget_button_container"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:visibility="visible">
+
+        <!-- 减号按钮 -->
+        <LinearLayout
+            android:id="@+id/widget_button_decrement"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/widget_button_background"
+            android:backgroundTint="#4D9E9E9E"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/widget_icon_decrement"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:tint="@android:color/white"
+                android:scaleType="fitCenter"
+                android:contentDescription="减少" />
+
+        </LinearLayout>
+
+        <!-- 间隔 -->
+        <View
+            android:layout_width="8dp"
+            android:layout_height="1dp" />
+
+        <!-- 加号按钮 -->
+        <LinearLayout
+            android:id="@+id/widget_button_increment"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/widget_button_background"
+            android:backgroundTint="#33FFFFFF"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/widget_icon_increment"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@android:drawable/ic_menu_add"
+                android:tint="@android:color/white"
+                android:scaleType="fitCenter"
+                android:contentDescription="增加" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

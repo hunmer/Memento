@@ -372,29 +372,26 @@ void _handleWidgetClick(String url) {
     debugPrint('处理后的路由路径: $routePath');
 
     // 特殊处理：打卡小组件配置路由
-    // 从 /checkin_item/config?widgetId=xxx 转换为 /checkin_item_selector?widgetId=xxx
+    // 从 /checkin_item/config?widgetId=xxx 转换为 /checkin_item_selector
+    // widgetId 参数会在后面被提取到 arguments 中
     if (routePath == '/checkin_item/config') {
-      final widgetId = uri.queryParameters['widgetId'];
-      routePath =
-          '/checkin_item_selector${widgetId != null ? '?widgetId=$widgetId' : ''}';
+      routePath = '/checkin_item_selector';
       debugPrint('打卡小组件配置路由转换为: $routePath');
     }
 
     // 特殊处理：待办列表小组件配置路由
-    // 从 /todo_list/config?widgetId=xxx 转换为 /todo_list_selector?widgetId=xxx
+    // 从 /todo_list/config?widgetId=xxx 转换为 /todo_list_selector
+    // widgetId 参数会在后面被提取到 arguments 中
     if (routePath == '/todo_list/config') {
-      final widgetId = uri.queryParameters['widgetId'];
-      routePath =
-          '/todo_list_selector${widgetId != null ? '?widgetId=$widgetId' : ''}';
+      routePath = '/todo_list_selector';
       debugPrint('待办列表小组件配置路由转换为: $routePath');
     }
 
     // 特殊处理：日历月视图小组件配置路由
-    // 从 /calendar_month/config?widgetId=xxx 转换为 /calendar_month_selector?widgetId=xxx
+    // 从 /calendar_month/config?widgetId=xxx 转换为 /calendar_month_selector
+    // widgetId 参数会在后面被提取到 arguments 中
     if (routePath == '/calendar_month/config') {
-      final widgetId = uri.queryParameters['widgetId'];
-      routePath =
-          '/calendar_month_selector${widgetId != null ? '?widgetId=$widgetId' : ''}';
+      routePath = '/calendar_month_selector';
       debugPrint('日历月视图小组件配置路由转换为: $routePath');
     }
 
@@ -410,6 +407,14 @@ void _handleWidgetClick(String url) {
       }
     }
 
+    // 特殊处理：目标追踪进度增减小组件配置路由
+    // 从 /tracker_goal/config?widgetId=xxx 转换为 /tracker_goal_selector
+    // widgetId 参数会在后面被提取到 arguments 中
+    if (routePath == '/tracker_goal/config') {
+      routePath = '/tracker_goal_selector';
+      debugPrint('目标追踪进度增减小组件配置路由转换为: $routePath');
+    }
+
     // 特殊处理：日历月视图小组件点击标题（打开日历插件）
     if (routePath == '/calendar' && uri.queryParameters.isEmpty) {
       // 直接打开日历插件主界面
@@ -417,11 +422,10 @@ void _handleWidgetClick(String url) {
     }
 
     // 特殊处理：待办列表小组件任务详情路由
-    // 从 /todo_list/detail?taskId=xxx 转换为 /todo_task_detail?taskId=xxx
+    // 从 /todo_list/detail?taskId=xxx 转换为 /todo_task_detail
+    // taskId 参数会在后面被提取到 arguments 中
     if (routePath == '/todo_list/detail') {
-      final taskId = uri.queryParameters['taskId'];
-      routePath =
-          '/todo_task_detail${taskId != null ? '?taskId=$taskId' : ''}';
+      routePath = '/todo_task_detail';
       debugPrint('待办列表小组件任务详情路由转换为: $routePath');
     }
 
@@ -430,6 +434,26 @@ void _handleWidgetClick(String url) {
     if (routePath == '/todo/add') {
       routePath = '/todo_add';
       debugPrint('待办添加任务路由转换为: $routePath');
+    }
+
+    // 特殊处理：目标追踪目标详情路由
+    // 从 /plugin/tracker/goal/goalId 跳转到目标详情页
+    if (routePath.startsWith('/plugin/tracker/goal/')) {
+      final goalId = routePath.substring('/plugin/tracker/goal/'.length);
+      debugPrint('目标追踪目标详情路由，goalId: $goalId');
+      // 打开 tracker 插件并导航到目标详情页
+      final trackerPlugin = TrackerPlugin.instance;
+      final goal = trackerPlugin.controller.goals.firstWhere(
+        (g) => g.id == goalId,
+        orElse: () => throw Exception('Goal not found: $goalId'),
+      );
+      routePath = '/tracker';
+      // 使用路由后回调导航到详情页
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (navigatorKey.currentContext != null) {
+          trackerPlugin.openGoalDetail(navigatorKey.currentContext!, goal);
+        }
+      });
     }
 
     // 提取所有查询参数

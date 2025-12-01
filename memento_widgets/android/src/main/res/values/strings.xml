@@ -127,4 +127,8 @@
     <!-- 日历月视图小组件 (自定义) -->
     <string name="widget_calendar_month_label">日历月视图</string>
     <string name="widget_calendar_month_description">显示本月日历事件</string>
+
+    <!-- 目标追踪进度增减小组件 (自定义) -->
+    <string name="widget_tracker_goal_label">目标进度</string>
+    <string name="widget_tracker_goal_description">快速增减目标进度</string>
 </resources>
