@@ -17,6 +17,7 @@ import './widgets/event_detail_card.dart';
 import './services/todo_event_service.dart';
 import '../todo/todo_plugin.dart';
 import './l10n/calendar_localizations.dart';
+import '../../core/services/plugin_widget_sync_helper.dart';
 
 class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   // 总控制器，管理所有日历相关服务
@@ -148,6 +149,9 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
 
     // 初始同步
     syncWidgetData();
+
+    // 处理小组件中待完成的事件（首次启动时）
+    PluginWidgetSyncHelper.instance.syncPendingCalendarEventsOnStartup();
   }
 
   // ========== 小组件数据同步 ==========
