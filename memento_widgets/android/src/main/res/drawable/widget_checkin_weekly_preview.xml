@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 白色圆角背景 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#f8fafc" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+
+    <!-- 分隔线 -->
+    <item
+        android:top="45dp"
+        android:left="16dp"
+        android:right="16dp"
+        android:bottom="115dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#e5e7eb" />
+        </shape>
+    </item>
+
+    <!-- 当天高亮列（周五） -->
+    <item
+        android:top="50dp"
+        android:left="140dp"
+        android:right="140dp"
+        android:bottom="16dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FEF3C7" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 第1列 -->
+    <item
+        android:top="55dp"
+        android:left="18dp"
+        android:right="262dp"
+        android:bottom="100dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FED7AA" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+    <item
+        android:top="75dp"
+        android:left="18dp"
+        android:right="262dp"
+        android:bottom="80dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#D1FAE5" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 第2列 -->
+    <item
+        android:top="55dp"
+        android:left="58dp"
+        android:right="222dp"
+        android:bottom="100dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#E9D5FF" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+    <item
+        android:top="75dp"
+        android:left="58dp"
+        android:right="222dp"
+        android:bottom="80dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#BFDBFE" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 第3列 -->
+    <item
+        android:top="55dp"
+        android:left="98dp"
+        android:right="182dp"
+        android:bottom="100dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FBCFE8" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 高亮列（第5列） -->
+    <item
+        android:top="55dp"
+        android:left="145dp"
+        android:right="135dp"
+        android:bottom="100dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#D1FAE5" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+    <item
+        android:top="75dp"
+        android:left="145dp"
+        android:right="135dp"
+        android:bottom="80dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FED7AA" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+    <item
+        android:top="95dp"
+        android:left="145dp"
+        android:right="135dp"
+        android:bottom="60dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#E9D5FF" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 第6列 -->
+    <item
+        android:top="55dp"
+        android:left="222dp"
+        android:right="58dp"
+        android:bottom="100dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#BFDBFE" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 第7列 -->
+    <item
+        android:top="55dp"
+        android:left="262dp"
+        android:right="18dp"
+        android:bottom="100dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#E5E7EB" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+</layer-list>

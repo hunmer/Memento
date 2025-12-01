@@ -36,9 +36,15 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
       colors: [
         ColorConfig(
           key: 'primary',
-          label: '主色调',
+          label: '背景色',
           defaultValue: Colors.purple,
           currentValue: Colors.purple,
+        ),
+        ColorConfig(
+          key: 'accent',
+          label: '标题色',
+          defaultValue: Colors.white,
+          currentValue: Colors.white,
         ),
       ],
       opacity: 0.95,
@@ -62,12 +68,20 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
         _selectedItemId = savedItemId;
       }
 
-      // 加载主色调
+      // 加载背景色
       final savedColorValue = await HomeWidget.getWidgetData<int>(
         'checkin_widget_primary_color_${widget.widgetId}',
       );
       if (savedColorValue != null) {
         _widgetConfig = _widgetConfig.updateColor('primary', Color(savedColorValue));
+      }
+
+      // 加载标题色
+      final savedAccentColorValue = await HomeWidget.getWidgetData<int>(
+        'checkin_widget_accent_color_${widget.widgetId}',
+      );
+      if (savedAccentColorValue != null) {
+        _widgetConfig = _widgetConfig.updateColor('accent', Color(savedAccentColorValue));
       }
 
       // 加载透明度
@@ -492,12 +506,21 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
         _selectedItemId!,
       );
 
-      // 保存主色调（使用 String 存储，因为 HomeWidget 不支持 int）
+      // 保存背景色（使用 String 存储，因为 HomeWidget 不支持 int）
       final primaryColor = _widgetConfig.getColor('primary');
       if (primaryColor != null) {
         await HomeWidget.saveWidgetData<String>(
           'checkin_widget_primary_color_${widget.widgetId}',
           primaryColor.value.toString(),
+        );
+      }
+
+      // 保存标题色（使用 String 存储）
+      final accentColor = _widgetConfig.getColor('accent');
+      if (accentColor != null) {
+        await HomeWidget.saveWidgetData<String>(
+          'checkin_widget_accent_color_${widget.widgetId}',
+          accentColor.value.toString(),
         );
       }
 

@@ -15,8 +15,11 @@
 5. [路由配置](#路由配置)
 6. [常见问题与解决方案](#常见问题与解决方案)
 7. [调试技巧](#调试技巧)
-8. [高级：构建复杂交互小组件](#高级构建复杂交互小组件) ⭐ 新增
+8. [高级：构建复杂交互小组件](#高级构建复杂交互小组件)
    - [陷阱 5：数量与列表数据不一致](#陷阱-5数量与列表数据不一致--重要) ⭐ 重要
+9. [高级：小组件主题配置](#高级小组件主题配置) ⭐ 新增
+   - [使用 WidgetConfigEditor 组件](#使用-widgetconfigeditor-组件)
+   - [Android 端读取颜色配置](#android-端读取颜色配置)
 
 ---
 
@@ -1459,3 +1462,573 @@ adb logcat | grep -E "TodoListWidget|RemoteViewsFactory"
   - 数据同步: `lib/core/services/plugin_widget_sync_helper.dart`
   - 生命周期监听: `lib/main.dart` (_MyAppState with WidgetsBindingObserver)
   - 数据控制器: `lib/plugins/todo/controllers/task_controller.dart`
+
+---
+
+## 高级：小组件主题配置
+
+本节详细说明如何为小组件添加**主题可配置**功能，包括背景颜色、强调色和透明度的自定义，以及如何使用 `WidgetConfigEditor` 组件实现实时预览。
+
+### 功能概述
+
+- **背景色配置**: 用户可自定义小组件背景颜色
+- **强调色配置**: 用户可自定义标题、文字等强调元素颜色
+- **透明度配置**: 用户可调整背景透明度
+- **实时预览**: 配置界面实时显示效果预览
+- **持久化保存**: 配置数据保存到 SharedPreferences，小组件重启后保持配置
+
+### 架构示意图
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Flutter 端 - 配置界面                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  WidgetConfigEditor 组件                                        │
+│  ├── 颜色选择器 (ColorConfig 列表)                               │
+│  │   ├── 主色调 (背景色)                                         │
+│  │   └── 强调色 (标题色)                                         │
+│  ├── 透明度滑块                                                  │
+│  └── 实时预览组件 (previewBuilder)                               │
+│                                                                 │
+│  保存配置                                                        │
+│  ├── HomeWidget.saveWidgetData<String>('xxx_primary_color_$id') │
+│  ├── HomeWidget.saveWidgetData<String>('xxx_accent_color_$id')  │
+│  └── HomeWidget.saveWidgetData<String>('xxx_opacity_$id')       │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+                            ↕ (SharedPreferences - String 类型)
+┌─────────────────────────────────────────────────────────────────┐
+│                    Android 端 - WidgetProvider                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  读取配置                                                        │
+│  ├── getString("xxx_primary_color_$id")?.toLongOrNull()?.toInt()│
+│  ├── getString("xxx_accent_color_$id")?.toLongOrNull()?.toInt() │
+│  └── getString("xxx_opacity_$id")?.toFloatOrNull()              │
+│                                                                 │
+│  应用颜色                                                        │
+│  ├── setColorStateList(..., "setBackgroundTintList", ...)       │
+│  │   └── 保持圆角效果的背景色设置方式                             │
+│  └── setTextColor(R.id.xxx, accentColor)                        │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 使用 WidgetConfigEditor 组件
+
+#### 1. 数据模型
+
+首先了解配置相关的数据模型：
+
+**路径**: `lib/widgets/widget_config_editor/models/`
+
+```dart
+/// 单个颜色配置项
+class ColorConfig {
+  final String key;           // 唯一标识，如 'primary', 'accent'
+  final String label;         // 显示标签，如 '背景色', '标题色'
+  final Color defaultValue;   // 默认颜色
+  Color currentValue;         // 当前选中的颜色
+
+  ColorConfig({
+    required this.key,
+    required this.label,
+    required this.defaultValue,
+    Color? currentValue,
+  }) : currentValue = currentValue ?? defaultValue;
+}
+
+/// 小组件完整配置
+class WidgetConfig {
+  final List<ColorConfig> colors;  // 颜色配置列表
+  double opacity;                   // 透明度 (0.0 - 1.0)
+
+  WidgetConfig({
+    required this.colors,
+    this.opacity = 1.0,
+  });
+
+  /// 根据 key 获取颜色配置
+  ColorConfig? getColor(String key) {
+    return colors.where((c) => c.key == key).firstOrNull;
+  }
+}
+```
+
+#### 2. 在配置界面中使用
+
+**路径**: `lib/plugins/xxx/screens/xxx_selector_screen.dart`
+
+```dart
+import 'package:Memento/widgets/widget_config_editor/widget_config_editor.dart';
+import 'package:Memento/widgets/widget_config_editor/models/color_config.dart';
+import 'package:Memento/widgets/widget_config_editor/models/widget_config.dart';
+
+class _XxxSelectorScreenState extends State<XxxSelectorScreen> {
+  late WidgetConfig _widgetConfig;
+
+  @override
+  void initState() {
+    super.initState();
+    _initWidgetConfig();
+  }
+
+  void _initWidgetConfig() {
+    // ⚠️ 初始化配置，可配置多个颜色
+    _widgetConfig = WidgetConfig(
+      colors: [
+        ColorConfig(
+          key: 'primary',
+          label: '背景色',
+          defaultValue: const Color(0xFF5A9E9A),  // 默认绿色
+          currentValue: const Color(0xFF5A9E9A),
+        ),
+        ColorConfig(
+          key: 'accent',
+          label: '标题色',
+          defaultValue: Colors.white,
+          currentValue: Colors.white,
+        ),
+      ],
+      opacity: 0.95,  // 默认透明度
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('配置小组件')),
+      body: Column(
+        children: [
+          // 其他配置界面（如项目选择列表）...
+
+          // ⚠️ 主题配置编辑器
+          WidgetConfigEditor(
+            config: _widgetConfig,
+            onConfigChanged: (newConfig) {
+              setState(() {
+                _widgetConfig = newConfig;
+              });
+            },
+            // ⚠️ 实时预览组件
+            previewBuilder: (config) => _buildPreview(config),
+          ),
+
+          // 保存按钮
+          ElevatedButton(
+            onPressed: _saveAndFinish,
+            child: const Text('完成'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建实时预览组件
+  Widget _buildPreview(WidgetConfig config) {
+    final primaryColor = config.getColor('primary')?.currentValue ?? Colors.green;
+    final accentColor = config.getColor('accent')?.currentValue ?? Colors.white;
+    final opacity = config.opacity;
+
+    return Container(
+      width: 160,
+      height: 160,
+      decoration: BoxDecoration(
+        color: primaryColor.withOpacity(opacity),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _selectedItemName ?? '示例标题',
+            style: TextStyle(
+              color: accentColor,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            '预览内容',
+            style: TextStyle(color: accentColor.withOpacity(0.8)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+#### 3. 保存颜色配置
+
+**⚠️ 关键：必须使用 `String` 类型保存颜色值**
+
+HomeWidget 的 `saveWidgetData` 方法**不支持** Dart 的 `int` 类型，只支持 `Boolean, Float, String, Double, Long`。
+
+```dart
+Future<void> _saveAndFinish() async {
+  if (_selectedItemId == null || widget.widgetId == null) return;
+
+  try {
+    // 1. 获取配置值
+    final primaryColor = _widgetConfig.getColor('primary')?.currentValue ?? Colors.green;
+    final accentColor = _widgetConfig.getColor('accent')?.currentValue ?? Colors.white;
+    final opacity = _widgetConfig.opacity;
+
+    // ⚠️ 2. 保存颜色配置（必须使用 String 类型！）
+    await HomeWidget.saveWidgetData<String>(
+      'xxx_widget_primary_color_${widget.widgetId}',
+      primaryColor.value.toString(),  // Color.value 转为字符串
+    );
+
+    await HomeWidget.saveWidgetData<String>(
+      'xxx_widget_accent_color_${widget.widgetId}',
+      accentColor.value.toString(),
+    );
+
+    await HomeWidget.saveWidgetData<String>(
+      'xxx_widget_opacity_${widget.widgetId}',
+      opacity.toString(),  // double 转为字符串
+    );
+
+    // 3. 保存选中项目 ID
+    await HomeWidget.saveWidgetData<String>(
+      'xxx_item_id_${widget.widgetId}',
+      _selectedItemId!,
+    );
+
+    // 4. 同步数据并更新小组件
+    await _syncDataToWidget();
+    await HomeWidget.updateWidget(
+      name: 'XxxWidgetProvider',
+      iOSName: 'XxxWidgetProvider',
+      qualifiedAndroidName: 'github.hunmer.memento.widgets.providers.XxxWidgetProvider',
+    );
+
+    if (mounted) Navigator.of(context).pop();
+  } catch (e) {
+    debugPrint('保存配置失败: $e');
+  }
+}
+```
+
+#### 4. 加载已保存的配置
+
+```dart
+Future<void> _loadSavedConfig() async {
+  if (widget.widgetId == null) return;
+
+  try {
+    // 加载颜色配置
+    final primaryColorStr = await HomeWidget.getWidgetData<String>(
+      'xxx_widget_primary_color_${widget.widgetId}',
+    );
+    final accentColorStr = await HomeWidget.getWidgetData<String>(
+      'xxx_widget_accent_color_${widget.widgetId}',
+    );
+    final opacityStr = await HomeWidget.getWidgetData<String>(
+      'xxx_widget_opacity_${widget.widgetId}',
+    );
+
+    setState(() {
+      // 解析颜色值
+      if (primaryColorStr != null) {
+        final colorValue = int.tryParse(primaryColorStr);
+        if (colorValue != null) {
+          _widgetConfig.getColor('primary')?.currentValue = Color(colorValue);
+        }
+      }
+
+      if (accentColorStr != null) {
+        final colorValue = int.tryParse(accentColorStr);
+        if (colorValue != null) {
+          _widgetConfig.getColor('accent')?.currentValue = Color(colorValue);
+        }
+      }
+
+      if (opacityStr != null) {
+        _widgetConfig.opacity = double.tryParse(opacityStr) ?? 0.95;
+      }
+    });
+  } catch (e) {
+    debugPrint('加载配置失败: $e');
+  }
+}
+```
+
+### Android 端读取颜色配置
+
+#### 1. 定义配置常量
+
+```kotlin
+class XxxWidgetProvider : BasePluginWidgetProvider() {
+    override val pluginId: String = "xxx"
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
+
+    companion object {
+        private const val PREF_KEY_PREFIX = "xxx_item_id_"
+        private const val PREF_KEY_PRIMARY_COLOR = "xxx_widget_primary_color_"
+        private const val PREF_KEY_ACCENT_COLOR = "xxx_widget_accent_color_"
+        private const val PREF_KEY_OPACITY = "xxx_widget_opacity_"
+
+        // 默认颜色值（ARGB 格式）
+        private const val DEFAULT_PRIMARY_COLOR = 0xFF5A9E9A.toInt()
+        private const val DEFAULT_ACCENT_COLOR = 0xFFFFFFFF.toInt()
+        private const val DEFAULT_OPACITY = 0.95f
+    }
+}
+```
+
+#### 2. 读取配置方法
+
+**⚠️ 关键：从 String 转换为对应类型**
+
+```kotlin
+/**
+ * 获取背景色（主色调）
+ * ⚠️ Flutter 使用 String 存储，需要转换
+ */
+private fun getConfiguredPrimaryColor(context: Context, appWidgetId: Int): Int {
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val colorStr = prefs.getString("$PREF_KEY_PRIMARY_COLOR$appWidgetId", null)
+    // ⚠️ 先转 Long 再转 Int（因为颜色值可能超过 Int.MAX_VALUE）
+    return colorStr?.toLongOrNull()?.toInt() ?: DEFAULT_PRIMARY_COLOR
+}
+
+/**
+ * 获取标题色（强调色）
+ */
+private fun getConfiguredAccentColor(context: Context, appWidgetId: Int): Int {
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val colorStr = prefs.getString("$PREF_KEY_ACCENT_COLOR$appWidgetId", null)
+    return colorStr?.toLongOrNull()?.toInt() ?: DEFAULT_ACCENT_COLOR
+}
+
+/**
+ * 获取透明度
+ */
+private fun getConfiguredOpacity(context: Context, appWidgetId: Int): Float {
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val opacityStr = prefs.getString("$PREF_KEY_OPACITY$appWidgetId", null)
+    return opacityStr?.toFloatOrNull() ?: DEFAULT_OPACITY
+}
+
+/**
+ * 调整颜色的透明度
+ */
+private fun adjustColorAlpha(color: Int, alphaFactor: Float): Int {
+    val alpha = (alphaFactor * 255).toInt()
+    val red = (color shr 16) and 0xFF
+    val green = (color shr 8) and 0xFF
+    val blue = color and 0xFF
+    return (alpha shl 24) or (red shl 16) or (green shl 8) or blue
+}
+```
+
+#### 3. 应用颜色到小组件
+
+**⚠️ 使用 `setColorStateList` + `backgroundTintList` 保持圆角效果**
+
+```kotlin
+import android.content.res.ColorStateList  // ⚠️ 别忘了导入
+
+override fun updateAppWidget(
+    context: Context,
+    appWidgetManager: AppWidgetManager,
+    appWidgetId: Int
+) {
+    val views = RemoteViews(context.packageName, R.layout.widget_xxx)
+
+    // 1. 读取颜色和透明度配置
+    val primaryColor = getConfiguredPrimaryColor(context, appWidgetId)
+    val accentColor = getConfiguredAccentColor(context, appWidgetId)
+    val opacity = getConfiguredOpacity(context, appWidgetId)
+
+    // 2. ⚠️ 应用背景颜色（使用 backgroundTintList 保持圆角效果）
+    val bgColor = adjustColorAlpha(primaryColor, opacity)
+    views.setColorStateList(
+        R.id.widget_container,
+        "setBackgroundTintList",
+        ColorStateList.valueOf(bgColor)
+    )
+
+    // 3. 应用标题颜色（强调色）
+    views.setTextColor(R.id.widget_title, accentColor)
+
+    // 4. 如果有多个标题，分别设置
+    // views.setTextColor(R.id.widget_subtitle, accentColor)
+
+    Log.d("XxxWidget", "应用颜色: bg=${Integer.toHexString(primaryColor)}, " +
+        "accent=${Integer.toHexString(accentColor)}, opacity=$opacity")
+
+    // ... 其他设置
+
+    appWidgetManager.updateAppWidget(appWidgetId, views)
+}
+```
+
+#### 4. 修改背景 Drawable
+
+**⚠️ 背景 Drawable 必须使用纯色，以便 `backgroundTintList` 生效**
+
+**路径**: `memento_widgets/android/src/main/res/drawable/widget_xxx_background.xml`
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- ⚠️ 使用纯色背景（白色），颜色通过 backgroundTintList 动态设置 -->
+    <solid android:color="#FFFFFF" />
+    <!-- 保持圆角效果 -->
+    <corners android:radius="16dp" />
+</shape>
+```
+
+**❌ 不要使用渐变色**:
+
+```xml
+<!-- ❌ 错误：渐变色会导致 backgroundTintList 无法正确应用 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#68A9A4"
+        android:endColor="#457C78"
+        android:angle="135" />
+</shape>
+```
+
+#### 5. 删除小组件时清理配置
+
+```kotlin
+override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+    super.onDeleted(context, appWidgetIds)
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val editor = prefs.edit()
+    for (appWidgetId in appWidgetIds) {
+        // 清理所有相关配置
+        editor.remove("$PREF_KEY_PREFIX$appWidgetId")
+        editor.remove("$PREF_KEY_PRIMARY_COLOR$appWidgetId")
+        editor.remove("$PREF_KEY_ACCENT_COLOR$appWidgetId")
+        editor.remove("$PREF_KEY_OPACITY$appWidgetId")
+    }
+    editor.apply()
+}
+```
+
+### 常见问题与解决方案
+
+#### 问题 1：PlatformException - Invalid Type
+
+**错误信息**:
+```
+PlatformException(-10, Invalid Type Long. Supported types are Boolean, Float, String, Double, Long
+```
+
+**原因**: Dart 的 `int` 类型不被 HomeWidget 支持
+
+**解决方案**:
+```dart
+// ❌ 错误
+await HomeWidget.saveWidgetData<int>('key', color.value);
+
+// ✅ 正确
+await HomeWidget.saveWidgetData<String>('key', color.value.toString());
+```
+
+#### 问题 2：背景颜色不生效（仍显示原色）
+
+**原因**:
+1. 背景 Drawable 使用了渐变色
+2. 使用了 `setBackgroundColor` 而不是 `setColorStateList`
+
+**解决方案**:
+1. 修改 Drawable 为纯色：
+   ```xml
+   <solid android:color="#FFFFFF" />
+   ```
+2. 使用正确的方法：
+   ```kotlin
+   views.setColorStateList(R.id.container, "setBackgroundTintList", ColorStateList.valueOf(color))
+   ```
+
+#### 问题 3：颜色值解析失败
+
+**原因**: 颜色值（如 `0xFFFFFFFF`）超过 `Int.MAX_VALUE`
+
+**解决方案**:
+```kotlin
+// ❌ 错误
+val color = colorStr?.toIntOrNull() ?: DEFAULT_COLOR
+
+// ✅ 正确：先转 Long 再转 Int
+val color = colorStr?.toLongOrNull()?.toInt() ?: DEFAULT_COLOR
+```
+
+### 完整示例：签到月历小组件
+
+以 `CheckinMonthWidgetProvider` 为例，展示双颜色配置的完整实现：
+
+**需求**:
+- 主色调 → 背景色
+- 强调色 → 左上角项目名称 + 右上角月份
+
+**Flutter 端配置初始化**:
+```dart
+_widgetConfig = WidgetConfig(
+  colors: [
+    ColorConfig(
+      key: 'primary',
+      label: '背景色',
+      defaultValue: Colors.purple,
+      currentValue: Colors.purple,
+    ),
+    ColorConfig(
+      key: 'accent',
+      label: '标题色',
+      defaultValue: Colors.white,
+      currentValue: Colors.white,
+    ),
+  ],
+  opacity: 0.95,
+);
+```
+
+**Android 端应用颜色**:
+```kotlin
+override fun updateAppWidget(...) {
+    val views = RemoteViews(context.packageName, R.layout.widget_checkin_month)
+
+    val primaryColor = getConfiguredPrimaryColor(context, appWidgetId)
+    val accentColor = getConfiguredAccentColor(context, appWidgetId)
+    val opacity = getConfiguredOpacity(context, appWidgetId)
+
+    // 背景色（主色调 + 透明度）
+    val bgColor = adjustColorAlpha(primaryColor, opacity)
+    views.setColorStateList(
+        R.id.month_widget_container,
+        "setBackgroundTintList",
+        ColorStateList.valueOf(bgColor)
+    )
+
+    // 标题色（强调色）应用到多个元素
+    views.setTextColor(R.id.month_widget_title, accentColor)  // 左上角项目名
+    views.setTextColor(R.id.month_widget_month, accentColor)  // 右上角月份
+
+    // ...
+}
+```
+
+### 总结
+
+实现小组件主题配置的**核心要点**:
+
+1. ✅ **使用 `WidgetConfigEditor`**: 提供统一的颜色和透明度配置 UI
+2. ✅ **数据类型转换**: Flutter 保存为 `String`，Android 读取后转换类型
+3. ✅ **使用 `backgroundTintList`**: 动态设置背景色同时保持圆角效果
+4. ✅ **纯色 Drawable**: 背景 Drawable 必须使用 `<solid>` 而非 `<gradient>`
+5. ✅ **配置清理**: `onDeleted()` 中清理所有相关配置项
+6. ✅ **实时预览**: 使用 `previewBuilder` 提供配置效果即时反馈
+
+遵循本节指南，可以为任何小组件添加完整的主题配置功能！
