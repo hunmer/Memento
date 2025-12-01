@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/weekly_widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_checkin_weekly_background"
+    android:padding="8dp">
+
+    <!-- 空状态提示 -->
+    <TextView
+        android:id="@+id/weekly_empty_hint"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="暂无打卡数据\n点击添加打卡项目"
+        android:textColor="#9ca3af"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:visibility="gone" />
+
+    <!-- 周视图主内容 -->
+    <LinearLayout
+        android:id="@+id/weekly_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- 星期标题行 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="2dp">
+
+            <TextView android:id="@+id/week_title_1" style="@style/WeeklyWidgetWeekTitle" android:text="周一" />
+            <TextView android:id="@+id/week_title_2" style="@style/WeeklyWidgetWeekTitle" android:text="周二" />
+            <TextView android:id="@+id/week_title_3" style="@style/WeeklyWidgetWeekTitle" android:text="周三" />
+            <TextView android:id="@+id/week_title_4" style="@style/WeeklyWidgetWeekTitle" android:text="周四" />
+            <TextView android:id="@+id/week_title_5" style="@style/WeeklyWidgetWeekTitle" android:text="周五" android:textColor="#FBBF24" />
+            <TextView android:id="@+id/week_title_6" style="@style/WeeklyWidgetWeekTitle" android:text="周六" />
+            <TextView android:id="@+id/week_title_7" style="@style/WeeklyWidgetWeekTitle" android:text="周日" />
+        </LinearLayout>
+
+        <!-- 日期数字行 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="4dp"
+            android:layout_marginBottom="4dp">
+
+            <TextView android:id="@+id/day_number_1" style="@style/WeeklyWidgetDayNumber" android:text="24" />
+            <TextView android:id="@+id/day_number_2" style="@style/WeeklyWidgetDayNumber" android:text="25" />
+            <TextView android:id="@+id/day_number_3" style="@style/WeeklyWidgetDayNumber" android:text="26" />
+            <TextView android:id="@+id/day_number_4" style="@style/WeeklyWidgetDayNumber" android:text="27" />
+            <TextView android:id="@+id/day_number_5" style="@style/WeeklyWidgetDayNumber" android:text="28" android:textColor="#FBBF24" />
+            <TextView android:id="@+id/day_number_6" style="@style/WeeklyWidgetDayNumber" android:text="29" />
+            <TextView android:id="@+id/day_number_7" style="@style/WeeklyWidgetDayNumber" android:text="30" />
+        </LinearLayout>
+
+        <!-- 分隔线 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E5E7EB"
+            android:layout_marginBottom="4dp" />
+
+        <!-- 打卡项目区域（7列） -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+
+            <!-- 第1列（周一） -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="1dp">
+
+                <View android:id="@+id/column_click_1" android:layout_width="match_parent" android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:id="@+id/day_items_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <!-- Day 1 Item 1 -->
+                    <LinearLayout android:id="@+id/day1_item_1" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day1_badge_1" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day1_name_1" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <!-- Day 1 Item 2 -->
+                    <LinearLayout android:id="@+id/day1_item_2" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day1_badge_2" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day1_name_2" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <!-- Day 1 Item 3 -->
+                    <LinearLayout android:id="@+id/day1_item_3" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day1_badge_3" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day1_name_3" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <!-- Day 1 Item 4 -->
+                    <LinearLayout android:id="@+id/day1_item_4" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day1_badge_4" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day1_name_4" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <!-- Day 1 Item 5 -->
+                    <LinearLayout android:id="@+id/day1_item_5" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day1_badge_5" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day1_name_5" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <!-- Day 1 Item 6 -->
+                    <LinearLayout android:id="@+id/day1_item_6" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day1_badge_6" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day1_name_6" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- 第2列（周二） -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="1dp">
+
+                <View android:id="@+id/column_click_2" android:layout_width="match_parent" android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:id="@+id/day_items_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout android:id="@+id/day2_item_1" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day2_badge_1" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day2_name_1" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day2_item_2" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day2_badge_2" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day2_name_2" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day2_item_3" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day2_badge_3" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day2_name_3" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day2_item_4" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day2_badge_4" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day2_name_4" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day2_item_5" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day2_badge_5" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day2_name_5" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day2_item_6" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day2_badge_6" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day2_name_6" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- 第3列（周三） -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="1dp">
+
+                <View android:id="@+id/column_click_3" android:layout_width="match_parent" android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:id="@+id/day_items_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout android:id="@+id/day3_item_1" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day3_badge_1" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day3_name_1" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day3_item_2" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day3_badge_2" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day3_name_2" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day3_item_3" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day3_badge_3" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day3_name_3" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day3_item_4" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day3_badge_4" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day3_name_4" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day3_item_5" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day3_badge_5" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day3_name_5" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day3_item_6" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day3_badge_6" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day3_name_6" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- 第4列（周四） -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="1dp">
+
+                <View android:id="@+id/column_click_4" android:layout_width="match_parent" android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:id="@+id/day_items_4"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout android:id="@+id/day4_item_1" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day4_badge_1" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day4_name_1" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day4_item_2" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day4_badge_2" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day4_name_2" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day4_item_3" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day4_badge_3" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day4_name_3" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day4_item_4" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day4_badge_4" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day4_name_4" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day4_item_5" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day4_badge_5" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day4_name_5" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day4_item_6" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day4_badge_6" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day4_name_6" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- 第5列（周五） -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="1dp">
+
+                <View android:id="@+id/column_click_5" android:layout_width="match_parent" android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:id="@+id/day_items_5"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout android:id="@+id/day5_item_1" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day5_badge_1" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day5_name_1" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day5_item_2" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day5_badge_2" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day5_name_2" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day5_item_3" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day5_badge_3" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day5_name_3" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day5_item_4" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day5_badge_4" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day5_name_4" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day5_item_5" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day5_badge_5" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day5_name_5" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day5_item_6" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day5_badge_6" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day5_name_6" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- 第6列（周六） -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="1dp">
+
+                <View android:id="@+id/column_click_6" android:layout_width="match_parent" android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:id="@+id/day_items_6"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout android:id="@+id/day6_item_1" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day6_badge_1" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day6_name_1" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day6_item_2" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day6_badge_2" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day6_name_2" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day6_item_3" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day6_badge_3" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day6_name_3" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day6_item_4" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day6_badge_4" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day6_name_4" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day6_item_5" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day6_badge_5" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day6_name_5" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day6_item_6" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day6_badge_6" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day6_name_6" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- 第7列（周日） -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <View android:id="@+id/column_click_7" android:layout_width="match_parent" android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:id="@+id/day_items_7"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout android:id="@+id/day7_item_1" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day7_badge_1" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day7_name_1" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day7_item_2" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day7_badge_2" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day7_name_2" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day7_item_3" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day7_badge_3" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day7_name_3" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day7_item_4" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day7_badge_4" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day7_name_4" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day7_item_5" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day7_badge_5" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day7_name_5" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/day7_item_6" style="@style/WeeklyWidgetItem" android:visibility="gone">
+                        <TextView android:id="@+id/day7_badge_6" style="@style/WeeklyWidgetBadge" />
+                        <TextView android:id="@+id/day7_name_6" style="@style/WeeklyWidgetName" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

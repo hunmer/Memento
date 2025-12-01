@@ -554,5 +554,17 @@
         android:name="github.hunmer.memento.widgets.providers.TodoListWidgetService"
         android:exported="false"
         android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+    <!-- 打卡周视图 4x2 (自定义) -->
+    <receiver
+        android:name="github.hunmer.memento.widgets.providers.CheckinWeeklyListWidgetProvider"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        </intent-filter>
+        <meta-data
+            android:name="android.appwidget.provider"
+            android:resource="@xml/widget_checkin_weekly_info" />
+    </receiver>
   </application>
 </manifest>

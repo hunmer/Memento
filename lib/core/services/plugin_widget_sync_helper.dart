@@ -68,6 +68,7 @@ class PluginWidgetSyncHelper {
       syncChat(),
       syncCheckinItemWidget(),
       syncTodoListWidget(),
+      syncCheckinWeeklyWidget(),
     ]);
   }
 
@@ -1021,6 +1022,95 @@ class PluginWidgetSyncHelper {
     } finally {
       _isSyncingPendingChanges = false;
     }
+  }
+
+  /// 同步打卡周视图小组件
+  Future<void> syncCheckinWeeklyWidget() async {
+    try {
+      // 获取签到插件数据
+      final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
+      if (plugin == null) {
+        debugPrint('Checkin plugin not found, skipping checkin_weekly widget sync');
+        return;
+      }
+
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      // 计算本周一的日期（周一=1，周日=7）
+      final mondayOffset = today.weekday - 1;
+      final monday = today.subtract(Duration(days: mondayOffset));
+
+      // 构建打卡项列表（基本信息）
+      final items = plugin.checkinItems.map((item) {
+        // 获取打卡项的颜色名称（转换为字符串）
+        String colorName = 'gray';
+        if (item.color != null) {
+          final colorValue = item.color!.value;
+          // 根据颜色值映射到预定义颜色名称
+          colorName = _getColorNameFromValue(colorValue);
+        }
+
+        return {
+          'id': item.id,
+          'name': item.name,
+          'color': colorName,
+        };
+      }).toList();
+
+      // 构建每日打卡数据
+      final Map<String, Map<String, int>> dailyCheckins = {};
+
+      for (int i = 0; i < 7; i++) {
+        final date = monday.add(Duration(days: i));
+        final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+        final dayData = <String, int>{};
+        for (final item in plugin.checkinItems) {
+          // 获取该日期的打卡记录数
+          final records = item.getDateRecords(date);
+          dayData[item.id] = records.length;
+        }
+
+        dailyCheckins[dateStr] = dayData;
+      }
+
+      // 保存为 JSON 格式到 SharedPreferences
+      final data = {
+        'items': items,
+        'dailyCheckins': dailyCheckins,
+      };
+      final jsonString = jsonEncode(data);
+      await MyWidgetManager().saveString('checkin_weekly_list_widget_data', jsonString);
+
+      // 更新小组件
+      await SystemWidgetService.instance.updateWidget('checkin_weekly_list');
+
+      debugPrint('Synced checkin_weekly_list widget with ${items.length} items');
+    } catch (e) {
+      debugPrint('Failed to sync checkin_weekly widget: $e');
+    }
+  }
+
+  /// 根据颜色值获取颜色名称
+  String _getColorNameFromValue(int colorValue) {
+    // 提取 RGB 分量进行匹配
+    final r = (colorValue >> 16) & 0xFF;
+    final g = (colorValue >> 8) & 0xFF;
+    final b = colorValue & 0xFF;
+
+    // 根据主要颜色分量判断颜色类型
+    if (r > 200 && g < 150 && b < 150) return 'red';
+    if (r > 200 && g > 150 && g < 200 && b < 100) return 'orange';
+    if (r > 200 && g > 200 && b < 100) return 'yellow';
+    if (r < 150 && g > 180 && b < 150) return 'green';
+    if (r < 150 && g > 150 && b > 200) return 'blue';
+    if (r > 150 && g < 150 && b > 200) return 'purple';
+    if (r > 200 && g < 150 && b > 150) return 'pink';
+    if (r < 150 && g > 180 && b > 180) return 'teal';
+    if (r > 100 && r < 150 && g > 100 && g < 150 && b > 200) return 'indigo';
+
+    return 'gray';
   }
 
   Future<void> syncChat() async {

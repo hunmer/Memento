@@ -119,4 +119,8 @@
     <!-- 待办列表小组件 (自定义) -->
     <string name="widget_todo_list_label">待办列表</string>
     <string name="widget_todo_list_description">显示待办任务列表</string>
+
+    <!-- 打卡周视图小组件 -->
+    <string name="widget_checkin_weekly_label">打卡周视图</string>
+    <string name="widget_checkin_weekly_description">显示本周打卡项目和次数</string>
 </resources>
