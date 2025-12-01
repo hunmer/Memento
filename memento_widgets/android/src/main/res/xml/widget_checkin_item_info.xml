@@ -10,4 +10,4 @@
     android:widgetCategory="home_screen"
     android:previewLayout="@layout/widget_checkin_item"
     android:previewImage="@drawable/widget_checkin_item_preview"
-    android:description="@string/widget_plugin_description" />
+    android:description="@string/widget_checkin_item_description" />

@@ -15,7 +15,10 @@ import 'screens/checkin_form_screen.dart';
 import 'controllers/checkin_list_controller.dart';
 
 class CheckinMainView extends StatefulWidget {
-  const CheckinMainView({super.key});
+  /// 可选的打卡项目ID，用于从小组件跳转时自动打开打卡记录对话框
+  final String? itemId;
+
+  const CheckinMainView({super.key, this.itemId});
 
   @override
   State<CheckinMainView> createState() => _CheckinMainViewState();
@@ -164,7 +167,10 @@ class _CheckinMainViewState extends State<CheckinMainView>
                               CheckinPlugin.instance.triggerSave();
                             },
                           );
-                          return CheckinListScreen(controller: listController);
+                          return CheckinListScreen(
+                            controller: listController,
+                            initialItemId: widget.itemId,
+                          );
                         },
                       ),
                       // 统计页面
@@ -361,6 +367,8 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   // 同步小组件数据
   Future<void> _syncWidget() async {
     await PluginWidgetSyncHelper.instance.syncCheckin();
+    // 同步打卡项目小组件（支持配置特定打卡项的小组件）
+    await PluginWidgetSyncHelper.instance.syncCheckinItemWidget();
   }
 
   @override

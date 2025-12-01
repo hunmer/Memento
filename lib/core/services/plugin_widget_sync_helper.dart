@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:memento_widgets/memento_widgets.dart';
 import 'system_widget_service.dart';
 import '../plugin_manager.dart';
 
@@ -842,20 +844,44 @@ class PluginWidgetSyncHelper {
   /// 同步自定义签到项小组件
   Future<void> syncCheckinItemWidget() async {
     try {
-      // For now, using mock data. Later, this should be fetched from the CheckinPlugin.
-      final checkinCount = 3;
-      final weekState = "1,1,1,1,1,0,0"; // 5 days checked
+      // 获取签到插件数据
+      final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
+      if (plugin == null) {
+        debugPrint('Checkin plugin not found, skipping checkin_item widget sync');
+        return;
+      }
 
-      await _updateWidget(
-        pluginId: 'checkin_item',
-        pluginName: '打卡',
-        iconCodePoint: Icons.task_alt.codePoint, // Example icon
-        colorValue: const Color(0xFF68A9A4).value, // Example color
-        stats: [
-          WidgetStatItem(id: 'checkin_count', label: '连续打卡', value: '$checkinCount'),
-          WidgetStatItem(id: 'week_state', label: '本周', value: weekState),
-        ],
-      );
+      // 构建签到项列表数据
+      final items = plugin.checkinItems.map((item) {
+        // 获取最近7天的打卡状态(周一到周日)
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        final List<String> weekChecks = [];
+
+        // 从周一开始计算(weekday 1-7,周一=1)
+        final mondayOffset = today.weekday - 1; // 0 表示今天是周一
+        final monday = today.subtract(Duration(days: mondayOffset));
+
+        for (int i = 0; i < 7; i++) {
+          final date = monday.add(Duration(days: i));
+          final hasCheckin = item.getDateRecords(date).isNotEmpty;
+          weekChecks.add(hasCheckin ? '1' : '0');
+        }
+
+        return {
+          'id': item.id,
+          'name': item.name,
+          'weekChecks': weekChecks.join(','),
+        };
+      }).toList();
+
+      // 保存为 JSON 格式到 SharedPreferences
+      final data = {'items': items};
+      final jsonString = jsonEncode(data);
+      await MyWidgetManager().saveString('checkin_item_widget_data', jsonString);
+      await SystemWidgetService.instance.updateWidget('checkin_item');
+
+      debugPrint('Synced checkin_item widget with ${items.length} items');
     } catch (e) {
       debugPrint('Failed to sync checkin_item widget: $e');
     }

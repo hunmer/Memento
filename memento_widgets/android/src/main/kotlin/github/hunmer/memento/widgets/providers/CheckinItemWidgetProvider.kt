@@ -17,7 +17,6 @@ class CheckinItemWidgetProvider : BasePluginWidgetProvider() {
     override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 
     companion object {
-        private const val WIDGET_PREFS_NAME = "checkin_item_widget_prefs"
         private const val PREF_KEY_PREFIX = "checkin_item_id_"
     }
 
@@ -30,12 +29,15 @@ class CheckinItemWidgetProvider : BasePluginWidgetProvider() {
 
         // 检查是否已配置打卡项目
         val checkinItemId = getConfiguredCheckinItemId(context, appWidgetId)
+        Log.d("CheckinItemWidget", "updateAppWidget: appWidgetId=$appWidgetId, checkinItemId=$checkinItemId")
 
         if (checkinItemId == null) {
             // 未配置，显示选择提示
+            Log.d("CheckinItemWidget", "小组件未配置，显示选择提示")
             setupUnconfiguredWidget(views, context, appWidgetId)
         } else {
             // 已配置，显示打卡数据
+            Log.d("CheckinItemWidget", "小组件已配置，itemId=$checkinItemId")
             val data = loadWidgetData(context)
             if (data != null) {
                 val applied = setupCustomWidget(views, data, checkinItemId)
@@ -43,9 +45,11 @@ class CheckinItemWidgetProvider : BasePluginWidgetProvider() {
                     setupDefaultWidget(views)
                 }
             } else {
+                Log.w("CheckinItemWidget", "无法加载小组件数据")
                 setupDefaultWidget(views)
             }
-            setupClickIntent(context, views)
+            // 设置点击事件，传递 itemId 参数以便打开对应的打卡记录对话框
+            setupClickIntentWithItemId(context, views, checkinItemId)
         }
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
@@ -83,7 +87,7 @@ class CheckinItemWidgetProvider : BasePluginWidgetProvider() {
      * 获取配置的打卡项目ID
      */
     private fun getConfiguredCheckinItemId(context: Context, appWidgetId: Int): String? {
-        val prefs = context.getSharedPreferences(WIDGET_PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         return prefs.getString("$PREF_KEY_PREFIX$appWidgetId", null)
     }
 
@@ -91,7 +95,7 @@ class CheckinItemWidgetProvider : BasePluginWidgetProvider() {
      * 保存配置的打卡项目ID
      */
     fun saveConfiguredCheckinItemId(context: Context, appWidgetId: Int, checkinItemId: String) {
-        val prefs = context.getSharedPreferences(WIDGET_PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString("$PREF_KEY_PREFIX$appWidgetId", checkinItemId).apply()
     }
 
@@ -100,7 +104,7 @@ class CheckinItemWidgetProvider : BasePluginWidgetProvider() {
      */
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         super.onDeleted(context, appWidgetIds)
-        val prefs = context.getSharedPreferences(WIDGET_PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val editor = prefs.edit()
         for (appWidgetId in appWidgetIds) {
             editor.remove("$PREF_KEY_PREFIX$appWidgetId")
@@ -143,6 +147,10 @@ class CheckinItemWidgetProvider : BasePluginWidgetProvider() {
             val itemName = targetItem.optString("name", "打卡")
             views.setTextViewText(R.id.widget_title, itemName)
 
+            // 隐藏提示文本，显示数据
+            views.setViewVisibility(R.id.widget_hint_text, View.GONE)
+            views.setViewVisibility(R.id.widget_checkin_count, View.VISIBLE)
+
             // 获取七日打卡记录
             val weekChecks = targetItem.optString("weekChecks", "")
             val checks = weekChecks
@@ -173,5 +181,28 @@ class CheckinItemWidgetProvider : BasePluginWidgetProvider() {
             Log.e("CheckinItemWidget", "Failed to bind widget data", e)
             false
         }
+    }
+
+    /**
+     * 设置已配置状态的点击事件（带 itemId 参数）
+     */
+    private fun setupClickIntentWithItemId(context: Context, views: RemoteViews, itemId: String) {
+        val uriString = "memento://widget/checkin_item?itemId=$itemId"
+        Log.d("CheckinItemWidget", "setupClickIntentWithItemId: itemId=$itemId, uri=$uriString")
+
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse(uriString)
+        intent.setPackage("github.hunmer.memento")
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            itemId.hashCode(),  // 使用 itemId 的 hashCode 确保唯一性
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        views.setOnClickPendingIntent(R.id.widget_container, pendingIntent)
+        Log.d("CheckinItemWidget", "点击事件已设置")
     }
 }
