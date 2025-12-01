@@ -19,11 +19,6 @@ import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/calendar/calendar_plugin.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
-import 'package:Memento/plugins/checkin/screens/checkin_item_selector_screen.dart';
-import 'package:Memento/plugins/todo/screens/todo_list_selector_screen.dart';
-import 'package:Memento/plugins/todo/widgets/task_detail_view.dart';
-import 'package:Memento/plugins/todo/widgets/task_form.dart';
-import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/database/database_plugin.dart';
 import 'package:Memento/plugins/day/day_plugin.dart';
@@ -37,7 +32,18 @@ import 'package:Memento/plugins/timer/views/timer_main_view.dart';
 import 'package:Memento/plugins/todo/views/todo_main_view.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 
+// 插件路由处理器导入
+import 'package:Memento/core/routing/plugin_route_handler.dart';
+import 'package:Memento/plugins/checkin/checkin_route_handler.dart';
+import 'package:Memento/plugins/todo/todo_route_handler.dart';
+
 class AppRoutes extends NavigatorObserver {
+  // 插件路由处理器列表
+  static final List<PluginRouteHandler> _pluginRouteHandlers = [
+    CheckinRouteHandler(),
+    TodoRouteHandler(),
+  ];
+
   // 判断是否可以返回上一级路由
   static bool canPop(BuildContext context) {
     final navigator = Navigator.of(context);
@@ -109,118 +115,16 @@ class AppRoutes extends NavigatorObserver {
   }
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    // 处理系统小组件的 Deep Link 跳转
-    // 格式: memento://widget/{pluginId} 或 memento://widget/{pluginId}?id={id}
+    // 尝试使用插件路由处理器处理路由
+    for (final handler in _pluginRouteHandlers) {
+      final route = handler.handleRoute(settings);
+      if (route != null) {
+        return route;
+      }
+    }
+
+    // 如果插件路由处理器无法处理，使用原有的路由逻辑
     final routeName = settings.name ?? '/';
-
-    // 处理打卡小组件配置路由
-    // 格式: /checkin_item_selector?widgetId={widgetId}
-    if (routeName.startsWith('/checkin_item_selector')) {
-      // 解析 widgetId 参数
-      final uri = Uri.parse(routeName);
-      final widgetIdStr = uri.queryParameters['widgetId'];
-      final widgetId = widgetIdStr != null ? int.tryParse(widgetIdStr) : null;
-
-      return _createRoute(CheckinItemSelectorScreen(widgetId: widgetId));
-    }
-
-    // 处理待办列表小组件配置路由
-    // 格式: /todo_list_selector?widgetId={widgetId}
-    if (routeName.startsWith('/todo_list_selector')) {
-      // 解析 widgetId 参数
-      final uri = Uri.parse(routeName);
-      final widgetIdStr = uri.queryParameters['widgetId'];
-      final widgetId = widgetIdStr != null ? int.tryParse(widgetIdStr) : null;
-
-      return _createRoute(TodoListSelectorScreen(widgetId: widgetId));
-    }
-
-    // 处理待办任务详情路由（从小组件打开）
-    // 格式: /todo_task_detail?taskId={taskId}
-    if (routeName.startsWith('/todo_task_detail')) {
-      String? taskId;
-
-      if (settings.arguments is Map<String, String>) {
-        final args = settings.arguments as Map<String, String>;
-        taskId = args['taskId'];
-      } else {
-        final uri = Uri.parse(routeName);
-        taskId = uri.queryParameters['taskId'];
-      }
-
-      debugPrint('打开任务详情: taskId=$taskId');
-
-      if (taskId != null) {
-        // 查找任务
-        final plugin = TodoPlugin.instance;
-        final tasks = plugin.taskController.tasks.where((t) => t.id == taskId);
-
-        if (tasks.isNotEmpty) {
-          return _createRoute(
-            TaskDetailView(
-              task: tasks.first,
-              taskController: plugin.taskController,
-              reminderController: plugin.reminderController,
-            ),
-          );
-        }
-      }
-
-      // 没有找到任务，打开待办列表
-      return _createRoute(const TodoMainView());
-    }
-
-    // 处理待办添加任务路由（从小组件打开）
-    // 格式: /todo_add
-    if (routeName == '/todo_add') {
-      debugPrint('打开添加任务界面');
-
-      final plugin = TodoPlugin.instance;
-      return _createRoute(
-        TaskForm(
-          taskController: plugin.taskController,
-          reminderController: plugin.reminderController,
-        ),
-      );
-    }
-
-    // 处理待办列表小组件点击路由（已配置状态）
-    // 格式: /todo_list?taskId={taskId}
-    if (routeName.startsWith('/todo_list') && !routeName.contains('_selector')) {
-      debugPrint('打开待办列表界面');
-
-      // 打开待办插件主界面
-      return _createRoute(const TodoMainView());
-    }
-
-    // 处理打卡小组件点击路由（已配置状态）
-    // 格式: /checkin_item?itemId={itemId}&date={date}
-    if (routeName.startsWith('/checkin_item')) {
-      // 从 arguments 或 URI 中获取参数
-      String? itemId;
-      String? date;
-
-      // 优先从 arguments 中获取（来自小组件点击）
-      if (settings.arguments is Map<String, String>) {
-        final args = settings.arguments as Map<String, String>;
-        itemId = args['itemId'];
-        date = args['date'];
-      } else {
-        // 备用：从 URI 中解析
-        final uri = Uri.parse(routeName);
-        itemId = uri.queryParameters['itemId'];
-        date = uri.queryParameters['date'];
-      }
-
-      debugPrint('打卡小组件点击: itemId=$itemId, date=$date');
-
-      // 如果有 itemId，打开打卡插件并自动展示打卡记录对话框
-      if (itemId != null) {
-        return _createRoute(CheckinMainView(itemId: itemId, targetDate: date));
-      }
-      // 没有 itemId，正常打开打卡插件
-      return _createRoute(const CheckinMainView());
-    }
 
     switch (routeName) {
       case '/':
