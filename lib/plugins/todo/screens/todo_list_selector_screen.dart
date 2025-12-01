@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import '../todo_plugin.dart';
 import '../models/task.dart';
+import '../../../widgets/widget_config_editor/index.dart';
 
 /// 待办列表小组件配置界面
+///
+/// 提供实时预览、双色配置和透明度调节功能。
 class TodoListSelectorScreen extends StatefulWidget {
   /// 小组件ID（Android appWidgetId）
   final int? widgetId;
@@ -21,6 +24,8 @@ class TodoListSelectorScreen extends StatefulWidget {
 class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
   final TodoPlugin _todoPlugin = TodoPlugin.instance;
   final TextEditingController _titleController = TextEditingController();
+  late WidgetConfig _widgetConfig;
+  bool _isLoading = true;
 
   /// 时间范围选项
   static const Map<String, String> _timeRangeOptions = {
@@ -35,8 +40,79 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
   @override
   void initState() {
     super.initState();
-    // 默认标题为空，显示时间范围对应的默认标题
-    _titleController.text = '';
+    // 初始化双色配置
+    _widgetConfig = WidgetConfig(
+      colors: [
+        const ColorConfig(
+          key: 'primary',
+          label: '主色调',
+          defaultValue: Color(0xFF2dd4bf),
+          currentValue: Color(0xFF2dd4bf),
+        ),
+        const ColorConfig(
+          key: 'accent',
+          label: '强调色',
+          defaultValue: Color(0xFF5eeada),
+          currentValue: Color(0xFF5eeada),
+        ),
+      ],
+      opacity: 1.0,
+    );
+    _loadSavedConfig();
+  }
+
+  /// 加载已保存的配置
+  Future<void> _loadSavedConfig() async {
+    if (widget.widgetId == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    try {
+      // 加载时间范围
+      final savedRange = await HomeWidget.getWidgetData<String>(
+        'todo_list_range_${widget.widgetId}',
+      );
+      if (savedRange != null && _timeRangeOptions.containsKey(savedRange)) {
+        _selectedTimeRange = savedRange;
+      }
+
+      // 加载标题
+      final savedTitle = await HomeWidget.getWidgetData<String>(
+        'todo_list_title_${widget.widgetId}',
+      );
+      if (savedTitle != null) {
+        _titleController.text = savedTitle;
+      }
+
+      // 加载主色调
+      final savedPrimaryColor = await HomeWidget.getWidgetData<int>(
+        'todo_widget_primary_color_${widget.widgetId}',
+      );
+      if (savedPrimaryColor != null) {
+        _widgetConfig = _widgetConfig.updateColor('primary', Color(savedPrimaryColor));
+      }
+
+      // 加载强调色
+      final savedAccentColor = await HomeWidget.getWidgetData<int>(
+        'todo_widget_accent_color_${widget.widgetId}',
+      );
+      if (savedAccentColor != null) {
+        _widgetConfig = _widgetConfig.updateColor('accent', Color(savedAccentColor));
+      }
+
+      // 加载透明度
+      final savedOpacity = await HomeWidget.getWidgetData<double>(
+        'todo_widget_opacity_${widget.widgetId}',
+      );
+      if (savedOpacity != null) {
+        _widgetConfig = _widgetConfig.copyWith(opacity: savedOpacity);
+      }
+    } catch (e) {
+      debugPrint('加载配置失败: $e');
+    }
+
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -130,8 +206,11 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final filteredTasks = _getFilteredTasks();
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -141,225 +220,18 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // 标题设置
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.title, color: theme.colorScheme.primary),
-                      const SizedBox(width: 8),
-                      Text(
-                        '小组件标题',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _titleController,
-                    decoration: InputDecoration(
-                      hintText: '留空则使用默认标题（${_timeRangeOptions[_selectedTimeRange]}）',
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
+      body: WidgetConfigEditor(
+        widgetSize: WidgetSize.large,
+        initialConfig: _widgetConfig,
+        previewTitle: '待办列表预览',
+        onConfigChanged: (config) {
+          setState(() => _widgetConfig = config);
+        },
+        previewBuilder: _buildPreview,
+        customConfigWidgets: [
+          _buildTitleConfig(),
           const SizedBox(height: 16),
-
-          // 时间范围选择
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.date_range, color: theme.colorScheme.primary),
-                      const SizedBox(width: 8),
-                      Text(
-                        '时间范围',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _timeRangeOptions.entries.map((entry) {
-                      final isSelected = _selectedTimeRange == entry.key;
-                      return ChoiceChip(
-                        label: Text(entry.value),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() {
-                              _selectedTimeRange = entry.key;
-                            });
-                          }
-                        },
-                        selectedColor: const Color(0xFF2dd4bf).withAlpha(50),
-                        checkmarkColor: const Color(0xFF2dd4bf),
-                        labelStyle: TextStyle(
-                          color: isSelected
-                              ? const Color(0xFF2dd4bf)
-                              : theme.textTheme.bodyMedium?.color,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // 预览
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.preview, color: theme.colorScheme.primary),
-                      const SizedBox(width: 8),
-                      Text(
-                        '预览（${filteredTasks.length} 个任务）',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // 模拟小组件样式
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 标题栏
-                        Row(
-                          children: [
-                            Text(
-                              _titleController.text.isEmpty
-                                  ? _timeRangeOptions[_selectedTimeRange]!
-                                  : _titleController.text,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF2dd4bf),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${filteredTasks.length}',
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF5eeada),
-                              ),
-                            ),
-                            const Spacer(),
-                            const Icon(
-                              Icons.add,
-                              color: Color(0xFF2dd4bf),
-                              size: 32,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-
-                        // 任务列表（最多显示4个）
-                        ...filteredTasks.take(4).map((task) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: const Color(0xFFD1D5DB),
-                                        width: 2,
-                                      ),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      task.title,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF1F2937),
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )),
-
-                        if (filteredTasks.isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Center(
-                              child: Text(
-                                '暂无待办任务',
-                                style: TextStyle(
-                                  color: Color(0xFF9CA3AF),
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          _buildTimeRangeConfig(),
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -368,7 +240,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
           child: ElevatedButton(
             onPressed: _saveAndFinish,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2dd4bf),
+              backgroundColor: _widgetConfig.getColor('primary') ?? const Color(0xFF2dd4bf),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -380,6 +252,209 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  /// 构建预览
+  Widget _buildPreview(BuildContext context, WidgetConfig config) {
+    final primaryColor = config.getColor('primary') ?? const Color(0xFF2dd4bf);
+    final accentColor = config.getColor('accent') ?? const Color(0xFF5eeada);
+    final filteredTasks = _getFilteredTasks();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC).withOpacity(config.opacity),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 标题栏
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _titleController.text.isEmpty
+                      ? _timeRangeOptions[_selectedTimeRange]!
+                      : _titleController.text,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${filteredTasks.length}',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: accentColor,
+                ),
+              ),
+              const Spacer(),
+              Icon(
+                Icons.add,
+                color: primaryColor,
+                size: 32,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // 任务列表
+          Expanded(
+            child: filteredTasks.isEmpty
+                ? const Center(
+                    child: Text(
+                      '暂无待办任务',
+                      style: TextStyle(
+                        color: Color(0xFF9CA3AF),
+                        fontSize: 14,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: filteredTasks.take(4).length,
+                    itemBuilder: (context, index) {
+                      final task = filteredTasks[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: const Color(0xFFD1D5DB),
+                                  width: 2,
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                task.title,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1F2937),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建标题配置
+  Widget _buildTitleConfig() {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.title, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  '小组件标题',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                hintText: '留空则使用默认标题（${_timeRangeOptions[_selectedTimeRange]}）',
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 构建时间范围配置
+  Widget _buildTimeRangeConfig() {
+    final theme = Theme.of(context);
+    final primaryColor = _widgetConfig.getColor('primary') ?? const Color(0xFF2dd4bf);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.date_range, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  '时间范围',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _timeRangeOptions.entries.map((entry) {
+                final isSelected = _selectedTimeRange == entry.key;
+                return ChoiceChip(
+                  label: Text(entry.value),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    if (selected) {
+                      setState(() {
+                        _selectedTimeRange = entry.key;
+                      });
+                    }
+                  },
+                  selectedColor: primaryColor.withAlpha(50),
+                  checkmarkColor: primaryColor,
+                  labelStyle: TextStyle(
+                    color: isSelected ? primaryColor : theme.textTheme.bodyMedium?.color,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
         ),
       ),
     );
@@ -403,6 +478,30 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
       await HomeWidget.saveWidgetData<String>(
         'todo_list_title_${widget.widgetId}',
         _titleController.text,
+      );
+
+      // 保存主色调（使用 String 存储，因为 HomeWidget 不支持 int）
+      final primaryColor = _widgetConfig.getColor('primary');
+      if (primaryColor != null) {
+        await HomeWidget.saveWidgetData<String>(
+          'todo_widget_primary_color_${widget.widgetId}',
+          primaryColor.value.toString(),
+        );
+      }
+
+      // 保存强调色（使用 String 存储）
+      final accentColor = _widgetConfig.getColor('accent');
+      if (accentColor != null) {
+        await HomeWidget.saveWidgetData<String>(
+          'todo_widget_accent_color_${widget.widgetId}',
+          accentColor.value.toString(),
+        );
+      }
+
+      // 保存透明度（使用 String 存储）
+      await HomeWidget.saveWidgetData<String>(
+        'todo_widget_opacity_${widget.widgetId}',
+        _widgetConfig.opacity.toString(),
       );
 
       // 同步任务数据到小组件
@@ -443,15 +542,12 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
   }
 
   /// 同步任务数据到小组件
-  /// 同步所有未完成任务（包含日期信息），让 Android 端按时间范围过滤
   Future<void> _syncTasksToWidget() async {
     try {
-      // 获取所有未完成任务（不按时间范围过滤，让 Android 端过滤）
       final allTasks = _todoPlugin.taskController.tasks
           .where((task) => task.status != TaskStatus.done)
           .toList();
 
-      // 构建任务数据（包含日期字段，供 Android 端过滤使用）
       final taskList = allTasks.map((task) {
         return {
           'id': task.id,
@@ -462,13 +558,11 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
         };
       }).toList();
 
-      // 构建小组件数据
       final widgetData = jsonEncode({
         'tasks': taskList,
         'total': taskList.length,
       });
 
-      // 保存到 SharedPreferences
       await HomeWidget.saveWidgetData<String>(
         'todo_list_widget_data',
         widgetData,
