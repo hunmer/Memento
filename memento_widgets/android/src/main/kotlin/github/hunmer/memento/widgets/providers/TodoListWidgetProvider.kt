@@ -32,6 +32,14 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
         private const val TAG = "TodoListWidget"
         private const val PREF_KEY_PREFIX_RANGE = "todo_list_range_"
         private const val PREF_KEY_PREFIX_TITLE = "todo_list_title_"
+        private const val PREF_KEY_PRIMARY_COLOR = "todo_widget_primary_color_"
+        private const val PREF_KEY_ACCENT_COLOR = "todo_widget_accent_color_"
+        private const val PREF_KEY_OPACITY = "todo_widget_opacity_"
+
+        // 默认颜色（青绿色）
+        private const val DEFAULT_PRIMARY_COLOR = 0xFF2dd4bf.toInt()
+        private const val DEFAULT_ACCENT_COLOR = 0xFF5eeada.toInt()
+        private const val DEFAULT_OPACITY = 1.0f
 
         // 广播 Action
         const val ACTION_TASK_CLICK = "github.hunmer.memento.widgets.TODO_LIST_TASK_CLICK"
@@ -214,7 +222,13 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
         } else {
             // 已配置，显示任务列表
             Log.d(TAG, "小组件已配置，timeRange=$timeRange")
-            setupConfiguredWidget(views, context, appWidgetId, timeRange)
+
+            // 读取颜色和透明度配置
+            val primaryColor = getConfiguredPrimaryColor(context, appWidgetId)
+            val accentColor = getConfiguredAccentColor(context, appWidgetId)
+            val opacity = getConfiguredOpacity(context, appWidgetId)
+
+            setupConfiguredWidget(views, context, appWidgetId, timeRange, primaryColor, accentColor, opacity)
         }
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
@@ -256,7 +270,10 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
         views: RemoteViews,
         context: Context,
         appWidgetId: Int,
-        timeRange: String
+        timeRange: String,
+        primaryColor: Int,
+        accentColor: Int,
+        opacity: Float
     ) {
         // 获取配置的标题
         val customTitle = getConfiguredTitle(context, appWidgetId)
@@ -271,12 +288,19 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
 
         views.setTextViewText(R.id.widget_title, title)
 
+        // 应用配置的颜色
+        views.setTextColor(R.id.widget_title, primaryColor)
+        views.setInt(R.id.widget_add_button, "setColorFilter", primaryColor)
+
         // 隐藏配置提示
         views.setViewVisibility(R.id.widget_hint_text, View.GONE)
 
         // 获取任务数量
         val taskCount = getTaskCount(context, timeRange)
         views.setTextViewText(R.id.widget_count, taskCount.toString())
+
+        // 应用强调色到任务数量
+        views.setTextColor(R.id.widget_count, accentColor)
 
         if (taskCount > 0) {
             views.setViewVisibility(R.id.task_list_view, View.VISIBLE)
@@ -492,6 +516,36 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
     }
 
     /**
+     * 获取配置的主色调
+     * 注意：Flutter HomeWidget 使用 String 存储，需要转换
+     */
+    private fun getConfiguredPrimaryColor(context: Context, appWidgetId: Int): Int {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val colorStr = prefs.getString("$PREF_KEY_PRIMARY_COLOR$appWidgetId", null)
+        return colorStr?.toLongOrNull()?.toInt() ?: DEFAULT_PRIMARY_COLOR
+    }
+
+    /**
+     * 获取配置的强调色
+     * 注意：Flutter HomeWidget 使用 String 存储，需要转换
+     */
+    private fun getConfiguredAccentColor(context: Context, appWidgetId: Int): Int {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val colorStr = prefs.getString("$PREF_KEY_ACCENT_COLOR$appWidgetId", null)
+        return colorStr?.toLongOrNull()?.toInt() ?: DEFAULT_ACCENT_COLOR
+    }
+
+    /**
+     * 获取配置的透明度
+     * 注意：Flutter HomeWidget 使用 String 存储，需要转换
+     */
+    private fun getConfiguredOpacity(context: Context, appWidgetId: Int): Float {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val opacityStr = prefs.getString("$PREF_KEY_OPACITY$appWidgetId", null)
+        return opacityStr?.toFloatOrNull() ?: DEFAULT_OPACITY
+    }
+
+    /**
      * 删除配置
      */
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
@@ -501,6 +555,9 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             editor.remove("$PREF_KEY_PREFIX_RANGE$appWidgetId")
             editor.remove("$PREF_KEY_PREFIX_TITLE$appWidgetId")
+            editor.remove("$PREF_KEY_PRIMARY_COLOR$appWidgetId")
+            editor.remove("$PREF_KEY_ACCENT_COLOR$appWidgetId")
+            editor.remove("$PREF_KEY_OPACITY$appWidgetId")
         }
         editor.apply()
     }

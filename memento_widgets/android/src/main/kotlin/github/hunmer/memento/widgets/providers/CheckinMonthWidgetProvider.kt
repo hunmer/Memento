@@ -20,7 +20,13 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
     companion object {
         // 复用签到项的配置键前缀
         private const val PREF_KEY_PREFIX = "checkin_item_id_"
+        private const val PREF_KEY_PRIMARY_COLOR = "checkin_widget_primary_color_"
+        private const val PREF_KEY_OPACITY = "checkin_widget_opacity_"
         private const val TAG = "CheckinMonthWidget"
+
+        // 默认颜色（紫色）
+        private const val DEFAULT_PRIMARY_COLOR = 0xFF9C27B0.toInt()
+        private const val DEFAULT_OPACITY = 0.95f
     }
 
     /**
@@ -64,9 +70,14 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
         } else {
             // 已配置，显示月历数据
             Log.d(TAG, "小组件已配置，itemId=$checkinItemId")
+
+            // 读取颜色和透明度配置
+            val primaryColor = getConfiguredPrimaryColor(context, appWidgetId)
+            val opacity = getConfiguredOpacity(context, appWidgetId)
+
             val data = loadWidgetData(context)
             if (data != null) {
-                val applied = setupMonthCalendar(context, views, data, checkinItemId)
+                val applied = setupMonthCalendar(context, views, data, checkinItemId, primaryColor, opacity)
                 if (!applied) {
                     // 显示默认状态
                     views.setTextViewText(R.id.month_widget_title, "打卡月历")
@@ -119,7 +130,14 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
     /**
      * 设置月历视图
      */
-    private fun setupMonthCalendar(context: Context, views: RemoteViews, data: JSONObject, itemId: String): Boolean {
+    private fun setupMonthCalendar(
+        context: Context,
+        views: RemoteViews,
+        data: JSONObject,
+        itemId: String,
+        primaryColor: Int,
+        opacity: Float
+    ): Boolean {
         return try {
             // 从 data 中查找对应 ID 的项目
             val items = data.optJSONArray("items")
@@ -146,6 +164,9 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
 
             views.setTextViewText(R.id.month_widget_title, itemName)
             views.setTextViewText(R.id.month_widget_month, currentMonth)
+
+            // 应用主色调到标题
+            views.setTextColor(R.id.month_widget_title, primaryColor)
 
             // 显示日历，隐藏提示
             views.setViewVisibility(R.id.month_widget_hint, View.GONE)
@@ -208,6 +229,9 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
                     val isChecked = checkedDates.contains(dayPosition)
                     val isToday = dayPosition == today
 
+                    // 计算配置色的透明版本
+                    val checkedBgColor = adjustColorAlpha(primaryColor, 0.8f)
+
                     when {
                         isFuture -> {
                             // 未来日期：禁用状态（透明背景，灰色文字）
@@ -215,19 +239,19 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
                             views.setTextColor(dayViewIds[i], 0xFFd1d5db.toInt()) // 浅灰色
                         }
                         isChecked && isToday -> {
-                            // 今天已打卡：实心紫色圆圈
-                            views.setInt(dayViewIds[i], "setBackgroundResource", R.drawable.day_checked_bg)
+                            // 今天已打卡：实心主色调圆圈
+                            views.setInt(dayViewIds[i], "setBackgroundColor", checkedBgColor)
                             views.setTextColor(dayViewIds[i], 0xFFFFFFFF.toInt())
                         }
                         isChecked -> {
-                            // 已打卡（非今天）：实心紫色圆圈
-                            views.setInt(dayViewIds[i], "setBackgroundResource", R.drawable.day_checked_bg)
+                            // 已打卡（非今天）：实心主色调圆圈
+                            views.setInt(dayViewIds[i], "setBackgroundColor", checkedBgColor)
                             views.setTextColor(dayViewIds[i], 0xFFFFFFFF.toInt())
                         }
                         isToday -> {
-                            // 今天未打卡：空心紫色圆圈
-                            views.setInt(dayViewIds[i], "setBackgroundResource", R.drawable.day_today_bg)
-                            views.setTextColor(dayViewIds[i], 0xFF8a4bde.toInt())
+                            // 今天未打卡：空心主色调圆圈
+                            views.setInt(dayViewIds[i], "setBackgroundColor", adjustColorAlpha(primaryColor, 0.1f))
+                            views.setTextColor(dayViewIds[i], primaryColor)
                         }
                         else -> {
                             // 过去日期未打卡：透明背景，正常文字
@@ -271,6 +295,37 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
     fun saveConfiguredCheckinItemId(context: Context, appWidgetId: Int, checkinItemId: String) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString("$PREF_KEY_PREFIX$appWidgetId", checkinItemId).apply()
+    }
+
+    /**
+     * 获取配置的主色调
+     * 注意：Flutter HomeWidget 使用 String 存储，需要转换
+     */
+    private fun getConfiguredPrimaryColor(context: Context, appWidgetId: Int): Int {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val colorStr = prefs.getString("$PREF_KEY_PRIMARY_COLOR$appWidgetId", null)
+        return colorStr?.toLongOrNull()?.toInt() ?: DEFAULT_PRIMARY_COLOR
+    }
+
+    /**
+     * 获取配置的透明度
+     * 注意：Flutter HomeWidget 使用 String 存储，需要转换
+     */
+    private fun getConfiguredOpacity(context: Context, appWidgetId: Int): Float {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val opacityStr = prefs.getString("$PREF_KEY_OPACITY$appWidgetId", null)
+        return opacityStr?.toFloatOrNull() ?: DEFAULT_OPACITY
+    }
+
+    /**
+     * 调整颜色的透明度
+     */
+    private fun adjustColorAlpha(color: Int, alphaFactor: Float): Int {
+        val alpha = (alphaFactor * 255).toInt()
+        val red = (color shr 16) and 0xFF
+        val green = (color shr 8) and 0xFF
+        val blue = color and 0xFF
+        return (alpha shl 24) or (red shl 16) or (green shl 8) or blue
     }
 
     /**
