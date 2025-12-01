@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/month_widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:padding="12dp">
+
+    <!-- 标题栏 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/month_widget_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="跑步"
+            android:textColor="#8a4bde"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true" />
+
+        <TextView
+            android:id="@+id/month_widget_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="11月"
+            android:textColor="#1f2937"
+            android:textSize="20sp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true" />
+
+    </RelativeLayout>
+
+    <!-- 未配置时显示的提示文本 -->
+    <TextView
+        android:id="@+id/month_widget_hint"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="点击选择打卡项目"
+        android:textColor="#9ca3af"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:visibility="gone" />
+
+    <!-- 日历容器 -->
+    <LinearLayout
+        android:id="@+id/month_calendar_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+        <!-- 星期标题行 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="4dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="一"
+                android:textColor="#9ca3af"
+                android:textSize="12sp"
+                android:gravity="center" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="二"
+                android:textColor="#9ca3af"
+                android:textSize="12sp"
+                android:gravity="center" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="三"
+                android:textColor="#9ca3af"
+                android:textSize="12sp"
+                android:gravity="center" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="四"
+                android:textColor="#9ca3af"
+                android:textSize="12sp"
+                android:gravity="center" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="五"
+                android:textColor="#9ca3af"
+                android:textSize="12sp"
+                android:gravity="center" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="六"
+                android:textColor="#9ca3af"
+                android:textSize="12sp"
+                android:gravity="center" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="日"
+                android:textColor="#9ca3af"
+                android:textSize="12sp"
+                android:gravity="center" />
+
+        </LinearLayout>
+
+        <!-- 第1周 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView android:id="@+id/day_1" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_2" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_3" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_4" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_5" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_6" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_7" style="@style/CalendarDayText" />
+
+        </LinearLayout>
+
+        <!-- 第2周 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView android:id="@+id/day_8" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_9" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_10" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_11" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_12" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_13" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_14" style="@style/CalendarDayText" />
+
+        </LinearLayout>
+
+        <!-- 第3周 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView android:id="@+id/day_15" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_16" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_17" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_18" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_19" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_20" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_21" style="@style/CalendarDayText" />
+
+        </LinearLayout>
+
+        <!-- 第4周 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView android:id="@+id/day_22" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_23" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_24" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_25" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_26" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_27" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_28" style="@style/CalendarDayText" />
+
+        </LinearLayout>
+
+        <!-- 第5周 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView android:id="@+id/day_29" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_30" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_31" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_32" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_33" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_34" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_35" style="@style/CalendarDayText" />
+
+        </LinearLayout>
+
+        <!-- 第6周 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView android:id="@+id/day_36" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_37" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_38" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_39" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_40" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_41" style="@style/CalendarDayText" />
+            <TextView android:id="@+id/day_42" style="@style/CalendarDayText" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

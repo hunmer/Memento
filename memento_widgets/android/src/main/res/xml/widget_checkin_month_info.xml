@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="150dp"
+    android:minHeight="300dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="4"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/widget_checkin_month"
+    android:resizeMode="none"
+    android:widgetCategory="home_screen"
+    android:previewLayout="@layout/widget_checkin_month"
+    android:previewImage="@drawable/widget_checkin_month_preview"
+    android:description="@string/widget_checkin_month_description" />

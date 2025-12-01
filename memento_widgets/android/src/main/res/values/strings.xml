@@ -111,4 +111,8 @@
     <!-- 签到项小组件 -->
     <string name="widget_checkin_item_label">签到项</string>
     <string name="widget_checkin_item_description">快速签到</string>
+
+    <!-- 打卡月份视图小组件 -->
+    <string name="widget_checkin_month_label">打卡月历</string>
+    <string name="widget_checkin_month_description">查看本月打卡日历</string>
 </resources>

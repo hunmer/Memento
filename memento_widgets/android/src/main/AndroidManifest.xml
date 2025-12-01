@@ -523,5 +523,17 @@
             android:name="android.appwidget.provider"
             android:resource="@xml/widget_checkin_item_info" />
     </receiver>
+
+    <!-- 打卡月份视图 3x3 (自定义) -->
+    <receiver
+        android:name="github.hunmer.memento.widgets.providers.CheckinMonthWidgetProvider"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        </intent-filter>
+        <meta-data
+            android:name="android.appwidget.provider"
+            android:resource="@xml/widget_checkin_month_info" />
+    </receiver>
   </application>
 </manifest>

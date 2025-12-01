@@ -868,10 +868,24 @@ class PluginWidgetSyncHelper {
           weekChecks.add(hasCheckin ? '1' : '0');
         }
 
+        // 获取本月的打卡日期列表（用于月份视图小组件）
+        final firstDayOfMonth = DateTime(today.year, today.month, 1);
+        final lastDayOfMonth = DateTime(today.year, today.month + 1, 0);
+        final List<int> monthChecks = [];
+
+        for (int day = 1; day <= lastDayOfMonth.day; day++) {
+          final date = DateTime(today.year, today.month, day);
+          final hasCheckin = item.getDateRecords(date).isNotEmpty;
+          if (hasCheckin) {
+            monthChecks.add(day);
+          }
+        }
+
         return {
           'id': item.id,
           'name': item.name,
           'weekChecks': weekChecks.join(','),
+          'monthChecks': monthChecks.join(','), // 本月打卡日期列表
         };
       }).toList();
 
@@ -879,9 +893,14 @@ class PluginWidgetSyncHelper {
       final data = {'items': items};
       final jsonString = jsonEncode(data);
       await MyWidgetManager().saveString('checkin_item_widget_data', jsonString);
+
+      // 更新打卡项小组件
       await SystemWidgetService.instance.updateWidget('checkin_item');
 
-      debugPrint('Synced checkin_item widget with ${items.length} items');
+      // 同时更新打卡月份视图小组件（使用相同的数据）
+      await SystemWidgetService.instance.updateWidget('checkin_month');
+
+      debugPrint('Synced checkin widgets (item & month) with ${items.length} items');
     } catch (e) {
       debugPrint('Failed to sync checkin_item widget: $e');
     }
