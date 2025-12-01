@@ -262,6 +262,8 @@ void main() async {
 
       // 同步待处理的小组件任务变更（用户在小组件上完成的任务）
       await PluginWidgetSyncHelper.instance.syncPendingTaskChangesOnStartup();
+      // 同步待处理的小组件目标变更（用户在小组件上增减的进度）
+      await PluginWidgetSyncHelper.instance.syncPendingGoalChangesOnStartup();
     });
   } catch (e) {
     debugPrint('初始化失败: $e');
@@ -576,6 +578,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       debugPrint('应用恢复到前台，同步待处理的小组件变更');
       PluginWidgetSyncHelper.instance.syncPendingTaskChangesOnStartup();
       PluginWidgetSyncHelper.instance.syncPendingCalendarEventsOnStartup();
+      PluginWidgetSyncHelper.instance.syncPendingGoalChangesOnStartup();
     }
   }
 

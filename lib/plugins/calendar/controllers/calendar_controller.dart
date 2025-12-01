@@ -111,11 +111,67 @@ class CalendarController extends ChangeNotifier {
         _completedEvents.addAll(
           completedEventsData.map((e) => CalendarEvent.fromJson(e)),
         );
+      } else {
+        // 文件不存在或为空，创建示例事件
+        await _createSampleEvents();
       }
     } catch (e) {
       debugPrint('Error loading calendar events: $e');
+      // 加载失败时也尝试创建示例事件
+      await _createSampleEvents();
     }
     notifyListeners();
+  }
+
+  // 创建示例事件
+  Future<void> _createSampleEvents() async {
+    final now = DateTime.now();
+
+    final sampleEvents = [
+      CalendarEvent(
+        id: now.millisecondsSinceEpoch.toString(),
+        title: '团队周会',
+        description: '每周例会，讨论本周工作进展和下周计划',
+        startTime: DateTime(now.year, now.month, now.day, 10, 0),
+        endTime: DateTime(now.year, now.month, now.day, 11, 0),
+        icon: const IconData(0xe8df, fontFamily: 'MaterialIcons'), // Icons.groups
+        color: Colors.blue,
+        reminderMinutes: 15,
+      ),
+      CalendarEvent(
+        id: (now.millisecondsSinceEpoch + 1).toString(),
+        title: '健身时间',
+        description: '下班后去健身房锻炼',
+        startTime: DateTime(now.year, now.month, now.day, 18, 30),
+        endTime: DateTime(now.year, now.month, now.day, 20, 0),
+        icon: const IconData(0xeb43, fontFamily: 'MaterialIcons'), // Icons.fitness_center
+        color: Colors.green,
+        reminderMinutes: 30,
+      ),
+      CalendarEvent(
+        id: (now.millisecondsSinceEpoch + 2).toString(),
+        title: '朋友生日',
+        description: '记得准备生日礼物和蛋糕',
+        startTime: DateTime(now.year, now.month, now.day + 3, 19, 0),
+        endTime: DateTime(now.year, now.month, now.day + 3, 21, 0),
+        icon: const IconData(0xe7f2, fontFamily: 'MaterialIcons'), // Icons.cake
+        color: Colors.pink,
+        reminderMinutes: 1440, // 提前一天提醒
+      ),
+      CalendarEvent(
+        id: (now.millisecondsSinceEpoch + 3).toString(),
+        title: '项目截止日期',
+        description: '完成项目文档和代码提交',
+        startTime: DateTime(now.year, now.month, now.day + 7, 17, 0),
+        endTime: DateTime(now.year, now.month, now.day + 7, 18, 0),
+        icon: const IconData(0xe873, fontFamily: 'MaterialIcons'), // Icons.assignment
+        color: Colors.orange,
+        reminderMinutes: 2880, // 提前两天提醒
+      ),
+    ];
+
+    _events.addAll(sampleEvents);
+    await _saveEvents();
   }
 
   // 保存事件

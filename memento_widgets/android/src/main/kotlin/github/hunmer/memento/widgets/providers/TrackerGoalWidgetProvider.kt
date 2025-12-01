@@ -43,6 +43,9 @@ class TrackerGoalWidgetProvider : BasePluginWidgetProvider() {
         private const val ACTION_INCREMENT = "github.hunmer.memento.widgets.TRACKER_GOAL_INCREMENT"
         private const val ACTION_DECREMENT = "github.hunmer.memento.widgets.TRACKER_GOAL_DECREMENT"
         private const val EXTRA_WIDGET_ID = "appWidgetId"
+
+        // 待同步的目标变更（应用启动时读取）
+        const val PREF_KEY_PENDING_CHANGES = "tracker_goal_pending_changes"
     }
 
     override fun updateAppWidget(
@@ -381,6 +384,9 @@ class TrackerGoalWidgetProvider : BasePluginWidgetProvider() {
                             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                             prefs.edit().putString("tracker_goal_widget_data", data.toString()).apply()
 
+                            // 记录待同步的变更（应用恢复时处理）
+                            recordPendingChange(context, goalId, 1.0)
+
                             // 刷新小组件
                             val appWidgetManager = AppWidgetManager.getInstance(context)
                             updateAppWidget(context, appWidgetManager, appWidgetId)
@@ -428,6 +434,7 @@ class TrackerGoalWidgetProvider : BasePluginWidgetProvider() {
                         if (goal.optString("id") == goalId) {
                             val currentValue = goal.optDouble("currentValue", 0.0)
                             val newValue = (currentValue - 1).coerceAtLeast(0.0)
+                            val actualDelta = newValue - currentValue // 实际变更值（可能是 0 或 -1）
 
                             // 更新数据(仅内存中,实际应由 Flutter 端处理)
                             goal.put("currentValue", newValue)
@@ -435,6 +442,11 @@ class TrackerGoalWidgetProvider : BasePluginWidgetProvider() {
                             // 保存数据
                             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                             prefs.edit().putString("tracker_goal_widget_data", data.toString()).apply()
+
+                            // 记录待同步的变更（应用恢复时处理）
+                            if (actualDelta != 0.0) {
+                                recordPendingChange(context, goalId, actualDelta)
+                            }
 
                             // 刷新小组件
                             val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -456,6 +468,27 @@ class TrackerGoalWidgetProvider : BasePluginWidgetProvider() {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to handle decrement", e)
             Toast.makeText(context, "操作失败", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * 记录待同步的目标变更
+     * 应用启动时会读取并同步这些变更到实际的目标数据
+     */
+    private fun recordPendingChange(context: Context, goalId: String, delta: Double) {
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val pendingJson = prefs.getString(PREF_KEY_PENDING_CHANGES, "{}") ?: "{}"
+            val pending = JSONObject(pendingJson)
+
+            // 累加变更值：goalId -> 累计的增减值
+            val existingDelta = pending.optDouble(goalId, 0.0)
+            pending.put(goalId, existingDelta + delta)
+
+            prefs.edit().putString(PREF_KEY_PENDING_CHANGES, pending.toString()).apply()
+            Log.d(TAG, "Recorded pending change: goalId=$goalId, delta=$delta, total=${existingDelta + delta}")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to record pending change", e)
         }
     }
 
