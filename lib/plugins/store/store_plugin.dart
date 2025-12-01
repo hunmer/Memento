@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/store/widgets/store_bottom_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/base_plugin.dart';
@@ -420,7 +421,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     // 使用自定义ID或生成新ID
     final String productId = customId != null && customId.isNotEmpty
         ? customId
-        : DateTime.now().millisecondsSinceEpoch.toString();
+        : const Uuid().v4();
 
     final product = Product(
       id: productId,

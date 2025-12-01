@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:uuid/uuid.dart';
 import 'package:Memento/core/notification_controller.dart';
 import '../../../../core/event/event_manager.dart';
 
@@ -129,7 +130,7 @@ class TimerItem {
     bool enableNotification = false,
   }) {
     return TimerItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       name: name,
       description: description,
       type: TimerType.countUp,
@@ -149,7 +150,7 @@ class TimerItem {
     bool enableNotification = false,
   }) {
     return TimerItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       name: name,
       type: TimerType.countDown,
       duration: duration,
@@ -173,7 +174,7 @@ class TimerItem {
     final totalDuration = workDuration * cycles + breakDuration * (cycles - 1);
 
     return TimerItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       name: name,
       type: TimerType.pomodoro,
       duration: totalDuration,

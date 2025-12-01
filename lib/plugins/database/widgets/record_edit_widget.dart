@@ -2,6 +2,7 @@ import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/database/models/database_field.dart';
 import '../controllers/field_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../controllers/database_controller.dart';
 import '../models/database_model.dart';
 import '../models/record.dart' as record_model;
@@ -94,7 +95,7 @@ class _RecordEditWidgetState extends State<RecordEditWidget> {
       _formKey.currentState!.save();
 
       final newRecord = record_model.Record(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: const Uuid().v4(),
         tableId: widget.database.id,
         fields: _fields,
         createdAt: DateTime.now(),

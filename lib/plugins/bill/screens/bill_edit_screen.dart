@@ -1,6 +1,7 @@
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:uuid/uuid.dart';
 import '../bill_plugin.dart';
 import '../models/bill.dart';
 
@@ -122,7 +123,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
         final bill = Bill(
           id:
               widget.bill?.id ??
-              DateTime.now().millisecondsSinceEpoch.toString(),
+              const Uuid().v4(),
           title: title,
           amount: _isExpense ? -amount : amount,
           accountId: widget.accountId,

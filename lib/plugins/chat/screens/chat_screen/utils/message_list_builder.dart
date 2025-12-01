@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import '../../../models/message.dart';
 import 'package:path/path.dart' as path;
 
@@ -26,7 +27,7 @@ class MessageListBuilder {
     String sizeUnit = sizeMatch.group(2) ?? 'B';
 
     // 生成唯一ID
-    String id = DateTime.now().millisecondsSinceEpoch.toString();
+    String id = const Uuid().v4();
 
     // 计算文件大小（转换为字节）
     double size = double.parse(fileSizeStr);

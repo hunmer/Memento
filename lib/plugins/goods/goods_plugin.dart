@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -716,7 +717,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
       // 生成ID（如果没有提供）
       String warehouseId =
-          id ?? DateTime.now().millisecondsSinceEpoch.toString();
+          id ?? const Uuid().v4();
 
       // 检查ID是否已存在
       if (getWarehouse(warehouseId) != null) {
@@ -885,7 +886,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
       // 生成ID（如果没有提供）
       data['id'] =
-          data['id'] ?? DateTime.now().millisecondsSinceEpoch.toString();
+          data['id'] ?? const Uuid().v4();
 
       // 检查ID是否已存在（跨所有仓库）
       final existingItem = findGoodsItemById(data['id']);

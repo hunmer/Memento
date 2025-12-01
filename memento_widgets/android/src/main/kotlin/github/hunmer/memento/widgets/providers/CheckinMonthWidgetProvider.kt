@@ -66,7 +66,7 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
             Log.d(TAG, "小组件已配置，itemId=$checkinItemId")
             val data = loadWidgetData(context)
             if (data != null) {
-                val applied = setupMonthCalendar(views, data, checkinItemId)
+                val applied = setupMonthCalendar(context, views, data, checkinItemId)
                 if (!applied) {
                     // 显示默认状态
                     views.setTextViewText(R.id.month_widget_title, "打卡月历")
@@ -119,7 +119,7 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
     /**
      * 设置月历视图
      */
-    private fun setupMonthCalendar(views: RemoteViews, data: JSONObject, itemId: String): Boolean {
+    private fun setupMonthCalendar(context: Context, views: RemoteViews, data: JSONObject, itemId: String): Boolean {
         return try {
             // 从 data 中查找对应 ID 的项目
             val items = data.optJSONArray("items")
@@ -159,8 +159,11 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
                 emptySet()
             }
 
-            // 获取今天的日期
-            val today = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+            // 获取今天的完整日期信息
+            val nowCalendar = Calendar.getInstance()
+            val today = nowCalendar.get(Calendar.DAY_OF_MONTH)
+            val currentYear = nowCalendar.get(Calendar.YEAR)
+            val monthIndex = nowCalendar.get(Calendar.MONTH)  // 0-11
 
             // 计算本月第一天是星期几 (1=周一, 7=周日)
             val calendar = Calendar.getInstance()
@@ -198,11 +201,19 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
                     views.setViewVisibility(dayViewIds[i], View.VISIBLE)
                     views.setTextViewText(dayViewIds[i], dayPosition.toString())
 
+                    // 检查是否是未来日期
+                    val isFuture = dayPosition > today
+
                     // 根据打卡状态设置背景
                     val isChecked = checkedDates.contains(dayPosition)
                     val isToday = dayPosition == today
 
                     when {
+                        isFuture -> {
+                            // 未来日期：禁用状态（透明背景，灰色文字）
+                            views.setInt(dayViewIds[i], "setBackgroundResource", 0)
+                            views.setTextColor(dayViewIds[i], 0xFFd1d5db.toInt()) // 浅灰色
+                        }
                         isChecked && isToday -> {
                             // 今天已打卡：实心紫色圆圈
                             views.setInt(dayViewIds[i], "setBackgroundResource", R.drawable.day_checked_bg)
@@ -219,10 +230,15 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
                             views.setTextColor(dayViewIds[i], 0xFF8a4bde.toInt())
                         }
                         else -> {
-                            // 未打卡：透明背景
+                            // 过去日期未打卡：透明背景，正常文字
                             views.setInt(dayViewIds[i], "setBackgroundResource", 0)
                             views.setTextColor(dayViewIds[i], 0xFF1f2937.toInt())
                         }
+                    }
+
+                    // 为每个日期设置独立的点击事件
+                    if (!isFuture) {
+                        setupDayClickIntent(context, views, dayViewIds[i], itemId, currentYear, monthIndex, dayPosition)
                     }
                 } else {
                     // 隐藏非本月日期
@@ -255,6 +271,7 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
 
     /**
      * 设置已配置状态的点击事件（带 itemId 参数）
+     * 仅为标题栏设置点击事件，打开打卡项详情
      */
     private fun setupClickIntentWithItemId(context: Context, views: RemoteViews, itemId: String) {
         val uriString = "memento://widget/checkin_item?itemId=$itemId"
@@ -272,7 +289,43 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        views.setOnClickPendingIntent(R.id.month_widget_container, pendingIntent)
+        // 只为标题设置点击事件，不影响日期的点击
+        views.setOnClickPendingIntent(R.id.month_widget_title, pendingIntent)
+        views.setOnClickPendingIntent(R.id.month_widget_month, pendingIntent)
+    }
+
+    /**
+     * 为单个日期设置点击事件
+     */
+    private fun setupDayClickIntent(
+        context: Context,
+        views: RemoteViews,
+        dayViewId: Int,
+        itemId: String,
+        year: Int,
+        month: Int,
+        day: Int
+    ) {
+        // 格式化日期为 YYYY-MM-DD
+        val dateString = String.format("%04d-%02d-%02d", year, month + 1, day)
+        val uriString = "memento://widget/checkin_item?itemId=$itemId&date=$dateString"
+
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse(uriString)
+        intent.setPackage("github.hunmer.memento")
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+
+        // 使用唯一的 requestCode (itemId.hashCode + day) 确保每个日期都有独立的 PendingIntent
+        val requestCode = itemId.hashCode() + day
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        views.setOnClickPendingIntent(dayViewId, pendingIntent)
+        Log.d(TAG, "setupDayClickIntent: day=$day, date=$dateString, uri=$uriString")
     }
 
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../../../models/channel.dart';
 import '../../../models/user.dart';
 import '../../../models/message.dart';
@@ -346,7 +347,7 @@ class ChatScreenController extends ChangeNotifier {
 
     try {
       final newMessage = await Message.create(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: const Uuid().v4(),
         content: content,
         channelId: channel.id,
         user: currentUser,

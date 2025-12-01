@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../checkin_plugin.dart';
 
 enum CheckinCardStyle {
@@ -33,7 +34,7 @@ class CheckinItem {
     this.reminderSettings,
     this.cardStyle = CheckinCardStyle.weekly,
     Map<String, List<CheckinRecord>>? checkInRecords,
-  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+  }) : id = id ?? const Uuid().v4(),
        color = color ?? Colors.blue,
        group = group ?? '默认分组',
        description = description ?? '',

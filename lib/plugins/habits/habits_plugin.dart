@@ -8,6 +8,7 @@ import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
@@ -326,7 +327,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
 
     // 如果没有提供自定义ID，则生成新的习惯ID
     final finalHabitId =
-        habitId ?? DateTime.now().millisecondsSinceEpoch.toString();
+        habitId ?? const Uuid().v4();
 
     final habit = Habit(
       id: finalHabitId,
@@ -452,7 +453,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
 
     // 如果没有提供自定义ID，则生成新的技能ID
     final finalSkillId =
-        skillId ?? DateTime.now().millisecondsSinceEpoch.toString();
+        skillId ?? const Uuid().v4();
 
     final skill = Skill(
       id: finalSkillId,
@@ -538,7 +539,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     try {
       final habit = habits.firstWhere((h) => h.id == habitId);
 
-      final recordId = DateTime.now().millisecondsSinceEpoch.toString();
+      final recordId = const Uuid().v4();
       final duration =
           durationSeconds != null
               ? Duration(seconds: durationSeconds)

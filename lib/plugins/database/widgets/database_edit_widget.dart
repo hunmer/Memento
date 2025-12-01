@@ -3,6 +3,7 @@ import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/database/controllers/field_controller.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../controllers/database_controller.dart';
 import '../models/database_model.dart';
 import '../models/field_model.dart';
@@ -274,7 +275,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
 
     if (fieldType != null) {
       final newField = FieldModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: const Uuid().v4(),
         name: DatabaseLocalizations.of(
           context,
         ).newFieldTitle.replaceFirst('%s', fieldType),
@@ -305,7 +306,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
 
       if (_editedDatabase.id.isEmpty) {
         _editedDatabase = _editedDatabase.copyWith(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          id: const Uuid().v4(),
         );
         await widget.controller.createDatabase(_editedDatabase);
       } else {

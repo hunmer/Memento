@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart' as syncfusion;
+import 'package:uuid/uuid.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
@@ -635,7 +636,7 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     final endTime = endTimeStr != null ? DateTime.parse(endTimeStr) : null;
 
     final event = CalendarEvent(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       title: title,
       description: description,
       startTime: startTime,

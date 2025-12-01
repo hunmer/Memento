@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../l10n/openai_localizations.dart';
 import '../../../utils/image_utils.dart';
 import '../../../widgets/circle_icon_picker.dart';
@@ -254,7 +255,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     }
 
     final agent = AIAgent(
-      id: widget.agent?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: widget.agent?.id ?? const Uuid().v4(),
       name: _nameController.text,
       description: _descriptionController.text,
       serviceProviderId: _selectedProviderId,
@@ -357,7 +358,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
 
     // 创建一个新的智能体，复制当前智能体的所有属性，但生成新ID并更新名称
     final clonedAgent = AIAgent(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       name: '${_nameController.text} (复制)',
       description: _descriptionController.text,
       serviceProviderId: _selectedProviderId,

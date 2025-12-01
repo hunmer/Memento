@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -357,8 +358,8 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
       id = customId;
     } else {
-      // 自动生成ID
-      id = DateTime.now().millisecondsSinceEpoch.toString();
+      // 使用UUID生成
+      id = const Uuid().v4();
     }
 
     // 解析计时器类型
@@ -374,7 +375,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
     // 创建计时器项
     final timerItem = TimerItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       name: name,
       type: timerType,
       duration: Duration(seconds: durationSeconds),

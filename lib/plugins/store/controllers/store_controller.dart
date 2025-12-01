@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:Memento/plugins/store/models/used_item.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
@@ -167,7 +168,7 @@ class StoreController with ChangeNotifier {
 
     // 添加用户物品(保存购买时的商品快照)
     final newItem = UserItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       productId: product.id,
       remaining: 1,
       expireDate: DateTime.now().add(Duration(days: product.useDuration)),
@@ -180,7 +181,7 @@ class StoreController with ChangeNotifier {
     // 添加积分记录
     _pointsLogs.add(
       PointsLog(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: const Uuid().v4(),
         type: '消耗',
         value: product.price,
         reason: '兑换商品: ${product.name}',
@@ -255,7 +256,7 @@ class StoreController with ChangeNotifier {
     _userPoints += value;
     _pointsLogs.add(
       PointsLog(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: const Uuid().v4(),
         type: value > 0 ? '获得' : '失去',
         value: value,
         reason: reason,

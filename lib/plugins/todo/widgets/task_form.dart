@@ -2,6 +2,7 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 import '../models/models.dart';
 import '../controllers/controllers.dart';
 
@@ -114,7 +115,7 @@ class _TaskFormState extends State<TaskForm> {
       setState(() {
         _subtasks.add(
           Subtask(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            id: const Uuid().v4(),
             title: _subtaskController.text,
           ),
         );

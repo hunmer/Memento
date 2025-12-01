@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../../../core/event/event_manager.dart';
 import '../../../core/event/item_event_args.dart';
@@ -147,7 +148,7 @@ class NotesController {
     }
 
     final folder = Folder(
-      id: customId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: customId ?? const Uuid().v4(),
       name: name,
       parentId: parentId,
       createdAt: DateTime.now(),
@@ -174,7 +175,7 @@ class NotesController {
     }
 
     final note = Note(
-      id: customId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: customId ?? const Uuid().v4(),
       title: title,
       content: content,
       folderId: folderId,

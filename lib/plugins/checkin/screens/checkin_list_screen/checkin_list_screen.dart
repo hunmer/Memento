@@ -13,11 +13,14 @@ class CheckinListScreen extends StatefulWidget {
   final CheckinListController controller;
   /// 可选的打卡项目ID，用于从小组件跳转时自动打开打卡记录对话框
   final String? initialItemId;
+  /// 可选的目标日期（格式：YYYY-MM-DD），用于打开指定日期的打卡记录
+  final String? targetDate;
 
   const CheckinListScreen({
     super.key,
     required this.controller,
     this.initialItemId,
+    this.targetDate,
   });
 
   @override
@@ -38,7 +41,7 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
 
       // 如果指定了 initialItemId，则自动打开对应的打卡记录对话框
       if (widget.initialItemId != null && mounted) {
-        _showCheckinDialogForItem(widget.initialItemId!);
+        _showCheckinDialogForItem(widget.initialItemId!, widget.targetDate);
       }
     });
   }
@@ -177,12 +180,29 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
   }
 
   /// 根据 itemId 显示打卡记录对话框
-  void _showCheckinDialogForItem(String itemId) {
+  void _showCheckinDialogForItem(String itemId, [String? targetDate]) {
     // 查找对应的打卡项目
     final item = controller.checkinItems.firstWhere(
       (item) => item.id == itemId,
       orElse: () => throw Exception('未找到ID为 $itemId 的打卡项目'),
     );
+
+    // 解析目标日期
+    DateTime? selectedDate;
+    if (targetDate != null && targetDate.isNotEmpty) {
+      try {
+        final parts = targetDate.split('-');
+        if (parts.length == 3) {
+          selectedDate = DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2]),
+          );
+        }
+      } catch (e) {
+        debugPrint('解析日期失败: $targetDate, 错误: $e');
+      }
+    }
 
     // 延迟一帧以确保界面完全加载
     Future.delayed(const Duration(milliseconds: 300), () {
@@ -194,6 +214,7 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
           item: item,
           controller: controller,
           onCheckinCompleted: _handleStateChanged,
+          selectedDate: selectedDate,
         ),
       );
     });

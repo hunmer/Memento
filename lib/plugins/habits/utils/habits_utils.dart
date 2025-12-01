@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
+import 'package:uuid/uuid.dart';
 
 class HabitsUtils {
   static List<String> getGroups(List<Habit> habits, List<Skill> skills) {
@@ -21,7 +22,7 @@ class HabitsUtils {
   }
 
   static String generateId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
+    return const Uuid().v4();
   }
 
   static String formatDuration(int minutes) {

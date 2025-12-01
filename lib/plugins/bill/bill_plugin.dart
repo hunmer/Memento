@@ -6,6 +6,7 @@ import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
+import 'package:uuid/uuid.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
 import 'controls/bill_controller.dart';
@@ -522,7 +523,7 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
     // 创建账单
     final bill = Bill(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       title: title,
       amount: amount,
       category: category,
