@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 背景 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#F44336" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+
+    <!-- 装饰性图标 -->
+    <item
+        android:gravity="center"
+        android:width="48dp"
+        android:height="48dp">
+        <shape android:shape="oval">
+            <solid android:color="#FFFFFF" />
+        </shape>
+    </item>
+
+    <!-- 内部小圆 -->
+    <item
+        android:gravity="center"
+        android:width="24dp"
+        android:height="24dp">
+        <shape android:shape="oval">
+            <solid android:color="#F44336" />
+        </shape>
+    </item>
+</layer-list>

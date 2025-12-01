@@ -97,13 +97,13 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:orientation="horizontal">
-                <FrameLayout android:id="@+id/day_cell_1" style="@style/CalendarDayCell"><TextView android:id="@+id/day_1" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_1" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_2" style="@style/CalendarDayCell"><TextView android:id="@+id/day_2" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_2" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_3" style="@style/CalendarDayCell"><TextView android:id="@+id/day_3" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_3" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_4" style="@style/CalendarDayCell"><TextView android:id="@+id/day_4" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_4" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_5" style="@style/CalendarDayCell"><TextView android:id="@+id/day_5" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_5" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_6" style="@style/CalendarDayCell"><TextView android:id="@+id/day_6" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_6" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_7" style="@style/CalendarDayCell"><TextView android:id="@+id/day_7" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_7" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_1" style="@style/CalendarDayCell"><TextView android:id="@+id/day_1" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_1" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_2" style="@style/CalendarDayCell"><TextView android:id="@+id/day_2" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_2" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_3" style="@style/CalendarDayCell"><TextView android:id="@+id/day_3" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_3" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_4" style="@style/CalendarDayCell"><TextView android:id="@+id/day_4" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_4" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_5" style="@style/CalendarDayCell"><TextView android:id="@+id/day_5" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_5" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_6" style="@style/CalendarDayCell"><TextView android:id="@+id/day_6" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_6" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_7" style="@style/CalendarDayCell"><TextView android:id="@+id/day_7" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_7" style="@style/CalendarDayDot" /></FrameLayout>
             </LinearLayout>
 
             <!-- 第2周 -->
@@ -112,13 +112,13 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:orientation="horizontal">
-                <FrameLayout android:id="@+id/day_cell_8" style="@style/CalendarDayCell"><TextView android:id="@+id/day_8" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_8" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_9" style="@style/CalendarDayCell"><TextView android:id="@+id/day_9" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_9" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_10" style="@style/CalendarDayCell"><TextView android:id="@+id/day_10" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_10" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_11" style="@style/CalendarDayCell"><TextView android:id="@+id/day_11" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_11" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_12" style="@style/CalendarDayCell"><TextView android:id="@+id/day_12" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_12" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_13" style="@style/CalendarDayCell"><TextView android:id="@+id/day_13" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_13" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_14" style="@style/CalendarDayCell"><TextView android:id="@+id/day_14" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_14" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_8" style="@style/CalendarDayCell"><TextView android:id="@+id/day_8" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_8" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_9" style="@style/CalendarDayCell"><TextView android:id="@+id/day_9" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_9" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_10" style="@style/CalendarDayCell"><TextView android:id="@+id/day_10" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_10" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_11" style="@style/CalendarDayCell"><TextView android:id="@+id/day_11" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_11" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_12" style="@style/CalendarDayCell"><TextView android:id="@+id/day_12" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_12" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_13" style="@style/CalendarDayCell"><TextView android:id="@+id/day_13" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_13" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_14" style="@style/CalendarDayCell"><TextView android:id="@+id/day_14" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_14" style="@style/CalendarDayDot" /></FrameLayout>
             </LinearLayout>
 
             <!-- 第3周 -->
@@ -127,13 +127,13 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:orientation="horizontal">
-                <FrameLayout android:id="@+id/day_cell_15" style="@style/CalendarDayCell"><TextView android:id="@+id/day_15" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_15" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_16" style="@style/CalendarDayCell"><TextView android:id="@+id/day_16" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_16" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_17" style="@style/CalendarDayCell"><TextView android:id="@+id/day_17" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_17" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_18" style="@style/CalendarDayCell"><TextView android:id="@+id/day_18" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_18" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_19" style="@style/CalendarDayCell"><TextView android:id="@+id/day_19" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_19" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_20" style="@style/CalendarDayCell"><TextView android:id="@+id/day_20" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_20" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_21" style="@style/CalendarDayCell"><TextView android:id="@+id/day_21" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_21" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_15" style="@style/CalendarDayCell"><TextView android:id="@+id/day_15" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_15" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_16" style="@style/CalendarDayCell"><TextView android:id="@+id/day_16" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_16" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_17" style="@style/CalendarDayCell"><TextView android:id="@+id/day_17" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_17" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_18" style="@style/CalendarDayCell"><TextView android:id="@+id/day_18" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_18" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_19" style="@style/CalendarDayCell"><TextView android:id="@+id/day_19" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_19" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_20" style="@style/CalendarDayCell"><TextView android:id="@+id/day_20" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_20" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_21" style="@style/CalendarDayCell"><TextView android:id="@+id/day_21" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_21" style="@style/CalendarDayDot" /></FrameLayout>
             </LinearLayout>
 
             <!-- 第4周 -->
@@ -142,13 +142,13 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:orientation="horizontal">
-                <FrameLayout android:id="@+id/day_cell_22" style="@style/CalendarDayCell"><TextView android:id="@+id/day_22" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_22" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_23" style="@style/CalendarDayCell"><TextView android:id="@+id/day_23" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_23" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_24" style="@style/CalendarDayCell"><TextView android:id="@+id/day_24" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_24" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_25" style="@style/CalendarDayCell"><TextView android:id="@+id/day_25" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_25" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_26" style="@style/CalendarDayCell"><TextView android:id="@+id/day_26" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_26" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_27" style="@style/CalendarDayCell"><TextView android:id="@+id/day_27" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_27" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_28" style="@style/CalendarDayCell"><TextView android:id="@+id/day_28" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_28" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_22" style="@style/CalendarDayCell"><TextView android:id="@+id/day_22" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_22" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_23" style="@style/CalendarDayCell"><TextView android:id="@+id/day_23" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_23" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_24" style="@style/CalendarDayCell"><TextView android:id="@+id/day_24" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_24" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_25" style="@style/CalendarDayCell"><TextView android:id="@+id/day_25" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_25" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_26" style="@style/CalendarDayCell"><TextView android:id="@+id/day_26" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_26" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_27" style="@style/CalendarDayCell"><TextView android:id="@+id/day_27" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_27" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_28" style="@style/CalendarDayCell"><TextView android:id="@+id/day_28" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_28" style="@style/CalendarDayDot" /></FrameLayout>
             </LinearLayout>
 
             <!-- 第5周 -->
@@ -157,13 +157,13 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:orientation="horizontal">
-                <FrameLayout android:id="@+id/day_cell_29" style="@style/CalendarDayCell"><TextView android:id="@+id/day_29" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_29" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_30" style="@style/CalendarDayCell"><TextView android:id="@+id/day_30" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_30" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_31" style="@style/CalendarDayCell"><TextView android:id="@+id/day_31" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_31" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_32" style="@style/CalendarDayCell"><TextView android:id="@+id/day_32" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_32" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_33" style="@style/CalendarDayCell"><TextView android:id="@+id/day_33" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_33" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_34" style="@style/CalendarDayCell"><TextView android:id="@+id/day_34" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_34" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_35" style="@style/CalendarDayCell"><TextView android:id="@+id/day_35" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_35" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_29" style="@style/CalendarDayCell"><TextView android:id="@+id/day_29" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_29" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_30" style="@style/CalendarDayCell"><TextView android:id="@+id/day_30" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_30" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_31" style="@style/CalendarDayCell"><TextView android:id="@+id/day_31" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_31" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_32" style="@style/CalendarDayCell"><TextView android:id="@+id/day_32" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_32" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_33" style="@style/CalendarDayCell"><TextView android:id="@+id/day_33" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_33" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_34" style="@style/CalendarDayCell"><TextView android:id="@+id/day_34" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_34" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_35" style="@style/CalendarDayCell"><TextView android:id="@+id/day_35" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_35" style="@style/CalendarDayDot" /></FrameLayout>
             </LinearLayout>
 
             <!-- 第6周 -->
@@ -172,13 +172,13 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:orientation="horizontal">
-                <FrameLayout android:id="@+id/day_cell_36" style="@style/CalendarDayCell"><TextView android:id="@+id/day_36" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_36" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_37" style="@style/CalendarDayCell"><TextView android:id="@+id/day_37" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_37" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_38" style="@style/CalendarDayCell"><TextView android:id="@+id/day_38" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_38" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_39" style="@style/CalendarDayCell"><TextView android:id="@+id/day_39" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_39" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_40" style="@style/CalendarDayCell"><TextView android:id="@+id/day_40" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_40" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_41" style="@style/CalendarDayCell"><TextView android:id="@+id/day_41" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_41" style="@style/CalendarDayDot" /></FrameLayout>
-                <FrameLayout android:id="@+id/day_cell_42" style="@style/CalendarDayCell"><TextView android:id="@+id/day_42" style="@style/CalendarDayTextNew" /><View android:id="@+id/day_dot_42" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_36" style="@style/CalendarDayCell"><TextView android:id="@+id/day_36" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_36" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_37" style="@style/CalendarDayCell"><TextView android:id="@+id/day_37" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_37" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_38" style="@style/CalendarDayCell"><TextView android:id="@+id/day_38" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_38" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_39" style="@style/CalendarDayCell"><TextView android:id="@+id/day_39" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_39" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_40" style="@style/CalendarDayCell"><TextView android:id="@+id/day_40" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_40" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_41" style="@style/CalendarDayCell"><TextView android:id="@+id/day_41" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_41" style="@style/CalendarDayDot" /></FrameLayout>
+                <FrameLayout android:id="@+id/day_cell_42" style="@style/CalendarDayCell"><TextView android:id="@+id/day_42" style="@style/CalendarDayTextNew" /><ImageView android:id="@+id/day_dot_42" style="@style/CalendarDayDot" /></FrameLayout>
             </LinearLayout>
 
         </LinearLayout>
@@ -203,7 +203,7 @@
             android:gravity="center_vertical"
             android:layout_marginBottom="8dp"
             android:visibility="gone">
-            <View
+            <ImageView
                 android:id="@+id/event_checkbox_1"
                 android:layout_width="14dp"
                 android:layout_height="14dp"
@@ -238,7 +238,7 @@
             android:gravity="center_vertical"
             android:layout_marginBottom="8dp"
             android:visibility="gone">
-            <View
+            <ImageView
                 android:id="@+id/event_checkbox_2"
                 android:layout_width="14dp"
                 android:layout_height="14dp"
@@ -273,7 +273,7 @@
             android:gravity="center_vertical"
             android:layout_marginBottom="8dp"
             android:visibility="gone">
-            <View
+            <ImageView
                 android:id="@+id/event_checkbox_3"
                 android:layout_width="14dp"
                 android:layout_height="14dp"
@@ -308,7 +308,7 @@
             android:gravity="center_vertical"
             android:layout_marginBottom="8dp"
             android:visibility="gone">
-            <View
+            <ImageView
                 android:id="@+id/event_checkbox_4"
                 android:layout_width="14dp"
                 android:layout_height="14dp"
@@ -342,7 +342,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:visibility="gone">
-            <View
+            <ImageView
                 android:id="@+id/event_checkbox_5"
                 android:layout_width="14dp"
                 android:layout_height="14dp"

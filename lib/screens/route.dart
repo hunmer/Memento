@@ -32,6 +32,7 @@ import 'package:Memento/plugins/scripts_center/scripts_center_plugin.dart';
 import 'package:Memento/plugins/timer/views/timer_main_view.dart';
 import 'package:Memento/plugins/todo/views/todo_main_view.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
+import 'package:Memento/plugins/tracker/screens/tracker_goal_selector_screen.dart';
 
 // 插件路由处理器导入
 import 'package:Memento/core/routing/plugin_route_handler.dart';
@@ -105,6 +106,9 @@ class AppRoutes extends NavigatorObserver {
 
   // 日历月视图小组件配置路由
   static const String calendarMonthSelector = '/calendar_month_selector';
+
+  // 目标追踪进度增减小组件配置路由
+  static const String trackerGoalSelector = '/tracker_goal_selector';
 
   // 自定义页面过渡动画 - 无动画
   static Route _createRoute(Widget page) {
@@ -238,12 +242,43 @@ class AppRoutes extends NavigatorObserver {
       case 'calendar_month_selector':
         // 日历月视图小组件配置界面
         int? widgetId;
+
+        // 从 arguments 中解析 widgetId
         if (settings.arguments is Map<String, dynamic>) {
-          widgetId = (settings.arguments as Map<String, dynamic>)['widgetId'] as int?;
+          final args = settings.arguments as Map<String, dynamic>;
+          // widgetId 可能是字符串或整数
+          final widgetIdValue = args['widgetId'];
+          if (widgetIdValue is int) {
+            widgetId = widgetIdValue;
+          } else if (widgetIdValue is String) {
+            widgetId = int.tryParse(widgetIdValue);
+          }
         } else if (settings.arguments is int) {
           widgetId = settings.arguments as int;
         }
+
         return _createRoute(CalendarMonthSelectorScreen(widgetId: widgetId));
+      case '/tracker_goal_selector':
+      case 'tracker_goal_selector':
+        // 目标追踪进度增减小组件配置界面
+        int? trackerWidgetId;
+
+        // 从 arguments 中解析 widgetId
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          // widgetId 可能是字符串或整数
+          final widgetIdValue = args['widgetId'];
+          if (widgetIdValue is int) {
+            trackerWidgetId = widgetIdValue;
+          } else if (widgetIdValue is String) {
+            trackerWidgetId = int.tryParse(widgetIdValue);
+          }
+        } else if (settings.arguments is int) {
+          trackerWidgetId = settings.arguments as int;
+        }
+
+        return _createRoute(
+            TrackerGoalSelectorScreen(widgetId: trackerWidgetId));
       default:
         return _createRoute(
           Scaffold(
