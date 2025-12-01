@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'models/widget_config.dart';
 import 'models/widget_size.dart';
 import 'models/color_config.dart';
@@ -279,12 +280,54 @@ class _ColorPickerWithLabel extends StatelessWidget {
     required this.onColorChanged,
   });
 
+  /// 显示自定义颜色选择器
+  void _showColorPicker(BuildContext context) {
+    Color pickerColor = selectedColor;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('选择颜色'),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              pickerColor: pickerColor,
+              onColorChanged: (Color color) {
+                pickerColor = color;
+              },
+              pickerAreaHeightPercent: 0.8,
+              enableAlpha: false,
+              displayThumbColor: true,
+              labelTypes: const [],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('取消'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('确定'),
+              onPressed: () {
+                onColorChanged(pickerColor);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     // 定义常用颜色列表
     const List<Color> commonColors = [
+      Colors.white,
       Colors.grey,
       Colors.red,
       Colors.orange,
@@ -311,30 +354,74 @@ class _ColorPickerWithLabel extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: commonColors.map((color) {
-            final isSelected = selectedColor.value == color.value;
-            return GestureDetector(
-              onTap: () => onColorChanged(color),
+          children: [
+            // 常用颜色
+            ...commonColors.map((color) {
+              final isSelected = selectedColor.value == color.value;
+              return GestureDetector(
+                onTap: () => onColorChanged(color),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: color == Colors.white
+                          ? theme.colorScheme.outline.withOpacity(0.5)
+                          : (isSelected ? Colors.black : Colors.transparent),
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: isSelected
+                      ? Icon(
+                          Icons.check,
+                          color: color == Colors.white ? Colors.black : Colors.white,
+                          size: 20,
+                        )
+                      : null,
+                ),
+              );
+            }),
+            // 自定义颜色按钮
+            GestureDetector(
+              onTap: () => _showColorPicker(context),
               child: Container(
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: color,
                   shape: BoxShape.circle,
-                  border: isSelected
-                      ? Border.all(color: Colors.black, width: 2)
-                      : null,
+                  border: Border.all(
+                    color: theme.colorScheme.outline,
+                    width: 2,
+                    style: BorderStyle.solid,
+                  ),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Colors.red,
+                      Colors.yellow,
+                      Colors.green,
+                      Colors.blue,
+                      Colors.purple,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                 ),
-                child: isSelected
-                    ? const Icon(
-                        Icons.check,
-                        color: Colors.white,
-                        size: 20,
-                      )
-                    : null,
+                child: Icon(
+                  Icons.palette,
+                  color: Colors.white,
+                  size: 20,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: 2,
+                    ),
+                  ],
+                ),
               ),
-            );
-          }).toList(),
+            ),
+          ],
         ),
       ],
     );
