@@ -40,8 +40,9 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
-    # 修复桥接头文件与模块接口冲突
+    # 修复桥接头文件与模块接口冲突（兼容 Xcode 16.2）
     target.build_configurations.each do |config|
+      # 关键修复：禁用模块分发以兼容 bridging headers
       config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
 
       # 额外的兼容性设置
@@ -54,6 +55,18 @@ post_install do |installer|
       if config.build_settings['SWIFT_VERSION'].to_f < 5.0
         config.build_settings['SWIFT_VERSION'] = '5.0'
       end
+
+      # Xcode 16.2 特定修复
+      config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'NO'
+      config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'YES'
+    end
+  end
+
+  # 为 Runner target 单独配置
+  installer.target_installation_results.pod_target_installation_results.each do |pod_name, target_installation_result|
+    target_installation_result.native_target.build_configurations.each do |config|
+      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
+      config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'NO'
     end
   end
 end
