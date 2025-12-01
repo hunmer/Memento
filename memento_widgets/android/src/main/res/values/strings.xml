@@ -123,4 +123,8 @@
     <!-- 打卡周视图小组件 -->
     <string name="widget_checkin_weekly_label">打卡周视图</string>
     <string name="widget_checkin_weekly_description">显示本周打卡项目和次数</string>
+
+    <!-- 日历月视图小组件 (自定义) -->
+    <string name="widget_calendar_month_label">日历月视图</string>
+    <string name="widget_calendar_month_description">显示本月日历事件</string>
 </resources>

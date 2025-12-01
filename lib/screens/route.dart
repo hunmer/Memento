@@ -17,6 +17,7 @@ import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/calendar/calendar_plugin.dart';
+import 'package:Memento/plugins/calendar/screens/calendar_month_selector_screen.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
@@ -101,6 +102,9 @@ class AppRoutes extends NavigatorObserver {
 
   // 待办添加任务路由（从小组件打开）
   static const String todoAdd = '/todo_add';
+
+  // 日历月视图小组件配置路由
+  static const String calendarMonthSelector = '/calendar_month_selector';
 
   // 自定义页面过渡动画 - 无动画
   static Route _createRoute(Widget page) {
@@ -230,6 +234,16 @@ class AppRoutes extends NavigatorObserver {
           channelId = settings.arguments as String;
         }
         return _createRoute(ChatMainView(channelId: channelId));
+      case '/calendar_month_selector':
+      case 'calendar_month_selector':
+        // 日历月视图小组件配置界面
+        int? widgetId;
+        if (settings.arguments is Map<String, dynamic>) {
+          widgetId = (settings.arguments as Map<String, dynamic>)['widgetId'] as int?;
+        } else if (settings.arguments is int) {
+          widgetId = settings.arguments as int;
+        }
+        return _createRoute(CalendarMonthSelectorScreen(widgetId: widgetId));
       default:
         return _createRoute(
           Scaffold(

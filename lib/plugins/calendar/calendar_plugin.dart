@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart' as syncfusion;
 import 'package:uuid/uuid.dart';
 import '../../core/plugin_manager.dart';
@@ -134,8 +135,101 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
         // 监听任务变化
         taskController.addListener(() {
           controller.refresh();
+          // 同步小组件数据
+          syncWidgetData();
         });
       }
+    }
+
+    // 监听日历事件变化，同步小组件数据
+    controller.addListener(() {
+      syncWidgetData();
+    });
+
+    // 初始同步
+    syncWidgetData();
+  }
+
+  // ========== 小组件数据同步 ==========
+
+  /// 同步日历月视图小组件数据
+  Future<void> syncWidgetData() async {
+    // 只在 Android 平台同步
+    if (!Platform.isAndroid) return;
+
+    try {
+      final now = DateTime.now();
+      final firstDayOfMonth = DateTime(now.year, now.month, 1);
+      final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+
+      // 获取本月第一天是星期几 (1=周一, 7=周日)
+      int firstWeekday = firstDayOfMonth.weekday;
+
+      // 获取本月所有事件
+      final allEvents = controller.getAllEvents();
+      final monthEvents = allEvents.where((event) {
+        return event.startTime.isAfter(
+              firstDayOfMonth.subtract(const Duration(seconds: 1)),
+            ) &&
+            event.startTime.isBefore(
+              lastDayOfMonth.add(const Duration(days: 1)),
+            );
+      }).toList();
+
+      // 构建每日事件数据
+      final Map<String, List<Map<String, dynamic>>> dayEventsMap = {};
+
+      for (var event in monthEvents) {
+        final day = event.startTime.day.toString();
+        if (!dayEventsMap.containsKey(day)) {
+          dayEventsMap[day] = [];
+        }
+        dayEventsMap[day]!.add({
+          'id': event.id,
+          'title': event.title,
+          'description': event.description,
+          'startTime': event.startTime.toIso8601String(),
+          'endTime': event.endTime?.toIso8601String(),
+          'completed': false,
+        });
+      }
+
+      // 按开始时间排序每日事件
+      for (var day in dayEventsMap.keys) {
+        dayEventsMap[day]!.sort((a, b) {
+          final aTime = DateTime.parse(a['startTime'] as String);
+          final bTime = DateTime.parse(b['startTime'] as String);
+          return aTime.compareTo(bTime);
+        });
+      }
+
+      // 构建完整的小组件数据
+      final widgetData = {
+        'year': now.year,
+        'month': now.month,
+        'daysInMonth': lastDayOfMonth.day,
+        'firstWeekday': firstWeekday,
+        'today': now.day,
+        'dayEvents': dayEventsMap,
+      };
+
+      // 保存到 HomeWidget
+      final jsonString = jsonEncode(widgetData);
+      await HomeWidget.saveWidgetData<String>(
+        'calendar_month_widget_data',
+        jsonString,
+      );
+
+      // 更新小组件
+      await HomeWidget.updateWidget(
+        name: 'CalendarMonthWidgetProvider',
+        qualifiedAndroidName:
+            'github.hunmer.memento.widgets.providers.CalendarMonthWidgetProvider',
+      );
+
+      debugPrint('日历小组件数据同步成功: ${monthEvents.length} 个事件');
+    } catch (e) {
+      debugPrint('日历小组件数据同步失败: $e');
     }
   }
 

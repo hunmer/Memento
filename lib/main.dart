@@ -389,6 +389,33 @@ void _handleWidgetClick(String url) {
       debugPrint('待办列表小组件配置路由转换为: $routePath');
     }
 
+    // 特殊处理：日历月视图小组件配置路由
+    // 从 /calendar_month/config?widgetId=xxx 转换为 /calendar_month_selector?widgetId=xxx
+    if (routePath == '/calendar_month/config') {
+      final widgetId = uri.queryParameters['widgetId'];
+      routePath =
+          '/calendar_month_selector${widgetId != null ? '?widgetId=$widgetId' : ''}';
+      debugPrint('日历月视图小组件配置路由转换为: $routePath');
+    }
+
+    // 特殊处理：日历月视图小组件日期点击
+    // 从 /calendar_month?date=YYYY-MM-DD 打开事件详情对话框
+    if (routePath == '/calendar_month' && uri.queryParameters.containsKey('date')) {
+      final dateString = uri.queryParameters['date'];
+      if (dateString != null) {
+        // 打开日历插件并显示选中日期的事件
+        routePath = '/calendar';
+        debugPrint('日历月视图日期点击，打开日历插件: $dateString');
+        // 注意：这里需要在日历插件中处理date参数来显示对应日期的事件
+      }
+    }
+
+    // 特殊处理：日历月视图小组件点击标题（打开日历插件）
+    if (routePath == '/calendar' && uri.queryParameters.isEmpty) {
+      // 直接打开日历插件主界面
+      debugPrint('日历月视图标题点击，打开日历插件');
+    }
+
     // 特殊处理：待办列表小组件任务详情路由
     // 从 /todo_list/detail?taskId=xxx 转换为 /todo_task_detail?taskId=xxx
     if (routePath == '/todo_list/detail') {
