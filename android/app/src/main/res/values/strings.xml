@@ -1,10 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Memento</string>
-    <string name="widget_chat_quick_description">快速发送消息到频道</string>
-    <string name="widget_agent_voice_description">快速发送语音到 AI 助手</string>
-    <string name="widget_plugin_1x1_label">Memento 插件 (1x1)</string>
-    <string name="widget_plugin_2x1_label">Memento 插件 (2x1)</string>
-    <string name="widget_plugin_2x2_label">Memento 插件 (2x2)</string>
-    <string name="widget_plugin_description">快速访问 Memento 插件功能</string>
 </resources>

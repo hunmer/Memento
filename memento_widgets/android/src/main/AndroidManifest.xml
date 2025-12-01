@@ -39,7 +39,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_todo_1x1_info" />
     </receiver>
 
     <!-- 计时器 1x1 -->
@@ -51,7 +51,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_timer_1x1_info" />
     </receiver>
 
     <!-- 账单 1x1 -->
@@ -63,7 +63,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_bill_1x1_info" />
     </receiver>
 
     <!-- 日历 1x1 -->
@@ -75,7 +75,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_calendar_1x1_info" />
     </receiver>
 
     <!-- 活动记录 1x1 -->
@@ -87,7 +87,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_activity_1x1_info" />
     </receiver>
 
     <!-- 目标追踪 1x1 -->
@@ -99,7 +99,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_tracker_1x1_info" />
     </receiver>
 
     <!-- 习惯 1x1 -->
@@ -111,7 +111,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_habits_1x1_info" />
     </receiver>
 
     <!-- 日记 1x1 -->
@@ -123,7 +123,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_diary_1x1_info" />
     </receiver>
 
     <!-- 签到 1x1 -->
@@ -135,7 +135,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_checkin_1x1_info" />
     </receiver>
 
     <!-- 节点 1x1 -->
@@ -147,7 +147,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_nodes_1x1_info" />
     </receiver>
 
     <!-- 数据库 1x1 -->
@@ -159,7 +159,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_database_1x1_info" />
     </receiver>
 
     <!-- 联系人 1x1 -->
@@ -171,7 +171,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_contact_1x1_info" />
     </receiver>
 
     <!-- 纪念日 1x1 -->
@@ -183,7 +183,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_day_1x1_info" />
     </receiver>
 
     <!-- 物品 1x1 -->
@@ -195,7 +195,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_goods_1x1_info" />
     </receiver>
 
     <!-- 笔记 1x1 -->
@@ -207,7 +207,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_notes_1x1_info" />
     </receiver>
 
     <!-- 商店 1x1 -->
@@ -219,7 +219,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_store_1x1_info" />
     </receiver>
 
     <!-- OpenAI 1x1 -->
@@ -231,7 +231,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_openai_1x1_info" />
     </receiver>
 
     <!-- AI对话 1x1 -->
@@ -243,7 +243,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_agent_chat_1x1_info" />
     </receiver>
 
     <!-- 日记相册 1x1 -->
@@ -255,7 +255,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_calendar_album_1x1_info" />
     </receiver>
 
     <!-- 聊天 1x1 -->
@@ -267,7 +267,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_1x1_info" />
+        android:resource="@xml/widget_chat_1x1_info" />
     </receiver>
 
     <!-- ========== 插件小组件 2x2 尺寸 ========== -->
@@ -281,7 +281,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_todo_2x2_info" />
     </receiver>
 
     <!-- 计时器 2x2 -->
@@ -293,7 +293,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_timer_2x2_info" />
     </receiver>
 
     <!-- 账单 2x2 -->
@@ -305,7 +305,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_bill_2x2_info" />
     </receiver>
 
     <!-- 日历 2x2 -->
@@ -317,7 +317,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_calendar_2x2_info" />
     </receiver>
 
     <!-- 活动记录 2x2 -->
@@ -329,7 +329,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_activity_2x2_info" />
     </receiver>
 
     <!-- 目标追踪 2x2 -->
@@ -341,7 +341,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_tracker_2x2_info" />
     </receiver>
 
     <!-- 习惯 2x2 -->
@@ -353,7 +353,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_habits_2x2_info" />
     </receiver>
 
     <!-- 日记 2x2 -->
@@ -365,7 +365,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_diary_2x2_info" />
     </receiver>
 
     <!-- 签到 2x2 -->
@@ -377,7 +377,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_checkin_2x2_info" />
     </receiver>
 
     <!-- 节点 2x2 -->
@@ -389,7 +389,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_nodes_2x2_info" />
     </receiver>
 
     <!-- 数据库 2x2 -->
@@ -401,7 +401,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_database_2x2_info" />
     </receiver>
 
     <!-- 联系人 2x2 -->
@@ -413,7 +413,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_contact_2x2_info" />
     </receiver>
 
     <!-- 纪念日 2x2 -->
@@ -425,7 +425,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_day_2x2_info" />
     </receiver>
 
     <!-- 物品 2x2 -->
@@ -437,7 +437,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_goods_2x2_info" />
     </receiver>
 
     <!-- 笔记 2x2 -->
@@ -449,7 +449,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_notes_2x2_info" />
     </receiver>
 
     <!-- 商店 2x2 -->
@@ -461,7 +461,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_store_2x2_info" />
     </receiver>
 
     <!-- OpenAI 2x2 -->
@@ -473,7 +473,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_openai_2x2_info" />
     </receiver>
 
     <!-- AI对话 2x2 -->
@@ -485,7 +485,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_agent_chat_2x2_info" />
     </receiver>
 
     <!-- 日记相册 2x2 -->
@@ -497,7 +497,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_calendar_album_2x2_info" />
     </receiver>
 
     <!-- 聊天 2x2 -->
@@ -509,7 +509,7 @@
       </intent-filter>
       <meta-data
         android:name="android.appwidget.provider"
-        android:resource="@xml/widget_plugin_2x1_info" />
+        android:resource="@xml/widget_chat_2x2_info" />
     </receiver>
 
     <!-- 签到项 2x2 (自定义) -->

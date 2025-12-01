@@ -1,10 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Memento</string>
+
+    <!-- 快速小组件 -->
     <string name="widget_chat_quick_description">快速发送消息到频道</string>
     <string name="widget_agent_voice_description">快速发送语音到 AI 助手</string>
+
+    <!-- 通用小组件（备用） -->
     <string name="widget_plugin_1x1_label">Memento 插件 (1x1)</string>
     <string name="widget_plugin_2x1_label">Memento 插件 (2x1)</string>
     <string name="widget_plugin_2x2_label">Memento 插件 (2x2)</string>
     <string name="widget_plugin_description">快速访问 Memento 插件功能</string>
+
+    <!-- 待办事项小组件 -->
+    <string name="widget_todo_1x1_label">待办事项</string>
+    <string name="widget_todo_2x2_label">待办事项 (2x2)</string>
+    <string name="widget_todo_description">查看待办任务统计</string>
+
+    <!-- 计时器小组件 -->
+    <string name="widget_timer_1x1_label">计时器</string>
+    <string name="widget_timer_2x2_label">计时器 (2x2)</string>
+    <string name="widget_timer_description">查看计时任务</string>
+
+    <!-- 账单小组件 -->
+    <string name="widget_bill_1x1_label">账单</string>
+    <string name="widget_bill_2x2_label">账单 (2x2)</string>
+    <string name="widget_bill_description">查看收支统计</string>
+
+    <!-- 日历小组件 -->
+    <string name="widget_calendar_1x1_label">日历</string>
+    <string name="widget_calendar_2x2_label">日历 (2x2)</string>
+    <string name="widget_calendar_description">查看日历事件</string>
+
+    <!-- 活动记录小组件 -->
+    <string name="widget_activity_1x1_label">活动记录</string>
+    <string name="widget_activity_2x2_label">活动记录 (2x2)</string>
+    <string name="widget_activity_description">查看活动统计</string>
+
+    <!-- 目标追踪小组件 -->
+    <string name="widget_tracker_1x1_label">目标追踪</string>
+    <string name="widget_tracker_2x2_label">目标追踪 (2x2)</string>
+    <string name="widget_tracker_description">查看目标进度</string>
+
+    <!-- 习惯小组件 -->
+    <string name="widget_habits_1x1_label">习惯</string>
+    <string name="widget_habits_2x2_label">习惯 (2x2)</string>
+    <string name="widget_habits_description">查看习惯统计</string>
+
+    <!-- 日记小组件 -->
+    <string name="widget_diary_1x1_label">日记</string>
+    <string name="widget_diary_2x2_label">日记 (2x2)</string>
+    <string name="widget_diary_description">查看日记统计</string>
+
+    <!-- 签到小组件 -->
+    <string name="widget_checkin_1x1_label">签到</string>
+    <string name="widget_checkin_2x2_label">签到 (2x2)</string>
+    <string name="widget_checkin_description">查看签到统计</string>
+
+    <!-- 节点小组件 -->
+    <string name="widget_nodes_1x1_label">节点</string>
+    <string name="widget_nodes_2x2_label">节点 (2x2)</string>
+    <string name="widget_nodes_description">查看节点信息</string>
+
+    <!-- 数据库小组件 -->
+    <string name="widget_database_1x1_label">数据库</string>
+    <string name="widget_database_2x2_label">数据库 (2x2)</string>
+    <string name="widget_database_description">查看数据库统计</string>
+
+    <!-- 联系人小组件 -->
+    <string name="widget_contact_1x1_label">联系人</string>
+    <string name="widget_contact_2x2_label">联系人 (2x2)</string>
+    <string name="widget_contact_description">查看联系人信息</string>
+
+    <!-- 纪念日小组件 -->
+    <string name="widget_day_1x1_label">纪念日</string>
+    <string name="widget_day_2x2_label">纪念日 (2x2)</string>
+    <string name="widget_day_description">查看纪念日倒计时</string>
+
+    <!-- 物品小组件 -->
+    <string name="widget_goods_1x1_label">物品</string>
+    <string name="widget_goods_2x2_label">物品 (2x2)</string>
+    <string name="widget_goods_description">查看物品统计</string>
+
+    <!-- 笔记小组件 -->
+    <string name="widget_notes_1x1_label">笔记</string>
+    <string name="widget_notes_2x2_label">笔记 (2x2)</string>
+    <string name="widget_notes_description">查看笔记统计</string>
+
+    <!-- 商店小组件 -->
+    <string name="widget_store_1x1_label">商店</string>
+    <string name="widget_store_2x2_label">商店 (2x2)</string>
+    <string name="widget_store_description">查看商店信息</string>
+
+    <!-- OpenAI小组件 -->
+    <string name="widget_openai_1x1_label">AI助手</string>
+    <string name="widget_openai_2x2_label">AI助手 (2x2)</string>
+    <string name="widget_openai_description">查看AI助手统计</string>
+
+    <!-- AI对话小组件 -->
+    <string name="widget_agent_chat_1x1_label">AI对话</string>
+    <string name="widget_agent_chat_2x2_label">AI对话 (2x2)</string>
+    <string name="widget_agent_chat_description">查看AI对话统计</string>
+
+    <!-- 日记相册小组件 -->
+    <string name="widget_calendar_album_1x1_label">日记相册</string>
+    <string name="widget_calendar_album_2x2_label">日记相册 (2x2)</string>
+    <string name="widget_calendar_album_description">查看日记相册</string>
+
+    <!-- 聊天小组件 -->
+    <string name="widget_chat_1x1_label">聊天</string>
+    <string name="widget_chat_2x2_label">聊天 (2x2)</string>
+    <string name="widget_chat_description">查看聊天统计</string>
+
+    <!-- 签到项小组件 -->
+    <string name="widget_checkin_item_label">签到项</string>
+    <string name="widget_checkin_item_description">快速签到</string>
 </resources>

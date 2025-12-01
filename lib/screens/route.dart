@@ -19,6 +19,7 @@ import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/calendar/calendar_plugin.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
+import 'package:Memento/plugins/checkin/screens/checkin_item_selector_screen.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/database/database_plugin.dart';
 import 'package:Memento/plugins/day/day_plugin.dart';
@@ -79,6 +80,9 @@ class AppRoutes extends NavigatorObserver {
   static const String toolTemplate = '/tool_template';
   static const String toolManagement = '/tool_management';
 
+  // 打卡小组件配置路由
+  static const String checkinItemSelector = '/checkin_item_selector';
+
   // 自定义页面过渡动画 - 无动画
   static Route _createRoute(Widget page) {
     return PageRouteBuilder(
@@ -95,6 +99,17 @@ class AppRoutes extends NavigatorObserver {
     // 处理系统小组件的 Deep Link 跳转
     // 格式: memento://widget/{pluginId} 或 memento://widget/{pluginId}?id={id}
     final routeName = settings.name ?? '/';
+
+    // 处理打卡小组件配置路由
+    // 格式: /checkin_item_selector?widgetId={widgetId}
+    if (routeName.startsWith('/checkin_item_selector')) {
+      // 解析 widgetId 参数
+      final uri = Uri.parse(routeName);
+      final widgetIdStr = uri.queryParameters['widgetId'];
+      final widgetId = widgetIdStr != null ? int.tryParse(widgetIdStr) : null;
+
+      return _createRoute(CheckinItemSelectorScreen(widgetId: widgetId));
+    }
 
     switch (routeName) {
       case '/':
