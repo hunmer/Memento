@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 白色背景 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+
+    <!-- 紫色标题文本示意（使用矩形模拟） -->
+    <item
+        android:left="12dp"
+        android:top="12dp"
+        android:width="40dp"
+        android:height="16dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#8a4bde" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+
+    <!-- 月份文本示意 -->
+    <item
+        android:right="12dp"
+        android:top="12dp"
+        android:width="30dp"
+        android:height="16dp"
+        android:gravity="end">
+        <shape android:shape="rectangle">
+            <solid android:color="#1f2937" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+
+    <!-- 示意打卡圆圈（紫色实心） -->
+    <item
+        android:left="20dp"
+        android:top="60dp"
+        android:width="12dp"
+        android:height="12dp">
+        <shape android:shape="oval">
+            <solid android:color="#8a4bde" />
+        </shape>
+    </item>
+
+    <item
+        android:left="50dp"
+        android:top="60dp"
+        android:width="12dp"
+        android:height="12dp">
+        <shape android:shape="oval">
+            <solid android:color="#8a4bde" />
+        </shape>
+    </item>
+
+    <!-- 今天示意（空心圆圈） -->
+    <item
+        android:left="80dp"
+        android:top="80dp"
+        android:width="12dp"
+        android:height="12dp">
+        <shape android:shape="oval">
+            <stroke
+                android:width="2dp"
+                android:color="#8a4bde" />
+        </shape>
+    </item>
+
+    <item
+        android:right="20dp"
+        android:top="100dp"
+        android:width="12dp"
+        android:height="12dp">
+        <shape android:shape="oval">
+            <solid android:color="#8a4bde" />
+        </shape>
+    </item>
+</layer-list>

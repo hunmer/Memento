@@ -234,11 +234,18 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
       // 同步打卡项目数据到小组件
       await _syncCheckinItemToWidget(selectedItem);
 
-      // 更新小组件
+      // 更新小组件（同时更新打卡项和打卡月份视图）
       await HomeWidget.updateWidget(
         name: 'CheckinItemWidgetProvider',
         iOSName: 'CheckinItemWidgetProvider',
         qualifiedAndroidName: 'github.hunmer.memento.widgets.providers.CheckinItemWidgetProvider',
+      );
+
+      // 更新打卡月份视图小组件
+      await HomeWidget.updateWidget(
+        name: 'CheckinMonthWidgetProvider',
+        iOSName: 'CheckinMonthWidgetProvider',
+        qualifiedAndroidName: 'github.hunmer.memento.widgets.providers.CheckinMonthWidgetProvider',
       );
 
       if (mounted) {
@@ -272,6 +279,7 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
     try {
       // 计算七日打卡记录（周一到周日）
       final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
       final weekChecks = List<bool>.filled(7, false);
 
       // 从周一开始算起（周一=0, 周日=6）
@@ -286,6 +294,18 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
       // 转换为逗号分隔的字符串
       final weekChecksString = weekChecks.map((e) => e ? '1' : '0').join(',');
 
+      // 获取本月的打卡日期列表（用于月份视图小组件）
+      final lastDayOfMonth = DateTime(today.year, today.month + 1, 0);
+      final List<int> monthChecks = [];
+
+      for (int day = 1; day <= lastDayOfMonth.day; day++) {
+        final date = DateTime(today.year, today.month, day);
+        final records = item.getDateRecords(date);
+        if (records.isNotEmpty) {
+          monthChecks.add(day);
+        }
+      }
+
       // 构建符合 Android 端期望的 JSON 数据格式
       final widgetData = jsonEncode({
         'items': [
@@ -293,6 +313,7 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
             'id': item.id,
             'name': item.name,
             'weekChecks': weekChecksString,
+            'monthChecks': monthChecks.join(','), // 本月打卡日期列表
           }
         ],
       });
@@ -303,7 +324,7 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
         widgetData,
       );
 
-      debugPrint('打卡项目数据已同步: ${item.name}, weekChecks: $weekChecksString');
+      debugPrint('打卡项目数据已同步: ${item.name}, weekChecks: $weekChecksString, monthChecks: ${monthChecks.join(',')}');
     } catch (e) {
       debugPrint('同步打卡项目数据失败: $e');
     }

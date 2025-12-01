@@ -38,7 +38,8 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
     enum class WidgetSize {
         SIZE_1X1,
         SIZE_2X1,
-        SIZE_2X2
+        SIZE_2X2,
+        SIZE_2X4
     }
 
     /**
