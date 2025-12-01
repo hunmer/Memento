@@ -15,6 +15,7 @@
 5. [路由配置](#路由配置)
 6. [常见问题与解决方案](#常见问题与解决方案)
 7. [调试技巧](#调试技巧)
+8. [高级：构建复杂交互小组件](#高级构建复杂交互小组件) ⭐ 新增
 
 ---
 
@@ -832,3 +833,452 @@ override fun updateAppWidget(...) {
 7. ✅ **Provider 映射**: 在 `MyWidgetManager` 中注册完整类名
 
 遵循本文档的步骤和注意事项，可以避免 90% 的常见错误！
+
+---
+
+## 高级：构建复杂交互小组件
+
+本节基于"待办列表小组件"(TodoListWidget)的开发经验，详细说明如何实现一个**支持后台交互、可滚动列表**的复杂小组件。
+
+### 功能需求
+
+- **可滚动列表**: 支持无限任务显示，不限制数量
+- **多区域点击**: 不同区域触发不同操作
+  - 点击 checkbox → 后台完成任务（不打开应用）
+  - 点击任务标题 → 打开任务详情页
+  - 点击标题栏 → 跳转到任务列表
+- **后台数据更新**: 不打开应用的情况下更新数据
+- **双向同步**: 小组件操作同步到应用，应用操作同步到小组件
+
+### 架构设计
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                       Android 端                                │
+├─────────────────────────────────────────────────────────────────┤
+│  1. WidgetProvider (处理广播和整体更新)                          │
+│     - onReceive() 处理点击广播                                   │
+│     - updateAppWidget() 设置 RemoteViews                        │
+│     - 后台更新 SharedPreferences 数据                            │
+│     - 显示 Toast 提示                                           │
+│                                                                 │
+│  2. RemoteViewsService (提供列表数据)                           │
+│     - 继承 RemoteViewsService                                   │
+│     - 返回 RemoteViewsFactory 实例                              │
+│                                                                 │
+│  3. RemoteViewsFactory (创建列表项)                             │
+│     - 实现 getViewAt() 创建每个列表项                            │
+│     - 设置 setOnClickFillInIntent() 填充点击数据                 │
+│                                                                 │
+│  4. 布局文件                                                    │
+│     - widget_xxx.xml (主布局，包含 ListView)                     │
+│     - widget_xxx_item.xml (列表项布局)                          │
+└─────────────────────────────────────────────────────────────────┘
+                            ↕ (SharedPreferences + 待处理变更)
+┌─────────────────────────────────────────────────────────────────┐
+│                       Flutter 端                                │
+├─────────────────────────────────────────────────────────────────┤
+│  1. 数据同步 (PluginWidgetSyncHelper)                           │
+│     - syncXxxWidget() 同步数据到小组件                          │
+│     - syncPendingChangesOnStartup() 同步待处理变更               │
+│                                                                 │
+│  2. 生命周期监听 (main.dart)                                    │
+│     - WidgetsBindingObserver 监听应用恢复                       │
+│     - 恢复时同步待处理变更                                       │
+│                                                                 │
+│  3. 数据变更监听 (TaskController)                               │
+│     - 任务增删改时调用 _syncWidget()                             │
+│     - 同时同步标准小组件和列表小组件                             │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 实现步骤
+
+#### 1. 创建 RemoteViewsService
+
+**路径**: `memento_widgets/android/src/main/kotlin/.../TodoListWidgetService.kt`
+
+```kotlin
+class TodoListWidgetService : RemoteViewsService() {
+    override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
+        return TodoListRemoteViewsFactory(applicationContext, intent)
+    }
+}
+```
+
+#### 2. 创建 RemoteViewsFactory
+
+**路径**: `memento_widgets/android/src/main/kotlin/.../TodoListRemoteViewsFactory.kt`
+
+```kotlin
+class TodoListRemoteViewsFactory(
+    private val context: Context,
+    private val intent: Intent
+) : RemoteViewsService.RemoteViewsFactory {
+
+    private var tasks: List<TaskItem> = emptyList()
+
+    data class TaskItem(
+        val id: String,
+        val title: String,
+        val completed: Boolean
+    )
+
+    override fun onDataSetChanged() {
+        // 从 SharedPreferences 加载数据
+        tasks = loadTasks()
+    }
+
+    override fun getCount(): Int = tasks.size
+
+    override fun getViewAt(position: Int): RemoteViews {
+        val task = tasks[position]
+        val views = RemoteViews(context.packageName, R.layout.widget_todo_list_item)
+
+        views.setTextViewText(R.id.task_title, task.title)
+
+        // ⚠️ 关键：使用 setOnClickFillInIntent 填充点击数据
+        // checkbox 点击 - 触发任务完成
+        val checkboxFillIntent = Intent().apply {
+            putExtra("action", "toggle_task")
+            putExtra("task_id", task.id)
+            putExtra("task_completed", task.completed)
+        }
+        views.setOnClickFillInIntent(R.id.task_checkbox, checkboxFillIntent)
+
+        // 标题点击 - 打开详情
+        val detailFillIntent = Intent().apply {
+            putExtra("action", "open_detail")
+            putExtra("task_id", task.id)
+        }
+        views.setOnClickFillInIntent(R.id.task_title_container, detailFillIntent)
+
+        return views
+    }
+
+    // ... 其他必要方法
+}
+```
+
+#### 3. 更新 WidgetProvider 支持 ListView
+
+```kotlin
+class TodoListWidgetProvider : BasePluginWidgetProvider() {
+
+    companion object {
+        const val ACTION_TASK_CLICK = "github.hunmer.memento.widgets.TODO_LIST_TASK_CLICK"
+        const val PREF_KEY_PENDING_CHANGES = "todo_list_pending_changes"
+    }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        when (intent.action) {
+            ACTION_TASK_CLICK -> handleTaskClick(context, intent)
+        }
+    }
+
+    private fun setupConfiguredWidget(views: RemoteViews, context: Context, appWidgetId: Int) {
+        // ⚠️ 设置 ListView 的 RemoteViewsService
+        val serviceIntent = Intent(context, TodoListWidgetService::class.java).apply {
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+            data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
+        }
+        views.setRemoteAdapter(R.id.task_list_view, serviceIntent)
+
+        // ⚠️ 设置 PendingIntent 模板（必须使用 FLAG_MUTABLE）
+        val clickIntent = Intent(context, TodoListWidgetProvider::class.java).apply {
+            action = ACTION_TASK_CLICK
+        }
+        val clickPendingIntent = PendingIntent.getBroadcast(
+            context,
+            appWidgetId,
+            clickIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE  // ⚠️ 必须 MUTABLE
+        )
+        views.setPendingIntentTemplate(R.id.task_list_view, clickPendingIntent)
+    }
+}
+```
+
+#### 4. 后台处理点击事件（不打开应用）
+
+```kotlin
+private fun handleTaskClick(context: Context, intent: Intent) {
+    val action = intent.getStringExtra("action") ?: return
+    val taskId = intent.getStringExtra("task_id") ?: return
+
+    when (action) {
+        "toggle_task" -> {
+            val currentCompleted = intent.getBooleanExtra("task_completed", false)
+
+            // 1. 直接更新 SharedPreferences 数据（不打开应用）
+            val taskTitle = updateTaskInPrefs(context, taskId, !currentCompleted)
+
+            // 2. 记录待同步变更（应用启动时处理）
+            recordPendingChange(context, taskId, !currentCompleted)
+
+            // 3. 显示 Toast 提示
+            Toast.makeText(context, "✓ 已完成「$taskTitle」", Toast.LENGTH_SHORT).show()
+
+            // 4. 刷新小组件
+            refreshAllWidgets(context)
+        }
+        "open_detail" -> {
+            // 打开应用的任务详情页
+            val detailIntent = Intent(Intent.ACTION_VIEW)
+            detailIntent.data = Uri.parse("memento://widget/todo_list/detail?taskId=$taskId")
+            detailIntent.setPackage("github.hunmer.memento")
+            detailIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            context.startActivity(detailIntent)
+        }
+    }
+}
+
+// ⚠️ 记录待同步变更，应用启动时读取并同步到实际数据
+private fun recordPendingChange(context: Context, taskId: String, completed: Boolean) {
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val pendingJson = prefs.getString(PREF_KEY_PENDING_CHANGES, "{}") ?: "{}"
+    val pending = JSONObject(pendingJson)
+    pending.put(taskId, completed)
+    prefs.edit().putString(PREF_KEY_PENDING_CHANGES, pending.toString()).apply()
+}
+```
+
+#### 5. 注册 Service（AndroidManifest.xml）
+
+```xml
+<!-- 注册 RemoteViewsService -->
+<service
+    android:name="github.hunmer.memento.widgets.providers.TodoListWidgetService"
+    android:exported="false"
+    android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+<!-- 注册 Provider，添加自定义 Action -->
+<receiver
+    android:name="github.hunmer.memento.widgets.providers.TodoListWidgetProvider"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        <action android:name="github.hunmer.memento.widgets.TODO_LIST_TASK_CLICK" />
+    </intent-filter>
+    <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/widget_todo_list_info" />
+</receiver>
+```
+
+#### 6. Flutter 端：应用恢复时同步待处理变更
+
+**在 main.dart 添加生命周期监听**:
+
+```dart
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // ⚠️ 应用恢复到前台时同步待处理变更
+    if (state == AppLifecycleState.resumed) {
+      PluginWidgetSyncHelper.instance.syncPendingTaskChangesOnStartup();
+    }
+  }
+}
+```
+
+**在 PluginWidgetSyncHelper 添加同步方法**:
+
+```dart
+// ⚠️ 防止重复同步的标志（避免循环调用）
+bool _isSyncingPendingChanges = false;
+
+Future<void> syncPendingTaskChangesOnStartup() async {
+  final plugin = PluginManager.instance.getPlugin('todo') as TodoPlugin?;
+  if (plugin == null) return;
+  await _syncPendingTaskChanges(plugin);
+}
+
+Future<void> _syncPendingTaskChanges(TodoPlugin plugin) async {
+  // ⚠️ 防止循环调用
+  if (_isSyncingPendingChanges) return;
+
+  try {
+    final pendingJson = await MyWidgetManager().getData<String>('todo_list_pending_changes');
+    if (pendingJson == null || pendingJson == '{}') return;
+
+    final pending = jsonDecode(pendingJson) as Map<String, dynamic>;
+    if (pending.isEmpty) return;
+
+    // ⚠️ 先清除再处理（防止循环调用时重复处理）
+    await MyWidgetManager().saveString('todo_list_pending_changes', '{}');
+
+    _isSyncingPendingChanges = true;
+
+    for (final entry in pending.entries) {
+      final taskId = entry.key;
+      final completed = entry.value as bool;
+
+      if (completed) {
+        await plugin.taskController.updateTaskStatus(taskId, TaskStatus.done);
+      } else {
+        await plugin.taskController.updateTaskStatus(taskId, TaskStatus.todo);
+      }
+    }
+  } finally {
+    _isSyncingPendingChanges = false;
+  }
+}
+```
+
+#### 7. 数据控制器：任务变更时同步小组件
+
+```dart
+class TaskController extends ChangeNotifier {
+  Future<void> _syncWidget() async {
+    // 同步标准小组件
+    await PluginWidgetSyncHelper.instance.syncTodo();
+    // ⚠️ 同时同步列表小组件
+    await PluginWidgetSyncHelper.instance.syncTodoListWidget();
+  }
+
+  Future<void> addTask(Task task) async {
+    _tasks.add(task);
+    notifyListeners();
+    await _saveTasks();
+    await _syncWidget();  // ⚠️ 同步小组件
+  }
+
+  Future<void> updateTaskStatus(String taskId, TaskStatus status) async {
+    // ... 更新逻辑
+    await _saveTasks();
+    await _syncWidget();  // ⚠️ 同步小组件
+  }
+}
+```
+
+### 常见陷阱与解决方案
+
+#### 陷阱 1：PendingIntent 使用 FLAG_IMMUTABLE 导致 FillInIntent 无效
+
+**问题**: ListView 项点击无响应
+
+**原因**: `PendingIntent.FLAG_IMMUTABLE` 会阻止 FillInIntent 的数据填充
+
+**解决**:
+```kotlin
+// ❌ 错误
+PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+
+// ✅ 正确
+PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+```
+
+#### 陷阱 2：循环调用导致无限递归
+
+**问题**: 控制台一直打印同步日志，应用卡死
+
+**原因**: `syncTodoListWidget()` 内部调用 `_syncPendingTaskChanges()`，而 `_syncPendingTaskChanges()` 更新任务状态后触发 `_syncWidget()`，又调用 `syncTodoListWidget()`
+
+**解决**:
+1. 使用标志变量防止重复调用
+2. 先清除待处理变更再处理
+3. 将 pending 同步逻辑与 widget 数据同步逻辑分离
+
+```dart
+bool _isSyncingPendingChanges = false;
+
+Future<void> _syncPendingTaskChanges(TodoPlugin plugin) async {
+  if (_isSyncingPendingChanges) return;  // ⚠️ 防止重复调用
+
+  // 先清除再处理
+  await MyWidgetManager().saveString('todo_list_pending_changes', '{}');
+
+  _isSyncingPendingChanges = true;
+  try {
+    // ... 处理逻辑
+  } finally {
+    _isSyncingPendingChanges = false;
+  }
+}
+```
+
+#### 陷阱 3：应用在后台时恢复不触发同步
+
+**问题**: 小组件完成任务后，切换到应用发现任务状态未更新
+
+**原因**: 应用在后台时 `main()` 不会重新执行
+
+**解决**: 使用 `WidgetsBindingObserver` 监听 `AppLifecycleState.resumed`
+
+#### 陷阱 4：应用内操作不同步到小组件
+
+**问题**: 在应用内添加/完成任务，小组件不更新
+
+**原因**: 只同步了标准小组件，没有同步列表小组件
+
+**解决**: 在 `_syncWidget()` 中同时调用两个同步方法
+
+### 数据流总结
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    完整数据流                                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  【应用内操作】                                                  │
+│  添加/完成任务 → TaskController._syncWidget()                   │
+│       ↓                                                         │
+│  syncTodo() + syncTodoListWidget()                              │
+│       ↓                                                         │
+│  更新 SharedPreferences → 刷新小组件 ✓                          │
+│                                                                 │
+│  ═══════════════════════════════════════════════════════════    │
+│                                                                 │
+│  【小组件操作】                                                  │
+│  点击 checkbox → Provider.handleTaskClick()                     │
+│       ↓                                                         │
+│  updateTaskInPrefs() + recordPendingChange()                    │
+│       ↓                                                         │
+│  Toast 提示 → 刷新小组件 ✓                                       │
+│                                                                 │
+│  ═══════════════════════════════════════════════════════════    │
+│                                                                 │
+│  【应用恢复】                                                    │
+│  AppLifecycleState.resumed → syncPendingChangesOnStartup()      │
+│       ↓                                                         │
+│  读取 pending → 清除 pending → 设置标志                          │
+│       ↓                                                         │
+│  updateTaskStatus() → _syncWidget()                             │
+│       ↓                                                         │
+│  syncTodoListWidget() (跳过 pending 同步)                       │
+│       ↓                                                         │
+│  清除标志 → 完成 ✓                                               │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 完整示例代码位置
+
+以待办列表小组件为例:
+
+- **Android 端**:
+  - Provider: `memento_widgets/android/src/main/kotlin/.../providers/TodoListWidgetProvider.kt`
+  - Service: `memento_widgets/android/src/main/kotlin/.../providers/TodoListWidgetService.kt`
+  - Factory: `memento_widgets/android/src/main/kotlin/.../providers/TodoListRemoteViewsFactory.kt`
+  - 主布局: `memento_widgets/android/src/main/res/layout/widget_todo_list.xml`
+  - 列表项布局: `memento_widgets/android/src/main/res/layout/widget_todo_list_item.xml`
+
+- **Flutter 端**:
+  - 配置界面: `lib/plugins/todo/screens/todo_list_selector_screen.dart`
+  - 数据同步: `lib/core/services/plugin_widget_sync_helper.dart`
+  - 生命周期监听: `lib/main.dart` (_MyAppState with WidgetsBindingObserver)
+  - 数据控制器: `lib/plugins/todo/controllers/task_controller.dart`

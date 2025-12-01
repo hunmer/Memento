@@ -512,6 +512,9 @@ class TaskController extends ChangeNotifier {
 
   // 同步小组件数据
   Future<void> _syncWidget() async {
+    // 同步标准待办小组件 (1x1/2x2)
     await PluginWidgetSyncHelper.instance.syncTodo();
+    // 同步待办列表自定义小组件（可滚动列表）
+    await PluginWidgetSyncHelper.instance.syncTodoListWidget();
   }
 }

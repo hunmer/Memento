@@ -443,24 +443,29 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
   }
 
   /// 同步任务数据到小组件
+  /// 同步所有未完成任务（包含日期信息），让 Android 端按时间范围过滤
   Future<void> _syncTasksToWidget() async {
     try {
-      final filteredTasks = _getFilteredTasks();
+      // 获取所有未完成任务（不按时间范围过滤，让 Android 端过滤）
+      final allTasks = _todoPlugin.taskController.tasks
+          .where((task) => task.status != TaskStatus.done)
+          .toList();
 
-      // 构建任务数据（最多4个）
-      final taskList = filteredTasks.take(4).map((task) {
+      // 构建任务数据（包含日期字段，供 Android 端过滤使用）
+      final taskList = allTasks.map((task) {
         return {
           'id': task.id,
           'title': task.title,
           'completed': task.status == TaskStatus.done,
+          'startDate': task.startDate?.toIso8601String(),
+          'dueDate': task.dueDate?.toIso8601String(),
         };
       }).toList();
 
       // 构建小组件数据
       final widgetData = jsonEncode({
         'tasks': taskList,
-        'total': filteredTasks.length,
-        'timeRange': _selectedTimeRange,
+        'total': taskList.length,
       });
 
       // 保存到 SharedPreferences

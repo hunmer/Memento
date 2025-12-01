@@ -9,11 +9,10 @@ import android.net.Uri
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
+import android.widget.Toast
 import com.example.memento_widgets.R
 import github.hunmer.memento.widgets.BasePluginWidgetProvider
-import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.dart.DartExecutor
-import io.flutter.plugin.common.MethodChannel
+import org.json.JSONArray
 import org.json.JSONObject
 
 /**
@@ -21,7 +20,7 @@ import org.json.JSONObject
  * 显示用户的待办任务列表，支持配置时间范围和标题
  *
  * 交互逻辑：
- * - 点击 checkbox：广播完成任务（不打开应用）
+ * - 点击 checkbox：后台完成任务（不打开应用），显示 Toast 提示
  * - 点击任务标题：打开任务详情页
  * - 点击标题栏/添加按钮：跳转到待办列表
  */
@@ -37,6 +36,9 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
         // 广播 Action
         const val ACTION_TASK_CLICK = "github.hunmer.memento.widgets.TODO_LIST_TASK_CLICK"
 
+        // 待同步的任务变更（应用启动时读取）
+        const val PREF_KEY_PENDING_CHANGES = "todo_list_pending_changes"
+
         // 时间范围常量
         const val RANGE_TODAY = "today"
         const val RANGE_WEEK = "week"
@@ -51,7 +53,13 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
             val componentName = ComponentName(context, TodoListWidgetProvider::class.java)
             val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
 
-            // 通知数据已更改
+            // 触发小组件更新
+            val intent = Intent(context, TodoListWidgetProvider::class.java)
+            intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
+            context.sendBroadcast(intent)
+
+            // 通知列表数据已更改
             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.task_list_view)
         }
     }
@@ -75,16 +83,27 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
 
         when (action) {
             "toggle_task" -> {
-                // 切换任务完成状态 - 启动应用处理
-                val completed = intent.getBooleanExtra("task_completed", false)
-                Log.d(TAG, "Toggle task: taskId=$taskId, currentCompleted=$completed")
+                // 后台完成任务切换（不打开应用）
+                val currentCompleted = intent.getBooleanExtra("task_completed", false)
+                val newCompleted = !currentCompleted
+                Log.d(TAG, "Toggle task in background: taskId=$taskId, newCompleted=$newCompleted")
 
-                // 启动主应用处理任务切换
-                val toggleIntent = Intent(Intent.ACTION_VIEW)
-                toggleIntent.data = Uri.parse("memento://widget/todo_list/toggle?taskId=$taskId&completed=${!completed}")
-                toggleIntent.setPackage("github.hunmer.memento")
-                toggleIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                context.startActivity(toggleIntent)
+                // 1. 更新 SharedPreferences 中的任务数据
+                val taskTitle = updateTaskInPrefs(context, taskId, newCompleted)
+
+                // 2. 记录待同步的变更（应用启动时处理）
+                recordPendingChange(context, taskId, newCompleted)
+
+                // 3. 显示 Toast 提示
+                val message = if (newCompleted) {
+                    "✓ 已完成「$taskTitle」"
+                } else {
+                    "↩ 已恢复「$taskTitle」"
+                }
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+
+                // 4. 刷新小组件
+                refreshAllWidgets(context)
             }
             "open_detail" -> {
                 // 打开任务详情页
@@ -95,6 +114,68 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
                 detailIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 context.startActivity(detailIntent)
             }
+        }
+    }
+
+    /**
+     * 更新 SharedPreferences 中的任务完成状态
+     * @return 任务标题（用于 Toast 显示）
+     */
+    private fun updateTaskInPrefs(context: Context, taskId: String, completed: Boolean): String {
+        var taskTitle = "任务"
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val jsonString = prefs.getString("todo_list_widget_data", null) ?: return taskTitle
+
+            val json = JSONObject(jsonString)
+            val tasks = json.optJSONArray("tasks") ?: return taskTitle
+
+            // 查找并更新任务
+            val newTasks = JSONArray()
+            var totalCount = 0
+
+            for (i in 0 until tasks.length()) {
+                val task = tasks.getJSONObject(i)
+                if (task.optString("id") == taskId) {
+                    taskTitle = task.optString("title", "任务")
+                    task.put("completed", completed)
+                }
+                // 只保留未完成的任务在列表中（已完成的从小组件列表移除）
+                if (!task.optBoolean("completed", false)) {
+                    newTasks.put(task)
+                    totalCount++
+                }
+            }
+
+            // 保存更新后的数据
+            json.put("tasks", newTasks)
+            json.put("total", totalCount)
+            prefs.edit().putString("todo_list_widget_data", json.toString()).apply()
+
+            Log.d(TAG, "Task updated in prefs: taskId=$taskId, completed=$completed, remaining=$totalCount")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update task in prefs", e)
+        }
+        return taskTitle
+    }
+
+    /**
+     * 记录待同步的任务变更
+     * 应用启动时会读取并同步这些变更到实际的任务数据
+     */
+    private fun recordPendingChange(context: Context, taskId: String, completed: Boolean) {
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val pendingJson = prefs.getString(PREF_KEY_PENDING_CHANGES, "{}") ?: "{}"
+            val pending = JSONObject(pendingJson)
+
+            // 记录变更：taskId -> completed
+            pending.put(taskId, completed)
+
+            prefs.edit().putString(PREF_KEY_PENDING_CHANGES, pending.toString()).apply()
+            Log.d(TAG, "Recorded pending change: taskId=$taskId, completed=$completed")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to record pending change", e)
         }
     }
 
@@ -197,7 +278,7 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
         views.setRemoteAdapter(R.id.task_list_view, serviceIntent)
         views.setEmptyView(R.id.task_list_view, R.id.widget_empty_text)
 
-        // 设置 ListView 项目点击的 PendingIntent 模板
+        // 设置 ListView 项目点击的 PendingIntent 模板（广播，不是 Activity）
         val clickIntent = Intent(context, TodoListWidgetProvider::class.java).apply {
             action = ACTION_TASK_CLICK
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -218,7 +299,7 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
     }
 
     /**
-     * 获取任务数量
+     * 获取任务数量（按时间范围过滤）
      */
     private fun getTaskCount(context: Context, timeRange: String): Int {
         return try {
@@ -227,13 +308,14 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
             val json = JSONObject(jsonString)
             val tasks = json.optJSONArray("tasks") ?: return 0
 
-            // 这里简单返回总数，实际过滤在 Factory 中完成
-            // 但为了准确显示数量，我们需要在这里也做过滤
             var count = 0
             for (i in 0 until tasks.length()) {
                 val task = tasks.getJSONObject(i)
                 if (!task.optBoolean("completed", false)) {
-                    count++
+                    // 按时间范围过滤（与 TodoListRemoteViewsFactory 保持一致）
+                    if (shouldIncludeTask(task, timeRange)) {
+                        count++
+                    }
                 }
             }
             count
@@ -241,6 +323,101 @@ class TodoListWidgetProvider : BasePluginWidgetProvider() {
             Log.e(TAG, "Failed to get task count", e)
             0
         }
+    }
+
+    /**
+     * 根据时间范围判断是否包含任务（与 TodoListRemoteViewsFactory 保持一致）
+     */
+    private fun shouldIncludeTask(task: JSONObject, timeRange: String): Boolean {
+        // 如果是"全部"范围，包含所有任务
+        if (timeRange == RANGE_ALL) return true
+
+        val startDateStr = task.optString("startDate", null)
+        val dueDateStr = task.optString("dueDate", null)
+
+        // 如果任务没有日期，默认包含
+        if (startDateStr.isNullOrEmpty() && dueDateStr.isNullOrEmpty()) return true
+
+        val todayStart = getTodayStart()
+        val todayEnd = todayStart + 24 * 60 * 60 * 1000
+
+        val taskStart = parseDate(startDateStr)
+        val taskDue = parseDate(dueDateStr)
+
+        return when (timeRange) {
+            RANGE_TODAY -> {
+                // 今天的任务：开始日期<=今天 且 截止日期>=今天
+                val startOk = taskStart == null || taskStart <= todayEnd
+                val dueOk = taskDue == null || taskDue >= todayStart
+                startOk && dueOk
+            }
+            RANGE_WEEK -> {
+                // 本周的任务
+                val weekStart = getWeekStart()
+                val weekEnd = weekStart + 7 * 24 * 60 * 60 * 1000
+                val startOk = taskStart == null || taskStart <= weekEnd
+                val dueOk = taskDue == null || taskDue >= weekStart
+                startOk && dueOk
+            }
+            RANGE_MONTH -> {
+                // 本月的任务
+                val monthStart = getMonthStart()
+                val monthEnd = getMonthEnd()
+                val startOk = taskStart == null || taskStart <= monthEnd
+                val dueOk = taskDue == null || taskDue >= monthStart
+                startOk && dueOk
+            }
+            else -> true
+        }
+    }
+
+    private fun parseDate(dateStr: String?): Long? {
+        if (dateStr.isNullOrEmpty()) return null
+        return try {
+            java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault())
+                .parse(dateStr)?.time
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun getTodayStart(): Long {
+        val cal = java.util.Calendar.getInstance()
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        cal.set(java.util.Calendar.MINUTE, 0)
+        cal.set(java.util.Calendar.SECOND, 0)
+        cal.set(java.util.Calendar.MILLISECOND, 0)
+        return cal.timeInMillis
+    }
+
+    private fun getWeekStart(): Long {
+        val cal = java.util.Calendar.getInstance()
+        cal.set(java.util.Calendar.DAY_OF_WEEK, cal.firstDayOfWeek)
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        cal.set(java.util.Calendar.MINUTE, 0)
+        cal.set(java.util.Calendar.SECOND, 0)
+        cal.set(java.util.Calendar.MILLISECOND, 0)
+        return cal.timeInMillis
+    }
+
+    private fun getMonthStart(): Long {
+        val cal = java.util.Calendar.getInstance()
+        cal.set(java.util.Calendar.DAY_OF_MONTH, 1)
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        cal.set(java.util.Calendar.MINUTE, 0)
+        cal.set(java.util.Calendar.SECOND, 0)
+        cal.set(java.util.Calendar.MILLISECOND, 0)
+        return cal.timeInMillis
+    }
+
+    private fun getMonthEnd(): Long {
+        val cal = java.util.Calendar.getInstance()
+        cal.set(java.util.Calendar.DAY_OF_MONTH, cal.getActualMaximum(java.util.Calendar.DAY_OF_MONTH))
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 23)
+        cal.set(java.util.Calendar.MINUTE, 59)
+        cal.set(java.util.Calendar.SECOND, 59)
+        cal.set(java.util.Calendar.MILLISECOND, 999)
+        return cal.timeInMillis
     }
 
     /**

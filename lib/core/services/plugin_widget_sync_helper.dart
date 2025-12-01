@@ -918,6 +918,9 @@ class PluginWidgetSyncHelper {
         return;
       }
 
+      // 注意：待处理的任务变更（pending changes）在应用启动/恢复时单独同步
+      // 这里不再调用 _syncPendingTaskChanges()，避免循环调用
+
       // 获取所有未完成任务
       final allTasks = plugin.taskController.tasks
           .where((task) => task.status != TaskStatus.done)
@@ -945,6 +948,78 @@ class PluginWidgetSyncHelper {
       debugPrint('Synced todo_list widget with ${items.length} tasks');
     } catch (e) {
       debugPrint('Failed to sync todo_list widget: $e');
+    }
+  }
+
+  /// 应用启动时同步待处理的小组件任务变更
+  /// 在 main.dart 中调用，确保用户在小组件上完成的任务能立即同步到应用
+  Future<void> syncPendingTaskChangesOnStartup() async {
+    try {
+      final plugin = PluginManager.instance.getPlugin('todo') as TodoPlugin?;
+      if (plugin == null) {
+        debugPrint('Todo plugin not found, skipping pending changes sync');
+        return;
+      }
+
+      await _syncPendingTaskChanges(plugin);
+    } catch (e) {
+      debugPrint('Failed to sync pending task changes on startup: $e');
+    }
+  }
+
+  // 防止重复同步的标志
+  bool _isSyncingPendingChanges = false;
+
+  /// 同步待处理的任务变更（从小组件后台完成的任务）
+  Future<void> _syncPendingTaskChanges(TodoPlugin plugin) async {
+    // 防止重复调用（避免循环）
+    if (_isSyncingPendingChanges) {
+      debugPrint('Already syncing pending changes, skipping');
+      return;
+    }
+
+    try {
+      // 读取待处理的变更
+      final pendingJson = await MyWidgetManager().getData<String>('todo_list_pending_changes');
+      if (pendingJson == null || pendingJson.isEmpty || pendingJson == '{}') {
+        return;
+      }
+
+      debugPrint('Found pending task changes: $pendingJson');
+
+      final pending = jsonDecode(pendingJson) as Map<String, dynamic>;
+      if (pending.isEmpty) return;
+
+      // 先清除待处理的变更（防止循环调用时重复处理）
+      await MyWidgetManager().saveString('todo_list_pending_changes', '{}');
+      debugPrint('Cleared pending task changes');
+
+      // 设置标志防止循环
+      _isSyncingPendingChanges = true;
+
+      // 处理每个变更
+      for (final entry in pending.entries) {
+        final taskId = entry.key;
+        final completed = entry.value as bool;
+
+        debugPrint('Syncing pending change: taskId=$taskId, completed=$completed');
+
+        try {
+          if (completed) {
+            await plugin.taskController.updateTaskStatus(taskId, TaskStatus.done);
+          } else {
+            await plugin.taskController.updateTaskStatus(taskId, TaskStatus.todo);
+          }
+        } catch (e) {
+          debugPrint('Failed to sync task $taskId: $e');
+        }
+      }
+
+      debugPrint('All pending task changes synced');
+    } catch (e) {
+      debugPrint('Failed to sync pending task changes: $e');
+    } finally {
+      _isSyncingPendingChanges = false;
     }
   }
 
