@@ -232,10 +232,20 @@ class _CheckinMainViewState extends State<CheckinMainView>
               elevation: 4,
               shape: const CircleBorder(),
               child: const Icon(Icons.add, color: Colors.white, size: 32),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => CheckinFormScreen()),
+              onPressed: () async {
+                final newItem = await Navigator.of(context).push<CheckinItem>(
+                  MaterialPageRoute(
+                    builder: (context) => const CheckinFormScreen(),
+                  ),
                 );
+
+                if (newItem != null) {
+                  await checkinPlugin.addCheckinItem(newItem);
+                  // 触发界面刷新
+                  if (mounted) {
+                    setState(() {});
+                  }
+                }
               },
             ),
           ),

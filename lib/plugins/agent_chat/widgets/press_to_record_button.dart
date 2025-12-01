@@ -71,7 +71,8 @@ class PressToRecordButton extends StatefulWidget {
   State<PressToRecordButton> createState() => _PressToRecordButtonState();
 }
 
-class _PressToRecordButtonState extends State<PressToRecordButton> {
+class _PressToRecordButtonState extends State<PressToRecordButton>
+    with SingleTickerProviderStateMixin {
   String _recognizedText = '';
   bool _isRecording = false;
   bool _isInitialized = false;
@@ -79,14 +80,40 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
   /// 录音开始前输入框中的文本
   String _textBeforeRecording = '';
 
+  /// 录音开始前光标的位置
+  int _cursorPositionBeforeRecording = 0;
+
   StreamSubscription<String>? _recognitionSubscription;
   StreamSubscription<SpeechRecognitionState>? _stateSubscription;
   StreamSubscription<String>? _errorSubscription;
 
+  // 动画控制器
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
   @override
   void initState() {
     super.initState();
+    _initializeAnimation();
     _initializeService();
+  }
+
+  /// 初始化动画
+  void _initializeAnimation() {
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.2,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   @override
@@ -94,6 +121,7 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
     _recognitionSubscription?.cancel();
     _stateSubscription?.cancel();
     _errorSubscription?.cancel();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -145,25 +173,40 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
     if (!widget.enabled || !_isInitialized || _isRecording) return;
 
     try {
-      // 保存录音开始前的文本
+      // 保存录音开始前的文本和光标位置
       _textBeforeRecording = widget.textController.text;
+      _cursorPositionBeforeRecording = widget.textController.selection.baseOffset;
+      // 如果光标位置无效（-1），则使用文本末尾
+      if (_cursorPositionBeforeRecording < 0 ||
+          _cursorPositionBeforeRecording > _textBeforeRecording.length) {
+        _cursorPositionBeforeRecording = _textBeforeRecording.length;
+      }
 
       setState(() {
         _isRecording = true;
         _recognizedText = '';
       });
 
+      // 启动循环缩放动画
+      _animationController.repeat(reverse: true);
+
       final success = await widget.recognitionService.startRecording();
       if (!success) {
         setState(() {
           _isRecording = false;
         });
+        // 停止动画
+        _animationController.stop();
+        _animationController.reset();
         _handleError('开始录音失败');
       }
     } catch (e) {
       setState(() {
         _isRecording = false;
       });
+      // 停止动画
+      _animationController.stop();
+      _animationController.reset();
       _handleError('开始录音失败: $e');
     }
   }
@@ -171,6 +214,10 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
   /// 停止录音
   Future<void> _stopRecording() async {
     if (!_isRecording) return;
+
+    // 立即停止动画并更新状态
+    _animationController.stop();
+    _animationController.reset();
 
     try {
       await widget.recognitionService.stopRecording();
@@ -197,16 +244,19 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
   void _updateTextController(String recognizedText) {
     if (recognizedText.isEmpty) return;
 
-    // 合并录音前的文本和当前识别的文本
-    final newText = _textBeforeRecording.isEmpty
-        ? recognizedText
-        : '$_textBeforeRecording\n$recognizedText';
+    // 将识别的文本插入到开始录音时的光标位置
+    final beforeCursor = _textBeforeRecording.substring(0, _cursorPositionBeforeRecording);
+    final afterCursor = _textBeforeRecording.substring(_cursorPositionBeforeRecording);
+
+    // 构建新文本：光标前 + 识别文本 + 光标后
+    final newText = beforeCursor + recognizedText + afterCursor;
 
     widget.textController.text = newText;
 
-    // 移动光标到末尾
+    // 将光标移动到插入文本的末尾
+    final newCursorPosition = _cursorPositionBeforeRecording + recognizedText.length;
     widget.textController.selection = TextSelection.fromPosition(
-      TextPosition(offset: newText.length),
+      TextPosition(offset: newCursorPosition),
     );
   }
 
@@ -244,19 +294,24 @@ class _PressToRecordButtonState extends State<PressToRecordButton> {
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: widget.enabled && _isInitialized ? _toggleRecording : null,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+          child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: AnimatedScale(
-              scale: _isRecording ? 1.2 : 1.0,
-              duration: const Duration(milliseconds: 200),
-              child: IconTheme(
-                data: IconThemeData(
-                  color: buttonColor,
-                  size: widget.size ?? 24.0,
-                ),
-                child: iconWidget,
-              ),
+            child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                final scale = _isRecording ? _scaleAnimation.value : 1.0;
+
+                return Transform.scale(
+                  scale: scale,
+                  child: IconTheme(
+                    data: IconThemeData(
+                      color: buttonColor,
+                      size: widget.size ?? 24.0,
+                    ),
+                    child: iconWidget,
+                  ),
+                );
+              },
             ),
           ),
         ),

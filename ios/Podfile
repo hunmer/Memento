@@ -59,6 +59,9 @@ post_install do |installer|
       # Xcode 16.2 特定修复
       config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'NO'
       config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'YES'
+
+      # 修复 Privacy Manifest 构建问题（Xcode 16+）
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
     end
   end
 
@@ -68,5 +71,36 @@ post_install do |installer|
       config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
       config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'NO'
     end
+  end
+
+  # 修复 Xcode 16 中 Privacy Manifest Bundle 资源问题
+  # 参考: https://github.com/flutter/flutter/issues/151618
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      if config.base_configuration_reference
+        xcconfig_path = config.base_configuration_reference.real_path
+        xcconfig = File.read(xcconfig_path)
+
+        # 移除可能导致资源找不到的旧配置
+        xcconfig_mod = xcconfig.gsub(/DT_TOOLCHAIN_DIR/, "TOOLCHAIN_DIR")
+        File.open(xcconfig_path, "w") { |file| file << xcconfig_mod }
+      end
+    end
+  end
+
+  # 移除导致问题的 Privacy Manifest 资源引用
+  # 这是 Xcode 16 和 Flutter 之间的临时解决方案
+  installer.aggregate_targets.each do |aggregate_target|
+    aggregate_target.user_project.native_targets.each do |target|
+      target.build_phases.grep(Xcodeproj::Project::Object::PBXResourcesBuildPhase).each do |resources_build_phase|
+        resources_build_phase.files.each do |build_file|
+          if build_file.file_ref && build_file.file_ref.path&.end_with?('_privacy.bundle')
+            puts "移除有问题的 privacy bundle 引用: #{build_file.file_ref.path}"
+            resources_build_phase.remove_file_reference(build_file.file_ref)
+          end
+        end
+      end
+    end
+    aggregate_target.user_project.save
   end
 end

@@ -4,13 +4,12 @@ import '../../../controllers/chat_controller.dart';
 import '../../../models/chat_command.dart';
 import '../../../models/saved_tool_template.dart';
 import '../../../../../utils/file_picker_helper.dart';
-import '../../../services/speech/speech_recognition_config.dart';
 import '../../../services/speech/tencent_asr_service.dart';
+import '../../../services/speech/voice_recognition_helper.dart';
+import '../../../agent_chat_plugin.dart';
 import 'suggested_questions_dialog.dart';
 import 'command_selector.dart';
 import 'tool_template_selector.dart';
-import 'voice_input_dialog.dart';
-import '../../../agent_chat_plugin.dart';
 import '../../../widgets/press_to_record_button.dart';
 
 /// 消息输入框组件
@@ -64,25 +63,16 @@ class _MessageInputState extends State<MessageInput> {
 
   /// 初始化语音识别服务
   Future<void> _initializeVoiceRecognition() async {
+    if (!mounted) return;
+
     try {
-      // 获取插件实例
-      final plugin = AgentChatPlugin.instance;
+      // 使用 VoiceRecognitionHelper 创建服务（不显示错误提示）
+      final service =
+          await VoiceRecognitionHelper.createServiceSilently(context);
 
-      // 读取配置
-      final settings = plugin.settings;
-      final asrConfigMap = settings['asrConfig'] as Map<String, dynamic>?;
-
-      if (asrConfigMap == null || asrConfigMap.isEmpty) {
-        return;
-      }
-
-      // 创建配置对象
-      final asrConfig = TencentASRConfig.fromJson(asrConfigMap);
-
-      // 验证配置
-      if (asrConfig.isValid()) {
+      if (service != null && mounted) {
         setState(() {
-          _recognitionService = TencentASRService(config: asrConfig);
+          _recognitionService = service;
         });
       }
     } catch (e) {
@@ -596,78 +586,19 @@ class _MessageInputState extends State<MessageInput> {
 
   /// 显示语音输入对话框
   Future<void> _showVoiceInputDialog() async {
-    try {
-      // 获取插件实例
-      final plugin = AgentChatPlugin.instance;
+    if (!mounted) return;
 
-      // 读取配置
-      final settings = plugin.settings;
-      debugPrint('🎤 [语音输入] 读取到的完整配置: $settings');
-      final asrConfigMap = settings['asrConfig'] as Map<String, dynamic>?;
-      debugPrint('🎤 [语音输入] ASR配置: $asrConfigMap');
+    await VoiceRecognitionHelper.showVoiceInputDialog(
+      context: context,
+      onComplete: (text) {
+        // 将识别的文本填充到输入框
+        _textController.text = text;
+        widget.controller.setInputText(text);
 
-      if (asrConfigMap == null) {
-        debugPrint('⚠️ [语音输入] ASR配置为空');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('请先在设置中配置腾讯云语音识别服务'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
-        return;
-      }
-
-      // 创建配置对象
-      final asrConfig = TencentASRConfig.fromJson(asrConfigMap);
-      debugPrint('🎤 [语音输入] 创建配置对象: appId=${asrConfig.appId}');
-
-      // 验证配置
-      if (!asrConfig.isValid()) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('语音识别配置无效，请检查设置'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-        return;
-      }
-
-      // 创建语音识别服务
-      final recognitionService = TencentASRService(config: asrConfig);
-
-      // 显示语音输入对话框
-      if (mounted) {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder:
-              (context) => VoiceInputDialog(
-                recognitionService: recognitionService,
-                onRecognitionComplete: (text) {
-                  // 将识别的文本填充到输入框
-                  _textController.text = text;
-                  widget.controller.setInputText(text);
-
-                  // 聚焦到输入框
-                  _focusNode.requestFocus();
-                },
-              ),
-        );
-      }
-
-      // 释放服务资源
-      recognitionService.dispose();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('打开语音输入失败: $e'), backgroundColor: Colors.red),
-        );
-      }
-    }
+        // 聚焦到输入框
+        _focusNode.requestFocus();
+      },
+    );
   }
 
   /// 构建工具模板搜索区域

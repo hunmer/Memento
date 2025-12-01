@@ -28,9 +28,11 @@ class VoiceInputDialog extends StatefulWidget {
   State<VoiceInputDialog> createState() => _VoiceInputDialogState();
 }
 
-class _VoiceInputDialogState extends State<VoiceInputDialog> {
+class _VoiceInputDialogState extends State<VoiceInputDialog>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
 
   SpeechRecognitionState _currentState = SpeechRecognitionState.idle;
 
@@ -39,11 +41,34 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
   StreamSubscription<String>? _errorSubscription;
 
   bool _isRecording = false;
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
+    _initializeAnimation();
     _initializeService();
+  }
+
+  /// 初始化动画
+  void _initializeAnimation() {
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.15,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // 注意：不在这里启动动画，而是在开始录音时启动
   }
 
   @override
@@ -53,6 +78,8 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
     _errorSubscription?.cancel();
     _textController.dispose();
     _focusNode.dispose();
+    _scrollController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -64,9 +91,12 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
       // 监听识别结果
       _recognitionSubscription =
           widget.recognitionService.recognitionStream.listen((text) {
-            setState(() {
+        if (!mounted) return;
+        setState(() {
           _textController.text = text;
         });
+        // 自动滚动到底部
+        _scrollToBottom();
       });
 
       // 监听状态变化
@@ -98,17 +128,24 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
         _isRecording = true;
       });
 
+      // 启动循环缩放动画
+      _animationController.repeat(reverse: true);
+
       final success = await widget.recognitionService.startRecording();
       if (!success) {
         setState(() {
           _isRecording = false;
         });
+        // 停止动画
+        _animationController.stop();
         _showErrorSnackBar('开始录音失败');
       }
     } catch (e) {
       setState(() {
         _isRecording = false;
       });
+      // 停止动画
+      _animationController.stop();
       _showErrorSnackBar('开始录音失败: $e');
     }
   }
@@ -117,14 +154,22 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
   Future<void> _stopRecording() async {
     if (!_isRecording) return;
 
+    // 立即更新 UI 状态并停止动画
+    setState(() {
+      _isRecording = false;
+    });
+    _animationController.stop();
+    _animationController.reset();
+
     try {
+      // 取消识别流订阅，避免重复应用文本
+      await _recognitionSubscription?.cancel();
+      _recognitionSubscription = null;
+
+      // 停止录音
       await widget.recognitionService.stopRecording();
     } catch (e) {
       _showErrorSnackBar('停止录音失败: $e');
-    } finally {
-      setState(() {
-        _isRecording = false;
-      });
     }
   }
 
@@ -139,7 +184,26 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
         _isRecording = false;
         _textController.clear();
       });
+      // 停止并重置动画
+      _animationController.stop();
+      _animationController.reset();
     }
+  }
+
+  /// 滚动到底部
+  void _scrollToBottom() {
+    if (!_scrollController.hasClients) return;
+
+    // 延迟执行，确保文本已更新
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   /// 显示错误提示
@@ -277,16 +341,20 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
           color: Theme.of(context).colorScheme.outline.withAlpha(51),
         ),
       ),
-      child: TextField(
-        controller: _textController,
-        focusNode: _focusNode,
-        maxLines: null,
-        decoration: const InputDecoration(
-          hintText: '识别的文本将显示在这里，您也可以编辑...',
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.all(12),
+      child: Scrollbar(
+        controller: _scrollController,
+        child: TextField(
+          controller: _textController,
+          focusNode: _focusNode,
+          scrollController: _scrollController,
+          maxLines: null,
+          decoration: const InputDecoration(
+            hintText: '识别的文本将显示在这里，您也可以编辑...',
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.all(12),
+          ),
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
-        style: Theme.of(context).textTheme.bodyLarge,
       ),
     );
   }
@@ -296,28 +364,39 @@ class _VoiceInputDialogState extends State<VoiceInputDialog> {
     return GestureDetector(
       onLongPressStart: (_) => _startRecording(),
       onLongPressEnd: (_) => _stopRecording(),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: _isRecording ? Colors.red : Theme.of(context).colorScheme.primary,
-          boxShadow: _isRecording
-              ? [
-                  BoxShadow(
-                    color: Colors.red.withAlpha(102),
-                    blurRadius: 20,
-                    spreadRadius: 5,
-                  )
-                ]
-              : [],
-        ),
-        child: Icon(
-          _isRecording ? Icons.mic : Icons.mic_none,
-          color: Colors.white,
-          size: 40,
-        ),
+      child: AnimatedBuilder(
+        animation: _animationController,
+        builder: (context, child) {
+          final scale = _isRecording ? _scaleAnimation.value : 1.0;
+
+          return Transform.scale(
+            scale: scale,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _isRecording
+                    ? Colors.red
+                    : Theme.of(context).colorScheme.primary,
+                boxShadow: _isRecording
+                    ? [
+                        BoxShadow(
+                          color: Colors.red.withAlpha(102),
+                          blurRadius: 20,
+                          spreadRadius: 5,
+                        )
+                      ]
+                    : [],
+              ),
+              child: Icon(
+                _isRecording ? Icons.mic : Icons.mic_none,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+          );
+        },
       ),
     );
   }
