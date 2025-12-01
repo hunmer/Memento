@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:universal_platform/universal_platform.dart';
@@ -616,7 +617,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
         contentController.text.isNotEmpty) {
       final service = PromptPresetService();
       final preset = PromptPreset(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: const Uuid().v4(),
         name: nameController.text,
         description: descriptionController.text,
         content: contentController.text,

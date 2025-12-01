@@ -17,13 +17,10 @@ class CheckinListController {
   final BuildContext context;
   final List<CheckinItem> checkinItems;
   final Function() onStateChanged;
-  
-  // 移除 expandedGroups，不再使用分组展开/折叠逻辑
-  // final Map<String, bool> expandedGroups; 
 
   GroupSortType currentSortType = GroupSortType.upcoming;
   bool isReversed = false;
-  
+
   String selectedGroup = '全部'; // 当前选中的分组
 
   CheckinListController({
@@ -51,13 +48,14 @@ class CheckinListController {
     if (selectedGroup == '全部') {
       items = List.from(checkinItems);
     } else {
-      items = checkinItems.where((item) => item.group == selectedGroup).toList();
+      items =
+          checkinItems.where((item) => item.group == selectedGroup).toList();
     }
-    
+
     // 这里可以应用排序，如果需要的话。目前保持默认顺序或添加简单的排序。
     // 暂时保持添加顺序，或者可以复用 GroupSortService 对 flat list 进行排序 (需要修改 Service 支持 List<CheckinItem>)
     // 简单起见，这里先不进行复杂排序，或者复用之前的排序逻辑但应用在 List<CheckinItem> 上
-    
+
     return items;
   }
 
@@ -85,8 +83,9 @@ class CheckinListController {
   Map<String, dynamic> getStatistics() {
     final groupStats = <String, Map<String, int>>{};
     // Use actual groups from items, not including 'All'
-    final actualGroups = checkinItems.map((item) => item.group).toSet().toList()..sort();
-    
+    final actualGroups =
+        checkinItems.map((item) => item.group).toSet().toList()..sort();
+
     for (var group in actualGroups) {
       final items = groupedItems[group] ?? [];
       final completed = items.where((item) => item.isCheckedToday()).length;
@@ -270,9 +269,7 @@ class CheckinListController {
                 ),
                 ListTile(
                   leading: const Icon(Icons.edit),
-                  title: Text(
-                    CheckinLocalizations.of(context).editCheckinItem,
-                  ),
+                  title: Text(CheckinLocalizations.of(context).editCheckinItem),
                   onTap: () {
                     Navigator.pop(context);
                     _editCheckinItem(item);
@@ -309,32 +306,33 @@ class CheckinListController {
   void _showCardStyleDialog(CheckinItem item) {
     showDialog(
       context: context,
-      builder: (context) => SimpleDialog(
-        title: const Text('选择卡片风格'), // TODO: Localize
-        children: [
-          SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(context);
-              updateCardStyle(item, CheckinCardStyle.weekly);
-            },
-            child: const Text('七天显示 (默认)'),
+      builder:
+          (context) => SimpleDialog(
+            title: const Text('选择卡片风格'), // TODO: Localize
+            children: [
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context);
+                  updateCardStyle(item, CheckinCardStyle.weekly);
+                },
+                child: const Text('七天显示 (默认)'),
+              ),
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context);
+                  updateCardStyle(item, CheckinCardStyle.small);
+                },
+                child: const Text('小卡片风格 (1/2宽度)'),
+              ),
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context);
+                  updateCardStyle(item, CheckinCardStyle.calendar);
+                },
+                child: const Text('日历风格'),
+              ),
+            ],
           ),
-          SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(context);
-              updateCardStyle(item, CheckinCardStyle.small);
-            },
-            child: const Text('小卡片风格 (1/2宽度)'),
-          ),
-          SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(context);
-              updateCardStyle(item, CheckinCardStyle.calendar);
-            },
-            child: const Text('日历风格'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -506,7 +504,8 @@ class CheckinListController {
     // 获取当前的标签组
     List<TagGroup> getCurrentTagGroups() {
       // Re-calculate groups as selectedGroup shouldn't affect management
-      final groups = checkinItems.map((item) => item.group).toSet().toList()..sort();
+      final groups =
+          checkinItems.map((item) => item.group).toSet().toList()..sort();
       return groups.map((group) {
         final items = groupedItems[group] ?? [];
         return TagGroup(

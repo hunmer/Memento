@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../models/event.dart';
 import '../../../widgets/circle_icon_picker.dart';
 import '../utils/calendar_notification_utils.dart';
@@ -207,7 +208,7 @@ class _EventEditPageState extends State<EventEditPage> {
     }
 
     final event = CalendarEvent(
-      id: widget.event?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: widget.event?.id ?? const Uuid().v4(),
       title: _titleController.text,
       description: _descriptionController.text,
       startTime: startDateTime,

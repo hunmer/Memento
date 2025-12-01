@@ -1,6 +1,7 @@
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
@@ -336,11 +337,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     final String? icon = params['icon'];
     final String? dateType = params['dateType'];
 
-    // 如果提供了自定义ID，使用自定义ID；否则使用时间戳生成
+    // 如果提供了自定义ID，使用自定义ID；否则使用UUID生成
     final goalId =
         customId?.isNotEmpty == true
             ? customId!
-            : DateTime.now().millisecondsSinceEpoch.toString();
+            : const Uuid().v4();
 
     // 检查ID是否已存在
     final existingGoals = await _controller.getAllGoals();
@@ -461,11 +462,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       orElse: () => throw ArgumentError('Goal not found: $goalId'),
     );
 
-    // 如果提供了自定义ID，使用自定义ID；否则使用时间戳生成
+    // 如果提供了自定义ID，使用自定义ID；否则使用UUID生成
     final recordId =
         customId?.isNotEmpty == true
             ? customId!
-            : DateTime.now().millisecondsSinceEpoch.toString();
+            : const Uuid().v4();
 
     // 检查ID是否已存在
     final existingRecords = await _controller.getRecordsForGoal(goalId);

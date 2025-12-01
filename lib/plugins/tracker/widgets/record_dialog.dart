@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../models/goal.dart';
 import '../models/record.dart';
 import '../controllers/tracker_controller.dart';
@@ -189,7 +190,7 @@ class _RecordDialogState extends State<RecordDialog> {
       _formKey.currentState!.save();
 
       final record = Record(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: const Uuid().v4(),
         goalId: widget.goal.id,
         value: _value,
         note: _note,

@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../models/service_provider.dart';
 import '../models/llm_models.dart';
 import '../controllers/provider_controller.dart';
@@ -102,7 +103,7 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
     final provider = ServiceProvider(
       id:
           widget.provider?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
+          const Uuid().v4(),
       label: _labelController.text.trim(),
       baseUrl: _baseUrlController.text.trim(),
       headers: _headers,

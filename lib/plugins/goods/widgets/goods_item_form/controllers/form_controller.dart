@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../../../models/goods_item.dart';
 import '../../../models/usage_record.dart';
 import '../../../models/custom_field.dart';
@@ -141,7 +142,7 @@ class GoodsItemFormController {
 
   GoodsItem buildGoodsItem(String? existingId) {
     return GoodsItem(
-      id: existingId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: existingId ?? const Uuid().v4(),
       title: nameController.text,
       notes: descriptionController.text,
       purchasePrice: double.tryParse(priceController.text),

@@ -9,5 +9,7 @@
         <item name="android:textSize">11sp</item>
         <item name="android:textColor">#1f2937</item>
         <item name="android:textStyle">normal</item>
+        <item name="android:minWidth">28dp</item>
+        <item name="android:minHeight">28dp</item>
     </style>
 </resources>

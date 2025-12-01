@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:uuid/uuid.dart';
 
 class CalendarEntry {
   final String id;
@@ -39,7 +40,7 @@ class CalendarEntry {
     List<String> thumbUrls = const [],
   }) {
     return CalendarEntry(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       title: title,
       content: content,
       createdAt: createdAt,

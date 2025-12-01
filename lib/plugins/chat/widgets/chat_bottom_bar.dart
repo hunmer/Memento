@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:uuid/uuid.dart';
 import '../chat_plugin.dart';
 
 /// Chat 插件的底部栏组件
@@ -111,7 +112,7 @@ class _ChatBottomBarState extends State<ChatBottomBar>
       try {
         // 创建频道对象
         final channel = Channel(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          id: const Uuid().v4(),
           title: result,
           icon: Icons.chat,
           backgroundColor: widget.plugin.color,

@@ -3,6 +3,7 @@ import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../base_plugin.dart';
 import './l10n/database_localizations.dart';
 import './models/database_model.dart';
@@ -263,7 +264,7 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
     }
 
     final database = DatabaseModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       name: name,
       description: description,
       fields: fields,
@@ -405,7 +406,7 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
     }
 
     final record = Record(
-      id: (id != null && id.isNotEmpty) ? id : DateTime.now().millisecondsSinceEpoch.toString(),
+      id: (id != null && id.isNotEmpty) ? id : const Uuid().v4(),
       tableId: databaseId,
       fields: fields,
       createdAt: DateTime.now(),

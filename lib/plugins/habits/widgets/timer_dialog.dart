@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
@@ -502,7 +503,7 @@ class _TimerDialogState extends State<TimerDialog> {
 
       // 1. 先保存记录（在触发停止事件之前）
       final record = CompletionRecord(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: const Uuid().v4(),
         parentId: widget.habit.id,
         date: DateTime.now(),
         duration: _elapsed,

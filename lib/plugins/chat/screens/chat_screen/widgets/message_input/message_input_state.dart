@@ -1,6 +1,7 @@
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:uuid/uuid.dart';
 import '../../../../../../core/event/event.dart';
 import '../../../../models/message.dart';
 
@@ -89,7 +90,7 @@ class MessageInputState {
         final user = ChatPlugin.instance.userService.currentUser;
         // 创建消息对象
         final message = Message(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          id: const Uuid().v4(),
           content: controller.text.trim(),
           user: user,
           type: MessageType.sent,

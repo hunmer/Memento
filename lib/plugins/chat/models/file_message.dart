@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import 'package:uuid/uuid.dart';
 import '../services/file_service.dart';
 import '../../../utils/image_utils.dart';
 
@@ -107,7 +108,7 @@ class FileMessage {
     }
 
     return FileMessage(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: const Uuid().v4(),
       fileName: systemFileName ?? path.basename(file.path), // 系统文件名（UUID）
       originalFileName: fileName, // 保存原始文件名
       filePath: relativePath, // 使用相对路径
@@ -187,7 +188,7 @@ class FileMessage {
     }
 
     return FileMessage(
-      id: json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: json['id'] ?? const Uuid().v4(),
       fileName: fileName,
       originalFileName: json['originalFileName'] ?? json['originalName'] ?? fileName,
       filePath: filePath,

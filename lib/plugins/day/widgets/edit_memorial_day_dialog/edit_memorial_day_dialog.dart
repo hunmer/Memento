@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../../models/memorial_day.dart';
 import '../../l10n/day_localizations.dart';
 import 'information_tab.dart';
@@ -187,7 +188,7 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
     final memorialDay = MemorialDay(
       id:
           widget.memorialDay?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
+          const Uuid().v4(),
       title: _titleController.text.trim(),
       targetDate: _selectedDate,
       notes: filteredNotes,

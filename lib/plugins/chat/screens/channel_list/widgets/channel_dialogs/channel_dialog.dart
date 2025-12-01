@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../../../../models/channel.dart';
 import '../../../../../../widgets/circle_icon_picker.dart';
 import '../../../../l10n/chat_localizations.dart';
@@ -170,7 +171,7 @@ class _ChannelDialogState extends State<ChannelDialog> {
 
                 try {
                   final newChannel = Channel(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    id: const Uuid().v4(),
                     title: _titleController.text,
                     groups: groups,
                     icon: _selectedIcon,

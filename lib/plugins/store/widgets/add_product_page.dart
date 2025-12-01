@@ -4,6 +4,7 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import '../models/product.dart';
 import '../controllers/store_controller.dart';
@@ -129,7 +130,7 @@ class _AddProductPageState extends State<AddProductPage> {
                 useDuration: widget.product!.useDuration,
               )
               : Product(
-                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                id: const Uuid().v4(),
                 name: _nameController.text,
                 description: _descController.text,
                 image: _imageUrl ?? '',

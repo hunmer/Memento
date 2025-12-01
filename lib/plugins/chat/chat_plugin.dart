@@ -5,6 +5,7 @@ import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/chat/widgets/chat_bottom_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -269,7 +270,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       final String? channelId = params['channelId'];
 
       final channel = Channel(
-        id: channelId ?? DateTime.now().millisecondsSinceEpoch.toString(), // 支持自定义频道ID，默认使用时间戳
+        id: channelId ?? const Uuid().v4(), // 支持自定义频道ID，默认使用UUID
         title: name,
         icon: Icons.chat, // 默认图标
         messages: [], // 空消息列表
@@ -328,7 +329,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
       // 创建消息
       final message = Message(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: const Uuid().v4(),
         content: content,
         user: userService.currentUser, // 使用 User 对象
         type: messageType,

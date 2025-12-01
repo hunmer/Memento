@@ -18,7 +18,10 @@ class CheckinMainView extends StatefulWidget {
   /// 可选的打卡项目ID，用于从小组件跳转时自动打开打卡记录对话框
   final String? itemId;
 
-  const CheckinMainView({super.key, this.itemId});
+  /// 可选的目标日期（格式：YYYY-MM-DD），用于打开指定日期的打卡记录
+  final String? targetDate;
+
+  const CheckinMainView({super.key, this.itemId, this.targetDate});
 
   @override
   State<CheckinMainView> createState() => _CheckinMainViewState();
@@ -170,6 +173,7 @@ class _CheckinMainViewState extends State<CheckinMainView>
                           return CheckinListScreen(
                             controller: listController,
                             initialItemId: widget.itemId,
+                            targetDate: widget.targetDate,
                           );
                         },
                       ),
@@ -320,6 +324,40 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
           ),
         );
       }
+    } else {
+      // 文件不存在时，创建默认的四个打卡项目
+      _checkinItems = [
+        CheckinItem(
+          name: '早起',
+          icon: Icons.wb_sunny,
+          color: Colors.orange,
+          group: '健康习惯',
+          description: '每天早起，开启美好一天',
+        ),
+        CheckinItem(
+          name: '运动',
+          icon: Icons.directions_run,
+          color: Colors.green,
+          group: '健康习惯',
+          description: '坚持运动，保持健康',
+        ),
+        CheckinItem(
+          name: '阅读',
+          icon: Icons.menu_book,
+          color: Colors.blue,
+          group: '学习成长',
+          description: '每天阅读，丰富知识',
+        ),
+        CheckinItem(
+          name: '喝水',
+          icon: Icons.local_drink,
+          color: Colors.cyan,
+          group: '健康习惯',
+          description: '每天喝足够的水，保持健康',
+        ),
+      ];
+      // 保存默认打卡项目
+      await _saveCheckinItems();
     }
 
     // 注册 JS API（最后一步）

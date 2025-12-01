@@ -112,24 +112,29 @@ class AppRoutes extends NavigatorObserver {
     }
 
     // 处理打卡小组件点击路由（已配置状态）
-    // 格式: /checkin_item?itemId={itemId}
+    // 格式: /checkin_item?itemId={itemId}&date={date}
     if (routeName.startsWith('/checkin_item')) {
-      // 从 arguments 或 URI 中获取 itemId
+      // 从 arguments 或 URI 中获取参数
       String? itemId;
+      String? date;
 
       // 优先从 arguments 中获取（来自小组件点击）
       if (settings.arguments is Map<String, String>) {
         final args = settings.arguments as Map<String, String>;
         itemId = args['itemId'];
+        date = args['date'];
       } else {
         // 备用：从 URI 中解析
         final uri = Uri.parse(routeName);
         itemId = uri.queryParameters['itemId'];
+        date = uri.queryParameters['date'];
       }
+
+      debugPrint('打卡小组件点击: itemId=$itemId, date=$date');
 
       // 如果有 itemId，打开打卡插件并自动展示打卡记录对话框
       if (itemId != null) {
-        return _createRoute(CheckinMainView(itemId: itemId));
+        return _createRoute(CheckinMainView(itemId: itemId, targetDate: date));
       }
       // 没有 itemId，正常打开打卡插件
       return _createRoute(const CheckinMainView());

@@ -5,6 +5,7 @@ import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:Memento/widgets/color_picker_section.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
 import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
@@ -509,7 +510,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
       }
 
       final newGoal = Goal(
-        id: widget.goal?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id: widget.goal?.id ?? const Uuid().v4(),
         name: _name,
         icon: _icon,
         group: _group,

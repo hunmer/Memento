@@ -3,6 +3,7 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:Memento/plugins/tracker/utils/tracker_notification_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../models/goal.dart';
 import '../models/record.dart';
 import '../controllers/tracker_controller.dart';
@@ -89,7 +90,7 @@ class _TimerDialogState extends State<TimerDialog> {
       final recordValue = double.tryParse(_valueController.text) ?? 1;
 
       final record = Record(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: const Uuid().v4(),
         goalId: widget.goal.id,
         value: recordValue,
         note: _noteController.text,
