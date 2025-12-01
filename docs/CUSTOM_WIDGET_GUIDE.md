@@ -16,6 +16,7 @@
 6. [常见问题与解决方案](#常见问题与解决方案)
 7. [调试技巧](#调试技巧)
 8. [高级：构建复杂交互小组件](#高级构建复杂交互小组件) ⭐ 新增
+   - [陷阱 5：数量与列表数据不一致](#陷阱-5数量与列表数据不一致--重要) ⭐ 重要
 
 ---
 
@@ -1226,6 +1227,182 @@ Future<void> _syncPendingTaskChanges(TodoPlugin plugin) async {
 **原因**: 只同步了标准小组件，没有同步列表小组件
 
 **解决**: 在 `_syncWidget()` 中同时调用两个同步方法
+
+#### 陷阱 5：数量与列表数据不一致 ⭐ 重要
+
+**问题**:
+1. 首次配置小组件后，显示的数量与列表任务数量不一致
+2. 应用内完成任务后小组件数量更新，但列表不刷新
+3. 小组件操作后才正常显示
+
+**根本原因**:
+1. **数量计算未过滤**: `getTaskCount()` 计算所有未完成任务，但 `RemoteViewsFactory.loadTasks()` 按时间范围过滤
+2. **首次配置数据不完整**: 配置界面只同步部分任务（如4个），且缺少日期字段
+3. **ListView 未刷新**: Flutter 端更新小组件时，`onUpdate()` 没有通知 ListView 数据变化
+
+**完整解决方案**:
+
+**1. 统一过滤逻辑（数量计算与列表加载必须一致）**
+
+```kotlin
+// TodoListWidgetProvider.kt
+
+/**
+ * 获取任务数量（按时间范围过滤）
+ */
+private fun getTaskCount(context: Context, timeRange: String): Int {
+    return try {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val jsonString = prefs.getString("todo_list_widget_data", null) ?: return 0
+        val json = JSONObject(jsonString)
+        val tasks = json.optJSONArray("tasks") ?: return 0
+
+        var count = 0
+        for (i in 0 until tasks.length()) {
+            val task = tasks.getJSONObject(i)
+            if (!task.optBoolean("completed", false)) {
+                // ⚠️ 关键：按时间范围过滤（与 RemoteViewsFactory 保持一致）
+                if (shouldIncludeTask(task, timeRange)) {
+                    count++
+                }
+            }
+        }
+        count
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to get task count", e)
+        0
+    }
+}
+
+/**
+ * 根据时间范围判断是否包含任务
+ * ⚠️ 必须与 RemoteViewsFactory 中的过滤逻辑完全一致
+ */
+private fun shouldIncludeTask(task: JSONObject, timeRange: String): Boolean {
+    if (timeRange == RANGE_ALL) return true
+
+    val startDateStr = task.optString("startDate", null)
+    val dueDateStr = task.optString("dueDate", null)
+
+    if (startDateStr.isNullOrEmpty() && dueDateStr.isNullOrEmpty()) return true
+
+    val todayStart = getTodayStart()
+    val todayEnd = todayStart + 24 * 60 * 60 * 1000
+    val taskStart = parseDate(startDateStr)
+    val taskDue = parseDate(dueDateStr)
+
+    return when (timeRange) {
+        RANGE_TODAY -> {
+            // 今天的任务：开始日期<=今天 且 截止日期>=今天
+            val startOk = taskStart == null || taskStart <= todayEnd
+            val dueOk = taskDue == null || taskDue >= todayStart
+            startOk && dueOk
+        }
+        RANGE_WEEK -> {
+            val weekStart = getWeekStart()
+            val weekEnd = weekStart + 7 * 24 * 60 * 60 * 1000
+            val startOk = taskStart == null || taskStart <= weekEnd
+            val dueOk = taskDue == null || taskDue >= weekStart
+            startOk && dueOk
+        }
+        RANGE_MONTH -> {
+            val monthStart = getMonthStart()
+            val monthEnd = getMonthEnd()
+            val startOk = taskStart == null || taskStart <= monthEnd
+            val dueOk = taskDue == null || taskDue >= monthStart
+            startOk && dueOk
+        }
+        else -> true
+    }
+}
+```
+
+**2. 完整数据同步（包含日期字段）**
+
+```dart
+// todo_list_selector_screen.dart
+
+Future<void> _syncTasksToWidget() async {
+  try {
+    // ⚠️ 同步所有未完成任务（不按时间范围过滤，让 Android 端过滤）
+    final allTasks = _todoPlugin.taskController.tasks
+        .where((task) => task.status != TaskStatus.done)
+        .toList();
+
+    // ⚠️ 必须包含日期字段，供 Android 端过滤使用
+    final taskList = allTasks.map((task) {
+      return {
+        'id': task.id,
+        'title': task.title,
+        'completed': task.status == TaskStatus.done,
+        'startDate': task.startDate?.toIso8601String(),  // ⚠️ 关键：包含日期
+        'dueDate': task.dueDate?.toIso8601String(),      // ⚠️ 关键：包含日期
+      };
+    }).toList();
+
+    final widgetData = jsonEncode({
+      'tasks': taskList,
+      'total': taskList.length,
+    });
+
+    await HomeWidget.saveWidgetData<String>('todo_list_widget_data', widgetData);
+  } catch (e) {
+    debugPrint('同步待办列表数据失败: $e');
+  }
+}
+```
+
+**3. 通知 ListView 刷新数据**
+
+```kotlin
+// TodoListWidgetProvider.kt
+
+/**
+ * 重写 onUpdate 方法，确保 ListView 数据也被刷新
+ */
+override fun onUpdate(
+    context: Context,
+    appWidgetManager: AppWidgetManager,
+    appWidgetIds: IntArray
+) {
+    // 调用父类方法更新小组件 UI（数量等静态内容）
+    super.onUpdate(context, appWidgetManager, appWidgetIds)
+
+    // ⚠️ 关键：通知 ListView 数据已更改，触发 RemoteViewsFactory.onDataSetChanged()
+    appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.task_list_view)
+
+    Log.d(TAG, "onUpdate: notified ListView data changed for ${appWidgetIds.size} widgets")
+}
+```
+
+**问题分析**:
+
+| 问题 | 根源 | 症状 |
+|------|------|------|
+| 数量与列表不一致 | `getTaskCount()` 未过滤 | 显示"10个任务"，但列表只有3个 |
+| 首次配置数据不完整 | 只同步4个任务 | Android 端读不到完整数据，列表为空 |
+| ListView 不刷新 | 缺少 `notifyAppWidgetViewDataChanged()` | 数量更新但列表不变 |
+
+**验证方法**:
+
+```bash
+# 1. 查看 SharedPreferences 数据
+adb shell run-as github.hunmer.memento cat /data/data/github.hunmer.memento/shared_prefs/HomeWidgetPreferences.xml
+
+# 2. 查看 Logcat 日志
+adb logcat | grep -E "TodoListWidget|RemoteViewsFactory"
+
+# 3. 检查数据字段完整性
+# 确保 JSON 中包含 startDate 和 dueDate 字段
+```
+
+**最佳实践**:
+
+1. ✅ **数量统计与列表加载必须使用相同的过滤逻辑**
+2. ✅ **同步完整数据（包含所有过滤所需的字段）**
+3. ✅ **重写 `onUpdate()` 添加 `notifyAppWidgetViewDataChanged()`**
+4. ✅ **在 Android 端进行过滤，而不是 Flutter 端预过滤**
+5. ✅ **使用 Log 输出调试数量计算和列表加载的过程**
 
 ### 数据流总结
 
