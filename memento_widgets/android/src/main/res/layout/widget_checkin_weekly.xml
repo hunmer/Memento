@@ -57,8 +57,8 @@
             <TextView android:id="@+id/day_number_7" style="@style/WeeklyWidgetDayNumber" android:text="30" />
         </LinearLayout>
 
-        <!-- 分隔线 -->
-        <View
+        <!-- 分隔线 (使用 TextView 替代 View，因为 RemoteViews 不支持 View) -->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#E5E7EB"
@@ -74,12 +74,11 @@
 
             <!-- 第1列（周一） -->
             <FrameLayout
+                android:id="@+id/column_click_1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:layout_marginEnd="1dp">
-
-                <View android:id="@+id/column_click_1" android:layout_width="match_parent" android:layout_height="match_parent" />
 
                 <LinearLayout
                     android:id="@+id/day_items_1"
@@ -122,12 +121,11 @@
 
             <!-- 第2列（周二） -->
             <FrameLayout
+                android:id="@+id/column_click_2"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:layout_marginEnd="1dp">
-
-                <View android:id="@+id/column_click_2" android:layout_width="match_parent" android:layout_height="match_parent" />
 
                 <LinearLayout
                     android:id="@+id/day_items_2"
@@ -164,12 +162,11 @@
 
             <!-- 第3列（周三） -->
             <FrameLayout
+                android:id="@+id/column_click_3"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:layout_marginEnd="1dp">
-
-                <View android:id="@+id/column_click_3" android:layout_width="match_parent" android:layout_height="match_parent" />
 
                 <LinearLayout
                     android:id="@+id/day_items_3"
@@ -206,12 +203,11 @@
 
             <!-- 第4列（周四） -->
             <FrameLayout
+                android:id="@+id/column_click_4"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:layout_marginEnd="1dp">
-
-                <View android:id="@+id/column_click_4" android:layout_width="match_parent" android:layout_height="match_parent" />
 
                 <LinearLayout
                     android:id="@+id/day_items_4"
@@ -248,12 +244,11 @@
 
             <!-- 第5列（周五） -->
             <FrameLayout
+                android:id="@+id/column_click_5"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:layout_marginEnd="1dp">
-
-                <View android:id="@+id/column_click_5" android:layout_width="match_parent" android:layout_height="match_parent" />
 
                 <LinearLayout
                     android:id="@+id/day_items_5"
@@ -290,12 +285,11 @@
 
             <!-- 第6列（周六） -->
             <FrameLayout
+                android:id="@+id/column_click_6"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:layout_marginEnd="1dp">
-
-                <View android:id="@+id/column_click_6" android:layout_width="match_parent" android:layout_height="match_parent" />
 
                 <LinearLayout
                     android:id="@+id/day_items_6"
@@ -332,11 +326,10 @@
 
             <!-- 第7列（周日） -->
             <FrameLayout
+                android:id="@+id/column_click_7"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1">
-
-                <View android:id="@+id/column_click_7" android:layout_width="match_parent" android:layout_height="match_parent" />
 
                 <LinearLayout
                     android:id="@+id/day_items_7"

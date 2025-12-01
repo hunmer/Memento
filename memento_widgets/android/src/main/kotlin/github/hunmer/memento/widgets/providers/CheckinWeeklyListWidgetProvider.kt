@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.net.Uri
 import android.util.Log
@@ -36,13 +35,9 @@ class CheckinWeeklyListWidgetProvider : BasePluginWidgetProvider() {
     companion object {
         private const val TAG = "CheckinWeeklyList"
         private const val PREF_KEY_PRIMARY_COLOR = "checkin_weekly_primary_color_"
-        private const val PREF_KEY_ACCENT_COLOR = "checkin_weekly_accent_color_"
-        private const val PREF_KEY_OPACITY = "checkin_weekly_opacity_"
 
         // 默认颜色
         private const val DEFAULT_PRIMARY_COLOR = 0xFFFBBF24.toInt()  // 黄色（当天高亮）
-        private const val DEFAULT_ACCENT_COLOR = 0xFF6B7280.toInt()   // 灰色（普通日期）
-        private const val DEFAULT_OPACITY = 0.95f
 
         // 每列最多显示的打卡项目数
         private const val MAX_ITEMS_PER_DAY = 6
@@ -84,25 +79,24 @@ class CheckinWeeklyListWidgetProvider : BasePluginWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int
     ) {
-        val views = RemoteViews(context.packageName, R.layout.widget_checkin_weekly)
+        try {
+            val views = RemoteViews(context.packageName, R.layout.widget_checkin_weekly)
 
-        // 读取颜色和透明度配置
-        val primaryColor = getConfiguredPrimaryColor(context, appWidgetId)
-        val opacity = getConfiguredOpacity(context, appWidgetId)
+            // 读取颜色和透明度配置
+            val primaryColor = getConfiguredPrimaryColor(context, appWidgetId)
 
-        // 应用背景透明度
-        val bgColor = adjustColorAlpha(0xFFFFFFFF.toInt(), opacity)
-        views.setColorStateList(R.id.weekly_widget_container, "setBackgroundTintList", ColorStateList.valueOf(bgColor))
+            // 加载周数据
+            val data = loadWidgetData(context)
+            if (data != null) {
+                setupWeeklyWidget(views, context, data, primaryColor)
+            } else {
+                setupEmptyWidget(views, context)
+            }
 
-        // 加载周数据
-        val data = loadWidgetData(context)
-        if (data != null) {
-            setupWeeklyWidget(views, context, data, primaryColor)
-        } else {
-            setupEmptyWidget(views, context)
+            appWidgetManager.updateAppWidget(appWidgetId, views)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update widget", e)
         }
-
-        appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
     /**
@@ -233,13 +227,13 @@ class CheckinWeeklyListWidgetProvider : BasePluginWidgetProvider() {
             // 显示该项目
             views.setViewVisibility(itemIds[i], View.VISIBLE)
 
-            // 设置背景色
-            views.setColorStateList(itemIds[i], "setBackgroundTintList", ColorStateList.valueOf(colors[0]))
+            // 设置背景色 (使用 setInt 兼容旧版本)
+            views.setInt(itemIds[i], "setBackgroundColor", colors[0])
 
             // 设置徽章（次数）
             views.setTextViewText(badgeIds[i], count.toString())
             views.setTextColor(badgeIds[i], Color.WHITE)
-            views.setColorStateList(badgeIds[i], "setBackgroundTintList", ColorStateList.valueOf(colors[1]))
+            views.setInt(badgeIds[i], "setBackgroundColor", colors[1])
 
             // 设置名称
             views.setTextViewText(nameIds[i], itemName)
@@ -357,32 +351,12 @@ class CheckinWeeklyListWidgetProvider : BasePluginWidgetProvider() {
     }
 
     /**
-     * 调整颜色透明度
-     */
-    private fun adjustColorAlpha(color: Int, alphaFactor: Float): Int {
-        val alpha = (alphaFactor * 255).toInt()
-        val red = (color shr 16) and 0xFF
-        val green = (color shr 8) and 0xFF
-        val blue = color and 0xFF
-        return (alpha shl 24) or (red shl 16) or (green shl 8) or blue
-    }
-
-    /**
      * 获取配置的高亮色（主色调）
      */
     private fun getConfiguredPrimaryColor(context: Context, appWidgetId: Int): Int {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val colorStr = prefs.getString("$PREF_KEY_PRIMARY_COLOR$appWidgetId", null)
         return colorStr?.toLongOrNull()?.toInt() ?: DEFAULT_PRIMARY_COLOR
-    }
-
-    /**
-     * 获取配置的透明度
-     */
-    private fun getConfiguredOpacity(context: Context, appWidgetId: Int): Float {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val opacityStr = prefs.getString("$PREF_KEY_OPACITY$appWidgetId", null)
-        return opacityStr?.toFloatOrNull() ?: DEFAULT_OPACITY
     }
 
     /**
@@ -409,8 +383,6 @@ class CheckinWeeklyListWidgetProvider : BasePluginWidgetProvider() {
         val editor = prefs.edit()
         for (appWidgetId in appWidgetIds) {
             editor.remove("$PREF_KEY_PRIMARY_COLOR$appWidgetId")
-            editor.remove("$PREF_KEY_ACCENT_COLOR$appWidgetId")
-            editor.remove("$PREF_KEY_OPACITY$appWidgetId")
         }
         editor.apply()
     }
