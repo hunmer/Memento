@@ -236,13 +236,17 @@ class CheckinMonthWidgetProvider : BasePluginWidgetProvider() {
                         }
                     }
 
-                    // 为每个日期设置独立的点击事件
-                    if (!isFuture) {
+                    // 为每个日期设置独立的点击事件（未来日期不可点击）
+                    if (isFuture) {
+                        // 未来日期：移除点击事件
+                        views.setOnClickPendingIntent(dayViewIds[i], null)
+                    } else {
+                        // 过去和今天的日期：设置点击事件
                         setupDayClickIntent(context, views, dayViewIds[i], itemId, currentYear, monthIndex, dayPosition)
                     }
                 } else {
-                    // 隐藏非本月日期
-                    views.setViewVisibility(dayViewIds[i], View.GONE)
+                    // 非本月日期：使用 INVISIBLE 保持布局空间，避免其他日期平分宽度
+                    views.setViewVisibility(dayViewIds[i], View.INVISIBLE)
                 }
             }
 

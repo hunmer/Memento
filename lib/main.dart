@@ -60,6 +60,7 @@ import 'plugins/activity/activity_plugin.dart'; // 活动插件
 import 'plugins/checkin/checkin_plugin.dart'; // 打卡插件
 import 'plugins/timer/timer_plugin.dart'; // 计时器插件
 import 'plugins/todo/todo_plugin.dart'; // 任务插件
+import 'plugins/todo/models/task.dart'; // 任务模型
 import 'plugins/day/day_plugin.dart'; // 纪念日插件
 import 'plugins/nodes/nodes_plugin.dart'; // 笔记插件
 import 'plugins/notes/notes_plugin.dart'; // Notes插件
@@ -340,10 +341,46 @@ Future<void> _setupWidgetClickListener() async {
       if (url != null) {
         _handleWidgetClick(url);
       }
+    } else if (call.method == 'toggleTask') {
+      // 处理任务状态切换（从小组件 checkbox 触发）
+      final taskId = call.arguments['task_id'] as String?;
+      final newStatus = call.arguments['new_status'] as bool?;
+      if (taskId != null && newStatus != null) {
+        await _handleToggleTask(taskId, newStatus);
+      }
     }
   });
 
   debugPrint('桌面小组件点击监听器已设置');
+}
+
+/// 处理任务状态切换（从小组件触发）
+Future<void> _handleToggleTask(String taskId, bool completed) async {
+  debugPrint('切换任务状态: taskId=$taskId, completed=$completed');
+
+  try {
+    final plugin = globalPluginManager.getPlugin('todo');
+    if (plugin == null) {
+      debugPrint('Todo plugin not found');
+      return;
+    }
+
+    final todoPlugin = plugin as TodoPlugin;
+
+    // 更新任务状态
+    if (completed) {
+      await todoPlugin.taskController.updateTaskStatus(taskId, TaskStatus.done);
+    } else {
+      await todoPlugin.taskController.updateTaskStatus(taskId, TaskStatus.todo);
+    }
+
+    // 同步小组件数据
+    await PluginWidgetSyncHelper.instance.syncTodoListWidget();
+
+    debugPrint('任务状态已更新并同步');
+  } catch (e) {
+    debugPrint('切换任务状态失败: $e');
+  }
 }
 
 /// 处理小组件点击事件
@@ -375,6 +412,48 @@ void _handleWidgetClick(String url) {
       routePath =
           '/checkin_item_selector${widgetId != null ? '?widgetId=$widgetId' : ''}';
       debugPrint('打卡小组件配置路由转换为: $routePath');
+    }
+
+    // 特殊处理：待办列表小组件配置路由
+    // 从 /todo_list/config?widgetId=xxx 转换为 /todo_list_selector?widgetId=xxx
+    if (routePath == '/todo_list/config') {
+      final widgetId = uri.queryParameters['widgetId'];
+      routePath =
+          '/todo_list_selector${widgetId != null ? '?widgetId=$widgetId' : ''}';
+      debugPrint('待办列表小组件配置路由转换为: $routePath');
+    }
+
+    // 特殊处理：待办列表小组件任务详情路由
+    // 从 /todo_list/detail?taskId=xxx 转换为 /todo_task_detail?taskId=xxx
+    if (routePath == '/todo_list/detail') {
+      final taskId = uri.queryParameters['taskId'];
+      routePath =
+          '/todo_task_detail${taskId != null ? '?taskId=$taskId' : ''}';
+      debugPrint('待办列表小组件任务详情路由转换为: $routePath');
+    }
+
+    // 特殊处理：待办添加任务路由
+    // 从 /todo/add 转换为 /todo_add
+    if (routePath == '/todo/add') {
+      routePath = '/todo_add';
+      debugPrint('待办添加任务路由转换为: $routePath');
+    }
+
+    // 特殊处理：待办列表小组件任务切换路由
+    // 从 /todo_list/toggle?taskId=xxx&completed=true 处理任务完成切换
+    if (routePath == '/todo_list/toggle') {
+      final taskId = uri.queryParameters['taskId'];
+      final completedStr = uri.queryParameters['completed'];
+      final completed = completedStr == 'true';
+
+      if (taskId != null) {
+        debugPrint('处理任务切换: taskId=$taskId, completed=$completed');
+        // 异步处理任务切换，不阻塞UI
+        _handleToggleTask(taskId, completed);
+      }
+
+      // 不跳转到任何页面，直接返回
+      return;
     }
 
     // 提取所有查询参数

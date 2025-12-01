@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/task_item_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="6dp"
+    android:paddingHorizontal="4dp">
+
+    <!-- 复选框 - 单独点击区域 -->
+    <FrameLayout
+        android:id="@+id/task_checkbox_container"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/task_checkbox"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_checkbox_unchecked"
+            android:contentDescription="复选框" />
+
+    </FrameLayout>
+
+    <!-- 任务标题 - 单独点击区域 -->
+    <FrameLayout
+        android:id="@+id/task_title_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:minHeight="36dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/task_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text=""
+            android:textColor="#1f2937"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+    </FrameLayout>
+
+</LinearLayout>

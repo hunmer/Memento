@@ -20,6 +20,10 @@ import 'package:Memento/plugins/calendar/calendar_plugin.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/checkin/screens/checkin_item_selector_screen.dart';
+import 'package:Memento/plugins/todo/screens/todo_list_selector_screen.dart';
+import 'package:Memento/plugins/todo/widgets/task_detail_view.dart';
+import 'package:Memento/plugins/todo/widgets/task_form.dart';
+import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/database/database_plugin.dart';
 import 'package:Memento/plugins/day/day_plugin.dart';
@@ -83,6 +87,15 @@ class AppRoutes extends NavigatorObserver {
   // 打卡小组件配置路由
   static const String checkinItemSelector = '/checkin_item_selector';
 
+  // 待办列表小组件配置路由
+  static const String todoListSelector = '/todo_list_selector';
+
+  // 待办任务详情路由（从小组件打开）
+  static const String todoTaskDetail = '/todo_task_detail';
+
+  // 待办添加任务路由（从小组件打开）
+  static const String todoAdd = '/todo_add';
+
   // 自定义页面过渡动画 - 无动画
   static Route _createRoute(Widget page) {
     return PageRouteBuilder(
@@ -109,6 +122,75 @@ class AppRoutes extends NavigatorObserver {
       final widgetId = widgetIdStr != null ? int.tryParse(widgetIdStr) : null;
 
       return _createRoute(CheckinItemSelectorScreen(widgetId: widgetId));
+    }
+
+    // 处理待办列表小组件配置路由
+    // 格式: /todo_list_selector?widgetId={widgetId}
+    if (routeName.startsWith('/todo_list_selector')) {
+      // 解析 widgetId 参数
+      final uri = Uri.parse(routeName);
+      final widgetIdStr = uri.queryParameters['widgetId'];
+      final widgetId = widgetIdStr != null ? int.tryParse(widgetIdStr) : null;
+
+      return _createRoute(TodoListSelectorScreen(widgetId: widgetId));
+    }
+
+    // 处理待办任务详情路由（从小组件打开）
+    // 格式: /todo_task_detail?taskId={taskId}
+    if (routeName.startsWith('/todo_task_detail')) {
+      String? taskId;
+
+      if (settings.arguments is Map<String, String>) {
+        final args = settings.arguments as Map<String, String>;
+        taskId = args['taskId'];
+      } else {
+        final uri = Uri.parse(routeName);
+        taskId = uri.queryParameters['taskId'];
+      }
+
+      debugPrint('打开任务详情: taskId=$taskId');
+
+      if (taskId != null) {
+        // 查找任务
+        final plugin = TodoPlugin.instance;
+        final tasks = plugin.taskController.tasks.where((t) => t.id == taskId);
+
+        if (tasks.isNotEmpty) {
+          return _createRoute(
+            TaskDetailView(
+              task: tasks.first,
+              taskController: plugin.taskController,
+              reminderController: plugin.reminderController,
+            ),
+          );
+        }
+      }
+
+      // 没有找到任务，打开待办列表
+      return _createRoute(const TodoMainView());
+    }
+
+    // 处理待办添加任务路由（从小组件打开）
+    // 格式: /todo_add
+    if (routeName == '/todo_add') {
+      debugPrint('打开添加任务界面');
+
+      final plugin = TodoPlugin.instance;
+      return _createRoute(
+        TaskForm(
+          taskController: plugin.taskController,
+          reminderController: plugin.reminderController,
+        ),
+      );
+    }
+
+    // 处理待办列表小组件点击路由（已配置状态）
+    // 格式: /todo_list?taskId={taskId}
+    if (routeName.startsWith('/todo_list') && !routeName.contains('_selector')) {
+      debugPrint('打开待办列表界面');
+
+      // 打开待办插件主界面
+      return _createRoute(const TodoMainView());
     }
 
     // 处理打卡小组件点击路由（已配置状态）

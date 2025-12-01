@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Today's Tasks Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#2dd4bf", // Teal color for "今天" and "+" icon
+            "background-light": "#f8fafc", // Very light gray for light mode card
+            "background-dark": "#1e293b", // Slate gray for dark mode card
+          },
+          fontFamily: {
+            display: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+            "4xl": "2rem",
+          },
+        },
+      },
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 500,
+        'GRAD' 0,
+        'opsz' 24
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-200 dark:bg-black flex items-center justify-center min-h-screen p-4 font-display">
+<div class="w-full max-w-sm">
+<div class="bg-background-light dark:bg-background-dark rounded-4xl p-6 shadow-lg">
+<div class="flex justify-between items-center mb-5">
+<div class="flex items-baseline space-x-2">
+<h2 class="text-2xl font-bold text-primary">今天</h2>
+<span class="text-2xl font-semibold text-primary/70">10</span>
+</div>
+<button class="text-primary">
+<span class="material-symbols-outlined text-4xl">add</span>
+</button>
+</div>
+<div class="space-y-3">
+<div class="flex items-center">
+<div class="w-6 h-6 border-2 border-gray-300 dark:border-gray-500 rounded-md mr-4"></div>
+<span class="text-lg font-semibold text-gray-800 dark:text-gray-200">晨跑</span>
+</div>
+<div class="flex items-center">
+<div class="w-6 h-6 border-2 border-gray-300 dark:border-gray-500 rounded-md mr-4"></div>
+<span class="text-lg font-semibold text-gray-800 dark:text-gray-200">回邮件</span>
+</div>
+<div class="flex items-center">
+<div class="w-6 h-6 border-2 border-gray-300 dark:border-gray-500 rounded-md mr-4"></div>
+<span class="text-lg font-semibold text-gray-800 dark:text-gray-200">和客户沟通方案</span>
+</div>
+<div class="flex items-center">
+<div class="w-6 h-6 border-2 border-gray-300 dark:border-gray-500 rounded-md mr-4"></div>
+<span class="text-lg font-semibold text-gray-800 dark:text-gray-200">去超市买东西</span>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

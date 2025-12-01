@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 背景 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#2dd4bf" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+    <!-- 勾选图标 (用简单的形状模拟) -->
+    <item
+        android:top="6dp"
+        android:bottom="8dp"
+        android:left="4dp"
+        android:right="4dp">
+        <rotate
+            android:fromDegrees="45"
+            android:pivotX="30%"
+            android:pivotY="60%">
+            <layer-list>
+                <!-- 短边 -->
+                <item
+                    android:bottom="6dp"
+                    android:left="0dp"
+                    android:right="9dp"
+                    android:top="0dp">
+                    <shape android:shape="rectangle">
+                        <solid android:color="#ffffff" />
+                    </shape>
+                </item>
+                <!-- 长边 -->
+                <item
+                    android:bottom="0dp"
+                    android:left="7dp"
+                    android:right="0dp"
+                    android:top="0dp">
+                    <shape android:shape="rectangle">
+                        <solid android:color="#ffffff" />
+                    </shape>
+                </item>
+            </layer-list>
+        </rotate>
+    </item>
+</layer-list>

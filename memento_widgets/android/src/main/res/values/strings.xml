@@ -115,4 +115,8 @@
     <!-- 打卡月份视图小组件 -->
     <string name="widget_checkin_month_label">打卡月历</string>
     <string name="widget_checkin_month_description">查看本月打卡日历</string>
+
+    <!-- 待办列表小组件 (自定义) -->
+    <string name="widget_todo_list_label">待办列表</string>
+    <string name="widget_todo_list_description">显示待办任务列表</string>
 </resources>
