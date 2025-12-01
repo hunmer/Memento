@@ -11,10 +11,25 @@
         </shape>
     </item>
 
-    <!-- Center icon to represent check-in -->
+    <!-- Center check mark icon to represent check-in -->
     <item
-        android:gravity="center">
-        <bitmap
-            android:src="@drawable/ic_check" />
+        android:gravity="center"
+        android:width="48dp"
+        android:height="48dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+
+    <!-- Inner circle to create checkmark appearance -->
+    <item
+        android:gravity="center"
+        android:width="40dp"
+        android:height="40dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#68A9A4" />
+            <corners android:radius="20dp" />
+        </shape>
     </item>
 </layer-list>

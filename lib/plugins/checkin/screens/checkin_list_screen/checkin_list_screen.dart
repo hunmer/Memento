@@ -5,13 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../controllers/checkin_list_controller.dart';
 import '../../l10n/checkin_localizations.dart';
+import '../../widgets/checkin_record_dialog.dart';
 import 'components/empty_state.dart';
 import 'components/checkin_item_card.dart';
 
 class CheckinListScreen extends StatefulWidget {
   final CheckinListController controller;
+  /// 可选的打卡项目ID，用于从小组件跳转时自动打开打卡记录对话框
+  final String? initialItemId;
 
-  const CheckinListScreen({super.key, required this.controller});
+  const CheckinListScreen({
+    super.key,
+    required this.controller,
+    this.initialItemId,
+  });
 
   @override
   State<CheckinListScreen> createState() => _CheckinListScreenState();
@@ -28,6 +35,11 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await controller.restoreLastSortSetting();
       if (mounted) setState(() {});
+
+      // 如果指定了 initialItemId，则自动打开对应的打卡记录对话框
+      if (widget.initialItemId != null && mounted) {
+        _showCheckinDialogForItem(widget.initialItemId!);
+      }
     });
   }
 
@@ -162,5 +174,28 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
         },
       ),
     );
+  }
+
+  /// 根据 itemId 显示打卡记录对话框
+  void _showCheckinDialogForItem(String itemId) {
+    // 查找对应的打卡项目
+    final item = controller.checkinItems.firstWhere(
+      (item) => item.id == itemId,
+      orElse: () => throw Exception('未找到ID为 $itemId 的打卡项目'),
+    );
+
+    // 延迟一帧以确保界面完全加载
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (context) => CheckinRecordDialog(
+          item: item,
+          controller: controller,
+          onCheckinCompleted: _handleStateChanged,
+        ),
+      );
+    });
   }
 }

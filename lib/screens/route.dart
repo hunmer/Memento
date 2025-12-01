@@ -111,6 +111,30 @@ class AppRoutes extends NavigatorObserver {
       return _createRoute(CheckinItemSelectorScreen(widgetId: widgetId));
     }
 
+    // 处理打卡小组件点击路由（已配置状态）
+    // 格式: /checkin_item?itemId={itemId}
+    if (routeName.startsWith('/checkin_item')) {
+      // 从 arguments 或 URI 中获取 itemId
+      String? itemId;
+
+      // 优先从 arguments 中获取（来自小组件点击）
+      if (settings.arguments is Map<String, String>) {
+        final args = settings.arguments as Map<String, String>;
+        itemId = args['itemId'];
+      } else {
+        // 备用：从 URI 中解析
+        final uri = Uri.parse(routeName);
+        itemId = uri.queryParameters['itemId'];
+      }
+
+      // 如果有 itemId，打开打卡插件并自动展示打卡记录对话框
+      if (itemId != null) {
+        return _createRoute(CheckinMainView(itemId: itemId));
+      }
+      // 没有 itemId，正常打开打卡插件
+      return _createRoute(const CheckinMainView());
+    }
+
     switch (routeName) {
       case '/':
         return _createRoute(const HomeScreen());
@@ -132,7 +156,12 @@ class AppRoutes extends NavigatorObserver {
       case '/agent_chat':
       case 'agent_chat':
         // 支持通过 conversationId 参数直接打开指定对话
-        final conversationId = settings.arguments as String?;
+        String? conversationId;
+        if (settings.arguments is Map<String, String>) {
+          conversationId = (settings.arguments as Map<String, String>)['conversationId'];
+        } else if (settings.arguments is String) {
+          conversationId = settings.arguments as String;
+        }
         return _createRoute(AgentChatMainView(conversationId: conversationId));
       case '/bill':
       case 'bill':
@@ -203,7 +232,12 @@ class AppRoutes extends NavigatorObserver {
       case '/chat':
       case 'chat':
         // 支持通过 channelId 参数直接打开指定频道
-        final channelId = settings.arguments as String?;
+        String? channelId;
+        if (settings.arguments is Map<String, String>) {
+          channelId = (settings.arguments as Map<String, String>)['channelId'];
+        } else if (settings.arguments is String) {
+          channelId = settings.arguments as String;
+        }
         return _createRoute(ChatMainView(channelId: channelId));
       default:
         return _createRoute(

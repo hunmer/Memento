@@ -65,13 +65,13 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center">
-            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="一" android:gravity="center" android:textColor="@android:color/white" />
-            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="二" android:gravity="center" android:textColor="@android:color/white" />
-            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="三" android:gravity="center" android:textColor="@android:color/white" />
-            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="四" android:gravity="center" android:textColor="@android:color/white" />
-            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="五" android:gravity="center" android:textColor="@android:color/white" />
-            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="六" android:gravity="center" android:textColor="@android:color/white" android:alpha="0.5"/>
-            <TextView android:layout_width="0dp" android:layout_weight="1" android:text="日" android:gravity="center" android:textColor="@android:color/white" android:alpha="0.5"/>
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="一" android:gravity="center" android:textColor="@android:color/white" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="二" android:gravity="center" android:textColor="@android:color/white" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="三" android:gravity="center" android:textColor="@android:color/white" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="四" android:gravity="center" android:textColor="@android:color/white" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="五" android:gravity="center" android:textColor="@android:color/white" />
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="六" android:gravity="center" android:textColor="@android:color/white" android:alpha="0.5"/>
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="日" android:gravity="center" android:textColor="@android:color/white" android:alpha="0.5"/>
         </LinearLayout>
 
         <LinearLayout
@@ -81,13 +81,13 @@
             android:orientation="horizontal"
             android:layout_marginTop="4dp"
             android:gravity="center">
-             <ImageView android:id="@+id/week_checks_1" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" />
-             <ImageView android:id="@+id/week_checks_2" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" />
-             <ImageView android:id="@+id/week_checks_3" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" />
-             <ImageView android:id="@+id/week_checks_4" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" />
-             <ImageView android:id="@+id/week_checks_5" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" />
-             <ImageView android:id="@+id/week_checks_6" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" android:visibility="invisible" />
-             <ImageView android:id="@+id/week_checks_7" android:layout_width="0dp" android:layout_weight="1" android:src="@drawable/ic_check" android:visibility="invisible" />
+             <ImageView android:id="@+id/week_checks_1" android:layout_width="0dp" android:layout_height="24dp" android:layout_weight="1" android:src="@drawable/ic_check" />
+             <ImageView android:id="@+id/week_checks_2" android:layout_width="0dp" android:layout_height="24dp" android:layout_weight="1" android:src="@drawable/ic_check" />
+             <ImageView android:id="@+id/week_checks_3" android:layout_width="0dp" android:layout_height="24dp" android:layout_weight="1" android:src="@drawable/ic_check" />
+             <ImageView android:id="@+id/week_checks_4" android:layout_width="0dp" android:layout_height="24dp" android:layout_weight="1" android:src="@drawable/ic_check" />
+             <ImageView android:id="@+id/week_checks_5" android:layout_width="0dp" android:layout_height="24dp" android:layout_weight="1" android:src="@drawable/ic_check" />
+             <ImageView android:id="@+id/week_checks_6" android:layout_width="0dp" android:layout_height="24dp" android:layout_weight="1" android:src="@drawable/ic_check" android:visibility="invisible" />
+             <ImageView android:id="@+id/week_checks_7" android:layout_width="0dp" android:layout_height="24dp" android:layout_weight="1" android:src="@drawable/ic_check" android:visibility="invisible" />
         </LinearLayout>
     </LinearLayout>
 

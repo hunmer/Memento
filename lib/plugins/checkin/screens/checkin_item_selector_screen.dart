@@ -236,7 +236,9 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
 
       // 更新小组件
       await HomeWidget.updateWidget(
-        androidName: 'CheckinItemWidgetProvider',
+        name: 'CheckinItemWidgetProvider',
+        iOSName: 'CheckinItemWidgetProvider',
+        qualifiedAndroidName: 'github.hunmer.memento.widgets.providers.CheckinItemWidgetProvider',
       );
 
       if (mounted) {

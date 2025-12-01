@@ -77,7 +77,6 @@ import 'plugins/tts/tts_plugin.dart'; // TTS语音朗读插件
 import 'utils/image_utils.dart'; // 图片工具类
 import 'package:memento_widgets/memento_widgets.dart'; // memento_widgets 插件
 
-
 // 主页小组件注册
 import 'plugins/chat/home_widgets.dart';
 import 'plugins/diary/home_widgets.dart';
@@ -142,7 +141,9 @@ void main() async {
   Logger.root.level = Level.ALL; // 设置日志级别为 ALL 以显示所有日志
   Logger.root.onRecord.listen((record) {
     // 输出日志到控制台
-    debugPrint('[${record.level.name}] ${record.loggerName}: ${record.message}');
+    debugPrint(
+      '[${record.level.name}] ${record.loggerName}: ${record.message}',
+    );
     // 如果有错误或堆栈追踪,也输出
     if (record.error != null) {
       debugPrint('Error: ${record.error}');
@@ -371,40 +372,36 @@ void _handleWidgetClick(String url) {
     // 从 /checkin_item/config?widgetId=xxx 转换为 /checkin_item_selector?widgetId=xxx
     if (routePath == '/checkin_item/config') {
       final widgetId = uri.queryParameters['widgetId'];
-      routePath = '/checkin_item_selector${widgetId != null ? '?widgetId=$widgetId' : ''}';
+      routePath =
+          '/checkin_item_selector${widgetId != null ? '?widgetId=$widgetId' : ''}';
       debugPrint('打卡小组件配置路由转换为: $routePath');
     }
 
-    // 提取参数
+    // 提取所有查询参数
     final queryParams = uri.queryParameters;
-    String? argument;
-    if (queryParams.containsKey('channelId')) {
-      argument = queryParams['channelId'];
-    } else if (queryParams.containsKey('conversationId')) {
-      argument = queryParams['conversationId'];
-    }
 
-    debugPrint('导航到路由: $routePath, 参数: $argument');
+    // 将 queryParams 作为 arguments 传递，如果为空则传递 null
+    final arguments = queryParams.isNotEmpty ? queryParams : null;
+
+    debugPrint('导航到路由: $routePath, 参数: $arguments');
 
     // 延迟导航，确保应用完全启动
     Future.delayed(const Duration(milliseconds: 100), () {
       final navigator = navigatorKey.currentState;
       if (navigator != null) {
-        debugPrint('执行导航: 重置路由栈并push RouteSettings($routePath, arguments: $argument)');
+        debugPrint(
+          '执行导航: 重置路由栈并push RouteSettings($routePath, arguments: $arguments)',
+        );
         try {
           // 从小组件进入时，重置路由栈为两层：首页 + 目标页面
           // 1. 先清除所有路由并回到首页
-          navigator.pushNamedAndRemoveUntil(
-            '/',
-            (route) => false,
-          );
+          navigator.pushNamedAndRemoveUntil('/', (route) => false);
 
           // 2. 延迟一帧后再推入目标路由，确保首页已经完全加载
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            final route = AppRoutes.generateRoute(RouteSettings(
-              name: routePath,
-              arguments: argument,
-            ));
+            final route = AppRoutes.generateRoute(
+              RouteSettings(name: routePath, arguments: arguments),
+            );
             navigator.push(route);
             debugPrint('导航成功：路由栈现在有两层 (/ -> $routePath)');
           });
@@ -419,16 +416,12 @@ void _handleWidgetClick(String url) {
           if (retryNavigator != null) {
             try {
               // 重试时也使用相同的两层路由栈逻辑
-              retryNavigator.pushNamedAndRemoveUntil(
-                '/',
-                (route) => false,
-              );
+              retryNavigator.pushNamedAndRemoveUntil('/', (route) => false);
 
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                final route = AppRoutes.generateRoute(RouteSettings(
-                  name: routePath,
-                  arguments: argument,
-                ));
+                final route = AppRoutes.generateRoute(
+                  RouteSettings(name: routePath, arguments: arguments),
+                );
                 retryNavigator.push(route);
                 debugPrint('重试导航成功');
               });
@@ -583,8 +576,7 @@ class _MyAppState extends State<MyApp> {
               Locale('zh', ''), // 中文
               Locale('en', ''), // 英文
             ],
-            locale:
-                globalConfigManager.getLocale(),
+            locale: globalConfigManager.getLocale(),
             theme: theme,
             darkTheme: darkTheme,
             builder: (context, child) {
