@@ -661,6 +661,7 @@ void _handleDeepLink(String? routePath) {
 1. ✅ **布局文件缺少 layout_height**: 检查所有 TextView/ImageView 是否有 `android:layout_height`
 2. ✅ **预览图使用 bitmap 引用 vector**: 改用纯 drawable 绘制
 3. ✅ **资源文件缺失**: 确保所有引用的 drawable/layout/string 都存在
+4. RemoteViews（小组件）不支持直接使用 <View> 标签。RemoteViews 只支持有限的视图类型。
 
 **调试方法**:
 

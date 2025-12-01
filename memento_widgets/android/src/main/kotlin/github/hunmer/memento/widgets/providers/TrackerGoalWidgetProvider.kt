@@ -11,7 +11,7 @@ import android.view.View
 import android.widget.RemoteViews
 import android.widget.Toast
 import github.hunmer.memento.widgets.BasePluginWidgetProvider
-import github.hunmer.memento.widgets.R
+import com.example.memento_widgets.R
 import org.json.JSONObject
 
 /**
@@ -378,7 +378,8 @@ class TrackerGoalWidgetProvider : BasePluginWidgetProvider() {
                             goal.put("currentValue", newValue)
 
                             // 保存数据
-                            saveWidgetData(context, data)
+                            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                            prefs.edit().putString("tracker_goal_widget_data", data.toString()).apply()
 
                             // 刷新小组件
                             val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -432,7 +433,8 @@ class TrackerGoalWidgetProvider : BasePluginWidgetProvider() {
                             goal.put("currentValue", newValue)
 
                             // 保存数据
-                            saveWidgetData(context, data)
+                            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                            prefs.edit().putString("tracker_goal_widget_data", data.toString()).apply()
 
                             // 刷新小组件
                             val appWidgetManager = AppWidgetManager.getInstance(context)

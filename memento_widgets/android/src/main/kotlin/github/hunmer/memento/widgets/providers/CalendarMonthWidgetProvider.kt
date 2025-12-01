@@ -56,6 +56,9 @@ class CalendarMonthWidgetProvider : BasePluginWidgetProvider() {
         private const val ACTION_COMPLETE_EVENT = "github.hunmer.memento.widgets.COMPLETE_CALENDAR_EVENT"
         private const val ACTION_PREV_MONTH = "github.hunmer.memento.widgets.CALENDAR_PREV_MONTH"
         private const val ACTION_NEXT_MONTH = "github.hunmer.memento.widgets.CALENDAR_NEXT_MONTH"
+
+        // 待同步的完成事件队列 key
+        private const val PREF_KEY_PENDING_COMPLETE_EVENTS = "calendar_pending_complete_events"
     }
 
     override fun updateAppWidget(
@@ -655,7 +658,7 @@ class CalendarMonthWidgetProvider : BasePluginWidgetProvider() {
 
     /**
      * 后台完成事件
-     * 更新 SharedPreferences 中的事件状态，并通过广播通知 Flutter 端
+     * 更新 SharedPreferences 中的事件状态，并将事件 ID 添加到待同步队列
      */
     private fun completeEventInBackground(context: Context, eventId: String): Boolean {
         return try {
@@ -692,12 +695,8 @@ class CalendarMonthWidgetProvider : BasePluginWidgetProvider() {
                         // 保存更新后的数据
                         prefs.edit().putString("calendar_month_widget_data", data.toString()).apply()
 
-                        // 发送广播通知 Flutter 端同步状态
-                        val syncIntent = Intent("github.hunmer.memento.WIDGET_EVENT_COMPLETED").apply {
-                            putExtra("eventId", eventId)
-                            setPackage("github.hunmer.memento")
-                        }
-                        context.sendBroadcast(syncIntent)
+                        // 将事件 ID 添加到待同步队列，供 Flutter 端启动时处理
+                        addToPendingCompleteEvents(context, eventId)
 
                         return true
                     }
@@ -709,6 +708,34 @@ class CalendarMonthWidgetProvider : BasePluginWidgetProvider() {
         } catch (e: Exception) {
             Log.e(TAG, "后台完成事件失败", e)
             false
+        }
+    }
+
+    /**
+     * 将事件 ID 添加到待同步完成队列
+     */
+    private fun addToPendingCompleteEvents(context: Context, eventId: String) {
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val existingJson = prefs.getString(PREF_KEY_PENDING_COMPLETE_EVENTS, "[]")
+            val pendingArray = JSONArray(existingJson)
+
+            // 检查是否已存在
+            var exists = false
+            for (i in 0 until pendingArray.length()) {
+                if (pendingArray.getString(i) == eventId) {
+                    exists = true
+                    break
+                }
+            }
+
+            if (!exists) {
+                pendingArray.put(eventId)
+                prefs.edit().putString(PREF_KEY_PENDING_COMPLETE_EVENTS, pendingArray.toString()).apply()
+                Log.d(TAG, "事件已添加到待同步队列: $eventId, 队列长度: ${pendingArray.length()}")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "添加待同步事件失败", e)
         }
     }
 

@@ -188,6 +188,10 @@ class PluginWidgetSyncHelper {
   /// 在 main.dart 中调用，确保用户在小组件上完成的任务能立即同步到应用
   Future<void> syncPendingTaskChangesOnStartup() => _todoSyncer.syncPendingTaskChangesOnStartup();
 
+  /// 应用启动或恢复时同步待处理的日历事件完成操作
+  /// 在 main.dart 中调用，确保用户在小组件上完成的日历事件能立即同步到应用
+  Future<void> syncPendingCalendarEventsOnStartup() => _calendarSyncer.syncPendingEventsOnStartup();
+
   /// 同步打卡周视图小组件
   Future<void> syncCheckinWeeklyWidget() => _checkinSyncer.syncCheckinWeeklyWidget();
 }
