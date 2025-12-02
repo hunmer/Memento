@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <!-- Checkbox(仅UI装饰) -->
+    <ImageView
+        android:id="@+id/item_checkbox"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:src="@android:drawable/checkbox_off_background"
+        android:scaleType="fitCenter"
+        android:contentDescription="checkbox" />
+
+    <!-- 习惯名称 -->
+    <TextView
+        android:id="@+id/habit_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:minWidth="40dp"
+        android:maxWidth="60dp"
+        android:text="阅读"
+        android:textColor="#FF607AFB"
+        android:textSize="10sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:paddingStart="6dp"
+        android:paddingEnd="4dp" />
+
+    <!-- 周一时长 -->
+    <FrameLayout
+        android:id="@+id/day_0_container"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:layout_weight="1"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="0dp">
+
+        <View
+            android:id="@+id/day_0_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/habit_day_cell_bg" />
+
+        <TextView
+            android:id="@+id/day_0_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="30"
+            android:textColor="#FFFFFFFF"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+
+    <!-- 周二时长 -->
+    <FrameLayout
+        android:id="@+id/day_1_container"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:layout_weight="1"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="0dp">
+
+        <View
+            android:id="@+id/day_1_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/habit_day_cell_bg" />
+
+        <TextView
+            android:id="@+id/day_1_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text=""
+            android:textColor="#FFFFFFFF"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+
+    <!-- 周三时长 -->
+    <FrameLayout
+        android:id="@+id/day_2_container"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:layout_weight="1"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="0dp">
+
+        <View
+            android:id="@+id/day_2_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/habit_day_cell_bg" />
+
+        <TextView
+            android:id="@+id/day_2_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="45"
+            android:textColor="#FFFFFFFF"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+
+    <!-- 周四时长 -->
+    <FrameLayout
+        android:id="@+id/day_3_container"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:layout_weight="1"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="0dp">
+
+        <View
+            android:id="@+id/day_3_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/habit_day_cell_bg" />
+
+        <TextView
+            android:id="@+id/day_3_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="60"
+            android:textColor="#FFFFFFFF"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+
+    <!-- 周五时长 -->
+    <FrameLayout
+        android:id="@+id/day_4_container"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:layout_weight="1"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="0dp">
+
+        <View
+            android:id="@+id/day_4_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/habit_day_cell_bg" />
+
+        <TextView
+            android:id="@+id/day_4_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text=""
+            android:textColor="#FFFFFFFF"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+
+    <!-- 周六时长 -->
+    <FrameLayout
+        android:id="@+id/day_5_container"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:layout_weight="1"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="0dp">
+
+        <View
+            android:id="@+id/day_5_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/habit_day_cell_bg" />
+
+        <TextView
+            android:id="@+id/day_5_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="90"
+            android:textColor="#FFFFFFFF"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+
+    <!-- 周日时长 -->
+    <FrameLayout
+        android:id="@+id/day_6_container"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:layout_weight="1"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp">
+
+        <View
+            android:id="@+id/day_6_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/habit_day_cell_bg" />
+
+        <TextView
+            android:id="@+id/day_6_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="30"
+            android:textColor="#FFFFFFFF"
+            android:textSize="8sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+</LinearLayout>

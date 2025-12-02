@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Weekly Habit Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#FEE2E2", // A soft pink, can be adjusted
+              "background-light": "#FDF2F8", // Very light pink
+              "background-dark": "#1F2937", // Dark gray blue
+              "card-light": "#FFFFFF",
+              "card-dark": "#374151",
+              "text-light": "#4B5563",
+              "text-dark": "#E5E7EB",
+              "subtext-light": "#9CA3AF",
+              "subtext-dark": "#9CA3AF",
+            },
+            fontFamily: {
+              display: ["Noto Sans SC", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "1rem", // 16px
+            },
+          },
+        },
+      };
+    </script>
+<style>
+      .material-symbols-rounded {
+        font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 20
+      }
+      .material-symbols-rounded.filled {
+        font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display p-4 flex items-center justify-center min-h-screen">
+<div class="w-full max-w-sm mx-auto">
+<div class="bg-card-light dark:bg-card-dark p-6 rounded-3xl shadow-lg">
+<div class="flex justify-end items-center mb-4">
+<div class="flex items-center space-x-2 text-subtext-light dark:text-subtext-dark">
+<button class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+<span class="material-symbols-rounded text-base">arrow_back_ios_new</span>
+</button>
+<span class="text-sm font-medium">第20周</span>
+<button class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+<span class="material-symbols-rounded text-base">arrow_forward_ios</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-[100px_1fr] gap-x-4">
+<div></div>
+<div class="grid grid-cols-7 gap-2">
+<div class="text-center text-sm font-bold text-subtext-light dark:text-subtext-dark">一</div>
+<div class="text-center text-sm font-bold text-subtext-light dark:text-subtext-dark">二</div>
+<div class="text-center text-sm font-bold text-subtext-light dark:text-subtext-dark">三</div>
+<div class="text-center text-sm font-bold text-subtext-light dark:text-subtext-dark">四</div>
+<div class="text-center text-sm font-bold text-subtext-light dark:text-subtext-dark">五</div>
+<div class="text-center text-sm font-bold text-subtext-light dark:text-subtext-dark">六</div>
+<div class="text-center text-sm font-bold text-subtext-light dark:text-subtext-dark">日</div>
+</div>
+<div class="flex items-center space-x-2 my-2">
+<span>☀️</span>
+<span class="text-sm font-bold text-text-light dark:text-text-dark whitespace-nowrap">睡够8小时</span>
+</div>
+<div class="grid grid-cols-7 gap-2 my-2">
+<div class="w-full aspect-square rounded-lg bg-indigo-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-indigo-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-indigo-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-indigo-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-indigo-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-indigo-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-indigo-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-indigo-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-indigo-100 flex items-center justify-center ring-1 ring-indigo-300 dark:ring-indigo-500"><span class="material-symbols-rounded filled text-sm text-indigo-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-indigo-100 border border-indigo-200"></div>
+<div class="w-full aspect-square rounded-lg bg-indigo-100 border border-indigo-200"></div>
+</div>
+<div class="flex items-center space-x-2 my-2">
+<span>💊</span>
+<span class="text-sm font-bold text-text-light dark:text-text-dark whitespace-nowrap">每日维生素</span>
+</div>
+<div class="grid grid-cols-7 gap-2 my-2">
+<div class="w-full aspect-square rounded-lg bg-orange-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-orange-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-orange-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-orange-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-orange-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-orange-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-orange-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-orange-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-orange-100 flex items-center justify-center ring-1 ring-orange-300 dark:ring-orange-500"><span class="material-symbols-rounded filled text-sm text-orange-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-orange-100 flex items-center justify-center border border-orange-200"><span class="material-symbols-rounded filled text-sm text-orange-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-orange-100"></div>
+</div>
+<div class="flex items-center space-x-2 my-2">
+<span>🤸</span>
+<span class="text-sm font-bold text-text-light dark:text-text-dark whitespace-nowrap">多运动</span>
+</div>
+<div class="grid grid-cols-7 gap-2 my-2">
+<div class="w-full aspect-square rounded-lg bg-green-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-green-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-green-100"></div>
+<div class="w-full aspect-square rounded-lg bg-green-100"></div>
+<div class="w-full aspect-square rounded-lg bg-green-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-green-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-green-100 flex items-center justify-center ring-1 ring-green-300 dark:ring-green-500"><span class="material-symbols-rounded filled text-sm text-green-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-green-100"></div>
+<div class="w-full aspect-square rounded-lg bg-green-100 flex items-center justify-center border border-green-200"><span class="material-symbols-rounded filled text-sm text-green-500">check</span></div>
+</div>
+<div class="flex items-center space-x-2 my-2">
+<span>📚</span>
+<span class="text-sm font-bold text-text-light dark:text-text-dark whitespace-nowrap">看书30min</span>
+</div>
+<div class="grid grid-cols-7 gap-2 my-2">
+<div class="w-full aspect-square rounded-lg bg-violet-100"></div>
+<div class="w-full aspect-square rounded-lg bg-violet-100"></div>
+<div class="w-full aspect-square rounded-lg bg-violet-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-violet-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-violet-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-violet-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-violet-100 ring-1 ring-violet-300 dark:ring-violet-500"></div>
+<div class="w-full aspect-square rounded-lg bg-violet-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-violet-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-violet-100 flex items-center justify-center border border-violet-200"><span class="material-symbols-rounded filled text-sm text-violet-500">check</span></div>
+</div>
+<div class="flex items-center space-x-2 my-2">
+<span>🧹</span>
+<span class="text-sm font-bold text-text-light dark:text-text-dark whitespace-nowrap">打扫卫生</span>
+</div>
+<div class="grid grid-cols-7 gap-2 my-2">
+<div class="w-full aspect-square rounded-lg bg-blue-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-blue-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-blue-100"></div>
+<div class="w-full aspect-square rounded-lg bg-blue-100"></div>
+<div class="w-full aspect-square rounded-lg bg-blue-100"></div>
+<div class="w-full aspect-square rounded-lg bg-blue-100 flex items-center justify-center ring-1 ring-blue-300 dark:ring-blue-500"><span class="material-symbols-rounded filled text-sm text-blue-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-blue-100"></div>
+<div class="w-full aspect-square rounded-lg bg-blue-100 border border-blue-200"></div>
+</div>
+<div class="flex items-center space-x-2 my-2">
+<span>🥕</span>
+<span class="text-sm font-bold text-text-light dark:text-text-dark whitespace-nowrap">多吃蔬菜</span>
+</div>
+<div class="grid grid-cols-7 gap-2 my-2">
+<div class="w-full aspect-square rounded-lg bg-orange-100"></div>
+<div class="w-full aspect-square rounded-lg bg-orange-100"></div>
+<div class="w-full aspect-square rounded-lg bg-orange-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-orange-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-orange-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-orange-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-orange-100 ring-1 ring-orange-300 dark:ring-orange-500"></div>
+<div class="w-full aspect-square rounded-lg bg-orange-100 border border-orange-200"></div>
+<div class="w-full aspect-square rounded-lg bg-orange-100"></div>
+</div>
+<div class="flex items-center space-x-2 my-2">
+<span>📔</span>
+<span class="text-sm font-bold text-text-light dark:text-text-dark whitespace-nowrap">感恩日记</span>
+</div>
+<div class="grid grid-cols-7 gap-2 my-2">
+<div class="w-full aspect-square rounded-lg bg-red-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-red-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-red-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-red-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-red-100"></div>
+<div class="w-full aspect-square rounded-lg bg-red-100"></div>
+<div class="w-full aspect-square rounded-lg bg-red-100 flex items-center justify-center ring-1 ring-red-300 dark:ring-red-500"><span class="material-symbols-rounded filled text-sm text-red-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-red-100 flex items-center justify-center"><span class="material-symbols-rounded filled text-sm text-red-500">check</span></div>
+<div class="w-full aspect-square rounded-lg bg-red-100 flex items-center justify-center border border-red-200"><span class="material-symbols-rounded filled text-sm text-red-500">check</span></div>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>
