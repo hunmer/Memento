@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Weekly Activity Tracker Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#607afb",
+            "background-light": "#f5f6f8",
+            "background-dark": "#0f1323",
+            "widget-light": "#EFF7F0",
+            "widget-dark": "#1F2937",
+            "text-light": "#374151",
+            "text-dark": "#E5E7EB",
+            "subtext-light": "#6B7280",
+            "subtext-dark": "#9CA3AF",
+            "border-light": "#E5E7EB",
+            "border-dark": "#374151",
+            sleep: "#A7F3D0",
+            work: "#FDBA74",
+            hobby: "#FDE047",
+            entertainment: "#FCA5A5",
+            life: "#6EE7B7",
+            "blue-ish": "#BFDBFE"
+          },
+          fontFamily: {
+            display: "Inter"
+          },
+          borderRadius: {
+            DEFAULT: "0.5rem",
+            lg: "1rem",
+            xl: "1.5rem",
+            full: "9999px"
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display p-4 flex justify-center items-center min-h-screen">
+<div class="w-full max-w-sm mx-auto bg-widget-light dark:bg-widget-dark rounded-3xl shadow-lg p-4">
+<div class="flex">
+<div class="flex-1 pr-3">
+<div class="flex justify-between items-center text-[10px] text-subtext-light dark:text-subtext-dark font-medium mb-2">
+<div class="flex flex-col justify-between text-[10px] text-subtext-light dark:text-subtext-dark mr-2 h-[192px] py-0.5">
+<span>0</span>
+<span>6</span>
+<span>12</span>
+<span>18</span>
+</div>
+<div class="flex-1 grid grid-cols-7 gap-1">
+<div class="flex flex-col items-center">
+<span>一</span>
+<div class="grid grid-rows-24 gap-px w-full h-48 mt-1">
+<div class="bg-entertainment"></div><div class="bg-entertainment"></div>
+<div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div>
+<div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div>
+<div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div>
+<div class="bg-work"></div><div class="bg-work"></div><div class="bg-work"></div><div class="bg-work"></div>
+<div class="bg-sleep"></div><div class="bg-sleep"></div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<span>二</span>
+<div class="grid grid-rows-24 gap-px w-full h-48 mt-1">
+<div class="bg-work"></div><div class="bg-work"></div><div class="bg-work"></div><div class="bg-work"></div>
+<div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div>
+<div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div>
+<div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div>
+<div class="bg-work"></div><div class="bg-work"></div><div class="bg-work"></div><div class="bg-work"></div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<span>三</span>
+<div class="grid grid-rows-24 gap-px w-full h-48 mt-1">
+<div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div>
+<div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div>
+<div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div>
+<div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div>
+<div class="bg-sleep"></div><div class="bg-sleep"></div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<span>四</span>
+<div class="grid grid-rows-24 gap-px w-full h-48 mt-1">
+<div class="bg-blue-ish"></div><div class="bg-blue-ish"></div><div class="bg-blue-ish"></div><div class="bg-blue-ish"></div>
+<div class="bg-work"></div><div class="bg-work"></div>
+<div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div>
+<div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div>
+<div class="bg-work"></div><div class="bg-work"></div><div class="bg-work"></div><div class="bg-work"></div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<span>五</span>
+<div class="grid grid-rows-24 gap-px w-full h-48 mt-1">
+<div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div>
+<div class="bg-work"></div><div class="bg-work"></div>
+<div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div>
+<div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div>
+<div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<span>六</span>
+<div class="grid grid-rows-24 gap-px w-full h-48 mt-1">
+<div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div>
+<div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div>
+<div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div><div class="bg-entertainment"></div>
+<div class="bg-work"></div><div class="bg-work"></div><div class="bg-work"></div><div class="bg-work"></div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<span>日</span>
+<div class="grid grid-rows-24 gap-px w-full h-48 mt-1">
+<div class="bg-blue-ish"></div><div class="bg-blue-ish"></div><div class="bg-blue-ish"></div><div class="bg-blue-ish"></div>
+<div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div><div class="bg-sleep"></div>
+<div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div><div class="bg-entertainment opacity-50"></div>
+<div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div><div class="bg-hobby"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="w-px border-l-2 border-dashed border-gray-300 dark:border-gray-600 mx-2"></div>
+<div class="w-2/5 pl-2 flex flex-col">
+<div class="text-center mb-4">
+<div class="flex items-center justify-between space-x-1">
+<button class="text-subtext-light dark:text-subtext-dark opacity-75 hover:opacity-100">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</button>
+<div class="flex-grow">
+<p class="font-bold text-xs text-text-light dark:text-text-dark">第 21 周</p>
+<p class="text-[10px] text-subtext-light dark:text-subtext-dark">5.19 - 5.25</p>
+</div>
+<button class="text-subtext-light dark:text-subtext-dark opacity-75 hover:opacity-100">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-around text-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<span class="w-2 h-2 rounded-full bg-sleep inline-block mr-2"></span>
+<span class="text-text-light dark:text-text-dark">zZ 睡眠</span>
+</div>
+<span class="text-subtext-light dark:text-subtext-dark">41h</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<span class="w-2 h-2 rounded-full bg-work opacity-50 inline-block mr-2"></span>
+<span class="text-text-light dark:text-text-dark">🐮 工作</span>
+</div>
+<span class="text-subtext-light dark:text-subtext-dark">22h 40m</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<span class="w-2 h-2 rounded-full bg-hobby inline-block mr-2"></span>
+<span class="text-text-light dark:text-text-dark">📝 兴趣</span>
+</div>
+<span class="text-subtext-light dark:text-subtext-dark">16h 8m</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<span class="w-2 h-2 rounded-full bg-entertainment inline-block mr-2"></span>
+<span class="text-text-light dark:text-text-dark">🥳 娱乐</span>
+</div>
+<span class="text-subtext-light dark:text-subtext-dark">13h 12m</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<span class="w-2 h-2 rounded-full bg-entertainment opacity-60 inline-block mr-2"></span>
+<span class="text-text-light dark:text-text-dark">☀️ 生活</span>
+</div>
+<span class="text-subtext-light dark:text-subtext-dark">10h 50m</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

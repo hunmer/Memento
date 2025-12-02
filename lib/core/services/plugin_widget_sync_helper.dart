@@ -113,6 +113,7 @@ class PluginWidgetSyncHelper {
       _todoSyncer.syncTodoListWidget(),
       _checkinSyncer.syncCheckinWeeklyWidget(),
       _trackerSyncer.syncTrackerGoalWidget(),
+      _activitySyncer.syncActivityWeeklyWidget(),
     ]);
   }
 
@@ -209,4 +210,7 @@ class PluginWidgetSyncHelper {
   /// 应用启动或恢复时同步待处理的习惯计时器变更
   /// 在 main.dart 中调用，确保用户在小组件上启动/暂停的计时器能立即同步到应用
   Future<void> syncPendingHabitTimerChangesOnStartup() => _habitsSyncer.syncPendingHabitTimerChangesOnStartup();
+
+  /// 同步活动周视图小组件
+  Future<void> syncActivityWeeklyWidget() => _activitySyncer.syncActivityWeeklyWidget();
 }
