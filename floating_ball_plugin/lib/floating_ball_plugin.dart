@@ -100,11 +100,43 @@ class FloatingBallButtonEvent {
   });
 
   factory FloatingBallButtonEvent.fromMap(Map<String, dynamic> map) {
+    // 安全地转换 data 字段，处理嵌套 Map 的类型问题
+    Map<String, dynamic>? parsedData;
+    final rawData = map['data'];
+    if (rawData is Map) {
+      parsedData = _deepConvertMap(rawData);
+    }
+
     return FloatingBallButtonEvent(
       index: (map['index'] as num?)?.toInt() ?? 0,
       title: map['title']?.toString() ?? '',
-      data: map['data'] as Map<String, dynamic>?,
+      data: parsedData,
     );
+  }
+
+  /// 递归转换 Map 为 Map<String, dynamic>
+  static Map<String, dynamic> _deepConvertMap(Map map) {
+    return map.map((key, value) {
+      final stringKey = key.toString();
+      if (value is Map) {
+        return MapEntry(stringKey, _deepConvertMap(value));
+      } else if (value is List) {
+        return MapEntry(stringKey, _deepConvertList(value));
+      }
+      return MapEntry(stringKey, value);
+    });
+  }
+
+  /// 递归转换 List 中的 Map
+  static List<dynamic> _deepConvertList(List list) {
+    return list.map((item) {
+      if (item is Map) {
+        return _deepConvertMap(item);
+      } else if (item is List) {
+        return _deepConvertList(item);
+      }
+      return item;
+    }).toList();
   }
 }
 

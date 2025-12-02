@@ -243,8 +243,9 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  const FloatingButtonManagerScreen(),
+                              builder:
+                                  (context) =>
+                                      const FloatingButtonManagerScreen(),
                             ),
                           ).then((_) => setState(() {}));
                         },
@@ -287,20 +288,6 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                 backgroundColor:
                     _controller.isRunning ? Colors.red : Colors.green,
               ),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              '功能说明：\n'
-              '• 悬浮球可在任何应用上显示\n'
-              '• 支持自定义图片作为悬浮球外观\n'
-              '• 拖动悬浮球会自动吸附到屏幕边缘（靠近时）\n'
-              '• 点击悬浮球可展开圆形子按钮，点击后通过EventChannel回传事件\n'
-              '• 子按钮根据位置动态布局（全圆或半圆）\n'
-              '• 调节大小、吸附阈值和按钮数据无需重启\n'
-              '• 位置会自动保存，下次启动时恢复\n'
-              '• 建议在使用时保持应用后台运行',
             ),
           ),
         ],
