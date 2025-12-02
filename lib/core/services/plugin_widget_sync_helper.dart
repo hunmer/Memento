@@ -202,4 +202,11 @@ class PluginWidgetSyncHelper {
   /// 应用启动或恢复时同步待处理的目标变更
   /// 在 main.dart 中调用，确保用户在小组件上增减的进度能立即同步到应用
   Future<void> syncPendingGoalChangesOnStartup() => _trackerSyncer.syncPendingGoalChangesOnStartup();
+
+  /// 同步习惯计时器小组件
+  Future<void> syncHabitTimerWidget() => _habitsSyncer.syncHabitTimerWidget();
+
+  /// 应用启动或恢复时同步待处理的习惯计时器变更
+  /// 在 main.dart 中调用，确保用户在小组件上启动/暂停的计时器能立即同步到应用
+  Future<void> syncPendingHabitTimerChangesOnStartup() => _habitsSyncer.syncPendingHabitTimerChangesOnStartup();
 }

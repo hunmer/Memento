@@ -26,6 +26,10 @@ import 'package:Memento/plugins/day/day_plugin.dart';
 import 'package:Memento/plugins/diary/diary_plugin.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/habits/screens/habit_timer_selector_screen.dart';
+import 'package:Memento/plugins/habits/widgets/timer_dialog.dart';
+import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/nodes/nodes_plugin.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/scripts_center/scripts_center_plugin.dart';
@@ -109,6 +113,12 @@ class AppRoutes extends NavigatorObserver {
 
   // 目标追踪进度增减小组件配置路由
   static const String trackerGoalSelector = '/tracker_goal_selector';
+
+  // 习惯计时器小组件配置路由
+  static const String habitTimerSelector = '/habit_timer_selector';
+
+  // 习惯计时器对话框路由（从小组件打开）
+  static const String habitTimerDialog = '/habit_timer_dialog';
 
   // 自定义页面过渡动画 - 无动画
   static Route _createRoute(Widget page) {
@@ -279,6 +289,92 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
             TrackerGoalSelectorScreen(widgetId: trackerWidgetId));
+      case '/habit_timer_selector':
+      case 'habit_timer_selector':
+        // 习惯计时器小组件配置界面
+        int? habitTimerWidgetId;
+
+        // 从 arguments 中解析 widgetId
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          // widgetId 可能是字符串或整数
+          final widgetIdValue = args['widgetId'];
+          if (widgetIdValue is int) {
+            habitTimerWidgetId = widgetIdValue;
+          } else if (widgetIdValue is String) {
+            habitTimerWidgetId = int.tryParse(widgetIdValue);
+          }
+        } else if (settings.arguments is int) {
+          habitTimerWidgetId = settings.arguments as int;
+        }
+
+        return _createRoute(
+            HabitTimerSelectorScreen(widgetId: habitTimerWidgetId));
+      case '/habit_timer_dialog':
+      case 'habit_timer_dialog':
+        // 习惯计时器对话框（从小组件打开）
+        String? habitId;
+
+        // 从 arguments 中解析 habitId
+        if (settings.arguments is Map<String, dynamic>) {
+          habitId = (settings.arguments as Map<String, dynamic>)['habitId'];
+        } else if (settings.arguments is String) {
+          habitId = settings.arguments as String;
+        }
+
+        if (habitId == null) {
+          return _createRoute(
+            Scaffold(
+              body: Center(
+                child: Text('Error: habitId is required'),
+              ),
+            ),
+          );
+        }
+
+        // 获取 HabitsPlugin 实例
+        final habitsPlugin = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+        if (habitsPlugin == null) {
+          return _createRoute(
+            Scaffold(
+              body: Center(
+                child: Text('Error: HabitsPlugin not found'),
+              ),
+            ),
+          );
+        }
+
+        // 查找对应的 Habit
+        final habitController = habitsPlugin.getHabitController();
+        final habits = habitController.getHabits();
+        final habit = habits.cast<dynamic>().firstWhere(
+          (h) => h.id == habitId,
+          orElse: () => null,
+        );
+
+        if (habit == null) {
+          return _createRoute(
+            Scaffold(
+              body: Center(
+                child: Text('Error: Habit not found with id: $habitId'),
+              ),
+            ),
+          );
+        }
+
+        // 返回包含 TimerDialog 的页面
+        return _createRoute(
+          Scaffold(
+            backgroundColor: Colors.black.withOpacity(0.5),
+            body: Center(
+              child: TimerDialog(
+                habit: habit,
+                controller: habitController,
+                initialTimerData: habitsPlugin.timerController.getTimerData(habitId),
+              ),
+            ),
+          ),
+        );
       default:
         return _createRoute(
           Scaffold(

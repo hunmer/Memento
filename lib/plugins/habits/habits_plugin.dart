@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
@@ -95,6 +97,22 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   ) async {
     // 初始化插件
     await initialize();
+
+    // 监听计时器事件，同步小组件数据
+    EventManager.instance.subscribe('habit_timer_started', _onTimerEvent);
+    EventManager.instance.subscribe('habit_timer_stopped', _onTimerEvent);
+  }
+
+  /// 处理计时器事件，同步小组件
+  void _onTimerEvent(EventArgs args) {
+    // 异步执行同步操作，避免阻塞事件处理
+    Future.microtask(() async {
+      try {
+        await PluginWidgetSyncHelper.instance.syncHabitTimerWidget();
+      } catch (e) {
+        debugPrint('同步习惯计时器小组件失败: $e');
+      }
+    });
   }
 
   Future<void> onDispose() async {

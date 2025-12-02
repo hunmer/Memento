@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 习惯计时器小组件预览图 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 背景层 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#F3F4F6" />
+            <corners android:radius="40dp" />
+        </shape>
+    </item>
+
+    <!-- 白色卡片 -->
+    <item
+        android:left="24dp"
+        android:top="24dp"
+        android:right="24dp"
+        android:bottom="24dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF" />
+            <corners android:radius="40dp" />
+        </shape>
+    </item>
+
+    <!-- 装饰性文本提示（使用shape模拟） -->
+    <item
+        android:left="48dp"
+        android:top="80dp"
+        android:right="48dp"
+        android:bottom="80dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#9E9E9E" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+</layer-list>

@@ -77,6 +77,8 @@ class MyWidgetManager {
     'CheckinMonthWidgetProvider': 'github.hunmer.memento.widgets.providers.CheckinMonthWidgetProvider',
     'TodoListWidgetProvider': 'github.hunmer.memento.widgets.providers.TodoListWidgetProvider',
     'CheckinWeeklyListWidgetProvider': 'github.hunmer.memento.widgets.providers.CheckinWeeklyListWidgetProvider',
+    'TrackerGoalWidgetProvider': 'github.hunmer.memento.widgets.providers.TrackerGoalWidgetProvider',
+    'HabitTimerWidgetProvider': 'github.hunmer.memento.widgets.providers.HabitTimerWidgetProvider',
 
     // 快速小组件
     'ChatQuickWidgetProvider': 'github.hunmer.memento.widgets.quick.ChatQuickWidgetProvider',
@@ -261,6 +263,12 @@ class MyWidgetManager {
     if (pluginId == 'checkin_weekly_list') {
       return ['CheckinWeeklyListWidgetProvider'];
     }
+    if (pluginId == 'tracker_goal') {
+      return ['TrackerGoalWidgetProvider'];
+    }
+    if (pluginId == 'habit_timer') {
+      return ['HabitTimerWidgetProvider'];
+    }
     const provider1x1Map = {
       'todo': 'TodoWidgetProvider',
       'timer': 'TimerWidgetProvider',
@@ -367,6 +375,8 @@ class MyWidgetManager {
       'CheckinMonthWidgetProvider',
       'TodoListWidgetProvider',
       'CheckinWeeklyListWidgetProvider',
+      'TrackerGoalWidgetProvider',
+      'HabitTimerWidgetProvider',
     ];
   }
 }

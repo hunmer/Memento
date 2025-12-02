@@ -135,4 +135,8 @@
     <!-- 目标追踪进度增减小组件（进度条样式） -->
     <string name="widget_tracker_goal_progress_label">目标进度（进度条）</string>
     <string name="widget_tracker_goal_progress_description">显示目标进度条，快速增加进度</string>
+
+    <!-- 习惯计时器小组件 (自定义) -->
+    <string name="widget_habit_timer_label">习惯计时器</string>
+    <string name="widget_habit_timer_description">实时显示习惯计时状态，支持播放/暂停</string>
 </resources>
