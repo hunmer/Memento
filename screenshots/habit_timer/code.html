@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Word Memorization Timer Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#10B981", // Emerald 500 - Matches the play button
+              "background-light": "#F3F4F6", // Gray 100
+              "background-dark": "#111827", // Gray 900
+            },
+            fontFamily: {
+              display: ["Roboto", "sans-serif"],
+            },
+            borderRadius: {
+              'custom': '2rem', // Increased corner radius
+            },
+          },
+        },
+      };
+    </script>
+<style>
+        .material-icons {
+            font-size: inherit;
+            vertical-align: middle;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display flex items-center justify-center min-h-screen">
+<div class="w-1/2" style="aspect-ratio: 1 / 1;">
+<div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-lg w-full h-full p-6 flex flex-col justify-between">
+<div>
+<div class="flex items-center space-x-2">
+<div class="bg-blue-100 dark:bg-blue-900/50 p-1.5 rounded-lg flex items-center justify-center">
+<span class="material-icons text-blue-500 dark:text-blue-400" style="font-size: 0.75rem;">translate</span>
+</div>
+<span class="text-gray-500 dark:text-gray-400 text-xs">背单词</span>
+</div>
+<div class="mt-1">
+<span class="text-gray-800 dark:text-gray-200 text-3xl font-light tracking-wider">25:00</span>
+</div>
+</div>
+<div class="flex justify-end items-end">
+<button class="bg-primary text-white rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-emerald-600 transition-colors">
+<span class="material-icons" style="font-size: 1.5rem; padding-left: 2px;">play_arrow</span>
+<span class="sr-only">Play Timer</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

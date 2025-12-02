@@ -131,4 +131,8 @@
     <!-- 目标追踪进度增减小组件 (自定义) -->
     <string name="widget_tracker_goal_label">目标进度</string>
     <string name="widget_tracker_goal_description">快速增减目标进度</string>
+
+    <!-- 目标追踪进度增减小组件（进度条样式） -->
+    <string name="widget_tracker_goal_progress_label">目标进度（进度条）</string>
+    <string name="widget_tracker_goal_progress_description">显示目标进度条，快速增加进度</string>
 </resources>

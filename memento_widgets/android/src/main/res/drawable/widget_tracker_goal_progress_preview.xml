@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 进度增减小组件预览图 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 白色背景 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+
+    <!-- 进度条背景（底部） -->
+    <item
+        android:gravity="bottom|center_horizontal"
+        android:width="80dp"
+        android:height="8dp"
+        android:bottom="16dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#E0E0E0" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+
+    <!-- 进度条前景（蓝色，50%宽度） -->
+    <item
+        android:gravity="bottom|start"
+        android:width="40dp"
+        android:height="8dp"
+        android:bottom="16dp"
+        android:left="32dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#64B5F6" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+
+    <!-- 加号按钮（右上角） -->
+    <item
+        android:gravity="top|end"
+        android:width="24dp"
+        android:height="24dp"
+        android:top="12dp"
+        android:right="12dp">
+        <shape android:shape="oval">
+            <solid android:color="#F5F5F5" />
+            <stroke
+                android:width="1dp"
+                android:color="#E0E0E0" />
+        </shape>
+    </item>
+</layer-list>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Daily Goal Widget Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#9FB3BF",
+            "background-light": "#F3F4F6",
+            "background-dark": "#121212",
+          },
+          fontFamily: {
+            display: ["Noto Sans SC", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+            'large': '1.75rem'
+          },
+        },
+      },
+    };
+    </script>
+<style>
+        .aspect-square {
+            aspect-ratio: 1 / 1;
+        }
+        .material-icons {
+            font-size: inherit;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark flex items-center justify-center min-h-screen font-display p-4">
+<div class="w-1/2">
+<div class="bg-white text-gray-800 p-4 rounded-large aspect-square shadow-lg flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<h2 class="text-base font-medium text-gray-500">每日目标</h2>
+<button class="bg-white text-gray-400 w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
+<span class="material-icons text-2xl">add</span>
+</button>
+</div>
+<div>
+<p class="text-4xl font-light tracking-tighter text-gray-800">8<span class="text-3xl text-gray-400">/16</span></p>
+</div>
+<div>
+<p class="text-sm font-normal text-gray-500 mb-2">50%</p>
+<div class="w-full bg-gray-200 rounded-full h-2">
+<div class="bg-blue-400 h-2 rounded-full" style="width: 50%"></div>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

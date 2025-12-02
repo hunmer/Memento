@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 目标追踪进度增减小组件布局（单按钮+进度条样式） -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_white_background"
+    android:padding="16dp"
+    android:gravity="top">
+
+    <!-- 顶部标题栏 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp">
+
+        <!-- 目标名称 -->
+        <TextView
+            android:id="@+id/widget_goal_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:text="每日目标"
+            android:textColor="#808080"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <!-- 加号按钮 -->
+        <FrameLayout
+            android:id="@+id/widget_button_increment"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/widget_circle_button_background"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/widget_icon_increment"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_menu_add"
+                android:tint="#B0B0B0"
+                android:scaleType="fitCenter"
+                android:contentDescription="增加" />
+
+        </FrameLayout>
+
+    </RelativeLayout>
+
+    <!-- 提示文本(未配置时显示) -->
+    <TextView
+        android:id="@+id/widget_hint_text"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="点击设置小组件"
+        android:textColor="#808080"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:visibility="gone" />
+
+    <!-- 进度数值容器 -->
+    <LinearLayout
+        android:id="@+id/widget_progress_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical|start"
+        android:visibility="visible">
+
+        <!-- 当前值 -->
+        <TextView
+            android:id="@+id/widget_current_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="8"
+            android:textColor="#2C2C2C"
+            android:textSize="56sp"
+            android:fontFamily="sans-serif-light"
+            android:includeFontPadding="false"
+            android:lineSpacingMultiplier="0.9" />
+
+        <!-- 目标值 -->
+        <TextView
+            android:id="@+id/widget_target_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="/16"
+            android:textColor="#B0B0B0"
+            android:textSize="44sp"
+            android:fontFamily="sans-serif-light"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="6dp"
+            android:includeFontPadding="false"
+            android:lineSpacingMultiplier="0.9" />
+
+    </LinearLayout>
+
+    <!-- 底部进度信息 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp">
+
+        <!-- 百分比文本 -->
+        <TextView
+            android:id="@+id/widget_percentage_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="50%"
+            android:textColor="#808080"
+            android:textSize="13sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- 进度条 -->
+        <ProgressBar
+            android:id="@+id/widget_progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:max="100"
+            android:progress="50"
+            android:progressDrawable="@drawable/widget_progress_drawable"
+            android:background="@android:color/transparent" />
+
+    </LinearLayout>
+
+    <!-- 隐藏的减号按钮（保持兼容性） -->
+    <LinearLayout
+        android:id="@+id/widget_button_decrement"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/widget_icon_decrement"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="减少" />
+
+    </LinearLayout>
+
+    <!-- 隐藏的按钮容器（保持兼容性） -->
+    <LinearLayout
+        android:id="@+id/widget_button_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+</LinearLayout>
