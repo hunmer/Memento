@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/shortcut_item_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="8dp"
+    android:paddingHorizontal="4dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <!-- 复选框 - 左侧 -->
+    <FrameLayout
+        android:id="@+id/shortcut_checkbox_container"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/shortcut_checkbox"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_checkbox_unchecked"
+            android:contentDescription="选中状态" />
+
+    </FrameLayout>
+
+    <!-- 图标 -->
+    <ImageView
+        android:id="@+id/shortcut_icon"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="8dp"
+        android:scaleType="centerInside"
+        android:contentDescription="快捷图标" />
+
+    <!-- 预设信息容器 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="12dp"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+        <!-- 预设名称 -->
+        <TextView
+            android:id="@+id/shortcut_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#1f2937"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <!-- 预设详情(分类 + 金额) -->
+        <TextView
+            android:id="@+id/shortcut_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text=""
+            android:textColor="#6b7280"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+    </LinearLayout>
+
+    <!-- 金额标签 -->
+    <TextView
+        android:id="@+id/shortcut_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text=""
+        android:textColor="#10b981"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+</LinearLayout>

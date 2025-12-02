@@ -417,6 +417,22 @@ void _handleWidgetClick(String url) {
       debugPrint('目标追踪进度增减小组件配置路由转换为: $routePath');
     }
 
+    // 特殊处理：快捷记账小组件配置路由
+    // 从 /bill_shortcuts/config?widgetId=xxx 转换为 /bill_shortcuts_selector
+    // widgetId 参数会在后面被提取到 arguments 中
+    if (routePath == '/bill_shortcuts/config') {
+      routePath = '/bill_shortcuts_selector';
+      debugPrint('快捷记账小组件配置路由转换为: $routePath');
+    }
+
+    // 特殊处理：快捷记账添加账单路由
+    // 从 /bill_shortcuts/add?accountId=xxx&category=xxx&amount=xxx&isExpense=true
+    // 转换为 /bill 并传递参数
+    if (routePath == '/bill_shortcuts/add') {
+      routePath = '/bill';
+      debugPrint('快捷记账添加账单路由转换为: $routePath，参数: ${uri.queryParameters}');
+    }
+
     // 特殊处理：日历月视图小组件点击标题（打开日历插件）
     if (routePath == '/calendar' && uri.queryParameters.isEmpty) {
       // 直接打开日历插件主界面

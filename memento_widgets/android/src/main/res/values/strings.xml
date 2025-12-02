@@ -139,4 +139,8 @@
     <!-- 习惯计时器小组件 (自定义) -->
     <string name="widget_habit_timer_label">习惯计时器</string>
     <string name="widget_habit_timer_description">实时显示习惯计时状态，支持播放/暂停</string>
+
+    <!-- 快捷记账小组件 (自定义) -->
+    <string name="widget_bill_shortcuts_label">快捷记账</string>
+    <string name="widget_bill_shortcuts_description">快速记录常用账单</string>
 </resources>
