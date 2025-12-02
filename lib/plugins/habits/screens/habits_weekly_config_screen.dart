@@ -556,6 +556,9 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
           _widgetConfig.getColor('accent') ?? const Color(0xFF607AFB);
       final opacity = _widgetConfig.opacity;
 
+      debugPrint('习惯周小组件配置保存开始: widgetId=${widget.widgetId}');
+      debugPrint('选中的习惯IDs: $_selectedHabitIds');
+
       // 保存选中的习惯ID列表
       await HomeWidget.saveWidgetData<String>(
         'habits_weekly_selected_ids_${widget.widgetId}',
@@ -585,6 +588,8 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
         0, // 本周
       );
 
+      debugPrint('计算周数据完成: year=${weekData.year}, week=${weekData.week}, habitItems=${weekData.habitItems.length}');
+
       // 保存完整配置和数据
       final config = HabitsWeeklyWidgetConfig(
         widgetId: widget.widgetId,
@@ -597,6 +602,11 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
 
       await _syncDataToWidget(config, weekData);
 
+      debugPrint('数据同步到小组件完成，开始更新小组件...');
+
+      // 添加短暂延迟确保数据已写入 SharedPreferences
+      await Future.delayed(const Duration(milliseconds: 100));
+
       // 更新小组件
       await HomeWidget.updateWidget(
         name: 'HabitsWeeklyWidgetProvider',
@@ -605,11 +615,14 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
             'github.hunmer.memento.widgets.providers.HabitsWeeklyWidgetProvider',
       );
 
+      debugPrint('小组件更新请求已发送');
+
       if (mounted) {
         Navigator.of(context).pop();
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('保存配置失败: $e');
+      debugPrint('堆栈: $stackTrace');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('保存失败: $e')),
@@ -633,9 +646,16 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
       'data': data.toMap(),
     };
 
+    final jsonStr = jsonEncode(widgetData);
+    debugPrint('保存小组件数据到 habits_weekly_data_${widget.widgetId}');
+    debugPrint('数据长度: ${jsonStr.length} 字节');
+    debugPrint('数据内容: $jsonStr');
+
     await HomeWidget.saveWidgetData<String>(
       'habits_weekly_data_${widget.widgetId}',
-      jsonEncode(widgetData),
+      jsonStr,
     );
+
+    debugPrint('HomeWidget.saveWidgetData 调用完成');
   }
 }

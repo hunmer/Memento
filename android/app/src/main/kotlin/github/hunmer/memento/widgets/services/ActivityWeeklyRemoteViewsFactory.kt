@@ -152,7 +152,7 @@ class ActivityWeeklyRemoteViewsFactory(
 
     companion object {
         private const val TAG = "ActivityWeeklyFactory"
-        private const val PREFS_NAME = "FlutterSharedPreferences"
+        private const val PREFS_NAME = "HomeWidgetPreferences"
         private const val DEFAULT_ACCENT_COLOR = 0xFF607afb.toInt()
     }
 }

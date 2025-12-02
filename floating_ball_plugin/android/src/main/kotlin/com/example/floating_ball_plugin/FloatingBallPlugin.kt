@@ -89,6 +89,16 @@ class FloatingBallPlugin: FlutterPlugin, MethodCallHandler {
           result.error("INVALID_DATA", "No image bytes", null)
         }
       }
+      "setButtonImage" -> {
+        val index = call.argument<Int>("index")
+        val imageBase64 = call.argument<String>("imageBase64")
+        if (index != null && imageBase64 != null) {
+          FloatingBallService.setButtonImage(index, imageBase64)
+          result.success("Button image set")
+        } else {
+          result.error("INVALID_DATA", "Missing index or imageBase64", null)
+        }
+      }
       else -> result.notImplemented()
     }
   }

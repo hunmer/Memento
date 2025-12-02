@@ -43,13 +43,8 @@
         android:layout_height="20dp"
         android:layout_weight="1"
         android:layout_marginStart="2dp"
-        android:layout_marginEnd="0dp">
-
-        <View
-            android:id="@+id/day_0_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/habit_day_cell_bg" />
+        android:layout_marginEnd="0dp"
+        android:background="@drawable/habit_day_cell_bg">
 
         <TextView
             android:id="@+id/day_0_text"
@@ -69,13 +64,8 @@
         android:layout_height="20dp"
         android:layout_weight="1"
         android:layout_marginStart="2dp"
-        android:layout_marginEnd="0dp">
-
-        <View
-            android:id="@+id/day_1_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/habit_day_cell_bg" />
+        android:layout_marginEnd="0dp"
+        android:background="@drawable/habit_day_cell_bg">
 
         <TextView
             android:id="@+id/day_1_text"
@@ -95,13 +85,8 @@
         android:layout_height="20dp"
         android:layout_weight="1"
         android:layout_marginStart="2dp"
-        android:layout_marginEnd="0dp">
-
-        <View
-            android:id="@+id/day_2_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/habit_day_cell_bg" />
+        android:layout_marginEnd="0dp"
+        android:background="@drawable/habit_day_cell_bg">
 
         <TextView
             android:id="@+id/day_2_text"
@@ -121,13 +106,8 @@
         android:layout_height="20dp"
         android:layout_weight="1"
         android:layout_marginStart="2dp"
-        android:layout_marginEnd="0dp">
-
-        <View
-            android:id="@+id/day_3_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/habit_day_cell_bg" />
+        android:layout_marginEnd="0dp"
+        android:background="@drawable/habit_day_cell_bg">
 
         <TextView
             android:id="@+id/day_3_text"
@@ -147,13 +127,8 @@
         android:layout_height="20dp"
         android:layout_weight="1"
         android:layout_marginStart="2dp"
-        android:layout_marginEnd="0dp">
-
-        <View
-            android:id="@+id/day_4_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/habit_day_cell_bg" />
+        android:layout_marginEnd="0dp"
+        android:background="@drawable/habit_day_cell_bg">
 
         <TextView
             android:id="@+id/day_4_text"
@@ -173,13 +148,8 @@
         android:layout_height="20dp"
         android:layout_weight="1"
         android:layout_marginStart="2dp"
-        android:layout_marginEnd="0dp">
-
-        <View
-            android:id="@+id/day_5_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/habit_day_cell_bg" />
+        android:layout_marginEnd="0dp"
+        android:background="@drawable/habit_day_cell_bg">
 
         <TextView
             android:id="@+id/day_5_text"
@@ -199,13 +169,8 @@
         android:layout_height="20dp"
         android:layout_weight="1"
         android:layout_marginStart="2dp"
-        android:layout_marginEnd="2dp">
-
-        <View
-            android:id="@+id/day_6_bg"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/habit_day_cell_bg" />
+        android:layout_marginEnd="2dp"
+        android:background="@drawable/habit_day_cell_bg">
 
         <TextView
             android:id="@+id/day_6_text"

@@ -74,11 +74,6 @@ class HabitsWeeklyRemoteViewsFactory(
             R.id.day_3_container, R.id.day_4_container, R.id.day_5_container,
             R.id.day_6_container
         )
-        val dayBgIds = listOf(
-            R.id.day_0_bg, R.id.day_1_bg, R.id.day_2_bg,
-            R.id.day_3_bg, R.id.day_4_bg, R.id.day_5_bg,
-            R.id.day_6_bg
-        )
         val dayTextIds = listOf(
             R.id.day_0_text, R.id.day_1_text, R.id.day_2_text,
             R.id.day_3_text, R.id.day_4_text, R.id.day_5_text,
@@ -91,11 +86,11 @@ class HabitsWeeklyRemoteViewsFactory(
             if (minutes > 0) {
                 // 有时长:显示分钟数,背景色为习惯颜色
                 views.setTextViewText(dayTextIds[i], minutes.toString())
-                views.setInt(dayBgIds[i], "setBackgroundColor", item.colorValue)
+                views.setInt(dayContainerIds[i], "setBackgroundColor", item.colorValue)
             } else {
                 // 无时长:清空文本,背景透明
                 views.setTextViewText(dayTextIds[i], "")
-                views.setInt(dayBgIds[i], "setBackgroundColor", Color.TRANSPARENT)
+                views.setInt(dayContainerIds[i], "setBackgroundColor", Color.TRANSPARENT)
             }
         }
 
@@ -135,14 +130,23 @@ class HabitsWeeklyRemoteViewsFactory(
     private fun loadData() {
         try {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val dataJson = prefs.getString("flutter.habits_weekly_data_$widgetId", null)
+            val dataJson = prefs.getString("habits_weekly_data_$widgetId", null)
 
             if (dataJson.isNullOrEmpty()) {
+                android.util.Log.d(TAG, "No data found for widget $widgetId, will retry on next update")
                 habitItems = emptyList()
                 return
             }
 
             val json = JSONObject(dataJson)
+
+            // 检查是否包含必要的数据
+            if (!json.has("config") || !json.has("data")) {
+                android.util.Log.w(TAG, "Invalid data format for widget $widgetId")
+                habitItems = emptyList()
+                return
+            }
+
             val config = json.getJSONObject("config")
             val data = json.getJSONObject("data")
 
@@ -185,7 +189,7 @@ class HabitsWeeklyRemoteViewsFactory(
 
     companion object {
         private const val TAG = "HabitsWeeklyFactory"
-        private const val PREFS_NAME = "FlutterSharedPreferences"
+        private const val PREFS_NAME = "HomeWidgetPreferences"
         private const val DEFAULT_ACCENT_COLOR = 0xFF607AFB.toInt()
     }
 }

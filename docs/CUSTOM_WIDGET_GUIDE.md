@@ -677,21 +677,29 @@ android.view.InflateException: Binary XML file line #68: You must supply a layou
 
 ### 问题 2: 配置后小组件不更新
 
-**原因**: SharedPreferences 不一致
+**原因**: SharedPreferences 文件名或键名不一致
+
+**⚠️ 关键规则**:
+1. **SharedPreferences 文件名**: 必须使用 `HomeWidgetPreferences`，不能使用 `FlutterSharedPreferences`
+2. **键名前缀**: `HomeWidget.saveWidgetData()` **不会**自动添加 `flutter.` 前缀，Android 端读取时也不要加
 
 **检查清单**:
 
 ```kotlin
 // Android 端
-val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)  // ✅ 使用 PREFS_NAME
+// ✅ 正确：使用 PREFS_NAME（值为 "HomeWidgetPreferences"）
+val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+val data = prefs.getString("habits_weekly_data_$widgetId", null)  // ✅ 无 flutter. 前缀
 
-// ❌ 错误
-val prefs = context.getSharedPreferences("my_custom_prefs", Context.MODE_PRIVATE)
+// ❌ 错误：使用 FlutterSharedPreferences
+val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+val data = prefs.getString("flutter.habits_weekly_data_$widgetId", null)  // ❌ 有 flutter. 前缀
 ```
 
 ```dart
 // Flutter 端
-await HomeWidget.saveWidgetData<String>('key', value);  // ✅ 自动保存到 HomeWidgetPreferences
+await HomeWidget.saveWidgetData<String>('habits_weekly_data_$widgetId', value);
+// ✅ 自动保存到 HomeWidgetPreferences，键名就是 'habits_weekly_data_$widgetId'
 ```
 
 **验证方法**:
@@ -700,6 +708,14 @@ await HomeWidget.saveWidgetData<String>('key', value);  // ✅ 自动保存到 H
 # 查看 SharedPreferences 内容
 adb shell run-as github.hunmer.memento cat /data/data/github.hunmer.memento/shared_prefs/HomeWidgetPreferences.xml
 ```
+
+**常见错误示例**:
+
+| 问题 | 错误写法 | 正确写法 |
+|------|---------|---------|
+| 文件名错误 | `FlutterSharedPreferences` | `HomeWidgetPreferences` (或使用 `PREFS_NAME`) |
+| 键名多余前缀 | `flutter.xxx_data_$id` | `xxx_data_$id` |
+| 继承基类但使用错误常量 | 自定义 `PREFS_NAME` | 使用 `BasePluginWidgetProvider.PREFS_NAME` |
 
 ### 问题 3: ClassNotFoundException
 

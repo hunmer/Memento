@@ -17,8 +17,9 @@ class TodoRouteHandler extends PluginRouteHandler {
 
     // 处理待办列表小组件配置路由
     // 格式: /todo_list_selector?widgetId={widgetId}
+    // 或者 widgetId 通过 settings.arguments 传递
     if (routeName.startsWith('/todo_list_selector')) {
-      return _handleListSelectorRoute(routeName);
+      return _handleListSelectorRoute(routeName, settings.arguments);
     }
 
     // 处理待办任务详情路由（从小组件打开）
@@ -43,12 +44,30 @@ class TodoRouteHandler extends PluginRouteHandler {
   }
 
   /// 处理待办列表选择器路由
-  Route<dynamic> _handleListSelectorRoute(String routeName) {
-    // 解析 widgetId 参数
-    final uri = Uri.parse(routeName);
-    final widgetIdStr = uri.queryParameters['widgetId'];
-    final widgetId = widgetIdStr != null ? int.tryParse(widgetIdStr) : null;
+  Route<dynamic> _handleListSelectorRoute(String routeName, Object? arguments) {
+    int? widgetId;
 
+    // 优先从 arguments 中获取 widgetId（来自 main.dart 的路由处理）
+    if (arguments is Map<String, dynamic>) {
+      final widgetIdValue = arguments['widgetId'];
+      if (widgetIdValue is int) {
+        widgetId = widgetIdValue;
+      } else if (widgetIdValue is String) {
+        widgetId = int.tryParse(widgetIdValue);
+      }
+    } else if (arguments is Map<String, String>) {
+      final widgetIdStr = arguments['widgetId'];
+      widgetId = widgetIdStr != null ? int.tryParse(widgetIdStr) : null;
+    }
+
+    // 备用：从 URI 中解析 widgetId
+    if (widgetId == null) {
+      final uri = Uri.parse(routeName);
+      final widgetIdStr = uri.queryParameters['widgetId'];
+      widgetId = widgetIdStr != null ? int.tryParse(widgetIdStr) : null;
+    }
+
+    debugPrint('待办列表小组件配置路由: widgetId=$widgetId');
     return createRoute(TodoListSelectorScreen(widgetId: widgetId));
   }
 

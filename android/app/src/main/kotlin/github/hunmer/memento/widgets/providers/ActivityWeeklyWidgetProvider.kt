@@ -31,6 +31,7 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        android.util.Log.d(TAG, "onUpdate called for ${appWidgetIds.size} widgets: ${appWidgetIds.contentToString()}")
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
@@ -55,8 +56,12 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int
     ) {
+        android.util.Log.d(TAG, "updateAppWidget called for widgetId=$appWidgetId")
+
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val dataJson = prefs.getString("activity_weekly_data_$appWidgetId", null)
+
+        android.util.Log.d(TAG, "Data from SharedPreferences: ${if (dataJson.isNullOrEmpty()) "null or empty" else "${dataJson.length} chars"}")
 
         val views = if (dataJson == null || dataJson.isEmpty()) {
             buildConfigPromptView(context, appWidgetId)
@@ -70,6 +75,9 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
         }
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
+
+        // 通知 ListView 刷新数据（RemoteViewsFactory.onDataSetChanged 会被调用）
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.activity_list)
     }
 
     /**
@@ -219,6 +227,7 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        android.util.Log.d(TAG, "onReceive: action=${intent.action}")
         super.onReceive(context, intent)
 
         when (intent.action) {
@@ -328,7 +337,7 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
 
     companion object {
         private const val TAG = "ActivityWeeklyWidget"
-        private const val PREFS_NAME = "FlutterSharedPreferences"
+        private const val PREFS_NAME = "HomeWidgetPreferences"
         private const val ACTION_PREV_WEEK = "github.hunmer.memento.widget.ACTIVITY_PREV_WEEK"
         private const val ACTION_NEXT_WEEK = "github.hunmer.memento.widget.ACTIVITY_NEXT_WEEK"
         private const val ACTION_ITEM_CLICK = "github.hunmer.memento.widget.ACTIVITY_ITEM_CLICK"

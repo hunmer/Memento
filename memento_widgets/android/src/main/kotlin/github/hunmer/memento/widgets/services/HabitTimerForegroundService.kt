@@ -47,7 +47,7 @@ class HabitTimerForegroundService : Service() {
         const val EXTRA_HABIT_NAME = "EXTRA_HABIT_NAME"
         const val EXTRA_DURATION_MINUTES = "EXTRA_DURATION_MINUTES"
 
-        private const val PREFS_NAME = "FlutterSharedPreferences"
+        private const val PREFS_NAME = "HomeWidgetPreferences"
     }
 
     private val handler = Handler(Looper.getMainLooper())
@@ -320,7 +320,7 @@ class HabitTimerForegroundService : Service() {
 
         try {
             val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val stateKey = "flutter.habit_timer_state_${currentWidgetId}"
+            val stateKey = "habit_timer_state_${currentWidgetId}"
             val stateJson = prefs.getString(stateKey, null)
 
             if (stateJson != null) {
@@ -340,7 +340,7 @@ class HabitTimerForegroundService : Service() {
 
         try {
             val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val stateKey = "flutter.habit_timer_state_${currentWidgetId}"
+            val stateKey = "habit_timer_state_${currentWidgetId}"
 
             val state = JSONObject()
             state.put("elapsedSeconds", elapsedSeconds)
@@ -359,11 +359,11 @@ class HabitTimerForegroundService : Service() {
 
         try {
             val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val stateKey = "flutter.habit_timer_state_${currentWidgetId}"
+            val stateKey = "habit_timer_state_${currentWidgetId}"
             prefs.edit().remove(stateKey).apply()
 
             // 同时清除待处理变更
-            val pendingKey = "flutter.habit_timer_pending_changes"
+            val pendingKey = "habit_timer_pending_changes"
             val pendingJson = prefs.getString(pendingKey, "{}")
             if (pendingJson != null && pendingJson != "{}") {
                 val pending = JSONObject(pendingJson)

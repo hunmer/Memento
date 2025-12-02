@@ -409,7 +409,8 @@ void _handleWidgetClick(String url) {
 
     // 特殊处理：日历月视图小组件日期点击
     // 从 /calendar_month?date=YYYY-MM-DD 打开事件详情对话框
-    if (routePath == '/calendar_month' && uri.queryParameters.containsKey('date')) {
+    if (routePath == '/calendar_month' &&
+        uri.queryParameters.containsKey('date')) {
       final dateString = uri.queryParameters['date'];
       if (dateString != null) {
         // 打开日历插件并显示选中日期的事件
@@ -583,7 +584,9 @@ Future<void> _restoreFloatingBallState() async {
 /// 设置悬浮球按钮事件全局监听器
 void _setupFloatingBallButtonListener(FloatingWidgetController controller) {
   controller.buttonEvents.listen((event) {
-    debugPrint('全局悬浮球按钮事件: ${event.title}, data: ${event.data}, type: ${event.data.runtimeType}');
+    debugPrint(
+      '全局悬浮球按钮事件: ${event.title}, data: ${event.data}, type: ${event.data.runtimeType}',
+    );
 
     if (event.data == null) {
       debugPrint('悬浮球按钮事件 data 为 null');
