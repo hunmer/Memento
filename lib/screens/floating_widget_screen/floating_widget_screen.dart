@@ -3,6 +3,7 @@ import 'package:floating_ball_plugin/floating_ball_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:Memento/core/floating_ball/floating_widget_controller.dart';
+import 'package:Memento/core/floating_ball/screens/floating_button_manager_screen.dart';
 
 class FloatingBallScreen extends StatefulWidget {
   const FloatingBallScreen({super.key});
@@ -17,10 +18,6 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
   StreamSubscription<bool>? _permissionSubscription;
   StreamSubscription<FloatingBallPosition>? _positionSubscription;
   StreamSubscription<FloatingBallButtonEvent>? _buttonSubscription;
-
-  // 对话框输入控制器
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _iconController = TextEditingController();
 
   // 图片选择器
   final ImagePicker _picker = ImagePicker();
@@ -94,8 +91,6 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
     _permissionSubscription?.cancel();
     _positionSubscription?.cancel();
     _buttonSubscription?.cancel();
-    _titleController.dispose();
-    _iconController.dispose();
     super.dispose();
   }
 
@@ -230,55 +225,31 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                     ],
                   ),
                 ),
-                // 按钮数据列表
+                // 按钮管理
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      const Text('按钮数量: '),
-                      Text('${_controller.buttonData.length} 个'),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // 显示按钮列表
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        '当前按钮:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      Row(
+                        children: [
+                          const Text('按钮数量: '),
+                          Text('${_controller.buttonData.length} 个'),
+                        ],
                       ),
                       const SizedBox(height: 8),
-                      ..._controller.buttonData.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final button = entry.value;
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          child: ListTile(
-                            leading: const Icon(Icons.touch_app),
-                            title: Text(button.title),
-                            subtitle: Text('图标: ${button.icon}'),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                _controller.removeButtonAt(index);
-                                setState(() {});
-                                _controller.updateConfig();
-                              },
-                            ),
-                          ),
-                        );
-                      }),
                       ElevatedButton.icon(
-                        onPressed: _showAddButtonDialog,
-                        icon: const Icon(Icons.add),
-                        label: const Text('添加按钮'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const FloatingButtonManagerScreen(),
+                            ),
+                          ).then((_) => setState(() {}));
+                        },
+                        icon: const Icon(Icons.touch_app),
+                        label: const Text('管理悬浮按钮'),
                       ),
                     ],
                   ),
@@ -334,72 +305,6 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  /// 显示添加按钮对话框
-  void _showAddButtonDialog() {
-    _titleController.clear();
-    _iconController.clear();
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('添加按钮'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: '按钮标题',
-                  hintText: '例如：首页、设置',
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _iconController,
-                decoration: const InputDecoration(
-                  labelText: '图标名称',
-                  hintText: '例如：ic_menu_home',
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '注意：图标名称需要是Android drawable中的资源名',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('取消'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final title = _titleController.text.trim();
-                final icon = _iconController.text.trim();
-                if (title.isEmpty || icon.isEmpty) {
-                  _showMessage('请填写完整信息');
-                  return;
-                }
-                _controller.addButton(
-                  FloatingBallButtonData(
-                    title: title,
-                    icon: icon,
-                    data: {'custom': true},
-                  ),
-                );
-                setState(() {});
-                _controller.updateConfig();
-                Navigator.of(context).pop();
-              },
-              child: const Text('添加'),
-            ),
-          ],
-        );
-      },
     );
   }
 

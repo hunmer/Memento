@@ -210,21 +210,11 @@ class BillShortcutsRemoteViewsFactory(
      * 根据 iconCodePoint 获取对应的 drawable 资源
      *
      * 注意: RemoteViews 不支持动态设置 IconData,这里映射 Material Icons 到对应的 drawable
-     * 这里使用简化的映射,实际项目中可能需要更完整的图标映射表
+     * 目前使用系统默认图标,未来可以根据需要添加更多自定义图标
      */
     private fun getIconResource(codePoint: Int): Int {
-        return when (codePoint) {
-            0xe530 -> R.drawable.ic_restaurant_24 // restaurant (餐饮)
-            0xe8cc -> R.drawable.ic_shopping_cart_24 // shopping_cart (购物)
-            0xe531 -> R.drawable.ic_directions_car_24 // directions_car (交通)
-            0xe8b0 -> R.drawable.ic_home_24 // home (住房)
-            0xe158 -> R.drawable.ic_theater_comedy_24 // theater_comedy (娱乐)
-            0xe548 -> R.drawable.ic_local_hospital_24 // local_hospital (医疗)
-            0xe80c -> R.drawable.ic_school_24 // school (教育)
-            0xe263 -> R.drawable.ic_work_24 // work (工资)
-            0xe8d1 -> R.drawable.ic_card_giftcard_24 // card_giftcard (奖金)
-            0xe8d5 -> R.drawable.ic_trending_up_24 // trending_up (投资)
-            else -> R.drawable.ic_label_24 // label (其他)
-        }
+        // 使用 Android 系统内置的图标资源
+        // 未来可以根据 codePoint 映射到自定义的 drawable 资源
+        return android.R.drawable.ic_menu_info_details
     }
 }

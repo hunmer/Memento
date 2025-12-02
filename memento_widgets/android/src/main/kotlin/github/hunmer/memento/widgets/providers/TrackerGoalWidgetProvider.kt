@@ -23,7 +23,7 @@ import org.json.JSONObject
  * 3. 点击小组件主体打开目标详情页
  * 4. 支持颜色配置(背景色、强调色、透明度)
  */
-class TrackerGoalWidgetProvider : BasePluginWidgetProvider() {
+open class TrackerGoalWidgetProvider : BasePluginWidgetProvider() {
     override val pluginId: String = "tracker_goal"
     override val widgetSize: WidgetSize = WidgetSize.SIZE_2X2
 

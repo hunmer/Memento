@@ -143,4 +143,8 @@
     <!-- 快捷记账小组件 (自定义) -->
     <string name="widget_bill_shortcuts_label">快捷记账</string>
     <string name="widget_bill_shortcuts_description">快速记录常用账单</string>
+
+    <!-- 日历今日列表小组件 -->
+    <string name="widget_calendar_today_list_label">本周打卡列表</string>
+    <string name="widget_calendar_today_list_description">显示本周七天的打卡项目，点击打卡</string>
 </resources>

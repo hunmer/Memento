@@ -10,4 +10,4 @@
     android:widgetCategory="home_screen"
     android:previewLayout="@layout/widget_calendar_today_list"
     android:previewImage="@drawable/widget_calendar_today_list_preview"
-    android:description="本周打卡列表 - 显示本周七天的打卡项目，点击打卡" />
+    android:description="@string/widget_calendar_today_list_description" />
