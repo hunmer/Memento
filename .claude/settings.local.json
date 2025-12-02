@@ -16,7 +16,10 @@
       "Bash(./gradlew:*)",
       "Bash(gradle:*)",
       "Bash(r:*)",
-      "Bash(flutter create:*)"
+      "Bash(flutter create:*)",
+      "Bash(flutter pub:*)",
+      "Bash(find:*)",
+      "Bash(adb logcat:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:Memento/widgets/icon_picker_dialog.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
+import '../../../constants/app_icons.dart';
 
 /// 悬浮按钮编辑对话框
 class FloatingButtonEditDialog extends StatefulWidget {
@@ -182,6 +184,56 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
     });
   }
 
+  /// 选择图标
+  Future<void> _pickIcon() async {
+    // 将字符串转换为 IconData
+    IconData currentIcon = Icons.help_outline;
+    for (var entry in AppIcons.predefinedIcons.entries) {
+      if (entry.key == _selectedIcon) {
+        currentIcon = entry.value;
+        break;
+      }
+    }
+
+    final result = await showIconPickerDialog(
+      context,
+      currentIcon,
+      enableIconToImage: true,
+    );
+
+    if (result != null) {
+      setState(() {
+        if (result is IconData) {
+          // 仅选择图标
+          _selectedIcon = _getIconString(result);
+        } else if (result is Map<String, dynamic>) {
+          // 图标转图片
+          final bytes = result['bytes'] as Uint8List;
+          final icon = result['icon'] as IconData;
+          _imageBase64 = base64Encode(bytes);
+          _selectedIcon = _getIconString(icon);
+        }
+      });
+    }
+  }
+
+  /// 获取图标字符串
+  String _getIconString(IconData icon) {
+    for (var entry in AppIcons.predefinedIcons.entries) {
+      if (entry.value == icon) {
+        return entry.key;
+      }
+    }
+    return 'ic_menu_info_details';
+  }
+
+  /// 清除图标
+  void _clearIcon() {
+    setState(() {
+      _selectedIcon = 'ic_menu_info_details';
+    });
+  }
+
   /// 常用动作变更
   void _onActionChanged(String? action) {
     if (action == null) return;
@@ -234,6 +286,34 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
     Navigator.of(context).pop(button);
   }
 
+  /// 构建图标预览
+  Widget _buildIconPreview() {
+    // 如果有图片，优先显示图片
+    if (_imageBase64 != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: Image.memory(
+          base64Decode(_imageBase64!),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(Icons.image_not_supported);
+          },
+        ),
+      );
+    }
+
+    // 否则显示图标
+    IconData iconData = Icons.help_outline;
+    for (var entry in AppIcons.predefinedIcons.entries) {
+      if (entry.key == _selectedIcon) {
+        iconData = entry.value;
+        break;
+      }
+    }
+
+    return Icon(iconData);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -264,45 +344,106 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
               ),
               const SizedBox(height: 16),
 
-              // 按钮图片
+              // 按钮图标设置
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      _imageBase64 == null ? '未选择图片' : '已选择图片',
-                      style: TextStyle(
-                        color: _imageBase64 == null ? Colors.grey : Colors.green,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '按钮图标',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            // 图标预览
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: _buildIconPreview(),
+                            ),
+                            const SizedBox(width: 8),
+                            // 显示选择状态
+                            Expanded(
+                              child: Text(
+                                _imageBase64 != null
+                                    ? '已设置图片（优先级最高）'
+                                    : '已设置图标：$_selectedIcon',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: _imageBase64 != null
+                                      ? Colors.green
+                                      : Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  if (_imageBase64 != null) ...[
-                    // 预览图片
-                    Container(
-                      width: 50,
-                      height: 50,
-                      margin: const EdgeInsets.only(right: 8),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: Image.memory(
-                          base64Decode(_imageBase64!),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
+                  // 清除按钮
+                  if (_imageBase64 != null || _selectedIcon != 'ic_menu_info_details')
                     IconButton(
-                      icon: const Icon(Icons.close, color: Colors.red),
-                      onPressed: _clearImage,
-                      tooltip: '清除图片',
+                      icon: const Icon(Icons.clear_all, color: Colors.red),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('清空图标/图片'),
+                            content: const Text('确定要清空当前设置的图标和图片吗？'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('取消'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _clearImage();
+                                  _clearIcon();
+                                  Navigator.pop(context);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                ),
+                                child: const Text('清空'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      tooltip: '清空图标和图片',
                     ),
-                  ],
-                  ElevatedButton.icon(
-                    onPressed: _pickImage,
-                    icon: const Icon(Icons.image),
-                    label: Text(_imageBase64 == null ? '选择图片' : '更换图片'),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // 操作按钮组
+              Row(
+                children: [
+                  // 选择图标按钮
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _pickIcon,
+                      icon: const Icon(Icons.tag),
+                      label: const Text('选择图标'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // 选择图片按钮
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _pickImage,
+                      icon: const Icon(Icons.image),
+                      label: Text(_imageBase64 == null ? '选择图片' : '更换图片'),
+                    ),
                   ),
                 ],
               ),

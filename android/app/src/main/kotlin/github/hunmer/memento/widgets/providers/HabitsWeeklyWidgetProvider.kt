@@ -30,6 +30,7 @@ class HabitsWeeklyWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        android.util.Log.d(TAG, "onUpdate called for ${appWidgetIds.size} widgets: ${appWidgetIds.contentToString()}")
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
@@ -41,7 +42,7 @@ class HabitsWeeklyWidgetProvider : AppWidgetProvider() {
 
         // 清理已删除小组件的数据
         for (appWidgetId in appWidgetIds) {
-            editor.remove("flutter.habits_weekly_data_$appWidgetId")
+            editor.remove("habits_weekly_data_$appWidgetId")
             editor.remove("habits_weekly_selected_ids_$appWidgetId")
             editor.remove("habits_weekly_background_color_$appWidgetId")
             editor.remove("habits_weekly_accent_color_$appWidgetId")
@@ -55,13 +56,19 @@ class HabitsWeeklyWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int
     ) {
+        android.util.Log.d(TAG, "updateAppWidget called for widgetId=$appWidgetId")
+
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val dataJson = prefs.getString("flutter.habits_weekly_data_$appWidgetId", null)
+        val dataJson = prefs.getString("habits_weekly_data_$appWidgetId", null)
+
+        android.util.Log.d(TAG, "Data from SharedPreferences: ${if (dataJson.isNullOrEmpty()) "null or empty" else "${dataJson.length} chars"}")
 
         val views = if (dataJson == null || dataJson.isEmpty()) {
+            android.util.Log.d(TAG, "Building config prompt view (no data)")
             buildConfigPromptView(context, appWidgetId)
         } else {
             try {
+                android.util.Log.d(TAG, "Building content view with data")
                 buildContentView(context, appWidgetId, dataJson)
             } catch (e: Exception) {
                 android.util.Log.e(TAG, "Error building content view: $e")
@@ -71,6 +78,10 @@ class HabitsWeeklyWidgetProvider : AppWidgetProvider() {
         }
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
+        android.util.Log.d(TAG, "Widget updated successfully")
+
+        // 通知 ListView 刷新数据（RemoteViewsFactory.onDataSetChanged 会被调用）
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.habit_list)
     }
 
     /**
@@ -194,6 +205,7 @@ class HabitsWeeklyWidgetProvider : AppWidgetProvider() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        android.util.Log.d(TAG, "onReceive: action=${intent.action}")
         super.onReceive(context, intent)
 
         when (intent.action) {
@@ -216,7 +228,7 @@ class HabitsWeeklyWidgetProvider : AppWidgetProvider() {
         if (widgetId == -1) return
 
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val currentData = prefs.getString("flutter.habits_weekly_data_$widgetId", null) ?: return
+        val currentData = prefs.getString("habits_weekly_data_$widgetId", null) ?: return
 
         try {
             val json = JSONObject(currentData)
@@ -229,7 +241,7 @@ class HabitsWeeklyWidgetProvider : AppWidgetProvider() {
             config.put("weekOffset", newOffset)
             json.put("config", config)
 
-            prefs.edit().putString("flutter.habits_weekly_data_$widgetId", json.toString()).apply()
+            prefs.edit().putString("habits_weekly_data_$widgetId", json.toString()).apply()
 
             // 通知Flutter重新计算数据
             val refreshIntent = Intent("github.hunmer.memento.REFRESH_HABITS_WEEKLY_WIDGET").apply {
@@ -266,7 +278,7 @@ class HabitsWeeklyWidgetProvider : AppWidgetProvider() {
 
     companion object {
         private const val TAG = "HabitsWeeklyWidget"
-        private const val PREFS_NAME = "FlutterSharedPreferences"
+        private const val PREFS_NAME = "HomeWidgetPreferences"
         private const val ACTION_PREV_WEEK = "github.hunmer.memento.widget.HABITS_PREV_WEEK"
         private const val ACTION_NEXT_WEEK = "github.hunmer.memento.widget.HABITS_NEXT_WEEK"
         private const val ACTION_ITEM_CLICK = "github.hunmer.memento.widget.HABITS_ITEM_CLICK"

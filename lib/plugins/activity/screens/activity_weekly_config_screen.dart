@@ -251,6 +251,9 @@ class _ActivityWeeklyConfigScreenState
           _widgetConfig.getColor('accent') ?? const Color(0xFF607afb);
       final opacity = _widgetConfig.opacity;
 
+      debugPrint('ActivityWeeklyConfig: 保存配置 widgetId=${widget.widgetId}');
+      debugPrint('ActivityWeeklyConfig: primaryColor=${primaryColor.value}, accentColor=${accentColor.value}, opacity=$opacity');
+
       // 保存颜色配置（使用String类型）
       await HomeWidget.saveWidgetData<String>(
         'activity_weekly_primary_color_${widget.widgetId}',
@@ -283,13 +286,17 @@ class _ActivityWeeklyConfigScreenState
 
       await _syncDataToWidget(config, weekData);
 
+      debugPrint('ActivityWeeklyConfig: 数据已保存，准备调用 updateWidget');
+
       // 更新小组件
-      await HomeWidget.updateWidget(
+      final result = await HomeWidget.updateWidget(
         name: 'ActivityWeeklyWidgetProvider',
         iOSName: 'ActivityWeeklyWidget',
         qualifiedAndroidName:
             'github.hunmer.memento.widgets.providers.ActivityWeeklyWidgetProvider',
       );
+
+      debugPrint('ActivityWeeklyConfig: updateWidget result=$result');
 
       if (mounted) {
         Navigator.of(context).pop();

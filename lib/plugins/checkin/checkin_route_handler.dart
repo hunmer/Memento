@@ -14,8 +14,9 @@ class CheckinRouteHandler extends PluginRouteHandler {
 
     // 处理打卡小组件配置路由
     // 格式: /checkin_item_selector?widgetId={widgetId}
+    // 或者 widgetId 通过 settings.arguments 传递
     if (routeName.startsWith('/checkin_item_selector')) {
-      return _handleItemSelectorRoute(routeName);
+      return _handleItemSelectorRoute(routeName, settings.arguments);
     }
 
     // 处理打卡小组件点击路由（已配置状态）
@@ -28,12 +29,30 @@ class CheckinRouteHandler extends PluginRouteHandler {
   }
 
   /// 处理打卡项选择器路由
-  Route<dynamic> _handleItemSelectorRoute(String routeName) {
-    // 解析 widgetId 参数
-    final uri = Uri.parse(routeName);
-    final widgetIdStr = uri.queryParameters['widgetId'];
-    final widgetId = widgetIdStr != null ? int.tryParse(widgetIdStr) : null;
+  Route<dynamic> _handleItemSelectorRoute(String routeName, Object? arguments) {
+    int? widgetId;
 
+    // 优先从 arguments 中获取 widgetId（来自 main.dart 的路由处理）
+    if (arguments is Map<String, dynamic>) {
+      final widgetIdValue = arguments['widgetId'];
+      if (widgetIdValue is int) {
+        widgetId = widgetIdValue;
+      } else if (widgetIdValue is String) {
+        widgetId = int.tryParse(widgetIdValue);
+      }
+    } else if (arguments is Map<String, String>) {
+      final widgetIdStr = arguments['widgetId'];
+      widgetId = widgetIdStr != null ? int.tryParse(widgetIdStr) : null;
+    }
+
+    // 备用：从 URI 中解析 widgetId
+    if (widgetId == null) {
+      final uri = Uri.parse(routeName);
+      final widgetIdStr = uri.queryParameters['widgetId'];
+      widgetId = widgetIdStr != null ? int.tryParse(widgetIdStr) : null;
+    }
+
+    debugPrint('打卡小组件配置路由: widgetId=$widgetId');
     return createRoute(CheckinItemSelectorScreen(widgetId: widgetId));
   }
 

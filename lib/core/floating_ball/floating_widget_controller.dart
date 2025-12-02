@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -137,9 +138,34 @@ class FloatingWidgetController {
       _lastPosition = FloatingBallPosition(x, y);
     }
 
-    final imageBase64 = prefs.getString('floating_ball_image');
-    if (imageBase64 != null && imageBase64.isNotEmpty) {
-      _customImageBytes = Uint8List.fromList(base64Decode(imageBase64));
+    // 优先加载已压缩的图片
+    final compressedImageBase64 = prefs.getString('floating_ball_image_compressed');
+    if (compressedImageBase64 != null && compressedImageBase64.isNotEmpty) {
+      _customImageBytes = Uint8List.fromList(base64Decode(compressedImageBase64));
+    } else {
+      // 如果没有压缩图片，加载原始图片并压缩
+      final imageBase64 = prefs.getString('floating_ball_image');
+      if (imageBase64 != null && imageBase64.isNotEmpty) {
+        var imageBytes = Uint8List.fromList(base64Decode(imageBase64));
+        // 如果图片过大（超过 100KB），进行压缩
+        if (imageBytes.length > 100 * 1024) {
+          imageBytes = await _compressAndSaveFloatingBallImage(imageBytes);
+        }
+        _customImageBytes = imageBytes;
+      }
+    }
+  }
+
+  /// 重新加载位置数据（用于启动时确保使用最新位置）
+  Future<void> _reloadPosition() async {
+    final prefs = await SharedPreferences.getInstance();
+    final x = prefs.getInt('floating_ball_x');
+    final y = prefs.getInt('floating_ball_y');
+    if (x != null && y != null) {
+      _lastPosition = FloatingBallPosition(x, y);
+      print('重新加载悬浮球位置: x=$x, y=$y');
+    } else {
+      print('未找到保存的悬浮球位置，使用默认位置');
     }
   }
 
@@ -150,19 +176,65 @@ class FloatingWidgetController {
     if (buttonDataJson != null && buttonDataJson.isNotEmpty) {
       try {
         final List<dynamic> dataList = jsonDecode(buttonDataJson);
-        _buttonData = dataList.map((item) {
+        final List<FloatingBallButtonData> loadedButtons = [];
+
+        // 优先加载已压缩的按钮图片
+        final compressedButtonImage = prefs.getString('floating_ball_button_image_compressed');
+
+        for (final item in dataList) {
           final map = item as Map<String, dynamic>;
-          return FloatingBallButtonData(
+          String? imageBase64 = map['image'] as String?;
+
+          // 优先使用已压缩的图片
+          if (compressedButtonImage != null && compressedButtonImage.isNotEmpty) {
+            imageBase64 = compressedButtonImage;
+          } else if (imageBase64 != null && imageBase64.length > 50 * 1024) {
+            // 如果图片过大（超过 50KB），进行压缩并保存
+            imageBase64 = await _compressAndSaveButtonImage(imageBase64);
+          }
+
+          loadedButtons.add(FloatingBallButtonData(
             title: map['title'] as String? ?? '',
             icon: map['icon'] as String? ?? 'ic_menu_info_details',
             data: map['data'] as Map<String, dynamic>?,
-            image: map['image'] as String?,
-          );
-        }).toList();
+            image: imageBase64,
+          ));
+        }
+
+        _buttonData = loadedButtons;
       } catch (e) {
         print('加载按钮数据失败: $e');
         _buttonData = [];
       }
+    }
+  }
+
+  /// 压缩按钮图片并保存到本地
+  Future<String?> _compressAndSaveButtonImage(String base64Image) async {
+    try {
+      final imageBytes = base64Decode(base64Image);
+      // 按钮更小，使用 120x120 像素
+      const int maxSize = 120;
+
+      final compressedBytes = await FlutterImageCompress.compressWithList(
+        Uint8List.fromList(imageBytes),
+        minWidth: maxSize,
+        minHeight: maxSize,
+        quality: 80,
+        format: CompressFormat.png,
+      );
+
+      final compressedBase64 = base64Encode(compressedBytes);
+      print('按钮图片压缩: ${base64Image.length} -> ${compressedBase64.length} chars');
+
+      // 保存压缩后的图片到 SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('floating_ball_button_image_compressed', compressedBase64);
+
+      return compressedBase64;
+    } catch (e) {
+      print('按钮图片压缩失败: $e');
+      return base64Image;
     }
   }
 
@@ -172,6 +244,15 @@ class FloatingWidgetController {
     final dataList = _buttonData.map((button) => button.toMap()).toList();
     final buttonDataJson = jsonEncode(dataList);
     await prefs.setString('floating_ball_buttons', buttonDataJson);
+
+    // 保存按钮压缩图片（如果有的话）
+    final firstButtonWithImage = _buttonData.firstWhere(
+      (button) => button.image != null && button.image!.isNotEmpty,
+      orElse: () => FloatingBallButtonData(title: '', icon: '', data: null),
+    );
+    if (firstButtonWithImage.image != null && firstButtonWithImage.image!.isNotEmpty) {
+      await prefs.setString('floating_ball_button_image_compressed', firstButtonWithImage.image!);
+    }
   }
 
   /// 保存设置
@@ -186,6 +267,8 @@ class FloatingWidgetController {
     if (_customImageBytes != null) {
       final imageBase64 = base64Encode(_customImageBytes!);
       await prefs.setString('floating_ball_image', imageBase64);
+      // 同时保存压缩版本
+      await prefs.setString('floating_ball_image_compressed', imageBase64);
     }
 
     if (_lastPosition != null) {
@@ -265,70 +348,103 @@ class FloatingWidgetController {
 
   /// 切换悬浮球状态
   Future<String?> toggleFloatingBall() async {
+    // 强制刷新权限状态
+    _hasPermission = await Permission.systemAlertWindow.isGranted;
+
     if (!_hasPermission) {
-      await requestPermission();
-      return null;
+      final granted = await requestPermission();
+      if (!granted) {
+        return null;
+      }
     }
 
     String? result;
     if (_isRunning) {
       result = await FloatingBallPlugin.stopFloatingBall();
     } else {
+      // 启动前重新加载位置，确保使用最新的位置数据
+      await _reloadPosition();
+
+      print('切换悬浮球 - 加载到的位置: startX=${_lastPosition?.x}, startY=${_lastPosition?.y}');
+
+      // 启动时不传递按钮图片，避免 Binder 事务过大
       final config = FloatingBallConfig(
         iconName: _iconName.isEmpty ? null : _iconName,
         size: _ballSize,
         startX: _lastPosition?.x,
         startY: _lastPosition?.y,
         snapThreshold: _snapThreshold,
-        buttonData: _buttonData,
+        buttonData: _getButtonDataWithoutImages(),
       );
 
       result = await FloatingBallPlugin.startFloatingBall(config: config);
 
-      // 启动后恢复自定义图片
+      // 启动后分批设置图片
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      // 恢复主悬浮球图片
       if (_customImageBytes != null) {
-        await Future.delayed(const Duration(milliseconds: 200));
         await FloatingBallPlugin.setFloatingBallImage(_customImageBytes!);
       }
+
+      // 分批设置按钮图片
+      await _setBatchButtonImages();
 
       _startListeningPosition();
       _startListeningButtonEvents();
     }
 
-    await _saveSettings();
+    // 先更新状态，再保存（确保保存的是最新状态）
     await _checkStatus();
+    await _saveSettings();
 
     return result;
   }
 
   /// 启动悬浮球
   Future<String?> startFloatingBall() async {
+    // 强制刷新权限状态
+    _hasPermission = await Permission.systemAlertWindow.isGranted;
+
     if (!_hasPermission) {
-      await requestPermission();
-      return null;
+      final granted = await requestPermission();
+      if (!granted) {
+        return null;
+      }
     }
 
+    // 启动前重新加载位置，确保使用最新的位置数据
+    await _reloadPosition();
+
+    // 启动时不传递按钮图片，避免 Binder 事务过大
     final config = FloatingBallConfig(
       iconName: _iconName.isEmpty ? null : _iconName,
       size: _ballSize,
       startX: _lastPosition?.x,
       startY: _lastPosition?.y,
       snapThreshold: _snapThreshold,
-      buttonData: _buttonData,
+      buttonData: _getButtonDataWithoutImages(),
     );
 
     final result = await FloatingBallPlugin.startFloatingBall(config: config);
 
+    // 启动后分批设置图片
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    // 恢复主悬浮球图片
     if (_customImageBytes != null) {
-      await Future.delayed(const Duration(milliseconds: 200));
       await FloatingBallPlugin.setFloatingBallImage(_customImageBytes!);
     }
+
+    // 分批设置按钮图片
+    await _setBatchButtonImages();
 
     _startListeningPosition();
     _startListeningButtonEvents();
 
-    await _saveSettings();
+    // 先更新状态，再保存（确保保存的是最新状态）
     await _checkStatus();
+    await _saveSettings();
 
     return result;
   }
@@ -336,9 +452,34 @@ class FloatingWidgetController {
   /// 停止悬浮球
   Future<String?> stopFloatingBall() async {
     final result = await FloatingBallPlugin.stopFloatingBall();
-    await _saveSettings();
+    // 先更新状态，再保存（确保保存的是最新状态）
     await _checkStatus();
+    await _saveSettings();
     return result;
+  }
+
+  /// 获取不含图片的按钮数据（用于启动时减少数据传输量）
+  List<FloatingBallButtonData> _getButtonDataWithoutImages() {
+    return _buttonData.map((button) {
+      return FloatingBallButtonData(
+        title: button.title,
+        icon: button.icon,
+        data: button.data,
+        image: null, // 不传递图片
+      );
+    }).toList();
+  }
+
+  /// 分批设置按钮图片（避免 Binder 事务过大）
+  Future<void> _setBatchButtonImages() async {
+    for (int i = 0; i < _buttonData.length; i++) {
+      final button = _buttonData[i];
+      if (button.image != null && button.image!.isNotEmpty) {
+        await FloatingBallPlugin.setButtonImage(i, button.image!);
+        // 每个按钮之间稍微延迟，避免连续大量传输
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+    }
   }
 
   /// 请求悬浮窗权限
@@ -364,13 +505,43 @@ class FloatingWidgetController {
     return result;
   }
 
+  /// 压缩悬浮球图片并保存到本地
+  Future<Uint8List> _compressAndSaveFloatingBallImage(Uint8List imageBytes) async {
+    try {
+      // 悬浮球最大尺寸 (80dp * 3x = 240px)
+      const int maxSize = 240;
+
+      final compressedBytes = await FlutterImageCompress.compressWithList(
+        imageBytes,
+        minWidth: maxSize,
+        minHeight: maxSize,
+        quality: 85,
+        format: CompressFormat.png,
+      );
+
+      print('悬浮球图片压缩: ${imageBytes.length} -> ${compressedBytes.length} bytes');
+
+      // 保存压缩后的图片到 SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final compressedBase64 = base64Encode(compressedBytes);
+      await prefs.setString('floating_ball_image_compressed', compressedBase64);
+
+      return compressedBytes;
+    } catch (e) {
+      print('悬浮球图片压缩失败: $e，使用原图');
+      return imageBytes;
+    }
+  }
+
   /// 设置自定义图片
   Future<String?> setCustomImage(Uint8List imageBytes) async {
-    _customImageBytes = imageBytes;
+    // 压缩图片并保存到本地
+    final compressedBytes = await _compressAndSaveFloatingBallImage(imageBytes);
+    _customImageBytes = compressedBytes;
     await _saveSettings();
 
     if (_isRunning) {
-      final result = await FloatingBallPlugin.setFloatingBallImage(imageBytes);
+      final result = await FloatingBallPlugin.setFloatingBallImage(compressedBytes);
       return result;
     }
     return null;
@@ -449,6 +620,8 @@ class FloatingWidgetController {
 
     if (wasEnabled && _hasPermission) {
       await Future.delayed(const Duration(milliseconds: 500));
+      // 启动前重新加载位置，确保使用最新的位置数据
+      await _reloadPosition();
       await startFloatingBall();
     }
   }
@@ -463,9 +636,15 @@ class FloatingWidgetController {
     return wasEnabled && _hasPermission;
   }
 
-  /// 更新位置
+  /// 更新位置并保存到本地
   void updatePosition(FloatingBallPosition position) {
     _lastPosition = position;
+
+    // 保存位置到本地存储
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setInt('floating_ball_x', position.x);
+      prefs.setInt('floating_ball_y', position.y);
+    });
   }
 
   /// 清除位置
@@ -474,6 +653,29 @@ class FloatingWidgetController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('floating_ball_x');
     await prefs.remove('floating_ball_y');
+  }
+
+  /// 清除压缩图片数据
+  Future<void> clearCompressedImages() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('floating_ball_image_compressed');
+    await prefs.remove('floating_ball_button_image_compressed');
+  }
+
+  /// 清除所有悬浮球数据
+  Future<void> clearAllData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('floating_ball_image');
+    await prefs.remove('floating_ball_image_compressed');
+    await prefs.remove('floating_ball_button_image_compressed');
+    await prefs.remove('floating_ball_buttons');
+    await prefs.remove('floating_ball_x');
+    await prefs.remove('floating_ball_y');
+    await prefs.remove('floating_ball_size');
+    await prefs.remove('floating_ball_snap_threshold');
+    await prefs.remove('floating_ball_icon');
+    await prefs.remove('floating_ball_auto_restore');
+    await prefs.remove('floating_ball_enabled');
   }
 
   /// 刷新状态

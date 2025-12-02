@@ -212,7 +212,7 @@ class HabitsSyncer extends PluginWidgetSyncer {
   ) async {
     // 读取小组件配置
     final widgetDataJson = await HomeWidget.getWidgetData<String>(
-      'flutter.habits_weekly_data_$widgetId',
+      'habits_weekly_data_$widgetId',
     );
 
     List<String> selectedHabitIds = [];
@@ -249,10 +249,15 @@ class HabitsSyncer extends PluginWidgetSyncer {
         final widgetData = jsonDecode(widgetDataJson) as Map<String, dynamic>;
         widgetData['data'] = weekData.toMap();
 
+        final jsonStr = jsonEncode(widgetData);
+
         await HomeWidget.saveWidgetData<String>(
-          'flutter.habits_weekly_data_$widgetId',
-          jsonEncode(widgetData),
+          'habits_weekly_data_$widgetId',
+          jsonStr,
         );
+
+        // 添加短暂延迟确保数据已写入 SharedPreferences
+        await Future.delayed(const Duration(milliseconds: 50));
 
         debugPrint('Updated habits weekly widget $widgetId data');
       } catch (e) {

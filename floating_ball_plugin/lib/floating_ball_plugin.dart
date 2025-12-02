@@ -230,4 +230,19 @@ class FloatingBallPlugin {
       return 'Failed to set image';
     }
   }
+
+  /// 设置单个按钮的图片（分批次更新，避免 Binder 事务过大）
+  /// [index] 按钮索引
+  /// [imageBase64] 图片的 base64 编码字符串
+  static Future<String?> setButtonImage(int index, String imageBase64) async {
+    try {
+      final String? result = await _channel.invokeMethod(
+        'setButtonImage',
+        {'index': index, 'imageBase64': imageBase64},
+      );
+      return result;
+    } on PlatformException {
+      return 'Failed to set button image';
+    }
+  }
 }

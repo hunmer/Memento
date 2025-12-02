@@ -29,23 +29,23 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
 
     companion object {
         private const val TAG = "HabitTimerWidget"
-        private const val PREFS_NAME = "FlutterSharedPreferences"
+        private const val PREFS_NAME = "HomeWidgetPreferences"
 
         // Actions
         const val ACTION_TOGGLE_TIMER = "github.hunmer.memento.widgets.HABIT_TIMER_TOGGLE"
         const val ACTION_SWITCH_MODE = "github.hunmer.memento.widgets.HABIT_TIMER_SWITCH_MODE"
 
         // Preference Keys
-        const val PREF_KEY_HABIT_ID = "flutter.habit_timer_habit_id_"
-        const val PREF_KEY_HABIT_NAME = "flutter.habit_timer_habit_name_"
-        const val PREF_KEY_HABIT_ICON = "flutter.habit_timer_habit_icon_"
-        const val PREF_KEY_DURATION_MINUTES = "flutter.habit_timer_duration_minutes_"
-        const val PREF_KEY_PRIMARY_COLOR = "flutter.habit_timer_primary_color_"
-        const val PREF_KEY_ACCENT_COLOR = "flutter.habit_timer_accent_color_"
-        const val PREF_KEY_BUTTON_COLOR = "flutter.habit_timer_button_color_"
-        const val PREF_KEY_OPACITY = "flutter.habit_timer_opacity_"
-        const val PREF_KEY_TIMER_STATE = "flutter.habit_timer_state_"
-        const val PREF_KEY_PENDING_CHANGES = "flutter.habit_timer_pending_changes"
+        const val PREF_KEY_HABIT_ID = "habit_timer_habit_id_"
+        const val PREF_KEY_HABIT_NAME = "habit_timer_habit_name_"
+        const val PREF_KEY_HABIT_ICON = "habit_timer_habit_icon_"
+        const val PREF_KEY_DURATION_MINUTES = "habit_timer_duration_minutes_"
+        const val PREF_KEY_PRIMARY_COLOR = "habit_timer_primary_color_"
+        const val PREF_KEY_ACCENT_COLOR = "habit_timer_accent_color_"
+        const val PREF_KEY_BUTTON_COLOR = "habit_timer_button_color_"
+        const val PREF_KEY_OPACITY = "habit_timer_opacity_"
+        const val PREF_KEY_TIMER_STATE = "habit_timer_state_"
+        const val PREF_KEY_PENDING_CHANGES = "habit_timer_pending_changes"
 
         // Default Colors
         private const val DEFAULT_PRIMARY_COLOR = 0xFFF3F4F6.toInt() // Light gray background

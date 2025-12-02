@@ -47,10 +47,15 @@ class FloatingBallService : Service() {
         fun updateImageFromBytes(imageBytes: ByteArray) {
             instance?.updateImageInternal(imageBytes)
         }
+
+        /// 设置单个按钮的图片（静态方法，供插件主类调用）
+        fun setButtonImage(index: Int, imageBase64: String) {
+            instance?.setButtonImageInternal(index, imageBase64)
+        }
     }
 
     private lateinit var windowManager: WindowManager
-    private lateinit var floatingView: View
+    private var floatingView: View? = null  // 改为可空类型，便于重置
     private var params: WindowManager.LayoutParams? = null
     private var screenWidth: Int = 0
     private var screenHeight: Int = 0
@@ -78,40 +83,92 @@ class FloatingBallService : Service() {
         val displayMetrics = resources.displayMetrics
         screenWidth = displayMetrics.widthPixels
         screenHeight = displayMetrics.heightPixels
+
+        println("FloatingBallService onCreate - 屏幕尺寸: ${screenWidth}x${screenHeight}")
     }
 
     override fun onDestroy() {
         super.onDestroy()
         instance = null
         isRunning = false
-        if (::floatingView.isInitialized && floatingView.isAttachedToWindow) {
-            windowManager.removeView(floatingView)
+
+        println("FloatingBallService onDestroy")
+
+        floatingView?.let { view ->
+            if (view.isAttachedToWindow) {
+                windowManager.removeView(view)
+            }
         }
+        // 重置视图状态，确保重新启动时能正确创建
+        floatingView = null
         closeExpandedButtons()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        var configUpdated = false
         intent?.let {
             val config = it.getSerializableExtra("config") as? HashMap<String, Any>
             config?.let { cfg ->
+                println("onStartCommand - 收到的配置: $cfg")
+
                 iconName = cfg["iconName"] as? String
                 ballSize = (cfg["size"] as? Double)?.toInt() ?: 100
-                startX = (cfg["startX"] as? Double)?.toInt() ?: (screenWidth - ballSize)
-                startY = (cfg["startY"] as? Double)?.toInt() ?: (screenHeight / 2)
+
+                // 更新起始位置（支持多种数字类型）
+                val newStartX = when (val x = cfg["startX"]) {
+                    is Int -> x
+                    is Long -> x.toInt()
+                    is Double -> x.toInt()
+                    else -> null
+                }
+                val newStartY = when (val y = cfg["startY"]) {
+                    is Int -> y
+                    is Long -> y.toInt()
+                    is Double -> y.toInt()
+                    else -> null
+                }
+
+                println("onStartCommand - 解析位置: startX=$newStartX (${cfg["startX"]?.javaClass?.simpleName}), startY=$newStartY (${cfg["startY"]?.javaClass?.simpleName})")
+
+                if (newStartX != null && newStartY != null) {
+                    if (newStartX != startX || newStartY != startY) {
+                        startX = newStartX
+                        startY = newStartY
+                        configUpdated = true
+                        println("onStartCommand - 检测到位置变化: ($startX, $startY)")
+                    }
+                } else {
+                    println("onStartCommand - 未接收到位置信息，使用默认值: ($startX, $startY)")
+                }
+
                 snapThreshold = (cfg["snapThreshold"] as? Double)?.toInt() ?: 50
                 // 获取按钮数据数组
                 buttonData = cfg["buttonData"] as? List<Map<String, Any>>
             }
         }
 
-        // 只有在视图未初始化时才创建
-        if (!::floatingView.isInitialized) {
+        println("onStartCommand - 视图已初始化: ${floatingView != null}, 需要更新: $configUpdated")
+
+        // 只有在视图未初始化或位置更新时才重新创建
+        if (floatingView == null || configUpdated) {
+            // 如果视图已存在，先移除
+            floatingView?.let { view ->
+                if (view.isAttachedToWindow) {
+                    println("onStartCommand - 移除现有视图")
+                    windowManager.removeView(view)
+                    closeExpandedButtons()
+                }
+            }
+            // 重新初始化视图
+            println("onStartCommand - 重新创建视图，位置: ($startX, $startY)")
             initFloatingView()
         }
         return START_STICKY
     }
 
     private fun initFloatingView() {
+        println("initFloatingView - 开始创建视图，位置: ($startX, $startY)")
+
         // 创建悬浮球视图
         floatingView = ImageView(this).apply {
             // 优先使用自定义图片
@@ -146,7 +203,11 @@ class FloatingBallService : Service() {
             y = startY
         }
 
+        println("initFloatingView - 添加视图到窗口，params: x=${params?.x}, y=${params?.y}")
+
         windowManager.addView(floatingView, params)
+
+        println("initFloatingView - 视图添加完成")
     }
 
     /// 设置默认图标
@@ -397,7 +458,8 @@ class FloatingBallService : Service() {
 
     /// 内部配置更新方法
     private fun updateConfigInternal(config: HashMap<String, Any>) {
-        if (!::floatingView.isInitialized || !floatingView.isAttachedToWindow) {
+        val view = floatingView ?: return
+        if (!view.isAttachedToWindow) {
             return
         }
 
@@ -412,7 +474,7 @@ class FloatingBallService : Service() {
                 params?.let { p ->
                     p.width = ballSize
                     p.height = ballSize
-                    windowManager.updateViewLayout(floatingView, p)
+                    windowManager.updateViewLayout(view, p)
                 }
             }
         }
@@ -430,7 +492,7 @@ class FloatingBallService : Service() {
                     resources.getIdentifier(name, "drawable", packageName)
                 } ?: android.R.drawable.ic_menu_add
 
-                (floatingView as? ImageView)?.setImageDrawable(
+                (view as? ImageView)?.setImageDrawable(
                     ContextCompat.getDrawable(this, iconResId)
                 )
             }
@@ -461,7 +523,8 @@ class FloatingBallService : Service() {
         // 保存图片数据以供重启后恢复
         customImageBytes = imageBytes
 
-        if (!::floatingView.isInitialized || !floatingView.isAttachedToWindow) {
+        val view = floatingView ?: return
+        if (!view.isAttachedToWindow) {
             return
         }
 
@@ -470,14 +533,28 @@ class FloatingBallService : Service() {
             val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
             if (bitmap != null) {
                 // 设置到 ImageView
-                (floatingView as? ImageView)?.setImageBitmap(bitmap)
+                (view as? ImageView)?.setImageBitmap(bitmap)
                 // 更新窗口布局
                 params?.let { p ->
-                    windowManager.updateViewLayout(floatingView, p)
+                    windowManager.updateViewLayout(view, p)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    /// 设置单个按钮图片的内部方法
+    private fun setButtonImageInternal(index: Int, imageBase64: String) {
+        // 更新 buttonData 中对应按钮的图片
+        buttonData?.let { buttons ->
+            if (index >= 0 && index < buttons.size) {
+                val mutableButtons = buttons.toMutableList()
+                val button = mutableButtons[index].toMutableMap()
+                button["image"] = imageBase64
+                mutableButtons[index] = button
+                buttonData = mutableButtons
+            }
         }
     }
 }
