@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 白色圆角背景 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#ffffff" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+    <!-- 绿色标题装饰条 -->
+    <item
+        android:top="20dp"
+        android:left="20dp"
+        android:right="100dp"
+        android:bottom="140dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#10b981" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+    <!-- 快捷按钮 1 -->
+    <item
+        android:top="50dp"
+        android:left="20dp"
+        android:right="20dp"
+        android:bottom="120dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#d1fae5" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+    <!-- 快捷按钮 2 -->
+    <item
+        android:top="80dp"
+        android:left="20dp"
+        android:right="20dp"
+        android:bottom="90dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#d1fae5" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+    <!-- 快捷按钮 3 -->
+    <item
+        android:top="110dp"
+        android:left="20dp"
+        android:right="20dp"
+        android:bottom="60dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#d1fae5" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+</layer-list>

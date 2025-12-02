@@ -13,6 +13,11 @@ class BillEditScreen extends StatefulWidget {
   final VoidCallback? onCancel;
   final DateTime? initialDate;
 
+  // 预填充参数（用于快捷记账小组件）
+  final String? initialCategory;
+  final double? initialAmount;
+  final bool? initialIsExpense;
+
   const BillEditScreen({
     super.key,
     required this.billPlugin,
@@ -21,6 +26,9 @@ class BillEditScreen extends StatefulWidget {
     this.onSaved,
     this.onCancel,
     this.initialDate,
+    this.initialCategory,
+    this.initialAmount,
+    this.initialIsExpense,
   });
 
   @override
@@ -95,9 +103,24 @@ class _BillEditScreenState extends State<BillEditScreen> {
         _availableTags.add(_tag!);
       }
     } else {
-      // Default tag
-      _tag = _availableTags.first;
+      // 使用预填充参数（来自快捷记账小组件）或默认值
+      _tag = widget.initialCategory ?? _availableTags.first;
       _selectedIcon = _categoryIcons[_tag] ?? Icons.category;
+
+      // 预填充金额
+      if (widget.initialAmount != null) {
+        _amountController.text = widget.initialAmount!.toStringAsFixed(2);
+      }
+
+      // 预填充收入/支出类型
+      if (widget.initialIsExpense != null) {
+        _isExpense = widget.initialIsExpense!;
+      }
+
+      // 确保分类在可用标签列表中
+      if (_tag != null && !_availableTags.contains(_tag)) {
+        _availableTags.add(_tag!);
+      }
     }
   }
 

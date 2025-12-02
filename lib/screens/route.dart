@@ -16,6 +16,8 @@ import 'package:Memento/screens/widgets_config_screen/widgets_config_screen.dart
 import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
+import 'package:Memento/plugins/bill/screens/bill_edit_screen.dart';
+import 'package:Memento/plugins/bill/screens/bill_shortcuts_selector_screen.dart';
 import 'package:Memento/plugins/calendar/calendar_plugin.dart';
 import 'package:Memento/plugins/calendar/screens/calendar_month_selector_screen.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
@@ -117,6 +119,9 @@ class AppRoutes extends NavigatorObserver {
   // 习惯计时器小组件配置路由
   static const String habitTimerSelector = '/habit_timer_selector';
 
+  // 快捷记账小组件配置路由
+  static const String billShortcutsSelector = '/bill_shortcuts_selector';
+
   // 习惯计时器对话框路由（从小组件打开）
   static const String habitTimerDialog = '/habit_timer_dialog';
 
@@ -174,6 +179,51 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(AgentChatMainView(conversationId: conversationId));
       case '/bill':
       case 'bill':
+        // 检查是否来自快捷记账小组件（带有预填充参数）
+        if (settings.arguments is Map<String, dynamic> ||
+            settings.arguments is Map<String, String>) {
+          final args = settings.arguments as Map<String, dynamic>;
+
+          // 如果有category参数，说明是从快捷记账小组件打开的
+          if (args.containsKey('category')) {
+            // 获取 BillPlugin 实例
+            final billPlugin =
+                PluginManager.instance.getPlugin('bill') as BillPlugin?;
+
+            if (billPlugin == null) {
+              // 如果插件未初始化，回退到主视图
+              debugPrint('BillPlugin 未初始化，回退到主视图');
+              return _createRoute(const BillMainView());
+            }
+
+            // 解析参数
+            final String? accountId = args['accountId'] as String?;
+            final String? category = args['category'] as String?;
+            final double? amount = args['amount'] != null
+                ? double.tryParse(args['amount'].toString())
+                : null;
+            final bool? isExpense = args['isExpense'] != null
+                ? (args['isExpense'].toString().toLowerCase() == 'true')
+                : null;
+
+            // 如果缺少必需的 accountId，回退到主视图
+            if (accountId == null || accountId.isEmpty) {
+              debugPrint('缺少 accountId 参数，回退到主视图');
+              return _createRoute(const BillMainView());
+            }
+
+            // 打开账单编辑页面并传递预填充参数
+            return _createRoute(BillEditScreen(
+              billPlugin: billPlugin,
+              accountId: accountId,
+              initialCategory: category,
+              initialAmount: amount,
+              initialIsExpense: isExpense,
+            ));
+          }
+        }
+
+        // 默认打开账单主视图
         return _createRoute(const BillMainView());
       case '/calendar':
       case 'calendar':
@@ -310,6 +360,27 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
             HabitTimerSelectorScreen(widgetId: habitTimerWidgetId));
+      case '/bill_shortcuts_selector':
+      case 'bill_shortcuts_selector':
+        // 快捷记账小组件配置界面
+        int? billShortcutsWidgetId;
+
+        // 从 arguments 中解析 widgetId
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          // widgetId 可能是字符串或整数
+          final widgetIdValue = args['widgetId'];
+          if (widgetIdValue is int) {
+            billShortcutsWidgetId = widgetIdValue;
+          } else if (widgetIdValue is String) {
+            billShortcutsWidgetId = int.tryParse(widgetIdValue);
+          }
+        } else if (settings.arguments is int) {
+          billShortcutsWidgetId = settings.arguments as int;
+        }
+
+        return _createRoute(
+            BillShortcutsSelectorScreen(widgetId: billShortcutsWidgetId ?? 0));
       case '/habit_timer_dialog':
       case 'habit_timer_dialog':
         // 习惯计时器对话框（从小组件打开）

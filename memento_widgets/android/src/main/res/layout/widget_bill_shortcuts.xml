@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_bill_shortcuts_background"
+    android:padding="16dp">
+
+    <!-- 标题栏 -->
+    <RelativeLayout
+        android:id="@+id/widget_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp">
+
+        <!-- 标题 -->
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:text="快捷记账"
+            android:textColor="#10b981"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <!-- 添加按钮 -->
+        <ImageView
+            android:id="@+id/widget_add_button"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_add_green"
+            android:contentDescription="添加账单" />
+
+    </RelativeLayout>
+
+    <!-- 未配置提示文本 -->
+    <TextView
+        android:id="@+id/widget_hint_text"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="点击设置小组件"
+        android:textColor="#9ca3af"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:visibility="gone" />
+
+    <!-- 快捷按钮列表 - 可滚动 -->
+    <ListView
+        android:id="@+id/shortcuts_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:scrollbars="none"
+        android:listSelector="@android:color/transparent"
+        android:visibility="visible" />
+
+    <!-- 空状态提示 -->
+    <TextView
+        android:id="@+id/widget_empty_text"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="暂无快捷预设"
+        android:textColor="#9ca3af"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:visibility="gone" />
+
+</LinearLayout>
