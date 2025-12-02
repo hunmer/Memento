@@ -14,6 +14,7 @@ import 'package:Memento/screens/widgets_config_screen/widgets_config_screen.dart
 
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
+import 'package:Memento/plugins/activity/screens/activity_weekly_config_screen.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/screens/bill_edit_screen.dart';
@@ -121,6 +122,9 @@ class AppRoutes extends NavigatorObserver {
 
   // 快捷记账小组件配置路由
   static const String billShortcutsSelector = '/bill_shortcuts_selector';
+
+  // 活动周视图小组件配置路由
+  static const String activityWeeklyConfig = '/activity_weekly_config';
 
   // 习惯计时器对话框路由（从小组件打开）
   static const String habitTimerDialog = '/habit_timer_dialog';
@@ -381,6 +385,38 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
             BillShortcutsSelectorScreen(widgetId: billShortcutsWidgetId ?? 0));
+      case '/activity_weekly_config':
+      case 'activity_weekly_config':
+        // 活动周视图小组件配置界面
+        int? activityWeeklyWidgetId;
+
+        // 从 arguments 中解析 widgetId
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          // widgetId 可能是字符串或整数
+          final widgetIdValue = args['widgetId'];
+          if (widgetIdValue is int) {
+            activityWeeklyWidgetId = widgetIdValue;
+          } else if (widgetIdValue is String) {
+            activityWeeklyWidgetId = int.tryParse(widgetIdValue);
+          }
+        } else if (settings.arguments is int) {
+          activityWeeklyWidgetId = settings.arguments as int;
+        }
+
+        if (activityWeeklyWidgetId == null) {
+          return _createRoute(
+            Scaffold(
+              appBar: AppBar(title: const Text('错误')),
+              body: const Center(
+                child: Text('错误: widgetId 参数缺失'),
+              ),
+            ),
+          );
+        }
+
+        return _createRoute(
+            ActivityWeeklyConfigScreen(widgetId: activityWeeklyWidgetId));
       case '/habit_timer_dialog':
       case 'habit_timer_dialog':
         // 习惯计时器对话框（从小组件打开）
