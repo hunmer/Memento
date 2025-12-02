@@ -111,4 +111,67 @@
         <item name="android:layout_gravity">center</item>
         <item name="android:background">@drawable/calendar_today_circle</item>
     </style>
+
+    <!-- ========== 本周打卡列表小组件样式 ========== -->
+
+    <!-- 星期标题样式 -->
+    <style name="CalendarTodayWeekHeader">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">#6b7280</item>
+    </style>
+
+    <!-- 日期数字样式 -->
+    <style name="CalendarTodayDayNumber">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">#1f2937</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- 打卡项目容器样式 -->
+    <style name="CalendarTodayCheckinItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:layout_marginBottom">1dp</item>
+    </style>
+
+    <!-- 打卡项目彩色徽章样式（竖条） -->
+    <style name="CalendarTodayBadge">
+        <item name="android:layout_width">3dp</item>
+        <item name="android:layout_height">12dp</item>
+        <item name="android:background">@drawable/widget_checkin_badge_background</item>
+        <item name="android:layout_marginEnd">2dp</item>
+    </style>
+
+    <!-- 打卡项目名称样式 -->
+    <style name="CalendarTodayItemName">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">9sp</item>
+        <item name="android:textColor">#1f2937</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <!-- 更多项目数量显示样式 -->
+    <style name="CalendarTodayMoreCount">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">8sp</item>
+        <item name="android:textColor">#9ca3af</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">1dp</item>
+    </style>
 </resources>

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 本周打卡列表小组件预览图 - 日历网格视图 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 白色圆角背景 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#f8fafc" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+
+    <!-- 分隔线 -->
+    <item
+        android:top="60dp"
+        android:left="16dp"
+        android:right="16dp"
+        android:bottom="100dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#e5e7eb" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 第1列（周一） -->
+    <item
+        android:top="65dp"
+        android:left="18dp"
+        android:right="262dp"
+        android:bottom="85dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FED7AA" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+    <item
+        android:top="80dp"
+        android:left="18dp"
+        android:right="262dp"
+        android:bottom="70dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#D1FAE5" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 第2列（周二） -->
+    <item
+        android:top="65dp"
+        android:left="58dp"
+        android:right="222dp"
+        android:bottom="85dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#E9D5FF" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+    <item
+        android:top="80dp"
+        android:left="58dp"
+        android:right="222dp"
+        android:bottom="70dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#BFDBFE" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+    <item
+        android:top="95dp"
+        android:left="58dp"
+        android:right="222dp"
+        android:bottom="55dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FBCFE8" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 第3列（周三） -->
+    <item
+        android:top="65dp"
+        android:left="98dp"
+        android:right="182dp"
+        android:bottom="85dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FCD34D" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 第4列（周四） -->
+    <item
+        android:top="65dp"
+        android:left="138dp"
+        android:right="142dp"
+        android:bottom="85dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#A5B4FC" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+    <item
+        android:top="80dp"
+        android:left="138dp"
+        android:right="142dp"
+        android:bottom="70dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FCA5A5" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 第5列（周五） -->
+    <item
+        android:top="65dp"
+        android:left="178dp"
+        android:right="102dp"
+        android:bottom="85dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#D1FAE5" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+    <item
+        android:top="80dp"
+        android:left="178dp"
+        android:right="102dp"
+        android:bottom="70dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FED7AA" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+    <item
+        android:top="95dp"
+        android:left="178dp"
+        android:right="102dp"
+        android:bottom="55dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#E9D5FF" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 第6列（周六） -->
+    <item
+        android:top="65dp"
+        android:left="218dp"
+        android:right="62dp"
+        android:bottom="85dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#BFDBFE" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+
+    <!-- 模拟打卡项目 - 第7列（周日） -->
+    <item
+        android:top="65dp"
+        android:left="258dp"
+        android:right="22dp"
+        android:bottom="85dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FED7AA" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+    <item
+        android:top="80dp"
+        android:left="258dp"
+        android:right="22dp"
+        android:bottom="70dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#D1FAE5" />
+            <corners android:radius="2dp" />
+        </shape>
+    </item>
+</layer-list>

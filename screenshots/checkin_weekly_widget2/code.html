@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Monthly Calendar Events Widget</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6", // A generic primary color as none is specified
+                        "background-light": "#f3f4f6",
+                        "background-dark": "#1f2937",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#374151",
+                        "text-primary-light": "#111827",
+                        "text-primary-dark": "#f9fafb",
+                        "text-secondary-light": "#6b7280",
+                        "text-secondary-dark": "#d1d5db",
+                    },
+                    fontFamily: {
+                        display: ["Noto Sans SC", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem", // 16px
+                    },
+                },
+            },
+        };
+    </script>
+<style>body {
+    font-family: "Noto Sans SC", sans-serif;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAyxCj4ejeyMksxeEniuBaUD5sFd1PJoAon1lsBS9i1nexF1_BeQE7HKcWEEVXch0XX-6P72kUl0yv8tmr_0GcYvfqEX9gZ-XBRJGM-tjNCfqQnNo_HZc0acsCQTNz326QG53j_6zYqY0Ret6fRhkIkzKMvbazfX8yeETRy8tBRFO940gRRcrPjjdmX4A1d-O6EmzDYk9lJLheIPuD2-H_VtJL8KTLk0i2Zt3znPlTgtN_77JO0ijgp5ZQ9nMM_kIBYidQ0sV3qzauf);
+    background-size: cover;
+    background-position: center
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-200 dark:bg-gray-800 flex items-center justify-center min-h-screen p-4">
+<div class="w-full max-w-sm mx-auto bg-white dark:bg-surface-dark rounded-3xl p-4 shadow-xl font-display">
+<h2 class="text-2xl font-bold mb-4 text-text-primary-light dark:text-text-primary-dark">五月</h2>
+<div class="grid grid-cols-7 gap-1 text-center">
+<div class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">一</div>
+<div class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">二</div>
+<div class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">三</div>
+<div class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">四</div>
+<div class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">五</div>
+<div class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">六</div>
+<div class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">日</div>
+<div class="flex flex-col items-center">
+<span class="text-sm font-semibold mb-2 text-text-primary-light dark:text-text-primary-dark">13</span>
+<div class="space-y-1 text-left text-xs text-text-primary-light dark:text-text-primary-dark w-full">
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-yellow-500 mr-1.5 flex-shrink-0"></span><span class="truncate">睡觉</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-blue-500 mr-1.5 flex-shrink-0"></span><span class="truncate">上班</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-purple-500 mr-1.5 flex-shrink-0"></span><span class="truncate">摸鱼听播</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-green-500 mr-1.5 flex-shrink-0"></span><span class="truncate">阅读《刀锋》</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-orange-500 mr-1.5 flex-shrink-0"></span><span class="truncate">吃饭, 陪娃</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-green-400 mr-1.5 flex-shrink-0"></span><span class="truncate">公园散步</span></div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<span class="text-sm font-semibold mb-2 text-text-primary-light dark:text-text-primary-dark">14</span>
+<div class="space-y-1 text-left text-xs text-text-primary-light dark:text-text-primary-dark w-full">
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-yellow-500 mr-1.5 flex-shrink-0"></span><span class="truncate">睡觉</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-purple-500 mr-1.5 flex-shrink-0"></span><span class="truncate">写小红书</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-blue-500 mr-1.5 flex-shrink-0"></span><span class="truncate">上班</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-orange-500 mr-1.5 flex-shrink-0"></span><span class="truncate">陪娃吃午餐</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-orange-400 mr-1.5 flex-shrink-0"></span><span class="truncate">带娃按摩</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-purple-500 mr-1.5 flex-shrink-0"></span><span class="truncate">摸鱼听播</span></div>
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">+3</span>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<span class="text-sm font-semibold mb-2 text-text-primary-light dark:text-text-primary-dark">15</span>
+<div class="space-y-1 text-left text-xs text-text-primary-light dark:text-text-primary-dark w-full">
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-yellow-500 mr-1.5 flex-shrink-0"></span><span class="truncate">睡觉</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-purple-500 mr-1.5 flex-shrink-0"></span><span class="truncate">构思笔记</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-orange-500 mr-1.5 flex-shrink-0"></span><span class="truncate">带娃体检</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-cyan-500 mr-1.5 flex-shrink-0"></span><span class="truncate">忙碌工作</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-blue-400 mr-1.5 flex-shrink-0"></span><span class="truncate">无效会议</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-orange-400 mr-1.5 flex-shrink-0"></span><span class="truncate">和娃一起</span></div>
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">+2</span>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<span class="text-sm font-semibold mb-2 text-text-primary-light dark:text-text-primary-dark">16</span>
+<div class="space-y-1 text-left text-xs text-text-primary-light dark:text-text-primary-dark w-full">
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-yellow-500 mr-1.5 flex-shrink-0"></span><span class="truncate">睡觉</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-cyan-500 mr-1.5 flex-shrink-0"></span><span class="truncate">忙碌工作</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-green-500 mr-1.5 flex-shrink-0"></span><span class="truncate">带儿子复查</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-yellow-400 mr-1.5 flex-shrink-0"></span><span class="truncate">带儿子约饭</span></div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<span class="text-sm font-semibold mb-2 text-text-primary-light dark:text-text-primary-dark">17</span>
+<div class="space-y-1 text-left text-xs text-text-primary-light dark:text-text-primary-dark w-full">
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-yellow-500 mr-1.5 flex-shrink-0"></span><span class="truncate">睡觉</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-orange-500 mr-1.5 flex-shrink-0"></span><span class="truncate">给儿子幼儿园</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-orange-400 mr-1.5 flex-shrink-0"></span><span class="truncate">带娃电疗</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-purple-500 mr-1.5 flex-shrink-0"></span><span class="truncate">构思小红书</span></div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<span class="text-sm font-semibold mb-2 text-text-primary-light dark:text-text-primary-dark">18</span>
+<div class="space-y-1 text-left text-xs text-text-primary-light dark:text-text-primary-dark w-full">
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-yellow-500 mr-1.5 flex-shrink-0"></span><span class="truncate">睡觉</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-red-500 mr-1.5 flex-shrink-0"></span><span class="truncate">玩手机</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-cyan-400 mr-1.5 flex-shrink-0"></span><span class="truncate">入园照全家</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-gray-400 mr-1.5 flex-shrink-0"></span><span class="truncate">午睡</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-red-500 mr-1.5 flex-shrink-0"></span><span class="truncate">玩手机购物</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-yellow-400 mr-1.5 flex-shrink-0"></span><span class="truncate">准备入园</span></div>
+</div>
+</div>
+<div class="flex flex-col items-center bg-gray-200/50 dark:bg-gray-700/50 rounded-lg p-1 -m-1">
+<span class="text-sm font-semibold mb-2 text-text-primary-light dark:text-text-primary-dark">19</span>
+<div class="space-y-1 text-left text-xs text-text-primary-light dark:text-text-primary-dark w-full">
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-yellow-500 mr-1.5 flex-shrink-0"></span><span class="truncate">睡觉</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-green-500 mr-1.5 flex-shrink-0"></span><span class="truncate">看书</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-cyan-500 mr-1.5 flex-shrink-0"></span><span class="truncate">回笼觉</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-orange-500 mr-1.5 flex-shrink-0"></span><span class="truncate">包饺子</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-purple-500 mr-1.5 flex-shrink-0"></span><span class="truncate">写笔记</span></div>
+<div class="flex items-center"><span class="w-1 h-3 rounded-full bg-blue-500 mr-1.5 flex-shrink-0"></span><span class="truncate">骑车、走路</span></div>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>
