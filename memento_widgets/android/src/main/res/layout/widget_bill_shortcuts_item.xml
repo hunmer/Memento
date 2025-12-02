@@ -5,9 +5,11 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingVertical="8dp"
-    android:paddingHorizontal="4dp"
-    android:background="?android:attr/selectableItemBackground">
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
+    android:background="#00000000">
 
     <!-- 复选框 - 左侧 -->
     <FrameLayout

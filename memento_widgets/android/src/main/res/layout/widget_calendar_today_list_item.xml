@@ -7,8 +7,10 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingVertical="4dp"
-    android:paddingHorizontal="2dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:paddingStart="2dp"
+    android:paddingEnd="2dp"
     android:minHeight="44dp">
 
     <!-- Checkbox 容器 - 提供足够的点击区域 -->
