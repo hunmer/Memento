@@ -19,7 +19,8 @@
       "Bash(flutter create:*)",
       "Bash(flutter pub:*)",
       "Bash(find:*)",
-      "Bash(adb logcat:*)"
+      "Bash(adb logcat:*)",
+      "Bash(adb install:*)"
     ],
     "deny": [],
     "ask": []

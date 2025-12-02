@@ -203,12 +203,11 @@ class BillShortcutsWidgetProvider : BasePluginWidgetProvider() {
         // 设置添加按钮颜色
         views.setInt(R.id.widget_add_button, "setColorFilter", iconColor)
 
-        // 按照 CUSTOM_WIDGET_GUIDE.md 的要求，使用 ColorStateList 应用背景色
-        // 这样可以保留圆角效果
+        // 设置背景色 (使用 setBackgroundColor 替代 setBackgroundTintList)
         views.setInt(
             R.id.widget_container,
-            "setBackgroundTintList",
-            ColorStateList.valueOf(backgroundColor).defaultColor
+            "setBackgroundColor",
+            backgroundColor
         )
 
         // 隐藏配置提示

@@ -5,8 +5,10 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingVertical="6dp"
-    android:paddingHorizontal="4dp">
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp">
 
     <!-- 复选框 - 单独点击区域 -->
     <FrameLayout
