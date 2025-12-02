@@ -2,28 +2,28 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import '../tracker_plugin.dart';
-import '../models/goal.dart';
 import '../../../widgets/widget_config_editor/index.dart';
 
-/// 目标选择器界面(用于小组件配置)
+/// 目标进度条小组件选择器界面(用于小组件配置)
 ///
 /// 提供实时预览、颜色配置和透明度调节功能。
-class TrackerGoalSelectorScreen extends StatefulWidget {
+/// 预览样式：白色卡片 + 进度条
+class TrackerGoalProgressSelectorScreen extends StatefulWidget {
   /// 小组件ID(Android appWidgetId)
   final int? widgetId;
 
-  const TrackerGoalSelectorScreen({
+  const TrackerGoalProgressSelectorScreen({
     super.key,
     this.widgetId,
   });
 
   @override
-  State<TrackerGoalSelectorScreen> createState() =>
-      _TrackerGoalSelectorScreenState();
+  State<TrackerGoalProgressSelectorScreen> createState() =>
+      _TrackerGoalProgressSelectorScreenState();
 }
 
-class _TrackerGoalSelectorScreenState
-    extends State<TrackerGoalSelectorScreen> {
+class _TrackerGoalProgressSelectorScreenState
+    extends State<TrackerGoalProgressSelectorScreen> {
   final TrackerPlugin _trackerPlugin = TrackerPlugin.instance;
   String? _selectedGoalId;
   late WidgetConfig _widgetConfig;
@@ -32,23 +32,23 @@ class _TrackerGoalSelectorScreenState
   @override
   void initState() {
     super.initState();
-    // 初始化默认配置
+    // 初始化默认配置（白色背景）
     _widgetConfig = WidgetConfig(
       colors: [
         ColorConfig(
           key: 'primary',
           label: '背景色',
-          defaultValue: Colors.red,
-          currentValue: Colors.red,
-        ),
-        ColorConfig(
-          key: 'accent',
-          label: '强调色',
           defaultValue: Colors.white,
           currentValue: Colors.white,
         ),
+        ColorConfig(
+          key: 'accent',
+          label: '进度条颜色',
+          defaultValue: const Color(0xFF64B5F6), // 蓝色
+          currentValue: const Color(0xFF64B5F6),
+        ),
       ],
-      opacity: 0.95,
+      opacity: 1.0,
     );
     _loadSavedConfig();
   }
@@ -81,7 +81,7 @@ class _TrackerGoalSelectorScreenState
         }
       }
 
-      // 加载强调色
+      // 加载进度条颜色
       final savedAccentColorStr = await HomeWidget.getWidgetData<String>(
         'tracker_widget_accent_color_${widget.widgetId}',
       );
@@ -133,7 +133,7 @@ class _TrackerGoalSelectorScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('配置目标追踪小组件'),
+        title: const Text('配置目标进度条小组件'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
@@ -144,7 +144,7 @@ class _TrackerGoalSelectorScreenState
           : WidgetConfigEditor(
               widgetSize: WidgetSize.large,
               initialConfig: _widgetConfig,
-              previewTitle: '进度增减预览',
+              previewTitle: '进度条预览',
               onConfigChanged: (config) {
                 setState(() => _widgetConfig = config);
               },
@@ -208,10 +208,10 @@ class _TrackerGoalSelectorScreenState
     );
   }
 
-  /// 构建预览
+  /// 构建预览（进度条样式）
   Widget _buildPreview(BuildContext context, WidgetConfig config) {
-    final primaryColor = config.getColor('primary') ?? Colors.red;
-    final accentColor = config.getColor('accent') ?? Colors.white;
+    final primaryColor = config.getColor('primary') ?? Colors.white;
+    final accentColor = config.getColor('accent') ?? const Color(0xFF64B5F6);
     final selectedGoal = _getSelectedGoal();
 
     if (selectedGoal == null) {
@@ -238,32 +238,66 @@ class _TrackerGoalSelectorScreenState
       );
     }
 
-    // 渲染进度增减小组件预览
+    // 计算进度百分比
+    final progress = selectedGoal.targetValue > 0
+        ? selectedGoal.currentValue / selectedGoal.targetValue
+        : 0.0;
+    final progressPercent = (progress * 100).clamp(0, 100).toInt();
+
+    // 渲染进度条样式小组件预览（白色卡片）
     return Container(
       width: 160,
       height: 160,
       decoration: BoxDecoration(
         color: primaryColor.withOpacity(config.opacity),
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 标题
-          Text(
-            selectedGoal.name,
-            style: TextStyle(
-              color: accentColor,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          // 顶部：标题 + 加号按钮
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  selectedGoal.name,
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Icon(
+                  Icons.add,
+                  size: 18,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
 
-          // 进度数字
+          // 中间：大号进度数字
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
@@ -271,7 +305,7 @@ class _TrackerGoalSelectorScreenState
               Text(
                 '${selectedGoal.currentValue.toInt()}',
                 style: TextStyle(
-                  color: accentColor,
+                  color: Colors.grey[800],
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
                   height: 1.0,
@@ -280,7 +314,7 @@ class _TrackerGoalSelectorScreenState
               Text(
                 '/${selectedGoal.targetValue.toInt()}',
                 style: TextStyle(
-                  color: accentColor.withOpacity(0.7),
+                  color: Colors.grey[400],
                   fontSize: 24,
                   height: 1.0,
                 ),
@@ -290,42 +324,23 @@ class _TrackerGoalSelectorScreenState
 
           const Spacer(),
 
-          // 加减按钮
-          Row(
-            children: [
-              // 减号按钮
-              Expanded(
-                child: Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Icon(
-                    Icons.remove,
-                    color: accentColor,
-                    size: 28,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              // 加号按钮
-              Expanded(
-                child: Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Icon(
-                    Icons.add,
-                    color: accentColor,
-                    size: 28,
-                  ),
-                ),
-              ),
-            ],
+          // 底部：百分比 + 进度条
+          Text(
+            '$progressPercent%',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 4),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress.clamp(0.0, 1.0),
+              backgroundColor: Colors.grey.shade200,
+              valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+              minHeight: 8,
+            ),
           ),
         ],
       ),
@@ -390,7 +405,7 @@ class _TrackerGoalSelectorScreenState
                           decoration: BoxDecoration(
                             color: goal.iconColor != null
                                 ? Color(goal.iconColor!).withAlpha(30)
-                                : Colors.red.withAlpha(30),
+                                : Colors.blue.withAlpha(30),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
@@ -400,7 +415,7 @@ class _TrackerGoalSelectorScreenState
                             ),
                             color: goal.iconColor != null
                                 ? Color(goal.iconColor!)
-                                : Colors.red,
+                                : Colors.blue,
                             size: 24,
                           ),
                         ),
@@ -456,10 +471,13 @@ class _TrackerGoalSelectorScreenState
   void _onGoalSelected(Goal goal) {
     setState(() {
       _selectedGoalId = goal.id;
-      // 可以选择性地更新主色调为目标的颜色
-      if (goal.iconColor != null) {
+      // 可以选择性地更新进度条颜色为目标的颜色
+      if (goal.progressColor != null) {
         _widgetConfig =
-            _widgetConfig.updateColor('primary', Color(goal.iconColor!));
+            _widgetConfig.updateColor('accent', Color(goal.progressColor!));
+      } else if (goal.iconColor != null) {
+        _widgetConfig =
+            _widgetConfig.updateColor('accent', Color(goal.iconColor!));
       }
     });
   }
@@ -487,7 +505,7 @@ class _TrackerGoalSelectorScreenState
         );
       }
 
-      // 保存强调色(使用 String 存储)
+      // 保存进度条颜色(使用 String 存储)
       final accentColor = _widgetConfig.getColor('accent');
       if (accentColor != null) {
         await HomeWidget.saveWidgetData<String>(
@@ -508,12 +526,12 @@ class _TrackerGoalSelectorScreenState
       // 同步目标数据到小组件
       await _syncGoalToWidget(selectedGoal);
 
-      // 更新小组件
+      // 更新小组件（进度条样式）
       await HomeWidget.updateWidget(
-        name: 'TrackerGoalWidgetProvider',
-        iOSName: 'TrackerGoalWidgetProvider',
+        name: 'TrackerGoalProgressWidgetProvider',
+        iOSName: 'TrackerGoalProgressWidgetProvider',
         qualifiedAndroidName:
-            'github.hunmer.memento.widgets.providers.TrackerGoalWidgetProvider',
+            'github.hunmer.memento.widgets.providers.TrackerGoalProgressWidgetProvider',
       );
 
       if (mounted) {

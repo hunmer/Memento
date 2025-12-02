@@ -357,12 +357,22 @@ void _handleWidgetClick(String url) {
 
   try {
     final uri = Uri.parse(url);
+    debugPrint('URI scheme: ${uri.scheme}');
+    debugPrint('URI host: ${uri.host}');
     debugPrint('URI path: ${uri.path}');
     debugPrint('URI query: ${uri.query}');
 
     // 解析 URI 路径和参数
-    // 例如: memento://widget/quick_send?channelId=xxx
+    // 支持两种格式:
+    // 1. memento://widget/quick_send?channelId=xxx (path-based)
+    // 2. memento://habits_weekly_config?widgetId=35 (host-based)
     String routePath = uri.path;
+
+    // 如果 path 为空或只有斜杠，使用 host 作为路由路径
+    if (routePath.isEmpty || routePath == '/') {
+      routePath = '/${uri.host}';
+      debugPrint('使用 host 作为路由路径: $routePath');
+    }
 
     // 移除 /widget 前缀（如果存在）
     if (routePath.startsWith('/widget/')) {
@@ -415,6 +425,14 @@ void _handleWidgetClick(String url) {
     if (routePath == '/tracker_goal/config') {
       routePath = '/tracker_goal_selector';
       debugPrint('目标追踪进度增减小组件配置路由转换为: $routePath');
+    }
+
+    // 特殊处理：目标追踪进度条小组件配置路由
+    // 从 /tracker_goal_progress/config?widgetId=xxx 转换为 /tracker_goal_progress_selector
+    // widgetId 参数会在后面被提取到 arguments 中
+    if (routePath == '/tracker_goal_progress/config') {
+      routePath = '/tracker_goal_progress_selector';
+      debugPrint('目标追踪进度条小组件配置路由转换为: $routePath');
     }
 
     // 特殊处理：快捷记账小组件配置路由
@@ -549,6 +567,10 @@ Future<void> _restoreFloatingBallState() async {
     // 初始化悬浮球控制器
     final controller = FloatingWidgetController();
     await controller.initialize();
+
+    // 设置全局按钮事件监听器
+    _setupFloatingBallButtonListener(controller);
+
     await controller.performAutoRestore();
 
     debugPrint('悬浮球状态已恢复');
@@ -556,6 +578,106 @@ Future<void> _restoreFloatingBallState() async {
     debugPrint('恢复悬浮球状态失败: $e');
     debugPrint('堆栈: $stack');
   }
+}
+
+/// 设置悬浮球按钮事件全局监听器
+void _setupFloatingBallButtonListener(FloatingWidgetController controller) {
+  controller.buttonEvents.listen((event) {
+    debugPrint('全局悬浮球按钮事件: ${event.title}, data: ${event.data}, type: ${event.data.runtimeType}');
+
+    if (event.data == null) {
+      debugPrint('悬浮球按钮事件 data 为 null');
+      return;
+    }
+
+    // 安全地提取 action，处理可能的类型问题
+    final data = event.data!;
+    String? action;
+    Map<String, dynamic>? args;
+
+    try {
+      // 尝试直接获取 action
+      action = data['action']?.toString();
+
+      // 尝试获取 args，并转换为正确的类型
+      final rawArgs = data['args'];
+      if (rawArgs is Map) {
+        args = Map<String, dynamic>.from(rawArgs);
+      }
+    } catch (e) {
+      debugPrint('解析悬浮球按钮事件数据失败: $e');
+      return;
+    }
+
+    debugPrint('解析结果 - action: $action, args: $args');
+
+    if (action == null) {
+      debugPrint('悬浮球按钮事件没有 action 字段');
+      return;
+    }
+
+    switch (action) {
+      case 'openPlugin':
+        // 打开指定插件
+        final pluginId = args?['plugin']?.toString();
+        if (pluginId != null) {
+          final plugin = globalPluginManager.getPlugin(pluginId);
+          if (plugin != null) {
+            final context = navigatorKey.currentContext;
+            if (context != null) {
+              debugPrint('悬浮球打开插件: $pluginId');
+              globalPluginManager.openPlugin(context, plugin);
+            } else {
+              debugPrint('navigatorKey.currentContext 为 null');
+            }
+          } else {
+            debugPrint('插件不存在: $pluginId');
+          }
+        } else {
+          debugPrint('openPlugin action 缺少 plugin 参数');
+        }
+        break;
+
+      case 'openSettings':
+        // 打开设置页面
+        final navigator = navigatorKey.currentState;
+        if (navigator != null) {
+          debugPrint('悬浮球打开设置');
+          navigator.pushNamed('/settings');
+        } else {
+          debugPrint('navigatorKey.currentState 为 null');
+        }
+        break;
+
+      case 'goHome':
+      case 'home':
+        // 返回首页
+        final navigator = navigatorKey.currentState;
+        if (navigator != null) {
+          debugPrint('悬浮球返回首页');
+          navigator.pushNamedAndRemoveUntil('/', (route) => false);
+        } else {
+          debugPrint('navigatorKey.currentState 为 null');
+        }
+        break;
+
+      case 'goBack':
+        // 返回上一页
+        final navigator = navigatorKey.currentState;
+        if (navigator != null && navigator.canPop()) {
+          debugPrint('悬浮球返回上一页');
+          navigator.pop();
+        } else {
+          debugPrint('无法返回上一页');
+        }
+        break;
+
+      default:
+        debugPrint('未知的悬浮球动作: $action');
+    }
+  });
+
+  debugPrint('悬浮球按钮事件全局监听器已设置');
 }
 
 class MyApp extends StatefulWidget {

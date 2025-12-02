@@ -89,8 +89,9 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
     });
 
     // 监听位置变化（重置位置）
-    _positionSubscription =
-        FloatingBallService().positionChangeStream.listen((position) async {
+    _positionSubscription = FloatingBallService().positionChangeStream.listen((
+      position,
+    ) async {
       // 只在非拖动状态下响应位置变化（用于重置位置功能）
       if (mounted && !_isDragging) {
         final newPosition = await _manager.getPosition();
@@ -408,7 +409,6 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
       );
     }
 
-    // 简化的构建：只显示主悬浮球，不再包含展开的选项球
     return Positioned(
       left: _position!.dx,
       top: _position!.dy,

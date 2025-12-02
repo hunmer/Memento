@@ -442,6 +442,11 @@ class FloatingWidgetController {
     final prefs = await SharedPreferences.getInstance();
     final wasEnabled = prefs.getBool('floating_ball_enabled') ?? false;
 
+    // 强制刷新权限状态，确保应用启动时获取准确的权限信息
+    _hasPermission = await Permission.systemAlertWindow.isGranted;
+
+    print('performAutoRestore: wasEnabled=$wasEnabled, hasPermission=$_hasPermission');
+
     if (wasEnabled && _hasPermission) {
       await Future.delayed(const Duration(milliseconds: 500));
       await startFloatingBall();

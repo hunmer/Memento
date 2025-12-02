@@ -503,13 +503,19 @@ class _HabitTimerSelectorScreenState extends State<HabitTimerSelectorScreen> {
       // 4. 同步习惯数据到小组件（供Android端查找）
       await _syncHabitToWidget();
 
+      // 等待 SharedPreferences 数据写入完成
+      // HomeWidget.saveWidgetData 使用 apply() 是异步的，需要等待
+      await Future.delayed(const Duration(milliseconds: 200));
+
       // 5. 更新小组件
+      debugPrint('正在更新习惯计时器小组件...');
       await HomeWidget.updateWidget(
         name: 'HabitTimerWidgetProvider',
         iOSName: 'HabitTimerWidgetProvider',
         qualifiedAndroidName:
             'github.hunmer.memento.widgets.providers.HabitTimerWidgetProvider',
       );
+      debugPrint('HabitTimerWidgetProvider 更新完成');
 
       if (mounted) Navigator.of(context).pop();
     } catch (e) {

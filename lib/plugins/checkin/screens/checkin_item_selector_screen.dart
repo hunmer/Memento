@@ -68,28 +68,37 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
         _selectedItemId = savedItemId;
       }
 
-      // 加载背景色
-      final savedColorValue = await HomeWidget.getWidgetData<int>(
+      // 加载背景色（以 String 类型存储）
+      final savedColorStr = await HomeWidget.getWidgetData<String>(
         'checkin_widget_primary_color_${widget.widgetId}',
       );
-      if (savedColorValue != null) {
-        _widgetConfig = _widgetConfig.updateColor('primary', Color(savedColorValue));
+      if (savedColorStr != null) {
+        final colorValue = int.tryParse(savedColorStr);
+        if (colorValue != null) {
+          _widgetConfig = _widgetConfig.updateColor('primary', Color(colorValue));
+        }
       }
 
-      // 加载标题色
-      final savedAccentColorValue = await HomeWidget.getWidgetData<int>(
+      // 加载标题色（以 String 类型存储）
+      final savedAccentColorStr = await HomeWidget.getWidgetData<String>(
         'checkin_widget_accent_color_${widget.widgetId}',
       );
-      if (savedAccentColorValue != null) {
-        _widgetConfig = _widgetConfig.updateColor('accent', Color(savedAccentColorValue));
+      if (savedAccentColorStr != null) {
+        final colorValue = int.tryParse(savedAccentColorStr);
+        if (colorValue != null) {
+          _widgetConfig = _widgetConfig.updateColor('accent', Color(colorValue));
+        }
       }
 
-      // 加载透明度
-      final savedOpacity = await HomeWidget.getWidgetData<double>(
+      // 加载透明度（以 String 类型存储）
+      final savedOpacityStr = await HomeWidget.getWidgetData<String>(
         'checkin_widget_opacity_${widget.widgetId}',
       );
-      if (savedOpacity != null) {
-        _widgetConfig = _widgetConfig.copyWith(opacity: savedOpacity);
+      if (savedOpacityStr != null) {
+        final opacity = double.tryParse(savedOpacityStr);
+        if (opacity != null) {
+          _widgetConfig = _widgetConfig.copyWith(opacity: opacity);
+        }
       }
     } catch (e) {
       debugPrint('加载配置失败: $e');
@@ -536,13 +545,19 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
       // 同步打卡项目数据到小组件
       await _syncCheckinItemToWidget(selectedItem);
 
+      // 等待 SharedPreferences 数据写入完成
+      // HomeWidget.saveWidgetData 使用 apply() 是异步的，需要等待
+      await Future.delayed(const Duration(milliseconds: 200));
+
       // 更新小组件
+      debugPrint('正在更新小组件...');
       await HomeWidget.updateWidget(
         name: 'CheckinItemWidgetProvider',
         iOSName: 'CheckinItemWidgetProvider',
         qualifiedAndroidName:
             'github.hunmer.memento.widgets.providers.CheckinItemWidgetProvider',
       );
+      debugPrint('CheckinItemWidgetProvider 更新完成');
 
       await HomeWidget.updateWidget(
         name: 'CheckinMonthWidgetProvider',
@@ -550,6 +565,7 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
         qualifiedAndroidName:
             'github.hunmer.memento.widgets.providers.CheckinMonthWidgetProvider',
       );
+      debugPrint('CheckinMonthWidgetProvider 更新完成');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -72,9 +72,9 @@ class TrackerGoalProgressWidgetProvider : TrackerGoalWidgetProvider() {
         views.setViewVisibility(R.id.widget_hint_text, View.VISIBLE)
         views.setViewVisibility(R.id.widget_progress_container, View.GONE)
 
-        // 设置点击跳转到配置界面
+        // 设置点击跳转到配置界面（使用不同的路由以区分小组件类型）
         val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-        intent.data = android.net.Uri.parse("memento://widget/tracker_goal/config?widgetId=$appWidgetId")
+        intent.data = android.net.Uri.parse("memento://widget/tracker_goal_progress/config?widgetId=$appWidgetId")
         intent.setPackage("github.hunmer.memento")
         intent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
 

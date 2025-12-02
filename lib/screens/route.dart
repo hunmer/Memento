@@ -41,6 +41,7 @@ import 'package:Memento/plugins/timer/views/timer_main_view.dart';
 import 'package:Memento/plugins/todo/views/todo_main_view.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:Memento/plugins/tracker/screens/tracker_goal_selector_screen.dart';
+import 'package:Memento/plugins/tracker/screens/tracker_goal_progress_selector_screen.dart';
 
 // 插件路由处理器导入
 import 'package:Memento/core/routing/plugin_route_handler.dart';
@@ -117,6 +118,9 @@ class AppRoutes extends NavigatorObserver {
 
   // 目标追踪进度增减小组件配置路由
   static const String trackerGoalSelector = '/tracker_goal_selector';
+
+  // 目标追踪进度条小组件配置路由
+  static const String trackerGoalProgressSelector = '/tracker_goal_progress_selector';
 
   // 习惯计时器小组件配置路由
   static const String habitTimerSelector = '/habit_timer_selector';
@@ -344,6 +348,27 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
             TrackerGoalSelectorScreen(widgetId: trackerWidgetId));
+      case '/tracker_goal_progress_selector':
+      case 'tracker_goal_progress_selector':
+        // 目标追踪进度条小组件配置界面
+        int? trackerProgressWidgetId;
+
+        // 从 arguments 中解析 widgetId
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          // widgetId 可能是字符串或整数
+          final widgetIdValue = args['widgetId'];
+          if (widgetIdValue is int) {
+            trackerProgressWidgetId = widgetIdValue;
+          } else if (widgetIdValue is String) {
+            trackerProgressWidgetId = int.tryParse(widgetIdValue);
+          }
+        } else if (settings.arguments is int) {
+          trackerProgressWidgetId = settings.arguments as int;
+        }
+
+        return _createRoute(
+            TrackerGoalProgressSelectorScreen(widgetId: trackerProgressWidgetId));
       case '/habit_timer_selector':
       case 'habit_timer_selector':
         // 习惯计时器小组件配置界面

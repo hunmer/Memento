@@ -40,6 +40,8 @@ class BillShortcutsWidgetService {
 
       if (success == true) {
         debugPrint('BillShortcutsWidgetService: 配置已保存 (widgetId: ${config.widgetId})');
+        // 等待 SharedPreferences 数据写入完成
+        await Future.delayed(const Duration(milliseconds: 200));
         // 保存成功后触发小组件更新
         await updateWidget(config.widgetId);
       } else {
@@ -132,6 +134,8 @@ class BillShortcutsWidgetService {
 
       if (success == true) {
         debugPrint('BillShortcutsWidgetService: 颜色配置已保存 (widgetId: $widgetId)');
+        // 等待 SharedPreferences 数据写入完成
+        await Future.delayed(const Duration(milliseconds: 200));
         // 保存成功后触发小组件更新
         await updateWidget(widgetId);
       } else {
@@ -178,9 +182,12 @@ class BillShortcutsWidgetService {
   Future<void> updateWidget(int widgetId) async {
     try {
       // 使用 HomeWidget 触发 Android 端的小组件更新
+      debugPrint('BillShortcutsWidgetService: 正在更新小组件...');
       await HomeWidget.updateWidget(
         name: 'BillShortcutsWidgetProvider',
-        androidName: 'BillShortcutsWidgetProvider',
+        iOSName: 'BillShortcutsWidgetProvider',
+        qualifiedAndroidName:
+            'github.hunmer.memento.widgets.providers.BillShortcutsWidgetProvider',
       );
       debugPrint('BillShortcutsWidgetService: 小组件更新已触发 (widgetId: $widgetId)');
     } catch (e) {
