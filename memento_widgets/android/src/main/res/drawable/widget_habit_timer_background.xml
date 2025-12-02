@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 习惯计时器小组件背景（纯色+圆角） -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- 纯色背景（白色），颜色通过 backgroundTintList 动态设置 -->
+    <solid android:color="#FFFFFF" />
+    <!-- 圆角 -->
+    <corners android:radius="40dp" />
+</shape>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 播放按钮圆形背景 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <!-- 纯色背景，颜色通过 backgroundTintList 动态设置 -->
+    <solid android:color="#10B981" />
+</shape>
