@@ -141,7 +141,7 @@ class HabitsWeeklyWidgetProvider : AppWidgetProvider() {
         // 设置习惯列表
         val listIntent = Intent(context, HabitsWeeklyWidgetService::class.java).apply {
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-            data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
+            setData(Uri.parse(this.toUri(Intent.URI_INTENT_SCHEME)))
         }
         views.setRemoteAdapter(R.id.habit_list, listIntent)
 

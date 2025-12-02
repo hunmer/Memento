@@ -12,6 +12,7 @@ import android.view.View
 import android.widget.RemoteViews
 import org.json.JSONObject
 import github.hunmer.memento.R
+import github.hunmer.memento.widgets.services.ActivityWeeklyWidgetService
 
 /**
  * 活动周视图小组件Provider
@@ -141,7 +142,7 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
         // 设置活动列表
         val listIntent = Intent(context, ActivityWeeklyWidgetService::class.java).apply {
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-            data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
+            setData(Uri.parse(this.toUri(Intent.URI_INTENT_SCHEME)))
         }
         views.setRemoteAdapter(R.id.activity_list, listIntent)
 

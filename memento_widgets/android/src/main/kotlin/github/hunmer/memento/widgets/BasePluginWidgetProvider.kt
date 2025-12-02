@@ -289,7 +289,7 @@ abstract class BasePluginWidgetProvider : AppWidgetProvider() {
     /**
      * 将 Material Icon 字符转换为 Bitmap
      */
-    private fun createIconBitmap(context: Context, iconCodePoint: Int, size: Int, color: Int): Bitmap? {
+    protected fun createIconBitmap(context: Context, iconCodePoint: Int, size: Int, color: Int): Bitmap? {
         return try {
             // 加载 Material Icons 字体
             val typeface = ResourcesCompat.getFont(context, R.font.material_icons_regular)
