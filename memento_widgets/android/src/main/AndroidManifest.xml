@@ -592,5 +592,17 @@
             android:name="android.appwidget.provider"
             android:resource="@xml/widget_tracker_goal_info" />
     </receiver>
+
+    <!-- 目标追踪进度增减（进度条样式）2x2 (自定义) -->
+    <receiver
+        android:name="github.hunmer.memento.widgets.providers.TrackerGoalProgressWidgetProvider"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        </intent-filter>
+        <meta-data
+            android:name="android.appwidget.provider"
+            android:resource="@xml/widget_tracker_goal_progress_info" />
+    </receiver>
   </application>
 </manifest>
