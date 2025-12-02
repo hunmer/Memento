@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Daily Schedule List Widget</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@400;500;600&amp;family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#007AFF", // A standard iOS blue for primary actions
+            "background-light": "#F0F2F5", // A light grey for the page background
+            "background-dark": "#1C1C1E", // iOS-like dark mode background
+            "card-light": "#FFFFFF",
+            "card-dark": "#2C2C2E",
+            "text-primary-light": "#1C1C1E",
+            "text-primary-dark": "#F2F2F7",
+            "text-secondary-light": "#8E8E93",
+            "text-secondary-dark": "#8E8E93",
+          },
+          fontFamily: {
+            display: ["PingFang SC", "Noto Sans SC", "sans-serif"],
+          },
+          borderRadius: {
+            DEFAULT: "1.25rem",
+          },
+        },
+      },
+    };
+  </script>
+<style>
+    body {
+      font-family: 'display', sans-serif;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark flex items-center justify-center min-h-screen p-4">
+<div class="w-full max-w-[164px] aspect-square bg-card-light dark:bg-card-dark rounded-3xl shadow-lg p-3 flex flex-col font-display">
+<header class="mb-2">
+<h1 class="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark">
+        4月10日 周三
+      </h1>
+</header>
+<main class="flex-grow space-y-2 overflow-y-auto">
+<div class="flex items-start space-x-1.5">
+<div class="flex flex-col items-center">
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark w-10 text-right">全天</span>
+</div>
+<div class="w-1 bg-red-500 rounded-full flex-shrink-0 self-stretch"></div>
+<div class="flex-grow -mt-0.5">
+<p class="text-xs font-medium text-text-primary-light dark:text-text-primary-dark">点奶茶</p>
+<p class="text-[9px] text-text-secondary-light dark:text-text-secondary-dark truncate">Lizi:2024-04-09T19:00</p>
+</div>
+</div>
+<div class="flex items-start space-x-1.5">
+<div class="flex flex-col items-center">
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark w-10 text-right">8:00</span>
+</div>
+<div class="w-1 bg-green-500 rounded-full flex-shrink-0 self-stretch"></div>
+<div class="flex-grow -mt-0.5">
+<p class="text-xs font-medium text-text-primary-light dark:text-text-primary-dark">订午餐</p>
+<p class="text-[9px] text-text-secondary-light dark:text-text-secondary-dark truncate">Lizi:2023-05-16T09:00</p>
+</div>
+</div>
+<div class="flex items-start space-x-1.5">
+<div class="flex flex-col items-center">
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark w-10 text-right">9:00</span>
+</div>
+<div class="w-1 bg-green-500 rounded-full flex-shrink-0 self-stretch"></div>
+<div class="flex-grow -mt-0.5">
+<p class="text-xs font-medium text-text-primary-light dark:text-text-primary-dark">安装宽带</p>
+<p class="text-[9px] text-text-secondary-light dark:text-text-secondary-dark truncate">Lizi:2024-04-10T08:00</p>
+</div>
+</div>
+</main>
+</div>
+</body></html>

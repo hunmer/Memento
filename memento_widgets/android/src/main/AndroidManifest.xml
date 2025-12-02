@@ -550,6 +550,18 @@
             android:resource="@xml/widget_calendar_month_info" />
     </receiver>
 
+    <!-- 本周打卡列表 4x2 (自定义 - 日历网格视图) -->
+    <receiver
+        android:name="github.hunmer.memento.widgets.providers.CalendarTodayListWidgetProvider"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+        </intent-filter>
+        <meta-data
+            android:name="android:appwidget.provider"
+            android:resource="@xml/widget_calendar_today_list_info" />
+    </receiver>
+
     <!-- 待办列表 2x2 (自定义) -->
     <receiver
         android:name="github.hunmer.memento.widgets.providers.TodoListWidgetProvider"

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 今日事件列表项 - 单个事件的布局 -->
+<!-- 布局: [Checkbox] [时间] [彩色条] [事件内容] -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/event_item_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingVertical="4dp"
+    android:paddingHorizontal="2dp"
+    android:minHeight="44dp">
+
+    <!-- Checkbox 容器 - 提供足够的点击区域 -->
+    <FrameLayout
+        android:id="@+id/event_checkbox_container"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/event_checkbox"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_gravity="center"
+            android:src="@drawable/checkbox_unchecked"
+            android:contentDescription="复选框" />
+
+    </FrameLayout>
+
+    <!-- 时间标签 - 固定宽度，右对齐 -->
+    <TextView
+        android:id="@+id/event_time"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:text="全天"
+        android:textColor="#8E8E93"
+        android:textSize="10sp"
+        android:gravity="end|center_vertical"
+        android:maxLines="1" />
+
+    <!-- 彩色竖条 - 事件类型指示器 -->
+    <View
+        android:id="@+id/event_color_bar"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginVertical="4dp"
+        android:background="#34D399" />
+
+    <!-- 事件内容区域 -->
+    <LinearLayout
+        android:id="@+id/event_content_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:orientation="vertical"
+        android:gravity="start">
+
+        <!-- 事件标题 -->
+        <TextView
+            android:id="@+id/event_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="点奶茶"
+            android:textColor="#1F2937"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <!-- 事件详情 - 次要信息 -->
+        <TextView
+            android:id="@+id/event_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Lizi:2024-04-09T19:00"
+            android:textColor="#8E8E93"
+            android:textSize="9sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+    </LinearLayout>
+
+</LinearLayout>
