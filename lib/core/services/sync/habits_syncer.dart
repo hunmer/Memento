@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:home_widget/home_widget.dart';
 import '../../../plugins/habits/habits_plugin.dart';
+import '../../../plugins/habits/services/habits_widget_service.dart';
 import '../../plugin_manager.dart';
 import 'plugin_widget_syncer.dart';
 import 'package:memento_widgets/memento_widgets.dart';
@@ -160,6 +162,102 @@ class HabitsSyncer extends PluginWidgetSyncer {
       debugPrint('Failed to sync pending timer changes: $e');
     } finally {
       _isSyncingPendingTimerChanges = false;
+    }
+  }
+
+  /// 同步习惯周视图小组件
+  ///
+  /// 遍历所有已配置的周视图小组件,更新其数据
+  Future<void> syncHabitsWeeklyWidget() async {
+    try {
+      final plugin = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+      if (plugin == null) {
+        debugPrint('Habits plugin not found, skipping weekly widget sync');
+        return;
+      }
+
+      // 获取所有已配置的小组件ID列表
+      final widgetIdsJson = await HomeWidget.getWidgetData<String>(
+        'habits_weekly_widget_ids',
+      );
+
+      if (widgetIdsJson == null || widgetIdsJson.isEmpty) {
+        debugPrint('No configured habits weekly widgets found');
+        return;
+      }
+
+      final widgetIds = List<int>.from(jsonDecode(widgetIdsJson) as List);
+
+      final widgetService = HabitsWidgetService(plugin);
+
+      // 同步每个小组件
+      for (final widgetId in widgetIds) {
+        try {
+          await _syncSingleWeeklyWidget(widgetId, widgetService);
+        } catch (e) {
+          debugPrint('Failed to sync habits weekly widget $widgetId: $e');
+        }
+      }
+
+      debugPrint('Synced ${widgetIds.length} habits weekly widgets');
+    } catch (e) {
+      debugPrint('Failed to sync habits weekly widgets: $e');
+    }
+  }
+
+  /// 同步单个周视图小组件
+  Future<void> _syncSingleWeeklyWidget(
+    int widgetId,
+    HabitsWidgetService widgetService,
+  ) async {
+    // 读取小组件配置
+    final widgetDataJson = await HomeWidget.getWidgetData<String>(
+      'flutter.habits_weekly_data_$widgetId',
+    );
+
+    List<String> selectedHabitIds = [];
+    int weekOffset = 0;
+
+    if (widgetDataJson != null && widgetDataJson.isNotEmpty) {
+      try {
+        final widgetData = jsonDecode(widgetDataJson) as Map<String, dynamic>;
+        final configJson = widgetData['config'] as Map<String, dynamic>?;
+        if (configJson != null) {
+          selectedHabitIds = List<String>.from(configJson['selectedHabitIds'] as List);
+          weekOffset = configJson['weekOffset'] as int? ?? 0;
+        }
+      } catch (e) {
+        debugPrint('Failed to parse widget config for $widgetId: $e');
+        return;
+      }
+    }
+
+    if (selectedHabitIds.isEmpty) {
+      debugPrint('No habits selected for widget $widgetId, skipping sync');
+      return;
+    }
+
+    // 计算周数据
+    final weekData = await widgetService.calculateWeekData(
+      selectedHabitIds,
+      weekOffset,
+    );
+
+    // 更新数据(保留现有配置,只更新数据部分)
+    if (widgetDataJson != null && widgetDataJson.isNotEmpty) {
+      try {
+        final widgetData = jsonDecode(widgetDataJson) as Map<String, dynamic>;
+        widgetData['data'] = weekData.toMap();
+
+        await HomeWidget.saveWidgetData<String>(
+          'flutter.habits_weekly_data_$widgetId',
+          jsonEncode(widgetData),
+        );
+
+        debugPrint('Updated habits weekly widget $widgetId data');
+      } catch (e) {
+        debugPrint('Failed to update widget $widgetId data: $e');
+      }
     }
   }
 }

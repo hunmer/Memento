@@ -114,6 +114,7 @@ class PluginWidgetSyncHelper {
       _checkinSyncer.syncCheckinWeeklyWidget(),
       _trackerSyncer.syncTrackerGoalWidget(),
       _activitySyncer.syncActivityWeeklyWidget(),
+      _habitsSyncer.syncHabitsWeeklyWidget(),
     ]);
   }
 

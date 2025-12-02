@@ -30,6 +30,7 @@ import 'package:Memento/plugins/diary/diary_plugin.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/screens/habit_timer_selector_screen.dart';
+import 'package:Memento/plugins/habits/screens/habits_weekly_config_screen.dart';
 import 'package:Memento/plugins/habits/widgets/timer_dialog.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -417,6 +418,38 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
             ActivityWeeklyConfigScreen(widgetId: activityWeeklyWidgetId));
+      case '/habits_weekly_config':
+      case 'habits_weekly_config':
+        // 习惯周视图小组件配置界面
+        int? habitsWeeklyWidgetId;
+
+        // 从 arguments 中解析 widgetId
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          // widgetId 可能是字符串或整数
+          final widgetIdValue = args['widgetId'];
+          if (widgetIdValue is int) {
+            habitsWeeklyWidgetId = widgetIdValue;
+          } else if (widgetIdValue is String) {
+            habitsWeeklyWidgetId = int.tryParse(widgetIdValue);
+          }
+        } else if (settings.arguments is int) {
+          habitsWeeklyWidgetId = settings.arguments as int;
+        }
+
+        if (habitsWeeklyWidgetId == null) {
+          return _createRoute(
+            Scaffold(
+              appBar: AppBar(title: const Text('错误')),
+              body: const Center(
+                child: Text('错误: widgetId 参数缺失'),
+              ),
+            ),
+          );
+        }
+
+        return _createRoute(
+            HabitsWeeklyConfigScreen(widgetId: habitsWeeklyWidgetId));
       case '/habit_timer_dialog':
       case 'habit_timer_dialog':
         // 习惯计时器对话框（从小组件打开）
