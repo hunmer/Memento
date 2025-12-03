@@ -22,7 +22,6 @@ class _FloatingBallSettingsScreenState
   bool _isEnabled = true;
   final Map<FloatingBallGesture, GestureActionConfig?> _selectedActions = {};
 
-
   @override
   void initState() {
     super.initState();
@@ -204,74 +203,76 @@ class _FloatingBallSettingsScreenState
     final List<Widget> selectors = [];
 
     for (var gesture in FloatingBallGesture.values) {
-      final config = _selectedActions[gesture];
-      final displayText = _getGestureActionDisplayText(config);
+      if (gesture != FloatingBallGesture.longPress) {
+        final config = _selectedActions[gesture];
+        final displayText = _getGestureActionDisplayText(config);
 
-      selectors.add(
-        Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              child: Icon(
-                _getGestureIcon(gesture),
-                color: Colors.white,
+        selectors.add(
+          Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                child: Icon(_getGestureIcon(gesture), color: Colors.white),
               ),
-            ),
-            title: Text(_getGestureName(gesture)),
-            subtitle: Text(
-              displayText,
-              style: TextStyle(
-                color: displayText == l10n!.notSet
-                    ? Colors.grey[600]
-                    : null,
-              ),
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () async {
-              final result = await showDialog<ActionSelectorResult>(
-                context: context,
-                builder: (context) => ActionSelectorDialog(
-                  gesture: gesture,
-                  initialValue: config != null
-                      ? ActionSelectorResult(
-                          singleAction: config.singleAction,
-                          actionGroup: config.group,
-                        )
-                      : null,
+              title: Text(_getGestureName(gesture)),
+              subtitle: Text(
+                displayText,
+                style: TextStyle(
+                  color: displayText == l10n!.notSet ? Colors.grey[600] : null,
                 ),
-              );
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () async {
+                final result = await showDialog<ActionSelectorResult>(
+                  context: context,
+                  builder:
+                      (context) => ActionSelectorDialog(
+                        gesture: gesture,
+                        initialValue:
+                            config != null
+                                ? ActionSelectorResult(
+                                  singleAction: config.singleAction,
+                                  actionGroup: config.group,
+                                )
+                                : null,
+                      ),
+                );
 
-              if (result != null && mounted) {
-                setState(() {
-                  if (result.isGroup && result.actionGroup != null) {
-                    _selectedActions[gesture] = GestureActionConfig(
-                      gesture: gesture,
-                      group: result.actionGroup,
-                    );
-                  } else if (result.isSingleAction &&
-                      result.singleAction != null) {
-                    _selectedActions[gesture] = GestureActionConfig(
-                      gesture: gesture,
-                      singleAction: result.singleAction,
+                if (result != null && mounted) {
+                  setState(() {
+                    if (result.isGroup && result.actionGroup != null) {
+                      _selectedActions[gesture] = GestureActionConfig(
+                        gesture: gesture,
+                        group: result.actionGroup,
+                      );
+                    } else if (result.isSingleAction &&
+                        result.singleAction != null) {
+                      _selectedActions[gesture] = GestureActionConfig(
+                        gesture: gesture,
+                        singleAction: result.singleAction,
+                      );
+                    } else {
+                      _selectedActions[gesture] = null;
+                    }
+                  });
+
+                  // 保存到 ActionManager
+                  final actionConfig = _selectedActions[gesture];
+                  if (actionConfig != null) {
+                    await _actionManager.setGestureAction(
+                      gesture,
+                      actionConfig,
                     );
                   } else {
-                    _selectedActions[gesture] = null;
+                    await _actionManager.clearGestureAction(gesture);
                   }
-                });
-
-                // 保存到 ActionManager
-                final actionConfig = _selectedActions[gesture];
-                if (actionConfig != null) {
-                  await _actionManager.setGestureAction(gesture, actionConfig);
-                } else {
-                  await _actionManager.clearGestureAction(gesture);
                 }
-              }
-            },
+              },
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
 
     return selectors;
@@ -299,6 +300,10 @@ class _FloatingBallSettingsScreenState
     switch (gesture) {
       case FloatingBallGesture.tap:
         return Icons.touch_app;
+      case FloatingBallGesture.doubleTap:
+        return Icons.gesture;
+      case FloatingBallGesture.longPress:
+        return Icons.timer;
       case FloatingBallGesture.swipeUp:
         return Icons.keyboard_arrow_up;
       case FloatingBallGesture.swipeDown:
@@ -307,8 +312,6 @@ class _FloatingBallSettingsScreenState
         return Icons.keyboard_arrow_left;
       case FloatingBallGesture.swipeRight:
         return Icons.keyboard_arrow_right;
-      default:
-        return Icons.help_outline;
     }
   }
 
@@ -318,6 +321,10 @@ class _FloatingBallSettingsScreenState
     switch (gesture) {
       case FloatingBallGesture.tap:
         return l10n!.tapGesture;
+      case FloatingBallGesture.doubleTap:
+        return l10n!.doubleTapGesture;
+      case FloatingBallGesture.longPress:
+        return l10n!.longPressGesture;
       case FloatingBallGesture.swipeUp:
         return l10n!.swipeUpGesture;
       case FloatingBallGesture.swipeDown:

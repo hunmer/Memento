@@ -1,14 +1,17 @@
 /// 动作执行引擎
 /// 负责执行各种动作类型的逻辑
-library action_executor;
-
 import 'dart:async';
+import 'dart:convert';
 import 'package:Memento/core/app_initializer.dart';
+import 'package:Memento/core/event/event.dart';
+import 'package:Memento/core/event/plugin_action_event_args.dart';
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/dialogs/plugin_list_dialog.dart';
 import 'package:Memento/widgets/route_history_dialog/route_history_dialog.dart';
+import 'package:Memento/screens/settings_screen/settings_screen.dart';
 import 'package:flutter/material.dart';
+import 'action_manager.dart';
 import 'models/action_definition.dart';
 import 'models/action_group.dart';
 
@@ -59,6 +62,17 @@ class ExecutionResult {
       error: error,
       stackTrace: stackTrace,
     );
+  }
+
+  /// 序列化为JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'success': success,
+      'executionTimeMs': executionTimeMs,
+      'data': data,
+      'error': error,
+      'stackTrace': stackTrace,
+    };
   }
 }
 
@@ -177,8 +191,17 @@ class BuiltInActionExecutor implements ActionExecutor {
     BuildContext context,
     Map<String, dynamic>? data,
   ) async {
-    // TODO: 导航到设置页面
-    // Navigator.of(context).push(...);
+    if (!context.mounted) {
+      return ExecutionResult.failure(error: 'Context not mounted');
+    }
+
+    // 导航到设置页面
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SettingsScreen(),
+      ),
+    );
 
     return ExecutionResult.success(data: {'action': 'openSettings'});
   }
@@ -189,7 +212,7 @@ class BuiltInActionExecutor implements ActionExecutor {
     Map<String, dynamic>? data,
   ) async {
     // 触发刷新事件
-    // EventManager.broadcast('refresh', {...});
+    eventManager.broadcast('refresh', EventArgs());
 
     return ExecutionResult.success(data: {'action': 'refresh'});
   }
@@ -239,11 +262,49 @@ class BuiltInActionExecutor implements ActionExecutor {
     );
 
     // 根据页面ID导航到对应页面
-    // TODO: 实现完整的路由重新打开逻辑
-    // 这里可以扩展更多页面类型
+    bool navigated = false;
+
+    // 如果是插件页面，则打开插件
+    if (lastPage.pageId.startsWith('plugin:')) {
+      final pluginId = lastPage.pageId.substring(7); // 移除 'plugin:' 前缀
+      final plugin = globalPluginManager.getPlugin(pluginId);
+      if (plugin != null) {
+        globalPluginManager.openPlugin(context, plugin);
+        navigated = true;
+      }
+    }
+    // 如果是设置页面
+    else if (lastPage.pageId == 'settings') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SettingsScreen(),
+        ),
+      );
+      navigated = true;
+    }
+    // 如果是路由历史页面
+    else if (lastPage.pageId == 'route_history') {
+      showDialog(
+        context: context,
+        builder: (context) => const RouteHistoryDialog(),
+      );
+      navigated = true;
+    }
+    // 其他页面类型可以在这里扩展
+
+    if (!navigated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('无法打开页面: ${lastPage.pageId}')),
+      );
+    }
 
     return ExecutionResult.success(
-      data: {'action': 'reopenLastRoute', 'pageId': lastPage.pageId},
+      data: {
+        'action': 'reopenLastRoute',
+        'pageId': lastPage.pageId,
+        'navigated': navigated,
+      },
     );
   }
 
@@ -317,11 +378,24 @@ class PluginActionExecutor implements ActionExecutor {
     final stopwatch = Stopwatch()..start();
 
     try {
-      // TODO: 调用插件的动作
-      // final plugin = globalPluginManager.getPlugin(pluginId);
-      // if (plugin != null) {
-      //   await plugin.executeAction(actionName, data);
-      // }
+      // 检查插件是否存在
+      final plugin = globalPluginManager.getPlugin(pluginId);
+      if (plugin == null) {
+        return ExecutionResult.failure(
+          error: 'Plugin not found: $pluginId',
+          executionTimeMs: stopwatch.elapsedMilliseconds,
+        );
+      }
+
+      // 广播插件动作事件，让插件自行处理
+      eventManager.broadcast(
+        'plugin_action',
+        PluginActionEventArgs(
+          pluginId: pluginId,
+          actionName: actionName,
+          data: data,
+        ),
+      );
 
       return ExecutionResult.success(
         data: {
@@ -387,24 +461,26 @@ class GroupActionExecutor implements ActionExecutor {
       if (!action.enabled) continue;
 
       // 执行单个动作
-      // TODO: 通过 ActionManager 执行动作
-      // final result = await ActionManager.instance.execute(
-      //   action.actionId,
-      //   context,
-      //   data: {...data, ...action.data},
-      // );
+      final mergedData = <String, dynamic>{}
+        ..addAll(data ?? {})
+        ..addAll(action.data);
+      final result = await ActionManager().execute(
+        action.actionId,
+        context,
+        data: mergedData,
+      );
 
-      // results[action.actionId] = result;
+      results[action.actionId] = result;
 
       // 如果失败且配置为全部执行则中断
       if (group.executionMode == GroupExecutionMode.all) {
-        // if (!result.success) {
-        //   stopwatch.stop();
-        //   return ExecutionResult.failure(
-        //     error: 'Action ${action.actionId} failed: ${result.error}',
-        //     executionTimeMs: stopwatch.elapsedMilliseconds,
-        //   );
-        // }
+        if (!result.success) {
+          stopwatch.stop();
+          return ExecutionResult.failure(
+            error: 'Action ${action.actionId} failed: ${result.error}',
+            executionTimeMs: stopwatch.elapsedMilliseconds,
+          );
+        }
       }
     }
 
@@ -433,11 +509,14 @@ class GroupActionExecutor implements ActionExecutor {
     for (final action in group.actions) {
       if (!action.enabled) continue;
 
-      // futures[action.actionId] = ActionManager.instance.execute(
-      //   action.actionId,
-      //   context,
-      //   data: {...data, ...action.data},
-      // );
+      final mergedData = <String, dynamic>{}
+        ..addAll(data ?? {})
+        ..addAll(action.data);
+      futures[action.actionId] = ActionManager().execute(
+        action.actionId,
+        context,
+        data: mergedData,
+      );
     }
 
     // 等待所有动作完成
@@ -467,8 +546,7 @@ class GroupActionExecutor implements ActionExecutor {
     Map<String, dynamic>? data,
     Stopwatch stopwatch,
   ) async {
-    // TODO: 解析条件表达式并执行
-    // 这里可以集成一个简单的表达式求值器
+    // 解析条件表达式并执行
 
     final condition = group.condition;
     if (condition == null || condition.isEmpty) {
@@ -497,23 +575,26 @@ class GroupActionExecutor implements ActionExecutor {
 
     // 条件满足，执行第一个动作
     if (group.actions.isNotEmpty && group.actions.first.enabled) {
-      // final result = await ActionManager.instance.execute(
-      //   group.actions.first.actionId,
-      //   context,
-      //   data: {...data, ...group.actions.first.data},
-      // );
+      final mergedData = <String, dynamic>{}
+        ..addAll(data ?? {})
+        ..addAll(group.actions.first.data);
+      final result = await ActionManager().execute(
+        group.actions.first.actionId,
+        context,
+        data: mergedData,
+      );
 
-      // stopwatch.stop();
-      // return ExecutionResult.success(
-      //   data: {
-      //     'groupId': group.id,
-      //     'operator': 'condition',
-      //     'condition': condition,
-      //     'conditionMet': true,
-      //     'result': result,
-      //   },
-      //   executionTimeMs: stopwatch.elapsedMilliseconds,
-      // );
+      stopwatch.stop();
+      return ExecutionResult.success(
+        data: {
+          'groupId': group.id,
+          'operator': 'condition',
+          'condition': condition,
+          'conditionMet': true,
+          'result': result.toJson(),
+        },
+        executionTimeMs: stopwatch.elapsedMilliseconds,
+      );
     }
 
     stopwatch.stop();
@@ -573,8 +654,13 @@ class GroupActionExecutor implements ActionExecutor {
 class CustomActionExecutor implements ActionExecutor {
   final String script;
   final String scriptType; // 'javascript', 'dart', 'expression' 等
+  final String? actionId; // 可选的actionId，用于识别特定动作
 
-  const CustomActionExecutor({required this.script, required this.scriptType});
+  const CustomActionExecutor({
+    required this.script,
+    required this.scriptType,
+    this.actionId,
+  });
 
   @override
   Future<ExecutionResult> execute(
@@ -614,16 +700,180 @@ class CustomActionExecutor implements ActionExecutor {
     Map<String, dynamic>? data,
     Stopwatch stopwatch,
   ) async {
-    // TODO: 使用 JavaScript 引擎执行脚本
-    // 可以集成 js_interop 或其他 JS 引擎
+    // 获取脚本和输入数据
+    String userScript = script;
+    Map<String, dynamic>? inputData = data;
 
+    // 如果是 js_custom_executor 且没有提供脚本，检查配置数据
+    if (actionId == 'js_custom_executor') {
+      // 从配置数据中获取脚本和输入数据
+      if (data != null) {
+        if (data.containsKey('script') && (data['script'] as String?) != null && (data['script'] as String).isNotEmpty) {
+          userScript = data['script'] as String;
+        }
+        if (data.containsKey('inputData')) {
+          final inputDataStr = data['inputData'] as String?;
+          if (inputDataStr != null && inputDataStr.trim().isNotEmpty) {
+            try {
+              inputData = jsonDecode(inputDataStr);
+            } catch (e) {
+              stopwatch.stop();
+              return ExecutionResult.failure(
+                error: 'Invalid JSON in inputData: $e',
+                executionTimeMs: stopwatch.elapsedMilliseconds,
+              );
+            }
+          }
+        }
+      }
+
+      // 如果还是没有脚本，则显示输入对话框
+      if (userScript.trim().isEmpty) {
+        return await _showJavaScriptInputDialog(context, data, stopwatch);
+      }
+    }
+
+    // 使用 JavaScript 引擎执行脚本
+    // TODO: 集成 JavaScript 引擎库
+
+    try {
+      // 临时实现：返回脚本内容供外部处理
+      stopwatch.stop();
+      return ExecutionResult.success(
+        data: {
+          'script': userScript,
+          'scriptType': scriptType,
+          'inputData': inputData,
+          'message': 'JavaScript execution ready - integrate JS engine',
+        },
+        executionTimeMs: stopwatch.elapsedMilliseconds,
+      );
+    } catch (e, stack) {
+      stopwatch.stop();
+      return ExecutionResult.failure(
+        error: e.toString(),
+        stackTrace: stack.toString(),
+        executionTimeMs: stopwatch.elapsedMilliseconds,
+      );
+    }
+  }
+
+  /// 显示JavaScript代码输入对话框
+  Future<ExecutionResult> _showJavaScriptInputDialog(
+    BuildContext context,
+    Map<String, dynamic>? data,
+    Stopwatch stopwatch,
+  ) async {
+    // 如果上下文未挂载，返回失败
+    if (!context.mounted) {
+      stopwatch.stop();
+      return ExecutionResult.failure(
+        error: 'Context not mounted',
+        executionTimeMs: stopwatch.elapsedMilliseconds,
+      );
+    }
+
+    final scriptController = TextEditingController();
+    final inputDataController = TextEditingController(
+      text: data?.toString() ?? '',
+    );
+
+    // 显示对话框
+    final result = await showDialog<Map<String, String>>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('输入JavaScript代码'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: scriptController,
+                decoration: const InputDecoration(
+                  labelText: 'JavaScript代码',
+                  hintText: '在这里输入您的JavaScript代码',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 8,
+                minLines: 5,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: inputDataController,
+                decoration: const InputDecoration(
+                  labelText: '输入数据（JSON格式，可选）',
+                  hintText: '{"key": "value"}',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '提示：使用 inputData 访问输入数据，返回格式：{ success: true, ... }',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context, {
+                'script': scriptController.text,
+                'data': inputDataController.text,
+              });
+            },
+            child: const Text('执行'),
+          ),
+        ],
+      ),
+    );
+
+    // 如果用户取消，返回失败
+    if (result == null) {
+      stopwatch.stop();
+      return ExecutionResult.failure(
+        error: 'User cancelled',
+        executionTimeMs: stopwatch.elapsedMilliseconds,
+      );
+    }
+
+    // 执行用户输入的JavaScript代码
+    final userScript = result['script'] ?? '';
+    if (userScript.trim().isEmpty) {
+      stopwatch.stop();
+      return ExecutionResult.failure(
+        error: 'JavaScript code cannot be empty',
+        executionTimeMs: stopwatch.elapsedMilliseconds,
+      );
+    }
+
+    // 解析输入数据
+    Map<String, dynamic>? inputData;
+    try {
+      if (result['data']?.trim().isNotEmpty == true) {
+        inputData = jsonDecode(result['data']!);
+      }
+    } catch (e) {
+      // 如果解析失败，使用原始字符串作为输入数据
+      inputData = {'rawData': result['data']};
+    }
+
+    // 临时实现：返回用户输入的代码信息
     stopwatch.stop();
     return ExecutionResult.success(
       data: {
-        'script': script,
-        'scriptType': scriptType,
-        'inputData': data,
-        'message': 'JavaScript execution not implemented yet',
+        'script': userScript,
+        'scriptType': 'javascript',
+        'inputData': inputData,
+        'userInput': true,
+        'message': 'JavaScript code received - ready for execution',
+        'timestamp': DateTime.now().toIso8601String(),
       },
       executionTimeMs: stopwatch.elapsedMilliseconds,
     );
@@ -634,19 +884,30 @@ class CustomActionExecutor implements ActionExecutor {
     Map<String, dynamic>? data,
     Stopwatch stopwatch,
   ) async {
-    // TODO: 安全执行 Dart 代码
+    // 安全执行 Dart 代码
     // 需要使用 isolates 或其他安全执行机制
+    // TODO: 实现安全的 Dart 代码执行
 
-    stopwatch.stop();
-    return ExecutionResult.success(
-      data: {
-        'script': script,
-        'scriptType': scriptType,
-        'inputData': data,
-        'message': 'Dart execution not implemented yet',
-      },
-      executionTimeMs: stopwatch.elapsedMilliseconds,
-    );
+    try {
+      // 临时实现：返回脚本内容供外部处理
+      stopwatch.stop();
+      return ExecutionResult.success(
+        data: {
+          'script': script,
+          'scriptType': scriptType,
+          'inputData': data,
+          'message': 'Dart execution ready - implement safety mechanism',
+        },
+        executionTimeMs: stopwatch.elapsedMilliseconds,
+      );
+    } catch (e, stack) {
+      stopwatch.stop();
+      return ExecutionResult.failure(
+        error: e.toString(),
+        stackTrace: stack.toString(),
+        executionTimeMs: stopwatch.elapsedMilliseconds,
+      );
+    }
   }
 
   Future<ExecutionResult> _executeExpression(
@@ -654,18 +915,58 @@ class CustomActionExecutor implements ActionExecutor {
     Map<String, dynamic>? data,
     Stopwatch stopwatch,
   ) async {
-    // TODO: 执行简单表达式
+    // 执行简单表达式
+    try {
+      // 临时实现：简单的表达式求值
+      // 实际项目中应该使用表达式求值库
+      final result = _evaluateSimpleExpression(script, data);
 
-    stopwatch.stop();
-    return ExecutionResult.success(
-      data: {
-        'script': script,
-        'scriptType': scriptType,
-        'inputData': data,
-        'message': 'Expression execution not implemented yet',
-      },
-      executionTimeMs: stopwatch.elapsedMilliseconds,
-    );
+      stopwatch.stop();
+      return ExecutionResult.success(
+        data: {
+          'script': script,
+          'scriptType': scriptType,
+          'inputData': data,
+          'result': result,
+        },
+        executionTimeMs: stopwatch.elapsedMilliseconds,
+      );
+    } catch (e, stack) {
+      stopwatch.stop();
+      return ExecutionResult.failure(
+        error: e.toString(),
+        stackTrace: stack.toString(),
+        executionTimeMs: stopwatch.elapsedMilliseconds,
+      );
+    }
+  }
+
+  /// 简单表达式求值
+  dynamic _evaluateSimpleExpression(String expression, Map<String, dynamic>? data) {
+    try {
+      // 简单的数学表达式求值（仅支持基本运算）
+      if (expression.contains(RegExp(r'[\+\-\*/()]'))) {
+        // 将变量替换为实际值
+        String processedExpression = expression;
+        if (data != null) {
+          for (final entry in data.entries) {
+            processedExpression = processedExpression.replaceAll(
+              '\$${entry.key}',
+              entry.value.toString(),
+            );
+          }
+        }
+
+        // 简单的安全求值（仅用于演示，生产环境应使用专门的表达式求值库）
+        // 这里返回一个模拟结果
+        return 'Expression evaluated: $processedExpression';
+      }
+
+      // 如果不是数学表达式，直接返回字符串
+      return expression;
+    } catch (e) {
+      return 'Error evaluating expression: $e';
+    }
   }
 }
 

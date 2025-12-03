@@ -38,6 +38,12 @@ class FloatingBallLocalizationsEn extends FloatingBallLocalizations {
   String get tapGesture => 'Tap';
 
   @override
+  String get doubleTapGesture => 'Double Tap';
+
+  @override
+  String get longPressGesture => 'Long Press';
+
+  @override
   String get swipeUpGesture => 'Swipe Up';
 
   @override
