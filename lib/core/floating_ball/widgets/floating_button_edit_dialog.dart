@@ -6,6 +6,9 @@ import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
 import '../../../constants/app_icons.dart';
+import '../../action/action_manager.dart';
+import '../../action/widgets/action_selector_dialog.dart';
+import '../../action/models/action_instance.dart';
 
 /// 悬浮按钮编辑对话框
 class FloatingButtonEditDialog extends StatefulWidget {
@@ -28,76 +31,9 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
   late TextEditingController _dataController;
   String _selectedIcon = 'ic_menu_info_details';
   String? _imageBase64;
-  String? _selectedAction;
 
-  // 常用动作列表
-  final List<Map<String, dynamic>> _commonActions = [
-    {
-      'label': '打开聊天插件',
-      'value': 'openPlugin',
-      'data': {'action': 'openPlugin', 'args': {'plugin': 'chat'}},
-    },
-    {
-      'label': '打开日记插件',
-      'value': 'openPlugin_diary',
-      'data': {'action': 'openPlugin', 'args': {'plugin': 'diary'}},
-    },
-    {
-      'label': '打开活动插件',
-      'value': 'openPlugin_activity',
-      'data': {'action': 'openPlugin', 'args': {'plugin': 'activity'}},
-    },
-    {
-      'label': '打开笔记插件',
-      'value': 'openPlugin_notes',
-      'data': {'action': 'openPlugin', 'args': {'plugin': 'notes'}},
-    },
-    {
-      'label': '打开任务插件',
-      'value': 'openPlugin_todo',
-      'data': {'action': 'openPlugin', 'args': {'plugin': 'todo'}},
-    },
-    {
-      'label': '打开签到插件',
-      'value': 'openPlugin_checkin',
-      'data': {'action': 'openPlugin', 'args': {'plugin': 'checkin'}},
-    },
-    {
-      'label': '打开账单插件',
-      'value': 'openPlugin_bill',
-      'data': {'action': 'openPlugin', 'args': {'plugin': 'bill'}},
-    },
-    {
-      'label': '打开物品插件',
-      'value': 'openPlugin_goods',
-      'data': {'action': 'openPlugin', 'args': {'plugin': 'goods'}},
-    },
-    {
-      'label': '打开联系人插件',
-      'value': 'openPlugin_contact',
-      'data': {'action': 'openPlugin', 'args': {'plugin': 'contact'}},
-    },
-    {
-      'label': '打开习惯插件',
-      'value': 'openPlugin_habits',
-      'data': {'action': 'openPlugin', 'args': {'plugin': 'habits'}},
-    },
-    {
-      'label': '打开AI对话插件',
-      'value': 'openPlugin_agent_chat',
-      'data': {'action': 'openPlugin', 'args': {'plugin': 'agent_chat'}},
-    },
-    {
-      'label': '打开设置',
-      'value': 'openSettings',
-      'data': {'action': 'openSettings'},
-    },
-    {
-      'label': '返回首页',
-      'value': 'home',
-      'data': {'action': 'home'},
-    },
-  ];
+  // 选中的动作结果
+  ActionSelectorResult? _selectedActionResult;
 
   @override
   void initState() {
@@ -114,14 +50,16 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
         text: jsonEncode(widget.initialButton!.data),
       );
 
-      // 尝试匹配常用动作
+      // 尝试从已有数据创建 ActionSelectorResult
       final data = widget.initialButton!.data!;
-      for (var action in _commonActions) {
-        final actionData = action['data'] as Map<String, dynamic>;
-        if (_mapsEqual(data, actionData)) {
-          _selectedAction = action['value'] as String;
-          break;
-        }
+      final actionId = data['action'] as String?;
+      if (actionId != null) {
+        _selectedActionResult = ActionSelectorResult(
+          singleAction: ActionInstance.create(
+            actionId: actionId,
+            data: data['args'] as Map<String, dynamic>? ?? {},
+          ),
+        );
       }
     } else {
       _dataController = TextEditingController(text: '{}');
@@ -135,25 +73,73 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
     super.dispose();
   }
 
-  /// 比较两个 Map 是否相等
-  bool _mapsEqual(Map<String, dynamic> a, Map<String, dynamic> b) {
-    if (a.length != b.length) return false;
-    for (var key in a.keys) {
-      if (!b.containsKey(key)) return false;
-      final aValue = a[key];
-      final bValue = b[key];
-      if (aValue is Map && bValue is Map) {
-        if (!_mapsEqual(
-          aValue as Map<String, dynamic>,
-          bValue as Map<String, dynamic>,
-        )) {
-          return false;
-        }
-      } else if (aValue != bValue) {
-        return false;
-      }
+  /// 打开动作选择器
+  Future<void> _openActionSelector() async {
+    // 确保 ActionManager 已初始化
+    final actionManager = ActionManager();
+    if (!actionManager.isInitialized) {
+      await actionManager.initialize();
     }
-    return true;
+
+    if (!mounted) return;
+
+    final result = await showDialog<ActionSelectorResult>(
+      context: context,
+      builder: (context) => ActionSelectorDialog(
+        initialValue: _selectedActionResult,
+        showGroupEditor: false,
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedActionResult = result;
+        // 更新执行数据
+        _updateDataFromActionResult(result);
+      });
+    }
+  }
+
+  /// 根据动作结果更新执行数据
+  void _updateDataFromActionResult(ActionSelectorResult result) {
+    Map<String, dynamic> data = {};
+
+    if (result.singleAction != null) {
+      data = {
+        'action': result.singleAction!.actionId,
+        if (result.singleAction!.data.isNotEmpty)
+          'args': result.singleAction!.data,
+      };
+    } else if (result.actionGroup != null) {
+      data = {
+        'action': 'executeGroup',
+        'args': {'groupId': result.actionGroup!.id},
+      };
+    }
+
+    _dataController.text = jsonEncode(data);
+  }
+
+  /// 获取当前选中动作的显示名称
+  String _getSelectedActionLabel() {
+    if (_selectedActionResult == null || _selectedActionResult!.isEmpty) {
+      return '点击选择动作';
+    }
+
+    if (_selectedActionResult!.singleAction != null) {
+      final actionId = _selectedActionResult!.singleAction!.actionId;
+      // 尝试获取动作定义的标题
+      if (_selectedActionResult!.selectedDefinition != null) {
+        return _selectedActionResult!.selectedDefinition!.title;
+      }
+      return actionId;
+    }
+
+    if (_selectedActionResult!.actionGroup != null) {
+      return '动作组: ${_selectedActionResult!.actionGroup!.title}';
+    }
+
+    return '点击选择动作';
   }
 
   /// 选择图片
@@ -232,25 +218,6 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
     setState(() {
       _selectedIcon = 'ic_menu_info_details';
     });
-  }
-
-  /// 常用动作变更
-  void _onActionChanged(String? action) {
-    if (action == null) return;
-
-    setState(() {
-      _selectedAction = action;
-    });
-
-    // 查找对应的动作数据
-    final actionData = _commonActions.firstWhere(
-      (item) => item['value'] == action,
-      orElse: () => {'data': {}},
-    );
-
-    // 更新执行数据
-    final data = actionData['data'] as Map<String, dynamic>;
-    _dataController.text = jsonEncode(data);
   }
 
   /// 保存按钮
@@ -449,27 +416,44 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
               ),
               const Divider(height: 32),
 
-              // 常用动作
-              DropdownButtonFormField<String>(
-                value: _selectedAction,
-                decoration: const InputDecoration(
-                  labelText: '常用动作',
-                  border: OutlineInputBorder(),
-                  helperText: '选择后会自动填充执行数据',
-                ),
-                items: [
-                  const DropdownMenuItem<String>(
-                    value: null,
-                    child: Text('自定义'),
-                  ),
-                  ..._commonActions.map(
-                    (action) => DropdownMenuItem<String>(
-                      value: action['value'] as String,
-                      child: Text(action['label'] as String),
+              // 动作选择器
+              InkWell(
+                onTap: _openActionSelector,
+                borderRadius: BorderRadius.circular(4),
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: '选择动作',
+                    border: const OutlineInputBorder(),
+                    helperText: '点击选择要执行的动作',
+                    suffixIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_selectedActionResult != null &&
+                            !_selectedActionResult!.isEmpty)
+                          IconButton(
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () {
+                              setState(() {
+                                _selectedActionResult = null;
+                                _dataController.text = '{}';
+                              });
+                            },
+                            tooltip: '清除动作',
+                          ),
+                        const Icon(Icons.chevron_right),
+                      ],
                     ),
                   ),
-                ],
-                onChanged: _onActionChanged,
+                  child: Text(
+                    _getSelectedActionLabel(),
+                    style: TextStyle(
+                      color: _selectedActionResult == null ||
+                              _selectedActionResult!.isEmpty
+                          ? Colors.grey[600]
+                          : null,
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
 
