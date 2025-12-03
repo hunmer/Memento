@@ -120,48 +120,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Activity Weekly Widget Provider -->
-        <receiver
-            android:name="github.hunmer.memento.widgets.providers.ActivityWeeklyWidgetProvider"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="github.hunmer.memento.widget.ACTIVITY_PREV_WEEK" />
-                <action android:name="github.hunmer.memento.widget.ACTIVITY_NEXT_WEEK" />
-                <action android:name="github.hunmer.memento.widget.ACTIVITY_ITEM_CLICK" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/activity_weekly_widget_info" />
-        </receiver>
-
-        <!-- Activity Weekly Widget Service -->
-        <service
-            android:name="github.hunmer.memento.widgets.services.ActivityWeeklyWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS"
-            android:exported="false" />
-
-        <!-- Habits Weekly Widget Provider -->
-        <receiver
-            android:name="github.hunmer.memento.widgets.providers.HabitsWeeklyWidgetProvider"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="github.hunmer.memento.widget.HABITS_PREV_WEEK" />
-                <action android:name="github.hunmer.memento.widget.HABITS_NEXT_WEEK" />
-                <action android:name="github.hunmer.memento.widget.HABITS_ITEM_CLICK" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/habits_weekly_widget_info" />
-        </receiver>
-
-        <!-- Habits Weekly Widget Service -->
-        <service
-            android:name="github.hunmer.memento.widgets.services.HabitsWeeklyWidgetService"
-            android:permission="android.permission.BIND_REMOTEVIEWS"
-            android:exported="false" />
-
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
