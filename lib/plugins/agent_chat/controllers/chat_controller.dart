@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:openai_dart/openai_dart.dart';
 import 'package:uuid/uuid.dart';
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:memento_foreground_service/memento_foreground_service.dart';
 import '../../../core/plugin_manager.dart';
 import '../../../core/services/foreground_task_manager.dart';
 import '../../openai/openai_plugin.dart';
@@ -2527,7 +2527,7 @@ $toolDetailPrompt
           notificationTitle: 'AI助手运行中',
           notificationText: '正在为您生成回复...',
           notificationButtons: [
-            const NotificationButton(id: 'cancel', text: '取消'),
+            const ServiceNotificationButton(key: 'cancel', label: '取消'),
           ],
           notificationInitialRoute: '/chat',
           callback: startAIChatTaskCallback,

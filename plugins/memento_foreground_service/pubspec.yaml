@@ -1,0 +1,28 @@
+name: memento_foreground_service
+description: "Memento 前台服务管理插件，封装 flutter_foreground_task，提供简洁的前台服务 API"
+version: 1.0.0
+homepage: https://github.com/hunmer/Memento
+
+environment:
+  sdk: ^3.7.0
+  flutter: '>=3.7.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.0.2
+  flutter_foreground_task: ^9.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.memento.foreground_service
+        pluginClass: MementoForegroundServicePlugin
+      ios:
+        pluginClass: MementoForegroundServicePlugin

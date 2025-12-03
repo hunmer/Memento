@@ -15,7 +15,7 @@ class ActivityNotificationService {
   bool _isEnabled = false;
   Timer? _updateTimer;
   static const MethodChannel _activityChannel = MethodChannel(
-    'github.hunmer.memento/activity_notification',
+    'com.memento.foreground_service/activity_notification',
   );
 
   static const int _notificationId = 2001; // Android前台服务通知ID

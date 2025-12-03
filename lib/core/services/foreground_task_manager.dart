@@ -1,7 +1,9 @@
-import 'dart:io';
+import 'package:memento_foreground_service/memento_foreground_service.dart';
 
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-
+/// 前台任务管理器 - 使用 memento_foreground_service 插件
+///
+/// 这是对 memento_foreground_service 插件的薄封装层，
+/// 保持与原有 API 的兼容性。
 class ForegroundTaskManager {
   static final ForegroundTaskManager _instance =
       ForegroundTaskManager._internal();
@@ -9,104 +11,51 @@ class ForegroundTaskManager {
   factory ForegroundTaskManager() => _instance;
 
   ForegroundTaskManager._internal() {
-    initCommunicationPort();
-    requestPermissions();
-    initService();
+    _initialize();
   }
 
-  // 初始化通信端口
-  void initCommunicationPort() {
-    FlutterForegroundTask.initCommunicationPort();
+  Future<void> _initialize() async {
+    await MementoForegroundService.instance.initialize();
   }
 
-  // 请求必要的权限
-  Future<void> requestPermissions() async {
-    final notificationPermission =
-        await FlutterForegroundTask.checkNotificationPermission();
-    if (notificationPermission != NotificationPermission.granted) {
-      await FlutterForegroundTask.requestNotificationPermission();
-    }
-
-    if (Platform.isAndroid) {
-      if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
-        await FlutterForegroundTask.requestIgnoreBatteryOptimization();
-      }
-
-      if (!await FlutterForegroundTask.canScheduleExactAlarms) {
-        await FlutterForegroundTask.openAlarmsAndRemindersSettings();
-      }
-    }
-  }
-
-  // 初始化服务配置
-  void initService() {
-    FlutterForegroundTask.init(
-      androidNotificationOptions: AndroidNotificationOptions(
-        channelId: 'foreground_service',
-        channelName: 'Foreground Service Notification',
-        channelDescription:
-            'This notification appears when the foreground service is running.',
-        onlyAlertOnce: true,
-      ),
-      iosNotificationOptions: const IOSNotificationOptions(
-        showNotification: false,
-        playSound: false,
-      ),
-      foregroundTaskOptions: ForegroundTaskOptions(
-        eventAction: ForegroundTaskEventAction.repeat(5000),
-        autoRunOnBoot: true,
-        autoRunOnMyPackageReplaced: true,
-        allowWakeLock: true,
-        allowWifiLock: true,
-      ),
-    );
-  }
-
-  // 启动前台服务
-  Future<ServiceRequestResult> startService({
+  /// 启动前台服务
+  Future<ServiceResult> startService({
     required int serviceId,
     String? notificationIcon,
-    List<NotificationButton>? notificationButtons,
+    List<ServiceNotificationButton>? notificationButtons,
     required String notificationTitle,
     required String notificationText,
     required Function() callback,
     String? notificationInitialRoute,
   }) async {
-    if (await isServiceRunning()) {
-      return FlutterForegroundTask.restartService();
-    }
-
-    return FlutterForegroundTask.startService(
+    return await MementoForegroundService.instance.startService(
       serviceId: serviceId,
-      notificationIcon: const NotificationIcon(
-        metaDataName: 'github.hunmer.memento.service.APP_ICON',
-        // backgroundColor: Colors.orange,
-      ),
-      notificationButtons: notificationButtons,
       notificationTitle: notificationTitle,
       notificationText: notificationText,
+      notificationIcon: notificationIcon ?? 'github.hunmer.memento.service.APP_ICON',
+      notificationButtons: notificationButtons,
       notificationInitialRoute: notificationInitialRoute,
       callback: callback,
     );
   }
 
-  // 停止前台服务
-  Future<ServiceRequestResult> stopService() {
-    return FlutterForegroundTask.stopService();
+  /// 停止前台服务
+  Future<ServiceResult> stopService() {
+    return MementoForegroundService.instance.stopService();
   }
 
-  // 检查服务是否正在运行
+  /// 检查服务是否正在运行
   Future<bool> isServiceRunning() {
-    return FlutterForegroundTask.isRunningService;
+    return MementoForegroundService.instance.isRunning;
   }
 
-  // 添加数据回调
+  /// 添加数据回调
   void addDataCallback(Function(Object) callback) {
-    FlutterForegroundTask.addTaskDataCallback(callback);
+    MementoForegroundService.instance.addDataCallback(callback);
   }
 
-  // 移除数据回调
+  /// 移除数据回调
   void removeDataCallback(Function(Object) callback) {
-    FlutterForegroundTask.removeTaskDataCallback(callback);
+    MementoForegroundService.instance.removeDataCallback(callback);
   }
 }

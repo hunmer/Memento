@@ -36,96 +36,26 @@ target 'Runner' do
   end
 end
 
+# 需要保留模块接口的 Pod 列表（因为它们内部有跨文件类型引用）
+PODS_NEED_MODULE_INTERFACE = ['IosAwnCore', 'home_widget', 'flutter_foreground_task']
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
-    # 对所有 Pod 应用 Xcode 16 兼容配置
     target.build_configurations.each do |config|
-      config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'NO'
-      config.build_settings['SWIFT_ENABLE_MODULE_INTERFACE'] = 'NO'
-      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
-      config.build_settings['SWIFT_COMPILATION_MODE'] = 'singlefile'
-      config.build_settings['DEFINES_MODULE'] = 'NO'
+      # 基础兼容性设置
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
       config.build_settings['ENABLE_BITCODE'] = 'NO'
-    end
 
-    # 为 flutter_foreground_task 添加 Flutter 框架链接
-    if target.name == 'flutter_foreground_task'
-      target.build_configurations.each do |config|
-        config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= ['$(inherited)']
-        config.build_settings['FRAMEWORK_SEARCH_PATHS'] << '$(FLUTTER_ROOT)/bin/cache/artifacts/engine/ios'
-        config.build_settings['FRAMEWORK_SEARCH_PATHS'] << '$(PROJECT_DIR)/Flutter'
-        config.build_settings['OTHER_LDFLAGS'] ||= ['$(inherited)']
-        config.build_settings['OTHER_LDFLAGS'] << '-framework Flutter'
-        config.build_settings['SWIFT_INCLUDE_PATHS'] ||= ['$(inherited)']
-        config.build_settings['SWIFT_INCLUDE_PATHS'] << '$(FLUTTER_ROOT)/bin/cache/artifacts/engine/ios/Flutter.framework/Headers'
-        config.build_settings['SWIFT_INCLUDE_PATHS'] << '$(PROJECT_DIR)/Flutter'
-        config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= ['$(inherited)', '@executable_path/Frameworks']
+      # 对于需要模块接口的 Pod，不禁用
+      unless PODS_NEED_MODULE_INTERFACE.include?(target.name)
+        config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
+        config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'NO'
       end
-    end
-
-    # 为 awesome_notifications 添加 iOS 系统框架
-    if target.name == 'awesome_notifications'
-      target.build_configurations.each do |config|
-        config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= ['$(inherited)']
-        config.build_settings['OTHER_LDFLAGS'] ||= ['$(inherited)']
-        config.build_settings['OTHER_LDFLAGS'] << '-framework UserNotifications'
-        config.build_settings['OTHER_LDFLAGS'] << '-framework UIKit'
-        config.build_settings['OTHER_LDFLAGS'] << '-framework AVFoundation'
-        config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= ['$(inherited)', '@executable_path/Frameworks']
-      end
-    end
-
-    # 为 IosAwnCore (awesome_notifications 的核心) 保留原始构建设置
-    if target.name == 'IosAwnCore'
-      target.build_configurations.each do |config|
-        config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= ['$(inherited)']
-        config.build_settings['OTHER_LDFLAGS'] ||= ['$(inherited)']
-        config.build_settings['OTHER_LDFLAGS'] << '-framework UserNotifications'
-        config.build_settings['OTHER_LDFLAGS'] << '-framework UIKit'
-        config.build_settings['OTHER_LDFLAGS'] << '-framework AVFoundation'
-        config.build_settings['OTHER_LDFLAGS'] << '-framework CoreGraphics'
-        config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= ['$(inherited)', '@executable_path/Frameworks']
-        # IosAwnCore 需要保留模块接口设置才能正确导出类型
-        config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
-        config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'YES'
-        config.build_settings['DEFINES_MODULE'] = 'YES'
-      end
-    end
-  end
-
-  ################  Awesome Notifications pod modification 1 ###################
-  awesome_pod_file = File.expand_path(File.join('plugins', 'awesome_notifications', 'ios', 'Scripts', 'AwesomePodFile'), '.symlinks')
-  if File.exist?(awesome_pod_file)
-    require awesome_pod_file
-    update_awesome_pod_build_settings(installer)
-    puts "✅ 已应用 awesome_notifications Pod 修改 1"
-  else
-    puts "⚠️  未找到 awesome_notifications 配置文件，继续使用默认设置"
-  end
-  ################  Awesome Notifications pod modification 1 ###################
-
-  # 为 Runner 项目应用相同配置
-  installer.target_installation_results.pod_target_installation_results.each do |pod_name, target_installation_result|
-    target_installation_result.native_target.build_configurations.each do |config|
-      config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'NO'
-      config.build_settings['SWIFT_ENABLE_MODULE_INTERFACE'] = 'NO'
-      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
-      config.build_settings['SWIFT_COMPILATION_MODE'] = 'singlefile'
     end
   end
 
   # 保存项目更改
   installer.pods_project.save
 end
-
-################  Awesome Notifications pod modification 2 ###################
-awesome_pod_file = File.expand_path(File.join('plugins', 'awesome_notifications', 'ios', 'Scripts', 'AwesomePodFile'), '.symlinks')
-if File.exist?(awesome_pod_file)
-  require awesome_pod_file
-  update_awesome_main_target_settings('Runner', File.dirname(File.realpath(__FILE__)), flutter_root)
-  puts "✅ 已应用 awesome_notifications Pod 修改 2"
-end
-################  Awesome Notifications pod modification 2 ###################
