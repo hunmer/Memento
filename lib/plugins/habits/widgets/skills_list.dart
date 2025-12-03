@@ -25,19 +25,55 @@ class SkillsList extends StatefulWidget {
   State<SkillsList> createState() => _SkillsListState();
 }
 
-class _SkillsListState extends State<SkillsList> {
+class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
   List<Skill> _skills = [];
   bool _isCardView = false;
+  int _refreshKey = 0; // 用于强制刷新统计数据
 
   @override
   void initState() {
     super.initState();
+    // 添加生命周期监听
+    WidgetsBinding.instance.addObserver(this);
     _loadSkills();
+  }
+
+  @override
+  void dispose() {
+    // 移除生命周期监听
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // 应用从后台恢复时重新加载数据并刷新统计
+    if (state == AppLifecycleState.resumed) {
+      debugPrint('SkillsList: 应用恢复，重新加载技能数据');
+      _reloadSkills();
+    }
+  }
+
+  /// 从存储重新加载技能数据（用于应用恢复时）
+  Future<void> _reloadSkills() async {
+    // 等待同步完成
+    await Future.delayed(const Duration(milliseconds: 300));
+    // 从存储重新加载
+    final skills = await widget.skillController.loadSkills();
+    if (mounted) {
+      setState(() {
+        _skills = skills;
+        _refreshKey++; // 增加 key 强制刷新 FutureBuilder
+      });
+    }
   }
 
   Future<void> _loadSkills() async {
     final skills = widget.skillController.getSkills();
-    setState(() => _skills = skills);
+    if (mounted) {
+      setState(() => _skills = skills);
+    }
   }
 
   @override
@@ -107,6 +143,7 @@ class _SkillsListState extends State<SkillsList> {
               ),
               ...entry.value.map((skill) {
                 return FutureBuilder(
+                  key: ValueKey('${skill.id}_$_refreshKey'),
                   future: Future.wait([
                     widget.recordController.getCompletionCount(skill.id),
                     widget.recordController.getTotalDuration(skill.id),
@@ -197,6 +234,7 @@ class _SkillsListState extends State<SkillsList> {
                   itemBuilder: (context, index) {
                     final skill = entry.value[index];
                     return FutureBuilder(
+                      key: ValueKey('card_${skill.id}_$_refreshKey'),
                       future: Future.wait([
                         widget.recordController.getCompletionCount(skill.id),
                         widget.recordController.getTotalDuration(skill.id),

@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:uuid/uuid.dart';
 import '../../../plugins/habits/habits_plugin.dart';
+import '../../../plugins/habits/models/completion_record.dart';
 import '../../../plugins/habits/services/habits_widget_service.dart';
 import '../../plugin_manager.dart';
+import '../../event/event_manager.dart';
 import 'plugin_widget_syncer.dart';
 import 'package:memento_widgets/memento_widgets.dart';
 import '../system_widget_service.dart';
@@ -128,31 +131,65 @@ class HabitsSyncer extends PluginWidgetSyncer {
       for (final entry in pending.entries) {
         final habitId = entry.key;
         final change = entry.value as Map<String, dynamic>;
-        final isRunning = change['isRunning'] as bool;
 
-        debugPrint('Syncing pending timer change: habitId=$habitId, running=$isRunning');
+        // 检查是否为完成事件
+        if (change.containsKey('action') && change['action'] == 'complete') {
+          // 处理完成事件
+          final elapsedSeconds = change['elapsedSeconds'] as int;
+          debugPrint('Syncing pending completion: habitId=$habitId, elapsed=$elapsedSeconds');
 
-        try {
-          // 查找习惯
-          final habit = plugin.getHabitController().getHabits().firstWhere(
-            (h) => h.id == habitId,
-            orElse: () => throw ArgumentError('Habit not found: $habitId'),
-          );
+          try {
+            // 查找习惯
+            final habit = plugin.getHabitController().getHabits().firstWhere(
+              (h) => h.id == habitId,
+              orElse: () => throw ArgumentError('Habit not found: $habitId'),
+            );
 
-          // 启动或暂停计时器
-          if (isRunning) {
-            // 启动计时器
-            plugin.timerController.startTimer(habit, (_) {
-              // 更新回调（可选）
-            });
-            debugPrint('Started timer for habit: ${habit.title}');
-          } else {
-            // 暂停计时器
-            plugin.timerController.pauseTimer(habitId);
-            debugPrint('Paused timer for habit: ${habit.title}');
+            // 创建完成记录
+            final record = CompletionRecord(
+              id: const Uuid().v4(),
+              parentId: habitId,
+              date: DateTime.now(),
+              duration: Duration(seconds: elapsedSeconds),
+              notes: '从小组件完成',
+            );
+
+            // 保存完成记录
+            await plugin.getRecordController().saveCompletionRecord(habitId, record);
+            debugPrint('Completed timer for habit: ${habit.title}, duration: ${elapsedSeconds}s');
+
+            // 清除计时器状态（如果存在）
+            plugin.timerController.clearTimerData(habitId);
+          } catch (e) {
+            debugPrint('Failed to complete timer for habit $habitId: $e');
           }
-        } catch (e) {
-          debugPrint('Failed to sync timer for habit $habitId: $e');
+        } else {
+          // 处理启动/暂停事件
+          final isRunning = change['isRunning'] as bool;
+          debugPrint('Syncing pending timer change: habitId=$habitId, running=$isRunning');
+
+          try {
+            // 查找习惯
+            final habit = plugin.getHabitController().getHabits().firstWhere(
+              (h) => h.id == habitId,
+              orElse: () => throw ArgumentError('Habit not found: $habitId'),
+            );
+
+            // 启动或暂停计时器
+            if (isRunning) {
+              // 启动计时器
+              plugin.timerController.startTimer(habit, (_) {
+                // 更新回调（可选）
+              });
+              debugPrint('Started timer for habit: ${habit.title}');
+            } else {
+              // 暂停计时器
+              plugin.timerController.pauseTimer(habitId);
+              debugPrint('Paused timer for habit: ${habit.title}');
+            }
+          } catch (e) {
+            debugPrint('Failed to sync timer for habit $habitId: $e');
+          }
         }
       }
 

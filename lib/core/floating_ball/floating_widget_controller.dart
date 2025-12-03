@@ -53,6 +53,7 @@ class FloatingWidgetController {
   int _snapThreshold = 50;
   String _iconName = '';
   bool _autoRestore = true;
+  bool _autoHideInApp = false;
   Uint8List? _customImageBytes;
   List<FloatingBallButtonData> _buttonData = [];
 
@@ -64,6 +65,7 @@ class FloatingWidgetController {
   int get snapThreshold => _snapThreshold;
   String get iconName => _iconName;
   bool get autoRestore => _autoRestore;
+  bool get autoHideInApp => _autoHideInApp;
   Uint8List? get customImageBytes => _customImageBytes;
   List<FloatingBallButtonData> get buttonData => List.unmodifiable(_buttonData);
 
@@ -131,6 +133,7 @@ class FloatingWidgetController {
     _snapThreshold = prefs.getInt('floating_ball_snap_threshold') ?? 50;
     _iconName = prefs.getString('floating_ball_icon') ?? '';
     _autoRestore = prefs.getBool('floating_ball_auto_restore') ?? true;
+    _autoHideInApp = prefs.getBool('floating_ball_auto_hide_in_app') ?? false;
 
     final x = prefs.getInt('floating_ball_x');
     final y = prefs.getInt('floating_ball_y');
@@ -262,6 +265,7 @@ class FloatingWidgetController {
     await prefs.setInt('floating_ball_snap_threshold', _snapThreshold);
     await prefs.setString('floating_ball_icon', _iconName);
     await prefs.setBool('floating_ball_auto_restore', _autoRestore);
+    await prefs.setBool('floating_ball_auto_hide_in_app', _autoHideInApp);
     await prefs.setBool('floating_ball_enabled', _isRunning);
 
     if (_customImageBytes != null) {
@@ -585,6 +589,11 @@ class FloatingWidgetController {
     _autoRestore = autoRestore;
   }
 
+  /// 设置应用内自动隐藏
+  void setAutoHideInApp(bool autoHideInApp) {
+    _autoHideInApp = autoHideInApp;
+  }
+
   /// 添加按钮
   void addButton(FloatingBallButtonData button) {
     _buttonData.add(button);
@@ -675,6 +684,7 @@ class FloatingWidgetController {
     await prefs.remove('floating_ball_snap_threshold');
     await prefs.remove('floating_ball_icon');
     await prefs.remove('floating_ball_auto_restore');
+    await prefs.remove('floating_ball_auto_hide_in_app');
     await prefs.remove('floating_ball_enabled');
   }
 

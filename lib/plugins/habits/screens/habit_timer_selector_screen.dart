@@ -72,7 +72,7 @@ class _HabitTimerSelectorScreenState extends State<HabitTimerSelectorScreen> {
     try {
       // 加载习惯ID
       final savedHabitId = await HomeWidget.getWidgetData<String>(
-        'flutter.habit_timer_habit_id_${widget.widgetId}',
+        'habit_timer_habit_id_${widget.widgetId}',
       );
       if (savedHabitId != null) {
         _selectedHabitId = savedHabitId;
@@ -80,7 +80,7 @@ class _HabitTimerSelectorScreenState extends State<HabitTimerSelectorScreen> {
 
       // 加载背景色
       final primaryColorStr = await HomeWidget.getWidgetData<String>(
-        'flutter.habit_timer_primary_color_${widget.widgetId}',
+        'habit_timer_primary_color_${widget.widgetId}',
       );
       if (primaryColorStr != null) {
         final colorValue = int.tryParse(primaryColorStr);
@@ -92,7 +92,7 @@ class _HabitTimerSelectorScreenState extends State<HabitTimerSelectorScreen> {
 
       // 加载文字色
       final accentColorStr = await HomeWidget.getWidgetData<String>(
-        'flutter.habit_timer_accent_color_${widget.widgetId}',
+        'habit_timer_accent_color_${widget.widgetId}',
       );
       if (accentColorStr != null) {
         final colorValue = int.tryParse(accentColorStr);
@@ -104,7 +104,7 @@ class _HabitTimerSelectorScreenState extends State<HabitTimerSelectorScreen> {
 
       // 加载按钮色
       final buttonColorStr = await HomeWidget.getWidgetData<String>(
-        'flutter.habit_timer_button_color_${widget.widgetId}',
+        'habit_timer_button_color_${widget.widgetId}',
       );
       if (buttonColorStr != null) {
         final colorValue = int.tryParse(buttonColorStr);
@@ -116,7 +116,7 @@ class _HabitTimerSelectorScreenState extends State<HabitTimerSelectorScreen> {
 
       // 加载透明度
       final opacityStr = await HomeWidget.getWidgetData<String>(
-        'flutter.habit_timer_opacity_${widget.widgetId}',
+        'habit_timer_opacity_${widget.widgetId}',
       );
       if (opacityStr != null) {
         final opacity = double.tryParse(opacityStr);
@@ -165,7 +165,7 @@ class _HabitTimerSelectorScreenState extends State<HabitTimerSelectorScreen> {
       body: habits.isEmpty
           ? _buildEmptyState()
           : WidgetConfigEditor(
-              widgetSize: WidgetSize.medium,
+                widgetSize: WidgetSize.large,
               initialConfig: _widgetConfig,
               previewTitle: '计时器预览',
               onConfigChanged: (config) {
@@ -460,43 +460,43 @@ class _HabitTimerSelectorScreenState extends State<HabitTimerSelectorScreen> {
 
       // 2. 保存习惯信息
       await HomeWidget.saveWidgetData<String>(
-        'flutter.habit_timer_habit_id_${widget.widgetId}',
+        'habit_timer_habit_id_${widget.widgetId}',
         _selectedHabitId!,
       );
 
       await HomeWidget.saveWidgetData<String>(
-        'flutter.habit_timer_habit_name_${widget.widgetId}',
+        'habit_timer_habit_name_${widget.widgetId}',
         selectedHabit.title,
       );
 
       await HomeWidget.saveWidgetData<String>(
-        'flutter.habit_timer_habit_icon_${widget.widgetId}',
+        'habit_timer_habit_icon_${widget.widgetId}',
         selectedHabit.icon ?? '',
       );
 
       await HomeWidget.saveWidgetData<String>(
-        'flutter.habit_timer_duration_minutes_${widget.widgetId}',
+        'habit_timer_duration_minutes_${widget.widgetId}',
         selectedHabit.durationMinutes.toString(),
       );
 
       // 3. 保存颜色配置
       await HomeWidget.saveWidgetData<String>(
-        'flutter.habit_timer_primary_color_${widget.widgetId}',
+        'habit_timer_primary_color_${widget.widgetId}',
         primaryColor.value.toString(),
       );
 
       await HomeWidget.saveWidgetData<String>(
-        'flutter.habit_timer_accent_color_${widget.widgetId}',
+        'habit_timer_accent_color_${widget.widgetId}',
         accentColor.value.toString(),
       );
 
       await HomeWidget.saveWidgetData<String>(
-        'flutter.habit_timer_button_color_${widget.widgetId}',
+        'habit_timer_button_color_${widget.widgetId}',
         buttonColor.value.toString(),
       );
 
       await HomeWidget.saveWidgetData<String>(
-        'flutter.habit_timer_opacity_${widget.widgetId}',
+        'habit_timer_opacity_${widget.widgetId}',
         opacity.toString(),
       );
 
@@ -554,7 +554,7 @@ class _HabitTimerSelectorScreenState extends State<HabitTimerSelectorScreen> {
 
       // 保存为 JSON 字符串
       await HomeWidget.saveWidgetData<String>(
-        'flutter.habit_timer_widget_data',
+        'habit_timer_widget_data',
         jsonEncode({'habits': habitsData}),
       );
     } catch (e) {
