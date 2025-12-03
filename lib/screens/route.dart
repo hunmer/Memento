@@ -21,6 +21,10 @@ import 'package:Memento/plugins/bill/screens/bill_edit_screen.dart';
 import 'package:Memento/plugins/bill/screens/bill_shortcuts_selector_screen.dart';
 import 'package:Memento/plugins/calendar/calendar_plugin.dart';
 import 'package:Memento/plugins/calendar/screens/calendar_month_selector_screen.dart';
+import 'package:Memento/plugins/calendar/widgets/event_detail_card.dart';
+import 'package:Memento/plugins/calendar/models/event.dart';
+import 'package:Memento/plugins/todo/todo_plugin.dart';
+import 'package:Memento/plugins/todo/models/models.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
@@ -33,6 +37,7 @@ import 'package:Memento/plugins/habits/screens/habit_timer_selector_screen.dart'
 import 'package:Memento/plugins/habits/screens/habits_weekly_config_screen.dart';
 import 'package:Memento/plugins/habits/widgets/timer_dialog.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/plugins/nodes/nodes_plugin.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/scripts_center/scripts_center_plugin.dart';
@@ -539,6 +544,144 @@ class AppRoutes extends NavigatorObserver {
             ),
           ),
         );
+      case '/calendar_month/event':
+      case 'calendar_month/event':
+        // 日历事件详情路由（从桌面小组件打开）
+        String? eventId;
+
+        // 从 arguments 中解析 eventId
+        if (settings.arguments is Map<String, String>) {
+          eventId = (settings.arguments as Map<String, String>)['eventId'];
+        } else if (settings.arguments is Map<String, dynamic>) {
+          eventId = (settings.arguments as Map<String, dynamic>)['eventId'] as String?;
+        }
+
+        // 备用：从 URI 中解析 eventId
+        if (eventId == null) {
+          final uri = Uri.parse(settings.name ?? '');
+          eventId = uri.queryParameters['eventId'];
+        }
+
+        debugPrint('打开日历事件详情: eventId=$eventId');
+
+        if (eventId == null) {
+          // 没有 eventId 参数，回退到日历主视图
+          return _createRoute(const CalendarMainView());
+        }
+
+        // 获取日历插件实例
+        final calendarPlugin = CalendarPlugin.instance;
+        if (calendarPlugin == null) {
+          debugPrint('CalendarPlugin 未初始化，回退到主视图');
+          return _createRoute(const CalendarMainView());
+        }
+
+        // 从日历控制器中查找事件
+        final calendarController = calendarPlugin.controller;
+        List<CalendarEvent> allEvents = calendarController.getAllEvents();
+
+        CalendarEvent? event = allEvents.where((e) => e.id == eventId).isNotEmpty
+            ? allEvents.firstWhere((e) => e.id == eventId)
+            : null;
+
+        // 如果在日历中找不到事件，尝试从Todo插件中查找（针对todo_前缀的ID）
+        if (event == null && eventId.startsWith('todo_')) {
+          final todoPlugin = TodoPlugin.instance;
+          // 提取真正的任务ID（去掉 todo_ 前缀）
+          final taskId = eventId.substring(5);
+          final task = todoPlugin.taskController.tasks
+              .where((t) => t.id == taskId)
+              .isNotEmpty
+              ? todoPlugin.taskController.tasks.firstWhere((t) => t.id == taskId)
+              : null;
+
+          if (task != null) {
+            // 将 Todo 任务转换为 CalendarEvent
+            event = _convertTaskToEvent(task);
+          }
+        }
+
+        if (event != null) {
+          // 找到事件，显示详情对话框
+          final isTodoEvent = event.source == 'todo';
+          final taskId = isTodoEvent ? event.id.substring(5) : null;
+
+          // 确保 event 是 non-nullable
+          final CalendarEvent eventData = event;
+
+          return _createRoute(
+            Dialog(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 500),
+                child: EventDetailCard(
+                  event: eventData,
+                  onEdit: () {
+                    // 编辑事件
+                    Navigator.of(navigatorKey.currentContext!)
+                        .pop();
+                    if (isTodoEvent && taskId != null) {
+                      // Todo 任务事件不允许编辑
+                      ScaffoldMessenger.of(navigatorKey.currentContext!)
+                          .showSnackBar(
+                        const SnackBar(
+                          content: Text('任务事件不支持编辑，请前往待办事项中修改'),
+                        ),
+                      );
+                    } else {
+                      // 普通日历事件可以编辑
+                      calendarPlugin.showEventEditPage(
+                        navigatorKey.currentContext!,
+                        eventData,
+                      );
+                    }
+                  },
+                  onComplete: () {
+                    // 标记事件为完成
+                    Navigator.of(navigatorKey.currentContext!)
+                        .pop();
+                    if (isTodoEvent && taskId != null) {
+                      // Todo 任务事件：标记任务为完成
+                      final todoPlugin = TodoPlugin.instance;
+                      todoPlugin.taskController.updateTaskStatus(
+                        taskId,
+                        TaskStatus.done,
+                      );
+                    } else {
+                      // 普通日历事件
+                      calendarController.completeEvent(eventData);
+                    }
+                  },
+                  onDelete: () {
+                    // 删除事件
+                    Navigator.of(navigatorKey.currentContext!)
+                        .pop();
+                    if (isTodoEvent && taskId != null) {
+                      // Todo 任务事件：删除任务
+                      final todoPlugin = TodoPlugin.instance;
+                      todoPlugin.taskController.updateTaskStatus(
+                        taskId,
+                        TaskStatus.done,
+                      );
+                      ScaffoldMessenger.of(navigatorKey.currentContext!)
+                          .showSnackBar(
+                        const SnackBar(
+                          content: Text('任务已完成并移入历史记录'),
+                        ),
+                      );
+                    } else {
+                      // 普通日历事件
+                      calendarController.deleteEvent(eventData);
+                    }
+                  },
+                ),
+              ),
+            ),
+          );
+        }
+
+        // 没有找到事件，回退到日历主视图
+        debugPrint('未找到事件: $eventId');
+        return _createRoute(const CalendarMainView());
       default:
         return _createRoute(
           Scaffold(
@@ -582,4 +725,46 @@ class AppRoutes extends NavigatorObserver {
   };
 
   static String get initialRoute => home;
+}
+
+/// 将 Todo 任务转换为日历事件
+CalendarEvent _convertTaskToEvent(Task task) {
+  // 根据任务优先级设置颜色
+  Color priorityColor;
+  switch (task.priority) {
+    case TaskPriority.high:
+      priorityColor = Colors.red.shade300;
+      break;
+    case TaskPriority.medium:
+      priorityColor = Colors.orange.shade300;
+      break;
+    case TaskPriority.low:
+      priorityColor = Colors.blue.shade300;
+      break;
+  }
+
+  // 设置图标（使用任务状态图标）
+  IconData iconData;
+  switch (task.status) {
+    case TaskStatus.todo:
+      iconData = Icons.radio_button_unchecked;
+      break;
+    case TaskStatus.inProgress:
+      iconData = Icons.play_circle_outline;
+      break;
+    case TaskStatus.done:
+      iconData = Icons.check_circle_outline;
+      break;
+  }
+
+  return CalendarEvent(
+    id: 'todo_${task.id}',
+    title: task.title,
+    description: task.description ?? '',
+    startTime: task.startDate ?? task.dueDate ?? DateTime.now(),
+    endTime: task.dueDate,
+    icon: iconData,
+    color: priorityColor,
+    source: 'todo', // 标记为来自 Todo 插件
+  );
 }

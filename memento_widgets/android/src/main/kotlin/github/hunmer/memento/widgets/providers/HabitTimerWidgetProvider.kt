@@ -375,6 +375,9 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
     /**
      * 设置主体点击事件（打开timer_dialog）
      */
+    /**
+     * 设置主体点击事件（打开timer_dialog）
+     */
     private fun setupMainClick(
         views: RemoteViews,
         context: Context,
@@ -382,7 +385,7 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
     ) {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = android.net.Uri.parse("memento://plugin/habits/timer?habitId=$habitId")
-            setPackage("github.hunmer.memento")
+            setPackage("com.example.memento_widgets_example")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val pendingIntent = PendingIntent.getActivity(
@@ -393,7 +396,6 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
         )
         views.setOnClickPendingIntent(R.id.habit_icon_container, pendingIntent)
     }
-
     /**
      * 处理播放/暂停切换
      */

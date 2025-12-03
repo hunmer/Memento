@@ -20,6 +20,17 @@ import './l10n/calendar_localizations.dart';
 import '../../core/services/plugin_widget_sync_helper.dart';
 
 class CalendarPlugin extends BasePlugin with JSBridgePlugin {
+  static CalendarPlugin? _instance;
+  static CalendarPlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('calendar') as CalendarPlugin?;
+      if (_instance == null) {
+        throw StateError('CalendarPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
+
   // 总控制器，管理所有日历相关服务
   late final app.CalendarController controller;
   // SyncFusion日历控制器

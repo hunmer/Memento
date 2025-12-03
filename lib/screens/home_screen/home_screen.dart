@@ -13,6 +13,7 @@ import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/app_drawer.dart';
 import '../../core/floating_ball/floating_ball_service.dart';
+import '../../core/app_widgets/home_widget_service.dart';
 import 'managers/home_layout_manager.dart';
 import 'widgets/home_grid.dart';
 import 'widgets/add_widget_dialog.dart';
@@ -100,6 +101,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     // 将检查启动参数的逻辑移到这里，确保 context 已完全初始化
     if (!_launchedWithParameters) {
       _checkLaunchParameters();
+    }
+
+    // 检查完成后，重置全局标志
+    if (isLaunchedFromWidget) {
+      isLaunchedFromWidget = false;
     }
   }
 
@@ -297,6 +303,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   /// 检查启动参数，判断是否通过特定方式启动应用
   void _checkLaunchParameters() {
+    // 检查是否从小组件启动
+    if (isLaunchedFromWidget) {
+      _launchedWithParameters = true;
+      debugPrint('应用通过桌面小组件启动');
+      // 注意：不立即重置标志，在 didChangeDependencies() 中统一重置
+      return;
+    }
+
     // 检查路由设置，看是否有参数
     final routeSettings = ModalRoute.of(context)?.settings;
 

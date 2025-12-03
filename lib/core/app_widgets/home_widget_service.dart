@@ -109,9 +109,16 @@ Future<void> setupWidgetClickListener() async {
   debugPrint('桌面小组件点击监听器已设置');
 }
 
+/// 全局标志：标记应用是否从小组件启动
+/// 从小组件启动时，防止错误地自动打开最后使用的插件
+bool isLaunchedFromWidget = false;
+
 /// 处理小组件点击事件
 void handleWidgetClick(String url) {
   debugPrint('收到桌面小组件点击事件: $url');
+
+  // 标记应用从小组件启动，防止错误地自动打开最后使用的插件
+  isLaunchedFromWidget = true;
 
   try {
     final uri = Uri.parse(url);
