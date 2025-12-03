@@ -11,30 +11,18 @@
     android:paddingEnd="4dp"
     android:background="?android:attr/selectableItemBackground">
 
-    <!-- Checkbox(仅UI装饰) -->
-    <ImageView
-        android:id="@+id/item_checkbox"
-        android:layout_width="14dp"
-        android:layout_height="14dp"
-        android:src="@android:drawable/checkbox_off_background"
-        android:scaleType="fitCenter"
-        android:contentDescription="checkbox" />
-
     <!-- 习惯名称 -->
     <TextView
         android:id="@+id/habit_name"
-        android:layout_width="0dp"
+        android:layout_width="60dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:minWidth="40dp"
-        android:maxWidth="60dp"
         android:text="阅读"
         android:textColor="#FF607AFB"
         android:textSize="10sp"
         android:maxLines="1"
         android:ellipsize="end"
-        android:paddingStart="6dp"
-        android:paddingEnd="4dp" />
+        android:paddingStart="0dp"
+        android:paddingEnd="6dp" />
 
     <!-- 周一时长 -->
     <FrameLayout
