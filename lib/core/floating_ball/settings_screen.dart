@@ -1,5 +1,7 @@
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:flutter/material.dart';
+import '../action/action_manager.dart';
+import '../action/widgets/action_selector_dialog.dart';
 import 'floating_ball_manager.dart';
 import 'floating_ball_service.dart';
 import 'models/floating_ball_gesture.dart';
@@ -15,9 +17,10 @@ class FloatingBallSettingsScreen extends StatefulWidget {
 class _FloatingBallSettingsScreenState
     extends State<FloatingBallSettingsScreen> {
   final FloatingBallManager _manager = FloatingBallManager();
+  final ActionManager _actionManager = ActionManager();
   double _sizeScale = 1.0;
   bool _isEnabled = true;
-  final Map<FloatingBallGesture, String?> _selectedActions = {};
+  final Map<FloatingBallGesture, GestureActionConfig?> _selectedActions = {};
 
   // 从FloatingBallManager获取预定义动作列表
   List<String> get _availableActions => _manager.getAllPredefinedActionTitles();
@@ -25,7 +28,16 @@ class _FloatingBallSettingsScreenState
   @override
   void initState() {
     super.initState();
-    _loadSettings();
+    // 初始化 ActionManager（如果尚未初始化）
+    if (!_actionManager.isInitialized) {
+      _actionManager.initialize().then((_) {
+        if (mounted) {
+          _loadSettings();
+        }
+      });
+    } else {
+      _loadSettings();
+    }
   }
 
   Future<void> _loadSettings() async {
@@ -35,10 +47,10 @@ class _FloatingBallSettingsScreenState
     // 加载悬浮球启用状态
     final enabled = await _manager.isEnabled();
 
-    // 加载当前设置的动作
+    // 从 ActionManager 加载手势动作配置
     for (var gesture in FloatingBallGesture.values) {
-      final actionTitle = _manager.getActionTitle(gesture);
-      _selectedActions[gesture] = actionTitle;
+      final config = _actionManager.getGestureAction(gesture);
+      _selectedActions[gesture] = config;
     }
 
     if (mounted) {
@@ -194,58 +206,110 @@ class _FloatingBallSettingsScreenState
     final List<Widget> selectors = [];
 
     for (var gesture in FloatingBallGesture.values) {
+      final config = _selectedActions[gesture];
+      final displayText = _getGestureActionDisplayText(config);
+
       selectors.add(
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16.0),
-          child: Row(
-            children: [
-              SizedBox(width: 100, child: Text(_getGestureName(gesture))),
-              Expanded(
-                child: DropdownButton<String?>(
-                  isExpanded: true,
-                  value: _selectedActions[gesture],
-                  hint: Text(l10n!.notSet),
-                  items: [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text(l10n.noAction),
-                    ),
-                    ..._availableActions.map((action) {
-                      return DropdownMenuItem<String?>(
-                        value: action,
-                        child: Text(action),
-                      );
-                    }),
-                  ],
-                  onChanged: (value) async {
-                    setState(() {
-                      _selectedActions[gesture] = value;
-                    });
-
-                    if (value != null) {
-                      // 注册新动作
-                      await _manager.setAction(
-                        gesture,
-                        value,
-                        () {}, // 空回调，实际回调将在setActionContext中设置
-                      );
-
-                      // 立即更新上下文以应用新动作
-                      _manager.setActionContext(context);
-                    } else {
-                      // 清除动作
-                      await _manager.clearAction(gesture);
-                    }
-                  },
-                ),
+        Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: _getGestureIcon(gesture).color,
+              child: Icon(
+                _getGestureIcon(gesture).icon,
+                color: Colors.white,
               ),
-            ],
+            ),
+            title: Text(_getGestureName(gesture)),
+            subtitle: Text(
+              displayText,
+              style: TextStyle(
+                color: displayText == l10n!.notSet
+                    ? Colors.grey[600]
+                    : null,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () async {
+              final result = await showDialog<ActionSelectorResult>(
+                context: context,
+                builder: (context) => ActionSelectorDialog(
+                  gesture: gesture,
+                  initialValue: config != null
+                      ? ActionSelectorResult(
+                          singleAction: config.singleAction,
+                          actionGroup: config.group,
+                        )
+                      : null,
+                ),
+              );
+
+              if (result != null && mounted) {
+                setState(() {
+                  if (result.isGroup && result.actionGroup != null) {
+                    _selectedActions[gesture] = GestureActionConfig(
+                      gesture: gesture,
+                      group: result.actionGroup,
+                    );
+                  } else if (result.isSingleAction &&
+                      result.singleAction != null) {
+                    _selectedActions[gesture] = GestureActionConfig(
+                      gesture: gesture,
+                      singleAction: result.singleAction,
+                    );
+                  } else {
+                    _selectedActions[gesture] = null;
+                  }
+                });
+
+                // 保存到 ActionManager
+                final actionConfig = _selectedActions[gesture];
+                if (actionConfig != null) {
+                  await _actionManager.setGestureAction(gesture, actionConfig);
+                } else {
+                  await _actionManager.clearGestureAction(gesture);
+                }
+              }
+            },
           ),
         ),
       );
     }
 
     return selectors;
+  }
+
+  /// 获取手势动作的显示文本
+  String _getGestureActionDisplayText(GestureActionConfig? config) {
+    if (config == null || config.isEmpty) {
+      return '未设置';
+    }
+
+    if (config.singleAction != null) {
+      return config.singleAction!.displayTitle;
+    }
+
+    if (config.group != null) {
+      return '${config.group!.title} (${config.group!.actionCount}个动作)';
+    }
+
+    return '未设置';
+  }
+
+  /// 获取手势图标
+  IconData _getGestureIcon(FloatingBallGesture gesture) {
+    switch (gesture) {
+      case FloatingBallGesture.tap:
+        return Icons.touch_app;
+      case FloatingBallGesture.swipeUp:
+        return Icons.keyboard_arrow_up;
+      case FloatingBallGesture.swipeDown:
+        return Icons.keyboard_arrow_down;
+      case FloatingBallGesture.swipeLeft:
+        return Icons.keyboard_arrow_left;
+      case FloatingBallGesture.swipeRight:
+        return Icons.keyboard_arrow_right;
+    }
   }
 
   // 获取手势名称

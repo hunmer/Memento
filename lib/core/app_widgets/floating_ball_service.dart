@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:universal_platform/universal_platform.dart';
 
 import '../../core/floating_ball/floating_widget_controller.dart';
+import '../../core/action/action_manager.dart';
 import '../app_initializer.dart';
 
 /// 恢复悬浮球状态
@@ -68,65 +69,32 @@ void setupFloatingBallButtonListener(FloatingWidgetController controller) {
       return;
     }
 
-    switch (action) {
-      case 'openPlugin':
-        // 打开指定插件
-        final pluginId = args?['plugin']?.toString();
-        if (pluginId != null) {
-          final plugin = globalPluginManager.getPlugin(pluginId);
-          if (plugin != null) {
-            final context = navigatorKey.currentContext;
-            if (context != null) {
-              debugPrint('悬浮球打开插件: $pluginId');
-              globalPluginManager.openPlugin(context, plugin);
-            } else {
-              debugPrint('navigatorKey.currentContext 为 null');
-            }
-          } else {
-            debugPrint('插件不存在: $pluginId');
-          }
-        } else {
-          debugPrint('openPlugin action 缺少 plugin 参数');
-        }
-        break;
-
-      case 'openSettings':
-        // 打开设置页面
-        final navigator = navigatorKey.currentState;
-        if (navigator != null) {
-          debugPrint('悬浮球打开设置');
-          navigator.pushNamed('/settings');
-        } else {
-          debugPrint('navigatorKey.currentState 为 null');
-        }
-        break;
-
-      case 'goHome':
-      case 'home':
-        // 返回首页
-        final navigator = navigatorKey.currentState;
-        if (navigator != null) {
-          debugPrint('悬浮球返回首页');
-          navigator.pushNamedAndRemoveUntil('/', (route) => false);
-        } else {
-          debugPrint('navigatorKey.currentState 为 null');
-        }
-        break;
-
-      case 'goBack':
-        // 返回上一页
-        final navigator = navigatorKey.currentState;
-        if (navigator != null && navigator.canPop()) {
-          debugPrint('悬浮球返回上一页');
-          navigator.pop();
-        } else {
-          debugPrint('无法返回上一页');
-        }
-        break;
-
-      default:
-        debugPrint('未知的悬浮球动作: $action');
+    // 使用 ActionManager 执行动作
+    final context = navigatorKey.currentContext;
+    if (context == null) {
+      debugPrint('navigatorKey.currentContext 为 null，无法执行动作');
+      return;
     }
+
+    // 特殊处理 home 别名
+    if (action == 'home') {
+      action = 'goHome';
+    }
+
+    // 通过 ActionManager 执行动作
+    ActionManager().execute(
+      action,
+      context,
+      data: args,
+    ).then((result) {
+      if (!result.success) {
+        debugPrint('动作执行失败: $action, 错误: ${result.error}');
+      } else {
+        debugPrint('动作执行成功: $action');
+      }
+    }).catchError((error) {
+      debugPrint('动作执行异常: $action, 错误: $error');
+    });
   });
 
   debugPrint('悬浮球按钮事件全局监听器已设置');

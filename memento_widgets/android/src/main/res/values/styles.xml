@@ -174,7 +174,6 @@
         <item name="android:gravity">center</item>
         <item name="android:paddingTop">1dp</item>
     </style>
-</resources>
 
     <!-- ========== 计时器对话框主题 ========== -->
 
@@ -198,3 +197,4 @@
         <item name="android:background">@drawable/timer_dialog_background</item>
         <item name="android:padding">24dp</item>
     </style>
+</resources>
