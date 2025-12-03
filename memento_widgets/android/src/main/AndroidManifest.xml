@@ -1,6 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="github.hunmer.memento_widgets">
 
+  <!-- 允许接收自定义广播 -->
+  <uses-permission android:name="github.hunmer.memento.REFRESH_ACTIVITY_WEEKLY_WIDGET" />
+  <uses-permission android:name="github.hunmer.memento.REFRESH_HABITS_WEEKLY_WIDGET" />
+  <uses-permission android:name="github.hunmer.memento.REFRESH_CHECKIN_WEEKLY_WIDGET" />
+  <uses-permission android:name="github.hunmer.memento.CLEANUP_WIDGET_IDS" />
+
   <application>
     <!-- ========== 快速小组件 ========== -->
 

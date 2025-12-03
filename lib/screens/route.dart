@@ -15,6 +15,7 @@ import 'package:Memento/screens/widgets_config_screen/widgets_config_screen.dart
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'package:Memento/plugins/activity/screens/activity_weekly_config_screen.dart';
+import 'package:Memento/plugins/activity/screens/tag_statistics_screen.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/screens/bill_edit_screen.dart';
@@ -137,6 +138,9 @@ class AppRoutes extends NavigatorObserver {
 
   // 习惯计时器对话框路由（从小组件打开）
   static const String habitTimerDialog = '/habit_timer_dialog';
+
+  // 标签统计页面路由（从小组件打开）
+  static const String tagStatistics = '/tag_statistics';
 
   // 自定义页面过渡动画 - 无动画
   static Route _createRoute(Widget page) {
@@ -682,6 +686,39 @@ class AppRoutes extends NavigatorObserver {
         // 没有找到事件，回退到日历主视图
         debugPrint('未找到事件: $eventId');
         return _createRoute(const CalendarMainView());
+      case '/tag_statistics':
+      case 'tag_statistics':
+        // 标签统计页面（从桌面小组件打开）
+        String? tagName;
+
+        // 从 arguments 中解析 tag 参数
+        if (settings.arguments is Map<String, dynamic>) {
+          tagName = (settings.arguments as Map<String, dynamic>)['tag'] as String?;
+        } else if (settings.arguments is String) {
+          tagName = settings.arguments as String;
+        }
+
+        debugPrint('打开标签统计页面: tag=$tagName');
+
+        if (tagName == null || tagName.isEmpty) {
+          // 没有 tag 参数，回退到活动插件主页
+          return _createRoute(const ActivityMainView());
+        }
+
+        // 获取活动插件实例
+        final activityPlugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+        if (activityPlugin == null) {
+          debugPrint('ActivityPlugin 未初始化，回退到主视图');
+          return _createRoute(const ActivityMainView());
+        }
+
+        // 返回标签统计页面
+        return _createRoute(
+          TagStatisticsScreen(
+            tagName: tagName,
+            activityService: activityPlugin.activityService,
+          ),
+        );
       default:
         return _createRoute(
           Scaffold(

@@ -119,6 +119,7 @@ class ActivityWeeklyData {
       'weekNumber': weekNumber,
       'weekStart': weekStart.toIso8601String(),
       'weekEnd': weekEnd.toIso8601String(),
+      'weekRangeText': weekRangeText, // Android 小组件需要此字段
       'heatmap': heatmap.toJson(),
       'topTags': topTags.map((tag) => tag.toJson()).toList(),
     };

@@ -4,7 +4,6 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
 import android.app.PendingIntent
@@ -49,6 +48,13 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
             editor.remove("activity_weekly_opacity_$appWidgetId")
         }
         editor.apply()
+
+        // 通知 Flutter 端清理已删除的 widgetId
+        val intent = Intent("github.hunmer.memento.CLEANUP_WIDGET_IDS").apply {
+            putExtra("deletedWidgetIds", appWidgetIds)
+            putExtra("widgetType", "activity_weekly")
+        }
+        context.sendBroadcast(intent)
     }
 
     private fun updateAppWidget(
@@ -129,11 +135,10 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
         val bgColor = applyOpacity(primaryColor, opacity)
         views.setInt(R.id.widget_root, "setBackgroundColor", bgColor)
 
-        // 渲染热力图
+        // 渲染热力图网格（168个格子）
         val heatmapData = data.getJSONObject("heatmap")
         val heatmap = parseHeatmap(heatmapData)
-        val heatmapBitmap = generateHeatmapBitmap(heatmap, accentColor)
-        views.setImageViewBitmap(R.id.heatmap_image, heatmapBitmap)
+        setHeatmapGridColors(views, R.id.heatmap_container, heatmap, accentColor)
 
         // 设置周标题
         val weekRangeText = data.getString("weekRangeText")
@@ -172,14 +177,28 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
     }
 
     /**
-     * 生成热力图Bitmap（7天×24小时）
+     * 设置热力图网格颜色（24行7列 = 168个格子）
+     * 直接设置预定义View的背景色
+     *
+     * 布局：24行（每小时），每行7列（每天）
+     * 索引：index = hour * 7 + day
      */
-    private fun generateHeatmapBitmap(heatmap: List<List<Int>>, accentColor: Int): Bitmap {
+    private fun setHeatmapGridColors(
+        views: RemoteViews,
+        containerId: Int,
+        heatmap: List<List<Int>>,
+        accentColor: Int
+    ) {
         val maxCount = heatmap.flatten().maxOrNull() ?: 1
-        val bitmap = Bitmap.createBitmap(24, 7, Bitmap.Config.ARGB_8888)
 
-        for (day in 0..6) {
-            for (hour in 0..23) {
+        // 循环设置168个格子的颜色（24小时×7天）
+        for (hour in 0..23) {
+            for (day in 0..6) {
+                // 计算格子索引：24行7列布局
+                val index = hour * 7 + day
+                val cellId = R.id.heatmap_cell_0 + index
+
+                // 获取热力图数据：heatmap[day][hour]
                 val count = if (day < heatmap.size && hour < heatmap[day].size) {
                     heatmap[day][hour]
                 } else {
@@ -188,11 +207,11 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
 
                 val intensity = if (maxCount > 0) count.toFloat() / maxCount else 0f
                 val color = interpolateColor(Color.WHITE, accentColor, intensity)
-                bitmap.setPixel(hour, day, color)
+
+                // 设置每个格子的背景色
+                views.setInt(cellId, "setBackgroundColor", color)
             }
         }
-
-        return bitmap
     }
 
     /**

@@ -40,14 +40,30 @@ class HabitsWeeklyWidgetProvider : AppWidgetProvider() {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val editor = prefs.edit()
 
-        // 清理已删除小组件的数据
+        // 获取当前已配置的 widgetId 列表
+        val widgetIdsJson = prefs.getString("habits_weekly_widget_ids", "[]")
+        val widgetIdsList = try {
+            val jsonArray = org.json.JSONArray(widgetIdsJson)
+            (0 until jsonArray.length()).map { jsonArray.getInt(it) }.toMutableList()
+        } catch (e: Exception) {
+            mutableListOf()
+        }
+
+        // 清理已删除小组件的数据，并从列表中移除
         for (appWidgetId in appWidgetIds) {
             editor.remove("habits_weekly_data_$appWidgetId")
             editor.remove("habits_weekly_selected_ids_$appWidgetId")
             editor.remove("habits_weekly_background_color_$appWidgetId")
             editor.remove("habits_weekly_accent_color_$appWidgetId")
             editor.remove("habits_weekly_opacity_$appWidgetId")
+
+            // 从列表中移除已删除的 widgetId
+            widgetIdsList.remove(appWidgetId)
         }
+
+        // 保存更新后的列表
+        val updatedJson = org.json.JSONArray(widgetIdsList.toList()).toString()
+        editor.putString("habits_weekly_widget_ids", updatedJson)
         editor.apply()
     }
 

@@ -198,6 +198,9 @@ class PluginWidgetSyncHelper {
   /// 同步打卡周视图小组件
   Future<void> syncCheckinWeeklyWidget() => _checkinSyncer.syncCheckinWeeklyWidget();
 
+  /// 同步习惯周视图小组件
+  Future<void> syncHabitsWeeklyWidget() => _habitsSyncer.syncHabitsWeeklyWidget();
+
   /// 同步目标进度自定义小组件
   Future<void> syncTrackerGoalWidget() => _trackerSyncer.syncTrackerGoalWidget();
 

@@ -235,6 +235,9 @@ class HabitsSyncer extends PluginWidgetSyncer {
         }
       }
 
+      // 通知系统刷新所有习惯周视图小组件
+      await SystemWidgetService.instance.updateWidget('habits_weekly');
+
       debugPrint('Synced ${widgetIds.length} habits weekly widgets');
     } catch (e) {
       debugPrint('Failed to sync habits weekly widgets: $e');
