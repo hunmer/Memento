@@ -11,7 +11,7 @@ import android.app.PendingIntent
 import android.view.View
 import android.widget.RemoteViews
 import org.json.JSONObject
-import github.hunmer.memento.R
+import com.example.memento_widgets.R
 import github.hunmer.memento.widgets.services.ActivityWeeklyWidgetService
 
 /**

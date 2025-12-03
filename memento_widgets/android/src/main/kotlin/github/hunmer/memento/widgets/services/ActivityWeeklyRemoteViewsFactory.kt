@@ -7,7 +7,7 @@ import android.graphics.Color
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import org.json.JSONObject
-import github.hunmer.memento.R
+import com.example.memento_widgets.R
 
 /**
  * 活动周视图小组件数据工厂
