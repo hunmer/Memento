@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -54,6 +55,7 @@ class FloatingWidgetController {
   String _iconName = '';
   bool _autoRestore = true;
   bool _autoHideInApp = false;
+  bool _runningInBackground = false;
   Uint8List? _customImageBytes;
   List<FloatingBallButtonData> _buttonData = [];
 
@@ -66,6 +68,7 @@ class FloatingWidgetController {
   String get iconName => _iconName;
   bool get autoRestore => _autoRestore;
   bool get autoHideInApp => _autoHideInApp;
+  bool get runningInBackground => _runningInBackground;
   Uint8List? get customImageBytes => _customImageBytes;
   List<FloatingBallButtonData> get buttonData => List.unmodifiable(_buttonData);
 
@@ -134,6 +137,7 @@ class FloatingWidgetController {
     _iconName = prefs.getString('floating_ball_icon') ?? '';
     _autoRestore = prefs.getBool('floating_ball_auto_restore') ?? true;
     _autoHideInApp = prefs.getBool('floating_ball_auto_hide_in_app') ?? false;
+    _runningInBackground = prefs.getBool('floating_ball_running_in_background') ?? false;
 
     final x = prefs.getInt('floating_ball_x');
     final y = prefs.getInt('floating_ball_y');
@@ -266,6 +270,7 @@ class FloatingWidgetController {
     await prefs.setString('floating_ball_icon', _iconName);
     await prefs.setBool('floating_ball_auto_restore', _autoRestore);
     await prefs.setBool('floating_ball_auto_hide_in_app', _autoHideInApp);
+    await prefs.setBool('floating_ball_running_in_background', _runningInBackground);
     await prefs.setBool('floating_ball_enabled', _isRunning);
 
     if (_customImageBytes != null) {
@@ -334,11 +339,17 @@ class FloatingWidgetController {
   void _startListeningButtonEvents() {
     _buttonSubscription?.cancel();
     _buttonSubscription = FloatingBallPlugin.listenButtonEvents().listen(
-      (event) {
+      (event) async {
         try {
           print(
             "FloatingWidgetController: 收到按钮事件 - title: ${event.title}, data: ${event.data}",
           );
+
+          // 如果不是后台运行模式，则先激活应用
+          if (!_runningInBackground && UniversalPlatform.isAndroid) {
+            FlutterForegroundTask.launchApp();
+          }
+
           _buttonController.add(event);
         } catch (e) {
           // 忽略错误，避免崩溃
@@ -594,6 +605,13 @@ class FloatingWidgetController {
     _autoHideInApp = autoHideInApp;
   }
 
+  /// 设置后台运行模式
+  /// 如果为 false（默认），执行操作前会先激活应用
+  /// 如果为 true，允许在后台直接执行操作
+  void setRunningInBackground(bool runningInBackground) {
+    _runningInBackground = runningInBackground;
+  }
+
   /// 添加按钮
   void addButton(FloatingBallButtonData button) {
     _buttonData.add(button);
@@ -685,6 +703,7 @@ class FloatingWidgetController {
     await prefs.remove('floating_ball_icon');
     await prefs.remove('floating_ball_auto_restore');
     await prefs.remove('floating_ball_auto_hide_in_app');
+    await prefs.remove('floating_ball_running_in_background');
     await prefs.remove('floating_ball_enabled');
   }
 

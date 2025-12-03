@@ -61,9 +61,6 @@ class HabitsWeeklyRemoteViewsFactory(
         val item = habitItems[position]
         val views = RemoteViews(context.packageName, R.layout.widget_habits_weekly_item)
 
-        // 设置checkbox（仅UI装饰）
-        views.setInt(R.id.item_checkbox, "setColorFilter", accentColor)
-
         // 设置习惯名称
         views.setTextViewText(R.id.habit_name, item.habitTitle)
         views.setTextColor(R.id.habit_name, accentColor)

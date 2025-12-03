@@ -511,6 +511,14 @@ void _handleWidgetClick(String url) {
       debugPrint('习惯计时器对话框路由转换为: $routePath');
     }
 
+    // 特殊处理：习惯周小组件计时器对话框路由
+    // 从 /timer 且 host 为 habits 时，说明是习惯插件的计时器
+    // 例如: memento://habits/timer?habitId=xxx
+    if (routePath == '/timer' && uri.host == 'habits') {
+      routePath = '/habit_timer_dialog';
+      debugPrint('习惯周小组件计时器对话框路由转换为: $routePath');
+    }
+
     // 提取所有查询参数
     final queryParams = uri.queryParameters;
 
