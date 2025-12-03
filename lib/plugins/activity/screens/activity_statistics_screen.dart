@@ -220,31 +220,8 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
   }
 
   // 根据标签筛选活动
-  List<ActivityRecord> _getActivitiesByTag(String tag) {
-    if (tag == ActivityLocalizations.of(context).unnamedActivity) {
-      return _activities.where((activity) => activity.tags.isEmpty).toList();
-    } else {
-      return _activities
-          .where((activity) => activity.tags.contains(tag))
-          .toList();
-    }
-  }
 
   // 选择标签并显示相关活动
-  void _selectTag(String tag) {
-    if (_selectedTag == tag) {
-      setState(() {
-        _selectedTag = null;
-        _selectedTagActivities = [];
-      });
-    } else {
-      final activities = _getActivitiesByTag(tag);
-      setState(() {
-        _selectedTag = tag;
-        _selectedTagActivities = activities;
-      });
-    }
-  }
 
   String _getRangeText(String range, BuildContext context) {
     switch (range) {

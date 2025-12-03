@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import '../tracker_plugin.dart';
-import '../models/goal.dart';
 import '../../../widgets/widget_config_editor/index.dart';
 
 /// 目标选择器界面(用于小组件配置)

@@ -1,6 +1,6 @@
+import 'package:Memento/core/app_initializer.dart' show globalConfigManager;
 import 'package:Memento/core/utils/app.dart';
 import 'package:flutter/material.dart';
-import '../../../main.dart';
 
 class BaseSettingsController extends ChangeNotifier {
   Locale _currentLocale = globalConfigManager.getLocale();

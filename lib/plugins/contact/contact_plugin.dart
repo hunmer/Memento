@@ -692,7 +692,7 @@ class ContactMainViewState extends State<ContactMainView> {
   }
 
   Future<void> _showSortMenu() async {
-    final currentSort = await _controller.getSortConfig();
+    await _controller.getSortConfig();
 
     if (!mounted) return;
 
@@ -798,9 +798,6 @@ class ContactMainViewState extends State<ContactMainView> {
     );
   }
 
-  Future<void> _deleteContact(Contact contact) async {
-    // ... (this method is the same)
-  }
 
   @override
   Widget build(BuildContext context) {

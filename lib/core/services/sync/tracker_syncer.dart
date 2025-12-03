@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../../plugins/tracker/tracker_plugin.dart';
-import '../../../plugins/tracker/models/record.dart';
 import '../../plugin_manager.dart';
 import 'plugin_widget_syncer.dart';
 import 'package:memento_widgets/memento_widgets.dart';

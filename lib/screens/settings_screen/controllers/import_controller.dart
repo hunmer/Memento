@@ -1,9 +1,9 @@
 import 'dart:io';
+import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
-import '../../../main.dart';
 import '../../../core/utils/file_utils.dart';
 import '../widgets/folder_selection_dialog.dart';
 import '../../../core/l10n/import_localizations.dart';

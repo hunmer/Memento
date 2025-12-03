@@ -19,7 +19,6 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
 
   // 最近活动信息
   ActivityRecord? _lastActivity;
-  String _timeSinceLast = '';
 
   // 通知设置
   int _minimumReminderInterval = 30; // 默认30分钟
@@ -104,7 +103,6 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
     if (_lastActivity == null) {
       if (mounted) {
         setState(() {
-          _timeSinceLast = ActivityLocalizations.of(context).noActivities;
         });
       }
       return;
@@ -113,18 +111,13 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
     final now = DateTime.now();
     final diff = now.difference(_lastActivity!.endTime);
 
-    String timeText;
     if (diff.inDays > 0) {
-      timeText = '${diff.inDays}天 ${diff.inHours % 24}小时';
     } else if (diff.inHours > 0) {
-      timeText = '${diff.inHours}小时 ${diff.inMinutes % 60}分钟';
     } else {
-      timeText = '${diff.inMinutes}分钟';
     }
 
     if (mounted) {
       setState(() {
-        _timeSinceLast = timeText;
       });
     }
   }

@@ -109,7 +109,7 @@ class ActivityWeeklyData {
     final endMonth = weekEnd.subtract(const Duration(days: 1)).month;
     final endDay = weekEnd.subtract(const Duration(days: 1)).day;
 
-    return '第${weekNumber}周 $startMonth.$startDay-$endMonth.$endDay';
+    return '第$weekNumber周 $startMonth.$startDay-$endMonth.$endDay';
   }
 
   /// 序列化为JSON

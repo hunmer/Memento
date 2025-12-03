@@ -6,7 +6,6 @@ import '../../../plugins/habits/habits_plugin.dart';
 import '../../../plugins/habits/models/completion_record.dart';
 import '../../../plugins/habits/services/habits_widget_service.dart';
 import '../../plugin_manager.dart';
-import '../../event/event_manager.dart';
 import 'plugin_widget_syncer.dart';
 import 'package:memento_widgets/memento_widgets.dart';
 import '../system_widget_service.dart';

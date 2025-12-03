@@ -1,6 +1,6 @@
+import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/core/theme_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:Memento/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'base_settings_controller.dart';
 import 'export_controller.dart';

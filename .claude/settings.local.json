@@ -20,7 +20,9 @@
       "Bash(flutter pub:*)",
       "Bash(find:*)",
       "Bash(adb logcat:*)",
-      "Bash(adb install:*)"
+      "Bash(adb install:*)",
+      "Bash(chmod:*)",
+      "Bash(./verify_refactoring.sh:*)"
     ],
     "deny": [],
     "ask": []

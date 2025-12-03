@@ -185,28 +185,6 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
 
   double get _currentSize => widget.baseSize * _sizeScale;
 
-  /// 根据路径获取图标
-  IconData _getIconFromPath(String iconPath) {
-    switch (iconPath.toLowerCase()) {
-      case 'home':
-      case 'icons.home':
-        return Icons.home;
-      case 'chat':
-      case 'icons.chat':
-        return Icons.chat;
-      case 'settings':
-      case 'icons.settings':
-        return Icons.settings;
-      case 'favorite':
-      case 'icons.favorite':
-        return Icons.favorite;
-      case 'star':
-      case 'icons.star':
-        return Icons.star;
-      default:
-        return Icons.circle; // 默认图标
-    }
-  }
 
   @override
   void dispose() {
@@ -232,14 +210,6 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
   }
 
   // 显示子菜单（简化版）
-  Future<void> _showSubmenu() async {
-    if (_position == null) {
-      return;
-    }
-
-    // 简化版：直接发送 tap 手势，主应用会处理子菜单显示
-    widget.onGesture?.call(FloatingBallGesture.tap);
-  }
 
   // 检查指针是否在球内
   bool _isPointerInsideBall(Offset globalPosition, double ballSize) {

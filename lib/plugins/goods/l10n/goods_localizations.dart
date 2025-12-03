@@ -152,7 +152,6 @@ abstract class GoodsLocalizations {
   String? get createWarehouseFirst;
   String? get createWarehouseFailed;
 
-  @override
   String? get createItemFailed;
 
   String get dailyCost;
