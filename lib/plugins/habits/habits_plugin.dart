@@ -68,11 +68,12 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   @override
   Future<void> initialize() async {
     _timerController = TimerController();
+    _skillController = SkillController(storage);
     _habitController = HabitController(
       storage,
       timerController: _timerController,
+      skillController: _skillController,
     );
-    _skillController = SkillController(storage);
     _recordController = CompletionRecordController(
       storage,
       habitController: _habitController,

@@ -100,46 +100,199 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
       appBar: AppBar(title: const Text('悬浮球设置')),
       body: ListView(
         children: [
-          Card(
-            child: ListTile(
-              leading: Icon(
-                _controller.isRunning
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_unchecked,
-                color: _controller.isRunning ? Colors.green : Colors.grey,
-              ),
-              title: const Text('悬浮球状态'),
-              subtitle: Text(_controller.isRunning ? '运行中' : '已停止'),
-            ),
-          ),
-          Card(
-            child: Column(
+          // 第一行：悬浮球状态、悬浮窗权限、开启/禁用悬浮球
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Row(
               children: [
-                ListTile(
-                  leading: Icon(
-                    _controller.hasPermission
-                        ? Icons.check_circle
-                        : Icons.error,
-                    color:
-                        _controller.hasPermission ? Colors.green : Colors.red,
-                  ),
-                  title: const Text('悬浮窗权限'),
-                  subtitle: Text(_controller.hasPermission ? '已授予' : '未授予'),
-                ),
-                if (!_controller.hasPermission)
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: ElevatedButton.icon(
-                      onPressed: () async {
-                        await _controller.requestPermission();
-                      },
-                      icon: const Icon(Icons.security),
-                      label: const Text('申请权限'),
+                // 悬浮球状态卡片
+                Expanded(
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _controller.isRunning
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_unchecked,
+                            color: _controller.isRunning ? Colors.green : Colors.grey,
+                            size: 32,
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            '悬浮球状态',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _controller.isRunning ? '运行中' : '已停止',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: _controller.isRunning
+                                  ? Colors.green
+                                  : Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                ),
+                const SizedBox(width: 12),
+                // 悬浮窗权限卡片
+                Expanded(
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _controller.hasPermission
+                                ? Icons.check_circle
+                                : Icons.error,
+                            color: _controller.hasPermission
+                                ? Colors.green
+                                : Colors.red,
+                            size: 32,
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            '悬浮窗权限',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _controller.hasPermission ? '已授予' : '未授予',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: _controller.hasPermission
+                                  ? Colors.green
+                                  : Colors.red,
+                            ),
+                          ),
+                          if (!_controller.hasPermission) ...[
+                            const SizedBox(height: 8),
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                await _controller.requestPermission();
+                              },
+                              icon: const Icon(Icons.security, size: 16),
+                              label: const Text('申请权限', style: TextStyle(fontSize: 12)),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // 开启/禁用悬浮球卡片
+                Expanded(
+                  child: Card(
+                    color: _controller.isRunning
+                        ? Colors.red.shade50
+                        : Colors.green.shade50,
+                    child: InkWell(
+                      onTap: () async {
+                        await _controller.toggleFloatingBall();
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _controller.isRunning ? Icons.stop : Icons.play_arrow,
+                              color: _controller.isRunning
+                                  ? Colors.red
+                                  : Colors.green,
+                              size: 32,
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              '悬浮球开关',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _controller.isRunning ? '点击停止' : '点击开启',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: _controller.isRunning
+                                    ? Colors.red
+                                    : Colors.green,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
+          // 应用内自动隐藏overlay悬浮球选项
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '应用内自动隐藏',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            '在应用内自动隐藏overlay悬浮球',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: _controller.autoHideInApp,
+                      onChanged: (value) {
+                        _controller.setAutoHideInApp(value);
+                        setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
           // 配置参数卡片
           Card(
             child: Column(
@@ -276,20 +429,6 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                 ),
               ),
             ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton.icon(
-              onPressed: () async {
-                await _controller.toggleFloatingBall();
-              },
-              icon: Icon(_controller.isRunning ? Icons.stop : Icons.play_arrow),
-              label: Text(_controller.isRunning ? '停止悬浮球' : '启动悬浮球'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    _controller.isRunning ? Colors.red : Colors.green,
-              ),
-            ),
-          ),
         ],
       ),
     );

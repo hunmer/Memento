@@ -288,6 +288,9 @@ class _ActivityWeeklyConfigScreenState
 
       debugPrint('ActivityWeeklyConfig: 数据已保存，准备调用 updateWidget');
 
+      // 添加短暂延迟确保数据已写入 SharedPreferences
+      await Future.delayed(const Duration(milliseconds: 100));
+
       // 更新小组件
       final result = await HomeWidget.updateWidget(
         name: 'ActivityWeeklyWidgetProvider',

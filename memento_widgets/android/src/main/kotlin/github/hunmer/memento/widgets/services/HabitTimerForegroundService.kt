@@ -287,7 +287,7 @@ class HabitTimerForegroundService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("$currentHabitName - $statusText")
             .setContentText(timeString)
-            .setSmallIcon(R.drawable.ic_timer_notification)
+            .setSmallIcon(R.drawable.launcher_icon)
             .setOngoing(true)
             .setContentIntent(openPendingIntent)
             .addAction(toggleAction)
@@ -348,7 +348,10 @@ class HabitTimerForegroundService : Service() {
             state.put("isRunning", isTimerRunning)
             state.put("timestamp", System.currentTimeMillis())
 
-            prefs.edit().putString(stateKey, state.toString()).apply()
+            // 使用 commit() 而不是 apply()，确保数据立即写入
+            // 这样 updateWidget() 才能读取到最新状态
+            prefs.edit().putString(stateKey, state.toString()).commit()
+            Log.d(TAG, "Timer state saved: running=$isTimerRunning, elapsed=$elapsedSeconds")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to save timer state", e)
         }
@@ -360,18 +363,27 @@ class HabitTimerForegroundService : Service() {
         try {
             val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val stateKey = "habit_timer_state_${currentWidgetId}"
-            prefs.edit().remove(stateKey).apply()
+            prefs.edit().remove(stateKey).commit()
 
-            // 同时清除待处理变更
+            // 清除待处理变更（但保留完成事件，让 Flutter 端处理）
             val pendingKey = "habit_timer_pending_changes"
             val pendingJson = prefs.getString(pendingKey, "{}")
             if (pendingJson != null && pendingJson != "{}") {
                 val pending = JSONObject(pendingJson)
                 if (currentHabitId != null && pending.has(currentHabitId!!)) {
-                    pending.remove(currentHabitId!!)
-                    prefs.edit().putString(pendingKey, pending.toString()).apply()
+                    val change = pending.optJSONObject(currentHabitId!!)
+                    // 只清除非完成事件的变更，保留 action: "complete" 类型的变更
+                    // 完成事件需要由 Flutter 端同步保存后再清除
+                    if (change != null && change.optString("action") != "complete") {
+                        pending.remove(currentHabitId!!)
+                        prefs.edit().putString(pendingKey, pending.toString()).commit()
+                        Log.d(TAG, "Cleared non-completion pending change for habit: $currentHabitId")
+                    } else {
+                        Log.d(TAG, "Preserved completion pending change for habit: $currentHabitId")
+                    }
                 }
             }
+            Log.d(TAG, "Timer state cleared")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to clear timer state", e)
         }

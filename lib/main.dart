@@ -264,6 +264,8 @@ void main() async {
       await PluginWidgetSyncHelper.instance.syncPendingTaskChangesOnStartup();
       // 同步待处理的小组件目标变更（用户在小组件上增减的进度）
       await PluginWidgetSyncHelper.instance.syncPendingGoalChangesOnStartup();
+      // 同步待处理的习惯计时器变更（用户在小组件上完成的计时）
+      await PluginWidgetSyncHelper.instance.syncPendingHabitTimerChangesOnStartup();
     });
   } catch (e) {
     debugPrint('初始化失败: $e');
@@ -444,6 +446,14 @@ void _handleWidgetClick(String url) {
       debugPrint('快捷记账小组件配置路由转换为: $routePath');
     }
 
+    // 特殊处理：习惯计时器小组件配置路由
+    // 从 /habit_timer/config?widgetId=xxx 转换为 /habit_timer_selector
+    // widgetId 参数会在后面被提取到 arguments 中
+    if (routePath == '/habit_timer/config') {
+      routePath = '/habit_timer_selector';
+      debugPrint('习惯计时器小组件配置路由转换为: $routePath');
+    }
+
     // 特殊处理：快捷记账添加账单路由
     // 从 /bill_shortcuts/add?accountId=xxx&category=xxx&amount=xxx&isExpense=true
     // 转换为 /bill 并传递参数
@@ -491,6 +501,14 @@ void _handleWidgetClick(String url) {
           trackerPlugin.openGoalDetail(navigatorKey.currentContext!, goal);
         }
       });
+    }
+
+    // 特殊处理：习惯计时器对话框路由
+    // 从 /plugin/habits/timer?habitId=xxx 转换为 /habit_timer_dialog
+    // habitId 参数会在后面被提取到 arguments 中
+    if (routePath == '/plugin/habits/timer') {
+      routePath = '/habit_timer_dialog';
+      debugPrint('习惯计时器对话框路由转换为: $routePath');
     }
 
     // 提取所有查询参数
@@ -720,6 +738,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       PluginWidgetSyncHelper.instance.syncPendingTaskChangesOnStartup();
       PluginWidgetSyncHelper.instance.syncPendingCalendarEventsOnStartup();
       PluginWidgetSyncHelper.instance.syncPendingGoalChangesOnStartup();
+      PluginWidgetSyncHelper.instance.syncPendingHabitTimerChangesOnStartup();
     }
   }
 

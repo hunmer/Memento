@@ -34,6 +34,7 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
         // Actions
         const val ACTION_TOGGLE_TIMER = "github.hunmer.memento.widgets.HABIT_TIMER_TOGGLE"
         const val ACTION_SWITCH_MODE = "github.hunmer.memento.widgets.HABIT_TIMER_SWITCH_MODE"
+        const val ACTION_COMPLETE_TIMER = "github.hunmer.memento.widgets.HABIT_TIMER_COMPLETE"
 
         // Preference Keys
         const val PREF_KEY_HABIT_ID = "habit_timer_habit_id_"
@@ -71,6 +72,12 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
                 val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
                 if (widgetId != -1) {
                     handleSwitchMode(context, widgetId)
+                }
+            }
+            ACTION_COMPLETE_TIMER -> {
+                val widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
+                if (widgetId != -1) {
+                    handleCompleteTimer(context, widgetId)
                 }
             }
         }
@@ -121,6 +128,7 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
         views.setViewVisibility(R.id.habit_title, View.GONE)
         views.setViewVisibility(R.id.timer_display, View.GONE)
         views.setViewVisibility(R.id.play_pause_button, View.GONE)
+        views.setViewVisibility(R.id.complete_button, View.GONE)
         views.setViewVisibility(R.id.hint_text, View.VISIBLE)
 
         views.setTextViewText(R.id.hint_text, "点击设置小组件")
@@ -134,7 +142,7 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
 
         // 点击跳转到配置页面（使用deeplink）
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = android.net.Uri.parse("memento://habit_timer/config?widgetId=$appWidgetId")
+            data = android.net.Uri.parse("memento://widget/habit_timer/config?widgetId=$appWidgetId")
             setPackage("github.hunmer.memento")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -188,12 +196,21 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
             val elapsedSeconds = timerState?.optInt("elapsedSeconds", 0) ?: 0
             val isCountdown = timerState?.optBoolean("isCountdown", true) ?: true
 
+            Log.d(TAG, "Read timer state: isRunning=$isRunning, elapsed=$elapsedSeconds, json=$timerStateJson")
+
             // 显示所有内容，隐藏提示
             views.setViewVisibility(R.id.habit_icon_container, View.VISIBLE)
             views.setViewVisibility(R.id.habit_title, View.VISIBLE)
             views.setViewVisibility(R.id.timer_display, View.VISIBLE)
             views.setViewVisibility(R.id.play_pause_button, View.VISIBLE)
             views.setViewVisibility(R.id.hint_text, View.GONE)
+
+            // 完成按钮：仅在有计时数据时显示
+            if (elapsedSeconds > 0) {
+                views.setViewVisibility(R.id.complete_button, View.VISIBLE)
+            } else {
+                views.setViewVisibility(R.id.complete_button, View.GONE)
+            }
 
             // 设置背景颜色（带透明度）
             val bgColor = adjustColorAlpha(primaryColor, opacity)
@@ -239,7 +256,7 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
             )
 
             // 设置按钮点击事件
-            setupButtonClicks(views, context, appWidgetId, habitId, habitName, durationMinutes, isRunning)
+            setupButtonClicks(views, context, appWidgetId, habitId, habitName, durationMinutes, isRunning, elapsedSeconds)
 
             // 设置时间显示点击事件（切换模式）
             setupTimeClick(views, context, appWidgetId)
@@ -267,6 +284,7 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
         views.setViewVisibility(R.id.habit_title, View.VISIBLE)
         views.setViewVisibility(R.id.timer_display, View.VISIBLE)
         views.setViewVisibility(R.id.play_pause_button, View.VISIBLE)
+        views.setViewVisibility(R.id.complete_button, View.GONE)
         views.setViewVisibility(R.id.hint_text, View.GONE)
 
         views.setTextViewText(R.id.habit_title, "习惯")
@@ -283,7 +301,8 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
         habitId: String,
         habitName: String,
         durationMinutes: Int,
-        isRunning: Boolean
+        isRunning: Boolean,
+        elapsedSeconds: Int
     ) {
         // 播放/暂停按钮
         if (isRunning) {
@@ -314,6 +333,21 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             views.setOnClickPendingIntent(R.id.play_pause_button, startPendingIntent)
+        }
+
+        // 完成按钮（仅在有计时数据时设置点击事件）
+        if (elapsedSeconds > 0) {
+            val completeIntent = Intent(context, HabitTimerWidgetProvider::class.java).apply {
+                action = ACTION_COMPLETE_TIMER
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+            }
+            val completePendingIntent = PendingIntent.getBroadcast(
+                context,
+                appWidgetId * 10 + 3,
+                completeIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            views.setOnClickPendingIntent(R.id.complete_button, completePendingIntent)
         }
     }
 
@@ -347,7 +381,7 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
         habitId: String
     ) {
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = android.net.Uri.parse("memento://habit_timer/open?habitId=$habitId")
+            data = android.net.Uri.parse("memento://plugin/habits/timer?habitId=$habitId")
             setPackage("github.hunmer.memento")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -434,6 +468,97 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
             Log.d(TAG, "Mode switched: countdown=${!isCountdown}")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to switch mode", e)
+        }
+    }
+
+    /**
+     * 处理完成计时
+     */
+    private fun handleCompleteTimer(context: Context, appWidgetId: Int) {
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val habitId = prefs.getString("$PREF_KEY_HABIT_ID$appWidgetId", null) ?: return
+            val habitName = prefs.getString("$PREF_KEY_HABIT_NAME$appWidgetId", null) ?: "习惯"
+
+            // 读取当前状态
+            val stateKey = "$PREF_KEY_TIMER_STATE$appWidgetId"
+            val stateJson = prefs.getString(stateKey, null)
+            val state = if (stateJson != null) JSONObject(stateJson) else JSONObject()
+
+            val elapsedSeconds = state.optInt("elapsedSeconds", 0)
+
+            // 如果没有计时数据，不执行操作
+            if (elapsedSeconds <= 0) {
+                android.widget.Toast.makeText(
+                    context,
+                    "暂无计时数据",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+
+            // 停止前台服务（如果正在运行）
+            val stopIntent = Intent(context, HabitTimerForegroundService::class.java).apply {
+                action = HabitTimerForegroundService.ACTION_STOP_TIMER
+            }
+            context.startService(stopIntent)
+
+            // 记录完成的计时数据到待处理变更
+            recordCompletionChange(context, habitId, elapsedSeconds)
+
+            // 重置计时状态
+            val newState = JSONObject().apply {
+                put("isRunning", false)
+                put("elapsedSeconds", 0)
+                put("isCountdown", state.optBoolean("isCountdown", true))
+                put("timestamp", System.currentTimeMillis())
+            }
+            prefs.edit().putString(stateKey, newState.toString()).apply()
+
+            // 刷新小组件
+            refreshWidget(context, appWidgetId)
+
+            // 显示 Toast
+            val minutes = elapsedSeconds / 60
+            val seconds = elapsedSeconds % 60
+            val timeStr = if (minutes > 0) {
+                "${minutes}分${seconds}秒"
+            } else {
+                "${seconds}秒"
+            }
+            android.widget.Toast.makeText(
+                context,
+                "✓ 已完成「$habitName」计时 $timeStr",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+
+            Log.d(TAG, "Timer completed: $habitId, elapsed=$elapsedSeconds")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to complete timer", e)
+        }
+    }
+
+    /**
+     * 记录完成的计时数据（供Flutter端同步）
+     */
+    private fun recordCompletionChange(context: Context, habitId: String, elapsedSeconds: Int) {
+        try {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val pendingJson = prefs.getString(PREF_KEY_PENDING_CHANGES, "{}")
+            val pending = if (pendingJson != null) JSONObject(pendingJson) else JSONObject()
+
+            val change = JSONObject().apply {
+                put("action", "complete")
+                put("elapsedSeconds", elapsedSeconds)
+                put("timestamp", System.currentTimeMillis())
+            }
+
+            pending.put(habitId, change)
+            prefs.edit().putString(PREF_KEY_PENDING_CHANGES, pending.toString()).apply()
+
+            Log.d(TAG, "Completion change recorded: $habitId, elapsed=$elapsedSeconds")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to record completion change", e)
         }
     }
 

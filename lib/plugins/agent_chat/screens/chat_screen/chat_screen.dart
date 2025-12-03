@@ -114,14 +114,17 @@ class _ChatScreenState extends State<ChatScreen> {
     if (mounted) {
       final currentMessageCount = _controller.messages.length;
       final hasNewMessage = currentMessageCount > _lastMessageCount;
+      final wasEmpty = _lastMessageCount == 0;
+      _lastMessageCount = currentMessageCount;
 
       setState(() {});
 
-      // 仅在有新消息添加时自动滚动到底部，消息内容更新时不滚动
-      if (hasNewMessage) {
-        _lastMessageCount = currentMessageCount;
+      // 在以下情况自动滚动到底部：
+      // 1. 有新消息添加时
+      // 2. 从空消息列表变为有消息时（首次进入或清空后）
+      if (hasNewMessage || wasEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scrollToBottom();
+          _scrollToBottom(animate: hasNewMessage);
         });
       }
 
@@ -271,6 +274,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _scrollToBottom({bool animate = false}) {
+    // 尝试滚动，如果控制器还未准备好则延迟重试
     if (_scrollController.hasClients) {
       if (animate) {
         _scrollController.animateTo(
@@ -281,6 +285,21 @@ class _ChatScreenState extends State<ChatScreen> {
       } else {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       }
+    } else {
+      // 延迟一帧后重试，确保控制器已准备好
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          if (animate) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          } else {
+            _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+          }
+        }
+      });
     }
   }
 
@@ -517,6 +536,10 @@ class _ChatScreenState extends State<ChatScreen> {
                               controller: _scrollController,
                               padding: const EdgeInsets.all(16),
                               itemCount: _controller.messages.length + 1, // +1 for new session button
+                              // 添加反向物理效果，使滚动更自然
+                              physics: const BouncingScrollPhysics(
+                                parent: AlwaysScrollableScrollPhysics(),
+                              ),
                               itemBuilder: (context, index) {
                                 // 最后一个 item 显示新会话按钮
                                 if (index == _controller.messages.length) {

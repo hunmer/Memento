@@ -72,7 +72,7 @@
             android:gravity="center" />
     </LinearLayout>
 
-    <!-- 底部区域：播放按钮 -->
+    <!-- 底部区域：按钮组 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -80,6 +80,21 @@
         android:gravity="end|bottom"
         android:orientation="horizontal">
 
+        <!-- 完成按钮（仅在有计时数据时显示） -->
+        <ImageButton
+            android:id="@+id/complete_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_save"
+            android:background="@drawable/play_button_background"
+            android:backgroundTint="#3B82F6"
+            android:scaleType="center"
+            android:tint="#FFFFFF"
+            android:contentDescription="Complete Timer Button"
+            android:visibility="gone"
+            android:layout_marginEnd="8dp" />
+
+        <!-- 播放/暂停按钮 -->
         <ImageButton
             android:id="@+id/play_pause_button"
             android:layout_width="40dp"

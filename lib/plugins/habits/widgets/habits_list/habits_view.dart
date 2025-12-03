@@ -21,14 +21,18 @@ class CombinedHabitsView extends StatefulWidget {
   State<CombinedHabitsView> createState() => _CombinedHabitsViewState();
 }
 
-class _CombinedHabitsViewState extends State<CombinedHabitsView> {
+class _CombinedHabitsViewState extends State<CombinedHabitsView>
+    with WidgetsBindingObserver {
   List<Habit> _habits = [];
   late TimerController _timerController;
   final Map<String, bool> _timingStatus = {};
+  int _refreshKey = 0; // 用于强制刷新 HabitCard
 
   @override
   void initState() {
     super.initState();
+    // 添加生命周期监听
+    WidgetsBinding.instance.addObserver(this);
     final habitsPlugin =
         PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
     _timerController = habitsPlugin?.timerController ?? TimerController();
@@ -42,9 +46,35 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
 
   @override
   void dispose() {
+    // 移除生命周期监听
+    WidgetsBinding.instance.removeObserver(this);
     EventManager.instance.unsubscribe('habit_timer_started', _onTimerStarted);
     EventManager.instance.unsubscribe('habit_timer_stopped', _onTimerStopped);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // 应用从后台恢复时重新加载数据
+    if (state == AppLifecycleState.resumed) {
+      debugPrint('CombinedHabitsView: 应用恢复，重新加载习惯数据');
+      _reloadHabits();
+    }
+  }
+
+  /// 从存储重新加载习惯数据（用于应用恢复时）
+  Future<void> _reloadHabits() async {
+    // 等待同步完成
+    await Future.delayed(const Duration(milliseconds: 300));
+    // 从存储重新加载
+    final habits = await widget.controller.loadHabits();
+    if (mounted) {
+      setState(() {
+        _habits = habits;
+        _refreshKey++; // 增加 key 强制重建所有 HabitCard
+      });
+    }
   }
 
   void _onTimerStarted(EventArgs args) {
@@ -130,6 +160,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView> {
                 : null;
 
         return HabitCard(
+          key: ValueKey('${habit.id}_$_refreshKey'),
           habit: habit,
           skill: skill,
           controller: widget.controller,

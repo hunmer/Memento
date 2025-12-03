@@ -1,11 +1,13 @@
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
+import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 
 class SkillController {
   final StorageManager storage;
   static const _skillsKey = 'habits/skills';
   List<Skill> _skills = [];
+  static const String _initializedKey = 'habits/skills_initialized';
 
   SkillController(this.storage) {
     loadSkills();
@@ -41,16 +43,72 @@ class SkillController {
           data.whereType<Map>().where((m) => m.isNotEmpty),
         );
       }
+
       _skills =
           skillMaps
               .map((e) => Skill.fromMap(e))
               .where((s) => s != null)
               .toList();
+
+      // 如果没有技能数据且未初始化过，创建默认技能
+      if (_skills.isEmpty) {
+        final isInitialized = await storage.readJson(_initializedKey, false);
+        if (isInitialized == false) {
+          await _createDefaultSkills();
+          await storage.writeJson(_initializedKey, true);
+        }
+      }
+
       return _skills;
     } catch (e) {
       print('Error loading skills: $e');
       return _skills = [];
     }
+  }
+
+  Future<void> _createDefaultSkills() async {
+    final defaultSkills = [
+      Skill(
+        id: HabitsUtils.generateId(),
+        title: '健康生活',
+        description: '保持身体健康，养成良好的生活习惯',
+        notes: '包括运动、饮食、睡眠等方面',
+        group: '健康',
+        icon: '59512',
+        targetMinutes: 600, // 10小时目标
+      ),
+      Skill(
+        id: HabitsUtils.generateId(),
+        title: '学习提升',
+        description: '持续学习新知识，提升个人能力',
+        notes: '阅读、课程学习、技能训练等',
+        group: '学习',
+        icon: '59544',
+        targetMinutes: 1200, // 20小时目标
+      ),
+      Skill(
+        id: HabitsUtils.generateId(),
+        title: '工作效率',
+        description: '提高工作效率，优化工作时间',
+        notes: '包括时间管理、任务规划、专注力训练',
+        group: '工作',
+        icon: '59509',
+        targetMinutes: 480, // 8小时目标
+      ),
+      Skill(
+        id: HabitsUtils.generateId(),
+        title: '创意艺术',
+        description: '培养创造力和艺术修养',
+        notes: '绘画、音乐、写作、摄影等创意活动',
+        group: '兴趣',
+        icon: '59521',
+        targetMinutes: 300, // 5小时目标
+      ),
+    ];
+
+    _skills = defaultSkills;
+    await storage.writeJson(_skillsKey, defaultSkills.map((s) => s.toMap()).toList());
+    print('Created default skills: ${defaultSkills.length} items');
   }
 
   List<Skill> getSkills() {
