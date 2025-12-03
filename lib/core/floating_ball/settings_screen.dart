@@ -22,8 +22,6 @@ class _FloatingBallSettingsScreenState
   bool _isEnabled = true;
   final Map<FloatingBallGesture, GestureActionConfig?> _selectedActions = {};
 
-  // 从FloatingBallManager获取预定义动作列表
-  List<String> get _availableActions => _manager.getAllPredefinedActionTitles();
 
   @override
   void initState() {
@@ -214,9 +212,9 @@ class _FloatingBallSettingsScreenState
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: _getGestureIcon(gesture).color,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               child: Icon(
-                _getGestureIcon(gesture).icon,
+                _getGestureIcon(gesture),
                 color: Colors.white,
               ),
             ),
@@ -309,6 +307,8 @@ class _FloatingBallSettingsScreenState
         return Icons.keyboard_arrow_left;
       case FloatingBallGesture.swipeRight:
         return Icons.keyboard_arrow_right;
+      default:
+        return Icons.help_outline;
     }
   }
 
@@ -326,6 +326,8 @@ class _FloatingBallSettingsScreenState
         return l10n!.swipeLeftGesture;
       case FloatingBallGesture.swipeRight:
         return l10n!.swipeRightGesture;
+      default:
+        return 'Unknown';
     }
   }
 }

@@ -5,64 +5,11 @@ library action_manager;
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../plugin_manager.dart';
-import '../route/route_history_manager.dart';
-import '../floating_ball/l10n/floating_ball_localizations.dart';
-import '../../dialogs/plugin_list_dialog.dart';
-import '../../widgets/route_history_dialog/route_history_dialog.dart';
+import '../floating_ball/models/floating_ball_gesture.dart';
 import 'models/action_definition.dart';
 import 'models/action_instance.dart';
 import 'models/action_group.dart';
 import 'action_executor.dart';
-
-/// 手势类型（悬浮球使用）
-enum FloatingBallGesture {
-  tap,
-  doubleTap,
-  longPress,
-  swipeUp,
-  swipeDown,
-  swipeLeft,
-  swipeRight,
-}
-
-/// 手势动作配置
-class GestureActionConfig {
-  final FloatingBallGesture gesture;
-  final ActionGroup? group;
-  final ActionInstance? singleAction;
-
-  const GestureActionConfig({
-    required this.gesture,
-    this.group,
-    this.singleAction,
-  });
-
-  bool get hasAction => group != null || singleAction != null;
-  bool get isEmpty => !hasAction;
-
-  Map<String, dynamic> toJson() {
-    return {
-      'gesture': gesture.name,
-      'group': group?.toJson(),
-      'singleAction': singleAction?.toJson(),
-    };
-  }
-
-  factory GestureActionConfig.fromJson(Map<String, dynamic> json) {
-    return GestureActionConfig(
-      gesture: FloatingBallGesture.values.firstWhere(
-        (e) => e.name == json['gesture'],
-        orElse: () => FloatingBallGesture.tap,
-      ),
-      group: json['group'] != null ? ActionGroup.fromJson(json['group']) : null,
-      singleAction:
-          json['singleAction'] != null
-              ? ActionInstance.fromJson(json['singleAction'])
-              : null,
-    );
-  }
-}
 
 /// 动作管理器单例
 class ActionManager {

@@ -154,6 +154,10 @@ class FloatingBallConfig {
     switch (gesture) {
       case FloatingBallGesture.tap:
         return 'tap';
+      case FloatingBallGesture.doubleTap:
+        return 'doubleTap';
+      case FloatingBallGesture.longPress:
+        return 'longPress';
       case FloatingBallGesture.swipeUp:
         return 'swipeUp';
       case FloatingBallGesture.swipeDown:
@@ -170,6 +174,10 @@ class FloatingBallConfig {
     switch (gestureString) {
       case 'tap':
         return FloatingBallGesture.tap;
+      case 'doubleTap':
+        return FloatingBallGesture.doubleTap;
+      case 'longPress':
+        return FloatingBallGesture.longPress;
       case 'swipeUp':
         return FloatingBallGesture.swipeUp;
       case 'swipeDown':
