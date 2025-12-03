@@ -4,9 +4,6 @@ import android.util.Log
 import android.content.Intent
 import android.os.Build
 import android.net.Uri
-import android.view.WindowManager
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import github.hunmer.memento.TimerForegroundService
@@ -22,36 +19,9 @@ class MainActivity: FlutterActivity() {
 
     private var widgetMethodChannel: MethodChannel? = null
     private var pendingWidgetUrl: String? = null
-    private var isTimerDialogMode = false
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
-        // 检测是否是计时器对话框启动
-        val uri: Uri? = intent?.data
-        isTimerDialogMode = uri?.host == "habits" && uri?.path == "/timer"
-
-        // 如果是计时器对话框模式，设置透明主题和窗口属性
-        if (isTimerDialogMode) {
-            setTheme(R.style.TimerDialogTheme)
-            Log.d("MainActivity", "启动计时器对话框模式")
-        }
-
         super.onCreate(savedInstanceState)
-
-        // 如果是计时器对话框模式，设置透明背景和对话框属性
-        if (isTimerDialogMode) {
-            window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-            // 调整窗口参数，使对话框居中显示
-            val params = window.attributes
-            params.width = WindowManager.LayoutParams.WRAP_CONTENT
-            params.height = WindowManager.LayoutParams.WRAP_CONTENT
-            params.x = 0
-            params.y = 0
-            window.attributes = params
-
-            Log.d("MainActivity", "设置计时器对话框窗口属性")
-        }
-
         // 处理启动时的 DeepLink
         handleIntent(intent)
     }
