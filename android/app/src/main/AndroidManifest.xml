@@ -102,6 +102,17 @@
                     android:scheme="memento"
                     android:host="habits" />
             </intent-filter>
+
+            <!-- 计时器对话框专用 Intent Filter - 限制路径为 /timer -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="memento"
+                    android:host="habits"
+                    android:pathPrefix="/timer" />
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
