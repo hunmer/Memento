@@ -44,10 +44,6 @@ import 'core/app_initializer.dart';
 // 从 app_widgets 导入页面过渡构建器
 import 'core/app_widgets/page_transitions.dart';
 
-// 主页小组件注册 - 这些导入已移动到 app_initializer.dart
-// import 'plugins/chat/home_widgets.dart';
-// ... (所有小组件注册现在在 app_initializer.dart 的 initializeHomeWidgets() 中)
-
 void main() async {
   // 执行应用初始化
   await initializeApp();
