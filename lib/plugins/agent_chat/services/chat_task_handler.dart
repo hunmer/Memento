@@ -1,4 +1,4 @@
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:memento_foreground_service/memento_foreground_service.dart';
 import '../../../core/notification_controller.dart';
 
 /// AI 聊天任务处理器 - 在独立 isolate 中运行
