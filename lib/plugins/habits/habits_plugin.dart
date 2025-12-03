@@ -102,6 +102,8 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     // 监听计时器事件，同步小组件数据
     EventManager.instance.subscribe('habit_timer_started', _onTimerEvent);
     EventManager.instance.subscribe('habit_timer_stopped', _onTimerEvent);
+    // 监听完成记录保存事件，同步周视图小组件
+    EventManager.instance.subscribe('habit_completion_record_saved', _onCompletionRecordSaved);
   }
 
   /// 处理计时器事件，同步小组件
@@ -116,8 +118,24 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     });
   }
 
+  /// 处理完成记录保存事件，同步周视图小组件
+  void _onCompletionRecordSaved(EventArgs args) {
+    // 异步执行同步操作，避免阻塞事件处理
+    Future.microtask(() async {
+      try {
+        await PluginWidgetSyncHelper.instance.syncHabitsWeeklyWidget();
+        debugPrint('已同步习惯周视图小组件');
+      } catch (e) {
+        debugPrint('同步习惯周视图小组件失败: $e');
+      }
+    });
+  }
+
   Future<void> onDispose() async {
-    // Clean up resources if needed
+    // 取消事件订阅
+    EventManager.instance.unsubscribe('habit_timer_started', _onTimerEvent);
+    EventManager.instance.unsubscribe('habit_timer_stopped', _onTimerEvent);
+    EventManager.instance.unsubscribe('habit_completion_record_saved', _onCompletionRecordSaved);
   }
 
   @override

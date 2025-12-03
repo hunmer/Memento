@@ -1,3 +1,5 @@
+import 'package:Memento/core/event/event_args.dart';
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
@@ -40,6 +42,12 @@ class CompletionRecordController {
 
     records.add(record);
     await storage.writeJson(path, records.map((r) => r.toMap()).toList());
+
+    // 广播完成记录已保存的事件，触发小组件同步
+    EventManager.instance.broadcast(
+      'habit_completion_record_saved',
+      Value({'habitId': habitId, 'record': record}),
+    );
   }
 
   getSkillHabitIds(skillId) async {

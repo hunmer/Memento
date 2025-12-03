@@ -204,7 +204,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   audioplayers_darwin: 4f9ca89d92d3d21cec7ec580e78ca888e5fb68bd
-  awesome_notifications: 0f432b28098d193920b11a44cfa9d2d9313a3888
+  awesome_notifications: 39018490fa46bf3d1427e350cc6b977dcd08c3d6
   device_calendar: b55b2c5406cfba45c95a59f9059156daee1f74ed
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
@@ -237,6 +237,6 @@ SPEC CHECKSUMS:
   url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
   video_player_avfoundation: dd410b52df6d2466a42d28550e33e4146928280a
 
-PODFILE CHECKSUM: e71a9fdf367742e2874cad24bef2b13d500233a8
+PODFILE CHECKSUM: 5725e5c6519df3539cbf415631ac53f31abd706b
 
 COCOAPODS: 1.16.2

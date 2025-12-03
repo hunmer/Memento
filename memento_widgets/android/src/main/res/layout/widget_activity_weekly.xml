@@ -32,12 +32,141 @@
             android:layout_weight="0.4"
             android:padding="4dp">
 
-            <ImageView
-                android:id="@+id/heatmap_image"
+            <!-- 包含热力图网格布局 -->
+            <include
+                android:id="@+id/heatmap_container"
+                layout="@layout/widget_heatmap_grid"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="fitXY"
-                android:contentDescription="热力图" />
+                android:layout_marginLeft="18dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp" />
+
+            <!-- 顶部星期标签（上标） -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="18dp"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="周一"
+                    android:textColor="#FF607afb"
+                    android:textSize="8sp"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="周二"
+                    android:textColor="#FF607afb"
+                    android:textSize="8sp"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="周三"
+                    android:textColor="#FF607afb"
+                    android:textSize="8sp"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="周四"
+                    android:textColor="#FF607afb"
+                    android:textSize="8sp"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="周五"
+                    android:textColor="#FF607afb"
+                    android:textSize="8sp"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="周六"
+                    android:textColor="#FF607afb"
+                    android:textSize="8sp"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="周日"
+                    android:textColor="#FF607afb"
+                    android:textSize="8sp"
+                    android:gravity="center" />
+            </LinearLayout>
+
+            <!-- 左侧时间标签（左标） -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:orientation="vertical"
+                android:gravity="center_vertical"
+                android:layout_marginLeft="-18dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="0"
+                    android:textColor="#FF607afb"
+                    android:textSize="8sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="6"
+                    android:textColor="#FF607afb"
+                    android:textSize="8sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="12"
+                    android:textColor="#FF607afb"
+                    android:textSize="8sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="18"
+                    android:textColor="#FF607afb"
+                    android:textSize="8sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:text="24"
+                    android:textColor="#FF607afb"
+                    android:textSize="8sp" />
+            </LinearLayout>
         </FrameLayout>
 
         <!-- 右侧：周标题 + 标签列表（60%宽度） -->

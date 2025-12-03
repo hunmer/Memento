@@ -581,6 +581,22 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
         opacity.toString(),
       );
 
+      // 将当前 widgetId 添加到全局列表中
+      final existingWidgetIdsStr = await HomeWidget.getWidgetData<String>(
+        'habits_weekly_widget_ids',
+      ) ?? '[]';
+      final existingWidgetIds = List<int>.from(
+        jsonDecode(existingWidgetIdsStr) as List,
+      );
+      if (!existingWidgetIds.contains(widget.widgetId)) {
+        existingWidgetIds.add(widget.widgetId);
+        await HomeWidget.saveWidgetData<String>(
+          'habits_weekly_widget_ids',
+          jsonEncode(existingWidgetIds),
+        );
+        debugPrint('已添加小组件ID到列表: ${widget.widgetId}, 当前列表: $existingWidgetIds');
+      }
+
       // 生成初始周数据
       final widgetService = HabitsWidgetService(_habitsPlugin);
       final weekData = await widgetService.calculateWeekData(
