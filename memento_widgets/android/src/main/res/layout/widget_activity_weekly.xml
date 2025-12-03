@@ -26,28 +26,18 @@
         android:visibility="visible">
 
         <!-- 左侧：热力图（40%宽度） -->
-        <FrameLayout
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="0.4"
+            android:orientation="vertical"
             android:padding="4dp">
 
-            <!-- 包含热力图网格布局 -->
-            <include
-                android:id="@+id/heatmap_container"
-                layout="@layout/widget_heatmap_grid"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="18dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp" />
-
-            <!-- 顶部星期标签（上标） -->
+            <!-- 顶部星期标签（独立一行，不与热力图重叠） -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:layout_alignParentTop="true"
-                android:layout_marginLeft="18dp"
+                android:layout_height="14dp"
+                android:layout_marginStart="16dp"
                 android:orientation="horizontal"
                 android:gravity="center">
 
@@ -55,7 +45,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="周一"
+                    android:text="一"
                     android:textColor="#FF607afb"
                     android:textSize="8sp"
                     android:gravity="center" />
@@ -64,7 +54,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="周二"
+                    android:text="二"
                     android:textColor="#FF607afb"
                     android:textSize="8sp"
                     android:gravity="center" />
@@ -73,7 +63,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="周三"
+                    android:text="三"
                     android:textColor="#FF607afb"
                     android:textSize="8sp"
                     android:gravity="center" />
@@ -82,7 +72,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="周四"
+                    android:text="四"
                     android:textColor="#FF607afb"
                     android:textSize="8sp"
                     android:gravity="center" />
@@ -91,7 +81,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="周五"
+                    android:text="五"
                     android:textColor="#FF607afb"
                     android:textSize="8sp"
                     android:gravity="center" />
@@ -100,7 +90,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="周六"
+                    android:text="六"
                     android:textColor="#FF607afb"
                     android:textSize="8sp"
                     android:gravity="center" />
@@ -109,65 +99,81 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="周日"
+                    android:text="日"
                     android:textColor="#FF607afb"
                     android:textSize="8sp"
                     android:gravity="center" />
             </LinearLayout>
 
-            <!-- 左侧时间标签（左标） -->
+            <!-- 热力图区域（包含左侧时间标签和热力图网格） -->
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:orientation="vertical"
-                android:gravity="center_vertical"
-                android:layout_marginLeft="-18dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="20dp">
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="0"
-                    android:textColor="#FF607afb"
-                    android:textSize="8sp" />
+                <!-- 左侧时间标签 -->
+                <LinearLayout
+                    android:layout_width="16dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center_vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="6"
-                    android:textColor="#FF607afb"
-                    android:textSize="8sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textColor="#FF607afb"
+                        android:textSize="7sp"
+                        android:gravity="center" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="12"
-                    android:textColor="#FF607afb"
-                    android:textSize="8sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="6"
+                        android:textColor="#FF607afb"
+                        android:textSize="7sp"
+                        android:gravity="center" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="18"
-                    android:textColor="#FF607afb"
-                    android:textSize="8sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="12"
+                        android:textColor="#FF607afb"
+                        android:textSize="7sp"
+                        android:gravity="center" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="24"
-                    android:textColor="#FF607afb"
-                    android:textSize="8sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="18"
+                        android:textColor="#FF607afb"
+                        android:textSize="7sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="24"
+                        android:textColor="#FF607afb"
+                        android:textSize="7sp"
+                        android:gravity="center" />
+                </LinearLayout>
+
+                <!-- 热力图网格 -->
+                <include
+                    android:id="@+id/heatmap_container"
+                    layout="@layout/widget_heatmap_grid"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
             </LinearLayout>
-        </FrameLayout>
+        </LinearLayout>
 
         <!-- 右侧：周标题 + 标签列表（60%宽度） -->
         <LinearLayout

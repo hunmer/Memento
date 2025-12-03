@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import org.json.JSONObject
@@ -12,7 +13,7 @@ import github.hunmer.memento_widgets.R
 /**
  * 活动周视图小组件数据工厂
  *
- * 为ListView提供活动标签列表数据
+ * 为ListView提供活动标签列表数据（每行两个标签）
  */
 class ActivityWeeklyRemoteViewsFactory(
     private val context: Context,
@@ -24,13 +25,20 @@ class ActivityWeeklyRemoteViewsFactory(
         AppWidgetManager.INVALID_APPWIDGET_ID
     )
 
-    private var tagItems: List<TagItem> = emptyList()
+    // 成对的标签项（每行两个）
+    private var tagPairs: List<TagPair> = emptyList()
     private var accentColor: Int = DEFAULT_ACCENT_COLOR
 
     data class TagItem(
         val name: String,
         val duration: String,
-        val count: Int
+        val count: Int,
+        val color: Int  // 标签自身颜色
+    )
+
+    data class TagPair(
+        val left: TagItem,
+        val right: TagItem?  // 右侧可能为空（奇数个标签时）
     )
 
     override fun onCreate() {
@@ -44,43 +52,56 @@ class ActivityWeeklyRemoteViewsFactory(
     }
 
     override fun onDestroy() {
-        tagItems = emptyList()
+        tagPairs = emptyList()
     }
 
-    override fun getCount(): Int = tagItems.size
+    override fun getCount(): Int = tagPairs.size
 
     override fun getViewAt(position: Int): RemoteViews {
-        if (position >= tagItems.size) {
+        if (position >= tagPairs.size) {
             return getLoadingView()
         }
 
-        val item = tagItems[position]
+        val pair = tagPairs[position]
         val views = RemoteViews(context.packageName, R.layout.widget_activity_weekly_item)
 
-        // 设置checkbox（仅UI装饰）
-        views.setInt(R.id.item_checkbox, "setColorFilter", accentColor)
+        // 设置左侧标签
+        views.setTextViewText(R.id.left_tag_name, pair.left.name)
+        views.setTextViewText(R.id.left_tag_duration, pair.left.duration)
+        views.setInt(R.id.left_color_block, "setBackgroundColor", pair.left.color)
+        views.setViewVisibility(R.id.left_item, View.VISIBLE)
 
-        // 设置标签名称
-        views.setTextViewText(R.id.tag_name, item.name)
-        views.setTextColor(R.id.tag_name, accentColor)
-
-        // 设置时长
-        views.setTextViewText(R.id.tag_duration, item.duration)
-        views.setTextColor(R.id.tag_duration, applyAlpha(accentColor, 0.8f))
-
-        // 设置点击事件的填充Intent
-        val fillIntent = Intent().apply {
-            putExtra("tag_name", item.name)
+        // 设置左侧点击事件
+        val leftFillIntent = Intent().apply {
+            putExtra("tag_name", pair.left.name)
         }
-        views.setOnClickFillInIntent(R.id.item_root, fillIntent)
+        views.setOnClickFillInIntent(R.id.left_item, leftFillIntent)
+
+        // 设置右侧标签（如果存在）
+        if (pair.right != null) {
+            views.setTextViewText(R.id.right_tag_name, pair.right.name)
+            views.setTextViewText(R.id.right_tag_duration, pair.right.duration)
+            views.setInt(R.id.right_color_block, "setBackgroundColor", pair.right.color)
+            views.setViewVisibility(R.id.right_item, View.VISIBLE)
+
+            // 设置右侧点击事件
+            val rightFillIntent = Intent().apply {
+                putExtra("tag_name", pair.right.name)
+            }
+            views.setOnClickFillInIntent(R.id.right_item, rightFillIntent)
+        } else {
+            // 隐藏右侧
+            views.setViewVisibility(R.id.right_item, View.INVISIBLE)
+        }
 
         return views
     }
 
     override fun getLoadingView(): RemoteViews {
         return RemoteViews(context.packageName, R.layout.widget_activity_weekly_item).apply {
-            setTextViewText(R.id.tag_name, "加载中...")
-            setTextViewText(R.id.tag_duration, "")
+            setTextViewText(R.id.left_tag_name, "加载中...")
+            setTextViewText(R.id.left_tag_duration, "")
+            setViewVisibility(R.id.right_item, View.GONE)
         }
     }
 
@@ -99,7 +120,7 @@ class ActivityWeeklyRemoteViewsFactory(
             val dataJson = prefs.getString("activity_weekly_data_$widgetId", null)
 
             if (dataJson.isNullOrEmpty()) {
-                tagItems = emptyList()
+                tagPairs = emptyList()
                 return
             }
 
@@ -113,23 +134,36 @@ class ActivityWeeklyRemoteViewsFactory(
 
             // 解析标签列表
             val topTags = data.getJSONArray("topTags")
-            tagItems = List(topTags.length()) { index ->
+            val tagItems = mutableListOf<TagItem>()
+
+            for (index in 0 until topTags.length()) {
                 val tagJson = topTags.getJSONObject(index)
                 val name = tagJson.getString("name")
                 val durationSeconds = tagJson.getInt("duration")
                 val count = tagJson.getInt("count")
+                // 读取标签颜色，如果没有则使用默认强调色
+                val color = tagJson.optLong("color", accentColor.toLong()).toInt()
 
-                TagItem(
+                tagItems.add(TagItem(
                     name = name,
                     duration = formatDuration(durationSeconds),
-                    count = count
+                    count = count,
+                    color = color
+                ))
+            }
+
+            // 将标签成对分组
+            tagPairs = tagItems.chunked(2).map { chunk ->
+                TagPair(
+                    left = chunk[0],
+                    right = chunk.getOrNull(1)
                 )
             }
 
-            android.util.Log.d(TAG, "Loaded ${tagItems.size} tag items for widget $widgetId")
+            android.util.Log.d(TAG, "Loaded ${tagItems.size} tag items (${tagPairs.size} pairs) for widget $widgetId")
         } catch (e: Exception) {
             android.util.Log.e(TAG, "Error loading data: $e")
-            tagItems = emptyList()
+            tagPairs = emptyList()
         }
     }
 

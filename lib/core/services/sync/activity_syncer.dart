@@ -130,6 +130,14 @@ class ActivitySyncer extends PluginWidgetSyncer {
           jsonEncode(widgetData),
         );
 
+        // 通知 Android 端刷新小组件视图
+        await HomeWidget.updateWidget(
+          name: 'ActivityWeeklyWidgetProvider',
+          iOSName: 'ActivityWeeklyWidget',
+          qualifiedAndroidName:
+              'github.hunmer.memento.widgets.providers.ActivityWeeklyWidgetProvider',
+        );
+
         debugPrint('Updated activity weekly widget $widgetId data');
       } catch (e) {
         debugPrint('Failed to update widget $widgetId data: $e');

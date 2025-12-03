@@ -288,6 +288,15 @@ class HabitsSyncer extends PluginWidgetSyncer {
         final widgetData = jsonDecode(widgetDataJson) as Map<String, dynamic>;
         widgetData['data'] = weekData.toMap();
 
+        // 打印详细的周数据用于调试
+        debugPrint('=== 习惯周视图数据 (widgetId=$widgetId) ===');
+        debugPrint('年: ${weekData.year}, 周: ${weekData.week}');
+        debugPrint('周起止: ${weekData.weekStart} - ${weekData.weekEnd}');
+        for (final item in weekData.habitItems) {
+          debugPrint('习惯: ${item.habitTitle}, dailyMinutes: ${item.dailyMinutes}');
+        }
+        debugPrint('===========================================');
+
         final jsonStr = jsonEncode(widgetData);
 
         await HomeWidget.saveWidgetData<String>(
