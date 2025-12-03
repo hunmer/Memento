@@ -532,7 +532,7 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
                 ),
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

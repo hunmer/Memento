@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:intl/intl.dart';
 import 'package:Memento/utils/image_utils.dart';
 
 /// 日历数据模型，包含背景图片路径
@@ -279,37 +278,7 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
     );
   }
 
-  /// 构建头部左侧导航
-  Widget _buildLeftChevron() {
-    if (!widget.config.enableNavigation) return const SizedBox.shrink();
 
-    return IconButton(
-      icon: const Icon(Icons.chevron_left),
-      onPressed: () {
-        setState(() {
-          _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
-        });
-        // 可选：通知外部组件 focusedDay 已改变
-        widget.config.onFormatChanged?.call(_focusedDay);
-      },
-    );
-  }
-
-  /// 构建头部右侧导航
-  Widget _buildRightChevron() {
-    if (!widget.config.enableNavigation) return const SizedBox.shrink();
-
-    return IconButton(
-      icon: const Icon(Icons.chevron_right),
-      onPressed: () {
-        setState(() {
-          _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
-        });
-        // 可选：通知外部组件 focusedDay 已改变
-        widget.config.onFormatChanged?.call(_focusedDay);
-      },
-    );
-  }
 
   // 预留方法：未来可以扩展头部右侧按钮功能
   // List<Widget> _buildRightActions(BuildContext context) {

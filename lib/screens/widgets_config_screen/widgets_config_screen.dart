@@ -201,7 +201,7 @@ class _WidgetsConfigScreenState extends State<WidgetsConfigScreen> {
                 try {
                   await _widgetManager.saveString('text_key', _textValue);
 
-                  final success = await _widgetManager.renderFlutterWidget(
+                  await _widgetManager.renderFlutterWidget(
                     Container(
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(

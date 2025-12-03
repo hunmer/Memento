@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
@@ -11,7 +12,6 @@ import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/app_drawer.dart';
-import '../../main.dart';
 import '../../core/floating_ball/floating_ball_service.dart';
 import 'managers/home_layout_manager.dart';
 import 'widgets/home_grid.dart';

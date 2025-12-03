@@ -1,8 +1,9 @@
+import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../core/plugin_base.dart';
 import '../screens/settings_screen/settings_screen.dart';
-import '../main.dart'; // 导入全局实例
+// 导入全局实例
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});

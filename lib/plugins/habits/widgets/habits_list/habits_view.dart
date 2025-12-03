@@ -24,7 +24,6 @@ class CombinedHabitsView extends StatefulWidget {
 class _CombinedHabitsViewState extends State<CombinedHabitsView>
     with WidgetsBindingObserver {
   List<Habit> _habits = [];
-  late TimerController _timerController;
   final Map<String, bool> _timingStatus = {};
   int _refreshKey = 0; // 用于强制刷新 HabitCard
 
@@ -35,7 +34,6 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
     WidgetsBinding.instance.addObserver(this);
     final habitsPlugin =
         PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
-    _timerController = habitsPlugin?.timerController ?? TimerController();
     widget.controller.addTimerModeListener(_onTimerModeChanged);
     final activeTimers = habitsPlugin!.timerController.getActiveTimers();
     _timingStatus.addAll(activeTimers);

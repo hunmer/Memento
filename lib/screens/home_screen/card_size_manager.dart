@@ -1,5 +1,5 @@
+import 'package:Memento/core/app_initializer.dart';
 import 'package:flutter/material.dart';
-import '../../main.dart';
 import 'card_size.dart';
 
 class CardSizeManager {

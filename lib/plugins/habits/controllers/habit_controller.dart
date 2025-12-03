@@ -5,7 +5,6 @@ import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
-import 'package:flutter/foundation.dart';
 
 typedef TimerModeListener = void Function(String habitId, bool isCountdown);
 

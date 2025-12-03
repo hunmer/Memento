@@ -1,10 +1,10 @@
 import 'dart:io';
+import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/core/utils/zip.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as path;
-import '../../../main.dart';
 import '../../../core/utils/file_utils.dart';
 import '../widgets/plugin_selection_dialog.dart';
 

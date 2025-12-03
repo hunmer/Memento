@@ -1,6 +1,6 @@
 import 'dart:io';
+import 'package:Memento/core/app_initializer.dart';
 import 'package:flutter/material.dart';
-import '../../../main.dart';
 import '../models/home_item.dart';
 import '../models/home_widget_item.dart';
 import '../models/home_folder_item.dart';

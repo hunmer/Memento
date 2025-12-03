@@ -417,7 +417,7 @@ class ContactFormState extends State<ContactForm> {
     IconData? icon, {
     bool iconOnLeft = true,
   }) {
-    final theme = Theme.of(context);
+    Theme.of(context);
     final iconWidget =
         icon != null
             ? Icon(icon, color: Colors.green)

@@ -32,7 +32,6 @@ import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/screens/habit_timer_selector_screen.dart';
 import 'package:Memento/plugins/habits/screens/habits_weekly_config_screen.dart';
 import 'package:Memento/plugins/habits/widgets/timer_dialog.dart';
-import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/nodes/nodes_plugin.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';

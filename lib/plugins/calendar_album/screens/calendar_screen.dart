@@ -2,7 +2,6 @@ import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:table_calendar/table_calendar.dart' hide isSameDay;
 import 'package:Memento/widgets/enhanced_calendar/index.dart';
 import '../controllers/calendar_controller.dart';
 import '../controllers/tag_controller.dart';
@@ -29,59 +28,9 @@ class _CalendarScreenState extends State<CalendarScreen>
   @override
   bool get wantKeepAlive => true;
   DateTime _focusedDay = DateTime.now();
-  final ScrollController _scrollController = ScrollController();
   bool _isInitialized = false;
   // 移除水平视图，只保留垂直视图
 
-  /// 获取日历日期数据
-  Map<DateTime, CalendarDayData> _getCalendarDayData() {
-    final calendarController = Provider.of<CalendarController>(
-      context,
-      listen: false,
-    );
-    final selectedDate = calendarController.selectedDate;
-    final Map<DateTime, CalendarDayData> dayData = {};
-
-    // 获取当月所有条目
-    final currentMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
-    final nextMonth = DateTime(_focusedDay.year, _focusedDay.month + 1, 1);
-
-    // 为有日记的日期创建数据
-    calendarController.entries.forEach((date, entries) {
-      if (date.isAfter(currentMonth.subtract(const Duration(days: 1))) &&
-          date.isBefore(nextMonth)) {
-        // 获取当天日记的第一张图片作为背景
-        String? backgroundImage;
-
-        // 优先获取第一张图片作为背景
-        for (var entry in entries) {
-          // 首先检查直接的图片URLs
-          if (entry.imageUrls.isNotEmpty) {
-            backgroundImage = entry.imageUrls.first;
-            break;
-          }
-
-          // 然后检查Markdown中提取的图片
-          final markdownImages = entry.extractImagesFromMarkdown();
-          if (markdownImages.isNotEmpty) {
-            backgroundImage = markdownImages.first;
-            break;
-          }
-        }
-
-        dayData[date] = CalendarDayData(
-          date: date,
-          backgroundImage: backgroundImage,
-          count: entries.length,
-          isSelected: isSameDay(date, selectedDate),
-          isToday: isSameDay(date, DateTime.now()),
-          isCurrentMonth: date.month == _focusedDay.month,
-        );
-      }
-    });
-
-    return dayData;
-  }
 
   @override
   void initState() {

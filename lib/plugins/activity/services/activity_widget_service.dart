@@ -77,7 +77,6 @@ class ActivityWidgetService {
 
       // 只统计本周内的活动
       if (dayIndex >= 0 && dayIndex < 7) {
-        final hourIndex = activity.startTime.hour;
 
         // 活动可能跨越多个小时，统计每个小时
         final startHour = activity.startTime.hour;

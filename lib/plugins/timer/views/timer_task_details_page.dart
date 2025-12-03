@@ -90,7 +90,6 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
         .clamp(0.0, 1.0);
     final remainingTime = currentTimer.duration - currentTimer.completedDuration;
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final primaryColor = Color(0xFF607AFB);
 
     return Scaffold(

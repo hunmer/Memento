@@ -15,9 +15,9 @@ class BillShortcutsSelectorScreen extends StatefulWidget {
   final int widgetId;
 
   const BillShortcutsSelectorScreen({
-    Key? key,
+    super.key,
     required this.widgetId,
-  }) : super(key: key);
+  });
 
   @override
   State<BillShortcutsSelectorScreen> createState() =>
@@ -219,8 +219,8 @@ class _BillShortcutsSelectorScreenState
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addShortcut,
-        child: const Icon(Icons.add),
         tooltip: '添加快捷预设',
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -389,10 +389,10 @@ class BillShortcutEditDialog extends StatefulWidget {
   final BillShortcut? initialShortcut;
 
   const BillShortcutEditDialog({
-    Key? key,
+    super.key,
     required this.accounts,
     this.initialShortcut,
-  }) : super(key: key);
+  });
 
   @override
   State<BillShortcutEditDialog> createState() => _BillShortcutEditDialogState();

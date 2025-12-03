@@ -3,10 +3,8 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import '../goods_plugin.dart';
-import '../models/warehouse.dart';
 import 'warehouse_detail_screen.dart';
 import '../widgets/warehouse_card.dart';
-import '../widgets/warehouse_form.dart';
 
 class WarehouseListScreen extends StatefulWidget {
   const WarehouseListScreen({super.key, this.onWarehouseTap});
@@ -18,18 +16,6 @@ class WarehouseListScreen extends StatefulWidget {
 }
 
 class _WarehouseListScreenState extends State<WarehouseListScreen> {
-  void _showAddWarehouseDialog() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => WarehouseForm(
-              onSave: (Warehouse warehouse) async {
-                await GoodsPlugin.instance.saveWarehouse(warehouse);
-              },
-            ),
-      ),
-    );
-  }
 
   @override
   void initState() {
