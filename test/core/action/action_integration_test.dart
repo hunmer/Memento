@@ -1,3 +1,6 @@
+import 'package:Memento/core/action/action_executor.dart';
+import 'package:Memento/core/action/models/action_form.dart';
+import 'package:Memento/core/floating_ball/models/floating_ball_gesture.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/action/action_manager.dart';
@@ -35,7 +38,7 @@ void main() {
         id: 'customTestAction',
         title: '自定义测试动作',
         description: '这是一个集成测试动作',
-        icon: Icons.test,
+        icon: Icons.star,
         category: ActionCategory.custom,
         executor: BuiltInActionExecutor('customTestAction'),
       );
@@ -75,7 +78,7 @@ void main() {
       final gesture = FloatingBallGesture.tap;
       final gestureConfig = GestureActionConfig(
         gesture: gesture,
-        actionGroup: actionGroup,
+        group: actionGroup,
       );
 
       await actionManager.setGestureAction(gesture, gestureConfig);
@@ -93,7 +96,7 @@ void main() {
       );
 
       // 验证执行结果（这里会因为没有实际的 UI 环境而失败，但流程是对的）
-      // expect(result.success, true);
+      expect(result, isNotNull);
 
       // 7. 验证统计信息
       final stats = actionManager.getStatistics();
@@ -200,19 +203,19 @@ void main() {
       actionManager.registerAction(actionWithValidators);
 
       // 测试有效数据
-      final validData = {'name': '测试名称'};
+      final validData = <String, dynamic>{'name': '测试名称'};
       expect(
         actionManager.validateAction('validatedAction', validData),
         true,
       );
 
       // 测试无效数据 - 缺少必填字段
-      final emptyData = {};
+      final emptyData = <String, dynamic>{};
       final emptyErrors = actionManager.getValidationErrors('validatedAction', emptyData);
       expect(emptyErrors.isNotEmpty, true);
 
       // 测试无效数据 - 长度不足
-      final shortData = {'name': 'ab'};
+      final shortData = <String, dynamic>{'name': 'ab'};
       final shortErrors = actionManager.getValidationErrors('validatedAction', shortData);
       expect(shortErrors.isNotEmpty, true);
     });

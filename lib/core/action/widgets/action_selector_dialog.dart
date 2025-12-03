@@ -8,6 +8,7 @@ import '../action_manager.dart';
 import '../models/action_definition.dart';
 import '../models/action_instance.dart';
 import '../models/action_group.dart';
+import '../../floating_ball/models/floating_ball_gesture.dart';
 import 'action_config_form.dart';
 import 'action_group_editor.dart';
 

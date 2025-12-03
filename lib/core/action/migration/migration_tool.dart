@@ -4,6 +4,7 @@ library migration_tool;
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:Memento/core/floating_ball/models/floating_ball_gesture.dart';
 import 'package:flutter/material.dart';
 import '../action_manager.dart';
 import '../action_storage.dart';
