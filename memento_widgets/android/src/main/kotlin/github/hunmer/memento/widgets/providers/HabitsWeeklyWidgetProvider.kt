@@ -10,7 +10,7 @@ import android.app.PendingIntent
 import android.view.View
 import android.widget.RemoteViews
 import org.json.JSONObject
-import com.example.memento_widgets.R
+import github.hunmer.memento_widgets.R
 import github.hunmer.memento.widgets.services.HabitsWeeklyWidgetService
 
 /**

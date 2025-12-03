@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.floating_ball_plugin">
+    package="github.hunmer.floating_ball_plugin">
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 

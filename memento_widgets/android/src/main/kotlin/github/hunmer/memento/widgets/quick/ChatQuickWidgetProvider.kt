@@ -9,7 +9,7 @@ import android.net.Uri
 import android.widget.RemoteViews
 import org.json.JSONArray
 import org.json.JSONObject
-import com.example.memento_widgets.R
+import github.hunmer.memento_widgets.R
 
 /**
  * 频道快速发送小组件 Provider

@@ -8,7 +8,7 @@ import android.content.res.ColorStateList
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
-import com.example.memento_widgets.R
+import github.hunmer.memento_widgets.R
 import github.hunmer.memento.widgets.BasePluginWidgetProvider
 import github.hunmer.memento.widgets.services.HabitTimerForegroundService
 import org.json.JSONObject
@@ -385,7 +385,7 @@ class HabitTimerWidgetProvider : BasePluginWidgetProvider() {
     ) {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = android.net.Uri.parse("memento://plugin/habits/timer?habitId=$habitId")
-            setPackage("com.example.memento_widgets_example")
+            setPackage("github.hunmer.memento_widgets_example")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val pendingIntent = PendingIntent.getActivity(

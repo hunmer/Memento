@@ -1,4 +1,4 @@
-package com.example.memento_widgets
+package github.hunmer.memento_widgets
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

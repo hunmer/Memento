@@ -259,7 +259,7 @@ adb logcat | grep -E "🚀|✅|❌|📨|🤖"
 adb shell input keyevent KEYCODE_HOME
 
 # 模拟通知点击
-adb shell am start -n com.example.memento/.MainActivity --es route "/chat"
+adb shell am start -n github.hunmer.memento/.MainActivity --es route "/chat"
 ```
 
 ### 2. 检查前台服务状态
@@ -287,7 +287,7 @@ adb logcat | grep NotificationManager
 ### 监控命令
 ```bash
 # 监控内存使用
-adb shell dumpsys meminfo com.example.memento
+adb shell dumpsys meminfo github.hunmer.memento
 
 # 监控CPU使用
 adb shell top | grep memento

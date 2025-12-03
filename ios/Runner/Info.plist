@@ -77,7 +77,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.example.flutterApplication1</string>
+			<string>github.hunmer.flutterApplication1</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>memento</string>

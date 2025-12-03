@@ -30,9 +30,9 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="memento" 
-                      android:host="plugin"
-                      android:pathPrefix="/habits/timer" />
+                <data android:scheme="memento"
+                      android:host="habits"
+                      android:pathPrefix="/timer" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

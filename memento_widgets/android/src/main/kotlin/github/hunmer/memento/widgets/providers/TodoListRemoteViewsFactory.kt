@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import com.example.memento_widgets.R
+import github.hunmer.memento_widgets.R
 import github.hunmer.memento.widgets.BasePluginWidgetProvider
 import org.json.JSONArray
 import org.json.JSONObject
