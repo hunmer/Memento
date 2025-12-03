@@ -773,7 +773,7 @@ static Future<void> initialize({
   await NotificationManager.initialize(
     onSelectNotification: onSelectNotification,
     appName: '目标跟踪提醒',
-    appId: 'com.example.memento.tracker',
+    appId: 'github.hunmer.memento.tracker',
   );
 
   await NotificationManager.createNotificationChannel(

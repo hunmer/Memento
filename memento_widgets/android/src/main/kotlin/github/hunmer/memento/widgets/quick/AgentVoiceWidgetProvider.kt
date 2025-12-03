@@ -8,7 +8,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.RemoteViews
 import org.json.JSONArray
-import com.example.memento_widgets.R
+import github.hunmer.memento_widgets.R
 
 /**
  * AI 语音快捷小组件 Provider

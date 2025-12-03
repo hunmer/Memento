@@ -1,4 +1,4 @@
-package com.example.floating_ball_plugin
+package github.hunmer.floating_ball_plugin
 
 import android.content.Context
 import android.content.Intent

@@ -73,7 +73,7 @@ home_widget不直接处理XML注册；你需要在Android原生代码中手动�
 2. **创建AppWidgetProvider类**（在`android/src/main/kotlin/com/example/memento_widgets/`）：
    - 你可以为两个widget共享一个Provider类（通过context区分），或创建两个。示例使用共享：
      ```kotlin
-     package com.example.memento_widgets
+     package github.hunmer.memento_widgets
 
      import android.appwidget.AppWidgetManager
      import android.appwidget.AppWidgetProvider

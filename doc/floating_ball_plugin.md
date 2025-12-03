@@ -47,7 +47,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.example.floating_ball_plugin
+        package: github.hunmer.floating_ball_plugin
         pluginClass: FloatingBallPlugin
 ```
 
@@ -84,7 +84,7 @@ class FloatingBallPlugin {
 #### 步骤4: 实现Android Kotlin侧（android/src/main/kotlin/com/example/floating_ball_plugin/FloatingBallPlugin.kt）
 这里注册MethodChannel，并处理调用。启动/停止时使用Service（FloatingBallService）。
 ```kotlin
-package com.example.floating_ball_plugin
+package github.hunmer.floating_ball_plugin
 
 import android.content.Context
 import android.content.Intent

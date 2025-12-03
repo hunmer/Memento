@@ -1,4 +1,4 @@
-package com.example.floating_ball_plugin_example
+package github.hunmer.floating_ball_plugin_example
 
 import io.flutter.embedding.android.FlutterActivity
 
