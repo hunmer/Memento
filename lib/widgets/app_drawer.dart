@@ -85,6 +85,7 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.settings),
             title: Text(AppLocalizations.of(context)!.settings),
             onTap: () {
+              Navigator.pop(context); // 先关闭抽屉
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../core/plugin_manager.dart';
 import '../core/plugin_base.dart';
 
+/// 防重复弹窗标志位
+bool _isDialogShowing = false;
+
 class PluginListDialog extends StatelessWidget {
   final bool sortByRecentlyOpened;
 
@@ -116,10 +119,22 @@ void showPluginListDialog(
   BuildContext context, {
   bool sortByRecentlyOpened = true,
 }) {
+  // 检查是否已经有对话框打开，避免重复弹窗
+  if (_isDialogShowing) {
+    print('[插件列表对话框] 对话框已在显示中，跳过重复打开');
+    return;
+  }
+
+  _isDialogShowing = true;
+
   showDialog(
     context: context,
+    barrierDismissible: true,
     builder:
         (context) =>
             PluginListDialog(sortByRecentlyOpened: sortByRecentlyOpened),
-  );
+  ).then((_) {
+    // 对话框关闭时重置标志位
+    _isDialogShowing = false;
+  });
 }

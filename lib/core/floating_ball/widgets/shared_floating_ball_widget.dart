@@ -69,6 +69,13 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
   // 大小缩放（从配置加载）
   double _sizeScale = 1.0;
 
+  // 自定义双击检测
+  DateTime? _lastTapTime;
+  Offset? _lastTapPosition;
+  Timer? _doubleTapTimer;
+  static const int _doubleTapThresholdMs = 300; // 双击时间阈值
+  static const double _doubleTapDistanceThreshold = 50.0; // 双击位置阈值（像素）
+
   // 监听大小和位置变化的订阅
   StreamSubscription<double>? _sizeSubscription;
   StreamSubscription<Offset>? _positionSubscription;
@@ -189,6 +196,7 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
   @override
   void dispose() {
     _longPressTimer?.cancel();
+    _doubleTapTimer?.cancel();
     _sizeSubscription?.cancel();
     _positionSubscription?.cancel();
     _adapter.dispose();
@@ -347,10 +355,54 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
     }
   }
 
-  // 处理点击
-  void _handleTap() {
-    // 执行tap手势动作
-    widget.onGesture?.call(FloatingBallGesture.tap);
+  // 处理点击和双击
+  void _handleTap(TapDownDetails details) {
+    final now = DateTime.now();
+    final currentPosition = details.globalPosition;
+
+    print('[悬浮球] 点击检测: position=${currentPosition.dx.toStringAsFixed(1)},${currentPosition.dy.toStringAsFixed(1)}');
+
+    // 检查是否是双击
+    if (_lastTapTime != null) {
+      final timeDiff = now.difference(_lastTapTime!).inMilliseconds;
+      final positionDiff = _lastTapPosition != null
+          ? (currentPosition - _lastTapPosition!).distance
+          : double.infinity;
+
+      print('[悬浮球] 第二次点击检测: timeDiff=${timeDiff}ms, positionDiff=${positionDiff.toStringAsFixed(1)}px, threshold=${_doubleTapThresholdMs}ms/${_doubleTapDistanceThreshold}px');
+
+      if (timeDiff < _doubleTapThresholdMs &&
+          positionDiff < _doubleTapDistanceThreshold) {
+        // 确认为双击
+        print('[悬浮球] >>> 识别为双击，触发回调 <<<');
+        widget.onGesture?.call(FloatingBallGesture.doubleTap);
+
+        // 重置双击检测状态
+        _lastTapTime = null;
+        _lastTapPosition = null;
+        _doubleTapTimer?.cancel();
+        _doubleTapTimer = null;
+        return;
+      } else {
+        print('[悬浮球] 不满足双击条件，重新开始计时');
+      }
+    }
+
+    // 记录第一次点击
+    print('[悬浮球] 记录第一次点击');
+    _lastTapTime = now;
+    _lastTapPosition = currentPosition;
+
+    // 启动定时器，如果超时则认为是单击
+    _doubleTapTimer?.cancel();
+    _doubleTapTimer = Timer(const Duration(milliseconds: _doubleTapThresholdMs), () {
+      // 超时认为是单击
+      print('[悬浮球] >>> 超时，触发单击 <<<');
+      widget.onGesture?.call(FloatingBallGesture.tap);
+      _lastTapTime = null;
+      _lastTapPosition = null;
+      _doubleTapTimer = null;
+    });
   }
 
   @override
@@ -407,7 +459,7 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
         }
       },
       child: GestureDetector(
-        onTap: _handleTap,
+        onTapDown: _handleTap,
         onLongPressDown: _handleLongPressDown,
         onLongPressMoveUpdate: _handleLongPressMoveUpdate,
         onLongPressEnd: _handleLongPressEnd,

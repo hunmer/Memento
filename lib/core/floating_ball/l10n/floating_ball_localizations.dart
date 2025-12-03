@@ -48,6 +48,8 @@ abstract class FloatingBallLocalizations {
   String get notSet;
   String get noAction;
   String get tapGesture;
+  String get doubleTapGesture;
+  String get longPressGesture;
   String get swipeUpGesture;
   String get swipeDownGesture;
   String get swipeLeftGesture;

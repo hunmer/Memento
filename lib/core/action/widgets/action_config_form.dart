@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../models/action_definition.dart';
 import '../models/action_form.dart';
 import '../action_manager.dart';
+import '../../app_initializer.dart';
 
 /// 表单值改变回调
 typedef OnFormChanged = void Function(Map<String, dynamic> values);
@@ -56,8 +57,10 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
       }
     }
 
-    // 触发初始变化回调
-    _emitChange();
+    // 延迟触发初始变化回调，避免在构建过程中调用 setState
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _emitChange();
+    });
   }
 
   void _emitChange() {
@@ -120,6 +123,13 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
       ];
     }
 
+    // 为 js_custom_executor 动作显示JavaScript代码输入框
+    if (widget.actionDefinition.id == 'js_custom_executor') {
+      return [
+        _buildJavaScriptCodeField(),
+      ];
+    }
+
     // 默认显示空提示
     return [
       Padding(
@@ -133,6 +143,72 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
         ),
       ),
     ];
+  }
+
+  /// 构建JavaScript代码输入字段
+  Widget _buildJavaScriptCodeField() {
+    final scriptController = TextEditingController(
+      text: _formData['script'] as String? ?? '',
+    );
+
+    scriptController.addListener(() {
+      _updateField('script', scriptController.text);
+    });
+
+    final inputDataController = TextEditingController(
+      text: _formData['inputData'] as String? ?? '',
+    );
+
+    inputDataController.addListener(() {
+      _updateField('inputData', inputDataController.text);
+    });
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'JavaScript代码',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: scriptController,
+            decoration: const InputDecoration(
+              hintText: '在这里输入您的JavaScript代码',
+              border: OutlineInputBorder(),
+              helperText: '使用 inputData 访问输入数据，返回格式：{ success: true, ... }',
+              helperMaxLines: 2,
+            ),
+            maxLines: 10,
+            minLines: 5,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            '输入数据（JSON格式，可选）',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: inputDataController,
+            decoration: const InputDecoration(
+              hintText: '{"key": "value"}',
+              border: OutlineInputBorder(),
+              helperText: '可选：输入要传递给JavaScript的数据',
+              helperMaxLines: 2,
+            ),
+            maxLines: 3,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildFormField(String fieldName, FormFieldConfig config) {
@@ -558,10 +634,8 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
     String? hint,
     String? currentValue,
   ) {
-    final actionManager = ActionManager();
-    final plugins = actionManager.allActions
-        .where((a) => a.category == ActionCategory.navigation)
-        .toList();
+    // 获取所有真实插件
+    final plugins = globalPluginManager.allPlugins;
 
     return DropdownButtonFormField<String>(
       value: currentValue,
@@ -579,14 +653,18 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
           (plugin) => DropdownMenuItem<String>(
             value: plugin.id,
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   plugin.icon ?? Icons.extension,
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text(plugin.title),
+                Flexible(
+                  child: Text(
+                    plugin.getPluginName(context) ?? plugin.id,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),

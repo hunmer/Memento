@@ -4,6 +4,7 @@ import 'floating_ball_service.dart';
 import 'floating_ball_manager.dart';
 import 'widgets/shared_floating_ball_widget.dart';
 import 'models/floating_ball_gesture.dart';
+import '../action/action_manager.dart';
 
 /// 浮浮球Widget
 ///
@@ -67,10 +68,34 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
   }
 
   /// 处理手势动作
-  void _handleGesture(FloatingBallGesture gesture) {
-    final action = _manager.getAction(gesture);
-    if (action != null) {
-      action();
+  void _handleGesture(FloatingBallGesture gesture) async {
+    print('[悬浮球Widget] 手势触发: ${gesture.name}');
+
+    // 长按手势不触发动作，避免与长按移动功能冲突
+    if (gesture == FloatingBallGesture.longPress) {
+      print('[悬浮球Widget] 跳过 longPress 手势');
+      return;
+    }
+
+    // 使用 ActionManager 执行手势动作
+    if (context.mounted) {
+      print('[悬浮球Widget] 开始执行动作: ${gesture.name}');
+      final actionManager = ActionManager();
+      final result = await actionManager.executeGestureAction(gesture, context);
+
+      print('[悬浮球Widget] 动作执行结果: success=${result.success}, error=${result.error}');
+
+      if (!result.success) {
+        // 如果执行失败，显示提示
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('手势动作执行失败: ${result.error ?? "未知错误"}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } else {
+      print('[悬浮球Widget] context 已卸载，无法执行动作');
     }
   }
 

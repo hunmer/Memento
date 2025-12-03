@@ -89,6 +89,9 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
   // 表单数据
   Map<String, dynamic> _formData = {};
 
+  // 初始表单数据（用于恢复已有配置）
+  Map<String, dynamic>? _initialFormData;
+
   @override
   void initState() {
     super.initState();
@@ -98,9 +101,6 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
 
     // 加载数据
     _loadActions();
-
-    // 设置初始值
-    _setInitialValue();
 
     // 初始化搜索
     _filterActions();
@@ -130,24 +130,54 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
       _allGroups = actionManager.actionGroups;
       _allCustomActions = actionManager.customActions;
     });
+
+    // 如果有初始值，在动作加载完成后设置
+    _setInitialFromWidget();
   }
 
-  void _setInitialValue() {
+  void _setInitialFromWidget() {
     final initial = widget.initialValue;
     if (initial == null) return;
 
     if (initial.singleAction != null) {
-      _selectedCustomAction = initial.singleAction;
-      _currentTab = ActionSelectorTab.single;
-    } else if (initial.actionGroup != null) {
-      _selectedGroup = initial.actionGroup;
-      _currentTab = ActionSelectorTab.group;
-    }
+      // 根据 actionId 找到对应的 ActionDefinition
+      try {
+        final actionDef = _allActions.firstWhere(
+          (action) => action.id == initial.singleAction!.actionId,
+        );
 
-    // 设置 Tab 索引
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _tabController.index = _currentTab.index;
-    });
+        setState(() {
+          _selectedDefinition = actionDef;
+          _initialFormData = initial.singleAction?.data ?? {};
+          _currentTab = ActionSelectorTab.single;
+          // 恢复表单数据
+          _formData = Map<String, dynamic>.from(_initialFormData ?? {});
+        });
+
+        // 异步设置 Tab 索引
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _tabController.index = _currentTab.index;
+        });
+      } catch (e) {
+        print('Warning: Action not found: ${initial.singleAction?.actionId}');
+      }
+    } else if (initial.actionGroup != null) {
+      // 异步检查动作组是否存在
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final groupExists = _allGroups.any((g) => g.id == initial.actionGroup!.id);
+        if (groupExists) {
+          setState(() {
+            _selectedGroup = initial.actionGroup;
+            _currentTab = ActionSelectorTab.group;
+          });
+
+          // 设置 Tab 索引
+          _tabController.index = _currentTab.index;
+        } else {
+          print('Warning: Action group not found: ${initial.actionGroup?.id}');
+        }
+      });
+    }
   }
 
   void _filterActions() {
@@ -192,6 +222,13 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
       _selectedDefinition = definition;
       _selectedGroup = null;
       _selectedCustomAction = null;
+
+      // 如果选择的不是初始动作，清空表单数据
+      if (_initialFormData == null ||
+          _initialFormData!.isEmpty ||
+          _selectedDefinition?.id != definition.id) {
+        _formData = {};
+      }
     });
   }
 
@@ -224,7 +261,8 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
     );
 
     if (result != null) {
-      // TODO: 保存动作组到 ActionManager
+      // 保存动作组到 ActionManager
+      await ActionManager().saveActionGroup(result);
 
       setState(() {
         _allGroups.add(result);
@@ -363,16 +401,42 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('取消'),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: _onConfirm,
-                    child: const Text('确认'),
+                  // 左侧：清除按钮
+                  if (widget.initialValue != null &&
+                      !widget.initialValue!.isEmpty) ...[
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(
+                          context,
+                          const ActionSelectorResult(), // 返回空的结果
+                        );
+                      },
+                      icon: const Icon(Icons.clear_all, size: 18),
+                      label: const Text('清除已设置'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[300],
+                        foregroundColor: Colors.black87,
+                      ),
+                    ),
+                  ] else
+                    const SizedBox(),
+
+                  // 右侧：取消和确认按钮
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('取消'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: _onConfirm,
+                        child: const Text('确认'),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -438,16 +502,24 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 16),
-          Text(
-            '动作配置',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '动作配置',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-          ),
-          const SizedBox(height: 8),
-          ActionConfigForm(
-            actionDefinition: _selectedDefinition!,
-            onChanged: _onFormDataChanged,
+                const SizedBox(height: 8),
+                ActionConfigForm(
+                  actionDefinition: _selectedDefinition!,
+                  initialData: _initialFormData,
+                  onChanged: _onFormDataChanged,
+                ),
+              ],
+            ),
           ),
         ],
       ],
@@ -509,12 +581,14 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
         // 创建组按钮
         if (widget.showGroupEditor) ...[
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: _onCreateGroup,
-              icon: const Icon(Icons.add),
-              label: const Text('创建动作组'),
+          SingleChildScrollView(
+            child: SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _onCreateGroup,
+                icon: const Icon(Icons.add),
+                label: const Text('创建动作组'),
+              ),
             ),
           ),
         ],

@@ -48,4 +48,10 @@ class FloatingBallLocalizationsZh extends FloatingBallLocalizations {
   @override
   String get tapGesture => '点击手势';
 
+  @override
+  String get doubleTapGesture => '双击手势';
+
+  @override
+  String get longPressGesture => '长按手势';
+
   }

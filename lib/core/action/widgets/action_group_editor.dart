@@ -138,8 +138,10 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
       return;
     }
 
+    final groupId = widget.group?.id ?? 'group_${DateTime.now().millisecondsSinceEpoch}';
+
     final group = ActionGroup(
-      id: widget.group?.id,
+      id: groupId,
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim().isEmpty
           ? null

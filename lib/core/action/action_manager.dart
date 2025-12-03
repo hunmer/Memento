@@ -1,7 +1,5 @@
 /// 动作管理器
 /// 单例模式，管理所有动作的注册、验证和执行
-library action_manager;
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -10,6 +8,7 @@ import 'models/action_definition.dart';
 import 'models/action_instance.dart';
 import 'models/action_group.dart';
 import 'action_executor.dart';
+import '../app_initializer.dart';
 
 /// 动作管理器单例
 class ActionManager {
@@ -48,9 +47,22 @@ class ActionManager {
     if (_initialized) return;
 
     _registerBuiltInActions();
+    _registerDefaultCustomActions();
     await _loadConfig();
 
     _initialized = true;
+  }
+
+  /// 注册默认的自定义动作
+  void _registerDefaultCustomActions() {
+    // 注册一个默认的JavaScript执行动作（无预设代码）
+    registerJavaScriptAction(
+      id: 'js_custom_executor',
+      title: '自定义执行JavaScript代码',
+      description: '允许用户输入并执行自定义的JavaScript代码',
+      script: '', // 空脚本，用户可以修改
+      icon: Icons.code,
+    );
   }
 
   /// 注册内置动作
@@ -211,6 +223,107 @@ class ActionManager {
     return _actions.values
         .where((action) => action.category == category)
         .toList();
+  }
+
+  // === 自定义动作注册方法 ===
+
+  /// 注册JavaScript动作
+  void registerJavaScriptAction({
+    required String id,
+    required String title,
+    required String script,
+    String? description,
+    IconData? icon,
+  }) {
+    final action = ActionDefinition(
+      id: id,
+      title: title,
+      description: description,
+      icon: icon ?? Icons.code,
+      category: ActionCategory.custom,
+      executor: CustomActionExecutor(
+        script: script,
+        scriptType: 'javascript',
+        actionId: id,
+      ),
+      isBuiltIn: false,
+    );
+    registerAction(action);
+  }
+
+  /// 注册Dart动作
+  void registerDartAction({
+    required String id,
+    required String title,
+    required String script,
+    String? description,
+    IconData? icon,
+  }) {
+    final action = ActionDefinition(
+      id: id,
+      title: title,
+      description: description,
+      icon: icon ?? Icons.code_off,
+      category: ActionCategory.custom,
+      executor: CustomActionExecutor(script: script, scriptType: 'dart'),
+      isBuiltIn: false,
+    );
+    registerAction(action);
+  }
+
+  /// 注册表达式动作
+  void registerExpressionAction({
+    required String id,
+    required String title,
+    required String expression,
+    String? description,
+    IconData? icon,
+  }) {
+    final action = ActionDefinition(
+      id: id,
+      title: title,
+      description: description,
+      icon: icon ?? Icons.calculate,
+      category: ActionCategory.custom,
+      executor: CustomActionExecutor(script: expression, scriptType: 'expression'),
+      isBuiltIn: false,
+    );
+    registerAction(action);
+  }
+
+  /// 创建并注册临时JavaScript动作
+  Future<ExecutionResult> executeJavaScript(
+    BuildContext context,
+    String script, {
+    Map<String, dynamic>? data,
+    String? actionId,
+  }) async {
+    final executor = CustomActionExecutor(
+      script: script,
+      scriptType: 'javascript',
+      actionId: actionId,
+    );
+    return await executor.execute(context, data);
+  }
+
+  /// 创建并注册临时Dart动作
+  Future<ExecutionResult> executeDart(
+    BuildContext context,
+    String script, {
+    Map<String, dynamic>? data,
+  }) async {
+    final executor = CustomActionExecutor(script: script, scriptType: 'dart');
+    return await executor.execute(context, data);
+  }
+
+  /// 创建并注册临时表达式动作
+  Future<ExecutionResult> executeExpression(
+    BuildContext context,
+    String expression, {
+    Map<String, dynamic>? data,
+  }) async {
+    final executor = CustomActionExecutor(script: expression, scriptType: 'expression');
+    return await executor.execute(context, data);
   }
 
   /// 执行动作
@@ -404,19 +517,74 @@ class ActionManager {
 
   /// 保存配置到文件
   Future<void> saveConfig() async {
-    // TODO: 实现保存到 storage/floating_ball_config_v1.json
-    // 使用 storage_manager.write()
+    try {
+      final config = {
+        'version': '1.0',
+        'saveTime': DateTime.now().toIso8601String(),
+        'actions': _actions.values.map((a) => a.toJson()).toList(),
+        'customActions': _customActions.values.map((a) => a.toJson()).toList(),
+        'actionGroups': _actionGroups.values.map((g) => g.toJson()).toList(),
+        'gestureActions': _gestureActions.map(
+          (k, v) => MapEntry(k.name, v.toJson()),
+        ),
+        'statistics': getStatistics(),
+      };
+
+      await globalStorage.write('floating_ball_config_v1', config);
+    } catch (e) {
+      print('Error saving action config: $e');
+      rethrow;
+    }
   }
 
   /// 从文件加载配置
   Future<void> _loadConfig() async {
-    // TODO: 实现从 storage/floating_ball_config_v1.json 加载
-    // 使用 storage_manager.read()
+    try {
+      // 加载手势动作配置
+      final gestureActionsData = await globalStorage.read('floating_ball_gesture_actions');
+      if (gestureActionsData != null && gestureActionsData is Map) {
+        _gestureActions.clear();
+        for (final entry in gestureActionsData.entries) {
+          final gestureName = entry.key as String;
+          final configData = entry.value as Map<String, dynamic>;
+
+          final gesture = FloatingBallGesture.values.firstWhere(
+            (g) => g.name == gestureName,
+            orElse: () => throw Exception('Unknown gesture: $gestureName'),
+          );
+
+          _gestureActions[gesture] = GestureActionConfig.fromJson(configData);
+        }
+      }
+
+      // 加载动作组配置
+      final groupsData = await globalStorage.read('floating_ball_action_groups');
+      if (groupsData != null && groupsData is Map) {
+        _actionGroups.clear();
+        for (final entry in groupsData.entries) {
+          final groupId = entry.key as String;
+          final groupData = entry.value as Map<String, dynamic>;
+          _actionGroups[groupId] = ActionGroup.fromJson(groupData);
+        }
+      }
+    } catch (e) {
+      print('Error loading gesture actions: $e');
+    }
   }
 
   /// 保存手势动作配置
   Future<void> _saveGestureActions() async {
-    // TODO: 实现保存到 storage
+    try {
+      final gestureActionsData = <String, Map<String, dynamic>>{};
+
+      for (final entry in _gestureActions.entries) {
+        gestureActionsData[entry.key.name] = entry.value.toJson();
+      }
+
+      await globalStorage.write('floating_ball_gesture_actions', gestureActionsData);
+    } catch (e) {
+      print('Error saving gesture actions: $e');
+    }
   }
 
   // === 自定义动作实例管理 ===
@@ -440,19 +608,34 @@ class ActionManager {
   // === 动作组管理 ===
 
   /// 保存动作组
-  void saveActionGroup(ActionGroup group) {
+  Future<void> saveActionGroup(ActionGroup group) async {
     if (group.id == null) {
       throw ArgumentError('Action group must have an ID');
     }
     _actionGroups[group.id!] = group;
+    await _saveActionGroups();
   }
 
   /// 获取动作组
   ActionGroup? getActionGroup(String id) => _actionGroups[id];
 
   /// 删除动作组
-  void deleteActionGroup(String id) {
+  Future<void> deleteActionGroup(String id) async {
     _actionGroups.remove(id);
+    await _saveActionGroups();
+  }
+
+  /// 保存动作组到存储
+  Future<void> _saveActionGroups() async {
+    try {
+      final groupsData = <String, Map<String, dynamic>>{};
+      for (final entry in _actionGroups.entries) {
+        groupsData[entry.key] = entry.value.toJson();
+      }
+      await globalStorage.write('floating_ball_action_groups', groupsData);
+    } catch (e) {
+      print('Error saving action groups: $e');
+    }
   }
 
   // === 资源清理 ===
@@ -499,7 +682,71 @@ class ActionManager {
 
   /// 导入配置
   Future<void> importConfig(String jsonString) async {
-    // TODO: 实现配置导入
+    try {
+      final configData = jsonDecode(jsonString) as Map<String, dynamic>;
+
+      final version = configData['version'] as String?;
+      if (version == null) {
+        throw ArgumentError('Invalid config: missing version');
+      }
+
+      // 导入动作
+      if (configData['actions'] != null) {
+        final actions = configData['actions'] as List;
+        for (final actionJson in actions) {
+          final action = ActionDefinition.fromJson(
+            actionJson as Map<String, dynamic>,
+          );
+          _actions[action.id] = action;
+        }
+      }
+
+      // 导入自定义动作实例
+      if (configData['customActions'] != null) {
+        final customActions = configData['customActions'] as List;
+        for (final actionJson in customActions) {
+          final action = ActionInstance.fromJson(
+            actionJson as Map<String, dynamic>,
+          );
+          _customActions[action.id!] = action;
+        }
+      }
+
+      // 导入动作组
+      if (configData['actionGroups'] != null) {
+        final groups = configData['actionGroups'] as List;
+        for (final groupJson in groups) {
+          final group = ActionGroup.fromJson(
+            groupJson as Map<String, dynamic>,
+          );
+          if (group.id != null) {
+            _actionGroups[group.id!] = group;
+          }
+        }
+      }
+
+      // 导入手势动作
+      if (configData['gestureActions'] != null) {
+        final gestureActions = configData['gestureActions'] as Map;
+        for (final entry in gestureActions.entries) {
+          final gestureName = entry.key as String;
+          final configMap = entry.value as Map<String, dynamic>;
+
+          final gesture = FloatingBallGesture.values.firstWhere(
+            (g) => g.name == gestureName,
+            orElse: () => throw Exception('Unknown gesture: $gestureName'),
+          );
+
+          _gestureActions[gesture] = GestureActionConfig.fromJson(configMap);
+        }
+      }
+
+      await _saveGestureActions();
+      await _saveActionGroups();
+    } catch (e) {
+      print('Error importing action config: $e');
+      rethrow;
+    }
   }
 }
 
