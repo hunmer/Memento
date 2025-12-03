@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import '../activity_plugin.dart';
 import '../models/activity_record.dart';
 import '../models/activity_weekly_widget_data.dart';
@@ -8,6 +9,20 @@ import '../models/activity_weekly_widget_data.dart';
 /// 负责计算周数据、生成热力图、统计标签时长
 class ActivityWidgetService {
   final ActivityPlugin plugin;
+
+  /// 默认颜色列表，用于没有设置颜色的活动
+  static const List<int> _defaultColors = [
+    0xFF607afb, // 蓝色
+    0xFF4CAF50, // 绿色
+    0xFFFF9800, // 橙色
+    0xFFE91E63, // 粉色
+    0xFF9C27B0, // 紫色
+    0xFF00BCD4, // 青色
+    0xFFFF5722, // 深橙色
+    0xFF795548, // 棕色
+    0xFF009688, // 青绿色
+    0xFF3F51B5, // 靛蓝色
+  ];
 
   ActivityWidgetService(this.plugin);
 
@@ -25,27 +40,40 @@ class ActivityWidgetService {
 
     // 2. 获取该周所有活动
     final activities = <ActivityRecord>[];
-    for (var date = weekStart;
-        date.isBefore(weekEnd);
-        date = date.add(const Duration(days: 1))) {
-      final dailyActivities =
-          await plugin.activityService.getActivitiesForDate(date);
+    for (
+      var date = weekStart;
+      date.isBefore(weekEnd);
+      date = date.add(const Duration(days: 1))
+    ) {
+      final dailyActivities = await plugin.activityService.getActivitiesForDate(
+        date,
+      );
       activities.addAll(dailyActivities);
     }
 
-    // 3. 生成热力图数据（统计每小时活动次数）
-    final heatmap = _buildHeatmap(activities, weekStart);
-
-    // 4. 统计标签时长并排序（前20）
+    // 3. 统计标签时长并排序（前20）- 需要先计算，用于获取标签颜色映射
     final tagStats = _calculateTagStats(activities);
-    final topTags = tagStats.entries
-        .map((e) => WeeklyTagItem(
-              tagName: e.key,
-              totalDuration: e.value.duration,
-              activityCount: e.value.count,
-            ))
-        .toList()
-      ..sort((a, b) => b.totalDuration.compareTo(a.totalDuration));
+    final sortedTagEntries =
+        tagStats.entries.toList()
+          ..sort((a, b) => b.value.duration.compareTo(a.value.duration));
+
+    // 为每个标签分配颜色
+    final topTags = <WeeklyTagItem>[];
+    for (var i = 0; i < sortedTagEntries.length; i++) {
+      final entry = sortedTagEntries[i];
+      topTags.add(
+        WeeklyTagItem(
+          tagName: entry.key,
+          totalDuration: entry.value.duration,
+          activityCount: entry.value.count,
+          color: _defaultColors[i % _defaultColors.length],
+        ),
+      );
+    }
+
+    // 4. 生成热力图数据（使用活动颜色）
+    final tagColorMap = _buildTagColorMap(topTags);
+    final heatmap = _buildHeatmap(activities, weekStart, tagColorMap);
 
     // 5. 计算周数（ISO 8601）
     final weekNumber = _calculateWeekOfYear(targetWeek);
@@ -60,44 +88,55 @@ class ActivityWidgetService {
     );
   }
 
-  /// 生成热力图（7天×24小时）
+  /// 构建标签到颜色的映射
+  ///
+  /// 直接使用 WeeklyTagItem 中已分配的颜色
+  Map<String, int> _buildTagColorMap(List<WeeklyTagItem> sortedTags) {
+    final colorMap = <String, int>{};
+    for (var tag in sortedTags) {
+      colorMap[tag.tagName] = tag.color;
+    }
+    return colorMap;
+  }
+
+  /// 生成热力图（24小时×7天）
   ///
   /// [activities]: 活动记录列表
   /// [weekStart]: 周起始日期（周一）
+  /// [tagColorMap]: 标签到颜色的映射
   ///
-  /// 返回二维数组：heatmap[day][hour] = 活动次数
+  /// 返回二维数组：heatmap[hour][day] = 活动颜色值（0表示无活动）
+  /// 注意：Android端布局是24行×7列，索引计算为 index = hour * 7 + day
   List<List<int>> _buildHeatmap(
-      List<ActivityRecord> activities, DateTime weekStart) {
-    // 初始化7天×24小时的二维数组
-    final heatmap = List.generate(7, (_) => List.filled(24, 0));
+    List<ActivityRecord> activities,
+    DateTime weekStart,
+    Map<String, int> tagColorMap,
+  ) {
+    // 初始化24小时×7天的二维数组（0 = 无活动）
+    final heatmap = List.generate(24, (_) => List.filled(7, 0));
+    return heatmap;
+  }
 
-    for (var activity in activities) {
-      // 计算活动所属的星期几（0=周一，6=周日）
-      final dayIndex = activity.startTime.difference(weekStart).inDays;
+  /// 获取活动的颜色
+  ///
+  /// 优先级：活动自身颜色 > 第一个标签的颜色 > 默认颜色
+  int _getActivityColor(ActivityRecord activity, Map<String, int> tagColorMap) {
+    // 1. 使用活动自身的颜色
+    if (activity.color != null) {
+      // ignore: deprecated_member_use
+      return activity.color!.value;
+    }
 
-      // 只统计本周内的活动
-      if (dayIndex >= 0 && dayIndex < 7) {
-
-        // 活动可能跨越多个小时，统计每个小时
-        final startHour = activity.startTime.hour;
-        final endHour = activity.endTime.hour;
-        final isSameDay = activity.startTime.day == activity.endTime.day;
-
-        if (isSameDay) {
-          // 同一天内，统计跨越的每个小时
-          for (var hour = startHour;
-              hour <= endHour && hour < 24;
-              hour++) {
-            heatmap[dayIndex][hour]++;
-          }
-        } else {
-          // 跨天活动，只统计起始小时
-          heatmap[dayIndex][startHour]++;
-        }
+    // 2. 使用第一个标签的颜色
+    if (activity.tags.isNotEmpty) {
+      final firstTag = activity.tags.first;
+      if (tagColorMap.containsKey(firstTag)) {
+        return tagColorMap[firstTag]!;
       }
     }
 
-    return heatmap;
+    // 3. 使用默认颜色
+    return _defaultColors[0];
   }
 
   /// 统计标签时长
@@ -126,12 +165,15 @@ class ActivityWidgetService {
     return stats;
   }
 
-  /// 获取周起始日期（周一）
+  /// 获取周起始日期（周一 00:00:00）
   ///
   /// ISO 8601标准：一周从周一开始
+  /// 返回的日期时间归一化到 00:00:00，确保日期计算准确
   DateTime _getWeekStart(DateTime date) {
     // weekday: 1=周一, 7=周日
-    return date.subtract(Duration(days: date.weekday - 1));
+    final monday = date.subtract(Duration(days: date.weekday - 1));
+    // 归一化到 00:00:00
+    return DateTime(monday.year, monday.month, monday.day);
   }
 
   /// 计算ISO 8601周数
@@ -177,7 +219,7 @@ class ActivityWidgetService {
   ///
   /// 返回(年份, 周数, 周起始日期, 周结束日期)
   ({int year, int weekNumber, DateTime weekStart, DateTime weekEnd})
-      getWeekInfo(int weekOffset) {
+  getWeekInfo(int weekOffset) {
     final now = DateTime.now();
     final targetWeek = now.add(Duration(days: weekOffset * 7));
     final weekStart = _getWeekStart(targetWeek);
@@ -188,7 +230,7 @@ class ActivityWidgetService {
       year: targetWeek.year,
       weekNumber: weekNumber,
       weekStart: weekStart,
-      weekEnd: weekEnd
+      weekEnd: weekEnd,
     );
   }
 }

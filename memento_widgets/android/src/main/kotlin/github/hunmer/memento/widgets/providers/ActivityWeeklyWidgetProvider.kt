@@ -182,6 +182,8 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
      *
      * 布局：24行（每小时），每行7列（每天）
      * 索引：index = hour * 7 + day
+     *
+     * 数据格式：heatmap[hour][day] = 颜色值（0 表示无活动）
      */
     private fun setHeatmapGridColors(
         views: RemoteViews,
@@ -189,24 +191,77 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
         heatmap: List<List<Int>>,
         accentColor: Int
     ) {
-        val maxCount = heatmap.flatten().maxOrNull() ?: 1
+        // 无活动时的背景色（浅灰色）
+        val emptyColor = Color.parseColor("#F5F5F5")
+
+        // 168个格子的资源ID数组（Android资源ID不是连续的，必须显式列出）
+        val cellIds = intArrayOf(
+            // 第0行 - 0点 (周一到周日)
+            R.id.heatmap_cell_0, R.id.heatmap_cell_1, R.id.heatmap_cell_2, R.id.heatmap_cell_3, R.id.heatmap_cell_4, R.id.heatmap_cell_5, R.id.heatmap_cell_6,
+            // 第1行 - 1点
+            R.id.heatmap_cell_7, R.id.heatmap_cell_8, R.id.heatmap_cell_9, R.id.heatmap_cell_10, R.id.heatmap_cell_11, R.id.heatmap_cell_12, R.id.heatmap_cell_13,
+            // 第2行 - 2点
+            R.id.heatmap_cell_14, R.id.heatmap_cell_15, R.id.heatmap_cell_16, R.id.heatmap_cell_17, R.id.heatmap_cell_18, R.id.heatmap_cell_19, R.id.heatmap_cell_20,
+            // 第3行 - 3点
+            R.id.heatmap_cell_21, R.id.heatmap_cell_22, R.id.heatmap_cell_23, R.id.heatmap_cell_24, R.id.heatmap_cell_25, R.id.heatmap_cell_26, R.id.heatmap_cell_27,
+            // 第4行 - 4点
+            R.id.heatmap_cell_28, R.id.heatmap_cell_29, R.id.heatmap_cell_30, R.id.heatmap_cell_31, R.id.heatmap_cell_32, R.id.heatmap_cell_33, R.id.heatmap_cell_34,
+            // 第5行 - 5点
+            R.id.heatmap_cell_35, R.id.heatmap_cell_36, R.id.heatmap_cell_37, R.id.heatmap_cell_38, R.id.heatmap_cell_39, R.id.heatmap_cell_40, R.id.heatmap_cell_41,
+            // 第6行 - 6点
+            R.id.heatmap_cell_42, R.id.heatmap_cell_43, R.id.heatmap_cell_44, R.id.heatmap_cell_45, R.id.heatmap_cell_46, R.id.heatmap_cell_47, R.id.heatmap_cell_48,
+            // 第7行 - 7点
+            R.id.heatmap_cell_49, R.id.heatmap_cell_50, R.id.heatmap_cell_51, R.id.heatmap_cell_52, R.id.heatmap_cell_53, R.id.heatmap_cell_54, R.id.heatmap_cell_55,
+            // 第8行 - 8点
+            R.id.heatmap_cell_56, R.id.heatmap_cell_57, R.id.heatmap_cell_58, R.id.heatmap_cell_59, R.id.heatmap_cell_60, R.id.heatmap_cell_61, R.id.heatmap_cell_62,
+            // 第9行 - 9点
+            R.id.heatmap_cell_63, R.id.heatmap_cell_64, R.id.heatmap_cell_65, R.id.heatmap_cell_66, R.id.heatmap_cell_67, R.id.heatmap_cell_68, R.id.heatmap_cell_69,
+            // 第10行 - 10点
+            R.id.heatmap_cell_70, R.id.heatmap_cell_71, R.id.heatmap_cell_72, R.id.heatmap_cell_73, R.id.heatmap_cell_74, R.id.heatmap_cell_75, R.id.heatmap_cell_76,
+            // 第11行 - 11点
+            R.id.heatmap_cell_77, R.id.heatmap_cell_78, R.id.heatmap_cell_79, R.id.heatmap_cell_80, R.id.heatmap_cell_81, R.id.heatmap_cell_82, R.id.heatmap_cell_83,
+            // 第12行 - 12点
+            R.id.heatmap_cell_84, R.id.heatmap_cell_85, R.id.heatmap_cell_86, R.id.heatmap_cell_87, R.id.heatmap_cell_88, R.id.heatmap_cell_89, R.id.heatmap_cell_90,
+            // 第13行 - 13点
+            R.id.heatmap_cell_91, R.id.heatmap_cell_92, R.id.heatmap_cell_93, R.id.heatmap_cell_94, R.id.heatmap_cell_95, R.id.heatmap_cell_96, R.id.heatmap_cell_97,
+            // 第14行 - 14点
+            R.id.heatmap_cell_98, R.id.heatmap_cell_99, R.id.heatmap_cell_100, R.id.heatmap_cell_101, R.id.heatmap_cell_102, R.id.heatmap_cell_103, R.id.heatmap_cell_104,
+            // 第15行 - 15点
+            R.id.heatmap_cell_105, R.id.heatmap_cell_106, R.id.heatmap_cell_107, R.id.heatmap_cell_108, R.id.heatmap_cell_109, R.id.heatmap_cell_110, R.id.heatmap_cell_111,
+            // 第16行 - 16点
+            R.id.heatmap_cell_112, R.id.heatmap_cell_113, R.id.heatmap_cell_114, R.id.heatmap_cell_115, R.id.heatmap_cell_116, R.id.heatmap_cell_117, R.id.heatmap_cell_118,
+            // 第17行 - 17点
+            R.id.heatmap_cell_119, R.id.heatmap_cell_120, R.id.heatmap_cell_121, R.id.heatmap_cell_122, R.id.heatmap_cell_123, R.id.heatmap_cell_124, R.id.heatmap_cell_125,
+            // 第18行 - 18点
+            R.id.heatmap_cell_126, R.id.heatmap_cell_127, R.id.heatmap_cell_128, R.id.heatmap_cell_129, R.id.heatmap_cell_130, R.id.heatmap_cell_131, R.id.heatmap_cell_132,
+            // 第19行 - 19点
+            R.id.heatmap_cell_133, R.id.heatmap_cell_134, R.id.heatmap_cell_135, R.id.heatmap_cell_136, R.id.heatmap_cell_137, R.id.heatmap_cell_138, R.id.heatmap_cell_139,
+            // 第20行 - 20点
+            R.id.heatmap_cell_140, R.id.heatmap_cell_141, R.id.heatmap_cell_142, R.id.heatmap_cell_143, R.id.heatmap_cell_144, R.id.heatmap_cell_145, R.id.heatmap_cell_146,
+            // 第21行 - 21点
+            R.id.heatmap_cell_147, R.id.heatmap_cell_148, R.id.heatmap_cell_149, R.id.heatmap_cell_150, R.id.heatmap_cell_151, R.id.heatmap_cell_152, R.id.heatmap_cell_153,
+            // 第22行 - 22点
+            R.id.heatmap_cell_154, R.id.heatmap_cell_155, R.id.heatmap_cell_156, R.id.heatmap_cell_157, R.id.heatmap_cell_158, R.id.heatmap_cell_159, R.id.heatmap_cell_160,
+            // 第23行 - 23点
+            R.id.heatmap_cell_161, R.id.heatmap_cell_162, R.id.heatmap_cell_163, R.id.heatmap_cell_164, R.id.heatmap_cell_165, R.id.heatmap_cell_166, R.id.heatmap_cell_167
+        )
 
         // 循环设置168个格子的颜色（24小时×7天）
         for (hour in 0..23) {
             for (day in 0..6) {
                 // 计算格子索引：24行7列布局
                 val index = hour * 7 + day
-                val cellId = R.id.heatmap_cell_0 + index
+                val cellId = cellIds[index]
 
-                // 获取热力图数据：heatmap[day][hour]
-                val count = if (day < heatmap.size && hour < heatmap[day].size) {
-                    heatmap[day][hour]
+                // 获取热力图数据：heatmap[hour][day] = 颜色值
+                val colorValue = if (hour < heatmap.size && day < heatmap[hour].size) {
+                    heatmap[hour][day]
                 } else {
                     0
                 }
 
-                val intensity = if (maxCount > 0) count.toFloat() / maxCount else 0f
-                val color = interpolateColor(Color.WHITE, accentColor, intensity)
+                // 如果颜色值为0（无活动），使用空白色；否则直接使用活动颜色
+                val color = if (colorValue == 0) emptyColor else colorValue
 
                 // 设置每个格子的背景色
                 views.setInt(cellId, "setBackgroundColor", color)
@@ -348,9 +403,9 @@ class ActivityWeeklyWidgetProvider : AppWidgetProvider() {
      */
     private fun parseHeatmap(heatmapJson: JSONObject): List<List<Int>> {
         val heatmapArray = heatmapJson.getJSONArray("heatmap")
-        return List(7) { day ->
-            val dayArray = heatmapArray.getJSONArray(day)
-            List(24) { hour -> dayArray.optInt(hour, 0) }
+        return List(24) { hour ->
+            val hourArray = heatmapArray.getJSONArray(hour)
+            List(7) { day -> hourArray.optInt(day, 0) }
         }
     }
 

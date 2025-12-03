@@ -122,6 +122,9 @@ class ActivityService {
           final filePath = _getActivityFilePath(date);
           final jsonList = activities.map((e) => e.toJson()).toList();
           await _storage.writeJson(filePath, jsonList);
+
+          // 同步到小组件
+          await _syncWidget();
         }
       }
     } catch (e) {
