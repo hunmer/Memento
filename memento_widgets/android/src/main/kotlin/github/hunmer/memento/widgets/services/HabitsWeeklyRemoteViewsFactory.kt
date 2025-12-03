@@ -8,7 +8,7 @@ import android.graphics.drawable.GradientDrawable
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import org.json.JSONObject
-import github.hunmer.memento.R
+import com.example.memento_widgets.R
 import android.graphics.drawable.ColorDrawable
 
 /**
