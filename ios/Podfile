@@ -78,7 +78,7 @@ post_install do |installer|
       end
     end
 
-    # 为 IosAwnCore (awesome_notifications 的核心) 添加 iOS 系统框架
+    # 为 IosAwnCore (awesome_notifications 的核心) 保留原始构建设置
     if target.name == 'IosAwnCore'
       target.build_configurations.each do |config|
         config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= ['$(inherited)']
@@ -88,6 +88,10 @@ post_install do |installer|
         config.build_settings['OTHER_LDFLAGS'] << '-framework AVFoundation'
         config.build_settings['OTHER_LDFLAGS'] << '-framework CoreGraphics'
         config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= ['$(inherited)', '@executable_path/Frameworks']
+        # IosAwnCore 需要保留模块接口设置才能正确导出类型
+        config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
+        config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'YES'
+        config.build_settings['DEFINES_MODULE'] = 'YES'
       end
     end
   end
