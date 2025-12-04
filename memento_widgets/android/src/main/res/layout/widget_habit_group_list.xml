@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="@drawable/widget_habit_group_list_background"
+    android:padding="8dp">
+
+    <!-- 左侧分组列表 -->
+    <LinearLayout
+        android:id="@+id/group_list_container"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/widget_habit_group_sidebar_bg"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <!-- 分组列表标题 -->
+        <TextView
+            android:id="@+id/group_list_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="分组"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:paddingBottom="8dp" />
+
+        <!-- 分组列表 ListView -->
+        <ListView
+            android:id="@+id/group_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:divider="@null"
+            android:dividerHeight="0dp"
+            android:scrollbars="none"
+            android:listSelector="@android:color/transparent" />
+
+    </LinearLayout>
+
+    <!-- 右侧习惯列表 -->
+    <LinearLayout
+        android:id="@+id/habit_list_container"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingStart="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <!-- 习惯列表标题 -->
+        <TextView
+            android:id="@+id/habit_list_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="习惯"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <!-- 习惯列表 ListView -->
+        <ListView
+            android:id="@+id/habit_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:divider="@null"
+            android:dividerHeight="0dp"
+            android:scrollbars="none"
+            android:listSelector="@android:color/transparent" />
+
+        <!-- 空状态提示 -->
+        <TextView
+            android:id="@+id/habit_empty_text"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="无习惯"
+            android:textColor="#9ca3af"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- 未配置提示 -->
+    <TextView
+        android:id="@+id/widget_hint_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="点击配置小组件"
+        android:textColor="#9ca3af"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:visibility="gone" />
+
+</LinearLayout>

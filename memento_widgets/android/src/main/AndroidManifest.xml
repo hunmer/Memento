@@ -3,6 +3,7 @@
 
   <!-- 允许接收自定义广播 -->
   <uses-permission android:name="github.hunmer.memento.REFRESH_ACTIVITY_WEEKLY_WIDGET" />
+  <uses-permission android:name="github.hunmer.memento.REFRESH_ACTIVITY_DAILY_WIDGET" />
   <uses-permission android:name="github.hunmer.memento.REFRESH_HABITS_WEEKLY_WIDGET" />
   <uses-permission android:name="github.hunmer.memento.REFRESH_CHECKIN_WEEKLY_WIDGET" />
   <uses-permission android:name="github.hunmer.memento.CLEANUP_WIDGET_IDS" />
@@ -704,5 +705,46 @@
         android:name="github.hunmer.memento.widgets.services.HabitsWeeklyWidgetService"
         android:permission="android.permission.BIND_REMOTEVIEWS"
         android:exported="false" />
+
+    <!-- Activity Daily Widget Provider (本日活动详细视图) -->
+    <receiver
+        android:name="github.hunmer.memento.widgets.providers.ActivityDailyWidgetProvider"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            <action android:name="github.hunmer.memento.widget.ACTIVITY_PREV_DAY" />
+            <action android:name="github.hunmer.memento.widget.ACTIVITY_NEXT_DAY" />
+            <action android:name="github.hunmer.memento.widget.ACTIVITY_DAILY_ITEM_CLICK" />
+        </intent-filter>
+        <meta-data
+            android:name="android.appwidget.provider"
+            android:resource="@xml/activity_daily_widget_info" />
+    </receiver>
+
+    <!-- Activity Daily Widget Service -->
+    <service
+        android:name="github.hunmer.memento.widgets.services.ActivityDailyWidgetService"
+        android:permission="android.permission.BIND_REMOTEVIEWS"
+        android:exported="false" />
+
+    <!-- 习惯分组列表 4x3 (自定义) -->
+    <receiver
+        android:name="github.hunmer.memento.widgets.providers.HabitGroupListWidgetProvider"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            <action android:name="github.hunmer.memento.widgets.HABIT_GROUP_LIST_GROUP_CLICK" />
+            <action android:name="github.hunmer.memento.widgets.HABIT_GROUP_LIST_HABIT_CLICK" />
+        </intent-filter>
+        <meta-data
+            android:name="android.appwidget.provider"
+            android:resource="@xml/widget_habit_group_list_info" />
+    </receiver>
+
+    <!-- 习惯分组列表小组件的 RemoteViewsService -->
+    <service
+        android:name="github.hunmer.memento.widgets.services.HabitGroupListWidgetService"
+        android:exported="false"
+        android:permission="android.permission.BIND_REMOTEVIEWS" />
   </application>
 </manifest>

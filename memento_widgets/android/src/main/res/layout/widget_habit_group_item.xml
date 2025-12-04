@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/group_item_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:background="@drawable/widget_habit_group_item_bg">
+
+    <!-- 分组图标 (emoji) -->
+    <TextView
+        android:id="@+id/group_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:gravity="center"
+        android:textSize="16sp" />
+
+    <!-- 分组名称 -->
+    <TextView
+        android:id="@+id/group_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="4dp"
+        android:text=""
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+</LinearLayout>

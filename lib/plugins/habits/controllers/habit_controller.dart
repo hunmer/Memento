@@ -1,5 +1,7 @@
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/event_args.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
@@ -194,6 +196,9 @@ class HabitController {
 
     await storage.writeJson(_habitsKey, habits.map((h) => h.toMap()).toList());
 
+    // 广播习惯数据变更事件，同步小组件
+    EventManager.instance.broadcast('habit_data_changed', Value({'habit': habit}));
+
     // 同步到小组件
     await _syncWidget();
   }
@@ -202,6 +207,9 @@ class HabitController {
     final habits = getHabits();
     habits.removeWhere((h) => h.id == id);
     await storage.writeJson(_habitsKey, habits.map((h) => h.toMap()).toList());
+
+    // 广播习惯数据变更事件，同步小组件
+    EventManager.instance.broadcast('habit_data_changed', Value({'habitId': id}));
 
     // 同步到小组件
     await _syncWidget();

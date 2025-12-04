@@ -115,6 +115,7 @@ class PluginWidgetSyncHelper {
       _trackerSyncer.syncTrackerGoalWidget(),
       _activitySyncer.syncActivityWeeklyWidget(),
       _habitsSyncer.syncHabitsWeeklyWidget(),
+      _habitsSyncer.syncHabitGroupListWidget(),
     ]);
   }
 
@@ -217,4 +218,7 @@ class PluginWidgetSyncHelper {
 
   /// 同步活动周视图小组件
   Future<void> syncActivityWeeklyWidget() => _activitySyncer.syncActivityWeeklyWidget();
+
+  /// 同步习惯分组列表小组件
+  Future<void> syncHabitGroupListWidget() => _habitsSyncer.syncHabitGroupListWidget();
 }

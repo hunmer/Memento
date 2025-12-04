@@ -104,6 +104,10 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     EventManager.instance.subscribe('habit_timer_stopped', _onTimerEvent);
     // 监听完成记录保存事件，同步周视图小组件
     EventManager.instance.subscribe('habit_completion_record_saved', _onCompletionRecordSaved);
+    // 监听习惯数据变更事件，同步习惯分组列表小组件
+    EventManager.instance.subscribe('habit_data_changed', _onHabitDataChanged);
+    // 监听技能数据变更事件，同步习惯分组列表小组件
+    EventManager.instance.subscribe('skill_data_changed', _onSkillDataChanged);
   }
 
   /// 处理计时器事件，同步小组件
@@ -131,11 +135,39 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     });
   }
 
+  /// 处理习惯数据变更事件，同步习惯分组列表小组件
+  void _onHabitDataChanged(EventArgs args) {
+    // 异步执行同步操作，避免阻塞事件处理
+    Future.microtask(() async {
+      try {
+        await PluginWidgetSyncHelper.instance.syncHabitGroupListWidget();
+        debugPrint('已同步习惯分组列表小组件');
+      } catch (e) {
+        debugPrint('同步习惯分组列表小组件失败: $e');
+      }
+    });
+  }
+
+  /// 处理技能数据变更事件，同步习惯分组列表小组件
+  void _onSkillDataChanged(EventArgs args) {
+    // 异步执行同步操作，避免阻塞事件处理
+    Future.microtask(() async {
+      try {
+        await PluginWidgetSyncHelper.instance.syncHabitGroupListWidget();
+        debugPrint('已同步习惯分组列表小组件');
+      } catch (e) {
+        debugPrint('同步习惯分组列表小组件失败: $e');
+      }
+    });
+  }
+
   Future<void> onDispose() async {
     // 取消事件订阅
     EventManager.instance.unsubscribe('habit_timer_started', _onTimerEvent);
     EventManager.instance.unsubscribe('habit_timer_stopped', _onTimerEvent);
     EventManager.instance.unsubscribe('habit_completion_record_saved', _onCompletionRecordSaved);
+    EventManager.instance.unsubscribe('habit_data_changed', _onHabitDataChanged);
+    EventManager.instance.unsubscribe('skill_data_changed', _onSkillDataChanged);
   }
 
   @override

@@ -1,4 +1,7 @@
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/event_args.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
@@ -132,11 +135,33 @@ class SkillController {
       _skills.add(skill);
     }
     await storage.writeJson(_skillsKey, _skills.map((s) => s.toMap()).toList());
+
+    // 广播技能数据变更事件，同步小组件
+    EventManager.instance.broadcast(
+      'skill_data_changed',
+      Value({'skill': skill}),
+    );
+
+    // 同步到小组件
+    await _syncWidget();
   }
 
   Future<void> deleteSkill(String id) async {
     _skills.removeWhere((s) => s.id == id);
     await storage.writeJson(_skillsKey, _skills.map((s) => s.toMap()).toList());
+
+    // 广播技能数据变更事件，同步小组件
+    EventManager.instance.broadcast(
+      'skill_data_changed',
+      Value({'skillId': id}),
+    );
+
+    // 同步到小组件
+    await _syncWidget();
+  }
+
+  Future<void> _syncWidget() async {
+    await PluginWidgetSyncHelper.instance.syncHabits();
   }
 
   /// Gets a skill by its title.

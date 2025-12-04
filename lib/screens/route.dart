@@ -36,6 +36,7 @@ import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/screens/habit_timer_selector_screen.dart';
 import 'package:Memento/plugins/habits/screens/habits_weekly_config_screen.dart';
+import 'package:Memento/plugins/habits/screens/habit_group_list_selector_screen.dart';
 import 'package:Memento/plugins/habits/widgets/timer_dialog.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/app_initializer.dart';
@@ -138,6 +139,9 @@ class AppRoutes extends NavigatorObserver {
 
   // 习惯计时器对话框路由（从小组件打开）
   static const String habitTimerDialog = '/habit_timer_dialog';
+
+  // 习惯分组列表小组件配置路由
+  static const String habitGroupListSelector = '/habit_group_list_selector';
 
   // 标签统计页面路由（从小组件打开）
   static const String tagStatistics = '/tag_statistics';
@@ -483,6 +487,27 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
             HabitsWeeklyConfigScreen(widgetId: habitsWeeklyWidgetId));
+      case '/habit_group_list_selector':
+      case 'habit_group_list_selector':
+        // 习惯分组列表小组件配置界面
+        int? habitGroupListWidgetId;
+
+        // 从 arguments 中解析 widgetId
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          // widgetId 可能是字符串或整数
+          final widgetIdValue = args['widgetId'];
+          if (widgetIdValue is int) {
+            habitGroupListWidgetId = widgetIdValue;
+          } else if (widgetIdValue is String) {
+            habitGroupListWidgetId = int.tryParse(widgetIdValue);
+          }
+        } else if (settings.arguments is int) {
+          habitGroupListWidgetId = settings.arguments as int;
+        }
+
+        return _createRoute(
+            HabitGroupListSelectorScreen(widgetId: habitGroupListWidgetId));
       case '/habit_timer_dialog':
       case 'habit_timer_dialog':
         // 习惯计时器对话框（从小组件打开）
