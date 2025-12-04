@@ -1,10 +1,9 @@
 /// 动作组模型
 /// 支持多个动作的组合执行
-library action_group;
+library;
 
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'action_definition.dart';
+
 import 'action_instance.dart';
 
 /// 动作组操作符

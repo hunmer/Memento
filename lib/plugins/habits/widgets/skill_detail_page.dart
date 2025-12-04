@@ -82,7 +82,7 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
   }
 
   Future<void> _navigateToEdit(BuildContext context) async {
-    final l10n = HabitsLocalizations.of(context);
+    HabitsLocalizations.of(context);
     await NavigationHelper.push(
       context,
       SkillForm(

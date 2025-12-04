@@ -1,10 +1,8 @@
 /// 动作组编辑器
 /// 用于创建和编辑动作组
-library action_group_editor;
+library;
 
 import 'package:flutter/material.dart';
-import '../action_manager.dart';
-import '../models/action_definition.dart';
 import '../models/action_instance.dart';
 import '../models/action_group.dart';
 import 'action_selector_dialog.dart';

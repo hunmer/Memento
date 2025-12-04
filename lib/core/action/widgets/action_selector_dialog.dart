@@ -1,6 +1,6 @@
 /// 动作选择对话框
 /// 用于选择和配置动作
-library action_selector_dialog;
+library;
 
 import 'dart:async';
 import 'package:flutter/material.dart';

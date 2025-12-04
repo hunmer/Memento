@@ -333,8 +333,6 @@ class _FloatingBallSettingsScreenState
         return l10n!.swipeLeftGesture;
       case FloatingBallGesture.swipeRight:
         return l10n!.swipeRightGesture;
-      default:
-        return 'Unknown';
     }
   }
 }

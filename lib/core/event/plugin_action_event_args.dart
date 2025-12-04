@@ -1,5 +1,6 @@
 /// 插件动作事件参数
 /// 用于传递插件动作执行的数据
+library;
 import 'event_manager.dart';
 
 /// 插件动作事件参数类

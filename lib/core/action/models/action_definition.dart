@@ -1,8 +1,7 @@
 /// 动作定义模型
 /// 定义动作的基本信息、执行器和配置
-library action_definition;
+library;
 
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../action_executor.dart';
 import 'action_form.dart';
