@@ -82,7 +82,10 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
 
   void _addLog(String message) {
     setState(() {
-      _logs.insert(0, '[${DateTime.now().toString().split(' ')[1].substring(0, 8)}] $message');
+      _logs.insert(
+        0,
+        '[${DateTime.now().toString().split(' ')[1].substring(0, 8)}] $message',
+      );
       if (_logs.length > 100) {
         _logs.removeLast();
       }
@@ -107,12 +110,14 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
       return;
     }
 
-    final host = _hostController.text.trim().isNotEmpty
-        ? _hostController.text.trim()
-        : null;
-    final pathPrefix = _pathPrefixController.text.trim().isNotEmpty
-        ? _pathPrefixController.text.trim()
-        : null;
+    final host =
+        _hostController.text.trim().isNotEmpty
+            ? _hostController.text.trim()
+            : null;
+    final pathPrefix =
+        _pathPrefixController.text.trim().isNotEmpty
+            ? _pathPrefixController.text.trim()
+            : null;
 
     _addLog('🔄 正在注册 Scheme: $scheme');
     if (host != null) _addLog('   Host: $host');
@@ -155,6 +160,108 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
     setState(() {
       _logs.clear();
     });
+  }
+
+  void _testScheme(String scheme) {
+    // 构建测试 URI
+    final testUri = Uri.parse('$scheme://test');
+    _addLog('🧪 测试 Scheme: $scheme');
+    _addLog('   生成的测试 URI: $testUri');
+
+    // 手动触发 onDeepLink 回调来模拟接收深度链接
+    _intent.onDeepLink?.call(testUri);
+    _addLog('✅ 已触发测试回调');
+  }
+
+  void _showQuickRegisterDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('快速注册 Intent'),
+          content: const Text('选择一个预设的 Intent 类型进行快速注册'),
+          actions: <Widget>[
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _quickRegister('memento', null, '/test');
+                },
+                icon: const Icon(Icons.link),
+                label: const Text('Memento 测试 (memento:///test)'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _quickRegister('memento', 'app.example.com', '/open');
+                },
+                icon: const Icon(Icons.link),
+                label: const Text('Memento 完整 (memento://app.example.com/open)'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _quickRegister('myapp', 'custom.host', null);
+                },
+                icon: const Icon(Icons.link),
+                label: const Text('自定义应用 (myapp://custom.host)'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('取消'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _quickRegister(String scheme, String? host, String? pathPrefix) async {
+    _addLog('🚀 快速注册 Intent');
+    _addLog('   Scheme: $scheme');
+    if (host != null) _addLog('   Host: $host');
+    if (pathPrefix != null) _addLog('   Path Prefix: $pathPrefix');
+
+    final success = await _intent.registerDynamicScheme(
+      scheme: scheme,
+      host: host,
+      pathPrefix: pathPrefix,
+    );
+
+    if (success) {
+      _addLog('✅ 快速注册成功!');
+      setState(() {
+        _isSchemeRegistered = true;
+      });
+      _loadRegisteredSchemes();
+
+      // 自动填充表单
+      _schemeController.text = scheme;
+      _hostController.text = host ?? '';
+      _pathPrefixController.text = pathPrefix ?? '';
+    } else {
+      _addLog('❌ 快速注册失败');
+    }
   }
 
   @override
@@ -200,7 +307,8 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                       Text(
                         'Scheme 状态: ${_isSchemeRegistered ? '已注册' : '未注册'}',
                         style: TextStyle(
-                          color: _isSchemeRegistered ? Colors.green : Colors.grey,
+                          color:
+                              _isSchemeRegistered ? Colors.green : Colors.grey,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -255,11 +363,32 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: _isSchemeRegistered ? _unregisterScheme : _registerScheme,
-                          icon: Icon(_isSchemeRegistered ? Icons.link_off : Icons.link),
-                          label: Text(_isSchemeRegistered ? '注销 Scheme' : '注册 Scheme'),
+                          onPressed: () => _showQuickRegisterDialog(),
+                          icon: const Icon(Icons.flash_on),
+                          label: const Text('快速注册'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _isSchemeRegistered ? Colors.red : Colors.blue,
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton.icon(
+                          onPressed:
+                              _isSchemeRegistered
+                                  ? _unregisterScheme
+                                  : _registerScheme,
+                          icon: Icon(
+                            _isSchemeRegistered ? Icons.link_off : Icons.link,
+                          ),
+                          label: Text(
+                            _isSchemeRegistered ? '注销 Scheme' : '注册 Scheme',
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                _isSchemeRegistered ? Colors.red : Colors.blue,
                             foregroundColor: Colors.white,
                           ),
                         ),
@@ -285,37 +414,35 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                           ..._registeredSchemes.map(
                             (scheme) => Padding(
                               padding: const EdgeInsets.symmetric(vertical: 2),
-                              child: Text('• $scheme'),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text('• $scheme'),
+                                  ),
+                                  ElevatedButton.icon(
+                                    onPressed: () => _testScheme(scheme),
+                                    icon: const Icon(
+                                      Icons.play_arrow,
+                                      size: 16,
+                                    ),
+                                    label: const Text(
+                                      '测试',
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                ],
-              ),
-            ),
-          ),
-
-          // 测试说明卡片
-          Card(
-            margin: const EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '测试说明',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    '1. 注册 Scheme 后，可以接收对应的 URL 打开应用\n'
-                    '2. 在其他应用中选择"分享"可以触发分享回调\n'
-                    '3. 深度链接格式: scheme://host/path\n'
-                    '4. 测试深度链接请在浏览器中输入对应 URL',
-                    style: TextStyle(fontSize: 14),
-                  ),
                 ],
               ),
             ),
@@ -332,7 +459,10 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                   children: [
                     const Text(
                       '日志',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const Divider(),
                     Expanded(

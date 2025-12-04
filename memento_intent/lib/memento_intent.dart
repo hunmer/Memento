@@ -14,13 +14,14 @@ class SharedMediaFile {
     'type': type.toString().split('.').last,
   };
 
-  factory SharedMediaFile.fromJson(Map<String, dynamic> json) => SharedMediaFile(
-    json['path'] ?? '',
-    SharedMediaType.values.firstWhere(
-      (e) => e.toString().split('.').last == json['type'],
-      orElse: () => SharedMediaType.file,
-    ),
-  );
+  factory SharedMediaFile.fromJson(Map<String, dynamic> json) =>
+      SharedMediaFile(
+        json['path'] ?? '',
+        SharedMediaType.values.firstWhere(
+          (e) => e.toString().split('.').last == json['type'],
+          orElse: () => SharedMediaType.file,
+        ),
+      );
 }
 
 enum SharedMediaType { image, video, file }
@@ -51,10 +52,13 @@ class IntentData {
 
 /// 深度链接处理器回调
 typedef DeepLinkHandler = void Function(Uri uri);
+
 /// 分享文件处理器回调
 typedef SharedFilesHandler = void Function(List<SharedMediaFile> files);
+
 /// 分享文本处理器回调
 typedef SharedTextHandler = void Function(String text);
+
 /// Intent 数据处理器回调
 typedef IntentDataHandler = void Function(IntentData data);
 
