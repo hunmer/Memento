@@ -31,6 +31,7 @@ import '../../plugins/tracker/tracker_plugin.dart';
 import '../../core/services/plugin_widget_sync_helper.dart';
 import 'package:memento_widgets/memento_widgets.dart';
 import '../app_initializer.dart';
+import '../global_flags.dart';
 
 /// 初始化主页小组件系统
 Future<void> initializeHomeWidgets() async {
@@ -322,10 +323,6 @@ Future<void> _cleanupWidgetIds(String listKey, List<int> deletedWidgetIds) async
     debugPrint('Cleanup failed for $listKey: $e');
   }
 }
-
-/// 全局标志：标记应用是否从小组件启动
-/// 从小组件启动时，防止错误地自动打开最后使用的插件
-bool isLaunchedFromWidget = false;
 
 /// 处理小组件点击事件
 void handleWidgetClick(String url) {
