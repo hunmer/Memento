@@ -2,6 +2,7 @@ import 'dart:math';
 import '../activity_plugin.dart';
 import '../models/activity_record.dart';
 import '../models/activity_weekly_widget_data.dart';
+import '../models/activity_daily_widget_data.dart';
 
 /// 周视图小组件业务逻辑服务
 ///
@@ -210,5 +211,184 @@ class ActivityWidgetService {
       weekStart: weekStart,
       weekEnd: weekEnd,
     );
+  }
+
+  /// 计算指定日期的数据
+  ///
+  /// [dayOffset]: 日期偏移量，0=今天，-1=昨天，1=明天
+  ///
+  /// 返回包含24小时时间轴、活动列表和统计信息的完整数据
+  Future<ActivityDailyWidgetData> calculateDayData(int dayOffset) async {
+    // 1. 计算目标日期
+    final now = DateTime.now();
+    final targetDate = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).add(Duration(days: dayOffset));
+
+    // 2. 获取该日所有活动
+    final activities = await plugin.activityService.getActivitiesForDate(
+      targetDate,
+    );
+
+    // 3. 统计标签时长并排序（前20）
+    final tagStats = _calculateTagStats(activities);
+    final sortedTagEntries =
+        tagStats.entries.toList()
+          ..sort((a, b) => b.value.duration.compareTo(a.value.duration));
+
+    // 为每个标签分配颜色，并构建颜色映射
+    final topTags = <DailyTagItem>[];
+    final tagColorMap = <String, int>{};
+    for (var i = 0; i < sortedTagEntries.length; i++) {
+      final entry = sortedTagEntries[i];
+      final color = _defaultColors[i % _defaultColors.length];
+      tagColorMap[entry.key] = color;
+      topTags.add(
+        DailyTagItem(
+          tagName: entry.key,
+          totalDuration: entry.value.duration,
+          activityCount: entry.value.count,
+          color: color,
+        ),
+      );
+    }
+
+    // 4. 构建24小时时间轴数据（使用颜色映射）
+    final hourlyActivities = _buildHourlyActivities(activities, tagColorMap);
+
+    // 5. 构建Android端活动列表项
+    final androidActivities = _buildAndroidActivities(activities, tagColorMap);
+
+    // 6. 计算总时长和活动数
+    final totalDuration = Duration(
+      seconds: activities.fold<int>(
+        0,
+        (sum, activity) => sum + activity.endTime.difference(activity.startTime).inSeconds,
+      ),
+    );
+
+    return ActivityDailyWidgetData(
+      date: targetDate,
+      hourlyActivities: hourlyActivities,
+      topTags: topTags.take(20).toList(),
+      activities: androidActivities,
+      totalDuration: totalDuration,
+      activityCount: activities.length,
+    );
+  }
+
+  /// 构建24小时时间轴数据
+  ///
+  /// [activities]: 活动记录列表
+  /// [tagColorMap]: 标签到颜色的映射
+  ///
+  /// 返回24个HourActivityItem，每个代表一小时的统计数据
+  List<HourActivityItem> _buildHourlyActivities(
+    List<ActivityRecord> activities,
+    Map<String, int> tagColorMap,
+  ) {
+    final hourlyData = <int, ({Duration duration, Map<String, Duration> tagDurations})>{};
+
+    // 初始化24小时数据
+    for (var hour = 0; hour < 24; hour++) {
+      hourlyData[hour] = (duration: Duration.zero, tagDurations: {});
+    }
+
+    // 累加每小时的时长和标签数据
+    for (final activity in activities) {
+      final startHour = activity.startTime.hour;
+      final endHour = activity.endTime.hour;
+      final activityDuration = activity.endTime.difference(activity.startTime);
+
+      for (var hour = startHour; hour <= endHour; hour++) {
+        if (hour < 0 || hour >= 24) continue;
+
+        final currentData = hourlyData[hour]!;
+        final newDuration = currentData.duration + activityDuration;
+
+        // 为每个标签累加时长
+        final newTagDurations = Map<String, Duration>.from(currentData.tagDurations);
+        for (final tag in activity.tags) {
+          newTagDurations[tag] = (newTagDurations[tag] ?? Duration.zero) + activityDuration;
+        }
+
+        hourlyData[hour] = (duration: newDuration, tagDurations: newTagDurations);
+      }
+    }
+
+    // 转换为HourActivityItem列表
+    return List.generate(24, (hour) {
+      final data = hourlyData[hour]!;
+      final totalMinutes = data.duration.inMinutes;
+
+      // 找到时长最长的标签
+      String? topTag;
+      int? topTagColor;
+      if (data.tagDurations.isNotEmpty) {
+        final sortedEntries = data.tagDurations.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
+        topTag = sortedEntries.first.key;
+
+        // 使用标签颜色映射
+        topTagColor = tagColorMap[topTag] ?? _defaultColors[0];
+      }
+
+      return HourActivityItem(
+        hour: hour,
+        totalMinutes: totalMinutes,
+        topTag: topTag,
+        color: topTagColor,
+      );
+    });
+  }
+
+  /// 构建Android端活动列表项
+  ///
+  /// [activities]: 活动记录列表
+  /// [tagColorMap]: 标签到颜色的映射
+  ///
+  /// 返回用于Android RemoteViews的列表项数据
+  List<AndroidActivityItem> _buildAndroidActivities(
+    List<ActivityRecord> activities,
+    Map<String, int> tagColorMap,
+  ) {
+    final items = <AndroidActivityItem>[];
+
+    // 按开始时间排序
+    final sortedActivities = [...activities]..sort(
+      (a, b) => a.startTime.compareTo(b.startTime),
+    );
+
+    for (final activity in sortedActivities) {
+      // 获取主要标签（第一个标签或最长的标签）
+      String? primaryTag;
+      if (activity.tags.isNotEmpty) {
+        primaryTag = activity.tags.first;
+      }
+
+      // 获取颜色（优先使用活动颜色，其次使用标签颜色）
+      int color;
+      if (activity.color != null) {
+        color = activity.color!.value;
+      } else if (primaryTag != null && tagColorMap.containsKey(primaryTag)) {
+        color = tagColorMap[primaryTag]!;
+      } else {
+        color = _defaultColors[0];
+      }
+
+      items.add(
+        AndroidActivityItem(
+          name: activity.title,
+          emoji: activity.mood ?? '📋',
+          duration: activity.formattedDuration,
+          color: color,
+          tags: activity.tags,
+        ),
+      );
+    }
+
+    return items;
   }
 }

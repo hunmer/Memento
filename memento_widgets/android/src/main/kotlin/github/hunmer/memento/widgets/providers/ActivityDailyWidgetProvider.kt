@@ -121,6 +121,24 @@ class ActivityDailyWidgetProvider : AppWidgetProvider() {
         val config = json.getJSONObject("config")
         val data = json.getJSONObject("data")
 
+        android.util.Log.d(TAG, "Build content view for widget $widgetId")
+        android.util.Log.d(TAG, "Data keys: ${data.keys().asSequence().toList()}")
+
+        // 调试输出数据结构
+        if (data.has("activities")) {
+            val activities = data.getJSONArray("activities")
+            android.util.Log.d(TAG, "Found activities array with ${activities.length()} items")
+        } else {
+            android.util.Log.w(TAG, "No 'activities' field in data")
+        }
+
+        if (data.has("timeline")) {
+            val timeline = data.getJSONObject("timeline")
+            android.util.Log.d(TAG, "Found timeline object with keys: ${timeline.keys().asSequence().toList()}")
+        } else {
+            android.util.Log.w(TAG, "No 'timeline' field in data")
+        }
+
         views.setViewVisibility(R.id.config_prompt, View.GONE)
         views.setViewVisibility(R.id.content_container, View.VISIBLE)
 
@@ -130,6 +148,8 @@ class ActivityDailyWidgetProvider : AppWidgetProvider() {
         val accentColor = config.getString("accentColor").toLongOrNull()?.toInt()
             ?: DEFAULT_ACCENT_COLOR
         val opacity = config.optDouble("opacity", 0.95).toFloat()
+
+        android.util.Log.d(TAG, "Colors: primary=${Integer.toHexString(primaryColor)}, accent=${Integer.toHexString(accentColor)}")
 
         // 应用背景色（带透明度）
         val bgColor = applyOpacity(primaryColor, opacity)
@@ -152,8 +172,11 @@ class ActivityDailyWidgetProvider : AppWidgetProvider() {
         // 设置时间轴数据
         setTimelineData(views, data, accentColor)
 
-        // 设置底部统计数据
-        setStatsData(views, data)
+        // 设置底部统计数据（长时间活动列表）
+        setLongActivitiesData(views, data)
+
+        // 设置标签统计数据
+        setTagStatsData(views, data)
 
         // 设置日期切换按钮点击事件
         setupDayNavigation(context, views, widgetId)
@@ -179,6 +202,14 @@ class ActivityDailyWidgetProvider : AppWidgetProvider() {
         // 空列表提示
         views.setEmptyView(R.id.activity_list, R.id.empty_view)
 
+        // 根据是否有活动来显示/隐藏整个底部统计区域
+        val hasActivities = data.optJSONArray("activities")?.length() ?: 0
+        if (hasActivities > 0) {
+            views.setViewVisibility(R.id.stats_container, View.VISIBLE)
+        } else {
+            views.setViewVisibility(R.id.stats_container, View.GONE)
+        }
+
         return views
     }
 
@@ -193,6 +224,8 @@ class ActivityDailyWidgetProvider : AppWidgetProvider() {
         val amBars = timeline.optJSONArray("amBars")
         val pmDots = timeline.optJSONArray("pmDots")
 
+        android.util.Log.d(TAG, "Timeline data: amBars=${amBars?.length()}, pmDots=${pmDots?.length()}")
+
         // AM活动条资源ID
         val amBarIds = intArrayOf(
             R.id.am_bar_0, R.id.am_bar_1, R.id.am_bar_2, R.id.am_bar_3,
@@ -204,33 +237,152 @@ class ActivityDailyWidgetProvider : AppWidgetProvider() {
         if (amBars != null) {
             for (i in 0 until minOf(amBars.length(), amBarIds.size)) {
                 val color = amBars.optLong(i, emptyColor.toLong()).toInt()
-                if (color != 0) {
-                    views.setInt(amBarIds[i], "setBackgroundColor", color)
+                android.util.Log.d(TAG, "Setting AM bar $i to color: ${Integer.toHexString(color)}")
+                views.setInt(amBarIds[i], "setBackgroundColor", color)
+            }
+        }
+
+        // 设置PM活动点（下午12-23点）
+        if (pmDots != null) {
+            for (hour in 12..23) {
+                val dotIndex = hour - 12
+                if (dotIndex < pmDots.length()) {
+                    val color = pmDots.optLong(dotIndex, 0).toInt()
+                    if (color != 0) {
+                        // 获取对应小时的dot ID
+                        val dotId = when (hour) {
+                            12 -> R.id.pm_dot_0_1
+                            13 -> R.id.pm_dot_1_1
+                            14 -> R.id.pm_dot_2_1
+                            15 -> R.id.pm_dot_3_1
+                            16 -> R.id.pm_dot_4_1
+                            17 -> R.id.pm_dot_5_1
+                            18 -> R.id.pm_dot_6_1
+                            19 -> R.id.pm_dot_7_1
+                            20 -> R.id.pm_dot_8_1
+                            21 -> R.id.pm_dot_9_1
+                            22 -> R.id.pm_dot_10_1
+                            23 -> R.id.pm_dot_11_1
+                            else -> R.id.pm_dot_0_1
+                        }
+                        android.util.Log.d(TAG, "Setting PM dot $hour (index $dotIndex) to color: ${Integer.toHexString(color)}")
+                        views.setViewVisibility(dotId, View.VISIBLE)
+                        views.setInt(dotId, "setBackgroundColor", color)
+                    }
                 }
             }
         }
     }
 
     /**
-     * 设置底部统计数据
+     * 设置长时间活动数据（左下角显示前几个占用时间最长的活动）
      */
-    private fun setStatsData(views: RemoteViews, data: JSONObject) {
-        val stats = data.optJSONArray("stats") ?: return
+    private fun setLongActivitiesData(views: RemoteViews, data: JSONObject) {
+        // 从activities数组中获取前4个活动，按时长排序
+        val activities = data.optJSONArray("activities")
 
         val statDotIds = intArrayOf(R.id.stat_dot_1, R.id.stat_dot_2, R.id.stat_dot_3, R.id.stat_dot_4)
         val statNameIds = intArrayOf(R.id.stat_name_1, R.id.stat_name_2, R.id.stat_name_3, R.id.stat_name_4)
         val statDurationIds = intArrayOf(R.id.stat_duration_1, R.id.stat_duration_2, R.id.stat_duration_3, R.id.stat_duration_4)
+        val statRowIds = intArrayOf(R.id.stat_row_1, R.id.stat_row_2, R.id.stat_row_3, R.id.stat_row_4)
 
-        for (i in 0 until minOf(stats.length(), 4)) {
-            val stat = stats.optJSONObject(i) ?: continue
-            val name = stat.optString("name", "")
-            val duration = stat.optString("duration", "")
-            val color = stat.optLong("color", 0xFFE5E7EB).toInt()
-
-            views.setTextViewText(statNameIds[i], name)
-            views.setTextViewText(statDurationIds[i], duration)
-            views.setInt(statDotIds[i], "setBackgroundColor", color)
+        // 如果没有活动数据，隐藏所有行
+        if (activities == null || activities.length() == 0) {
+            android.util.Log.d(TAG, "No activities found, hiding all stat rows")
+            for (rowId in statRowIds) {
+                views.setViewVisibility(rowId, View.GONE)
+            }
+            return
         }
+
+        android.util.Log.d(TAG, "Found ${activities.length()} activities, showing top ones")
+
+        val items = mutableListOf<Triple<String, String, Int>>()
+
+        // 解析activities并提取名称和时长
+        for (i in 0 until activities.length()) {
+            val activity = activities.optJSONObject(i) ?: continue
+            val name = if (activity.optString("name").isNotEmpty()) {
+                activity.optString("name")
+            } else {
+                // 如果标题为空，显示标签（第一个标签或"活动"）
+                val tags = activity.optJSONArray("tags")
+                if (tags != null && tags.length() > 0) {
+                    tags.optString(0)
+                } else {
+                    "活动"
+                }
+            }
+            val duration = activity.optString("duration", "0h")
+            val color = activity.optLong("color", 0xFF607afb.toLong()).toInt()
+
+            items.add(Triple(name, duration, color))
+        }
+
+        // 按时长排序（从长到短）
+        items.sortWith { item1, item2 ->
+            val duration1 = parseDurationToMinutes(item1.second)
+            val duration2 = parseDurationToMinutes(item2.second)
+            duration2.compareTo(duration1)
+        }
+
+        // 取前4个
+        val topItems = items.take(4)
+
+        // 设置到UI - 显示前N个，隐藏多余的
+        for (i in 0 until 4) {
+            if (i < topItems.size) {
+                val (name, duration, color) = topItems[i]
+                views.setViewVisibility(statRowIds[i], View.VISIBLE)
+                views.setTextViewText(statNameIds[i], name)
+                views.setTextViewText(statDurationIds[i], duration)
+                views.setInt(statDotIds[i], "setBackgroundColor", color)
+                android.util.Log.d(TAG, "Setting stat row $i: $name ($duration)")
+            } else {
+                // 隐藏多余的空行
+                views.setViewVisibility(statRowIds[i], View.GONE)
+            }
+        }
+    }
+
+    /**
+     * 将时长字符串转换为分钟数（用于排序）
+     */
+    private fun parseDurationToMinutes(duration: String): Int {
+        return try {
+            // 处理 "02時30分" 或 "2.5h" 或 "150分" 格式
+            when {
+                duration.contains("時") && duration.contains("分") -> {
+                    // "02時30分" 格式
+                    val parts = duration.split("時", "分")
+                    val hours = parts[0].toIntOrNull() ?: 0
+                    val minutes = parts[1].toIntOrNull() ?: 0
+                    hours * 60 + minutes
+                }
+                duration.contains("h") -> {
+                    // "2.5h" 格式
+                    val hours = duration.replace("h", "").toDoubleOrNull() ?: 0.0
+                    (hours * 60).toInt()
+                }
+                duration.contains("分") -> {
+                    // "150分" 格式
+                    duration.replace("分", "").toIntOrNull() ?: 0
+                }
+                else -> 0
+            }
+        } catch (e: Exception) {
+            android.util.Log.w(TAG, "Failed to parse duration: $duration")
+            0
+        }
+    }
+
+    /**
+     * 设置标签统计数据（右上角统计信息）
+     */
+    private fun setTagStatsData(views: RemoteViews, data: JSONObject) {
+        // 如果需要显示标签统计，可以在这里添加
+        // 目前右上角主要是日期和进度，进度已经在上面设置了
+        android.util.Log.d(TAG, "Tag stats data set")
     }
 
     /**

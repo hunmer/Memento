@@ -192,13 +192,13 @@ class HabitGroupListRemoteViewsFactory(
             result.add(GroupItem(
                 id = HabitGroupListWidgetProvider.GROUP_ALL,
                 name = "所有",
-                icon = "📋",
+                icon = "view_list", // 使用图标名称而非emoji
                 isSelected = selectedGroupId == HabitGroupListWidgetProvider.GROUP_ALL
             ))
             result.add(GroupItem(
                 id = HabitGroupListWidgetProvider.GROUP_UNGROUPED,
                 name = "未分组",
-                icon = "📁",
+                icon = "folder", // 使用图标名称而非emoji
                 isSelected = selectedGroupId == HabitGroupListWidgetProvider.GROUP_UNGROUPED
             ))
 
@@ -209,7 +209,7 @@ class HabitGroupListRemoteViewsFactory(
                 result.add(GroupItem(
                     id = groupId,
                     name = groupJson.optString("name", ""),
-                    icon = groupJson.optString("icon", "📂"),
+                    icon = convertIconValue(groupJson.optString("icon", "folder_open")),
                     isSelected = selectedGroupId == groupId
                 ))
             }
@@ -260,7 +260,7 @@ class HabitGroupListRemoteViewsFactory(
                     result.add(HabitItem(
                         id = habitJson.optString("id", ""),
                         title = habitJson.optString("title", ""),
-                        icon = habitJson.optString("icon", null),
+                        icon = convertIconValue(habitJson.optString("icon", "star")),
                         group = habitGroup
                     ))
                 }
@@ -270,6 +270,72 @@ class HabitGroupListRemoteViewsFactory(
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load habits", e)
             emptyList()
+        }
+    }
+
+    /**
+     * 转换图标值（emoji或codePoint）为图标名称
+     * @param iconValue 从JSON读取的图标值（可能是emoji、codePoint字符串或图标名称）
+     * @return 图标名称
+     */
+    private fun convertIconValue(iconValue: String?): String {
+        if (iconValue.isNullOrEmpty()) {
+            return "star"
+        }
+
+        return when (iconValue) {
+            // 常见emoji的图标名称映射
+            "📋" -> "view_list"
+            "📁" -> "folder"
+            "📂" -> "folder_open"
+            "📊" -> "bar_chart"
+            "⭐" -> "star"
+            "✨" -> "auto_awesome"
+            else -> {
+                // 如果是数字字符串，说明是codePoint，转换为图标名称
+                val codePoint = iconValue.toIntOrNull()
+                if (codePoint != null) {
+                    getIconNameFromCodePoint(codePoint)
+                } else {
+                    // 否则直接作为图标名称返回
+                    iconValue
+                }
+            }
+        }
+    }
+
+    /**
+     * 根据Material Icon的codePoint获取图标名称
+     * @param codePoint 图标codePoint值
+     * @return 图标名称
+     */
+    private fun getIconNameFromCodePoint(codePoint: Int): String {
+        // 常用Material Icons的codePoint到名称映射
+        return when (codePoint) {
+            0xE3C3 -> "star"              // Icons.star
+            0xE1E5 -> "home"              // Icons.home
+            0xE367 -> "settings"          // Icons.settings
+            0xE1B8 -> "fitness_center"    // Icons.fitness_center
+            0xE353 -> "school"            // Icons.school
+            0xE3F2 -> "tab_unselected"    // Icons.tab_unselected (对应📋)
+            0xE199 -> "folder"            // Icons.folder (对应📁)
+            0xE19A -> "folder_open"       // Icons.folder_open (对应📂)
+            0xE16D -> "fiber_new"         // Icons.fiber_new
+            0xE0C2 -> "chat"              // Icons.chat
+            0xE0C5 -> "check"             // Icons.check
+            0xE050 -> "assistant"         // Icons.assistant
+            0xE051 -> "assistant_photo"   // Icons.assistant_photo
+            0xE052 -> "atm"               // Icons.atm
+            0xE168 -> "featured_play_list" // Icons.featured_play_list
+            0xE169 -> "featured_video"    // Icons.featured_video
+            0xE16A -> "feedback"          // Icons.feedback
+            0xE16B -> "fiber_dvr"         // Icons.fiber_dvr
+            0xE16C -> "fiber_manual_record" // Icons.fiber_manual_record
+            0xE16E -> "fiber_pin"         // Icons.fiber_pin
+            0xE16F -> "fiber_smart_record" // Icons.fiber_smart_record
+            0xE170 -> "file_copy"         // Icons.file_copy
+            0xE171 -> "file_upload"       // Icons.file_upload
+            else -> "star"                // 默认图标
         }
     }
 

@@ -15,7 +15,10 @@ enum WidgetSize {
   large(2, 2),
 
   /// 4x2 - 超大横向卡片 (用于月视图等复杂小组件)
-  extraLarge(4, 2);
+  extraLarge(4, 2),
+
+  /// 4x4 - 超大正方形卡片 (用于复杂视图小组件)
+  huge(4, 4);
 
   final int width;
   final int height;
@@ -52,6 +55,8 @@ enum WidgetSize {
         return '2x2';
       case WidgetSize.extraLarge:
         return '4x2';
+      case WidgetSize.huge:
+        return '4x4';
     }
   }
 }

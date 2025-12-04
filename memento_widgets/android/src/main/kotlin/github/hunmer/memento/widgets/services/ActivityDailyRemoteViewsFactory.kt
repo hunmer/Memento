@@ -100,6 +100,8 @@ class ActivityDailyRemoteViewsFactory(
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val dataJson = prefs.getString("activity_daily_data_$widgetId", null)
 
+            android.util.Log.d(TAG, "Loading data for widget $widgetId: ${if (dataJson.isNullOrEmpty()) "null or empty" else "${dataJson.length} chars"}")
+
             if (dataJson.isNullOrEmpty()) {
                 activityItems = emptyList()
                 return
@@ -109,33 +111,40 @@ class ActivityDailyRemoteViewsFactory(
             val config = json.getJSONObject("config")
             val data = json.getJSONObject("data")
 
+            android.util.Log.d(TAG, "Parsed JSON config and data")
+
             // 读取强调色
             accentColor = config.getString("accentColor").toLongOrNull()?.toInt()
                 ?: DEFAULT_ACCENT_COLOR
 
-            // 解析活动列表
-            val activities = data.getJSONArray("activities")
+            // 解析活动列表（使用 optJSONArray 避免异常）
+            val activities = data.optJSONArray("activities")
             val items = mutableListOf<ActivityItem>()
 
-            for (i in 0 until activities.length()) {
-                val activity = activities.getJSONObject(i)
-                val name = activity.getString("name")
-                val emoji = activity.optString("emoji", "📋")
-                val duration = activity.getString("duration")
-                val color = activity.optLong("color", accentColor.toLong()).toInt()
+            if (activities != null) {
+                android.util.Log.d(TAG, "Found ${activities.length()} activities")
+                for (i in 0 until activities.length()) {
+                    val activity = activities.getJSONObject(i)
+                    val name = activity.getString("name")
+                    val emoji = activity.optString("emoji", "📋")
+                    val duration = activity.getString("duration")
+                    val color = activity.optLong("color", accentColor.toLong()).toInt()
 
-                items.add(ActivityItem(
-                    name = name,
-                    emoji = emoji,
-                    duration = duration,
-                    color = color
-                ))
+                    items.add(ActivityItem(
+                        name = name,
+                        emoji = emoji,
+                        duration = duration,
+                        color = color
+                    ))
+                }
+            } else {
+                android.util.Log.w(TAG, "No 'activities' field found in data")
             }
 
             activityItems = items
             android.util.Log.d(TAG, "Loaded ${items.size} activity items for widget $widgetId")
         } catch (e: Exception) {
-            android.util.Log.e(TAG, "Error loading data: $e")
+            android.util.Log.e(TAG, "Error loading data: $e", e)
             activityItems = emptyList()
         }
     }
