@@ -4,6 +4,7 @@ import 'package:Memento/plugins/calendar_album/screens/entry_detail/entry_detail
 import 'package:Memento/plugins/calendar_album/screens/entry_editor_screen.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import '../controllers/calendar_controller.dart';
 import '../controllers/tag_controller.dart';
@@ -171,16 +172,13 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () async {
-              final updatedEntry = await Navigator.push<CalendarEntry?>(
+              final updatedEntry = await NavigationHelper.push<CalendarEntry?>(
                 context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => _buildEntryEditorScreen(
-                        calendarController: calendarController,
-                        tagController: tagController,
-                        entry: currentEntry.copyWith(),
-                        isEditing: true,
-                      ),
+                _buildEntryEditorScreen(
+                  calendarController: calendarController,
+                  tagController: tagController,
+                  entry: currentEntry.copyWith(),
+                  isEditing: true,
                 ),
               );
 
@@ -235,16 +233,10 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                       padding: const EdgeInsets.only(right: 8.0),
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => Scaffold(
+                          NavigationHelper.push(context, Scaffold(
                                     body: EntryDetailImageViewer(
                                       imageUrls: currentEntry.imageUrls,
-                                      initialIndex: index,
-                                    ),
-                                  ),
+                                      initialIndex: index,),
                             ),
                           );
                         },

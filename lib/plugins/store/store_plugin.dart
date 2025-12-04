@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/store/widgets/store_bottom_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -232,10 +233,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
             ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => PointSettingsView(plugin: this),
-                ),
+              NavigationHelper.push(context, PointSettingsView(plugin: this),
               );
             },
           ),

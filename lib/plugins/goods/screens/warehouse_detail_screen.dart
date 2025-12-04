@@ -2,6 +2,7 @@ import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../models/warehouse.dart';
 import '../widgets/warehouse_form.dart';
 import '../models/goods_item.dart';
@@ -88,10 +89,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                 onTap: () {
                   Navigator.pop(context);
                   // 实现仓库编辑功能
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder:
-                          (context) => WarehouseForm(
+                  NavigationHelper.push(context, WarehouseForm(
                             warehouse: _warehouse,
                             onSave: (warehouse) async {
                               await GoodsPlugin.instance.saveWarehouse(
@@ -110,9 +108,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                                 Navigator.pop(context); // 关闭表单
                                 Navigator.pop(context); // 关闭详情
                               }
-                            },
-                          ),
-                    ),
+                            },),
                   );
                 },
               ),

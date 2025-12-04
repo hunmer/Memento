@@ -6,6 +6,7 @@ import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import '../goods_plugin.dart';
 
@@ -74,16 +75,13 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
   Future<void> _createWarehouse() async {
     final l10n = GoodsLocalizations.of(context);
 
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => WarehouseForm(
+    await NavigationHelper.push(context, WarehouseForm(
               onSave: (warehouse) async {
                 try {
                   await widget.plugin.saveWarehouse(warehouse);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.warehouseCreated ?? '仓库已创建')),
+                      SnackBar(content: Text(l10n.warehouseCreated ?? '仓库已创建'),
                     );
                   }
                 } catch (e) {
@@ -138,10 +136,7 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
     }
 
     // 跳转到物品创建表单
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => GoodsItemForm(
+    NavigationHelper.push(context, GoodsItemForm(
               onSubmit: (item) async {
                 try {
                   // 选择第一个仓库（实际应用中应该让用户选择）
@@ -149,7 +144,7 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
                   await widget.plugin.saveGoodsItem(warehouseId, item);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.itemCreated ?? '物品已创建')),
+                      SnackBar(content: Text(l10n.itemCreated ?? '物品已创建'),
                     );
                   }
                 } catch (e) {

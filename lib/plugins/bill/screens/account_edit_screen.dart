@@ -1,6 +1,7 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../bill_plugin.dart';
 import '../models/account.dart';
@@ -286,9 +287,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
           widget.billPlugin.selectedAccount = widget.billPlugin.accounts.first;
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (context) => widget.billPlugin.buildMainView(context),
-            ),
+            NavigationHelper.createRoute(widget.billPlugin.buildMainView(context)),
           );
           return;
         }

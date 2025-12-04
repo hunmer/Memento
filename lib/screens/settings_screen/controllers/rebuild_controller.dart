@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import '../../../plugins/chat/l10n/chat_localizations.dart';
@@ -28,39 +29,38 @@ class RebuildController {
     final effectiveLocale = newLocale ?? Localizations.localeOf(currentContext);
 
     navigator.pushReplacement(
-      MaterialPageRoute(
-        builder:
-            (context) => MaterialApp(
-              title: 'Memento',
-              debugShowCheckedModeBanner: false,
-              home: const HomeScreen(),
-              locale: effectiveLocale,
-              themeMode: effectiveThemeMode,
-              theme: ThemeData(
-                colorScheme: const ColorScheme.light(
-                  primary: Colors.blue,
-                  secondary: Colors.blueAccent,
-                ),
-                useMaterial3: true,
-              ),
-              darkTheme: ThemeData(
-                colorScheme: const ColorScheme.dark(
-                  primary: Colors.blue,
-                  secondary: Colors.blueAccent,
-                ),
-                useMaterial3: true,
-              ),
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                ChatLocalizations.delegate,
-                DayLocalizationsDelegate.delegate,
-                nodes_l10n.NodesLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: const [Locale('zh', ''), Locale('en', '')],
+      NavigationHelper.createRoute(
+        MaterialApp(
+          title: 'Memento',
+          debugShowCheckedModeBanner: false,
+          home: const HomeScreen(),
+          locale: effectiveLocale,
+          themeMode: effectiveThemeMode,
+          theme: ThemeData(
+            colorScheme: const ColorScheme.light(
+              primary: Colors.blue,
+              secondary: Colors.blueAccent,
             ),
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            colorScheme: const ColorScheme.dark(
+              primary: Colors.blue,
+              secondary: Colors.blueAccent,
+            ),
+            useMaterial3: true,
+          ),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            ChatLocalizations.delegate,
+            DayLocalizationsDelegate.delegate,
+            nodes_l10n.NodesLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('zh', ''), Locale('en', '')],
+        ),
       ),
     );
   }

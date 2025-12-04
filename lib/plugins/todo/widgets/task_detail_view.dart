@@ -1,6 +1,7 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:async';
 import '../models/models.dart';
 import '../controllers/controllers.dart';
@@ -56,16 +57,10 @@ class _TaskDetailViewState extends State<TaskDetailView> {
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => TaskForm(
+              NavigationHelper.push(context, TaskForm(
                         task: widget.task,
                         taskController: widget.taskController,
-                        reminderController: widget.reminderController,
-                      ),
-                ),
+                        reminderController: widget.reminderController,),
               );
             },
           ),

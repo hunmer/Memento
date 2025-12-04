@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../core/route/route_history_manager.dart';
 import '../../core/route/page_visit_record.dart';
 import '../../plugins/agent_chat/agent_chat_plugin.dart';
@@ -79,13 +80,8 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
       icon: Icons.inventory_2_outlined,
     );
 
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ToolTemplateScreen(
-          templateService: AgentChatPlugin.instance.templateService,
-        ),
-      ),
+    await NavigationHelper.push(context, ToolTemplateScreen(
+          templateService: AgentChatPlugin.instance.templateService,),
     );
   }
 
@@ -100,11 +96,7 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
       icon: Icons.settings_outlined,
     );
 
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ToolManagementScreen(),
-      ),
+    await NavigationHelper.push(context, const ToolManagementScreen(),
     );
   }
 

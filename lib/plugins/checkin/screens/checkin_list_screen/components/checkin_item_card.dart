@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../../controllers/checkin_list_controller.dart';
 import '../../../models/checkin_item.dart';
 import '../../../screens/checkin_record_screen.dart';
@@ -57,15 +58,9 @@ class CheckinItemCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (context) => CheckinRecordScreen(
+            NavigationHelper.push(context, CheckinRecordScreen(
                       checkinItem: item,
-                      controller: controller,
-                    ),
-              ),
+                      controller: controller,),
             ).then((_) => onStateChanged());
           },
           onLongPress: () {

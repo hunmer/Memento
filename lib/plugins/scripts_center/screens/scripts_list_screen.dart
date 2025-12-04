@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import '../services/script_manager.dart';
 import '../services/script_executor.dart';
@@ -101,13 +102,11 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
 
   /// 显示创建/编辑脚本屏幕
   Future<void> _showScriptDialog({ScriptInfo? script}) async {
-    final result = await Navigator.push<Map<String, dynamic>>(
+    final result = await NavigationHelper.push<Map<String, dynamic>>(
       context,
-      MaterialPageRoute(
-        builder: (context) => ScriptEditScreen(
-          script: script,
-          scriptManager: widget.scriptManager,
-        ),
+      ScriptEditScreen(
+        script: script,
+        scriptManager: widget.scriptManager,
       ),
     );
 

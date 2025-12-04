@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../timer_plugin.dart';
 import '../models/timer_task.dart';
 import '../models/timer_item.dart';
@@ -116,11 +117,7 @@ class _TimerMainViewState extends State<TimerMainView> {
   }
 
   void _showTaskDetails(TimerTask task) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => TimerTaskDetailsPage(
+    await NavigationHelper.push(context, TimerTaskDetailsPage(
               task: task,
               onReset: () {
                 task.reset();
@@ -129,9 +126,7 @@ class _TimerMainViewState extends State<TimerMainView> {
               onResume: () {
                 task.toggle();
                 setState(() {});
-              },
-            ),
-      ),
+              },),
     );
     setState(() {
       _updateTasksAndGroups();

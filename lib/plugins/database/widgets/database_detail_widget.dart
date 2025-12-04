@@ -1,6 +1,7 @@
 import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/database/widgets/record_edit_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../controllers/database_controller.dart';
 import '../models/database_model.dart';
 import '../widgets/database_edit_widget.dart';
@@ -62,17 +63,13 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
-              Navigator.of(context)
-                  .push(
-                    MaterialPageRoute(
-                      builder:
-                          (context) => DatabaseEditWidget(
-                            controller: widget.controller,
-                            database: database,
-                          ),
-                    ),
-                  )
-                  .then((_) => setState(() {}));
+              NavigationHelper.push(
+                context,
+                DatabaseEditWidget(
+                  controller: widget.controller,
+                  database: database,
+                ),
+              ).then((_) => setState(() {}));
             },
           ),
         ],
@@ -80,15 +77,10 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
       body: _isGridView ? _buildGridView(database) : _buildListView(database),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final result = await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder:
-                  (context) => RecordEditWidget(
+          final result = await NavigationHelper.push(context, RecordEditWidget(
                     controller: widget.controller,
                     database: database,
-                    record: null, // 新增记录时传null
-                  ),
-            ),
+                    record: null, // 新增记录时传null),
           );
           if (result != null) {
             setState(() {});
@@ -133,14 +125,9 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
                 ),
                 subtitle: Text(record.updatedAt.toString()),
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder:
-                          (context) => RecordDetailWidget(
+                  NavigationHelper.push(context, RecordDetailWidget(
                             record: record,
-                            controller: widget.controller,
-                          ),
-                    ),
+                            controller: widget.controller,),
                   );
                 },
                 onLongPress: () {
@@ -176,14 +163,9 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
             return Card(
               child: InkWell(
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder:
-                          (context) => RecordDetailWidget(
+                  NavigationHelper.push(context, RecordDetailWidget(
                             record: record,
-                            controller: widget.controller,
-                          ),
-                    ),
+                            controller: widget.controller,),
                   );
                 },
                 onLongPress: () {
@@ -280,17 +262,13 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
   }
 
   void _editRecord(BuildContext context, record_model.Record record) {
-    Navigator.of(context)
-        .push(
-          MaterialPageRoute(
-            builder:
-                (context) => RecordEditWidget(
-                  controller: widget.controller,
-                  database: widget.controller.currentDatabase!,
-                  record: record,
-                ),
-          ),
-        )
-        .then((_) => setState(() {}));
+    NavigationHelper.push(
+      context,
+      RecordEditWidget(
+        controller: widget.controller,
+        database: widget.controller.currentDatabase!,
+        record: record,
+      ),
+    ).then((_) => setState(() {}));
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../models/checkin_item.dart';
 import '../../../utils/audio_service.dart';
 
@@ -51,9 +52,8 @@ class CheckinDetailScreen extends StatelessWidget {
           if (context.mounted) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                builder:
-                    (context) => CheckinDetailScreen(checkinItem: checkinItem),
+              NavigationHelper.createRoute(
+                CheckinDetailScreen(checkinItem: checkinItem),
               ),
             );
           }

@@ -11,6 +11,7 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../widgets/app_drawer.dart';
 import '../../core/floating_ball/floating_ball_service.dart';
 import '../../core/app_widgets/home_widget_service.dart';
@@ -582,9 +583,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   /// 显示主题设置页面
   void _showThemeSettings() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const BackgroundSettingsPage()),
+    await NavigationHelper.push(context, const BackgroundSettingsPage(),
     );
 
     // 返回后刷新背景图和透明度

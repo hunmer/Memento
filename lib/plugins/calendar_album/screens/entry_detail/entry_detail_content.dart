@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/quill_viewer/index.dart';
 import '../../models/calendar_entry.dart';
 import 'entry_detail_image_viewer.dart';
@@ -46,15 +47,9 @@ class EntryDetailContent extends StatelessWidget {
                     padding: const EdgeInsets.only(right: 8.0),
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => EntryDetailImageViewer(
+                        NavigationHelper.push(context, EntryDetailImageViewer(
                                   imageUrls: entry.imageUrls,
-                                  initialIndex: index,
-                                ),
-                          ),
+                                  initialIndex: index,),
                         );
                       },
                       child: _buildImage(entry.imageUrls[index]),

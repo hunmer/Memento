@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/gestures.dart';
 import '../../plugin_base.dart';
 
@@ -317,20 +318,18 @@ class _PluginOverlayWidgetState extends State<PluginOverlayWidget>
     switch (settings.name) {
       case '/':
       case null:
-        return MaterialPageRoute(
+        return NavigationHelper.createRoute(
+          _PluginMainView(plugin: widget.plugin),
           settings: const RouteSettings(name: '/'),
-          builder: (context) => _PluginMainView(plugin: widget.plugin),
         );
       default:
         // 如果是插件内部的路由，返回错误页面
-        return MaterialPageRoute(
-          builder: (context) => Scaffold(
+        return NavigationHelper.createRoute(Scaffold(
             appBar: AppBar(title: const Text('路由错误')),
             body: Center(
               child: Text('未找到路由: ${settings.name}'),
             ),
-          ),
-        );
+          ),);
     }
   }
 

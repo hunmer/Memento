@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'provider_settings_screen.dart';
 import 'model_list_screen.dart';
 import 'prompt_preset_screen.dart';
@@ -18,11 +19,9 @@ class PluginSettingsScreen extends StatelessWidget {
             subtitle: Text(OpenAILocalizations.of(context).pluginDescription),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              Navigator.push(
+              NavigationHelper.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const ProviderSettingsScreen(),
-                ),
+                const ProviderSettingsScreen(),
               );
             },
           ),
@@ -35,11 +34,9 @@ class PluginSettingsScreen extends StatelessWidget {
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              Navigator.push(
+              NavigationHelper.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const ModelListScreen(),
-                ),
+                const ModelListScreen(),
               );
             },
           ),
@@ -52,11 +49,9 @@ class PluginSettingsScreen extends StatelessWidget {
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              Navigator.push(
+              NavigationHelper.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const PromptPresetScreen(),
-                ),
+                const PromptPresetScreen(),
               );
             },
           ),

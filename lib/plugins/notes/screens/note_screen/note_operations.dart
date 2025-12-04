@@ -2,6 +2,7 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../controllers/notes_controller.dart';
 import '../../models/folder.dart';
 import '../../models/note.dart';
@@ -14,16 +15,10 @@ Future<void> createNewNote(
   String currentFolderId,
   VoidCallback onReload,
 ) async {
-  await Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder:
-          (context) => NoteEditScreen(
+  await NavigationHelper.push(context, NoteEditScreen(
             onSave: (title, content) async {
               await controller.createNote(title, content, currentFolderId);
-            },
-          ),
-    ),
+            },),
   );
   onReload();
 }
@@ -35,11 +30,7 @@ Future<void> editNote(
   Note note,
   VoidCallback onReload,
 ) async {
-  await Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder:
-          (context) => NoteEditScreen(
+  await NavigationHelper.push(context, NoteEditScreen(
             note: note,
             onSave: (title, content) async {
               final updatedNote = Note(
@@ -52,9 +43,7 @@ Future<void> editNote(
                 tags: note.tags,
               );
               await controller.updateNote(updatedNote);
-            },
-          ),
-    ),
+            },),
   );
   onReload();
 }

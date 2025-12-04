@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:io';
 import '../models/goods_item.dart';
 import '../l10n/goods_localizations.dart';
@@ -96,14 +97,9 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
             title: const Text('使用历史'), // TODO: Localize
             onTap: () {
               Navigator.pop(context); // Close menu
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => GoodsItemHistoryPage(
+              NavigationHelper.push(context, GoodsItemHistoryPage(
                     item: widget.item,
-                    warehouseId: widget.warehouseId!,
-                  ),
-                ),
+                    warehouseId: widget.warehouseId!,),
               );
             },
           ),

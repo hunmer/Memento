@@ -10,6 +10,7 @@ import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 
@@ -84,19 +85,14 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
 
   /// 新建日记
   Future<void> _createNewDiary() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => MultiProvider(
+    await NavigationHelper.push(context, MultiProvider(
               providers: [
                 ChangeNotifierProvider.value(value: _calendarController),
                 ChangeNotifierProvider.value(value: _tagController),
               ],
               child: EntryEditorScreen(
                 initialDate: _calendarController.selectedDate,
-                isEditing: false,
-              ),
-            ),
+                isEditing: false,),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart' as syncfusion;
 import 'package:uuid/uuid.dart';
@@ -276,10 +277,7 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   void showEventEditPage(BuildContext context, [CalendarEvent? event]) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => EventEditPage(
+    NavigationHelper.push(context, EventEditPage(
               event: event,
               initialDate: event?.startTime ?? controller.selectedDate,
               onSave: (updatedEvent) {
@@ -290,17 +288,12 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
                 }
                 // 强制重建界面
                 controller.refresh();
-              },
-            ),
-      ),
+              },),
     );
   }
 
   void showAllEvents(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => EventListPage(
+    NavigationHelper.push(context, EventListPage(
               events: controller.events,
               onEventUpdated: (event) {
                 showEventEditPage(context, event);
@@ -310,20 +303,13 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
               },
               onEventDeleted: (event) {
                 controller.deleteEvent(event);
-              },
-            ),
-      ),
+              },),
     );
   }
 
   void showCompletedEvents(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => CompletedEventsPage(
-              completedEvents: controller.completedEvents,
-            ),
-      ),
+    NavigationHelper.push(context, CompletedEventsPage(
+              completedEvents: controller.completedEvents,),
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
 import '../models/service_provider.dart';
 import '../models/llm_models.dart';
@@ -77,12 +78,10 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
   }
 
   Future<void> _selectDefaultModel() async {
-    final selectedModel = await Navigator.push<LLMModel>(
+    final selectedModel = await NavigationHelper.push<LLMModel>(
       context,
-      MaterialPageRoute(
-        builder: (context) => ModelSearchScreen(
-          initialModelId: _defaultModelController.text,
-        ),
+      ModelSearchScreen(
+        initialModelId: _defaultModelController.text,
       ),
     );
 

@@ -4,6 +4,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:async';
 import '../controllers/controllers.dart';
 import '../controllers/task_controller.dart'; // 直接导入以获取 SortBy 枚举
@@ -104,15 +105,9 @@ class _TodoMainViewState extends State<TodoMainView> {
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => HistoryCompletedView(
+              NavigationHelper.push(context, HistoryCompletedView(
                         completedTasks: _plugin.taskController.completedTasks,
-                        taskController: _plugin.taskController,
-                      ),
-                ),
+                        taskController: _plugin.taskController,),
               );
             },
           ),
@@ -146,16 +141,10 @@ class _TodoMainViewState extends State<TodoMainView> {
               ? TaskGridView(
                 tasks: _plugin.taskController.tasks,
                 onTaskTap: (task) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => TaskDetailView(
+                  NavigationHelper.push(context, TaskDetailView(
                             task: task,
                             taskController: _plugin.taskController,
-                            reminderController: _plugin.reminderController,
-                          ),
-                    ),
+                            reminderController: _plugin.reminderController,),
                   );
                 },
                 onTaskStatusChanged: (task, status) {
@@ -165,16 +154,10 @@ class _TodoMainViewState extends State<TodoMainView> {
               : TaskListView(
                 tasks: _plugin.taskController.tasks,
                 onTaskTap: (task) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => TaskDetailView(
+                  NavigationHelper.push(context, TaskDetailView(
                             task: task,
                             taskController: _plugin.taskController,
-                            reminderController: _plugin.reminderController,
-                          ),
-                    ),
+                            reminderController: _plugin.reminderController,),
                   );
                 },
                 onTaskStatusChanged: (task, status) {
@@ -196,15 +179,9 @@ class _TodoMainViewState extends State<TodoMainView> {
       // 添加任务按钮
       floatingActionButton: AddTaskButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (context) => TaskForm(
+          NavigationHelper.push(context, TaskForm(
                     taskController: _plugin.taskController,
-                    reminderController: _plugin.reminderController,
-                  ),
-            ),
+                    reminderController: _plugin.reminderController,),
           );
         },
       ),

@@ -5,6 +5,7 @@ import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/chat/widgets/chat_bottom_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
@@ -54,11 +55,7 @@ class _ChatMainViewState extends State<ChatMainView> {
       _plugin.channelService.setCurrentChannel(channel);
 
       // 导航到聊天界面
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatScreen(channel: channel),
-        ),
+      NavigationHelper.push(context, ChatScreen(channel: channel),
       );
     } catch (e) {
       if (mounted) {

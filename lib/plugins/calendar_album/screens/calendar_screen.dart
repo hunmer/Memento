@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/widgets/enhanced_calendar/index.dart';
 import '../controllers/calendar_controller.dart';
@@ -119,20 +120,14 @@ class _CalendarScreenState extends State<CalendarScreen>
     );
     final tagController = Provider.of<TagController>(context, listen: false);
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => MultiProvider(
+    NavigationHelper.push(context, MultiProvider(
               providers: [
                 ChangeNotifierProvider.value(value: calendarController),
                 ChangeNotifierProvider.value(value: tagController),
               ],
               child: EntryEditorScreen(
                 initialDate: calendarController.selectedDate,
-                isEditing: false,
-              ),
-            ),
+                isEditing: false,),
       ),
     ).then((_) {
       if (mounted) setState(() {});
@@ -158,16 +153,11 @@ class _CalendarScreenState extends State<CalendarScreen>
         // 长按可以选择日期并打开编辑器
         calendarController.selectDate(pressedDay);
         setState(() => _focusedDay = pressedDay);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) => MultiProvider(
+        NavigationHelper.push(context, MultiProvider(
                   providers: [
                     ChangeNotifierProvider.value(value: calendarController),
                     ChangeNotifierProvider.value(
                       value: Provider.of<TagController>(context, listen: false),
-                    ),
                   ],
                   child: EntryEditorScreen(
                     initialDate: pressedDay,
@@ -244,11 +234,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                               IconButton(
                                 onPressed: () {
                                   Navigator.pop(context); // 关闭抽屉
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) => MultiProvider(
+                                  NavigationHelper.push(context, MultiProvider(
                                             providers: [
                                               ChangeNotifierProvider.value(
                                                 value: calendarController,
@@ -259,9 +245,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                             ],
                                             child: EntryEditorScreen(
                                               initialDate: selectedDate,
-                                              isEditing: false,
-                                            ),
-                                          ),
+                                              isEditing: false,),
                                     ),
                                   ).then((_) {
                                     if (mounted) setState(() {});
@@ -310,34 +294,24 @@ class _CalendarScreenState extends State<CalendarScreen>
       entries: calendarController.getEntriesForDate(selectedDate),
       onTap: (entry) async {
         Navigator.pop(context); // 关闭抽屉
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) => MultiProvider(
+        await NavigationHelper.push(context, MultiProvider(
                   providers: [
                     ChangeNotifierProvider.value(value: calendarController),
                     ChangeNotifierProvider.value(value: tagController),
                   ],
                   child: EntryDetailScreen(entry: entry),
-                ),
           ),
         );
         if (mounted) setState(() {});
       },
       onEdit: (entry) async {
         Navigator.pop(context); // 关闭抽屉
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) => MultiProvider(
+        await NavigationHelper.push(context, MultiProvider(
                   providers: [
                     ChangeNotifierProvider.value(value: calendarController),
                     ChangeNotifierProvider.value(value: tagController),
                   ],
                   child: EntryEditorScreen(entry: entry, isEditing: true),
-                ),
           ),
         );
         if (mounted) {
@@ -371,20 +345,14 @@ class _CalendarScreenState extends State<CalendarScreen>
           ),
       onCreateNew: () {
         Navigator.pop(context); // 关闭抽屉
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) => MultiProvider(
+        NavigationHelper.push(context, MultiProvider(
                   providers: [
                     ChangeNotifierProvider.value(value: calendarController),
                     ChangeNotifierProvider.value(value: tagController),
                   ],
                   child: EntryEditorScreen(
                     initialDate: selectedDate,
-                    isEditing: false,
-                  ),
-                ),
+                    isEditing: false,),
           ),
         ).then((_) {
           if (mounted) setState(() {});

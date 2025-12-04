@@ -1,3 +1,4 @@
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -136,12 +137,8 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
     }
 
     // 导航到预览页面
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => JsonDynamicPreviewScreen(
-          widgetData: widgetData,
-        ),
-      ),
+    NavigationHelper.push(context, JsonDynamicPreviewScreen(
+          widgetData: widgetData,),
     );
   }
 

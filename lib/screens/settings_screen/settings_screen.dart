@@ -2,6 +2,7 @@ import 'package:Memento/core/services/backup_service.dart';
 import 'package:Memento/core/theme_controller.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import './controllers/settings_screen_controller.dart';
 import './widgets/webdav_settings_dialog.dart';
 import './controllers/webdav_controller.dart';
@@ -160,9 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SettingsScreenLocalizations.of(context).dataManagementSubtitle,
             ),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => DataManagementScreen()),
+              NavigationHelper.push(context, DataManagementScreen(),
               );
             },
           ),
@@ -249,11 +248,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const FloatingBallSettingsScreen(),
-                    ),
+                  NavigationHelper.push(context, const FloatingBallSettingsScreen(),
                   );
                 },
               );
@@ -395,9 +390,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text(AppLocalizations.of(context)!.aboutTitle),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AboutScreen()),
+              NavigationHelper.push(context, const AboutScreen(),
               );
             },
           ),

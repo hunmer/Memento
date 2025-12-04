@@ -11,6 +11,7 @@ import 'package:Memento/dialogs/plugin_list_dialog.dart';
 import 'package:Memento/widgets/route_history_dialog/route_history_dialog.dart';
 import 'package:Memento/screens/settings_screen/settings_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'action_manager.dart';
 import 'models/action_definition.dart';
 import 'models/action_group.dart';
@@ -196,11 +197,7 @@ class BuiltInActionExecutor implements ActionExecutor {
     }
 
     // 导航到设置页面
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const SettingsScreen(),
-      ),
+    NavigationHelper.push(context, const SettingsScreen(),
     );
 
     return ExecutionResult.success(data: {'action': 'openSettings'});
@@ -275,11 +272,7 @@ class BuiltInActionExecutor implements ActionExecutor {
     }
     // 如果是设置页面
     else if (lastPage.pageId == 'settings') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const SettingsScreen(),
-        ),
+      NavigationHelper.push(context, const SettingsScreen(),
       );
       navigated = true;
     }

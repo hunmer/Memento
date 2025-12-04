@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:ui' show lerpDouble;
 import 'package:provider/provider.dart';
 import '../controllers/nodes_controller.dart';
@@ -119,15 +120,9 @@ class NotebooksScreen extends StatelessWidget {
                 ),
                 onTap: () {
                   controller.selectNotebook(notebook);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) =>
-                              ChangeNotifierProvider<NodesController>.value(
+                  NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
                                 value: controller,
                                 child: NodesScreen(notebook: notebook),
-                              ),
                     ),
                   );
                 },

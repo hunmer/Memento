@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../../models/message.dart';
 import '../../../models/file_message.dart';
 import '../../../utils/message_options_handler.dart';
@@ -161,19 +162,13 @@ class _MessageListState extends State<MessageList> {
                                         item.metadata![Message.metadataKeyFileInfo],
                                       ),
                                     );
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder:
-                                            (context) => FilePreviewScreen(
+                                    NavigationHelper.push(context, FilePreviewScreen(
                                               filePath: fileInfo.filePath,
                                               fileName: fileInfo.fileName,
                                               mimeType:
                                                   fileInfo.mimeType ??
                                                   'application/octet-stream',
-                                              fileSize: fileInfo.fileSize,
-                                            ),
-                                      ),
+                                              fileSize: fileInfo.fileSize,),
                                     );
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(

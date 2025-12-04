@@ -1,6 +1,7 @@
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -92,13 +93,9 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   /// 打开目标详情页
   void openGoalDetail(BuildContext context, Goal goal) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => ChangeNotifierProvider.value(
+    NavigationHelper.push(context, ChangeNotifierProvider.value(
               value: _controller,
               child: GoalDetailScreen(goal: goal),
-            ),
       ),
     );
   }

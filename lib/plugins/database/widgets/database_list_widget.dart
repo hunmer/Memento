@@ -8,6 +8,7 @@ import 'package:Memento/plugins/database/widgets/database_detail_widget.dart';
 import 'package:Memento/plugins/database/widgets/database_edit_widget.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
 import '../models/database_model.dart';
 import '../services/database_service.dart';
@@ -47,23 +48,18 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final date = DateTime.now();
-          final result = await Navigator.of(context).push<bool>(
-            MaterialPageRoute(
-              builder:
-                  (context) => DatabaseEditWidget(
-                    controller: DatabaseController(widget.service),
-                    database: DatabaseModel(
-                      id: '',
-                      name:
-                          DatabaseLocalizations.of(
-                            context,
-                          ).newDatabaseDefaultName,
-                      description: '',
-                      fields: [],
-                      createdAt: date,
-                      updatedAt: date,
-                    ),
-                  ),
+          final result = await NavigationHelper.push<bool>(
+            context,
+            DatabaseEditWidget(
+              controller: DatabaseController(widget.service),
+              database: DatabaseModel(
+                id: '',
+                name: DatabaseLocalizations.of(context).newDatabaseDefaultName,
+                description: '',
+                fields: [],
+                createdAt: date,
+                updatedAt: date,
+              ),
             ),
           );
           if (result == true && mounted) {
@@ -168,24 +164,17 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   ),
                   child: InkWell(
                     onTap: () {
-                      Navigator.of(context)
-                          .push(
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => DatabaseDetailWidget(
-                                    controller: DatabaseController(
-                                      widget.service,
-                                    ),
-                                    databaseId: database.id,
-                                  ),
-                            ),
-                          )
-                          .then(
-                            (_) => setState(() {
-                              _databasesFuture =
-                                  widget.service.getAllDatabases();
-                            }),
-                          );
+                      NavigationHelper.push(
+                        context,
+                        DatabaseDetailWidget(
+                          controller: DatabaseController(widget.service),
+                          databaseId: database.id,
+                        ),
+                      ).then(
+                        (_) => setState(() {
+                          _databasesFuture = widget.service.getAllDatabases();
+                        }),
+                      );
                     },
                     onLongPress: () {
                       _showBottomSheet(context, database);
@@ -255,13 +244,11 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                 title: Text(AppLocalizations.of(context)!.edit),
                 onTap: () async {
                   Navigator.pop(context);
-                  final result = await Navigator.of(context).push<bool>(
-                    MaterialPageRoute(
-                      builder:
-                          (context) => DatabaseEditWidget(
-                            controller: DatabaseController(widget.service),
-                            database: database,
-                          ),
+                  final result = await NavigationHelper.push<bool>(
+                    context,
+                    DatabaseEditWidget(
+                      controller: DatabaseController(widget.service),
+                      database: database,
                     ),
                   );
                   if (result == true && mounted) {

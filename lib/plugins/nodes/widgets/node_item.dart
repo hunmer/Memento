@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../controllers/nodes_controller.dart';
@@ -157,18 +158,11 @@ class NodeItem extends StatelessWidget {
               if (node.children.isNotEmpty) {
                 controller.toggleNodeExpansion(notebookId, node.id);
               } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) =>
-                            ChangeNotifierProvider<NodesController>.value(
+                NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
                               value: controller,
                               child: NodeEditScreen(
                                 notebookId: notebookId,
-                                node: node,
-                              ),
-                            ),
+                                node: node,),
                   ),
                 );
               }
@@ -431,18 +425,11 @@ class NodeItem extends StatelessWidget {
                 title: Text(l10n.editNode),
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) =>
-                              ChangeNotifierProvider<NodesController>.value(
+                  NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
                                 value: controller,
                                 child: NodeEditScreen(
                                   notebookId: notebookId,
-                                  node: node,
-                                ),
-                              ),
+                                  node: node,),
                     ),
                   );
                 },
@@ -485,18 +472,12 @@ class NodeItem extends StatelessWidget {
       status: NodeStatus.todo, // Default new nodes to Todo (New)
     );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => ChangeNotifierProvider<NodesController>.value(
+    NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
               value: controller,
               child: NodeEditScreen(
                 notebookId: notebookId,
                 node: newNode,
-                isNew: true,
-              ),
-            ),
+                isNew: true,),
       ),
     );
   }
@@ -510,18 +491,12 @@ class NodeItem extends StatelessWidget {
       status: NodeStatus.todo,
     );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => ChangeNotifierProvider<NodesController>.value(
+    NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
               value: controller,
               child: NodeEditScreen(
                 notebookId: notebookId,
                 node: newNode,
-                isNew: true,
-              ),
-            ),
+                isNew: true,),
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'floating_ball_service.dart';
 import '../../dialogs/plugin_list_dialog.dart';
 import '../plugin_manager.dart';
@@ -147,20 +148,12 @@ class FloatingBallManager {
 
     switch (lastPage.pageId) {
       case 'tool_template':
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) => ToolTemplateScreen(
-                  templateService: AgentChatPlugin.instance.templateService,
-                ),
-          ),
+        await NavigationHelper.push(context, ToolTemplateScreen(
+                  templateService: AgentChatPlugin.instance.templateService,),
         );
         break;
       case 'tool_management':
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ToolManagementScreen()),
+        await NavigationHelper.push(context, const ToolManagementScreen(),
         );
         break;
       default:

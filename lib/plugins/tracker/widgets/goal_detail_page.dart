@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Row, SizedBox, ListTile;
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/material.dart' as flutter show Row, SizedBox, ListTile;
 import '../models/goal.dart';
 import '../controllers/tracker_controller.dart';
@@ -120,11 +121,7 @@ class GoalDetailPage extends StatelessWidget {
   }
 
   void _navigateToEditPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => GoalEditPage(controller: controller, goal: goal),
-      ),
+    NavigationHelper.push(context, GoalEditPage(controller: controller, goal: goal),
     );
   }
 }

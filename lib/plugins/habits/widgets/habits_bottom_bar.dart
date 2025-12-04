@@ -11,6 +11,7 @@ import 'package:Memento/core/widgets/keep_alive_wrapper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 
 /// Habits 插件的底部栏组件
@@ -86,10 +87,7 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
   /// 添加习惯
   Future<void> _addHabit() async {
     final l10n = HabitsLocalizations.of(context);
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => Scaffold(
+    await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
                 title: Text(l10n.newHabit),
                 backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -98,9 +96,7 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
               body: HabitForm(
                 onSave: (habit) async {
                   await _habitController.saveHabit(habit);
-                },
-              ),
-            ),
+                },),
       ),
     );
   }
@@ -108,10 +104,7 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
   /// 添加技能
   Future<void> _addSkill() async {
     final l10n = HabitsLocalizations.of(context);
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => Scaffold(
+    await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
                 title: Text(l10n.createSkill),
                 backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -120,9 +113,7 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
               body: SkillForm(
                 onSave: (skill) async {
                   await _skillController.saveSkill(skill);
-                },
-              ),
-            ),
+                },),
       ),
     );
   }

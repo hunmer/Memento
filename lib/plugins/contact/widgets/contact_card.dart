@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:io';
 import '../controllers/contact_controller.dart';
 import '../models/contact_model.dart';
@@ -66,14 +67,9 @@ class ContactCard extends StatelessWidget {
   }
 
   void _navigateToRecords(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ContactRecordsScreen(
+    NavigationHelper.push(context, ContactRecordsScreen(
           contact: contact,
-          controller: controller,
-        ),
-      ),
+          controller: controller,),
     );
   }
 

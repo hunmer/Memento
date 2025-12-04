@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/services.dart';
 import '../../../models/chat_message.dart';
 import '../../../models/file_attachment.dart';
@@ -434,16 +435,11 @@ class MessageBubble extends StatelessWidget {
 
   /// 查看图片大图
   void _viewImage(BuildContext context, FileAttachment attachment) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => FilePreviewScreen(
+    NavigationHelper.push(context, FilePreviewScreen(
               filePath: attachment.filePath,
               fileName: attachment.fileName,
               mimeType: 'image/${_getImageExtension(attachment.fileName)}',
-              fileSize: attachment.fileSize,
-            ),
-      ),
+              fileSize: attachment.fileSize,),
     );
   }
 
