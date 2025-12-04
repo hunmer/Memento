@@ -80,7 +80,8 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
           final result = await NavigationHelper.push(context, RecordEditWidget(
                     controller: widget.controller,
                     database: database,
-                    record: null, // 新增记录时传null),
+              record: null,
+            )
           );
           if (result != null) {
             setState(() {});

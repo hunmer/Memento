@@ -929,10 +929,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   content: Text('已添加工具: ${config.title}'),
                   backgroundColor: Colors.green,
                   duration: const Duration(seconds: 2),
+              )
               );
             }
           },
-        ),
       ),
     );
   }

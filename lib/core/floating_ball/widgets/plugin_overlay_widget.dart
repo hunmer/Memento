@@ -320,7 +320,6 @@ class _PluginOverlayWidgetState extends State<PluginOverlayWidget>
       case null:
         return NavigationHelper.createRoute(
           _PluginMainView(plugin: widget.plugin),
-          settings: const RouteSettings(name: '/'),
         );
       default:
         // 如果是插件内部的路由，返回错误页面
