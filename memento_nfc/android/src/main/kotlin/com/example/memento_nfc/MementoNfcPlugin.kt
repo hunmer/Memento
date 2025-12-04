@@ -123,7 +123,7 @@ class MementoNfcPlugin :
         } catch (e: Exception) {
             val result = HashMap<String, Any>()
             result["success"] = false
-            result["error"] = e.message
+            result["error"] = e.message ?: "Unknown error"
             return result
         }
     }
@@ -165,7 +165,7 @@ class MementoNfcPlugin :
         } catch (e: Exception) {
             val result = HashMap<String, Any>()
             result["success"] = false
-            result["error"] = e.message
+            result["error"] = e.message ?: "Unknown error"
             return result
         }
     }
@@ -212,7 +212,7 @@ class MementoNfcPlugin :
         } catch (e: Exception) {
             val result = HashMap<String, Any>()
             result["success"] = false
-            result["error"] = e.message
+            result["error"] = e.message ?: "Unknown error"
             return result
         }
     }
@@ -263,7 +263,7 @@ class MementoNfcPlugin :
         } catch (e: Exception) {
             val result = HashMap<String, Any>()
             result["success"] = false
-            result["error"] = e.message
+            result["error"] = e.message ?: "Unknown error"
             return result
         }
     }

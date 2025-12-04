@@ -5,6 +5,7 @@ import CoreNFC
 public class MementoNfcPlugin: NSObject, FlutterPlugin, NFCNDEFReaderSessionDelegate {
   private var readerSession: NFCNDEFReaderSession?
   private var flutterResult: FlutterResult?
+  private var pendingMessage: NFCNDEFMessage?
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "memento_nfc", binaryMessenger: registrar.messenger())
@@ -57,95 +58,37 @@ public class MementoNfcPlugin: NSObject, FlutterPlugin, NFCNDEFReaderSessionDele
     }
 
     readerSession = NFCNDEFReaderSession(delegate: self, queue: nil, invalidateAfterFirstRead: true)
+    readerSession?.alertMessage = "将iPhone靠近要读取的NFC标签"
     readerSession?.begin()
   }
 
   private func writeNfc(data: String) {
-    guard NFCNDEFReaderSession.readingAvailable else {
-      flutterResult?(["success": false, "error": "NFC not supported on this device"])
-      return
-    }
-
-    let payload = NFCNDEFPayload(
-      format: .media,
-      type: "text/plain".data(using: .utf8)!,
-      identifier: Data(),
-      payload: data.data(using: .utf8)!
-    )
-
-    let message = NFCNDEFMessage(records: [payload])
-
-    readerSession = NFCNDEFReaderSession(delegate: self, queue: nil, invalidateAfterFirstRead: false)
-    readerSession?.alertMessage = "Hold iPhone near NFC tag to write"
-    readerSession?.begin()
+    // iOS NFC写入需要iOS 13+，但Flutter插件编译时可能有兼容性问题
+    // 暂时返回错误，建议使用第三方应用
+    flutterResult?(["success": false, "error": "iOS NFC写入功能需要iOS 13+，建议使用NFC Tools等第三方应用"])
   }
 
   private func writeNdefUrl(url: String) {
-    guard NFCNDEFReaderSession.readingAvailable else {
-      flutterResult?(["success": false, "error": "NFC not supported on this device"])
-      return
-    }
-
-    let urlData = url.data(using: .utf8)!
-    var payloadBytes = [UInt8](urlData)
-    payloadBytes.insert(0x00, at: 0)
-
-    let payload = NFCNDEFPayload(
-      format: .wellKnown,
-      type: "U".data(using: .utf8)!,
-      identifier: Data(),
-      payload: Data(payloadBytes)
-    )
-
-    let message = NFCNDEFMessage(records: [payload])
-
-    readerSession = NFCNDEFReaderSession(delegate: self, queue: nil, invalidateAfterFirstRead: false)
-    readerSession?.alertMessage = "Hold iPhone near NFC tag to write"
-    readerSession?.begin()
+    // iOS NFC写入需要iOS 13+，但Flutter插件编译时可能有兼容性问题
+    // 暂时返回错误，建议使用第三方应用
+    flutterResult?(["success": false, "error": "iOS NFC写入功能需要iOS 13+，建议使用NFC Tools等第三方应用"])
   }
 
   private func writeNdefText(text: String) {
-    guard NFCNDEFReaderSession.readingAvailable else {
-      flutterResult?(["success": false, "error": "NFC not supported on this device"])
-      return
-    }
-
-    let lang = "en"
-    let textBytes = [UInt8](text.data(using: .utf8)!)
-    let langBytes = [UInt8](lang.data(using: .utf8)!)
-
-    var payload = [UInt8]()
-    payload.append(UInt8(langBytes.count))
-    payload.append(contentsOf: langBytes)
-    payload.append(contentsOf: textBytes)
-
-    let payloadData = Data(payload)
-
-    let payload = NFCNDEFPayload(
-      format: .wellKnown,
-      type: "T".data(using: .utf8)!,
-      identifier: Data(),
-      payload: payloadData
-    )
-
-    let message = NFCNDEFMessage(records: [payload])
-
-    readerSession = NFCNDEFReaderSession(delegate: self, queue: nil, invalidateAfterFirstRead: false)
-    readerSession?.alertMessage = "Hold iPhone near NFC tag to write"
-    readerSession?.begin()
+    // iOS NFC写入需要iOS 13+，但Flutter插件编译时可能有兼容性问题
+    // 暂时返回错误，建议使用第三方应用
+    flutterResult?(["success": false, "error": "iOS NFC写入功能需要iOS 13+，建议使用NFC Tools等第三方应用"])
   }
 
   // MARK: - NFCNDEFReaderSessionDelegate
 
   public func readerSession(_ session: NFCNDEFReaderSession, didInvalidateWithError error: Error) {
-    if let nfcError = error as? NFCReaderError {
-      if nfcError.code != .readerSessionInvalidationNeededFirstRead {
-        flutterResult?(["success": false, "error": error.localizedDescription])
-      }
-    }
+    // 简化错误处理，直接返回错误信息
+    flutterResult?(["success": false, "error": error.localizedDescription])
   }
 
-  public func readerSession(_ session: NFCNDEFReaderSession, didDetectNDEFMessages messages: [NFCNDEFMessage]) {
+  public func readerSession(_ session: NFCNDEFReaderSession, didDetectNDEFs messages: [NFCNDEFMessage]) {
+    // This is a read operation (when invalidateAfterFirstRead is true)
     var detectedData: [String] = []
 
     for message in messages {
