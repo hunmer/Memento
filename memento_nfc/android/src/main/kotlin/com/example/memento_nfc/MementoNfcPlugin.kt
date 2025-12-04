@@ -35,9 +35,19 @@ class MementoNfcPlugin :
     private var isWriteMode = false
     private var pendingWriteData: String = ""
     private var pendingWriteFormat: String = ""
+    private var timeoutHandler: Handler? = null
+    private val timeoutRunnable = Runnable {
+        Log.w(TAG, "NFC operation timeout")
+        pendingResult?.success(hashMapOf(
+            "success" to false,
+            "error" to "NFC操作超时，请重试"
+        ))
+        stopNfcReading()
+    }
 
     companion object {
         private const val TAG = "MementoNfcPlugin"
+        private const val NFC_TIMEOUT_MS = 15000L // 15秒超时
     }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -100,6 +110,10 @@ class MementoNfcPlugin :
         pendingWriteData = data
         pendingWriteFormat = formatType
 
+        // 启动超时计时器
+        timeoutHandler = Handler(Looper.getMainLooper())
+        timeoutHandler?.postDelayed(timeoutRunnable, NFC_TIMEOUT_MS)
+
         // 延迟一点时间启动，让Flutter有时间显示对话框
         Handler(Looper.getMainLooper()).postDelayed({
             try {
@@ -116,6 +130,8 @@ class MementoNfcPlugin :
 
                 nfcAdapter!!.enableReaderMode(activity, this, flags, extras)
             } catch (e: Exception) {
+                // 取消超时计时器
+                timeoutHandler?.removeCallbacks(timeoutRunnable)
                 result.success(hashMapOf(
                     "success" to false,
                     "error" to "启动NFC写入失败: ${e.message}"
@@ -138,6 +154,10 @@ class MementoNfcPlugin :
         pendingResult = result
         Log.d(TAG, "startNfcReading: NFC adapter is ready, starting reader mode in 200ms")
 
+        // 启动超时计时器
+        timeoutHandler = Handler(Looper.getMainLooper())
+        timeoutHandler?.postDelayed(timeoutRunnable, NFC_TIMEOUT_MS)
+
         // 延迟一点时间启动，让Flutter有时间显示对话框
         Handler(Looper.getMainLooper()).postDelayed({
             try {
@@ -157,6 +177,8 @@ class MementoNfcPlugin :
                 Log.i(TAG, "startNfcReading: Reader mode enabled successfully")
             } catch (e: Exception) {
                 Log.e(TAG, "startNfcReading: Failed to enable reader mode", e)
+                // 取消超时计时器
+                timeoutHandler?.removeCallbacks(timeoutRunnable)
                 result.success(hashMapOf(
                     "success" to false,
                     "error" to "启动NFC读取失败: ${e.message}"
@@ -167,6 +189,9 @@ class MementoNfcPlugin :
 
     override fun onTagDiscovered(tag: Tag?) {
         Log.d(TAG, "onTagDiscovered: Tag discovered: ${tag != null}")
+        // 取消超时计时器
+        timeoutHandler?.removeCallbacks(timeoutRunnable)
+
         if (tag == null) {
             Log.w(TAG, "onTagDiscovered: Tag is null")
             Handler(Looper.getMainLooper()).post {
@@ -199,9 +224,15 @@ class MementoNfcPlugin :
     }
 
     private fun stopNfcReading() {
+        Log.d(TAG, "stopNfcReading: Stopping NFC reading")
         try {
+            // 取消超时计时器
+            timeoutHandler?.removeCallbacks(timeoutRunnable)
+            timeoutHandler = null
+
             nfcAdapter?.disableReaderMode(activity)
         } catch (e: Exception) {
+            Log.w(TAG, "stopNfcReading: Error disabling reader mode", e)
             // 忽略关闭错误
         }
         pendingResult = null
