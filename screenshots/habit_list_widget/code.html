@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Routine &amp; Habit Organizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#FFFFFF",
+              "background-light": "#F7F7F7",
+              "background-dark": "#1C1C1E",
+              "card-light": "#FFF7EB",
+              "card-dark": "#2C2C2E",
+              "text-light": "#333333",
+              "text-dark": "#E5E5E7",
+              "subtle-text-light": "#8A8A8E",
+              "subtle-text-dark": "#8E8E93"
+            },
+            fontFamily: {
+              display: ["Noto Sans SC", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "1rem",
+            },
+          },
+        },
+      };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex items-center justify-center min-h-screen">
+<div class="w-full max-w-sm mx-auto">
+<div class="bg-white dark:bg-gray-800 shadow-lg rounded-3xl p-4">
+<div class="flex relative">
+<aside class="w-[120px] pt-2 pr-4">
+<nav>
+<ul class="space-y-4">
+<li><a class="flex items-center space-x-2 text-sm font-medium text-text-light dark:text-text-dark" href="#"><span>☀️</span><span>日間儀式</span></a></li>
+<li><a class="flex items-center space-x-2 text-sm font-medium text-subtle-text-light dark:text-subtle-text-dark" href="#"><span>🌙</span><span>晚間儀式</span></a></li>
+<li><a class="flex items-center space-x-2 text-sm font-medium text-subtle-text-light dark:text-subtle-text-dark" href="#"><span>🌿</span><span>日常生活</span></a></li>
+<li><a class="flex items-center space-x-2 text-sm font-medium text-subtle-text-light dark:text-subtle-text-dark" href="#"><span>❤️</span><span>重要</span></a></li>
+<li><a class="flex items-center space-x-2 text-sm font-medium text-subtle-text-light dark:text-subtle-text-dark" href="#"><span>🤩</span><span>偷偷期待</span></a></li>
+<li><a class="flex items-center space-x-2 text-sm font-medium text-subtle-text-light dark:text-subtle-text-dark" href="#"><span>🚨</span><span>其他瑣事</span></a></li>
+<li><a class="flex items-center space-x-2 text-sm font-medium text-subtle-text-light dark:text-subtle-text-dark" href="#"><span>💼</span><span>業務工作</span></a></li>
+<li><a class="flex items-center space-x-2 text-sm font-medium text-subtle-text-light dark:text-subtle-text-dark" href="#"><span>⏰</span><span>近期在做</span></a></li>
+<li><a class="flex items-center space-x-2 text-sm font-medium text-subtle-text-light dark:text-subtle-text-dark" href="#"><span>‼️</span><span>本月要事</span></a></li>
+</ul>
+</nav>
+</aside>
+<div class="absolute inset-y-0 left-[120px] border-r border-dashed border-gray-200 dark:border-gray-700"></div>
+<main class="flex-1 pl-4">
+<div class="grid grid-cols-3 gap-y-4 gap-x-2">
+<div class="flex flex-col items-center space-y-2">
+<button class="w-16 h-16 bg-card-light dark:bg-card-dark rounded-full flex items-center justify-center text-3xl shadow-sm">
+<span aria-label="Wake up and wash face" role="img">😴</span>
+</button>
+<span class="text-xs text-subtle-text-light dark:text-subtle-text-dark">起床洗漱</span>
+</div>
+<div class="flex flex-col items-center space-y-2">
+<button class="w-16 h-16 bg-card-light dark:bg-card-dark rounded-full flex items-center justify-center text-3xl shadow-sm">
+<span aria-label="Plan" role="img">🗓️</span>
+</button>
+<span class="text-xs text-subtle-text-light dark:text-subtle-text-dark">計劃</span>
+</div>
+<div class="flex flex-col items-center space-y-2">
+<button class="w-16 h-16 bg-card-light dark:bg-card-dark rounded-full flex items-center justify-center text-3xl shadow-sm">
+<span aria-label="Read" role="img">📖</span>
+</button>
+<span class="text-xs text-subtle-text-light dark:text-subtle-text-dark">看書</span>
+</div>
+<div class="flex flex-col items-center space-y-2">
+<button class="w-16 h-16 bg-card-light dark:bg-card-dark rounded-full flex items-center justify-center text-3xl shadow-sm">
+<span aria-label="Stretch" role="img">🤸</span>
+</button>
+<span class="text-xs text-subtle-text-light dark:text-subtle-text-dark">拉拉筋</span>
+</div>
+<div class="flex flex-col items-center space-y-2">
+<button class="w-16 h-16 bg-card-light dark:bg-card-dark rounded-full flex items-center justify-center text-3xl shadow-sm">
+<span aria-label="Meditate" role="img">🧘</span>
+</button>
+<span class="text-xs text-subtle-text-light dark:text-subtle-text-dark">冥想</span>
+</div>
+<div class="flex flex-col items-center space-y-2">
+<button class="w-16 h-16 bg-card-light dark:bg-card-dark rounded-full flex items-center justify-center text-3xl shadow-sm">
+<span aria-label="Books" role="img">📚</span>
+</button>
+<span class="text-xs text-subtle-text-light dark:text-subtle-text-dark">Audible</span>
+</div>
+<div class="flex flex-col items-center space-y-2">
+<button class="w-16 h-16 bg-card-light dark:bg-card-dark rounded-full flex items-center justify-center text-3xl shadow-sm">
+<span aria-label="Breakfast" role="img">🍳</span>
+</button>
+<span class="text-xs text-subtle-text-light dark:text-subtle-text-dark">早餐</span>
+</div>
+<div class="flex flex-col items-center space-y-2">
+<button class="w-16 h-16 bg-card-light dark:bg-card-dark rounded-full flex items-center justify-center text-3xl shadow-sm">
+<span aria-label="Lunch" role="img">🥗</span>
+</button>
+<span class="text-xs text-subtle-text-light dark:text-subtle-text-dark">午餐</span>
+</div>
+<div class="flex flex-col items-center space-y-2">
+<button class="w-16 h-16 bg-card-light dark:bg-card-dark rounded-full flex items-center justify-center text-3xl shadow-sm">
+<span aria-label="Get ready" role="img">💄</span>
+</button>
+<span class="text-xs text-subtle-text-light dark:text-subtle-text-dark">出門準備</span>
+</div>
+</div>
+</main>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>
