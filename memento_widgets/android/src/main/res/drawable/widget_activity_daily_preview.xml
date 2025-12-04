@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 本日活动详细视图小组件预览图 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 背景 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#F8F9FA" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+
+    <!-- 左侧区域示意（时间轴） -->
+    <item
+        android:left="12dp"
+        android:top="24dp"
+        android:right="100dp"
+        android:bottom="60dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#A2E0B5" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+
+    <!-- 右侧圆环示意 -->
+    <item
+        android:left="100dp"
+        android:top="30dp"
+        android:right="20dp"
+        android:bottom="80dp">
+        <shape android:shape="oval">
+            <stroke
+                android:width="8dp"
+                android:color="#A2E0B5" />
+        </shape>
+    </item>
+</layer-list>

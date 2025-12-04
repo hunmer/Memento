@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 本日活动详细视图 - 活动列表项 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <!-- 颜色圆点 -->
+    <View
+        android:id="@+id/activity_color_dot"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:background="@drawable/widget_activity_daily_stat_dot" />
+
+    <!-- Emoji图标 -->
+    <TextView
+        android:id="@+id/activity_emoji"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:text="💤"
+        android:textSize="14sp" />
+
+    <!-- 活动名称 -->
+    <TextView
+        android:id="@+id/activity_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="4dp"
+        android:text="睡眠"
+        android:textColor="#1F2937"
+        android:textSize="12sp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- 活动时长 -->
+    <TextView
+        android:id="@+id/activity_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="8h 19m"
+        android:textColor="#6B7280"
+        android:textSize="11sp"
+        android:fontFamily="sans-serif-medium" />
+</LinearLayout>

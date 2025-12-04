@@ -1,0 +1,1006 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 本日活动详细视图小组件 -->
+<!-- 颜色配置说明：
+     - widget_root: 背景色通过 backgroundTintList 动态设置
+     - 文本颜色：主文本 #1F2937，次要文本 #6B7280
+     - 强调色：通过 setTextColor 动态设置
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="12dp"
+    android:background="@drawable/widget_activity_daily_background">
+
+    <!-- 配置提示文本（首次添加时显示） -->
+    <TextView
+        android:id="@+id/config_prompt"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="点击配置小组件"
+        android:textColor="#6B7280"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <!-- 内容容器（已配置时显示） -->
+    <LinearLayout
+        android:id="@+id/content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:visibility="visible">
+
+        <!-- ========== 左侧：时间轴视图（40%宽度） ========== -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.4"
+            android:orientation="vertical"
+            android:paddingEnd="8dp">
+
+            <!-- 上午/下午标题 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="4dp">
+
+                <TextView
+                    android:id="@+id/label_am"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="上午"
+                    android:textColor="#1F2937"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center" />
+
+                <TextView
+                    android:id="@+id/label_pm"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="下午"
+                    android:textColor="#1F2937"
+                    android:textSize="10sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center" />
+            </LinearLayout>
+
+            <!-- 时间轴行容器（0-11点） -->
+            <LinearLayout
+                android:id="@+id/timeline_container"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- 0点行 -->
+                <LinearLayout
+                    android:id="@+id/hour_row_0"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <!-- 上午活动条 -->
+                    <View
+                        android:id="@+id/am_bar_0"
+                        android:layout_width="0dp"
+                        android:layout_height="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/widget_activity_daily_bar"
+                        android:backgroundTint="#A2E0B5" />
+                    <!-- 小时数字 -->
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#6B7280"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+                    <!-- 下午活动点容器 -->
+                    <LinearLayout
+                        android:id="@+id/pm_dots_0"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="end|center_vertical">
+                        <View
+                            android:id="@+id/pm_dot_0_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:backgroundTint="#FECACA"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/pm_dot_0_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:backgroundTint="#FED7AA"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 1点行 -->
+                <LinearLayout
+                    android:id="@+id/hour_row_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <View
+                        android:id="@+id/am_bar_1"
+                        android:layout_width="0dp"
+                        android:layout_height="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/widget_activity_daily_bar"
+                        android:backgroundTint="#A2E0B5" />
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:text="1"
+                        android:textColor="#6B7280"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+                    <LinearLayout
+                        android:id="@+id/pm_dots_1"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="end|center_vertical">
+                        <View
+                            android:id="@+id/pm_dot_1_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/pm_dot_1_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 2点行 -->
+                <LinearLayout
+                    android:id="@+id/hour_row_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <View
+                        android:id="@+id/am_bar_2"
+                        android:layout_width="0dp"
+                        android:layout_height="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/widget_activity_daily_bar"
+                        android:backgroundTint="#A2E0B5" />
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:text="2"
+                        android:textColor="#6B7280"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+                    <LinearLayout
+                        android:id="@+id/pm_dots_2"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="end|center_vertical">
+                        <View
+                            android:id="@+id/pm_dot_2_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/pm_dot_2_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 3点行 -->
+                <LinearLayout
+                    android:id="@+id/hour_row_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <View
+                        android:id="@+id/am_bar_3"
+                        android:layout_width="0dp"
+                        android:layout_height="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/widget_activity_daily_bar"
+                        android:backgroundTint="#A2E0B5" />
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:text="3"
+                        android:textColor="#6B7280"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+                    <LinearLayout
+                        android:id="@+id/pm_dots_3"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="end|center_vertical">
+                        <View
+                            android:id="@+id/pm_dot_3_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/pm_dot_3_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 4点行 -->
+                <LinearLayout
+                    android:id="@+id/hour_row_4"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <View
+                        android:id="@+id/am_bar_4"
+                        android:layout_width="0dp"
+                        android:layout_height="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/widget_activity_daily_bar"
+                        android:backgroundTint="#A2E0B5" />
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:text="4"
+                        android:textColor="#6B7280"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+                    <LinearLayout
+                        android:id="@+id/pm_dots_4"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="end|center_vertical">
+                        <View
+                            android:id="@+id/pm_dot_4_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/pm_dot_4_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 5点行 -->
+                <LinearLayout
+                    android:id="@+id/hour_row_5"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <View
+                        android:id="@+id/am_bar_5"
+                        android:layout_width="0dp"
+                        android:layout_height="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/widget_activity_daily_bar"
+                        android:backgroundTint="#A2E0B5" />
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:text="5"
+                        android:textColor="#6B7280"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+                    <LinearLayout
+                        android:id="@+id/pm_dots_5"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="end|center_vertical">
+                        <View
+                            android:id="@+id/pm_dot_5_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/pm_dot_5_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 6点行 -->
+                <LinearLayout
+                    android:id="@+id/hour_row_6"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <View
+                        android:id="@+id/am_bar_6"
+                        android:layout_width="0dp"
+                        android:layout_height="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/widget_activity_daily_bar"
+                        android:backgroundTint="#A2E0B5" />
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:text="6"
+                        android:textColor="#6B7280"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+                    <LinearLayout
+                        android:id="@+id/pm_dots_6"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="end|center_vertical">
+                        <View
+                            android:id="@+id/pm_dot_6_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/pm_dot_6_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 7点行 -->
+                <LinearLayout
+                    android:id="@+id/hour_row_7"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <View
+                        android:id="@+id/am_bar_7"
+                        android:layout_width="0dp"
+                        android:layout_height="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/widget_activity_daily_bar"
+                        android:backgroundTint="#A2E0B5" />
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:text="7"
+                        android:textColor="#6B7280"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+                    <LinearLayout
+                        android:id="@+id/pm_dots_7"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="end|center_vertical">
+                        <View
+                            android:id="@+id/pm_dot_7_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/pm_dot_7_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 8点行 -->
+                <LinearLayout
+                    android:id="@+id/hour_row_8"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <LinearLayout
+                        android:id="@+id/am_dots_8"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="start|center_vertical">
+                        <View
+                            android:id="@+id/am_dot_8_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginEnd="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:backgroundTint="#E5E7EB"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/am_dot_8_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginEnd="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:backgroundTint="#A2E0B5"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:text="8"
+                        android:textColor="#6B7280"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+                    <LinearLayout
+                        android:id="@+id/pm_dots_8"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="end|center_vertical">
+                        <View
+                            android:id="@+id/pm_dot_8_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/pm_dot_8_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 9点行 -->
+                <LinearLayout
+                    android:id="@+id/hour_row_9"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <View
+                        android:id="@+id/am_bar_9"
+                        android:layout_width="0dp"
+                        android:layout_height="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/widget_activity_daily_bar"
+                        android:backgroundTint="#FDD8D8" />
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:text="9"
+                        android:textColor="#6B7280"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+                    <LinearLayout
+                        android:id="@+id/pm_dots_9"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="end|center_vertical">
+                        <View
+                            android:id="@+id/pm_dot_9_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/pm_dot_9_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 10点行 -->
+                <LinearLayout
+                    android:id="@+id/hour_row_10"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <View
+                        android:id="@+id/am_bar_10"
+                        android:layout_width="0dp"
+                        android:layout_height="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/widget_activity_daily_bar"
+                        android:backgroundTint="#FED7AA" />
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:text="10"
+                        android:textColor="#6B7280"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+                    <LinearLayout
+                        android:id="@+id/pm_dots_10"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="end|center_vertical">
+                        <View
+                            android:id="@+id/pm_dot_10_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/pm_dot_10_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 11点行 -->
+                <LinearLayout
+                    android:id="@+id/hour_row_11"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <View
+                        android:id="@+id/am_bar_11"
+                        android:layout_width="0dp"
+                        android:layout_height="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/widget_activity_daily_bar"
+                        android:backgroundTint="#E5E7EB" />
+                    <TextView
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:text="11"
+                        android:textColor="#6B7280"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+                    <LinearLayout
+                        android:id="@+id/pm_dots_11"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="end|center_vertical">
+                        <View
+                            android:id="@+id/pm_dot_11_1"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                        <View
+                            android:id="@+id/pm_dot_11_2"
+                            android:layout_width="6dp"
+                            android:layout_height="6dp"
+                            android:layout_marginStart="2dp"
+                            android:background="@drawable/widget_activity_daily_dot"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 底部刻度 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="2dp">
+
+                <!-- 上午刻度 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textColor="#9CA3AF"
+                        android:textSize="7sp"
+                        android:gravity="start" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="20"
+                        android:textColor="#9CA3AF"
+                        android:textSize="7sp"
+                        android:gravity="center" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="40"
+                        android:textColor="#9CA3AF"
+                        android:textSize="7sp"
+                        android:gravity="center" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="60"
+                        android:textColor="#9CA3AF"
+                        android:textSize="7sp"
+                        android:gravity="end" />
+                </LinearLayout>
+
+                <!-- 中间间隔 -->
+                <View
+                    android:layout_width="20dp"
+                    android:layout_height="1dp" />
+
+                <!-- 下午刻度 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textColor="#9CA3AF"
+                        android:textSize="7sp"
+                        android:gravity="start" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="20"
+                        android:textColor="#9CA3AF"
+                        android:textSize="7sp"
+                        android:gravity="center" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="40"
+                        android:textColor="#9CA3AF"
+                        android:textSize="7sp"
+                        android:gravity="center" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="60"
+                        android:textColor="#9CA3AF"
+                        android:textSize="7sp"
+                        android:gravity="end" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 底部统计区域 -->
+            <LinearLayout
+                android:id="@+id/stats_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="8dp">
+
+                <!-- 统计行1: 睡眠 -->
+                <LinearLayout
+                    android:id="@+id/stat_row_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp">
+                    <View
+                        android:id="@+id/stat_dot_1"
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/widget_activity_daily_stat_dot"
+                        android:backgroundTint="#A2E0B5" />
+                    <TextView
+                        android:id="@+id/stat_name_1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:text="睡眠"
+                        android:textColor="#6B7280"
+                        android:textSize="10sp" />
+                    <TextView
+                        android:id="@+id/stat_duration_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="8.3h"
+                        android:textColor="#1F2937"
+                        android:textSize="10sp"
+                        android:fontFamily="sans-serif-medium" />
+                </LinearLayout>
+
+                <!-- 统计行2: 工作 -->
+                <LinearLayout
+                    android:id="@+id/stat_row_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp">
+                    <View
+                        android:id="@+id/stat_dot_2"
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/widget_activity_daily_stat_dot"
+                        android:backgroundTint="#FDD8D8" />
+                    <TextView
+                        android:id="@+id/stat_name_2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:text="工作"
+                        android:textColor="#6B7280"
+                        android:textSize="10sp" />
+                    <TextView
+                        android:id="@+id/stat_duration_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="6.2h"
+                        android:textColor="#1F2937"
+                        android:textSize="10sp"
+                        android:fontFamily="sans-serif-medium" />
+                </LinearLayout>
+
+                <!-- 统计行3: 娱乐 -->
+                <LinearLayout
+                    android:id="@+id/stat_row_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp">
+                    <View
+                        android:id="@+id/stat_dot_3"
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/widget_activity_daily_stat_dot"
+                        android:backgroundTint="#FCD34D" />
+                    <TextView
+                        android:id="@+id/stat_name_3"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:text="娱乐"
+                        android:textColor="#6B7280"
+                        android:textSize="10sp" />
+                    <TextView
+                        android:id="@+id/stat_duration_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1.8h"
+                        android:textColor="#1F2937"
+                        android:textSize="10sp"
+                        android:fontFamily="sans-serif-medium" />
+                </LinearLayout>
+
+                <!-- 统计行4: 空白 -->
+                <LinearLayout
+                    android:id="@+id/stat_row_4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp">
+                    <View
+                        android:id="@+id/stat_dot_4"
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/widget_activity_daily_stat_dot"
+                        android:backgroundTint="#E5E7EB" />
+                    <TextView
+                        android:id="@+id/stat_name_4"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:text="空白"
+                        android:textColor="#6B7280"
+                        android:textSize="10sp" />
+                    <TextView
+                        android:id="@+id/stat_duration_4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="4h"
+                        android:textColor="#1F2937"
+                        android:textSize="10sp"
+                        android:fontFamily="sans-serif-medium" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 分隔线 -->
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="#E5E7EB" />
+
+        <!-- ========== 右侧：日期导航 + 圆环进度图 + 活动列表（60%宽度） ========== -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.6"
+            android:orientation="vertical"
+            android:paddingStart="8dp">
+
+            <!-- 日期导航栏 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="4dp">
+
+                <!-- 上一日按钮 -->
+                <ImageView
+                    android:id="@+id/btn_prev_day"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/ic_media_previous"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="上一日"
+                    android:alpha="0.5" />
+
+                <!-- 日期标题 -->
+                <TextView
+                    android:id="@+id/date_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="5月28日"
+                    android:textColor="#1F2937"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- 下一日按钮 -->
+                <ImageView
+                    android:id="@+id/btn_next_day"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/ic_media_next"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="下一日"
+                    android:alpha="0.5" />
+            </LinearLayout>
+
+            <!-- 圆环进度图区域 -->
+            <FrameLayout
+                android:id="@+id/progress_ring_container"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.45"
+                android:gravity="center">
+
+                <!-- 圆环进度图（使用ImageView，由Provider动态渲染） -->
+                <ImageView
+                    android:id="@+id/progress_ring"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:scaleType="centerInside"
+                    android:contentDescription="进度环" />
+
+                <!-- 中心百分比文本 -->
+                <TextView
+                    android:id="@+id/progress_percent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="83%"
+                    android:textColor="#1F2937"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+
+            <!-- 活动列表 -->
+            <ListView
+                android:id="@+id/activity_list"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.55"
+                android:divider="@null"
+                android:dividerHeight="0dp"
+                android:scrollbars="none"
+                android:paddingTop="4dp" />
+
+            <!-- 空列表提示 -->
+            <TextView
+                android:id="@+id/empty_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.55"
+                android:gravity="center"
+                android:text="今日暂无活动"
+                android:textColor="#9CA3AF"
+                android:textSize="12sp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

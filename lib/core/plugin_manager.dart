@@ -242,13 +242,7 @@ class PluginManager {
     _lastOpenedPluginId = plugin.id; // 记录最后打开的插件ID
     _saveLastOpenedPlugin(); // 保存最后打开的插件ID
     _updatePluginAccessTime(plugin.id);
-
-    // 清除历史路由记录，只保留根路由(BUG: 会导致ios无法返回到主界面)
-    // Navigator.pushNamedAndRemoveUntil(
-    //   context,
-    //   '/${plugin.id}',
-    //   (route) => route.isFirst,
-    // );
+    Navigator.pushNamed(context, '/${plugin.id}');
   }
 
   static toHomeScreen(BuildContext context) {
