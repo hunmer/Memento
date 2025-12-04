@@ -286,6 +286,9 @@ class _ActivityWeeklyConfigScreenState
 
       await _syncDataToWidget(config, weekData);
 
+      // 将 widgetId 添加到已配置列表中
+      await _registerWidgetId(widget.widgetId);
+
       debugPrint('ActivityWeeklyConfig: 数据已保存，准备调用 updateWidget');
 
       // 添加短暂延迟确保数据已写入 SharedPreferences
@@ -333,5 +336,38 @@ class _ActivityWeeklyConfigScreenState
       'activity_weekly_data_${widget.widgetId}',
       jsonEncode(widgetData),
     );
+  }
+
+  /// 注册小组件ID到已配置列表
+  Future<void> _registerWidgetId(int widgetId) async {
+    // 获取现有列表
+    final existingIdsJson = await HomeWidget.getWidgetData<String>(
+      'activity_weekly_widget_ids',
+    );
+
+    List<int> widgetIds = [];
+    if (existingIdsJson != null && existingIdsJson.isNotEmpty) {
+      try {
+        widgetIds = List<int>.from(jsonDecode(existingIdsJson) as List);
+      } catch (e) {
+        debugPrint('Failed to parse existing widget IDs, creating new list: $e');
+      }
+    }
+
+    // 添加新 widgetId（如果不存在）
+    if (!widgetIds.contains(widgetId)) {
+      widgetIds.add(widgetId);
+      debugPrint('ActivityWeeklyConfig: Registered widgetId $widgetId (total: ${widgetIds.length})');
+    } else {
+      debugPrint('ActivityWeeklyConfig: widgetId $widgetId already registered');
+    }
+
+    // 保存更新后的列表
+    await HomeWidget.saveWidgetData<String>(
+      'activity_weekly_widget_ids',
+      jsonEncode(widgetIds),
+    );
+
+    debugPrint('ActivityWeeklyConfig: Saved widget IDs list: $widgetIds');
   }
 }

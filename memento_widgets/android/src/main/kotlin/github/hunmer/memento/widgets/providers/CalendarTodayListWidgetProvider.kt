@@ -10,7 +10,7 @@ import android.net.Uri
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
-import com.example.memento_widgets.R
+import github.hunmer.memento_widgets.R
 import github.hunmer.memento.widgets.BasePluginWidgetProvider
 import org.json.JSONArray
 import org.json.JSONObject

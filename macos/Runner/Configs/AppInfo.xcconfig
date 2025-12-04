@@ -8,7 +8,7 @@
 PRODUCT_NAME = Memento
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.flutterApplication1
+PRODUCT_BUNDLE_IDENTIFIER = github.hunmer.memento
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 github.hunmer. All rights reserved.

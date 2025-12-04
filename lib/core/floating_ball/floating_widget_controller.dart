@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:memento_foreground_service/memento_foreground_service.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';

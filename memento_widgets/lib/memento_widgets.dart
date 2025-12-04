@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:home_widget/home_widget.dart';
 import 'package:flutter/material.dart';
@@ -27,62 +26,112 @@ class MyWidgetManager {
   /// 格式: '简单类名' -> '完整包名'
   static const Map<String, String> _androidProviders = {
     // 示例小组件
-    'TextWidgetProvider': 'com.example.memento_widgets.TextWidgetProvider',
-    'ImageWidgetProvider': 'com.example.memento_widgets.ImageWidgetProvider',
+    'TextWidgetProvider': 'github.hunmer.memento_widgets.TextWidgetProvider',
+    'ImageWidgetProvider': 'github.hunmer.memento_widgets.ImageWidgetProvider',
 
     // 插件小组件 - 1x1 尺寸
-    'TodoWidgetProvider': 'github.hunmer.memento.widgets.providers.TodoWidgetProvider',
-    'TimerWidgetProvider': 'github.hunmer.memento.widgets.providers.TimerWidgetProvider',
-    'BillWidgetProvider': 'github.hunmer.memento.widgets.providers.BillWidgetProvider',
-    'CalendarWidgetProvider': 'github.hunmer.memento.widgets.providers.CalendarWidgetProvider',
-    'ActivityWidgetProvider': 'github.hunmer.memento.widgets.providers.ActivityWidgetProvider',
-    'TrackerWidgetProvider': 'github.hunmer.memento.widgets.providers.TrackerWidgetProvider',
-    'HabitsWidgetProvider': 'github.hunmer.memento.widgets.providers.HabitsWidgetProvider',
-    'DiaryWidgetProvider': 'github.hunmer.memento.widgets.providers.DiaryWidgetProvider',
-    'CheckinWidgetProvider': 'github.hunmer.memento.widgets.providers.CheckinWidgetProvider',
-    'NodesWidgetProvider': 'github.hunmer.memento.widgets.providers.NodesWidgetProvider',
-    'DatabaseWidgetProvider': 'github.hunmer.memento.widgets.providers.DatabaseWidgetProvider',
-    'ContactWidgetProvider': 'github.hunmer.memento.widgets.providers.ContactWidgetProvider',
-    'DayWidgetProvider': 'github.hunmer.memento.widgets.providers.DayWidgetProvider',
-    'GoodsWidgetProvider': 'github.hunmer.memento.widgets.providers.GoodsWidgetProvider',
-    'NotesWidgetProvider': 'github.hunmer.memento.widgets.providers.NotesWidgetProvider',
-    'StoreWidgetProvider': 'github.hunmer.memento.widgets.providers.StoreWidgetProvider',
-    'OpenaiWidgetProvider': 'github.hunmer.memento.widgets.providers.OpenaiWidgetProvider',
-    'AgentChatWidgetProvider': 'github.hunmer.memento.widgets.providers.AgentChatWidgetProvider',
-    'CalendarAlbumWidgetProvider': 'github.hunmer.memento.widgets.providers.CalendarAlbumWidgetProvider',
-    'ChatWidgetProvider': 'github.hunmer.memento.widgets.providers.ChatWidgetProvider',
+    'TodoWidgetProvider':
+        'github.hunmer.memento.widgets.providers.TodoWidgetProvider',
+    'TimerWidgetProvider':
+        'github.hunmer.memento.widgets.providers.TimerWidgetProvider',
+    'BillWidgetProvider':
+        'github.hunmer.memento.widgets.providers.BillWidgetProvider',
+    'CalendarWidgetProvider':
+        'github.hunmer.memento.widgets.providers.CalendarWidgetProvider',
+    'ActivityWidgetProvider':
+        'github.hunmer.memento.widgets.providers.ActivityWidgetProvider',
+    'TrackerWidgetProvider':
+        'github.hunmer.memento.widgets.providers.TrackerWidgetProvider',
+    'HabitsWidgetProvider':
+        'github.hunmer.memento.widgets.providers.HabitsWidgetProvider',
+    'DiaryWidgetProvider':
+        'github.hunmer.memento.widgets.providers.DiaryWidgetProvider',
+    'CheckinWidgetProvider':
+        'github.hunmer.memento.widgets.providers.CheckinWidgetProvider',
+    'NodesWidgetProvider':
+        'github.hunmer.memento.widgets.providers.NodesWidgetProvider',
+    'DatabaseWidgetProvider':
+        'github.hunmer.memento.widgets.providers.DatabaseWidgetProvider',
+    'ContactWidgetProvider':
+        'github.hunmer.memento.widgets.providers.ContactWidgetProvider',
+    'DayWidgetProvider':
+        'github.hunmer.memento.widgets.providers.DayWidgetProvider',
+    'GoodsWidgetProvider':
+        'github.hunmer.memento.widgets.providers.GoodsWidgetProvider',
+    'NotesWidgetProvider':
+        'github.hunmer.memento.widgets.providers.NotesWidgetProvider',
+    'StoreWidgetProvider':
+        'github.hunmer.memento.widgets.providers.StoreWidgetProvider',
+    'OpenaiWidgetProvider':
+        'github.hunmer.memento.widgets.providers.OpenaiWidgetProvider',
+    'AgentChatWidgetProvider':
+        'github.hunmer.memento.widgets.providers.AgentChatWidgetProvider',
+    'CalendarAlbumWidgetProvider':
+        'github.hunmer.memento.widgets.providers.CalendarAlbumWidgetProvider',
+    'ChatWidgetProvider':
+        'github.hunmer.memento.widgets.providers.ChatWidgetProvider',
 
     // 插件小组件 - 2x2 尺寸
-    'TodoWidget2x1Provider': 'github.hunmer.memento.widgets.providers.TodoWidget2x1Provider',
-    'TimerWidget2x1Provider': 'github.hunmer.memento.widgets.providers.TimerWidget2x1Provider',
-    'BillWidget2x1Provider': 'github.hunmer.memento.widgets.providers.BillWidget2x1Provider',
-    'CalendarWidget2x1Provider': 'github.hunmer.memento.widgets.providers.CalendarWidget2x1Provider',
-    'ActivityWidget2x1Provider': 'github.hunmer.memento.widgets.providers.ActivityWidget2x1Provider',
-    'TrackerWidget2x1Provider': 'github.hunmer.memento.widgets.providers.TrackerWidget2x1Provider',
-    'HabitsWidget2x1Provider': 'github.hunmer.memento.widgets.providers.HabitsWidget2x1Provider',
-    'DiaryWidget2x1Provider': 'github.hunmer.memento.widgets.providers.DiaryWidget2x1Provider',
-    'CheckinWidget2x1Provider': 'github.hunmer.memento.widgets.providers.CheckinWidget2x1Provider',
-    'NodesWidget2x1Provider': 'github.hunmer.memento.widgets.providers.NodesWidget2x1Provider',
-    'DatabaseWidget2x1Provider': 'github.hunmer.memento.widgets.providers.DatabaseWidget2x1Provider',
-    'ContactWidget2x1Provider': 'github.hunmer.memento.widgets.providers.ContactWidget2x1Provider',
-    'DayWidget2x1Provider': 'github.hunmer.memento.widgets.providers.DayWidget2x1Provider',
-    'GoodsWidget2x1Provider': 'github.hunmer.memento.widgets.providers.GoodsWidget2x1Provider',
-    'NotesWidget2x1Provider': 'github.hunmer.memento.widgets.providers.NotesWidget2x1Provider',
-    'StoreWidget2x1Provider': 'github.hunmer.memento.widgets.providers.StoreWidget2x1Provider',
-    'OpenaiWidget2x1Provider': 'github.hunmer.memento.widgets.providers.OpenaiWidget2x1Provider',
-    'AgentChatWidget2x1Provider': 'github.hunmer.memento.widgets.providers.AgentChatWidget2x1Provider',
-    'CalendarAlbumWidget2x1Provider': 'github.hunmer.memento.widgets.providers.CalendarAlbumWidget2x1Provider',
-    'ChatWidget2x1Provider': 'github.hunmer.memento.widgets.providers.ChatWidget2x1Provider',
-    'CheckinItemWidgetProvider': 'github.hunmer.memento.widgets.providers.CheckinItemWidgetProvider',
-    'CheckinMonthWidgetProvider': 'github.hunmer.memento.widgets.providers.CheckinMonthWidgetProvider',
-    'TodoListWidgetProvider': 'github.hunmer.memento.widgets.providers.TodoListWidgetProvider',
-    'CheckinWeeklyListWidgetProvider': 'github.hunmer.memento.widgets.providers.CheckinWeeklyListWidgetProvider',
-    'TrackerGoalWidgetProvider': 'github.hunmer.memento.widgets.providers.TrackerGoalWidgetProvider',
-    'HabitTimerWidgetProvider': 'github.hunmer.memento.widgets.providers.HabitTimerWidgetProvider',
+    'TodoWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.TodoWidget2x1Provider',
+    'TimerWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.TimerWidget2x1Provider',
+    'BillWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.BillWidget2x1Provider',
+    'CalendarWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.CalendarWidget2x1Provider',
+    'ActivityWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.ActivityWidget2x1Provider',
+    'TrackerWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.TrackerWidget2x1Provider',
+    'HabitsWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.HabitsWidget2x1Provider',
+    'DiaryWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.DiaryWidget2x1Provider',
+    'CheckinWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.CheckinWidget2x1Provider',
+    'NodesWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.NodesWidget2x1Provider',
+    'DatabaseWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.DatabaseWidget2x1Provider',
+    'ContactWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.ContactWidget2x1Provider',
+    'DayWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.DayWidget2x1Provider',
+    'GoodsWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.GoodsWidget2x1Provider',
+    'NotesWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.NotesWidget2x1Provider',
+    'StoreWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.StoreWidget2x1Provider',
+    'OpenaiWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.OpenaiWidget2x1Provider',
+    'AgentChatWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.AgentChatWidget2x1Provider',
+    'CalendarAlbumWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.CalendarAlbumWidget2x1Provider',
+    'ChatWidget2x1Provider':
+        'github.hunmer.memento.widgets.providers.ChatWidget2x1Provider',
+    'CheckinItemWidgetProvider':
+        'github.hunmer.memento.widgets.providers.CheckinItemWidgetProvider',
+    'CheckinMonthWidgetProvider':
+        'github.hunmer.memento.widgets.providers.CheckinMonthWidgetProvider',
+    'TodoListWidgetProvider':
+        'github.hunmer.memento.widgets.providers.TodoListWidgetProvider',
+    'CheckinWeeklyListWidgetProvider':
+        'github.hunmer.memento.widgets.providers.CheckinWeeklyListWidgetProvider',
+    'TrackerGoalWidgetProvider':
+        'github.hunmer.memento.widgets.providers.TrackerGoalWidgetProvider',
+    'HabitTimerWidgetProvider':
+        'github.hunmer.memento.widgets.providers.HabitTimerWidgetProvider',
+    'HabitsWeeklyWidgetProvider':
+        'github.hunmer.memento.widgets.providers.HabitsWeeklyWidgetProvider',
 
     // 快速小组件
-    'ChatQuickWidgetProvider': 'github.hunmer.memento.widgets.quick.ChatQuickWidgetProvider',
-    'AgentVoiceWidgetProvider': 'github.hunmer.memento.widgets.quick.AgentVoiceWidgetProvider',
+    'ChatQuickWidgetProvider':
+        'github.hunmer.memento.widgets.quick.ChatQuickWidgetProvider',
+    'AgentVoiceWidgetProvider':
+        'github.hunmer.memento.widgets.quick.AgentVoiceWidgetProvider',
   };
 
   /// 获取单例实例
@@ -158,15 +207,17 @@ class MyWidgetManager {
       final targets = widgetName == null
           ? ['TextWidgetProvider', 'ImageWidgetProvider']
           : [widgetName];
-      final results = await Future.wait(targets.map((name) {
-        final qualifiedAndroidName = _androidProviders[name];
-        return HomeWidget.updateWidget(
-          name: name,
-          iOSName: name,
-          androidName: qualifiedAndroidName == null ? name : null,
-          qualifiedAndroidName: qualifiedAndroidName,
-        );
-      }));
+      final results = await Future.wait(
+        targets.map((name) {
+          final qualifiedAndroidName = _androidProviders[name];
+          return HomeWidget.updateWidget(
+            name: name,
+            iOSName: name,
+            androidName: qualifiedAndroidName == null ? name : null,
+            qualifiedAndroidName: qualifiedAndroidName,
+          );
+        }),
+      );
       return results.every((result) => result == true);
     } catch (e) {
       debugPrint('???????: $e');
@@ -268,6 +319,9 @@ class MyWidgetManager {
     }
     if (pluginId == 'habit_timer') {
       return ['HabitTimerWidgetProvider'];
+    }
+    if (pluginId == 'habits_weekly') {
+      return ['HabitsWeeklyWidgetProvider'];
     }
     const provider1x1Map = {
       'todo': 'TodoWidgetProvider',
@@ -380,4 +434,3 @@ class MyWidgetManager {
     ];
   }
 }
-

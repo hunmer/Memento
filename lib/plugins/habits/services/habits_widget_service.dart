@@ -86,20 +86,31 @@ class HabitsWidgetService {
       final recordController = plugin.getRecordController();
       final records = await recordController.getHabitCompletionRecords(habitId);
 
+      debugPrint('习惯 $habitId 的完成记录数: ${records.length}');
+      debugPrint('周起始日期: $weekStart');
+
       // 遍历7天
       for (int dayIndex = 0; dayIndex < 7; dayIndex++) {
         final dayStart = weekStart.add(Duration(days: dayIndex));
         final dayEnd = dayStart.add(const Duration(days: 1));
 
         // 筛选当天的记录并聚合时长
-        int totalMinutes = 0;
+        // 使用 !isBefore 代替 isAfter 来包含边界情况 (>=)
+        // 先用秒聚合，避免短时间记录被截断为 0
+        var totalSeconds = 0;
         for (final record in records) {
-          if (record.date.isAfter(dayStart) && record.date.isBefore(dayEnd)) {
-            totalMinutes = totalMinutes + (record.duration.inMinutes as int);
+          if (!record.date.isBefore(dayStart) && record.date.isBefore(dayEnd)) {
+            totalSeconds = (totalSeconds + record.duration.inSeconds).toInt();
+            debugPrint('找到记录: date=${record.date}, duration=${record.duration.inSeconds}秒, dayIndex=$dayIndex');
           }
         }
 
+        // 转换为分钟，向上取整（至少显示 1 分钟）
+        final totalMinutes = totalSeconds > 0 ? ((totalSeconds + 59) ~/ 60) : 0;
         dailyMinutes[dayIndex] = totalMinutes;
+        if (totalMinutes > 0) {
+          debugPrint('第$dayIndex天 ($dayStart - $dayEnd) 总时长: $totalSeconds秒 = $totalMinutes 分钟');
+        }
       }
     } catch (e) {
       debugPrint('计算习惯 $habitId 每日时长失败: $e');

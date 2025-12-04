@@ -122,6 +122,9 @@ class ActivityService {
           final filePath = _getActivityFilePath(date);
           final jsonList = activities.map((e) => e.toJson()).toList();
           await _storage.writeJson(filePath, jsonList);
+
+          // 同步到小组件
+          await _syncWidget();
         }
       }
     } catch (e) {
@@ -272,7 +275,11 @@ class ActivityService {
   // 同步小组件数据
   Future<void> _syncWidget() async {
     try {
+      // 同步基础活动小组件
       await PluginWidgetSyncHelper.instance.syncActivity();
+
+      // 同步活动周视图小组件
+      await PluginWidgetSyncHelper.instance.syncActivityWeeklyWidget();
     } catch (e) {
       // 静默处理小组件同步错误，不影响主要功能
       debugPrint('Failed to sync activity widget: $e');

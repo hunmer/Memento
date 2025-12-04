@@ -1,33 +1,29 @@
-import 'dart:math';
-
 /// 热力图数据模型
 ///
-/// 存储7天×24小时的活动密度数据
+/// 存储24小时×7天的活动颜色数据
+/// heatmap[hour][day] = 活动颜色值（0 表示无活动）
 class ActivityHeatmapData {
-  final List<List<int>> heatmap; // [day][hour] = 活动次数
+  final List<List<int>> heatmap; // [hour][day] = 颜色值
 
   ActivityHeatmapData({required this.heatmap});
 
-  /// 获取最大活动次数（用于归一化强度）
-  int get maxCount {
-    if (heatmap.isEmpty) return 0;
-    return heatmap
-        .expand((dayData) => dayData)
-        .reduce((a, b) => max(a, b));
+  /// 检查是否有活动数据
+  bool get hasData {
+    return heatmap.any((hourData) => hourData.any((color) => color != 0));
   }
 
-  /// 获取指定日期和小时的活动次数
-  int getCount(int day, int hour) {
-    if (day < 0 || day >= heatmap.length) return 0;
+  /// 获取指定日期和小时的活动颜色
+  /// 返回 0 表示该时间段无活动
+  int getColor(int day, int hour) {
     if (hour < 0 || hour >= 24) return 0;
-    return heatmap[day][hour];
+    if (day < 0 || day >= 7) return 0;
+    return heatmap[hour][day];
   }
 
   /// 序列化为JSON
   Map<String, dynamic> toJson() {
     return {
       'heatmap': heatmap,
-      'maxCount': maxCount,
     };
   }
 
@@ -49,11 +45,13 @@ class WeeklyTagItem {
   final String tagName;
   final Duration totalDuration;
   final int activityCount;
+  final int color; // 标签颜色值（ARGB格式）
 
   WeeklyTagItem({
     required this.tagName,
     required this.totalDuration,
     required this.activityCount,
+    required this.color,
   });
 
   /// 格式化时长显示（如: "2時30分"）
@@ -69,6 +67,7 @@ class WeeklyTagItem {
       'name': tagName,
       'duration': totalDuration.inSeconds,
       'count': activityCount,
+      'color': color,
     };
   }
 
@@ -78,6 +77,7 @@ class WeeklyTagItem {
       tagName: json['name'] as String,
       totalDuration: Duration(seconds: json['duration'] as int),
       activityCount: json['count'] as int,
+      color: json['color'] as int? ?? 0xFF607afb,
     );
   }
 }
@@ -119,6 +119,7 @@ class ActivityWeeklyData {
       'weekNumber': weekNumber,
       'weekStart': weekStart.toIso8601String(),
       'weekEnd': weekEnd.toIso8601String(),
+      'weekRangeText': weekRangeText, // Android 小组件需要此字段
       'heatmap': heatmap.toJson(),
       'topTags': topTags.map((tag) => tag.toJson()).toList(),
     };
@@ -151,7 +152,7 @@ class ActivityWeeklyData {
       weekStart: weekStart,
       weekEnd: weekEnd,
       heatmap: ActivityHeatmapData(
-        heatmap: List.generate(7, (_) => List.filled(24, 0)),
+        heatmap: List.generate(24, (_) => List.filled(7, 0)),
       ),
       topTags: [],
     );

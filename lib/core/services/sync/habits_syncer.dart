@@ -235,6 +235,9 @@ class HabitsSyncer extends PluginWidgetSyncer {
         }
       }
 
+      // 通知系统刷新所有习惯周视图小组件
+      await SystemWidgetService.instance.updateWidget('habits_weekly');
+
       debugPrint('Synced ${widgetIds.length} habits weekly widgets');
     } catch (e) {
       debugPrint('Failed to sync habits weekly widgets: $e');
@@ -284,6 +287,15 @@ class HabitsSyncer extends PluginWidgetSyncer {
       try {
         final widgetData = jsonDecode(widgetDataJson) as Map<String, dynamic>;
         widgetData['data'] = weekData.toMap();
+
+        // 打印详细的周数据用于调试
+        debugPrint('=== 习惯周视图数据 (widgetId=$widgetId) ===');
+        debugPrint('年: ${weekData.year}, 周: ${weekData.week}');
+        debugPrint('周起止: ${weekData.weekStart} - ${weekData.weekEnd}');
+        for (final item in weekData.habitItems) {
+          debugPrint('习惯: ${item.habitTitle}, dailyMinutes: ${item.dailyMinutes}');
+        }
+        debugPrint('===========================================');
 
         final jsonStr = jsonEncode(widgetData);
 

@@ -15,7 +15,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.example.memento_widgets.R
+import github.hunmer.memento_widgets.R
 import github.hunmer.memento.widgets.providers.HabitTimerWidgetProvider
 import org.json.JSONObject
 

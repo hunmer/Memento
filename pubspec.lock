@@ -98,7 +98,7 @@ packages:
     source: hosted
     version: "4.2.1"
   awesome_notifications:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: awesome_notifications
       sha256: "0d5fa4457f2ba4e536adc3ef6af709cdcecf4a05a1f3035981e9afa2f899b2a8"
@@ -431,7 +431,7 @@ packages:
     source: hosted
     version: "1.3.0"
   flutter_foreground_task:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_foreground_task
       sha256: "9f1b25a81db95d7119d2c5cffc654048cbdd49d4056183e1beadc1a6a38f3e29"
@@ -958,6 +958,20 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.3"
+  memento_foreground_service:
+    dependency: "direct main"
+    description:
+      path: "plugins/memento_foreground_service"
+      relative: true
+    source: path
+    version: "1.0.0"
+  memento_notifications:
+    dependency: "direct main"
+    description:
+      path: "plugins/memento_notifications"
+      relative: true
+    source: path
+    version: "1.0.0"
   memento_widgets:
     dependency: "direct main"
     description:

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
@@ -27,6 +29,7 @@ import '../../plugins/calendar_album/home_widgets.dart';
 import '../../screens/home_screen/managers/home_layout_manager.dart';
 import '../../screens/route.dart';
 import '../../plugins/tracker/tracker_plugin.dart';
+import '../../core/services/plugin_widget_sync_helper.dart';
 import 'package:memento_widgets/memento_widgets.dart';
 import '../app_initializer.dart';
 
@@ -106,7 +109,168 @@ Future<void> setupWidgetClickListener() async {
     }
   });
 
+  // 注册 Android 广播监听器（用于接收小组件广播事件）
+  if (UniversalPlatform.isAndroid) {
+    await _registerBroadcastReceiver();
+  }
+
   debugPrint('桌面小组件点击监听器已设置');
+}
+
+/// 注册 Android 广播监听器
+Future<void> _registerBroadcastReceiver() async {
+  const platform = MethodChannel('github.hunmer.memento/widget_broadcast');
+
+  try {
+    await platform.invokeMethod('registerBroadcastReceiver', <String, dynamic>{
+      'actions': [
+        'github.hunmer.memento.REFRESH_ACTIVITY_WEEKLY_WIDGET',
+        'github.hunmer.memento.REFRESH_HABITS_WEEKLY_WIDGET',
+        'github.hunmer.memento.REFRESH_CHECKIN_WEEKLY_WIDGET',
+        'github.hunmer.memento.CLEANUP_WIDGET_IDS',
+      ],
+    });
+
+    // 监听广播事件
+    platform.setMethodCallHandler((call) async {
+      if (call.method == 'onBroadcastReceived') {
+        final action = call.arguments['action'] as String;
+        final data = call.arguments['data'] as Map?;
+
+        debugPrint('收到小组件广播: $action, 数据: $data');
+
+        try {
+          // 处理活动周视图小组件刷新
+          if (action ==
+              'github.hunmer.memento.REFRESH_ACTIVITY_WEEKLY_WIDGET') {
+            final widgetId = data?['widgetId'] as int?;
+            final weekOffset = data?['weekOffset'] as int?;
+
+            debugPrint(
+              '活动周视图小组件刷新请求: widgetId=$widgetId, weekOffset=$weekOffset',
+            );
+
+            if (widgetId != null && weekOffset != null) {
+              // 更新 SharedPreferences 中的 weekOffset
+              final widgetDataJson = await HomeWidget.getWidgetData<String>(
+                'activity_weekly_data_$widgetId',
+              );
+
+              if (widgetDataJson != null && widgetDataJson.isNotEmpty) {
+                final widgetData =
+                    jsonDecode(widgetDataJson) as Map<String, dynamic>;
+                final configJson =
+                    widgetData['config'] as Map<String, dynamic>?;
+
+                if (configJson != null) {
+                  configJson['currentWeekOffset'] = weekOffset;
+                  widgetData['config'] = configJson;
+
+                  // 保存更新后的配置
+                  await HomeWidget.saveWidgetData<String>(
+                    'activity_weekly_data_$widgetId',
+                    jsonEncode(widgetData),
+                  );
+
+                  debugPrint('已更新 weekOffset 为 $weekOffset');
+                }
+              }
+
+              // 同步数据
+              await PluginWidgetSyncHelper.instance.syncActivityWeeklyWidget();
+
+              // 通知 Android 小组件刷新
+              await HomeWidget.updateWidget(
+                name: 'ActivityWeeklyWidgetProvider',
+                iOSName: 'ActivityWeeklyWidget',
+                qualifiedAndroidName:
+                    'github.hunmer.memento.widgets.providers.ActivityWeeklyWidgetProvider',
+              );
+
+              debugPrint('活动周视图小组件刷新完成');
+            }
+          }
+          // 处理习惯周视图小组件刷新
+          else if (action ==
+              'github.hunmer.memento.REFRESH_HABITS_WEEKLY_WIDGET') {
+            debugPrint('习惯周视图小组件刷新请求');
+            await PluginWidgetSyncHelper.instance.syncHabitsWeeklyWidget();
+            await HomeWidget.updateWidget(
+              name: 'HabitsWeeklyWidgetProvider',
+              iOSName: 'HabitsWeeklyWidget',
+              qualifiedAndroidName:
+                  'github.hunmer.memento.widgets.providers.HabitsWeeklyWidgetProvider',
+            );
+          }
+          // 处理签到周视图小组件刷新
+          else if (action ==
+              'github.hunmer.memento.REFRESH_CHECKIN_WEEKLY_WIDGET') {
+            debugPrint('签到周视图小组件刷新请求');
+            await PluginWidgetSyncHelper.instance.syncCheckinWeeklyWidget();
+            await HomeWidget.updateWidget(
+              name: 'CheckinWeeklyWidgetProvider',
+              iOSName: 'CheckinWeeklyWidget',
+              qualifiedAndroidName:
+                  'github.hunmer.memento.widgets.providers.CheckinWeeklyWidgetProvider',
+            );
+          }
+          // 处理小组件清理请求（删除时）
+          else if (action == 'github.hunmer.memento.CLEANUP_WIDGET_IDS') {
+            final widgetType = data?['widgetType'] as String?;
+            final deletedWidgetIds = data?['deletedWidgetIds'] as List?;
+
+            debugPrint('小组件清理请求: widgetType=$widgetType, deletedWidgetIds=$deletedWidgetIds');
+
+            if (widgetType == 'activity_weekly' && deletedWidgetIds != null) {
+              await _cleanupWidgetIds('activity_weekly_widget_ids', deletedWidgetIds.cast<int>());
+            }
+          }
+        } catch (e) {
+          debugPrint('处理广播事件失败: $e');
+        }
+      }
+    });
+
+    debugPrint('Android 广播监听器注册成功');
+  } catch (e) {
+    debugPrint('注册 Android 广播监听器失败: $e');
+  }
+}
+
+/// 清理已删除的 widgetId
+Future<void> _cleanupWidgetIds(String listKey, List<int> deletedWidgetIds) async {
+  try {
+    final existingIdsJson = await HomeWidget.getWidgetData<String>(listKey);
+
+    if (existingIdsJson == null || existingIdsJson.isEmpty) {
+      debugPrint('Cleanup: No existing widget IDs found for $listKey');
+      return;
+    }
+
+    final widgetIds = List<int>.from(jsonDecode(existingIdsJson) as List);
+    final originalCount = widgetIds.length;
+
+    // 移除已删除的 widgetId
+    widgetIds.removeWhere((id) => deletedWidgetIds.contains(id));
+
+    final removedCount = originalCount - widgetIds.length;
+    debugPrint('Cleanup: Removed $removedCount widget IDs from $listKey (remaining: ${widgetIds.length})');
+
+    // 保存更新后的列表
+    if (widgetIds.isEmpty) {
+      // 如果列表为空，删除整个键
+      await HomeWidget.saveWidgetData<String>(listKey, '');
+    } else {
+      await HomeWidget.saveWidgetData<String>(
+        listKey,
+        jsonEncode(widgetIds),
+      );
+    }
+
+    debugPrint('Cleanup: Updated $listKey with remaining IDs: $widgetIds');
+  } catch (e) {
+    debugPrint('Cleanup failed for $listKey: $e');
+  }
 }
 
 /// 全局标志：标记应用是否从小组件启动
