@@ -83,6 +83,8 @@ PODS:
     - Flutter
   - memento_intent (0.0.1):
     - Flutter
+  - memento_nfc (0.0.1):
+    - Flutter
   - memento_notifications (0.0.1):
     - Flutter
   - memento_widgets (0.0.1):
@@ -135,6 +137,7 @@ DEPENDENCIES:
   - location (from `.symlinks/plugins/location/ios`)
   - memento_foreground_service (from `.symlinks/plugins/memento_foreground_service/ios`)
   - memento_intent (from `.symlinks/plugins/memento_intent/ios`)
+  - memento_nfc (from `.symlinks/plugins/memento_nfc/ios`)
   - memento_notifications (from `.symlinks/plugins/memento_notifications/ios`)
   - memento_widgets (from `.symlinks/plugins/memento_widgets/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
@@ -192,6 +195,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/memento_foreground_service/ios"
   memento_intent:
     :path: ".symlinks/plugins/memento_intent/ios"
+  memento_nfc:
+    :path: ".symlinks/plugins/memento_nfc/ios"
   memento_notifications:
     :path: ".symlinks/plugins/memento_notifications/ios"
   memento_widgets:
@@ -239,6 +244,7 @@ SPEC CHECKSUMS:
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
   memento_foreground_service: 49c7208564aae506f3ea4b2a347021816239a390
   memento_intent: c40e4f6a331a5d63e7b511999cce7c40e2df9283
+  memento_nfc: 849ca55969b39eea737521f70bfd1543c44d8512
   memento_notifications: f18360cb848156b0c152f4244eba9736da498ce0
   memento_widgets: 6e7654aca3fb3267bd1918c568395749fd0e10ce
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
