@@ -54,10 +54,16 @@ class AppStartupState extends ChangeNotifier {
   bool _fullyReady = false; // 所有初始化完成
   String _loadingMessage = '正在启动...';
 
+  // 待处理的初始URI（从小组件启动时）
+  Uri? _initialWidgetUri;
+  bool _isHandlingInitialUri = false; // 是否正在处理初始URI
+
   bool get coreReady => _coreReady;
   bool get pluginsReady => _pluginsReady;
   bool get fullyReady => _fullyReady;
   String get loadingMessage => _loadingMessage;
+  Uri? get initialWidgetUri => _initialWidgetUri;
+  bool get isHandlingInitialUri => _isHandlingInitialUri;
 
   void _setCoreReady() {
     _coreReady = true;
@@ -76,6 +82,20 @@ class AppStartupState extends ChangeNotifier {
 
   void _setLoadingMessage(String message) {
     _loadingMessage = message;
+    notifyListeners();
+  }
+
+  /// 设置待处理的初始URI
+  void setInitialWidgetUri(Uri uri) {
+    _initialWidgetUri = uri;
+    _isHandlingInitialUri = true;
+    notifyListeners();
+  }
+
+  /// 清除初始URI（处理完成后调用）
+  void clearInitialWidgetUri() {
+    _initialWidgetUri = null;
+    _isHandlingInitialUri = false;
     notifyListeners();
   }
 }
@@ -236,6 +256,9 @@ Future<void> _handleInitialWidgetUri() async {
     if (initialUri != null && initialUri.toString().isNotEmpty) {
       debugPrint('检测到来自小组件的初始URI: $initialUri');
 
+      // 将URI设置到AppStartupState中
+      AppStartupState.instance.setInitialWidgetUri(initialUri);
+
       // 延迟等待应用完全初始化
       await Future.delayed(const Duration(milliseconds: 500));
 
@@ -306,10 +329,16 @@ void _navigateToWidgetUri(String url) {
             );
             navigator.push(route);
             debugPrint('导航成功：路由栈现在有两层 (/ -> $routePath)');
+
+            // 导航成功后清除初始URI状态
+            AppStartupState.instance.clearInitialWidgetUri();
           });
         } catch (error, stack) {
           debugPrint('路由导航失败: $error');
           debugPrint('堆栈: $stack');
+
+          // 导航失败时也清除状态
+          AppStartupState.instance.clearInitialWidgetUri();
         }
       } else {
         debugPrint('导航器尚未初始化，延迟500ms后重试');
@@ -325,12 +354,21 @@ void _navigateToWidgetUri(String url) {
                 );
                 retryNavigator.push(route);
                 debugPrint('重试导航成功');
+
+                // 导航成功后清除初始URI状态
+                AppStartupState.instance.clearInitialWidgetUri();
               });
             } catch (e) {
               debugPrint('重试导航失败: $e');
+
+              // 导航失败时也清除状态
+              AppStartupState.instance.clearInitialWidgetUri();
             }
           } else {
             debugPrint('导航器初始化失败');
+
+            // 失败时清除状态
+            AppStartupState.instance.clearInitialWidgetUri();
           }
         });
       }
@@ -338,6 +376,9 @@ void _navigateToWidgetUri(String url) {
   } catch (e, stack) {
     debugPrint('处理小组件点击失败: $e');
     debugPrint('堆栈: $stack');
+
+    // 发生异常时清除状态
+    AppStartupState.instance.clearInitialWidgetUri();
   }
 }
 
