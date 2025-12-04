@@ -972,6 +972,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  memento_nfc:
+    dependency: "direct main"
+    description:
+      path: memento_nfc
+      relative: true
+    source: path
+    version: "0.0.1"
   memento_notifications:
     dependency: "direct main"
     description:

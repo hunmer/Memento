@@ -103,6 +103,8 @@ dependencies:
     path: ./plugins/memento_notifications
   memento_intent:
     path: ./memento_intent
+  memento_nfc:
+    path: ./memento_nfc
 
 dev_dependencies:
   flutter_test:

@@ -36,6 +36,7 @@ import '../plugins/tts/tts_plugin.dart';
 import '../plugins/habits/habits_plugin.dart';
 import '../plugins/contact/contact_plugin.dart';
 import '../plugins/calendar_album/calendar_album_plugin.dart';
+import '../plugins/nfc/nfc_plugin.dart';
 import '../screens/settings_screen/controllers/auto_update_controller.dart';
 import '../screens/settings_screen/controllers/permission_controller.dart';
 import '../core/event/event.dart';
@@ -407,6 +408,7 @@ Future<void> _registerPlugins() async {
     CalendarAlbumPlugin(),
     ScriptsCenterPlugin(),
     TTSPlugin(),
+    NfcPlugin(),
   ];
 
   // 并行注册插件以提高速度
