@@ -161,6 +161,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                   ),
                   onPressed: () async {
                     try {
+                      debugPrint('开始选择图片...');
                       final List<XFile> images =
                           widget.multiple
                               ? (await _picker.pickMultiImage())
@@ -170,69 +171,98 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                                 ),
                               ].whereType<XFile>().toList();
 
+                      debugPrint('图片选择完成，数量: ${images.length}');
+
                       if (images.isNotEmpty) {
                         final results = <Map<String, dynamic>>[];
 
                         for (final image in images) {
-                          // 保存图片并获取相对路径
-                          final relativePath = await ImageUtils.saveImage(
-                            File(image.path),
-                            widget.saveDirectory,
-                          );
+                          try {
+                            debugPrint('处理图片: ${image.path}');
 
-                          // 获取保存后的文件路径
-                          final savedImagePath =
-                              await ImageUtils.getAbsolutePath(relativePath);
-                          final savedImage = File(savedImagePath);
-
-                          // 确认文件是否成功保存
-                          final fileExists = await savedImage.exists();
-                          debugPrint(
-                            '图片保存路径: $savedImagePath, 文件是否存在: $fileExists',
-                          );
-
-                          // 读取图片字节数据
-                          final bytes = await File(image.path).readAsBytes();
-
-                          // 如果启用了裁剪功能，显示裁剪对话框
-                          if (widget.enableCrop && context.mounted) {
-                            final result = await _showCropDialog(
-                              context,
-                              bytes,
-                              savedImage.path,
-                              relativePath,
+                            // 保存图片并获取相对路径
+                            final relativePath = await ImageUtils.saveImage(
+                              File(image.path),
+                              widget.saveDirectory,
                             );
-                            if (result != null) {
-                              results.add(result);
+                            debugPrint('图片保存完成，相对路径: $relativePath');
+
+                            // 获取保存后的文件路径
+                            final savedImagePath =
+                                await ImageUtils.getAbsolutePath(relativePath);
+                            final savedImage = File(savedImagePath);
+
+                            // 确认文件是否成功保存
+                            final fileExists = await savedImage.exists();
+                            debugPrint(
+                              '图片保存路径: $savedImagePath, 文件是否存在: $fileExists',
+                            );
+
+                            if (!fileExists) {
+                              throw Exception('文件保存后检查不存在: $savedImagePath');
                             }
-                          } else {
-                            // 处理压缩和缩略图
-                            final compressionResult = await _processImageCompression(
-                              savedImagePath,
-                              relativePath,
-                            );
-                            results.add({
-                              ...compressionResult,
-                              'bytes': bytes,
-                            });
+
+                            // 读取图片字节数据
+                            final bytes = await File(image.path).readAsBytes();
+                            debugPrint('图片字节大小: ${bytes.length}');
+
+                            // 如果启用了裁剪功能，显示裁剪对话框
+                            if (widget.enableCrop && context.mounted) {
+                              debugPrint('启用裁剪，显示裁剪对话框...');
+                              final result = await _showCropDialog(
+                                context,
+                                bytes,
+                                savedImage.path,
+                                relativePath,
+                              );
+                              if (result != null) {
+                                debugPrint('裁剪完成');
+                                results.add(result);
+                              } else {
+                                debugPrint('裁剪被取消');
+                              }
+                            } else {
+                              debugPrint('处理压缩和缩略图...');
+                              // 处理压缩和缩略图
+                              final compressionResult = await _processImageCompression(
+                                savedImagePath,
+                                relativePath,
+                              );
+                              debugPrint('压缩结果: ${compressionResult.keys}');
+                              results.add({
+                                ...compressionResult,
+                                'bytes': bytes,
+                              });
+                            }
+                          } catch (e) {
+                            debugPrint('处理单张图片时发生错误: $e');
+                            rethrow;
                           }
                         }
 
+                        debugPrint('所有图片处理完成，结果数量: ${results.length}');
                         if (results.isNotEmpty && context.mounted) {
+                          final result = widget.multiple ? results : results.first;
+                          debugPrint('返回结果，类型: ${widget.multiple ? "多张" : "单张"}');
                           Navigator.of(
                             context,
-                          ).pop(widget.multiple ? results : results.first);
+                          ).pop(result);
+                        } else {
+                          debugPrint('警告: 结果为空或上下文未挂载');
                         }
+                      } else {
+                        debugPrint('用户未选择图片');
                       }
-                    } catch (e) {
+                    } catch (e, stackTrace) {
+                      debugPrint('选择图片发生异常: $e');
+                      debugPrint('异常堆栈: $stackTrace');
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              ImagePickerLocalizations.of(
-                                context,
-                              )!.selectImageFailed,
+                              '${ImagePickerLocalizations.of(context)!.selectImageFailed}: $e',
                             ),
+                            backgroundColor: Colors.red,
                           ),
                         );
                       }
@@ -247,69 +277,104 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                   label: Text(ImagePickerLocalizations.of(context)!.takePhoto),
                   onPressed: () async {
                     try {
+                      debugPrint('开始调用相机...');
                       final XFile? photo = await _picker.pickImage(
                         source: ImageSource.camera,
                       );
+                      debugPrint('相机调用完成: ${photo != null}');
+
                       if (photo != null) {
                         final results = <Map<String, dynamic>>[];
+                        try {
+                          debugPrint('开始保存图片...');
 
-                        // 保存图片并获取相对路径
-                        final relativePath = await ImageUtils.saveImage(
-                          File(photo.path),
-                          widget.saveDirectory,
-                        );
+                          // 保存图片并获取相对路径
+                          final relativePath = await ImageUtils.saveImage(
+                            File(photo.path),
+                            widget.saveDirectory,
+                          );
+                          debugPrint('图片保存完成，相对路径: $relativePath');
 
-                        // 获取保存后的文件路径
-                        final savedImagePath = await ImageUtils.getAbsolutePath(
-                          relativePath,
-                        );
-                        final savedImage = File(savedImagePath);
-
-                        // 确认文件是否成功保存
-                        final fileExists = await savedImage.exists();
-                        debugPrint(
-                          '图片保存路径: $savedImagePath, 文件是否存在: $fileExists',
-                        );
-
-                        // 读取图片字节数据
-                        final bytes = await File(photo.path).readAsBytes();
-
-                        // 如果启用了裁剪功能，显示裁剪对话框
-                        if (widget.enableCrop && context.mounted) {
-                          final result = await _showCropDialog(
-                            context,
-                            bytes,
-                            savedImage.path,
+                          // 获取保存后的文件路径
+                          final savedImagePath = await ImageUtils.getAbsolutePath(
                             relativePath,
                           );
-                          if (result != null) {
-                            results.add(result);
+                          final savedImage = File(savedImagePath);
+
+                          // 确认文件是否成功保存
+                          final fileExists = await savedImage.exists();
+                          debugPrint(
+                            '图片保存路径: $savedImagePath, 文件是否存在: $fileExists',
+                          );
+
+                          if (!fileExists) {
+                            throw Exception('文件保存后检查不存在: $savedImagePath');
                           }
-                        } else {
-                          // 处理压缩和缩略图
-                          final compressionResult = await _processImageCompression(
-                            savedImagePath,
-                            relativePath,
-                          );
-                          results.add({
-                            ...compressionResult,
-                            'bytes': bytes,
-                          });
-                        }
 
-                        if (results.isNotEmpty && context.mounted) {
-                          Navigator.of(context).pop(results);
+                          // 读取图片字节数据
+                          final bytes = await File(photo.path).readAsBytes();
+                          debugPrint('原始图片字节大小: ${bytes.length}');
+
+                          // 如果启用了裁剪功能，显示裁剪对话框
+                          if (widget.enableCrop && context.mounted) {
+                            debugPrint('启用裁剪，显示裁剪对话框...');
+                            final result = await _showCropDialog(
+                              context,
+                              bytes,
+                              savedImage.path,
+                              relativePath,
+                            );
+                            if (result != null) {
+                              debugPrint('裁剪完成，结果: ${result.keys}');
+                              results.add(result);
+                            } else {
+                              debugPrint('裁剪被取消');
+                            }
+                          } else {
+                            debugPrint('处理压缩和缩略图...');
+                            // 处理压缩和缩略图
+                            final compressionResult = await _processImageCompression(
+                              savedImagePath,
+                              relativePath,
+                            );
+                            debugPrint('压缩结果: ${compressionResult.keys}');
+                            results.add({
+                              ...compressionResult,
+                              'bytes': bytes,
+                            });
+                          }
+
+                          if (results.isNotEmpty) {
+                            debugPrint('准备返回结果，results数量: ${results.length}');
+                            if (context.mounted) {
+                              debugPrint('上下文已挂载，关闭对话框');
+                              // 单张图片时返回单个结果，与相册选择一致
+                              final result = results.first;
+                              debugPrint('返回单个结果: ${result.keys}');
+                              Navigator.of(context).pop(result);
+                            } else {
+                              debugPrint('警告: 上下文未挂载，无法关闭对话框');
+                            }
+                          } else {
+                            debugPrint('错误: 结果为空');
+                          }
+                        } catch (e) {
+                          debugPrint('处理图片时发生错误: $e');
+                          rethrow;
                         }
+                      } else {
+                        debugPrint('用户取消拍照');
                       }
-                    } catch (e) {
+                    } catch (e, stackTrace) {
+                      debugPrint('拍照过程发生异常: $e');
+                      debugPrint('异常堆栈: $stackTrace');
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              ImagePickerLocalizations.of(
-                                context,
-                              )!.takePhotoFailed,
+                              '${ImagePickerLocalizations.of(context)!.takePhotoFailed}: $e',
                             ),
+                            backgroundColor: Colors.red,
                           ),
                         );
                       }

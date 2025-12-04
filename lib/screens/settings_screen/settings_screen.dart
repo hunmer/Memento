@@ -161,8 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SettingsScreenLocalizations.of(context).dataManagementSubtitle,
             ),
             onTap: () {
-              NavigationHelper.push(context, DataManagementScreen(),
-              );
+              NavigationHelper.push(context, DataManagementScreen());
             },
           ),
           ListTile(
@@ -248,7 +247,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
-                  NavigationHelper.push(context, const FloatingBallSettingsScreen(),
+                  NavigationHelper.push(
+                    context,
+                    const FloatingBallSettingsScreen(),
                   );
                 },
               );
@@ -356,15 +357,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.widgets),
-            title: const Text('小组件配置'),
-            subtitle: const Text('配置和管理桌面小组件'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.pushNamed(context, '/widgets_config');
-            },
-          ),
-          ListTile(
             leading: const Icon(Icons.touch_app),
             title: const Text('悬浮球设置'),
             subtitle: const Text('管理系统级悬浮球功能'),
@@ -399,8 +391,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text(AppLocalizations.of(context)!.aboutTitle),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              NavigationHelper.push(context, const AboutScreen(),
-              );
+              NavigationHelper.push(context, const AboutScreen());
             },
           ),
         ],

@@ -2,7 +2,7 @@ import Flutter
 import UIKit
 import Foundation
 
-public class MementoIntentPlugin: NSObject, FlutterPlugin {
+public class MementoIntentPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
 
     private static let deepLinkEventChannelName = "memento_intent/deep_link/events"
     private static let sharedTextEventChannelName = "memento_intent/shared_text/events"
@@ -27,37 +27,29 @@ public class MementoIntentPlugin: NSObject, FlutterPlugin {
         registrar.addMethodCallDelegate(instance, channel: instance.methodChannel!)
 
         // Register event channels
-        registrar.register(
-            FlutterEventChannel(
-                name: deepLinkEventChannelName,
-                binaryMessenger: registrar.messenger()
-            ),
-            instance: instance
+        let deepLinkChannel = FlutterEventChannel(
+            name: deepLinkEventChannelName,
+            binaryMessenger: registrar.messenger()
         )
+        deepLinkChannel.setStreamHandler(instance)
 
-        registrar.register(
-            FlutterEventChannel(
-                name: sharedTextEventChannelName,
-                binaryMessenger: registrar.messenger()
-            ),
-            instance: instance
+        let sharedTextChannel = FlutterEventChannel(
+            name: sharedTextEventChannelName,
+            binaryMessenger: registrar.messenger()
         )
+        sharedTextChannel.setStreamHandler(instance)
 
-        registrar.register(
-            FlutterEventChannel(
-                name: sharedFilesEventChannelName,
-                binaryMessenger: registrar.messenger()
-            ),
-            instance: instance
+        let sharedFilesChannel = FlutterEventChannel(
+            name: sharedFilesEventChannelName,
+            binaryMessenger: registrar.messenger()
         )
+        sharedFilesChannel.setStreamHandler(instance)
 
-        registrar.register(
-            FlutterEventChannel(
-                name: intentDataEventChannelName,
-                binaryMessenger: registrar.messenger()
-            ),
-            instance: instance
+        let intentDataChannel = FlutterEventChannel(
+            name: intentDataEventChannelName,
+            binaryMessenger: registrar.messenger()
         )
+        intentDataChannel.setStreamHandler(instance)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -140,11 +132,12 @@ public class MementoIntentPlugin: NSObject, FlutterPlugin {
 
     // Handle sharing
     public func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
-        return application(application, open: url, options: [:])
+        return self.application(application, open: url, options: [:])
     }
 
     // MARK: - FlutterStreamHandler
 
+    @objc
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         guard let channelName = arguments as? String else {
             return FlutterError(code: "INVALID_ARGUMENT", message: "Expected String channel name", details: nil)
@@ -166,6 +159,7 @@ public class MementoIntentPlugin: NSObject, FlutterPlugin {
         return nil
     }
 
+    @objc
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
         guard let channelName = arguments as? String else {
             return FlutterError(code: "INVALID_ARGUMENT", message: "Expected String channel name", details: nil)
