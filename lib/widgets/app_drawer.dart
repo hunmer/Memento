@@ -51,14 +51,9 @@ class AppDrawer extends StatelessWidget {
                           if (context.mounted) {
                             Navigator.pop(context); // 关闭抽屉
                             // 导航到插件设置页面
-                            NavigationHelper.push(context, Scaffold(
-                                  appBar: AppBar(
-                                    title: Text(
-                                      plugin.getPluginName(context) ??
-                                          plugin.id,),
-                                  body: plugin.buildSettingsView(context),
-                                ),
-                              ),
+                            NavigationHelper.push(
+                              context,
+                              plugin.buildSettingsView(context),
                             );
                           }
                         },

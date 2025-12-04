@@ -83,11 +83,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
 
   /// 打开设置页面
   void _openSettings() {
-    NavigationHelper.push(context, Scaffold(
-              appBar: AppBar(title: const Text('设置'),
-              body: AgentChatSettingsScreen(plugin: AgentChatPlugin.instance),
-            ),
-      ),
+    NavigationHelper.push(
+      context,
+      AgentChatSettingsScreen(plugin: AgentChatPlugin.instance),
     );
   }
 

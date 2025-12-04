@@ -83,18 +83,15 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
 
   Future<void> _navigateToEdit(BuildContext context) async {
     final l10n = HabitsLocalizations.of(context);
-    await NavigationHelper.push(context, Scaffold(
-              appBar: AppBar(title: Text(l10n.editSkill),
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              body: SkillForm(
-                initialSkill: widget.skill,
-                onSave: (skill) async {
-                  await widget.skillController.saveSkill(skill);
-                  Navigator.pop(context);
-                  setState(() {});
-                },
-              ),
-            ),
+    await NavigationHelper.push(
+      context,
+      SkillForm(
+        initialSkill: widget.skill,
+        onSave: (skill) async {
+          await widget.skillController.saveSkill(skill);
+          Navigator.pop(context);
+          setState(() {});
+        },
       ),
     );
   }
