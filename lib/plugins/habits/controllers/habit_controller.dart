@@ -24,7 +24,14 @@ class HabitController {
     required this.timerController,
     required this.skillController,
   }) {
-    loadHabits();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    // 先确保技能数据加载完成
+    await skillController.loadSkills();
+    // 再加载习惯数据
+    await loadHabits();
   }
 
   Future<List<Habit>> loadHabits() async {

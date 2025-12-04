@@ -20,149 +20,337 @@ class UserItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Stack(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // 物品图片
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child:
-                    item.productImage.isEmpty
-                        ? _buildErrorImage()
-                        : FutureBuilder<String>(
-                          future: ImageUtils.getAbsolutePath(item.productImage),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.done) {
-                              if (snapshot.hasData) {
-                                final imagePath = snapshot.data!;
-                                return isNetworkImage(imagePath)
-                                    ? Image.network(
-                                      imagePath,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              _buildErrorImage(),
-                                    )
-                                    : Image.file(
-                                      File(imagePath),
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              _buildErrorImage(),
-                                    );
-                              }
-                              return _buildErrorImage();
-                            }
-                            return _buildLoadingIndicator();
-                          },
+    final theme = Theme.of(context);
+    final now = DateTime.now();
+    final isExpired = now.isAfter(item.expireDate);
+    final daysUntilExpire = item.expireDate.difference(now).inDays;
+    final isExpiringSoon = daysUntilExpire <= 7 && daysUntilExpire >= 0;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.dividerColor.withOpacity(0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            if (!isExpired) {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(StoreLocalizations.of(context).confirmUse),
+                  content: Text(
+                    StoreLocalizations.of(context)
+                        .confirmUseMessage
+                        .replaceFirst('%s', item.productName),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(AppLocalizations.of(context)!.cancel),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        onUse();
+                      },
+                      child: Text(AppLocalizations.of(context)!.confirm),
+                    ),
+                  ],
+                ),
+              );
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(
+              left: 12,
+              right: 12,
+              top: 12,
+              bottom: 8,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Image Section with Badge
+                Stack(
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 1.5,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: item.productImage.isEmpty
+                            ? _buildErrorImage()
+                            : FutureBuilder<String>(
+                                future: ImageUtils.getAbsolutePath(item.productImage),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.done) {
+                                    if (snapshot.hasData) {
+                                      final imagePath = snapshot.data!;
+                                      return isNetworkImage(imagePath)
+                                          ? Image.network(
+                                              imagePath,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) =>
+                                                      _buildErrorImage(),
+                                            )
+                                          : Image.file(
+                                              File(imagePath),
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (context, error, stackTrace) =>
+                                                      _buildErrorImage(),
+                                            );
+                                    }
+                                    return _buildErrorImage();
+                                  }
+                                  return _buildLoadingIndicator();
+                                },
+                              ),
+                      ),
+                    ),
+                    // Badge showing count
+                    if (count > 1)
+                      Positioned(
+                        top: 6,
+                        right: 6,
+                        child: Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.6),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '$count',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-              ),
-              // 物品信息
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
+                    // Expiry Status Badge
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isExpired
+                              ? Colors.red
+                              : isExpiringSoon
+                                  ? Colors.orange
+                                  : Colors.green,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          isExpired
+                              ? '已过期'
+                              : isExpiringSoon
+                                  ? '即将过期'
+                                  : '有效',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // Title
+                Text(
+                  item.productName,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+
+                // Purchase Price
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.shopping_bag,
-                          size: 16,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          item.productName,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.inventory,
-                          size: 16,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '数量: $count',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
+                        const Text(
+                          '💰',
+                          style: TextStyle(
+                            fontSize: 10,
                           ),
                         ),
+                        const SizedBox(width: 2),
+                        Text(
+                          '购买价格',
+                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    Text(
+                      '${item.purchasePrice}积分',
+                      style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+
+                // Remaining Uses
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.calendar_today,
-                          size: 16,
-                          color: Theme.of(context).primaryColor,
+                        const Text(
+                          '🔢',
+                          style: TextStyle(
+                            fontSize: 10,
+                          ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 2),
                         Text(
-                          '有效期至: ${_formatDate(item.expireDate)}',
-                          style: Theme.of(context).textTheme.bodySmall,
+                          '剩余次数',
+                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isExpired
+                            ? Colors.grey
+                            : theme.primaryColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${item.remaining}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // Divider
+                Divider(height: 1, color: theme.dividerColor.withOpacity(0.2)),
+                const SizedBox(height: 8),
+
+                // Purchase Date & Expiry Date
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '购买日期',
+                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                        ),
+                        Text(
+                          _formatDate(item.purchaseDate),
+                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '过期日期',
+                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                        ),
+                        Text(
+                          _formatDate(item.expireDate),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 10,
+                            color: isExpired
+                                ? Colors.red
+                                : isExpiringSoon
+                                    ? Colors.orange
+                                    : null,
+                          ),
                         ),
                       ],
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          // 使用按钮
-          Positioned(
-            bottom: 12,
-            right: 12,
-            child: FloatingActionButton.small(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder:
-                      (context) => AlertDialog(
-                        title: Text(StoreLocalizations.of(context).confirmUse),
-                        content: Text(
-                          StoreLocalizations.of(context).confirmUseMessage
-                              .replaceFirst('%s', item.productName),
+                const SizedBox(height: 4),
+
+                // Days Until Expiry
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '剩余天数',
+                      style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: isExpired
+                                ? Colors.grey
+                                : isExpiringSoon
+                                    ? Colors.orange
+                                    : Colors.green,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: Text(AppLocalizations.of(context)!.cancel),
+                        const SizedBox(width: 4),
+                        Text(
+                          isExpired
+                              ? '已过期'
+                              : '$daysUntilExpire天',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 10,
+                            color: isExpired
+                                ? Colors.grey
+                                : isExpiringSoon
+                                    ? Colors.orange
+                                    : null,
                           ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              onUse();
-                            },
-                            child: Text(AppLocalizations.of(context)!.confirm),
-                          ),
-                        ],
-                      ),
-                );
-              },
-              child: const Icon(Icons.redeem, size: 20),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
   String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    return '${date.year.toString().substring(2)}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
   }
 
   bool isNetworkImage(String path) {
@@ -174,6 +362,15 @@ class UserItemCard extends StatelessWidget {
   }
 
   Widget _buildErrorImage() {
-    return const Icon(Icons.broken_image, size: 48);
+    return Container(
+      color: Colors.grey[200],
+      width: double.infinity,
+      height: double.infinity,
+      child: const Icon(
+        Icons.broken_image,
+        size: 48,
+        color: Colors.grey,
+      ),
+    );
   }
 }

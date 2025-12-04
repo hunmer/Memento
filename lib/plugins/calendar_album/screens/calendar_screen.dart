@@ -620,17 +620,25 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
               textAlign: TextAlign.center,
             ),
           ),
-          // 日历内容
+          // 日历内容 - 使用 GestureDetector 包装，确保滚动事件透传给外层 ListView
           Padding(
             padding: const EdgeInsets.all(8),
-            child: EnhancedCalendarWidget(
-              dayData: _getCalendarDayData(month),
-              focusedMonth: month,
-              selectedDate: widget.selectedDate,
-              onDaySelected: widget.onDateSelected,
-              onHeaderTapped: widget.onHeaderTapped,
-              enableNavigation: false, // 禁用内置导航，使用外部控制
-              locale: 'zh_CN',
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxHeight: 400, // 限制最大高度，防止内部滚动
+              ),
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                child: EnhancedCalendarWidget(
+                  dayData: _getCalendarDayData(month),
+                  focusedMonth: month,
+                  selectedDate: widget.selectedDate,
+                  onDaySelected: widget.onDateSelected,
+                  onHeaderTapped: widget.onHeaderTapped,
+                  enableNavigation: false, // 禁用内置导航，使用外部控制
+                  locale: 'zh_CN',
+                ),
+              ),
             ),
           ),
         ],
@@ -656,6 +664,9 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
             children: [
               ListView.builder(
                 controller: _scrollController,
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 itemCount: _months.length,
                 itemBuilder: (context, index) {

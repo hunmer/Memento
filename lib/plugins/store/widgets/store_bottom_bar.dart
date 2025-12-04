@@ -78,6 +78,73 @@ class _StoreBottomBarState extends State<StoreBottomBar>
     );
   }
 
+  /// 显示添加积分对话框
+  void _showAddPointsDialog() {
+    final TextEditingController pointsController = TextEditingController();
+    final TextEditingController reasonController = TextEditingController(text: StoreLocalizations.of(context).pointsAdjustmentDefaultReason);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(StoreLocalizations.of(context).addPointsDialogTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: pointsController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: StoreLocalizations.of(context).pointsAmountLabel,
+                hintText: '请输入积分数量',
+                prefixIcon: const Icon(Icons.add),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: reasonController,
+              decoration: InputDecoration(
+                labelText: StoreLocalizations.of(context).reasonLabel,
+                hintText: '请输入添加原因',
+                prefixIcon: const Icon(Icons.note_alt_outlined),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(StoreLocalizations.of(context).cancel),
+          ),
+          TextButton(
+            onPressed: () async {
+              final points = int.tryParse(pointsController.text);
+              if (points == null || points <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(StoreLocalizations.of(context).priceInvalid)),
+                );
+                return;
+              }
+
+              final reason = reasonController.text.isEmpty
+                  ? StoreLocalizations.of(context).pointsAdjustmentDefaultReason
+                  : reasonController.text;
+
+              Navigator.pop(context);
+              await widget.plugin.controller.addPoints(points, reason);
+
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${StoreLocalizations.of(context).pointsAdded}: +$points')),
+                );
+              }
+            },
+            child: Text(StoreLocalizations.of(context).add),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     _scheduleBottomBarHeightMeasurement();
@@ -220,33 +287,36 @@ class _StoreBottomBarState extends State<StoreBottomBar>
               ),
             ],
           ),
-          Positioned(
-            top: -25,
-              right:
-                  MediaQuery.of(context).size.width *
+          // 只有在非【我的物品】页面才显示浮动按钮
+          if (_currentPage != 1) ...[
+            Positioned(
+              top: -25,
+              right: MediaQuery.of(context).size.width *
                   0.15 *
                   0.25, // 向右偏移底部栏宽度的1/4
-            child: FloatingActionButton(
-              backgroundColor: widget.plugin.color, // 使用插件主题色
-              elevation: 4,
-              shape: const CircleBorder(),
-              child: Icon(
-                _currentPage == 0
-                    ? Icons.add_shopping_cart
-                    : _currentPage == 1
-                    ? Icons.redeem
-                    : Icons.add_chart,
-                color: Colors.white,
-                size: 32,
+              child: FloatingActionButton(
+                backgroundColor: widget.plugin.color, // 使用插件主题色
+                elevation: 4,
+                shape: const CircleBorder(),
+                child: Icon(
+                  _currentPage == 0
+                      ? Icons.add_shopping_cart
+                      : Icons.add_chart,
+                  color: Colors.white,
+                  size: 32,
+                ),
+                onPressed: () {
+                  if (_currentPage == 0) {
+                    // Tab0: 添加商品
+                    _addProduct();
+                  } else if (_currentPage == 2) {
+                    // Tab2: 添加积分
+                    _showAddPointsDialog();
+                  }
+                },
               ),
-              onPressed: () {
-                if (_currentPage == 0) {
-                  // Tab0: 添加商品
-                  _addProduct();
-                }
-              },
             ),
-          ),
+          ],
         ],
       ),
       ),
