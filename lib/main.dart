@@ -45,9 +45,10 @@ import 'core/app_initializer.dart';
 import 'core/app_widgets/page_transitions.dart';
 
 void main() async {
-  // 执行应用初始化
+  // 执行核心初始化（快速完成）
   await initializeApp();
 
+  // 立即启动应用，其他初始化在后台进行
   runApp(const MyApp());
 }
 
