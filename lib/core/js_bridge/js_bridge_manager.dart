@@ -9,6 +9,14 @@ import 'js_ui_handlers.dart';
 import '../plugin_base.dart';
 import '../data_filter/field_filter_service.dart';
 
+/// 延迟注册的插件信息
+class PendingPluginRegistration {
+  final PluginBase plugin;
+  final Map<String, Function> apis;
+
+  PendingPluginRegistration({required this.plugin, required this.apis});
+}
+
 /// 全局 JS 桥接管理器
 class JSBridgeManager {
   static JSBridgeManager? _instance;
@@ -28,6 +36,9 @@ class JSBridgeManager {
   String? _currentToolCallId;
   int _currentStepIndex = -1;
 
+  // 延迟注册队列 - 存储等待 JS Bridge 初始化完成后注册的插件
+  final List<PendingPluginRegistration> _pendingRegistrations = [];
+
   /// 初始化 JS 引擎
   Future<void> initialize() async {
     if (_initialized) return;
@@ -41,6 +52,9 @@ class JSBridgeManager {
 
       _initialized = true;
       print('JS Bridge 初始化成功');
+
+      // 处理延迟注册的插件
+      await _processPendingRegistrations();
     } catch (e) {
       print('JS Bridge 初始化失败: $e');
       _initialized = false;
@@ -90,15 +104,32 @@ class JSBridgeManager {
     }
   }
 
-  /// 注册插件的 JS API
-  Future<void> registerPlugin(
+  /// 处理延迟注册的插件
+  Future<void> _processPendingRegistrations() async {
+    if (_pendingRegistrations.isEmpty) return;
+
+    print('正在处理 ${_pendingRegistrations.length} 个延迟注册的插件...');
+
+    final registrations = List<PendingPluginRegistration>.from(_pendingRegistrations);
+    _pendingRegistrations.clear();
+
+    for (final registration in registrations) {
+      try {
+        await _doRegisterPlugin(registration.plugin, registration.apis);
+        print('✓ 延迟注册成功: ${registration.plugin.id}');
+      } catch (e) {
+        print('✗ 延迟注册失败: ${registration.plugin.id} - $e');
+      }
+    }
+
+    print('所有延迟注册已完成');
+  }
+
+  /// 执行实际的插件注册（拆分出来以便复用）
+  Future<void> _doRegisterPlugin(
     PluginBase plugin,
     Map<String, Function> apis,
   ) async {
-    if (!_initialized || _engine == null) {
-      throw StateError('JS Bridge not initialized');
-    }
-
     _registeredPlugins[plugin.id] = plugin;
 
     // 为每个插件创建命名空间
@@ -221,6 +252,24 @@ class JSBridgeManager {
         })();
       ''');
     }
+  }
+
+  /// 注册插件的 JS API
+  Future<void> registerPlugin(
+    PluginBase plugin,
+    Map<String, Function> apis,
+  ) async {
+    // 如果尚未初始化，先加入延迟注册队列
+    if (!_initialized || _engine == null) {
+      print('[${plugin.id}] JS Bridge 未初始化，添加到延迟注册队列');
+      _pendingRegistrations.add(
+        PendingPluginRegistration(plugin: plugin, apis: apis),
+      );
+      return;
+    }
+
+    // 如果已初始化，直接注册
+    await _doRegisterPlugin(plugin, apis);
   }
 
   /// 执行 JS 代码

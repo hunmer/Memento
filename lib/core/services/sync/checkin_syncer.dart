@@ -11,12 +11,12 @@ class CheckinSyncer extends PluginWidgetSyncer {
   @override
   Future<void> sync() async {
     if (!isWidgetSupported()) {
-      debugPrint('Widget not supported on this platform, skipping update for checkin');
       return;
     }
 
     await syncSafely('checkin', () async {
-      final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
       if (plugin == null) return;
 
       final todayCount = plugin.getTodayCheckins();
@@ -42,15 +42,12 @@ class CheckinSyncer extends PluginWidgetSyncer {
             label: '今日完成',
             value: '$todayCount/$totalItems',
             highlight: todayCount == totalItems && totalItems > 0,
-            colorValue: todayCount == totalItems && totalItems > 0
-                ? Colors.green.value
-                : null,
+            colorValue:
+                todayCount == totalItems && totalItems > 0
+                    ? Colors.green.value
+                    : null,
           ),
-          WidgetStatItem(
-            id: 'total',
-            label: '总签到数',
-            value: '$totalCheckins',
-          ),
+          WidgetStatItem(id: 'total', label: '总签到数', value: '$totalCheckins'),
           WidgetStatItem(
             id: 'streak',
             label: '最长连续',
@@ -66,53 +63,62 @@ class CheckinSyncer extends PluginWidgetSyncer {
   /// 同步自定义签到项小组件
   Future<void> syncCheckinItemWidget() async {
     try {
-      final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
       if (plugin == null) {
-        debugPrint('Checkin plugin not found, skipping checkin_item widget sync');
+        debugPrint(
+          'Checkin plugin not found, skipping checkin_item widget sync',
+        );
         return;
       }
 
-      final items = plugin.checkinItems.map((item) {
-        final now = DateTime.now();
-        final today = DateTime(now.year, now.month, now.day);
-        final List<String> weekChecks = [];
+      final items =
+          plugin.checkinItems.map((item) {
+            final now = DateTime.now();
+            final today = DateTime(now.year, now.month, now.day);
+            final List<String> weekChecks = [];
 
-        final mondayOffset = today.weekday - 1;
-        final monday = today.subtract(Duration(days: mondayOffset));
+            final mondayOffset = today.weekday - 1;
+            final monday = today.subtract(Duration(days: mondayOffset));
 
-        for (int i = 0; i < 7; i++) {
-          final date = monday.add(Duration(days: i));
-          final hasCheckin = item.getDateRecords(date).isNotEmpty;
-          weekChecks.add(hasCheckin ? '1' : '0');
-        }
+            for (int i = 0; i < 7; i++) {
+              final date = monday.add(Duration(days: i));
+              final hasCheckin = item.getDateRecords(date).isNotEmpty;
+              weekChecks.add(hasCheckin ? '1' : '0');
+            }
 
-        final lastDayOfMonth = DateTime(today.year, today.month + 1, 0);
-        final List<int> monthChecks = [];
+            final lastDayOfMonth = DateTime(today.year, today.month + 1, 0);
+            final List<int> monthChecks = [];
 
-        for (int day = 1; day <= lastDayOfMonth.day; day++) {
-          final date = DateTime(today.year, today.month, day);
-          final hasCheckin = item.getDateRecords(date).isNotEmpty;
-          if (hasCheckin) {
-            monthChecks.add(day);
-          }
-        }
+            for (int day = 1; day <= lastDayOfMonth.day; day++) {
+              final date = DateTime(today.year, today.month, day);
+              final hasCheckin = item.getDateRecords(date).isNotEmpty;
+              if (hasCheckin) {
+                monthChecks.add(day);
+              }
+            }
 
-        return {
-          'id': item.id,
-          'name': item.name,
-          'weekChecks': weekChecks.join(','),
-          'monthChecks': monthChecks.join(','),
-        };
-      }).toList();
+            return {
+              'id': item.id,
+              'name': item.name,
+              'weekChecks': weekChecks.join(','),
+              'monthChecks': monthChecks.join(','),
+            };
+          }).toList();
 
       final data = {'items': items};
       final jsonString = jsonEncode(data);
-      await MyWidgetManager().saveString('checkin_item_widget_data', jsonString);
+      await MyWidgetManager().saveString(
+        'checkin_item_widget_data',
+        jsonString,
+      );
 
       await SystemWidgetService.instance.updateWidget('checkin_item');
       await SystemWidgetService.instance.updateWidget('checkin_month');
 
-      debugPrint('Synced checkin widgets (item & month) with ${items.length} items');
+      debugPrint(
+        'Synced checkin widgets (item & month) with ${items.length} items',
+      );
     } catch (e) {
       debugPrint('Failed to sync checkin_item widget: $e');
     }
@@ -121,9 +127,12 @@ class CheckinSyncer extends PluginWidgetSyncer {
   /// 同步打卡周视图小组件
   Future<void> syncCheckinWeeklyWidget() async {
     try {
-      final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
       if (plugin == null) {
-        debugPrint('Checkin plugin not found, skipping checkin_weekly widget sync');
+        debugPrint(
+          'Checkin plugin not found, skipping checkin_weekly widget sync',
+        );
         return;
       }
 
@@ -133,25 +142,23 @@ class CheckinSyncer extends PluginWidgetSyncer {
       final mondayOffset = today.weekday - 1;
       final monday = today.subtract(Duration(days: mondayOffset));
 
-      final items = plugin.checkinItems.map((item) {
-        String colorName = 'gray';
-        if (item.color != null) {
-          final colorValue = item.color.value;
-          colorName = _getColorNameFromValue(colorValue);
-        }
+      final items =
+          plugin.checkinItems.map((item) {
+            String colorName = 'gray';
+            if (item.color != null) {
+              final colorValue = item.color.value;
+              colorName = _getColorNameFromValue(colorValue);
+            }
 
-        return {
-          'id': item.id,
-          'name': item.name,
-          'color': colorName,
-        };
-      }).toList();
+            return {'id': item.id, 'name': item.name, 'color': colorName};
+          }).toList();
 
       final Map<String, Map<String, int>> dailyCheckins = {};
 
       for (int i = 0; i < 7; i++) {
         final date = monday.add(Duration(days: i));
-        final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        final dateStr =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
         final dayData = <String, int>{};
         for (final item in plugin.checkinItems) {
@@ -162,16 +169,18 @@ class CheckinSyncer extends PluginWidgetSyncer {
         dailyCheckins[dateStr] = dayData;
       }
 
-      final data = {
-        'items': items,
-        'dailyCheckins': dailyCheckins,
-      };
+      final data = {'items': items, 'dailyCheckins': dailyCheckins};
       final jsonString = jsonEncode(data);
-      await MyWidgetManager().saveString('checkin_weekly_list_widget_data', jsonString);
+      await MyWidgetManager().saveString(
+        'checkin_weekly_list_widget_data',
+        jsonString,
+      );
 
       await SystemWidgetService.instance.updateWidget('checkin_weekly_list');
 
-      debugPrint('Synced checkin_weekly_list widget with ${items.length} items');
+      debugPrint(
+        'Synced checkin_weekly_list widget with ${items.length} items',
+      );
     } catch (e) {
       debugPrint('Failed to sync checkin_weekly widget: $e');
     }

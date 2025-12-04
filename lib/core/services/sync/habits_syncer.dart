@@ -16,12 +16,12 @@ class HabitsSyncer extends PluginWidgetSyncer {
   @override
   Future<void> sync() async {
     if (!isWidgetSupported()) {
-      debugPrint('Widget not supported on this platform, skipping update for habits');
       return;
     }
 
     await syncSafely('habits', () async {
-      final plugin = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
       if (plugin == null) return;
 
       final habitCount = plugin.getHabitController().getHabits().length;
@@ -43,7 +43,8 @@ class HabitsSyncer extends PluginWidgetSyncer {
   /// 同步习惯计时器小组件
   Future<void> syncHabitTimerWidget() async {
     try {
-      final plugin = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
       if (plugin == null) {
         debugPrint('Habits plugin not found, skipping habit_timer widget sync');
         return;
@@ -53,21 +54,22 @@ class HabitsSyncer extends PluginWidgetSyncer {
       final habits = plugin.getHabitController().getHabits();
 
       // 构建习惯数据（包含所有习惯，供Android端查找）
-      final habitsData = habits.map((habit) {
-        // 获取计时器状态
-        final timerData = plugin.timerController.getTimerData(habit.id);
-        final isRunning = plugin.timerController.isHabitTiming(habit.id);
+      final habitsData =
+          habits.map((habit) {
+            // 获取计时器状态
+            final timerData = plugin.timerController.getTimerData(habit.id);
+            final isRunning = plugin.timerController.isHabitTiming(habit.id);
 
-        return {
-          'id': habit.id,
-          'title': habit.title,
-          'durationMinutes': habit.durationMinutes,
-          'icon': habit.icon,
-          'isRunning': isRunning,
-          'elapsedSeconds': timerData?['elapsedSeconds'] ?? 0,
-          'isCountdown': timerData?['isCountdown'] ?? true,
-        };
-      }).toList();
+            return {
+              'id': habit.id,
+              'title': habit.title,
+              'durationMinutes': habit.durationMinutes,
+              'icon': habit.icon,
+              'isRunning': isRunning,
+              'elapsedSeconds': timerData?['elapsedSeconds'] ?? 0,
+              'isCountdown': timerData?['isCountdown'] ?? true,
+            };
+          }).toList();
 
       // 保存为 JSON 字符串
       await MyWidgetManager().saveString(
@@ -91,9 +93,12 @@ class HabitsSyncer extends PluginWidgetSyncer {
   /// 在 main.dart 中调用，确保用户在小组件上启动/暂停的计时器能立即同步到应用
   Future<void> syncPendingHabitTimerChangesOnStartup() async {
     try {
-      final plugin = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
       if (plugin == null) {
-        debugPrint('Habits plugin not found, skipping pending timer changes sync');
+        debugPrint(
+          'Habits plugin not found, skipping pending timer changes sync',
+        );
         return;
       }
 
@@ -111,7 +116,9 @@ class HabitsSyncer extends PluginWidgetSyncer {
     }
 
     try {
-      final pendingJson = await MyWidgetManager().getData<String>('habit_timer_pending_changes');
+      final pendingJson = await MyWidgetManager().getData<String>(
+        'habit_timer_pending_changes',
+      );
       if (pendingJson == null || pendingJson.isEmpty || pendingJson == '{}') {
         return;
       }
@@ -136,7 +143,9 @@ class HabitsSyncer extends PluginWidgetSyncer {
         if (change.containsKey('action') && change['action'] == 'complete') {
           // 处理完成事件
           final elapsedSeconds = change['elapsedSeconds'] as int;
-          debugPrint('Syncing pending completion: habitId=$habitId, elapsed=$elapsedSeconds');
+          debugPrint(
+            'Syncing pending completion: habitId=$habitId, elapsed=$elapsedSeconds',
+          );
 
           try {
             // 查找习惯
@@ -155,8 +164,13 @@ class HabitsSyncer extends PluginWidgetSyncer {
             );
 
             // 保存完成记录
-            await plugin.getRecordController().saveCompletionRecord(habitId, record);
-            debugPrint('Completed timer for habit: ${habit.title}, duration: ${elapsedSeconds}s');
+            await plugin.getRecordController().saveCompletionRecord(
+              habitId,
+              record,
+            );
+            debugPrint(
+              'Completed timer for habit: ${habit.title}, duration: ${elapsedSeconds}s',
+            );
 
             // 清除计时器状态（如果存在）
             plugin.timerController.clearTimerData(habitId);
@@ -166,7 +180,9 @@ class HabitsSyncer extends PluginWidgetSyncer {
         } else {
           // 处理启动/暂停事件
           final isRunning = change['isRunning'] as bool;
-          debugPrint('Syncing pending timer change: habitId=$habitId, running=$isRunning');
+          debugPrint(
+            'Syncing pending timer change: habitId=$habitId, running=$isRunning',
+          );
 
           try {
             // 查找习惯
@@ -207,7 +223,8 @@ class HabitsSyncer extends PluginWidgetSyncer {
   /// 遍历所有已配置的周视图小组件,更新其数据
   Future<void> syncHabitsWeeklyWidget() async {
     try {
-      final plugin = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
       if (plugin == null) {
         debugPrint('Habits plugin not found, skipping weekly widget sync');
         return;
@@ -250,9 +267,12 @@ class HabitsSyncer extends PluginWidgetSyncer {
   /// 同步所有习惯和技能数据到习惯分组列表小组件
   Future<void> syncHabitGroupListWidget() async {
     try {
-      final plugin = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
       if (plugin == null) {
-        debugPrint('Habits plugin not found, skipping habit_group_list widget sync');
+        debugPrint(
+          'Habits plugin not found, skipping habit_group_list widget sync',
+        );
         return;
       }
 
@@ -260,42 +280,39 @@ class HabitsSyncer extends PluginWidgetSyncer {
       final skills = plugin.getSkillController().getSkills();
 
       // 构建分组数据
-      final groupsData = skills.map((skill) {
-        // 将Material Icon codePoint转换为图标名称
-        final iconName = IconNameMapper.getIconName(skill.icon);
-        return {
-          'id': skill.id,
-          'name': skill.title,
-          'icon': iconName,
-        };
-      }).toList();
+      final groupsData =
+          skills.map((skill) {
+            // 将Material Icon codePoint转换为图标名称
+            final iconName = IconNameMapper.getIconName(skill.icon);
+            return {'id': skill.id, 'name': skill.title, 'icon': iconName};
+          }).toList();
 
       // 构建习惯数据
-      final habitsData = habits.map((habit) {
-        // 将Material Icon codePoint转换为图标名称
-        final iconName = IconNameMapper.getIconName(habit.icon);
-        return {
-          'id': habit.id,
-          'title': habit.title,
-          'icon': iconName,
-          'group': habit.skillId,
-          'completed': false, // TODO: 从完成记录中获取今日完成状态
-        };
-      }).toList();
+      final habitsData =
+          habits.map((habit) {
+            // 将Material Icon codePoint转换为图标名称
+            final iconName = IconNameMapper.getIconName(habit.icon);
+            return {
+              'id': habit.id,
+              'title': habit.title,
+              'icon': iconName,
+              'group': habit.skillId,
+              'completed': false, // TODO: 从完成记录中获取今日完成状态
+            };
+          }).toList();
 
       // 保存为 JSON 字符串
       await MyWidgetManager().saveString(
         'habit_group_list_widget_data',
-        jsonEncode({
-          'groups': groupsData,
-          'habits': habitsData,
-        }),
+        jsonEncode({'groups': groupsData, 'habits': habitsData}),
       );
 
       // 更新小组件
       await SystemWidgetService.instance.updateWidget('habit_group_list');
 
-      debugPrint('Synced habit_group_list widget with ${habits.length} habits and ${skills.length} groups');
+      debugPrint(
+        'Synced habit_group_list widget with ${habits.length} habits and ${skills.length} groups',
+      );
     } catch (e) {
       debugPrint('Failed to sync habit_group_list widget: $e');
     }
@@ -319,7 +336,9 @@ class HabitsSyncer extends PluginWidgetSyncer {
         final widgetData = jsonDecode(widgetDataJson) as Map<String, dynamic>;
         final configJson = widgetData['config'] as Map<String, dynamic>?;
         if (configJson != null) {
-          selectedHabitIds = List<String>.from(configJson['selectedHabitIds'] as List);
+          selectedHabitIds = List<String>.from(
+            configJson['selectedHabitIds'] as List,
+          );
           weekOffset = configJson['weekOffset'] as int? ?? 0;
         }
       } catch (e) {
@@ -350,7 +369,9 @@ class HabitsSyncer extends PluginWidgetSyncer {
         debugPrint('年: ${weekData.year}, 周: ${weekData.week}');
         debugPrint('周起止: ${weekData.weekStart} - ${weekData.weekEnd}');
         for (final item in weekData.habitItems) {
-          debugPrint('习惯: ${item.habitTitle}, dailyMinutes: ${item.dailyMinutes}');
+          debugPrint(
+            '习惯: ${item.habitTitle}, dailyMinutes: ${item.dailyMinutes}',
+          );
         }
         debugPrint('===========================================');
 

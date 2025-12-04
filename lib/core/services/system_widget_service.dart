@@ -4,7 +4,8 @@ import 'package:universal_platform/universal_platform.dart';
 import 'package:memento_widgets/memento_widgets.dart';
 
 // 重新导出数据模型，供其他文件使用
-export 'package:memento_widgets/memento_widgets.dart' show PluginWidgetData, WidgetStatItem;
+export 'package:memento_widgets/memento_widgets.dart'
+    show PluginWidgetData, WidgetStatItem;
 
 /// 系统桌面小组件数据同步服务
 ///
@@ -34,7 +35,6 @@ class SystemWidgetService {
   Future<void> updateWidgetData(String pluginId, PluginWidgetData data) async {
     // 只在支持的平台上运行（Android 和 iOS）
     if (!_isWidgetSupported()) {
-      debugPrint('Widget not supported on this platform, skipping update for $pluginId');
       return;
     }
 
@@ -64,7 +64,6 @@ class SystemWidgetService {
   Future<void> updateAllWidgets() async {
     // 只在支持的平台上运行（Android 和 iOS）
     if (!_isWidgetSupported()) {
-      debugPrint('Widget not supported on this platform, skipping updateAllWidgets');
       return;
     }
 

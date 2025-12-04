@@ -14,7 +14,6 @@ class AgentChatWidgetService {
   static Future<void> updateWidget() async {
     // 统一平台检查
     if (!SystemWidgetService.instance.isWidgetSupported()) {
-      _logger.fine('Widget not supported on this platform, skipping AgentChat widget update');
       return;
     }
 
@@ -41,15 +40,22 @@ class AgentChatWidgetService {
           WidgetStatItem(
             id: 'recent_message',
             label: '最近消息',
-            value: recentConversations.isNotEmpty
-                ? _truncateMessage(recentConversations.first.lastMessagePreview ?? '暂无消息', 15)
-                : '暂无对话',
+            value:
+                recentConversations.isNotEmpty
+                    ? _truncateMessage(
+                      recentConversations.first.lastMessagePreview ?? '暂无消息',
+                      15,
+                    )
+                    : '暂无对话',
           ),
         ],
       );
 
       // 使用系统小组件服务更新
-      await SystemWidgetService.instance.updateWidgetData('agent_chat', widgetData);
+      await SystemWidgetService.instance.updateWidgetData(
+        'agent_chat',
+        widgetData,
+      );
 
       _logger.info('AI对话小组件已更新: ${recentConversations.length} 个对话');
     } catch (e, stack) {
@@ -58,7 +64,9 @@ class AgentChatWidgetService {
   }
 
   /// 获取最近使用的对话
-  static List<Conversation> _getRecentConversations(List<Conversation> conversations) {
+  static List<Conversation> _getRecentConversations(
+    List<Conversation> conversations,
+  ) {
     // 按最后消息时间排序
     final sorted = List<Conversation>.from(conversations);
     sorted.sort((a, b) {
@@ -77,7 +85,6 @@ class AgentChatWidgetService {
   /// 初始化小组件服务
   static Future<void> initialize() async {
     if (!SystemWidgetService.instance.isWidgetSupported()) {
-      _logger.fine('Widget not supported on this platform, skipping AgentChatWidgetService initialization');
       return;
     }
 

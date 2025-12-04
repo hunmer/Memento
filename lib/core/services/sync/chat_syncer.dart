@@ -9,7 +9,6 @@ class ChatSyncer extends PluginWidgetSyncer {
   @override
   Future<void> sync() async {
     if (!isWidgetSupported()) {
-      debugPrint('Widget not supported on this platform, skipping update for chat');
       return;
     }
 
@@ -31,11 +30,7 @@ class ChatSyncer extends PluginWidgetSyncer {
         iconCodePoint: Icons.chat.codePoint,
         colorValue: Colors.lightGreen.value,
         stats: [
-          WidgetStatItem(
-            id: 'channels',
-            label: '频道数',
-            value: '$channelCount',
-          ),
+          WidgetStatItem(id: 'channels', label: '频道数', value: '$channelCount'),
           WidgetStatItem(
             id: 'messages',
             label: '消息数',
