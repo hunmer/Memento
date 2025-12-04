@@ -1,5 +1,5 @@
 /// 悬浮球手势类型
-library floating_ball_gesture;
+library;
 
 import '../../../core/action/models/action_group.dart';
 import '../../../core/action/models/action_instance.dart';

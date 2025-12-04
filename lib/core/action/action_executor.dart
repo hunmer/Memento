@@ -1,5 +1,6 @@
 /// 动作执行引擎
 /// 负责执行各种动作类型的逻辑
+library;
 import 'dart:async';
 import 'dart:convert';
 import 'package:Memento/core/app_initializer.dart';

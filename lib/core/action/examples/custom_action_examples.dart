@@ -1,11 +1,9 @@
 /// 自定义JavaScript动作使用示例
 /// 展示如何输入和使用自定义JavaScript代码（无预设代码）
+library;
 
 import 'package:flutter/material.dart';
 import 'package:Memento/core/action/action_manager.dart';
-import 'package:Memento/core/action/models/action_definition.dart';
-import 'package:Memento/core/action/models/action_group.dart';
-import 'package:Memento/core/action/models/action_instance.dart';
 
 /// 自定义JavaScript动作示例类
 class CustomActionExamples {

@@ -1,8 +1,7 @@
 /// 动作表单模型
 /// 定义动态表单的字段配置和验证规则
-library action_form;
+library;
 
-import 'dart:convert';
 import 'package:flutter/material.dart';
 
 /// 表单字段类型枚举
@@ -279,13 +278,13 @@ class FormFieldValidator {
 
       case 'minLength':
         if (fieldValue is String && fieldValue.length < (value as int)) {
-          return message ?? '最少需要${value}个字符';
+          return message ?? '最少需要$value个字符';
         }
         return null;
 
       case 'maxLength':
         if (fieldValue is String && fieldValue.length > (value as int)) {
-          return message ?? '最多允许${value}个字符';
+          return message ?? '最多允许$value个字符';
         }
         return null;
 
@@ -300,13 +299,13 @@ class FormFieldValidator {
 
       case 'min':
         if (fieldValue is num && fieldValue < (value as num)) {
-          return message ?? '不能小于${value}';
+          return message ?? '不能小于$value';
         }
         return null;
 
       case 'max':
         if (fieldValue is num && fieldValue > (value as num)) {
-          return message ?? '不能大于${value}';
+          return message ?? '不能大于$value';
         }
         return null;
 

@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import '../activity_plugin.dart';
 import '../models/activity_record.dart';
 import '../models/activity_weekly_widget_data.dart';
@@ -117,27 +116,6 @@ class ActivityWidgetService {
     return heatmap;
   }
 
-  /// 获取活动的颜色
-  ///
-  /// 优先级：活动自身颜色 > 第一个标签的颜色 > 默认颜色
-  int _getActivityColor(ActivityRecord activity, Map<String, int> tagColorMap) {
-    // 1. 使用活动自身的颜色
-    if (activity.color != null) {
-      // ignore: deprecated_member_use
-      return activity.color!.value;
-    }
-
-    // 2. 使用第一个标签的颜色
-    if (activity.tags.isNotEmpty) {
-      final firstTag = activity.tags.first;
-      if (tagColorMap.containsKey(firstTag)) {
-        return tagColorMap[firstTag]!;
-      }
-    }
-
-    // 3. 使用默认颜色
-    return _defaultColors[0];
-  }
 
   /// 统计标签时长
   ///

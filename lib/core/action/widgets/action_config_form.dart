@@ -1,12 +1,10 @@
 /// 动作配置表单组件
 /// 动态生成动作参数配置表单
-library action_config_form;
+library;
 
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../models/action_definition.dart';
 import '../models/action_form.dart';
-import '../action_manager.dart';
 import '../../app_initializer.dart';
 
 /// 表单值改变回调

@@ -1,10 +1,8 @@
 /// 动作实例模型
 /// 表示一个具体的动作配置和执行数据
-library action_instance;
+library;
 
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'action_definition.dart';
 
 /// 动作实例状态
 enum ActionInstanceStatus {

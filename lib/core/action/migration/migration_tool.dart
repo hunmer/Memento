@@ -1,6 +1,6 @@
 /// 配置迁移工具
 /// 演示如何从旧格式迁移到新格式
-library migration_tool;
+library;
 
 import 'dart:convert';
 import 'dart:io';
@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import '../action_manager.dart';
 import '../action_storage.dart';
 import '../models/action_instance.dart';
-import '../models/action_group.dart';
 import '../models/action_definition.dart';
 
 /// 迁移结果

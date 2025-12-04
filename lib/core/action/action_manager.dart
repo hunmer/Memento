@@ -1,5 +1,6 @@
 /// 动作管理器
 /// 单例模式，管理所有动作的注册、验证和执行
+library;
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
