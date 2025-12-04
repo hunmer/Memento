@@ -10,6 +10,7 @@ import android.nfc.tech.Ndef
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -34,6 +35,10 @@ class MementoNfcPlugin :
     private var isWriteMode = false
     private var pendingWriteData: String = ""
     private var pendingWriteFormat: String = ""
+
+    companion object {
+        private const val TAG = "MementoNfcPlugin"
+    }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "memento_nfc")
@@ -98,8 +103,18 @@ class MementoNfcPlugin :
         // 延迟一点时间启动，让Flutter有时间显示对话框
         Handler(Looper.getMainLooper()).postDelayed({
             try {
-                // 启动前台调度
-                nfcAdapter!!.enableReaderMode(activity, this, NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B or NfcAdapter.FLAG_READER_NFC_F or NfcAdapter.FLAG_READER_NFC_V, null)
+                // 启动前台调度，添加更多 flags 和 extras
+                val extras = android.os.Bundle()
+                extras.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 250)
+
+                // 使用所有支持的 NFC 技术，并添加 NDEF 过滤
+                val flags = NfcAdapter.FLAG_READER_NFC_A or
+                           NfcAdapter.FLAG_READER_NFC_B or
+                           NfcAdapter.FLAG_READER_NFC_F or
+                           NfcAdapter.FLAG_READER_NFC_V or
+                           NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS
+
+                nfcAdapter!!.enableReaderMode(activity, this, flags, extras)
             } catch (e: Exception) {
                 result.success(hashMapOf(
                     "success" to false,
@@ -110,7 +125,9 @@ class MementoNfcPlugin :
     }
 
     private fun startNfcReading(result: Result) {
+        Log.d(TAG, "startNfcReading: Starting NFC reading")
         if (nfcAdapter == null || !nfcAdapter!!.isEnabled) {
+            Log.e(TAG, "startNfcReading: NFC not supported or not enabled")
             result.success(hashMapOf(
                 "success" to false,
                 "error" to "NFC未启用"
@@ -119,13 +136,27 @@ class MementoNfcPlugin :
         }
 
         pendingResult = result
+        Log.d(TAG, "startNfcReading: NFC adapter is ready, starting reader mode in 200ms")
 
         // 延迟一点时间启动，让Flutter有时间显示对话框
         Handler(Looper.getMainLooper()).postDelayed({
             try {
-                // 启动前台调度
-                nfcAdapter!!.enableReaderMode(activity, this, NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B or NfcAdapter.FLAG_READER_NFC_F or NfcAdapter.FLAG_READER_NFC_V, null)
+                Log.d(TAG, "startNfcReading: Enabling reader mode")
+                // 启动前台调度，添加更多 flags 和 extras
+                val extras = android.os.Bundle()
+                extras.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 250)
+
+                // 使用所有支持的 NFC 技术，并添加 NDEF 过滤
+                val flags = NfcAdapter.FLAG_READER_NFC_A or
+                           NfcAdapter.FLAG_READER_NFC_B or
+                           NfcAdapter.FLAG_READER_NFC_F or
+                           NfcAdapter.FLAG_READER_NFC_V or
+                           NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS
+
+                nfcAdapter!!.enableReaderMode(activity, this, flags, extras)
+                Log.i(TAG, "startNfcReading: Reader mode enabled successfully")
             } catch (e: Exception) {
+                Log.e(TAG, "startNfcReading: Failed to enable reader mode", e)
                 result.success(hashMapOf(
                     "success" to false,
                     "error" to "启动NFC读取失败: ${e.message}"
@@ -135,7 +166,9 @@ class MementoNfcPlugin :
     }
 
     override fun onTagDiscovered(tag: Tag?) {
+        Log.d(TAG, "onTagDiscovered: Tag discovered: ${tag != null}")
         if (tag == null) {
+            Log.w(TAG, "onTagDiscovered: Tag is null")
             Handler(Looper.getMainLooper()).post {
                 pendingResult?.success(hashMapOf(
                     "success" to false,
@@ -147,6 +180,7 @@ class MementoNfcPlugin :
         }
 
         if (isWriteMode) {
+            Log.i(TAG, "onTagDiscovered: Processing write operation")
             // 写入模式
             val writeResult = performWrite(tag, pendingWriteData, pendingWriteFormat)
             Handler(Looper.getMainLooper()).post {
@@ -154,6 +188,7 @@ class MementoNfcPlugin :
                 stopNfcReading()
             }
         } else {
+            Log.i(TAG, "onTagDiscovered: Processing read operation")
             // 读取模式
             val readResult = performRead(tag)
             Handler(Looper.getMainLooper()).post {
@@ -368,6 +403,7 @@ class MementoNfcPlugin :
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+        stopNfcReading()
         activity = null
     }
 }
