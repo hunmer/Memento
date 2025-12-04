@@ -14,12 +14,12 @@ class ActivitySyncer extends PluginWidgetSyncer {
   @override
   Future<void> sync() async {
     if (!isWidgetSupported()) {
-      debugPrint('Widget not supported on this platform, skipping update for activity');
       return;
     }
 
     await syncSafely('activity', () async {
-      final plugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
       if (plugin == null) return;
 
       final activityCount = await plugin.getTodayActivityCount();
@@ -30,7 +30,8 @@ class ActivitySyncer extends PluginWidgetSyncer {
       final remainingHours = (remainingMinutes / 60.0).toStringAsFixed(1);
 
       final totalDayMinutes = 24 * 60;
-      final coveragePercent = (durationMinutes / totalDayMinutes * 100).toStringAsFixed(0);
+      final coveragePercent = (durationMinutes / totalDayMinutes * 100)
+          .toStringAsFixed(0);
 
       await updateWidget(
         pluginId: 'activity',
@@ -39,7 +40,11 @@ class ActivitySyncer extends PluginWidgetSyncer {
         colorValue: Colors.purple.value,
         stats: [
           WidgetStatItem(id: 'count', label: '今日活动', value: '$activityCount'),
-          WidgetStatItem(id: 'duration', label: '已记录', value: '${durationHours}h'),
+          WidgetStatItem(
+            id: 'duration',
+            label: '已记录',
+            value: '${durationHours}h',
+          ),
           WidgetStatItem(
             id: 'remaining',
             label: '剩余时间',
@@ -47,7 +52,11 @@ class ActivitySyncer extends PluginWidgetSyncer {
             highlight: remainingMinutes < 120,
             colorValue: remainingMinutes < 120 ? Colors.red.value : null,
           ),
-          WidgetStatItem(id: 'coverage', label: '覆盖率', value: '$coveragePercent%'),
+          WidgetStatItem(
+            id: 'coverage',
+            label: '覆盖率',
+            value: '$coveragePercent%',
+          ),
         ],
       );
     });
@@ -58,7 +67,8 @@ class ActivitySyncer extends PluginWidgetSyncer {
   /// 遍历所有已配置的周视图小组件，更新其数据
   Future<void> syncActivityWeeklyWidget() async {
     try {
-      final plugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
       if (plugin == null) {
         debugPrint('Activity plugin not found, skipping weekly widget sync');
         return;
@@ -151,7 +161,8 @@ class ActivitySyncer extends PluginWidgetSyncer {
   /// 遍历所有已配置的日视图小组件，更新其数据
   Future<void> syncActivityDailyWidget() async {
     try {
-      final plugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
       if (plugin == null) {
         debugPrint('Activity plugin not found, skipping daily widget sync');
         return;
@@ -217,14 +228,20 @@ class ActivitySyncer extends PluginWidgetSyncer {
     debugPrint('Calculating day data for offset: $dayOffset');
     final dayData = await widgetService.calculateDayData(dayOffset);
 
-    debugPrint('Calculated day data: ${dayData.activities.length} activities, total duration: ${dayData.totalDuration.inMinutes} minutes');
+    debugPrint(
+      'Calculated day data: ${dayData.activities.length} activities, total duration: ${dayData.totalDuration.inMinutes} minutes',
+    );
 
     // 调试输出activities数据
     if (dayData.activities.isNotEmpty) {
-      debugPrint('First activity: ${dayData.activities.first.name}, duration: ${dayData.activities.first.duration}');
+      debugPrint(
+        'First activity: ${dayData.activities.first.name}, duration: ${dayData.activities.first.duration}',
+      );
       for (int i = 0; i < dayData.activities.length && i < 2; i++) {
         final activity = dayData.activities[i];
-        debugPrint('Activity $i: name=${activity.name}, duration=${activity.duration}, emoji=${activity.emoji}, tags=${activity.tags}');
+        debugPrint(
+          'Activity $i: name=${activity.name}, duration=${activity.duration}, emoji=${activity.emoji}, tags=${activity.tags}',
+        );
       }
     }
 
@@ -238,7 +255,9 @@ class ActivitySyncer extends PluginWidgetSyncer {
         // 调试输出要保存的JSON结构
         debugPrint('Saving widget data with keys: ${dataJson.keys.toList()}');
         if (dataJson.containsKey('activities')) {
-          debugPrint('Activities count in JSON: ${(dataJson['activities'] as List).length}');
+          debugPrint(
+            'Activities count in JSON: ${(dataJson['activities'] as List).length}',
+          );
         }
 
         await HomeWidget.saveWidgetData<String>(

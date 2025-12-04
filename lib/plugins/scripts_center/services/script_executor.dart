@@ -48,9 +48,10 @@ class ScriptExecutor {
     }
 
     try {
-      // 确保 JSBridgeManager 已初始化
+      // 如果 JSBridgeManager 尚未初始化，等待它完成
       if (!_jsBridge.isSupported) {
-        throw Exception('JSBridgeManager 未初始化或不支持');
+        print('⏳ 等待 JS Bridge 初始化...');
+        await _waitForJSBridge();
       }
 
       // 注入脚本中心特有的全局API（runScript 等）
@@ -62,6 +63,25 @@ class ScriptExecutor {
       print('❌ ScriptExecutor初始化失败: $e');
       rethrow;
     }
+  }
+
+  /// 等待 JS Bridge 初始化完成
+  Future<void> _waitForJSBridge() async {
+    const maxWaitTime = Duration(seconds: 30); // 最多等待30秒
+    const checkInterval = Duration(milliseconds: 100); // 每100ms检查一次
+
+    final stopwatch = Stopwatch()..start();
+
+    while (stopwatch.elapsed < maxWaitTime) {
+      if (_jsBridge.isSupported) {
+        print('✅ JS Bridge 初始化完成，耗时 ${stopwatch.elapsedMilliseconds}ms');
+        return;
+      }
+
+      await Future.delayed(checkInterval);
+    }
+
+    throw Exception('等待 JS Bridge 初始化超时（${maxWaitTime.inSeconds}秒）');
   }
 
   /// 注入脚本中心特有的 API 到 JS 环境

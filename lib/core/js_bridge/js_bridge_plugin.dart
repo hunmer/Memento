@@ -53,11 +53,6 @@ mixin JSBridgePlugin on PluginBase {
   @protected
   Future<void> registerJSAPI() async {
     try {
-      if (!JSBridgeManager.instance.isSupported) {
-        print('[$id] JS Bridge 不支持，跳过 API 注册');
-        return;
-      }
-
       final apis = defineJSAPI();
       if (apis.isEmpty) {
         print('[$id] 没有定义 JS API');

@@ -9,7 +9,6 @@ class DiarySyncer extends PluginWidgetSyncer {
   @override
   Future<void> sync() async {
     if (!isWidgetSupported()) {
-      debugPrint('Widget not supported on this platform, skipping update for diary');
       return;
     }
 
@@ -36,11 +35,7 @@ class DiarySyncer extends PluginWidgetSyncer {
             highlight: todayCount > 0,
             colorValue: todayCount > 0 ? Colors.deepOrange.value : null,
           ),
-          WidgetStatItem(
-            id: 'month',
-            label: '本月字数',
-            value: '$monthCount',
-          ),
+          WidgetStatItem(id: 'month', label: '本月字数', value: '$monthCount'),
           WidgetStatItem(
             id: 'progress',
             label: '本月进度',
