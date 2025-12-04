@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../controllers/nodes_controller.dart';
@@ -162,18 +163,12 @@ class NodesScreen extends StatelessWidget {
       createdAt: DateTime.now(),
     );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => ChangeNotifierProvider<NodesController>.value(
+    NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
               value: controller,
               child: NodeEditScreen(
                 notebookId: notebook.id,
                 node: newNode,
-                isNew: true,
-              ),
-            ),
+                isNew: true,),
       ),
     );
   }

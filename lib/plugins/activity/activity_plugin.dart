@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
 import '../base_plugin.dart';
@@ -93,10 +94,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     // 使用全局导航器打开活动编辑界面
     final navigator = navigatorKey.currentState;
     if (navigator != null) {
-      navigator.push(
-        MaterialPageRoute(
-          builder:
-              (context) => ActivityEditScreen(
+      navigator.push(NavigationHelper.createRoute(ActivityEditScreen(
                 activityService: activityService,
                 selectedDate: DateTime.now(),
               ),

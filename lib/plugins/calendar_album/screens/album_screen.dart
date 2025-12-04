@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/calendar_album/screens/entry_detail_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 import '../controllers/calendar_controller.dart';
@@ -90,15 +91,9 @@ class _AlbumScreenState extends State<AlbumScreen> {
                   final imageUrl = images[index];
                   return GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (context) => _PhotoViewScreen(
+                      NavigationHelper.push(context, _PhotoViewScreen(
                                 images: images,
-                                initialIndex: index,
-                              ),
-                        ),
+                                initialIndex: index,),
                       );
                     },
                     child: Hero(tag: imageUrl, child: _buildImage(imageUrl)),
@@ -197,11 +192,7 @@ class _PhotoViewScreenState extends State<_PhotoViewScreen> {
                 listen: false,
               ).getDiaryEntryForImage(currentImage);
               if (entry != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EntryDetailScreen(entry: entry),
-                  ),
+                NavigationHelper.push(context, EntryDetailScreen(entry: entry),
                 );
               }
             },

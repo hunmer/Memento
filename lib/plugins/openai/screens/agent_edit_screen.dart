@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
 import '../l10n/openai_localizations.dart';
 import '../../../utils/image_utils.dart';
@@ -25,13 +26,11 @@ class AgentEditScreen extends StatefulWidget {
   State<AgentEditScreen> createState() => _AgentEditScreenState();
 
   static Route<T> route<T>({AIAgent? agent}) {
-    return MaterialPageRoute<T>(
-      builder: (BuildContext context) {
-        return Localizations.override(
-          context: context,
-          child: AgentEditScreen(agent: agent),
-        );
-      },
+    return NavigationHelper.createRoute(
+      Localizations.override(
+        context: context,
+        child: AgentEditScreen(agent: agent),
+      ),
     );
   }
 }
@@ -192,13 +191,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   }
 
   Future<void> _selectModel() async {
-    final selectedModel = await Navigator.push<LLMModel>(
+    final selectedModel = await NavigationHelper.push<LLMModel>(
       context,
-      MaterialPageRoute(
-        builder:
-            (context) =>
-                ModelSearchScreen(initialModelId: _modelController.text),
-      ),
+      ModelSearchScreen(initialModelId: _modelController.text),
     );
 
     if (selectedModel != null) {

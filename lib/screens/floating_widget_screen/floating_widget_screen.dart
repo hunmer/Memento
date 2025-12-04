@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:Memento/core/floating_ball/floating_widget_controller.dart';
 import 'package:Memento/core/floating_ball/screens/floating_button_manager_screen.dart';
@@ -393,13 +394,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                       const SizedBox(height: 8),
                       ElevatedButton.icon(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) =>
-                                      const FloatingButtonManagerScreen(),
-                            ),
+                          NavigationHelper.push(context, const FloatingButtonManagerScreen(),
                           ).then((_) => setState(() {}));
                         },
                         icon: const Icon(Icons.touch_app),

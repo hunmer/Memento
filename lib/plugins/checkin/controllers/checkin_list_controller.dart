@@ -3,6 +3,7 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/checkin_item.dart';
 import '../screens/checkin_form_screen.dart';
@@ -194,11 +195,9 @@ class CheckinListController {
 
   // 显示编辑打卡项页面
   void showEditItemDialog(CheckinItem item) {
-    Navigator.push<CheckinItem>(
+    NavigationHelper.push<CheckinItem>(
       context,
-      MaterialPageRoute(
-        builder: (context) => CheckinFormScreen(initialItem: item),
-      ),
+      CheckinFormScreen(initialItem: item),
     ).then((updatedItem) {
       if (updatedItem != null) {
         final index = checkinItems.indexWhere((i) => i.id == updatedItem.id);
@@ -338,11 +337,9 @@ class CheckinListController {
 
   // 编辑打卡项目
   void _editCheckinItem(CheckinItem item) {
-    Navigator.push<CheckinItem>(
+    NavigationHelper.push<CheckinItem>(
       context,
-      MaterialPageRoute(
-        builder: (context) => CheckinFormScreen(initialItem: item),
-      ),
+      CheckinFormScreen(initialItem: item),
     ).then((editedItem) async {
       if (editedItem != null) {
         final index = checkinItems.indexOf(item);
@@ -657,23 +654,19 @@ class CheckinListController {
       );
     }
 
-    Navigator.push<CheckinItem>(
+    NavigationHelper.push<CheckinItem>(
       context,
-      MaterialPageRoute(
-        builder:
-            (context) => CheckinFormScreen(
-              initialItem:
-                  existingItem ??
-                  templateItem ??
-                  (group != null
-                      ? CheckinItem(
-                        name: '',
-                        group: group,
-                        icon: Icons.check_circle,
-                        color: Colors.blue,
-                      )
-                      : null),
-            ),
+      CheckinFormScreen(
+        initialItem: existingItem ??
+            templateItem ??
+            (group != null
+                ? CheckinItem(
+                    name: '',
+                    group: group,
+                    icon: Icons.check_circle,
+                    color: Colors.blue,
+                  )
+                : null),
       ),
     ).then((checkinItem) async {
       if (checkinItem != null) {

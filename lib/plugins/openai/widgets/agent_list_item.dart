@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../../utils/image_utils.dart';
 import '../models/ai_agent.dart';
 import '../screens/agent_edit_screen.dart';
@@ -31,11 +32,7 @@ class AgentListItem extends StatelessWidget {
           ],
         ),
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AgentEditScreen(agent: agent),
-            ),
+          NavigationHelper.push(context, AgentEditScreen(agent: agent),
           );
         },
       ),

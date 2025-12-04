@@ -7,6 +7,7 @@ import 'package:Memento/plugins/openai/screens/agent_edit_screen.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/plugins/openai/handlers/chat_event_handler.dart'; // 导入ValuesEventArgs
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/services.dart';
 import 'dart:io'; // 添加File类支持
 import '../../models/channel.dart';
@@ -563,14 +564,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                           .controller
                                           .getAgent(agentId);
                                       if (agent != null) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder:
-                                                (context) => AgentEditScreen(
-                                                  agent: agent,
-                                                ),
-                                          ),
+                                        NavigationHelper.push(context, AgentEditScreen(
+                                                  agent: agent,),
                                         );
                                       } else {
                                         ScaffoldMessenger.of(

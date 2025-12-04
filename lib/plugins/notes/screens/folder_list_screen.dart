@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../controllers/notes_controller.dart';
 import '../models/folder.dart';
 import '../models/note.dart';
@@ -70,12 +71,7 @@ class _FolderListScreenState extends State<FolderListScreen> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => SearchScreen(controller: widget.controller),
-                ),
+              NavigationHelper.push(context, SearchScreen(controller: widget.controller),
               );
             },
           ),
@@ -98,18 +94,13 @@ class _FolderListScreenState extends State<FolderListScreen> {
               key: ValueKey(note.id),
               note: note,
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => NoteEditScreen(
+                NavigationHelper.push(context, NoteEditScreen(
                           note: note,
                           onSave: (title, content) {
                             final updatedNote = note.copyWith(
                               title: title,
                               content: content,
-                              updatedAt: DateTime.now(),
-                            );
+                              updatedAt: DateTime.now();
                             widget.controller.updateNote(updatedNote);
                           },
                         ),
@@ -143,20 +134,14 @@ class _FolderListScreenState extends State<FolderListScreen> {
                         title: Text(NodesLocalizations.of(context).newNote),
                         onTap: () {
                           Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => NoteEditScreen(
+                          NavigationHelper.push(context, NoteEditScreen(
                                     onSave: (title, content) {
                                       widget.controller.createNote(
                                         title,
                                         content,
                                         currentFolderId,
                                       );
-                                    },
-                                  ),
-                            ),
+                                    },),
                           ).then((_) => _loadCurrentFolder());
                         },
                       ),

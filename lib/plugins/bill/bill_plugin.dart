@@ -4,6 +4,7 @@ import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:uuid/uuid.dart';
@@ -1187,10 +1188,7 @@ class _BillMainViewState extends State<BillMainView>
 
   void _checkAccountStatus() {
     if (billPlugin.accounts.isEmpty) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => AccountListScreen(billPlugin: billPlugin),
-        ),
+      NavigationHelper.pushReplacement(context, AccountListScreen(billPlugin: billPlugin),
       );
     } else if (billPlugin.selectedAccountId == null) {
       setState(() {
@@ -1324,11 +1322,7 @@ class _BillMainViewState extends State<BillMainView>
                         IconButton(
                           icon: const Icon(Icons.list),
                           onPressed: () {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => AccountListScreen(billPlugin: billPlugin),
-                              ),
+                            NavigationHelper.pushReplacement(context, AccountListScreen(billPlugin: billPlugin),
                             );
                           },
                         ),
@@ -1403,14 +1397,9 @@ class _BillMainViewState extends State<BillMainView>
               shape: const CircleBorder(),
               child: const Icon(Icons.add, color: Colors.white, size: 32),
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder:
-                        (context) => BillEditScreen(
+                NavigationHelper.push(context, BillEditScreen(
                           billPlugin: billPlugin,
-                          accountId: billPlugin.selectedAccount?.id ?? '',
-                        ),
-                  ),
+                          accountId: billPlugin.selectedAccount?.id ?? '',),
                 );
               },
             ),

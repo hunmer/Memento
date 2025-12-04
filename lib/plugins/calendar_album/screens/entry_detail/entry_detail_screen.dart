@@ -1,6 +1,7 @@
 import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/calendar_controller.dart';
 import '../../controllers/tag_controller.dart';
@@ -55,17 +56,11 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => EntryDetailEditorLauncher(
+              NavigationHelper.push(context, EntryDetailEditorLauncher(
                         calendarController: calendarController,
                         tagController: tagController,
                         initialDate: widget.date!,
-                        isEditing: false,
-                      ),
-                ),
+                        isEditing: false,),
               );
             },
           ),
@@ -84,17 +79,11 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => EntryDetailEditorLauncher(
+                NavigationHelper.push(context, EntryDetailEditorLauncher(
                           calendarController: calendarController,
                           tagController: tagController,
                           initialDate: widget.date!,
-                          isEditing: false,
-                        ),
-                  ),
+                          isEditing: false,),
                 );
               },
               icon: const Icon(Icons.add),

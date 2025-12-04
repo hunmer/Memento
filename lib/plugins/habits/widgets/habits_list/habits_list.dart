@@ -2,6 +2,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/widgets/habit_form.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habits_app_bar.dart';
@@ -37,11 +38,7 @@ class _HabitsListState extends State<HabitsList> {
 
   Future<void> _showHabitForm(BuildContext context, [Habit? habit]) async {
     final l10n = HabitsLocalizations.of(context);
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => Scaffold(
+    await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
                 title: Text(habit == null ? l10n.createHabit : l10n.editHabit),
                 actions: [
@@ -63,9 +60,7 @@ class _HabitsListState extends State<HabitsList> {
                   await widget.controller.saveHabit(habit);
                   Navigator.pop(context);
                   _loadHabits();
-                },
-              ),
-            ),
+                },),
       ),
     );
   }

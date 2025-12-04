@@ -1,6 +1,7 @@
 import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../core/plugin_base.dart';
 import '../screens/settings_screen/settings_screen.dart';
 // 导入全局实例
@@ -50,16 +51,11 @@ class AppDrawer extends StatelessWidget {
                           if (context.mounted) {
                             Navigator.pop(context); // 关闭抽屉
                             // 导航到插件设置页面
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Scaffold(
+                            NavigationHelper.push(context, Scaffold(
                                   appBar: AppBar(
                                     title: Text(
                                       plugin.getPluginName(context) ??
-                                          plugin.id,
-                                    ),
-                                  ),
+                                          plugin.id,),
                                   body: plugin.buildSettingsView(context),
                                 ),
                               ),
@@ -86,9 +82,7 @@ class AppDrawer extends StatelessWidget {
             title: Text(AppLocalizations.of(context)!.settings),
             onTap: () {
               Navigator.pop(context); // 先关闭抽屉
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              NavigationHelper.push(context, const SettingsScreen(),
               );
             },
           ),

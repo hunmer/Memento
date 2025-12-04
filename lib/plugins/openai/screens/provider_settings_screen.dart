@@ -1,6 +1,7 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../models/service_provider.dart';
 import '../controllers/provider_controller.dart';
 import 'provider_edit_screen.dart';
@@ -71,9 +72,9 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
   }
 
   Future<void> _addProvider() async {
-    final result = await Navigator.push<bool>(
+    final result = await NavigationHelper.push<bool>(
       context,
-      MaterialPageRoute(builder: (context) => const ProviderEditScreen()),
+      const ProviderEditScreen(),
     );
 
     if (result == true) {
@@ -82,11 +83,9 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
   }
 
   Future<void> _editProvider(ServiceProvider provider) async {
-    final result = await Navigator.push<bool>(
+    final result = await NavigationHelper.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (context) => ProviderEditScreen(provider: provider),
-      ),
+      ProviderEditScreen(provider: provider),
     );
 
     if (result == true) {

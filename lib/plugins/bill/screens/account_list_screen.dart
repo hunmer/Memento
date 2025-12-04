@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../bill_plugin.dart';
 import '../models/account.dart';
 import 'account_edit_screen.dart';
@@ -68,13 +69,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
         height: 64,
         child: FloatingActionButton(
           onPressed:
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (context) =>
-                          AccountEditScreen(billPlugin: widget.billPlugin),
-                ),
+              () => NavigationHelper.push(context, AccountEditScreen(billPlugin: widget.billPlugin),
               ),
           backgroundColor: Theme.of(context).primaryColor,
           elevation: 4,
@@ -231,24 +226,16 @@ class _AccountListScreenState extends State<AccountListScreen> {
     // 设置选中的账户
     widget.billPlugin.selectedAccount = account;
     // 返回到主视图并显示选中账户的账单
-    Navigator.pushReplacement(
+    NavigationHelper.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => widget.billPlugin.buildMainView(context),
-      ),
+      widget.billPlugin.buildMainView(context),
     );
   }
 
   void _editAccount(BuildContext context, Account account) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => AccountEditScreen(
+    NavigationHelper.push(context, AccountEditScreen(
               billPlugin: widget.billPlugin,
-              account: account,
-            ),
-      ),
+              account: account,),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/habits/widgets/skill_form.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
@@ -82,12 +83,8 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
 
   Future<void> _navigateToEdit(BuildContext context) async {
     final l10n = HabitsLocalizations.of(context);
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => Scaffold(
-              appBar: AppBar(title: Text(l10n.editSkill)),
+    await NavigationHelper.push(context, Scaffold(
+              appBar: AppBar(title: Text(l10n.editSkill),
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               body: SkillForm(
                 initialSkill: widget.skill,

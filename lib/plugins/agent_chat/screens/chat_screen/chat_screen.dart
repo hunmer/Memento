@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../controllers/chat_controller.dart';
 import '../../models/conversation.dart';
 import '../../models/chat_message.dart';
@@ -897,17 +898,11 @@ class _ChatScreenState extends State<ChatScreen> {
       icon: Icons.inventory_2_outlined,
     );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => ToolTemplateScreen(
+    NavigationHelper.push(context, ToolTemplateScreen(
               templateService: _templateService,
               onUseTemplate: (template) {
                 _controller.setSelectedToolTemplate(template);
-              },
-            ),
-      ),
+              },),
     );
   }
 
@@ -920,10 +915,7 @@ class _ChatScreenState extends State<ChatScreen> {
       icon: Icons.settings_outlined,
     );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ToolManagementScreen(
+    NavigationHelper.push(context, ToolManagementScreen(
           conversationId: widget.conversation.id,
           onAddToChat: (pluginId, toolId, config) async {
             await _controller.addToolToConversation(
@@ -937,7 +929,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   content: Text('已添加工具: ${config.title}'),
                   backgroundColor: Colors.green,
                   duration: const Duration(seconds: 2),
-                ),
               );
             }
           },

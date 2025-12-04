@@ -1,6 +1,7 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:flutter/material.dart' hide ListTile, Row, Center, SizedBox;
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/material.dart'
     as flutter
     show ListTile, Row, Center, SizedBox;
@@ -72,13 +73,7 @@ class GoalDetailScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) =>
-                              GoalEditPage(controller: controller, goal: goal),
-                    ),
+                  NavigationHelper.push(context, GoalEditPage(controller: controller, goal: goal),
                   );
                 },
               ),

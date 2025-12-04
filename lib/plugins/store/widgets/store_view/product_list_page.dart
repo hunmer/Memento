@@ -3,6 +3,7 @@ import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/widgets/add_product_page.dart';
 import 'package:Memento/plugins/store/widgets/product_card.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../controllers/store_controller.dart';
 
 /// 商品列表内容组件（不包含 Scaffold，用于 TabBarView）
@@ -64,14 +65,9 @@ class _ProductListContentState extends State<ProductListContent> {
         final product = uniqueProducts[index];
         return GestureDetector(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AddProductPage(
+            NavigationHelper.push(context, AddProductPage(
                   controller: widget.controller,
-                  product: product,
-                ),
-              ),
+                  product: product,),
             ).then((_) {
               if (mounted) setState(() {});
             });

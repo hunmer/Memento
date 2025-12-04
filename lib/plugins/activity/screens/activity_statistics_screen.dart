@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../services/activity_service.dart';
@@ -645,14 +646,9 @@ class _ActivityStatisticsScreenState extends State<ActivityStatisticsScreen> {
 
               return InkWell(
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder:
-                          (context) => TagStatisticsScreen(
+                  NavigationHelper.push(context, TagStatisticsScreen(
                             tagName: tag,
-                            activityService: widget.activityService,
-                          ),
-                    ),
+                            activityService: widget.activityService,),
                   );
                 },
                 child: Padding(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import '../../../controllers/nodes_controller.dart';
 import '../../../models/node.dart';
@@ -101,15 +102,14 @@ class NodeBreadcrumbs extends StatelessWidget {
                           if (!currentContext.mounted) return;
                           
                           debugPrint('【Breadcrumbs】准备打开新的编辑页面');
-                          Navigator.of(currentContext).push(
-                            MaterialPageRoute(
-                              builder: (context) => ChangeNotifierProvider<NodesController>.value(
-                                value: controller,
-                                child: NodeEditScreen(
-                                  notebookId: notebookId,
-                                  node: updatedNode,
-                                  isNew: isNew,
-                                ),
+                          NavigationHelper.push(
+                            currentContext,
+                            ChangeNotifierProvider<NodesController>.value(
+                              value: controller,
+                              child: NodeEditScreen(
+                                notebookId: notebookId,
+                                node: updatedNode,
+                                isNew: isNew,
                               ),
                             ),
                           );
@@ -205,16 +205,12 @@ class NodeBreadcrumbs extends StatelessWidget {
               if (!context.mounted) return;
               
               debugPrint('【Breadcrumbs】准备打开新的编辑页面（菜单选择后）');
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => ChangeNotifierProvider<NodesController>.value(
+              NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
                     value: controller,
                     child: NodeEditScreen(
                       notebookId: notebookId,
                       node: updatedNode,
-                      isNew: isNew,
-                    ),
-                  ),
+                      isNew: isNew,),
                 ),
               );
             } catch (e) {

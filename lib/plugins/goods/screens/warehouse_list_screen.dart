@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../goods_plugin.dart';
 import 'warehouse_detail_screen.dart';
 import '../widgets/warehouse_card.dart';
@@ -63,12 +64,7 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
               if (widget.onWarehouseTap != null) {
                 widget.onWarehouseTap!(warehouse.id);
               } else {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder:
-                        (context) =>
-                            WarehouseDetailScreen(warehouse: warehouse),
-                  ),
+                NavigationHelper.push(context, WarehouseDetailScreen(warehouse: warehouse),
                 );
               }
             },

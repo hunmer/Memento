@@ -1,6 +1,7 @@
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:Memento/plugins/todo/widgets/history_task_detail_view.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../models/task.dart';
 import '../controllers/task_controller.dart';
 
@@ -35,11 +36,7 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
           final task = widget.completedTasks[index];
           return InkWell(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HistoryTaskDetailView(task: task),
-                ),
+              NavigationHelper.push(context, HistoryTaskDetailView(task: task),
               );
             },
             child: ListTile(

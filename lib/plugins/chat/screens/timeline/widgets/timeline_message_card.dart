@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:path/path.dart' as path;
 import '../../../models/message.dart';
 import '../../../models/channel.dart';
@@ -189,19 +190,13 @@ class TimelineMessageCard extends StatelessWidget {
                             case FileMessageType.image:
                               return GestureDetector(
                                 onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder:
-                                          (BuildContext ctx) =>
-                                              FilePreviewScreen(
+                                  NavigationHelper.push(context, FilePreviewScreen(
                                                 filePath: fileInfo.filePath,
                                                 fileName: fileInfo.fileName,
                                                 mimeType:
                                                     fileInfo.mimeType ??
                                                     'image/jpeg',
-                                                fileSize: fileInfo.fileSize,
-                                              ),
-                                    ),
+                                                fileSize: fileInfo.fileSize,),
                                   );
                                 },
                                 child: Container(
@@ -238,19 +233,13 @@ class TimelineMessageCard extends StatelessWidget {
                             case FileMessageType.video:
                               return GestureDetector(
                                 onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder:
-                                          (BuildContext ctx) =>
-                                              FilePreviewScreen(
+                                  NavigationHelper.push(context, FilePreviewScreen(
                                                 filePath: fileInfo.filePath,
                                                 fileName: fileInfo.fileName,
                                                 mimeType:
                                                     fileInfo.mimeType ??
                                                     'video/mp4',
-                                                fileSize: fileInfo.fileSize,
-                                              ),
-                                    ),
+                                                fileSize: fileInfo.fileSize,),
                                   );
                                 },
                                 child: Container(
@@ -293,19 +282,13 @@ class TimelineMessageCard extends StatelessWidget {
                             default: // 文档和其他类型文件
                               return GestureDetector(
                                 onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder:
-                                          (BuildContext ctx) =>
-                                              FilePreviewScreen(
+                                  NavigationHelper.push(context, FilePreviewScreen(
                                                 filePath: fileInfo.filePath,
                                                 fileName: fileInfo.fileName,
                                                 mimeType:
                                                     fileInfo.mimeType ??
                                                     'application/octet-stream',
-                                                fileSize: fileInfo.fileSize,
-                                              ),
-                                    ),
+                                                fileSize: fileInfo.fileSize,),
                                   );
                                 },
                                 child: Row(

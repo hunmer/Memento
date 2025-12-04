@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
 import '../../core/plugin_manager.dart';
@@ -243,10 +244,9 @@ class _CheckinMainViewState extends State<CheckinMainView>
               shape: const CircleBorder(),
               child: const Icon(Icons.add, color: Colors.white, size: 32),
               onPressed: () async {
-                final newItem = await Navigator.of(context).push<CheckinItem>(
-                  MaterialPageRoute(
-                    builder: (context) => const CheckinFormScreen(),
-                  ),
+                final newItem = await NavigationHelper.push<CheckinItem>(
+                  context,
+                  const CheckinFormScreen(),
                 );
 
                 if (newItem != null) {

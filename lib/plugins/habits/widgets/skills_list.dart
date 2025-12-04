@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
@@ -174,16 +175,10 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
                           '$count completions • ${HabitsUtils.formatDuration(duration)}',
                         ),
                         onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) => SkillDetailPage(
+                          await NavigationHelper.push(context, SkillDetailPage(
                                     skill: skill,
                                     skillController: widget.skillController,
-                                    recordController: widget.recordController,
-                                  ),
-                            ),
+                                    recordController: widget.recordController,),
                           );
                           if (mounted) _loadSkills();
                         },
@@ -246,17 +241,11 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
                         return Card(
                           child: InkWell(
                             onTap: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => SkillDetailPage(
+                              await NavigationHelper.push(context, SkillDetailPage(
                                         skill: skill,
                                         skillController: widget.skillController,
                                         recordController:
-                                            widget.recordController,
-                                      ),
-                                ),
+                                            widget.recordController,),
                               );
                               if (mounted) _loadSkills();
                             },
@@ -472,11 +461,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
 
   Future<void> _showSkillForm(BuildContext context, [Skill? skill]) async {
     final l10n = HabitsLocalizations.of(context);
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => Scaffold(
+    await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
                 title: Text(skill == null ? l10n.createSkill : l10n.editSkill),
                 actions: [
@@ -498,9 +483,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
                   await widget.skillController.saveSkill(skill);
                   Navigator.pop(context);
                   _loadSkills();
-                },
-              ),
-            ),
+                },),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:Memento/plugins/store/widgets/add_product_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import '../store_plugin.dart';
 
@@ -73,11 +74,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
 
   /// 添加商品
   Future<void> _addProduct() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder:
-            (context) => AddProductPage(controller: widget.plugin.controller),
-      ),
+    await NavigationHelper.push(context, AddProductPage(controller: widget.plugin.controller),
     );
   }
 

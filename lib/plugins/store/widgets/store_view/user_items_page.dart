@@ -3,6 +3,7 @@ import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:Memento/plugins/store/widgets/user_item_card.dart';
 import 'package:Memento/plugins/store/widgets/user_item_detail_page.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../controllers/store_controller.dart';
 
 /// 我的物品内容组件（不包含 Scaffold，用于 TabBarView）
@@ -82,14 +83,9 @@ class _UserItemsContentState extends State<UserItemsContent> {
                 .where((item) => item.productId == group.item.productId)
                 .toList();
 
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => UserItemDetailPage(
+            NavigationHelper.push(context, UserItemDetailPage(
                   controller: widget.controller,
-                  items: sameTypeItems,
-                ),
-              ),
+                  items: sameTypeItems,),
             ).then((_) {
               if (mounted) setState(() {});
             });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -236,16 +237,11 @@ class _AgentChatMainViewState extends State<AgentChatMainView> {
       );
 
       // 导航到聊天界面
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatScreen(
+      await NavigationHelper.push(context, ChatScreen(
             conversation: conversation,
             storage: controller.storage,
             conversationService: controller.conversationService,
-            getSettings: () => plugin.settings,
-          ),
-        ),
+            getSettings: () => plugin.settings,),
       );
     } catch (e) {
       if (mounted) {

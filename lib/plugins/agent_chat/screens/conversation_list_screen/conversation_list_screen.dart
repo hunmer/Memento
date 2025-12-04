@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../agent_chat_plugin.dart';
 import '../../controllers/conversation_controller.dart';
 import '../../models/conversation.dart';
@@ -82,12 +83,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
 
   /// 打开设置页面
   void _openSettings() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => Scaffold(
-              appBar: AppBar(title: const Text('设置')),
+    NavigationHelper.push(context, Scaffold(
+              appBar: AppBar(title: const Text('设置'),
               body: AgentChatSettingsScreen(plugin: AgentChatPlugin.instance),
             ),
       ),
@@ -103,9 +100,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       icon: Icons.settings_outlined,
     );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const ToolManagementScreen()),
+    NavigationHelper.push(context, const ToolManagementScreen(),
     );
   }
 
@@ -118,15 +113,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       icon: Icons.inventory_2_outlined,
     );
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => ToolTemplateScreen(
+    NavigationHelper.push(context, ToolTemplateScreen(
               templateService: _templateService,
-              // 不传递 onUseTemplate，隐藏"使用"按钮
-            ),
-      ),
+              // 不传递 onUseTemplate，隐藏"使用"按钮),
     );
   }
 
@@ -369,17 +358,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       final latestConversation =
           _controller.currentConversation ?? conversation;
       // 导航到聊天页面，传递共享的conversationService以保持缓存同步
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder:
-              (context) => ChatScreen(
+      await NavigationHelper.push(context, ChatScreen(
                 conversation: latestConversation,
                 storage: _controller.storage,
                 conversationService: _controller.conversationService,
-                getSettings: () => AgentChatPlugin.instance.settings,
-              ),
-        ),
+                getSettings: () => AgentChatPlugin.instance.settings,),
       );
     }
   }

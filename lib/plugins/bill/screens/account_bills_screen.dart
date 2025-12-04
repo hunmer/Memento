@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../models/bill.dart';
 import 'bill_edit_screen.dart' as bill_edit;
 import '../bill_plugin.dart';
@@ -220,37 +221,25 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
   }
 
   void _createBill(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => bill_edit.BillEditScreen(
+    NavigationHelper.push(context, bill_edit.BillEditScreen(
               billPlugin: widget.billPlugin,
               accountId: _currentAccount.id,
               onSaved: () {
                 // 强制更新列表
                 _refreshAccountData();
-              },
-            ),
-      ),
+              },),
     );
   }
 
   void _editBill(BuildContext context, Bill bill) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => bill_edit.BillEditScreen(
+    NavigationHelper.push(context, bill_edit.BillEditScreen(
               billPlugin: widget.billPlugin,
               accountId: _currentAccount.id,
               bill: bill,
               onSaved: () {
                 // 强制更新列表
                 _refreshAccountData();
-              },
-            ),
-      ),
+              },),
     );
   }
 

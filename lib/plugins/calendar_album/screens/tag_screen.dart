@@ -1,5 +1,6 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import '../controllers/tag_controller.dart';
 import '../controllers/calendar_controller.dart';
@@ -116,41 +117,37 @@ class _TagScreenState extends State<TagScreen> {
                             .toList(),
                       ),
                       onTap: (entry) {
-                        Navigator.of(context).push<void>(
-                          MaterialPageRoute<void>(
-                            builder:
-                                (context) => MultiProvider(
-                                  providers: [
-                                    ChangeNotifierProvider<
-                                      CalendarController
-                                    >.value(value: calendarController),
-                                    ChangeNotifierProvider<TagController>.value(
-                                      value: tagController,
-                                    ),
-                                  ],
-                                  child: EntryDetailScreen(entry: entry),
-                                ),
+                        NavigationHelper.push<void>(
+                          context,
+                          MultiProvider(
+                            providers: [
+                              ChangeNotifierProvider<CalendarController>.value(
+                                value: calendarController,
+                              ),
+                              ChangeNotifierProvider<TagController>.value(
+                                value: tagController,
+                              ),
+                            ],
+                            child: EntryDetailScreen(entry: entry),
                           ),
                         );
                       },
                       onEdit: (entry) {
-                        Navigator.of(context).push<void>(
-                          MaterialPageRoute<void>(
-                            builder:
-                                (context) => MultiProvider(
-                                  providers: [
-                                    ChangeNotifierProvider<
-                                      CalendarController
-                                    >.value(value: calendarController),
-                                    ChangeNotifierProvider<TagController>.value(
-                                      value: tagController,
-                                    ),
-                                  ],
-                                  child: EntryEditorScreen(
-                                    entry: entry,
-                                    isEditing: true,
-                                  ),
-                                ),
+                        NavigationHelper.push<void>(
+                          context,
+                          MultiProvider(
+                            providers: [
+                              ChangeNotifierProvider<CalendarController>.value(
+                                value: calendarController,
+                              ),
+                              ChangeNotifierProvider<TagController>.value(
+                                value: tagController,
+                              ),
+                            ],
+                            child: EntryEditorScreen(
+                              entry: entry,
+                              isEditing: true,
+                            ),
                           ),
                         );
                       },

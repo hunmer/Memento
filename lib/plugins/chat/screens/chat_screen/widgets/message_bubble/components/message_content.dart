@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/quill_viewer/index.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import '../../../../../../../plugins/chat/models/message.dart';
@@ -122,15 +123,11 @@ class MessageContent extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext ctx) => FilePreviewScreen(
+              NavigationHelper.push(context, FilePreviewScreen(
                     filePath: filePath,
                     fileName: fileName,
                     mimeType: mimeType,
-                    fileSize: fileSize,
-                  ),
-                ),
+                    fileSize: fileSize,),
               );
             },
             child: Column(
@@ -218,15 +215,11 @@ class MessageContent extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext ctx) => FilePreviewScreen(
+              NavigationHelper.push(context, FilePreviewScreen(
                     filePath: filePath,
                     fileName: fileName,
                     mimeType: mimeType,
-                    fileSize: fileSize,
-                  ),
-                ),
+                    fileSize: fileSize,),
               );
             },
             child: Padding(

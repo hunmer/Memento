@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../models/channel.dart';
 import '../../chat_plugin.dart';
 import '../../l10n/chat_localizations.dart';
@@ -150,9 +151,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
 
   void _navigateToChat(Channel channel) {
     widget.chatPlugin.channelService.setCurrentChannel(channel);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ChatScreen(channel: channel)),
+    NavigationHelper.push(context, ChatScreen(channel: channel),
     );
   }
 }

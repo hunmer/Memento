@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../base_plugin.dart';
 
 import '../../core/plugin_manager.dart';
@@ -704,10 +705,7 @@ class ContactMainViewState extends State<ContactMainView> {
 
     Contact? savedContact;
 
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder:
-            (context) => Scaffold(
+    await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
                 leading: TextButton(
                   child: Text(ContactLocalizations.of(context).cancel),
@@ -736,7 +734,7 @@ class ContactMainViewState extends State<ContactMainView> {
 
                       // a small delay to allow savedContact to be set
 
-                      await Future.delayed(const Duration(milliseconds: 50));
+                      await Future.delayed(const Duration(milliseconds: 50);
 
                       if (savedContact != null) {
                         try {

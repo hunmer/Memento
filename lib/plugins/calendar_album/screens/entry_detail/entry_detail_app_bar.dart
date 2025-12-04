@@ -1,6 +1,7 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/calendar_album/screens/entry_detail_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../controllers/calendar_controller.dart';
 import '../../controllers/tag_controller.dart';
 import '../../models/calendar_entry.dart';
@@ -29,24 +30,18 @@ class EntryDetailAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(Icons.edit),
           onPressed: () async {
-            final updatedEntry = await Navigator.push<CalendarEntry?>(
+            final updatedEntry = await NavigationHelper.push<CalendarEntry?>(
               context,
-              MaterialPageRoute(
-                builder:
-                    (context) => EntryDetailEditorLauncher(
-                      calendarController: calendarController,
-                      tagController: tagController,
-                      entry: entry,
-                      isEditing: true,
-                    ),
+              EntryDetailEditorLauncher(
+                calendarController: calendarController,
+                tagController: tagController,
+                entry: entry,
+                isEditing: true,
               ),
             );
 
             if (updatedEntry != null && context.mounted) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => EntryDetailScreen(entry: updatedEntry),
-                ),
+              NavigationHelper.pushReplacement(context, EntryDetailScreen(entry: updatedEntry),
               );
             }
           },
