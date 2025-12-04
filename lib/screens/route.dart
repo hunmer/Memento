@@ -10,7 +10,6 @@ import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart'
 import 'package:Memento/screens/notification_test/notification_test_page.dart';
 import 'package:Memento/screens/super_cupertino_test_screen/super_cupertino_test_screen.dart';
 import 'package:Memento/screens/floating_widget_screen/floating_widget_screen.dart';
-import 'package:Memento/screens/widgets_config_screen/widgets_config_screen.dart';
 import 'package:Memento/screens/intent_test_screen/intent_test_screen.dart';
 
 // 插件路由导入
@@ -104,7 +103,6 @@ class AppRoutes extends NavigatorObserver {
   static const String todo = '/todo';
   static const String tracker = '/tracker';
   static const String floatingBall = '/floating_ball';
-  static const String widgetsConfig = '/widgets_config';
 
   // Agent Chat 子页面路由
   static const String toolTemplate = '/tool_template';
@@ -129,7 +127,8 @@ class AppRoutes extends NavigatorObserver {
   static const String trackerGoalSelector = '/tracker_goal_selector';
 
   // 目标追踪进度条小组件配置路由
-  static const String trackerGoalProgressSelector = '/tracker_goal_progress_selector';
+  static const String trackerGoalProgressSelector =
+      '/tracker_goal_progress_selector';
 
   // 习惯计时器小组件配置路由
   static const String habitTimerSelector = '/habit_timer_selector';
@@ -199,7 +198,8 @@ class AppRoutes extends NavigatorObserver {
         // 支持通过 conversationId 参数直接打开指定对话
         String? conversationId;
         if (settings.arguments is Map<String, String>) {
-          conversationId = (settings.arguments as Map<String, String>)['conversationId'];
+          conversationId =
+              (settings.arguments as Map<String, String>)['conversationId'];
         } else if (settings.arguments is String) {
           conversationId = settings.arguments as String;
         }
@@ -226,12 +226,14 @@ class AppRoutes extends NavigatorObserver {
             // 解析参数
             final String? accountId = args['accountId'] as String?;
             final String? category = args['category'] as String?;
-            final double? amount = args['amount'] != null
-                ? double.tryParse(args['amount'].toString())
-                : null;
-            final bool? isExpense = args['isExpense'] != null
-                ? (args['isExpense'].toString().toLowerCase() == 'true')
-                : null;
+            final double? amount =
+                args['amount'] != null
+                    ? double.tryParse(args['amount'].toString())
+                    : null;
+            final bool? isExpense =
+                args['isExpense'] != null
+                    ? (args['isExpense'].toString().toLowerCase() == 'true')
+                    : null;
 
             // 如果缺少必需的 accountId，回退到主视图
             if (accountId == null || accountId.isEmpty) {
@@ -240,13 +242,15 @@ class AppRoutes extends NavigatorObserver {
             }
 
             // 打开账单编辑页面并传递预填充参数
-            return _createRoute(BillEditScreen(
-              billPlugin: billPlugin,
-              accountId: accountId,
-              initialCategory: category,
-              initialAmount: amount,
-              initialIsExpense: isExpense,
-            ));
+            return _createRoute(
+              BillEditScreen(
+                billPlugin: billPlugin,
+                accountId: accountId,
+                initialCategory: category,
+                initialAmount: amount,
+                initialIsExpense: isExpense,
+              ),
+            );
           }
         }
 
@@ -300,9 +304,6 @@ class AppRoutes extends NavigatorObserver {
       case '/floating_ball':
       case 'floating_ball':
         return _createRoute(const FloatingBallScreen());
-      case '/widgets_config':
-      case 'widgets_config':
-        return _createRoute(const WidgetsConfigScreen());
       case '/js_console':
       case 'js_console':
         return _createRoute(const JSConsoleScreen());
@@ -368,7 +369,8 @@ class AppRoutes extends NavigatorObserver {
         }
 
         return _createRoute(
-            TrackerGoalSelectorScreen(widgetId: trackerWidgetId));
+          TrackerGoalSelectorScreen(widgetId: trackerWidgetId),
+        );
       case '/tracker_goal_progress_selector':
       case 'tracker_goal_progress_selector':
         // 目标追踪进度条小组件配置界面
@@ -389,7 +391,8 @@ class AppRoutes extends NavigatorObserver {
         }
 
         return _createRoute(
-            TrackerGoalProgressSelectorScreen(widgetId: trackerProgressWidgetId));
+          TrackerGoalProgressSelectorScreen(widgetId: trackerProgressWidgetId),
+        );
       case '/habit_timer_selector':
       case 'habit_timer_selector':
         // 习惯计时器小组件配置界面
@@ -410,7 +413,8 @@ class AppRoutes extends NavigatorObserver {
         }
 
         return _createRoute(
-            HabitTimerSelectorScreen(widgetId: habitTimerWidgetId));
+          HabitTimerSelectorScreen(widgetId: habitTimerWidgetId),
+        );
       case '/bill_shortcuts_selector':
       case 'bill_shortcuts_selector':
         // 快捷记账小组件配置界面
@@ -431,7 +435,8 @@ class AppRoutes extends NavigatorObserver {
         }
 
         return _createRoute(
-            BillShortcutsSelectorScreen(widgetId: billShortcutsWidgetId ?? 0));
+          BillShortcutsSelectorScreen(widgetId: billShortcutsWidgetId ?? 0),
+        );
       case '/activity_weekly_config':
       case 'activity_weekly_config':
         // 活动周视图小组件配置界面
@@ -455,15 +460,14 @@ class AppRoutes extends NavigatorObserver {
           return _createRoute(
             Scaffold(
               appBar: AppBar(title: const Text('错误')),
-              body: const Center(
-                child: Text('错误: widgetId 参数缺失'),
-              ),
+              body: const Center(child: Text('错误: widgetId 参数缺失')),
             ),
           );
         }
 
         return _createRoute(
-            ActivityWeeklyConfigScreen(widgetId: activityWeeklyWidgetId));
+          ActivityWeeklyConfigScreen(widgetId: activityWeeklyWidgetId),
+        );
       case '/activity_daily_config':
       case 'activity_daily_config':
         // 活动日视图小组件配置界面
@@ -487,15 +491,14 @@ class AppRoutes extends NavigatorObserver {
           return _createRoute(
             Scaffold(
               appBar: AppBar(title: const Text('错误')),
-              body: const Center(
-                child: Text('错误: widgetId 参数缺失'),
-              ),
+              body: const Center(child: Text('错误: widgetId 参数缺失')),
             ),
           );
         }
 
         return _createRoute(
-            ActivityDailyConfigScreen(widgetId: activityDailyWidgetId));
+          ActivityDailyConfigScreen(widgetId: activityDailyWidgetId),
+        );
       case '/habits_weekly_config':
       case 'habits_weekly_config':
         // 习惯周视图小组件配置界面
@@ -519,15 +522,14 @@ class AppRoutes extends NavigatorObserver {
           return _createRoute(
             Scaffold(
               appBar: AppBar(title: const Text('错误')),
-              body: const Center(
-                child: Text('错误: widgetId 参数缺失'),
-              ),
+              body: const Center(child: Text('错误: widgetId 参数缺失')),
             ),
           );
         }
 
         return _createRoute(
-            HabitsWeeklyConfigScreen(widgetId: habitsWeeklyWidgetId));
+          HabitsWeeklyConfigScreen(widgetId: habitsWeeklyWidgetId),
+        );
       case '/habit_group_list_selector':
       case 'habit_group_list_selector':
         // 习惯分组列表小组件配置界面
@@ -548,7 +550,8 @@ class AppRoutes extends NavigatorObserver {
         }
 
         return _createRoute(
-            HabitGroupListSelectorScreen(widgetId: habitGroupListWidgetId));
+          HabitGroupListSelectorScreen(widgetId: habitGroupListWidgetId),
+        );
       case '/habit_timer_dialog':
       case 'habit_timer_dialog':
         // 习惯计时器对话框（从小组件打开）
@@ -563,22 +566,17 @@ class AppRoutes extends NavigatorObserver {
 
         if (habitId == null) {
           return _createRoute(
-            Scaffold(
-              body: Center(
-                child: Text('Error: habitId is required'),
-              ),
-            ),
+            Scaffold(body: Center(child: Text('Error: habitId is required'))),
           );
         }
 
         // 获取 HabitsPlugin 实例
-        final habitsPlugin = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+        final habitsPlugin =
+            PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
         if (habitsPlugin == null) {
           return _createRoute(
             Scaffold(
-              body: Center(
-                child: Text('Error: HabitsPlugin not found'),
-              ),
+              body: Center(child: Text('Error: HabitsPlugin not found')),
             ),
           );
         }
@@ -609,7 +607,9 @@ class AppRoutes extends NavigatorObserver {
               child: TimerDialog(
                 habit: habit,
                 controller: habitController,
-                initialTimerData: habitsPlugin.timerController.getTimerData(habitId),
+                initialTimerData: habitsPlugin.timerController.getTimerData(
+                  habitId,
+                ),
               ),
             ),
           ),
@@ -623,7 +623,9 @@ class AppRoutes extends NavigatorObserver {
         if (settings.arguments is Map<String, String>) {
           eventId = (settings.arguments as Map<String, String>)['eventId'];
         } else if (settings.arguments is Map<String, dynamic>) {
-          eventId = (settings.arguments as Map<String, dynamic>)['eventId'] as String?;
+          eventId =
+              (settings.arguments as Map<String, dynamic>)['eventId']
+                  as String?;
         }
 
         // 备用：从 URI 中解析 eventId
@@ -650,20 +652,24 @@ class AppRoutes extends NavigatorObserver {
         final calendarController = calendarPlugin.controller;
         List<CalendarEvent> allEvents = calendarController.getAllEvents();
 
-        CalendarEvent? event = allEvents.where((e) => e.id == eventId).isNotEmpty
-            ? allEvents.firstWhere((e) => e.id == eventId)
-            : null;
+        CalendarEvent? event =
+            allEvents.where((e) => e.id == eventId).isNotEmpty
+                ? allEvents.firstWhere((e) => e.id == eventId)
+                : null;
 
         // 如果在日历中找不到事件，尝试从Todo插件中查找（针对todo_前缀的ID）
         if (event == null && eventId.startsWith('todo_')) {
           final todoPlugin = TodoPlugin.instance;
           // 提取真正的任务ID（去掉 todo_ 前缀）
           final taskId = eventId.substring(5);
-          final task = todoPlugin.taskController.tasks
-              .where((t) => t.id == taskId)
-              .isNotEmpty
-              ? todoPlugin.taskController.tasks.firstWhere((t) => t.id == taskId)
-              : null;
+          final task =
+              todoPlugin.taskController.tasks
+                      .where((t) => t.id == taskId)
+                      .isNotEmpty
+                  ? todoPlugin.taskController.tasks.firstWhere(
+                    (t) => t.id == taskId,
+                  )
+                  : null;
 
           if (task != null) {
             // 将 Todo 任务转换为 CalendarEvent
@@ -687,15 +693,13 @@ class AppRoutes extends NavigatorObserver {
                   event: eventData,
                   onEdit: () {
                     // 编辑事件
-                    Navigator.of(navigatorKey.currentContext!)
-                        .pop();
+                    Navigator.of(navigatorKey.currentContext!).pop();
                     if (isTodoEvent && taskId != null) {
                       // Todo 任务事件不允许编辑
-                      ScaffoldMessenger.of(navigatorKey.currentContext!)
-                          .showSnackBar(
-                        const SnackBar(
-                          content: Text('任务事件不支持编辑，请前往待办事项中修改'),
-                        ),
+                      ScaffoldMessenger.of(
+                        navigatorKey.currentContext!,
+                      ).showSnackBar(
+                        const SnackBar(content: Text('任务事件不支持编辑，请前往待办事项中修改')),
                       );
                     } else {
                       // 普通日历事件可以编辑
@@ -707,8 +711,7 @@ class AppRoutes extends NavigatorObserver {
                   },
                   onComplete: () {
                     // 标记事件为完成
-                    Navigator.of(navigatorKey.currentContext!)
-                        .pop();
+                    Navigator.of(navigatorKey.currentContext!).pop();
                     if (isTodoEvent && taskId != null) {
                       // Todo 任务事件：标记任务为完成
                       final todoPlugin = TodoPlugin.instance;
@@ -723,8 +726,7 @@ class AppRoutes extends NavigatorObserver {
                   },
                   onDelete: () {
                     // 删除事件
-                    Navigator.of(navigatorKey.currentContext!)
-                        .pop();
+                    Navigator.of(navigatorKey.currentContext!).pop();
                     if (isTodoEvent && taskId != null) {
                       // Todo 任务事件：删除任务
                       final todoPlugin = TodoPlugin.instance;
@@ -732,11 +734,10 @@ class AppRoutes extends NavigatorObserver {
                         taskId,
                         TaskStatus.done,
                       );
-                      ScaffoldMessenger.of(navigatorKey.currentContext!)
-                          .showSnackBar(
-                        const SnackBar(
-                          content: Text('任务已完成并移入历史记录'),
-                        ),
+                      ScaffoldMessenger.of(
+                        navigatorKey.currentContext!,
+                      ).showSnackBar(
+                        const SnackBar(content: Text('任务已完成并移入历史记录')),
                       );
                     } else {
                       // 普通日历事件
@@ -759,7 +760,8 @@ class AppRoutes extends NavigatorObserver {
 
         // 从 arguments 中解析 tag 参数
         if (settings.arguments is Map<String, dynamic>) {
-          tagName = (settings.arguments as Map<String, dynamic>)['tag'] as String?;
+          tagName =
+              (settings.arguments as Map<String, dynamic>)['tag'] as String?;
         } else if (settings.arguments is String) {
           tagName = settings.arguments as String;
         }
@@ -772,7 +774,8 @@ class AppRoutes extends NavigatorObserver {
         }
 
         // 获取活动插件实例
-        final activityPlugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+        final activityPlugin =
+            PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
         if (activityPlugin == null) {
           debugPrint('ActivityPlugin 未初始化，回退到主视图');
           return _createRoute(const ActivityMainView());
@@ -820,8 +823,8 @@ class AppRoutes extends NavigatorObserver {
     todo: (context) => const TodoMainView(),
     tracker: (context) => const TrackerMainView(),
     floatingBall: (context) => const FloatingBallScreen(),
-    widgetsConfig: (context) => const WidgetsConfigScreen(),
-    activityDailyConfig: (context) => const ActivityDailyConfigScreen(widgetId: 0),
+    activityDailyConfig:
+        (context) => const ActivityDailyConfigScreen(widgetId: 0),
     jsConsole: (context) => const JSConsoleScreen(),
     jsonDynamicTest: (context) => const JsonDynamicTestScreen(),
     notificationTest: (context) => const NotificationTestPage(),
