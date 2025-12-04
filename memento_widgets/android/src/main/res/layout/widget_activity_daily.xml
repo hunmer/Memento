@@ -86,7 +86,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
                     <!-- 上午活动条 -->
-                    <View
+                    <TextView
                         android:id="@+id/am_bar_0"
                         android:layout_width="0dp"
                         android:layout_height="8dp"
@@ -109,7 +109,7 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_0_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -117,7 +117,7 @@
                             android:background="@drawable/widget_activity_daily_dot"
                             android:backgroundTint="#FECACA"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_0_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -136,7 +136,7 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
-                    <View
+                    <TextView
                         android:id="@+id/am_bar_1"
                         android:layout_width="0dp"
                         android:layout_height="8dp"
@@ -157,14 +157,14 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_1_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
                             android:layout_marginStart="2dp"
                             android:background="@drawable/widget_activity_daily_dot"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_1_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -182,7 +182,7 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
-                    <View
+                    <TextView
                         android:id="@+id/am_bar_2"
                         android:layout_width="0dp"
                         android:layout_height="8dp"
@@ -203,14 +203,14 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_2_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
                             android:layout_marginStart="2dp"
                             android:background="@drawable/widget_activity_daily_dot"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_2_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -228,7 +228,7 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
-                    <View
+                    <TextView
                         android:id="@+id/am_bar_3"
                         android:layout_width="0dp"
                         android:layout_height="8dp"
@@ -249,14 +249,14 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_3_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
                             android:layout_marginStart="2dp"
                             android:background="@drawable/widget_activity_daily_dot"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_3_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -274,7 +274,7 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
-                    <View
+                    <TextView
                         android:id="@+id/am_bar_4"
                         android:layout_width="0dp"
                         android:layout_height="8dp"
@@ -295,14 +295,14 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_4_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
                             android:layout_marginStart="2dp"
                             android:background="@drawable/widget_activity_daily_dot"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_4_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -320,7 +320,7 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
-                    <View
+                    <TextView
                         android:id="@+id/am_bar_5"
                         android:layout_width="0dp"
                         android:layout_height="8dp"
@@ -341,14 +341,14 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_5_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
                             android:layout_marginStart="2dp"
                             android:background="@drawable/widget_activity_daily_dot"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_5_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -366,7 +366,7 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
-                    <View
+                    <TextView
                         android:id="@+id/am_bar_6"
                         android:layout_width="0dp"
                         android:layout_height="8dp"
@@ -387,14 +387,14 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_6_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
                             android:layout_marginStart="2dp"
                             android:background="@drawable/widget_activity_daily_dot"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_6_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -412,7 +412,7 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
-                    <View
+                    <TextView
                         android:id="@+id/am_bar_7"
                         android:layout_width="0dp"
                         android:layout_height="8dp"
@@ -433,14 +433,14 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_7_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
                             android:layout_marginStart="2dp"
                             android:background="@drawable/widget_activity_daily_dot"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_7_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -465,7 +465,7 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="start|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/am_dot_8_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -473,7 +473,7 @@
                             android:background="@drawable/widget_activity_daily_dot"
                             android:backgroundTint="#E5E7EB"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/am_dot_8_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -496,14 +496,14 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_8_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
                             android:layout_marginStart="2dp"
                             android:background="@drawable/widget_activity_daily_dot"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_8_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -521,7 +521,7 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
-                    <View
+                    <TextView
                         android:id="@+id/am_bar_9"
                         android:layout_width="0dp"
                         android:layout_height="8dp"
@@ -542,14 +542,14 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_9_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
                             android:layout_marginStart="2dp"
                             android:background="@drawable/widget_activity_daily_dot"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_9_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -567,7 +567,7 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
-                    <View
+                    <TextView
                         android:id="@+id/am_bar_10"
                         android:layout_width="0dp"
                         android:layout_height="8dp"
@@ -588,14 +588,14 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_10_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
                             android:layout_marginStart="2dp"
                             android:background="@drawable/widget_activity_daily_dot"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_10_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -613,7 +613,7 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
-                    <View
+                    <TextView
                         android:id="@+id/am_bar_11"
                         android:layout_width="0dp"
                         android:layout_height="8dp"
@@ -634,14 +634,14 @@
                         android:layout_weight="1"
                         android:orientation="horizontal"
                         android:gravity="end|center_vertical">
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_11_1"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
                             android:layout_marginStart="2dp"
                             android:background="@drawable/widget_activity_daily_dot"
                             android:visibility="gone" />
-                        <View
+                        <TextView
                             android:id="@+id/pm_dot_11_2"
                             android:layout_width="6dp"
                             android:layout_height="6dp"
@@ -700,7 +700,7 @@
                 </LinearLayout>
 
                 <!-- 中间间隔 -->
-                <View
+                <TextView
                     android:layout_width="20dp"
                     android:layout_height="1dp" />
 
@@ -762,7 +762,7 @@
                     android:gravity="center_vertical"
                     android:paddingTop="2dp"
                     android:paddingBottom="2dp">
-                    <View
+                    <TextView
                         android:id="@+id/stat_dot_1"
                         android:layout_width="8dp"
                         android:layout_height="8dp"
@@ -796,7 +796,7 @@
                     android:gravity="center_vertical"
                     android:paddingTop="2dp"
                     android:paddingBottom="2dp">
-                    <View
+                    <TextView
                         android:id="@+id/stat_dot_2"
                         android:layout_width="8dp"
                         android:layout_height="8dp"
@@ -830,7 +830,7 @@
                     android:gravity="center_vertical"
                     android:paddingTop="2dp"
                     android:paddingBottom="2dp">
-                    <View
+                    <TextView
                         android:id="@+id/stat_dot_3"
                         android:layout_width="8dp"
                         android:layout_height="8dp"
@@ -864,7 +864,7 @@
                     android:gravity="center_vertical"
                     android:paddingTop="2dp"
                     android:paddingBottom="2dp">
-                    <View
+                    <TextView
                         android:id="@+id/stat_dot_4"
                         android:layout_width="8dp"
                         android:layout_height="8dp"
@@ -892,7 +892,7 @@
         </LinearLayout>
 
         <!-- 分隔线 -->
-        <View
+        <TextView
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:layout_marginTop="4dp"

@@ -64,14 +64,17 @@
             android:textStyle="bold"
             android:paddingBottom="8dp" />
 
-        <!-- 习惯列表 ListView -->
-        <ListView
-            android:id="@+id/habit_list_view"
+        <!-- 习惯列表 GridView -->
+        <GridView
+            android:id="@+id/habit_grid_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:divider="@null"
-            android:dividerHeight="0dp"
+            android:numColumns="2"
+            android:verticalSpacing="4dp"
+            android:horizontalSpacing="4dp"
+            android:stretchMode="columnWidth"
+            android:gravity="center"
             android:scrollbars="none"
             android:listSelector="@android:color/transparent" />
 

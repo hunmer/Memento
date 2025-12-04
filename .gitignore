@@ -72,3 +72,4 @@ app.*.map.json
 !README.md
 flutter-js/
 nul
+png/

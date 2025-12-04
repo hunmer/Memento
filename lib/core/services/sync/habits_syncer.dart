@@ -9,6 +9,7 @@ import '../../plugin_manager.dart';
 import 'plugin_widget_syncer.dart';
 import 'package:memento_widgets/memento_widgets.dart';
 import '../system_widget_service.dart';
+import 'icon_name_mapper.dart';
 
 /// 习惯插件同步器
 class HabitsSyncer extends PluginWidgetSyncer {
@@ -260,19 +261,23 @@ class HabitsSyncer extends PluginWidgetSyncer {
 
       // 构建分组数据
       final groupsData = skills.map((skill) {
+        // 将Material Icon codePoint转换为图标名称
+        final iconName = IconNameMapper.getIconName(skill.icon);
         return {
           'id': skill.id,
           'name': skill.title,
-          'icon': skill.icon ?? '📂',
+          'icon': iconName,
         };
       }).toList();
 
       // 构建习惯数据
       final habitsData = habits.map((habit) {
+        // 将Material Icon codePoint转换为图标名称
+        final iconName = IconNameMapper.getIconName(habit.icon);
         return {
           'id': habit.id,
           'title': habit.title,
-          'icon': habit.icon,
+          'icon': iconName,
           'group': habit.skillId,
           'completed': false, // TODO: 从完成记录中获取今日完成状态
         };

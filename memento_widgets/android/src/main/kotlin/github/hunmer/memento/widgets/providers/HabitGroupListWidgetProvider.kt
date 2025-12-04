@@ -6,12 +6,16 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.Toast
 import github.hunmer.memento_widgets.R
 import github.hunmer.memento.widgets.BasePluginWidgetProvider
+import github.hunmer.memento.widgets.services.HabitGroupListRemoteViewsFactory
+import github.hunmer.memento.widgets.services.HabitGroupListWidgetService
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -22,11 +26,10 @@ import org.json.JSONObject
  * 交互逻辑：
  * - 点击分组：切换显示该分组下的习惯
  * - 点击习惯：跳转到习惯计时器界面
- * - 点击 checkbox：标记习惯为完成（暂不实现）
  */
 class HabitGroupListWidgetProvider : BasePluginWidgetProvider() {
     override val pluginId: String = "habit_group_list"
-    override val widgetSize: WidgetSize = WidgetSize.SIZE_4X3
+    override val widgetSize: WidgetSize = WidgetSize.SIZE_4X2
 
     companion object {
         private const val TAG = "HabitGroupListWidget"
@@ -59,15 +62,36 @@ class HabitGroupListWidgetProvider : BasePluginWidgetProvider() {
             val componentName = ComponentName(context, HabitGroupListWidgetProvider::class.java)
             val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
 
+            if (appWidgetIds.isEmpty()) {
+                Log.d(TAG, "refreshAllWidgets: no widgets found")
+                return
+            }
+
             // 触发小组件更新
             val intent = Intent(context, HabitGroupListWidgetProvider::class.java)
             intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
             context.sendBroadcast(intent)
 
-            // 通知列表数据已更改
-            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.group_list_view)
-            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.habit_list_view)
+            // 延迟通知数据变化，给Flutter端时间完成数据同步
+            Handler(Looper.getMainLooper()).postDelayed({
+                for (appWidgetId in appWidgetIds) {
+                    // 检查数据是否存在
+                    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    val widgetData = prefs.getString("habit_group_list_widget_data", null)
+
+                    if (!widgetData.isNullOrEmpty()) {
+                        // 数据已准备好，通知更新
+                        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.group_list_view)
+                        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.habit_grid_view)
+                        Log.d(TAG, "refreshAllWidgets: notified data changed for widget $appWidgetId")
+                    } else {
+                        Log.d(TAG, "refreshAllWidgets: widget data not ready for $appWidgetId, skipping notification")
+                    }
+                }
+            }, 500) // 延迟500ms通知
+
+            Log.d(TAG, "refreshAllWidgets: scheduled data notification for ${appWidgetIds.size} widgets")
         }
     }
 
@@ -78,11 +102,25 @@ class HabitGroupListWidgetProvider : BasePluginWidgetProvider() {
     ) {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
 
-        // 通知 ListView 数据已更改
-        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.group_list_view)
-        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.habit_list_view)
+        // 延迟通知数据变化，给Flutter端时间完成数据同步
+        Handler(Looper.getMainLooper()).postDelayed({
+            for (appWidgetId in appWidgetIds) {
+                // 检查数据是否存在
+                val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                val widgetData = prefs.getString("habit_group_list_widget_data", null)
 
-        Log.d(TAG, "onUpdate: notified ListView data changed for ${appWidgetIds.size} widgets")
+                if (!widgetData.isNullOrEmpty()) {
+                    // 数据已准备好，通知更新
+                    appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.group_list_view)
+                    appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.habit_grid_view)
+                    Log.d(TAG, "onUpdate: notified data changed for widget $appWidgetId")
+                } else {
+                    Log.d(TAG, "onUpdate: widget data not ready for $appWidgetId, skipping notification")
+                }
+            }
+        }, 500) // 延迟500ms通知
+
+        Log.d(TAG, "onUpdate: scheduled data notification for ${appWidgetIds.size} widgets")
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -112,7 +150,7 @@ class HabitGroupListWidgetProvider : BasePluginWidgetProvider() {
         // 刷新小组件
         val appWidgetManager = AppWidgetManager.getInstance(context)
         updateAppWidget(context, appWidgetManager, widgetId)
-        appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.habit_list_view)
+        appWidgetManager.notifyAppWidgetViewDataChanged(widgetId, R.id.habit_grid_view)
     }
 
     /**
@@ -125,10 +163,6 @@ class HabitGroupListWidgetProvider : BasePluginWidgetProvider() {
         Log.d(TAG, "handleHabitClick: action=$action, habitId=$habitId")
 
         when (action) {
-            "toggle_habit" -> {
-                // 标记习惯完成（显示 Toast，实际完成在 Flutter 端处理）
-                Toast.makeText(context, "打卡功能即将支持", Toast.LENGTH_SHORT).show()
-            }
             "open_timer" -> {
                 // 打开习惯计时器界面
                 Log.d(TAG, "Open habit timer: habitId=$habitId")
@@ -220,7 +254,7 @@ class HabitGroupListWidgetProvider : BasePluginWidgetProvider() {
         val groupServiceIntent = Intent(context, HabitGroupListWidgetService::class.java).apply {
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             putExtra("list_type", "groups")
-            data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
+            setData(Uri.parse(this.toUri(Intent.URI_INTENT_SCHEME)))
         }
         views.setRemoteAdapter(R.id.group_list_view, groupServiceIntent)
 
@@ -228,10 +262,10 @@ class HabitGroupListWidgetProvider : BasePluginWidgetProvider() {
         val habitServiceIntent = Intent(context, HabitGroupListWidgetService::class.java).apply {
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             putExtra("list_type", "habits")
-            data = Uri.parse(toUri(Intent.URI_INTENT_SCHEME))
+            setData(Uri.parse(this.toUri(Intent.URI_INTENT_SCHEME)))
         }
-        views.setRemoteAdapter(R.id.habit_list_view, habitServiceIntent)
-        views.setEmptyView(R.id.habit_list_view, R.id.habit_empty_text)
+        views.setRemoteAdapter(R.id.habit_grid_view, habitServiceIntent)
+        views.setEmptyView(R.id.habit_grid_view, R.id.habit_empty_text)
 
         // 设置分组点击的 PendingIntent 模板
         val groupClickIntent = Intent(context, HabitGroupListWidgetProvider::class.java).apply {
@@ -257,7 +291,7 @@ class HabitGroupListWidgetProvider : BasePluginWidgetProvider() {
             habitClickIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         )
-        views.setPendingIntentTemplate(R.id.habit_list_view, habitClickPendingIntent)
+        views.setPendingIntentTemplate(R.id.habit_grid_view, habitClickPendingIntent)
 
         // 设置标题栏点击 - 跳转到习惯插件
         setupHeaderClickIntent(context, views)
