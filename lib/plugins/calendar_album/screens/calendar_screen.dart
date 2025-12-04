@@ -157,13 +157,13 @@ class _CalendarScreenState extends State<CalendarScreen>
                   providers: [
                     ChangeNotifierProvider.value(value: calendarController),
                     ChangeNotifierProvider.value(
-                      value: Provider.of<TagController>(context, listen: false),
+                value: Provider.of<TagController>(context, listen: false),
+              ),
                   ],
                   child: EntryEditorScreen(
                     initialDate: pressedDay,
                     isEditing: false,
                   ),
-                ),
           ),
         );
       },

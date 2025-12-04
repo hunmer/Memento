@@ -150,7 +150,9 @@ class NavigationHelper {
     BuildContext context,
     Widget newPage,
   ) {
-    return Navigator.of(context).pushAndPopUntil<T>(
+    return Navigator.of(
+      context,
+    ).pushAndRemoveUntil<T>(
       _createRoute(context, newPage),
       (route) => false,
     );
@@ -232,7 +234,7 @@ class NavigationHelper {
   /// [dialog] 对话框组件
   /// [barrierDismissible] 是否可点击外部关闭
   /// [barrierColor] 遮罩颜色
-  static Future<T?> showDialog<T extends Object?>(
+  static Future<T?> showCustomDialog<T extends Object?>(
     BuildContext context,
     Widget dialog, {
     bool barrierDismissible = true,
@@ -246,60 +248,18 @@ class NavigationHelper {
     );
   }
 
-  /// 显示底部弹窗
-  ///
-  /// [context] BuildContext
-  /// [builder] 构建器
-  static Future<T?> showBottomSheet<T extends Object?>(
-    BuildContext context,
-    WidgetBuilder builder, {
-    bool isScrollControlled = false,
-    Color? backgroundColor,
-    double? elevation,
-    ShapeBorder? shape,
-    Clip? clipBehavior,
-  }) {
-    if (_isIOS) {
-      return showCupertinoModalBottomSheet<T>(
-        context: context,
-        builder: builder,
-        isScrollControlled: isScrollControlled,
-        backgroundColor: backgroundColor,
-        elevation: elevation,
-        shape: shape,
-        clipBehavior: clipBehavior,
-      );
-    } else {
-      return showModalBottomSheet<T>(
-        context: context,
-        builder: builder,
-        isScrollControlled: isScrollControlled,
-        backgroundColor: backgroundColor,
-        elevation: elevation,
-        shape: shape,
-        clipBehavior: clipBehavior,
-      );
-    }
-  }
 
-  /// 显示底部弹窗（简洁版）
+  /// 显示底部弹窗
   static Future<T?> showModalBottomSheet<T extends Object?>(
     BuildContext context,
     WidgetBuilder builder, {
     bool isScrollControlled = false,
   }) {
-    if (_isIOS) {
-      return showCupertinoModalBottomSheet<T>(
-        context: context,
-        builder: builder,
-        isScrollControlled: isScrollControlled,
-      );
-    } else {
-      return Navigator.of(context).showModalBottomSheet<T>(
-        builder: builder,
-        isScrollControlled: isScrollControlled,
-      );
-    }
+    return showModalBottomSheet<T>(
+      context,
+      builder,
+      isScrollControlled: isScrollControlled,
+    );
   }
 
   // ==================== iOS 专用导航 ====================
@@ -329,8 +289,8 @@ class NavigationHelper {
     bool barrierDismissible = true,
   }) {
     return showCupertinoDialog<T>(
-      context: context,
-      builder: (context) => dialog,
+      context,
+      dialog,
       barrierDismissible: barrierDismissible,
     );
   }
@@ -340,9 +300,7 @@ class NavigationHelper {
     BuildContext context,
     Widget actionsSheet,
   ) {
-    return showCupertinoDialog<T>(
-      context: context,
-      builder: (context) => actionsSheet,
+    return showCupertinoActionSheet<T>(context, actionsSheet,
     );
   }
 
@@ -418,7 +376,7 @@ class NavigationHelper {
 
   /// 检查是否为根路由
   static bool isFirstRouteInStack(BuildContext context) {
-    return Navigator.of(context).isFirst();
+    return !Navigator.of(context).canPop();
   }
 }
 
@@ -463,7 +421,7 @@ extension NavigationExtensions on BuildContext {
     bool barrierDismissible = true,
     Color? barrierColor,
   }) {
-    return NavigationHelper.showDialog<T>(
+    return NavigationHelper.showCustomDialog<T>(
       this,
       dialog,
       barrierDismissible: barrierDismissible,
@@ -476,7 +434,7 @@ extension NavigationExtensions on BuildContext {
     WidgetBuilder builder, {
     bool isScrollControlled = false,
   }) {
-    return NavigationHelper.showBottomSheet<T>(
+    return NavigationHelper.showModalBottomSheet<T>(
       this,
       builder,
       isScrollControlled: isScrollControlled,

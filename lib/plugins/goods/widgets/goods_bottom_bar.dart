@@ -81,7 +81,7 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
                   await widget.plugin.saveWarehouse(warehouse);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.warehouseCreated ?? '仓库已创建'),
+                SnackBar(content: Text(l10n.warehouseCreated ?? '仓库已创建')),
                     );
                   }
                 } catch (e) {
@@ -97,8 +97,7 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
                   }
                 }
               },
-            ),
-      ),
+      )
     );
   }
 
@@ -144,7 +143,7 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
                   await widget.plugin.saveGoodsItem(warehouseId, item);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.itemCreated ?? '物品已创建'),
+                SnackBar(content: Text(l10n.itemCreated ?? '物品已创建')),
                     );
                   }
                 } catch (e) {
@@ -160,7 +159,6 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
                   }
                 }
               },
-            ),
       ),
     );
   }

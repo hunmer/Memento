@@ -705,97 +705,93 @@ class ContactMainViewState extends State<ContactMainView> {
 
     Contact? savedContact;
 
-    await NavigationHelper.push(context, Scaffold(
-              appBar: AppBar(
-                leading: TextButton(
-                  child: Text(ContactLocalizations.of(context).cancel),
+    await NavigationHelper.push(
+      context,
+      Scaffold(
+        appBar: AppBar(
+          leading: TextButton(
+            child: Text(ContactLocalizations.of(context).cancel),
 
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
 
-                leadingWidth: 80,
+          leadingWidth: 80,
 
-                title: Text(
-                  contact == null
-                      ? ContactLocalizations.of(context).addContact
-                      : ContactLocalizations.of(context).editContact,
-                ),
+          title: Text(
+            contact == null
+                ? ContactLocalizations.of(context).addContact
+                : ContactLocalizations.of(context).editContact,
+          ),
 
-                actions: [
-                  TextButton(
-                    child: Text(
-                      ContactLocalizations.of(context).done,
+          actions: [
+            TextButton(
+              child: Text(
+                ContactLocalizations.of(context).done,
 
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
 
-                    onPressed: () async {
-                      formStateKey.currentState?.saveContact();
+              onPressed: () async {
+                formStateKey.currentState?.saveContact();
 
-                      // a small delay to allow savedContact to be set
+                // a small delay to allow savedContact to be set
 
-                      await Future.delayed(const Duration(milliseconds: 50);
+                await Future.delayed(const Duration(milliseconds: 50));
 
-                      if (savedContact != null) {
-                        try {
-                          if (contact == null) {
-                            await _controller.addContact(savedContact!);
-                          } else {
-                            await _controller.updateContact(savedContact!);
-                          }
+                if (savedContact != null) {
+                  try {
+                    if (contact == null) {
+                      await _controller.addContact(savedContact!);
+                    } else {
+                      await _controller.updateContact(savedContact!);
+                    }
 
-                          if (mounted) {
-                            Navigator.of(context).pop();
+                    if (mounted) {
+                      Navigator.of(context).pop();
 
-                            setState(() {});
-                          }
-                        } catch (e) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  ContactLocalizations.of(
-                                    context,
-                                  ).saveFailedMessage,
-                                ),
-                              ),
-                            );
-                          }
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              ContactLocalizations.of(
-                                context,
-                              ).formValidationMessage,
-                            ),
+                      setState(() {});
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            ContactLocalizations.of(context).saveFailedMessage,
                           ),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-
-              body: ContactForm(
-                key: formStateKey,
-
-                formStateKey: formStateKey,
-
-                controller: _controller,
-
-                contact: contact,
-
-                onSave: (updatedContact) {
-                  savedContact = updatedContact;
-                },
-              ),
+                        ),
+                      );
+                    }
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        ContactLocalizations.of(context).formValidationMessage,
+                      ),
+                    ),
+                  );
+                }
+              },
             ),
+          ],
+        ),
+
+        body: ContactForm(
+          key: formStateKey,
+
+          formStateKey: formStateKey,
+
+          controller: _controller,
+
+          contact: contact,
+
+          onSave: (updatedContact) {
+            savedContact = updatedContact;
+          },
+        ),
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {

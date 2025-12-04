@@ -100,13 +100,13 @@ class _FolderListScreenState extends State<FolderListScreen> {
                             final updatedNote = note.copyWith(
                               title: title,
                               content: content,
-                              updatedAt: DateTime.now();
+                        updatedAt: DateTime.now(),
+                      );
                             widget.controller.updateNote(updatedNote);
                           },
-                        ),
                   ),
                 ).then((_) => _loadCurrentFolder());
-              },
+              }
             ),
           ),
         ],

@@ -115,7 +115,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
 
     NavigationHelper.push(context, ToolTemplateScreen(
               templateService: _templateService,
-              // 不传递 onUseTemplate，隐藏"使用"按钮),
+    ),
     );
   }
 
