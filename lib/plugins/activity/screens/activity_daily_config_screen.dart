@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
+import '../activity_plugin.dart';
 import '../models/activity_daily_widget_config.dart';
+import '../models/activity_daily_widget_data.dart';
+import '../services/activity_widget_service.dart';
 import '../../../widgets/widget_config_editor/index.dart';
 
 /// 日视图活动列表小组件配置界面
@@ -155,6 +158,13 @@ class _ActivityDailyConfigScreenState
         jsonEncode(config.toJson()),
       );
 
+      // 生成初始数据
+      final activityPlugin = ActivityPlugin.instance;
+      final widgetService = ActivityWidgetService(activityPlugin);
+      final dayData = await widgetService.calculateDayData(0); // 今天
+
+      await _syncDataToWidget(config, dayData);
+
       // 将 widgetId 添加到已配置列表中
       await _registerWidgetId(widget.widgetId);
 
@@ -221,6 +231,23 @@ class _ActivityDailyConfigScreenState
     );
 
     debugPrint('ActivityDailyConfig: Saved widget IDs list: $widgetIds');
+  }
+
+  /// 同步数据到小组件
+  Future<void> _syncDataToWidget(
+    ActivityDailyWidgetConfig config,
+    ActivityDailyWidgetData data,
+  ) async {
+    final widgetData = {
+      'widgetId': widget.widgetId,
+      'config': config.toJson(),
+      'data': data.toJson(),
+    };
+
+    await HomeWidget.saveWidgetData<String>(
+      'activity_daily_data_${widget.widgetId}',
+      jsonEncode(widgetData),
+    );
   }
 
   /// 构建预览组件
@@ -470,7 +497,7 @@ class _ActivityDailyConfigScreenState
         ],
       ),
       body: WidgetConfigEditor(
-        widgetSize: WidgetSize.medium,
+        widgetSize: WidgetSize.huge,
         initialConfig: _widgetConfig,
         onConfigChanged: (newConfig) {
           setState(() => _widgetConfig = newConfig);

@@ -124,6 +124,7 @@ Future<void> _registerBroadcastReceiver() async {
     await platform.invokeMethod('registerBroadcastReceiver', <String, dynamic>{
       'actions': [
         'github.hunmer.memento.REFRESH_ACTIVITY_WEEKLY_WIDGET',
+        'github.hunmer.memento.REFRESH_ACTIVITY_DAILY_WIDGET',
         'github.hunmer.memento.REFRESH_HABITS_WEEKLY_WIDGET',
         'github.hunmer.memento.REFRESH_CHECKIN_WEEKLY_WIDGET',
         'github.hunmer.memento.CLEANUP_WIDGET_IDS',
@@ -187,6 +188,56 @@ Future<void> _registerBroadcastReceiver() async {
               );
 
               debugPrint('活动周视图小组件刷新完成');
+            }
+          }
+          // 处理活动日视图小组件刷新
+          else if (action ==
+              'github.hunmer.memento.REFRESH_ACTIVITY_DAILY_WIDGET') {
+            final widgetId = data?['widgetId'] as int?;
+            final dayOffset = data?['dayOffset'] as int?;
+
+            debugPrint(
+              '活动日视图小组件刷新请求: widgetId=$widgetId, dayOffset=$dayOffset',
+            );
+
+            if (widgetId != null && dayOffset != null) {
+              // 更新 SharedPreferences 中的 dayOffset
+              final widgetDataJson = await HomeWidget.getWidgetData<String>(
+                'activity_daily_data_$widgetId',
+              );
+
+              if (widgetDataJson != null && widgetDataJson.isNotEmpty) {
+                final widgetData =
+                    jsonDecode(widgetDataJson) as Map<String, dynamic>;
+                final configJson =
+                    widgetData['config'] as Map<String, dynamic>?;
+
+                if (configJson != null) {
+                  configJson['currentDayOffset'] = dayOffset;
+                  widgetData['config'] = configJson;
+
+                  // 保存更新后的配置
+                  await HomeWidget.saveWidgetData<String>(
+                    'activity_daily_data_$widgetId',
+                    jsonEncode(widgetData),
+                  );
+
+                  debugPrint('已更新 dayOffset 为 $dayOffset');
+                }
+              }
+
+              // 同步数据
+              await PluginWidgetSyncHelper.instance.syncActivityDailyWidget();
+
+              // 通知 Android 小组件刷新
+              await HomeWidget.updateWidget(
+                name: 'ActivityDailyWidgetProvider',
+                iOSName: 'ActivityDailyWidget',
+                qualifiedAndroidName:
+                    'github.hunmer.memento.widgets.providers.ActivityDailyWidgetProvider',
+              );
+
+              debugPrint('活动日视图小组件刷新完成');
             }
           }
           // 处理习惯周视图小组件刷新
