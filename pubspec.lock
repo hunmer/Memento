@@ -965,6 +965,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  memento_intent:
+    dependency: "direct main"
+    description:
+      path: memento_intent
+      relative: true
+    source: path
+    version: "0.0.1"
   memento_notifications:
     dependency: "direct main"
     description:
@@ -1841,5 +1848,5 @@ packages:
     source: hosted
     version: "1.1.4+10"
 sdks:
-  dart: ">=3.10.0 <4.0.0"
+  dart: ">=3.10.1 <4.0.0"
   flutter: ">=3.35.0"
