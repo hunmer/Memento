@@ -11,13 +11,13 @@
     android:paddingEnd="8dp"
     android:background="@drawable/widget_habit_group_item_bg">
 
-    <!-- 分组图标 (emoji) -->
-    <TextView
+    <!-- 分组图标 (PNG from Flutter assets) -->
+    <ImageView
         android:id="@+id/group_icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:gravity="center"
-        android:textSize="16sp" />
+        android:contentDescription="Group Icon" />
 
     <!-- 分组名称 -->
     <TextView

@@ -3,6 +3,7 @@ package github.hunmer.memento.widgets.services
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.util.Log
 import android.widget.RemoteViews
@@ -12,6 +13,7 @@ import github.hunmer.memento.widgets.BasePluginWidgetProvider
 import github.hunmer.memento.widgets.providers.HabitGroupListWidgetProvider
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.InputStream
 
 /**
  * 习惯分组列表的 RemoteViewsFactory
@@ -46,8 +48,7 @@ class HabitGroupListRemoteViewsFactory(
         val id: String,
         val title: String,
         val icon: String?,
-        val group: String?,
-        val completed: Boolean = false
+        val group: String?
     )
 
     override fun onCreate() {
@@ -55,13 +56,13 @@ class HabitGroupListRemoteViewsFactory(
     }
 
     override fun onDataSetChanged() {
-        Log.d(TAG, "onDataSetChanged: Loading data for listType=$listType")
+        Log.d(TAG, "onDataSetChanged: Loading data for listType=$listType, appWidgetId=$appWidgetId")
         if (listType == "groups") {
             groups = loadGroups()
-            Log.d(TAG, "Loaded ${groups.size} groups")
+            Log.d(TAG, "onDataSetChanged: Loaded ${groups.size} groups for widget $appWidgetId")
         } else {
             habits = loadHabits()
-            Log.d(TAG, "Loaded ${habits.size} habits")
+            Log.d(TAG, "onDataSetChanged: Loaded ${habits.size} habits for widget $appWidgetId")
         }
     }
 
@@ -93,8 +94,14 @@ class HabitGroupListRemoteViewsFactory(
         val group = groups[position]
         val views = RemoteViews(context.packageName, R.layout.widget_habit_group_item)
 
-        // 设置分组图标 (emoji)
-        views.setTextViewText(R.id.group_icon, group.icon)
+        // 设置分组图标 (从Flutter assets加载PNG)
+        val iconBitmap = loadIconFromAssets(group.icon)
+        if (iconBitmap != null) {
+            views.setImageViewBitmap(R.id.group_icon, iconBitmap)
+        } else {
+            // 如果加载失败，显示默认图标
+            views.setImageViewResource(R.id.group_icon, android.R.drawable.ic_menu_gallery)
+        }
 
         // 设置分组名称
         views.setTextViewText(R.id.group_name, group.name)
@@ -126,35 +133,25 @@ class HabitGroupListRemoteViewsFactory(
         val habit = habits[position]
         val views = RemoteViews(context.packageName, R.layout.widget_habit_list_item)
 
-        // 设置复选框状态
-        if (habit.completed) {
-            views.setImageViewResource(R.id.habit_checkbox, R.drawable.ic_checkbox_checked)
+        // 设置习惯图标 (从Flutter assets加载PNG)
+        val iconName = habit.icon ?: "star"
+        val iconBitmap = loadIconFromAssets(iconName)
+        if (iconBitmap != null) {
+            views.setImageViewBitmap(R.id.habit_icon, iconBitmap)
         } else {
-            views.setImageViewResource(R.id.habit_checkbox, R.drawable.ic_checkbox_unchecked)
+            // 如果加载失败，显示默认图标
+            views.setImageViewResource(R.id.habit_icon, android.R.drawable.ic_menu_gallery)
         }
-
-        // 设置习惯图标
-        val iconText = habit.icon ?: "✨"
-        views.setTextViewText(R.id.habit_icon, iconText)
 
         // 设置习惯名称
         views.setTextViewText(R.id.habit_name, habit.title)
-
-        // 设置复选框点击 - 填充 Intent
-        val checkboxFillIntent = Intent().apply {
-            putExtra("action", "toggle_habit")
-            putExtra("habit_id", habit.id)
-            putExtra("habit_completed", habit.completed)
-        }
-        views.setOnClickFillInIntent(R.id.habit_checkbox_container, checkboxFillIntent)
 
         // 设置习惯项点击 - 打开计时器
         val itemFillIntent = Intent().apply {
             putExtra("action", "open_timer")
             putExtra("habit_id", habit.id)
         }
-        views.setOnClickFillInIntent(R.id.habit_icon_container, itemFillIntent)
-        views.setOnClickFillInIntent(R.id.habit_name, itemFillIntent)
+        views.setOnClickFillInIntent(R.id.habit_item_container, itemFillIntent)
 
         return views
     }
@@ -264,8 +261,7 @@ class HabitGroupListRemoteViewsFactory(
                         id = habitJson.optString("id", ""),
                         title = habitJson.optString("title", ""),
                         icon = habitJson.optString("icon", null),
-                        group = habitGroup,
-                        completed = habitJson.optBoolean("completed", false)
+                        group = habitGroup
                     ))
                 }
             }
@@ -274,6 +270,26 @@ class HabitGroupListRemoteViewsFactory(
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load habits", e)
             emptyList()
+        }
+    }
+
+    /**
+     * 从Flutter assets加载图标PNG
+     * @param iconName 图标名称 (不带.png后缀)
+     * @return Bitmap对象，如果加载失败返回null
+     */
+    private fun loadIconFromAssets(iconName: String): android.graphics.Bitmap? {
+        return try {
+            // Flutter assets的路径前缀为 flutter_assets/
+            val assetPath = "flutter_assets/assets/icons/material/$iconName.png"
+            Log.d(TAG, "Loading icon: $assetPath")
+
+            context.assets.open(assetPath).use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to load icon '$iconName': ${e.message}")
+            null
         }
     }
 }

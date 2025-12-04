@@ -94,6 +94,9 @@
                     android:host="activity_weekly_config" />
                 <data
                     android:scheme="memento"
+                    android:host="activity_daily_config" />
+                <data
+                    android:scheme="memento"
                     android:host="activity" />
                 <data
                     android:scheme="memento"

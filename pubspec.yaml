@@ -146,6 +146,7 @@ flutter:
     - assets/icon/icon.png
     - assets/images/image_not_found.jpg
     - assets/tool_templates/
+    - assets/icons/material/  # Material Icons for Android widgets
     - lib/screens/js_console/examples/
     - lib/plugins/agent_chat/tools/
 
