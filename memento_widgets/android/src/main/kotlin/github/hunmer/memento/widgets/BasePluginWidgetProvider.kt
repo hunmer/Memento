@@ -14,7 +14,7 @@ import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.res.ResourcesCompat
-import com.example.memento_widgets.R
+import github.hunmer.memento_widgets.R
 import org.json.JSONObject
 
 /**

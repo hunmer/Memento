@@ -36,71 +36,26 @@ target 'Runner' do
   end
 end
 
+# 需要保留模块接口的 Pod 列表（因为它们内部有跨文件类型引用）
+PODS_NEED_MODULE_INTERFACE = ['IosAwnCore', 'home_widget', 'flutter_foreground_task']
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
-    # 修复桥接头文件与模块接口冲突（兼容 Xcode 16.2）
     target.build_configurations.each do |config|
-      # 关键修复：禁用模块分发以兼容 bridging headers
-      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
-
-      # 额外的兼容性设置
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
-
-      # 禁用 bitcode（iOS 14+ 已不再需要）
+      # 基础兼容性设置
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
       config.build_settings['ENABLE_BITCODE'] = 'NO'
 
-      # Swift 编译优化
-      if config.build_settings['SWIFT_VERSION'].to_f < 5.0
-        config.build_settings['SWIFT_VERSION'] = '5.0'
-      end
-
-      # Xcode 16.2 特定修复
-      config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'NO'
-      config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'YES'
-
-      # 修复 Privacy Manifest 构建问题（Xcode 16+）
-      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
-    end
-  end
-
-  # 为 Runner target 单独配置
-  installer.target_installation_results.pod_target_installation_results.each do |pod_name, target_installation_result|
-    target_installation_result.native_target.build_configurations.each do |config|
-      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
-      config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'NO'
-    end
-  end
-
-  # 修复 Xcode 16 中 Privacy Manifest Bundle 资源问题
-  # 参考: https://github.com/flutter/flutter/issues/151618
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
-      if config.base_configuration_reference
-        xcconfig_path = config.base_configuration_reference.real_path
-        xcconfig = File.read(xcconfig_path)
-
-        # 移除可能导致资源找不到的旧配置
-        xcconfig_mod = xcconfig.gsub(/DT_TOOLCHAIN_DIR/, "TOOLCHAIN_DIR")
-        File.open(xcconfig_path, "w") { |file| file << xcconfig_mod }
+      # 对于需要模块接口的 Pod，不禁用
+      unless PODS_NEED_MODULE_INTERFACE.include?(target.name)
+        config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
+        config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'NO'
       end
     end
   end
 
-  # 移除导致问题的 Privacy Manifest 资源引用
-  # 这是 Xcode 16 和 Flutter 之间的临时解决方案
-  installer.aggregate_targets.each do |aggregate_target|
-    aggregate_target.user_project.native_targets.each do |target|
-      target.build_phases.grep(Xcodeproj::Project::Object::PBXResourcesBuildPhase).each do |resources_build_phase|
-        resources_build_phase.files.each do |build_file|
-          if build_file.file_ref && build_file.file_ref.path&.end_with?('_privacy.bundle')
-            puts "移除有问题的 privacy bundle 引用: #{build_file.file_ref.path}"
-            resources_build_phase.remove_file_reference(build_file.file_ref)
-          end
-        end
-      end
-    end
-    aggregate_target.user_project.save
-  end
+  # 保存项目更改
+  installer.pods_project.save
 end

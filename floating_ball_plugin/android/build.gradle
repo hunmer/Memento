@@ -1,4 +1,4 @@
-group = "com.example.floating_ball_plugin"
+group = "github.hunmer.floating_ball_plugin"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -25,7 +25,7 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
 android {
-    namespace = "com.example.floating_ball_plugin"
+    namespace = "github.hunmer.floating_ball_plugin"
 
     compileSdk = 36
 

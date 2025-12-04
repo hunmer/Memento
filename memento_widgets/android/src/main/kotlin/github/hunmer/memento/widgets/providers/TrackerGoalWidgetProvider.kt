@@ -11,7 +11,7 @@ import android.view.View
 import android.widget.RemoteViews
 import android.widget.Toast
 import github.hunmer.memento.widgets.BasePluginWidgetProvider
-import com.example.memento_widgets.R
+import github.hunmer.memento_widgets.R
 import org.json.JSONObject
 
 /**

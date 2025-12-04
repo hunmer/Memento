@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Memento</string>
-    <string name="activity_weekly_widget_description">活动周视图 - 显示本周活动热力图和标签列表</string>
-    <string name="habits_weekly_widget_description">习惯周视图 - 显示选中习惯的每日完成时长</string>
 </resources>

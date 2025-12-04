@@ -1,0 +1,5 @@
+SWIFT_VERSION = 5.0
+
+// 禁用 Runner 的模块接口，因为它使用了 bridging header
+BUILD_LIBRARY_FOR_DISTRIBUTION = NO
+SWIFT_EMIT_MODULE_INTERFACE = NO

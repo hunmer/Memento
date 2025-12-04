@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:paddingStart="2dp"
+    android:paddingEnd="2dp">
+
+    <!-- 左侧标签 -->
+    <LinearLayout
+        android:id="@+id/left_item"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="2dp"
+        android:paddingEnd="4dp"
+        android:background="?android:attr/selectableItemBackground">
+
+        <!-- 颜色方块 -->
+        <TextView
+            android:id="@+id/left_color_block"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="#FF607afb" />
+
+        <!-- 标签信息 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingStart="4dp">
+
+            <!-- 标签名称 -->
+            <TextView
+                android:id="@+id/left_tag_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="标签"
+                android:textColor="#FF333333"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- 时长 -->
+            <TextView
+                android:id="@+id/left_tag_duration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="00時00分"
+                android:textColor="#FF999999"
+                android:textSize="9sp"
+                android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 右侧标签 -->
+    <LinearLayout
+        android:id="@+id/right_item"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="4dp"
+        android:paddingEnd="2dp"
+        android:background="?android:attr/selectableItemBackground">
+
+        <!-- 颜色方块 -->
+        <TextView
+            android:id="@+id/right_color_block"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="#FF607afb" />
+
+        <!-- 标签信息 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingStart="4dp">
+
+            <!-- 标签名称 -->
+            <TextView
+                android:id="@+id/right_tag_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="标签"
+                android:textColor="#FF333333"
+                android:textSize="10sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- 时长 -->
+            <TextView
+                android:id="@+id/right_tag_duration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="00時00分"
+                android:textColor="#FF999999"
+                android:textSize="9sp"
+                android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -83,17 +83,9 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
       final actionManager = ActionManager();
       final result = await actionManager.executeGestureAction(gesture, context);
 
-      print('[悬浮球Widget] 动作执行结果: success=${result.success}, error=${result.error}');
-
-      if (!result.success) {
-        // 如果执行失败，显示提示
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('手势动作执行失败: ${result.error ?? "未知错误"}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      print(
+        '[悬浮球Widget] 动作执行结果: success=${result.success}, error=${result.error}',
+      );
     } else {
       print('[悬浮球Widget] context 已卸载，无法执行动作');
     }

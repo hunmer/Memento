@@ -35,7 +35,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.example.floating_ball_plugin
+        package: github.hunmer.floating_ball_plugin
         pluginClass: FloatingBallPlugin
 
   # To add assets to your plugin package, add an assets section, like this:

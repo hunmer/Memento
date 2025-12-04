@@ -1,5 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.example.memento_widgets">
+  package="github.hunmer.memento_widgets">
+
+  <!-- 允许接收自定义广播 -->
+  <uses-permission android:name="github.hunmer.memento.REFRESH_ACTIVITY_WEEKLY_WIDGET" />
+  <uses-permission android:name="github.hunmer.memento.REFRESH_HABITS_WEEKLY_WIDGET" />
+  <uses-permission android:name="github.hunmer.memento.REFRESH_CHECKIN_WEEKLY_WIDGET" />
+  <uses-permission android:name="github.hunmer.memento.CLEANUP_WIDGET_IDS" />
 
   <application>
     <!-- ========== 快速小组件 ========== -->
@@ -656,5 +662,47 @@
         android:name="github.hunmer.memento.widgets.providers.BillShortcutsWidgetService"
         android:exported="false"
         android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+    <!-- Activity Weekly Widget Provider -->
+    <receiver
+        android:name="github.hunmer.memento.widgets.providers.ActivityWeeklyWidgetProvider"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            <action android:name="github.hunmer.memento.widget.ACTIVITY_PREV_WEEK" />
+            <action android:name="github.hunmer.memento.widget.ACTIVITY_NEXT_WEEK" />
+            <action android:name="github.hunmer.memento.widget.ACTIVITY_ITEM_CLICK" />
+        </intent-filter>
+        <meta-data
+            android:name="android.appwidget.provider"
+            android:resource="@xml/activity_weekly_widget_info" />
+    </receiver>
+
+    <!-- Activity Weekly Widget Service -->
+    <service
+        android:name="github.hunmer.memento.widgets.services.ActivityWeeklyWidgetService"
+        android:permission="android.permission.BIND_REMOTEVIEWS"
+        android:exported="false" />
+
+    <!-- Habits Weekly Widget Provider -->
+    <receiver
+        android:name="github.hunmer.memento.widgets.providers.HabitsWeeklyWidgetProvider"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            <action android:name="github.hunmer.memento.widget.HABITS_PREV_WEEK" />
+            <action android:name="github.hunmer.memento.widget.HABITS_NEXT_WEEK" />
+            <action android:name="github.hunmer.memento.widget.HABITS_ITEM_CLICK" />
+        </intent-filter>
+        <meta-data
+            android:name="android.appwidget.provider"
+            android:resource="@xml/habits_weekly_widget_info" />
+    </receiver>
+
+    <!-- Habits Weekly Widget Service -->
+    <service
+        android:name="github.hunmer.memento.widgets.services.HabitsWeeklyWidgetService"
+        android:permission="android.permission.BIND_REMOTEVIEWS"
+        android:exported="false" />
   </application>
 </manifest>

@@ -323,7 +323,7 @@ class JSBridgeManager {
           'appName': 'Memento',
           'version': '1.0.0',
           'buildNumber': '1',
-          'packageName': 'com.example.memento',
+          'packageName': 'github.hunmer.memento',
         };
 
         return jsonEncode(appInfo);

@@ -1,4 +1,4 @@
-group = "com.example.memento_widgets"
+group = "github.hunmer.memento_widgets"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -25,7 +25,7 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
 android {
-    namespace = "com.example.memento_widgets"
+    namespace = "github.hunmer.memento_widgets"
 
     compileSdk = 36
 
@@ -48,6 +48,10 @@ android {
     }
 
     dependencies {
+        implementation "androidx.appcompat:appcompat:1.7.0"
+        implementation "androidx.core:core-ktx:1.13.1"
+        implementation "com.google.android.material:material:1.12.0"
+
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
     }
