@@ -25,7 +25,7 @@ class AgentEditScreen extends StatefulWidget {
   @override
   State<AgentEditScreen> createState() => _AgentEditScreenState();
 
-  static Route<T> route<T>({AIAgent? agent}) {
+  static Route<T> route<T>(BuildContext context, {AIAgent? agent}) {
     return NavigationHelper.createRoute(
       Localizations.override(
         context: context,

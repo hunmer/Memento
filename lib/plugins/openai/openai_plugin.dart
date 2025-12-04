@@ -781,7 +781,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
               onPressed: () {
                 if (_currentPage == 0) {
                   // AI助手 tab - 创建新助手
-                  Navigator.of(context).push(AgentEditScreen.route());
+                  Navigator.of(context).push(AgentEditScreen.route(context));
                 } else {
                   // 提示词预设 tab - 创建新预设
                   _showPresetEditDialog();
