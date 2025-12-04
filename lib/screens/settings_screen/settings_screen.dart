@@ -373,6 +373,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pushNamed(context, '/floating_ball');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.link),
+            title: const Text('Intent 测试'),
+            subtitle: const Text('测试动态 Intent 注册和深度链接'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/intent_test');
+            },
+          ),
           const Divider(),
 
           // 关于
