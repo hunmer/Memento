@@ -244,6 +244,58 @@ class HabitsSyncer extends PluginWidgetSyncer {
     }
   }
 
+  /// 同步习惯分组列表小组件
+  ///
+  /// 同步所有习惯和技能数据到习惯分组列表小组件
+  Future<void> syncHabitGroupListWidget() async {
+    try {
+      final plugin = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+      if (plugin == null) {
+        debugPrint('Habits plugin not found, skipping habit_group_list widget sync');
+        return;
+      }
+
+      final habits = plugin.getHabitController().getHabits();
+      final skills = plugin.getSkillController().getSkills();
+
+      // 构建分组数据
+      final groupsData = skills.map((skill) {
+        return {
+          'id': skill.id,
+          'name': skill.title,
+          'icon': skill.icon ?? '📂',
+        };
+      }).toList();
+
+      // 构建习惯数据
+      final habitsData = habits.map((habit) {
+        return {
+          'id': habit.id,
+          'title': habit.title,
+          'icon': habit.icon,
+          'group': habit.skillId,
+          'completed': false, // TODO: 从完成记录中获取今日完成状态
+        };
+      }).toList();
+
+      // 保存为 JSON 字符串
+      await MyWidgetManager().saveString(
+        'habit_group_list_widget_data',
+        jsonEncode({
+          'groups': groupsData,
+          'habits': habitsData,
+        }),
+      );
+
+      // 更新小组件
+      await SystemWidgetService.instance.updateWidget('habit_group_list');
+
+      debugPrint('Synced habit_group_list widget with ${habits.length} habits and ${skills.length} groups');
+    } catch (e) {
+      debugPrint('Failed to sync habit_group_list widget: $e');
+    }
+  }
+
   /// 同步单个周视图小组件
   Future<void> _syncSingleWeeklyWidget(
     int widgetId,

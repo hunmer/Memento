@@ -380,6 +380,14 @@ void handleWidgetClick(String url) {
       debugPrint('习惯计时器小组件配置路由转换为: $routePath');
     }
 
+    // 特殊处理：习惯分组列表小组件配置路由
+    // 从 /habit_group_list/config?widgetId=xxx 转换为 /habit_group_list_selector
+    // widgetId 参数会在后面被提取到 arguments 中
+    if (routePath == '/habit_group_list/config') {
+      routePath = '/habit_group_list_selector';
+      debugPrint('习惯分组列表小组件配置路由转换为: $routePath');
+    }
+
     // 特殊处理：快捷记账添加账单路由
     // 从 /bill_shortcuts/add?accountId=xxx&category=xxx&amount=xxx&isExpense=true
     // 转换为 /bill 并传递参数

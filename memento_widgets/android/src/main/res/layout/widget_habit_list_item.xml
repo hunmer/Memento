@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/habit_item_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp">
+
+    <!-- 左侧 Checkbox -->
+    <FrameLayout
+        android:id="@+id/habit_checkbox_container"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/habit_checkbox"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_checkbox_unchecked"
+            android:contentDescription="复选框" />
+
+    </FrameLayout>
+
+    <!-- 习惯图标 (圆形) -->
+    <FrameLayout
+        android:id="@+id/habit_icon_container"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="4dp"
+        android:background="@drawable/widget_habit_icon_circle_bg">
+
+        <TextView
+            android:id="@+id/habit_icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:textColor="#FFFFFF" />
+
+    </FrameLayout>
+
+    <!-- 习惯名称 -->
+    <TextView
+        android:id="@+id/habit_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:text=""
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+</LinearLayout>
