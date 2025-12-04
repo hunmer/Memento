@@ -3,199 +3,211 @@ import '../l10n/openai_localizations.dart';
 import '../models/prompt_preset.dart';
 import '../services/prompt_preset_service.dart';
 
-class PromptPresetScreen extends StatefulWidget {
+class PromptPresetScreen extends StatelessWidget {
   const PromptPresetScreen({super.key});
 
   @override
-  State<PromptPresetScreen> createState() => _PromptPresetScreenState();
-}
-
-class _PromptPresetScreenState extends State<PromptPresetScreen> {
-  final PromptPresetService _service = PromptPresetService();
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPresets();
-  }
-
-  Future<void> _loadPresets() async {
-    setState(() => _isLoading = true);
-    await _service.loadPresets();
-    setState(() => _isLoading = false);
-  }
-
-  Future<void> _showEditDialog({PromptPreset? preset}) async {
-    final result = await showDialog<PromptPreset>(
-      context: context,
-      builder: (context) => _PresetEditDialog(preset: preset),
-    );
-
-    if (result != null) {
-      if (preset == null) {
-        await _service.addPreset(result);
-      } else {
-        await _service.updatePreset(result);
-      }
-      setState(() {});
-    }
-  }
-
-  Future<void> _deletePreset(PromptPreset preset) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(OpenAILocalizations.of(context).deletePreset),
-        content: Text(OpenAILocalizations.of(context).confirmDeletePreset),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(OpenAILocalizations.of(context).cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              OpenAILocalizations.of(context).delete,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      await _service.deletePreset(preset.id);
-      setState(() {});
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final l10n = OpenAILocalizations.of(context);
+    final service = PromptPresetService();
+
+    // 确保预设已加载
+    if (service.presets.isEmpty) {
+      service.loadPresets();
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.promptPresetManagement),
+        title: Text(OpenAILocalizations.of(context).promptPresetManagement),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () async {
+              final result = await showDialog<PromptPreset>(
+                context: context,
+                builder: (context) => const _PresetEditDialog(),
+              );
+
+              if (result != null) {
+                await service.addPreset(result);
+              }
+            },
+          ),
+        ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _service.presets.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+      body: AnimatedBuilder(
+        animation: service,
+        builder: (context, _) {
+          if (service.presets.isEmpty) {
+            final l10n = OpenAILocalizations.of(context);
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.text_snippet_outlined,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.noPresetsYet,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.createFirstPreset,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey,
+                        ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      final result = await showDialog<PromptPreset>(
+                        context: context,
+                        builder: (context) => const _PresetEditDialog(),
+                      );
+
+                      if (result != null) {
+                        await service.addPreset(result);
+                      }
+                    },
+                    icon: const Icon(Icons.add),
+                    label: Text(l10n.addPreset),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: service.presets.length,
+            itemBuilder: (context, index) {
+              final preset = service.presets[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: ListTile(
+                  title: Text(
+                    preset.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.text_snippet_outlined,
-                        size: 64,
-                        color: Colors.grey,
+                      if (preset.description.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            preset.description,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      if (preset.tags.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Wrap(
+                            spacing: 4,
+                            runSpacing: 4,
+                            children: preset.tags
+                                .map(
+                                  (tag) => Chip(
+                                    label: Text(
+                                      tag,
+                                      style: const TextStyle(fontSize: 10),
+                                    ),
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    visualDensity: VisualDensity.compact,
+                                    padding: EdgeInsets.zero,
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                    ],
+                  ),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) async {
+                      if (value == 'edit') {
+                        final result = await showDialog<PromptPreset>(
+                          context: context,
+                          builder: (context) => _PresetEditDialog(preset: preset),
+                        );
+
+                        if (result != null) {
+                          await service.updatePreset(result);
+                        }
+                      } else if (value == 'delete') {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text(OpenAILocalizations.of(context).deletePreset),
+                            content: Text(OpenAILocalizations.of(context).confirmDeletePreset),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(false),
+                                child: Text(OpenAILocalizations.of(context).cancel),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(true),
+                                child: Text(
+                                  OpenAILocalizations.of(context).delete,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirmed == true) {
+                          await service.deletePreset(preset.id);
+                        }
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.edit, size: 20),
+                            const SizedBox(width: 8),
+                            Text(OpenAILocalizations.of(context).editPreset),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        l10n.noPresetsYet,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.createFirstPreset,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey,
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.delete, size: 20, color: Colors.red),
+                            const SizedBox(width: 8),
+                            Text(
+                              OpenAILocalizations.of(context).deletePreset,
+                              style: const TextStyle(color: Colors.red),
                             ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _service.presets.length,
-                  itemBuilder: (context, index) {
-                    final preset = _service.presets[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        title: Text(
-                          preset.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (preset.description.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  preset.description,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            if (preset.tags.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Wrap(
-                                  spacing: 4,
-                                  runSpacing: 4,
-                                  children: preset.tags
-                                      .map(
-                                        (tag) => Chip(
-                                          label: Text(
-                                            tag,
-                                            style: const TextStyle(fontSize: 10),
-                                          ),
-                                          materialTapTargetSize:
-                                              MaterialTapTargetSize.shrinkWrap,
-                                          visualDensity: VisualDensity.compact,
-                                          padding: EdgeInsets.zero,
-                                        ),
-                                      )
-                                      .toList(),
-                                ),
-                              ),
-                          ],
-                        ),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == 'edit') {
-                              _showEditDialog(preset: preset);
-                            } else if (value == 'delete') {
-                              _deletePreset(preset);
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.edit, size: 20),
-                                  const SizedBox(width: 8),
-                                  Text(l10n.editPreset),
-                                ],
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.delete, size: 20, color: Colors.red),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    l10n.deletePreset,
-                                    style: const TextStyle(color: Colors.red),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        onTap: () => _showEditDialog(preset: preset),
-                      ),
+                  onTap: () async {
+                    final result = await showDialog<PromptPreset>(
+                      context: context,
+                      builder: (context) => _PresetEditDialog(preset: preset),
                     );
+
+                    if (result != null) {
+                      await service.updatePreset(result);
+                    }
                   },
                 ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () => _showEditDialog(),
-      //   child: const Icon(Icons.add),
-      // ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
