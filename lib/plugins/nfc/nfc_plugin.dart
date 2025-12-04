@@ -17,7 +17,6 @@ class NfcMainView extends StatefulWidget {
 class _NfcMainViewState extends State<NfcMainView> {
   bool _isNfcSupported = false;
   bool _isNfcEnabled = false;
-  String _readData = '';
   bool _isReading = false;
   bool _isWriting = false;
 
@@ -49,23 +48,56 @@ class _NfcMainViewState extends State<NfcMainView> {
 
     setState(() {
       _isReading = true;
-      _readData = '';
     });
+
+    // 先显示等待对话框
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              const Text('请将手机靠近NFC标签'),
+              const SizedBox(height: 8),
+              Text(
+                '等待读取NFC数据...',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
 
     try {
       final nfc = MementoNfc();
       final result = await nfc.readNfc();
+
+      // 关闭等待对话框
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
 
       setState(() {
         _isReading = false;
       });
 
       if (result.success) {
-        setState(() {
-          _readData = result.data ?? '';
-        });
-        if (_readData.isNotEmpty) {
+        final readData = result.data ?? '';
+        if (readData.isNotEmpty) {
           _showSuccess('读取成功');
+          // 显示读取到的数据对话框
+          _showNfcDataDialog(readData);
         } else {
           _showError('未检测到NFC数据');
         }
@@ -73,6 +105,10 @@ class _NfcMainViewState extends State<NfcMainView> {
         _showError(result.error ?? '读取失败');
       }
     } catch (e) {
+      // 关闭等待对话框
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
       setState(() {
         _isReading = false;
       });
@@ -90,9 +126,44 @@ class _NfcMainViewState extends State<NfcMainView> {
       _isWriting = true;
     });
 
+    // 先显示等待对话框
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              const Text('请将手机靠近NFC标签'),
+              const SizedBox(height: 8),
+              Text(
+                '正在写入数据...\n$data',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
     try {
       final nfc = MementoNfc();
       final result = await nfc.writeNfc(data);
+
+      // 关闭等待对话框
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
 
       setState(() {
         _isWriting = false;
@@ -104,6 +175,10 @@ class _NfcMainViewState extends State<NfcMainView> {
         _showError(result.error ?? '写入失败');
       }
     } catch (e) {
+      // 关闭等待对话框
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
       setState(() {
         _isWriting = false;
       });
@@ -136,12 +211,44 @@ class _NfcMainViewState extends State<NfcMainView> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('写入NFC数据'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: '请输入要写入的数据',
-          ),
-          maxLines: 3,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: '请输入要写入的数据',
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.blue[700],
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '点击"开始写入"后，请将手机靠近NFC标签',
+                      style: TextStyle(
+                        color: Colors.blue[700],
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -155,7 +262,52 @@ class _NfcMainViewState extends State<NfcMainView> {
                 _writeNfc(controller.text);
               }
             },
-            child: const Text('写入'),
+            child: const Text('开始写入'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showNfcDataDialog(String data) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('NFC数据'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '读取到的数据：',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: SelectableText(data),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('关闭'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Clipboard.setData(ClipboardData(text: data));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('已复制到剪贴板')),
+              );
+            },
+            child: const Text('复制数据'),
           ),
         ],
       ),
@@ -272,36 +424,33 @@ class _NfcMainViewState extends State<NfcMainView> {
                           : const Icon(Icons.nfc),
                       label: Text(_isReading ? '读取中...' : '读取NFC'),
                     ),
-                    if (_readData.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        '读取的数据:',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
-                        ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[50],
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      const SizedBox(height: 8),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: SelectableText(_readData),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Colors.blue[700],
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '点击"读取NFC"后，将手机靠近NFC标签即可读取数据',
+                              style: TextStyle(
+                                color: Colors.blue[700],
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: _readData));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('已复制到剪贴板')),
-                          );
-                        },
-                        child: const Text('复制数据'),
-                      ),
-                    ],
+                    ),
                   ],
                 ),
               ),
@@ -333,11 +482,30 @@ class _NfcMainViewState extends State<NfcMainView> {
                       label: Text(_isWriting ? '写入中...' : '写入NFC'),
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      '提示: 点击"写入NFC"后，将手机靠近NFC标签即可完成写入',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange[50],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.lightbulb_outline,
+                            color: Colors.orange[700],
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '点击"写入NFC"输入数据后，将手机靠近NFC标签即可完成写入',
+                              style: TextStyle(
+                                color: Colors.orange[700],
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

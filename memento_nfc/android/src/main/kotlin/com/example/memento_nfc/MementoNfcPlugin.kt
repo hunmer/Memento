@@ -24,11 +24,16 @@ import java.nio.charset.Charset
 class MementoNfcPlugin :
     FlutterPlugin,
     MethodCallHandler,
-    ActivityAware {
+    ActivityAware,
+    NfcAdapter.ReaderCallback {
     private lateinit var channel: MethodChannel
     private var context: Context? = null
     private var activity: android.app.Activity? = null
     private var nfcAdapter: NfcAdapter? = null
+    private var pendingResult: Result? = null
+    private var isWriteMode = false
+    private var pendingWriteData: String = ""
+    private var pendingWriteFormat: String = ""
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "memento_nfc")
@@ -52,14 +57,14 @@ class MementoNfcPlugin :
                 result.success(nfcAdapter?.isEnabled ?: false)
             }
             "readNfc" -> {
-                val mapResult = readNfc()
-                result.success(mapResult)
+                isWriteMode = false
+                startNfcReading(result)
             }
             "writeNfc" -> {
                 val data = call.argument<String>("data") ?: ""
                 val formatType = call.argument<String>("formatType") ?: "NDEF"
-                val mapResult = writeNfc(data, formatType)
-                result.success(mapResult)
+                isWriteMode = true
+                startNfcWriting(result, data, formatType)
             }
             "writeNdefUrl" -> {
                 val url = call.argument<String>("url") ?: ""
@@ -77,15 +82,100 @@ class MementoNfcPlugin :
         }
     }
 
-    private fun readNfc(): HashMap<String, Any> {
-        try {
-            val tag = activity?.intent?.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
-            if (tag == null) {
-                val result = HashMap<String, Any>()
-                result["success"] = false
-                result["error"] = "No NFC tag detected"
-                return result
+    private fun startNfcWriting(result: Result, data: String, formatType: String) {
+        if (nfcAdapter == null || !nfcAdapter!!.isEnabled) {
+            result.success(hashMapOf(
+                "success" to false,
+                "error" to "NFC未启用"
+            ))
+            return
+        }
+
+        pendingResult = result
+        pendingWriteData = data
+        pendingWriteFormat = formatType
+
+        // 延迟一点时间启动，让Flutter有时间显示对话框
+        Handler(Looper.getMainLooper()).postDelayed({
+            try {
+                // 启动前台调度
+                nfcAdapter!!.enableReaderMode(activity, this, NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B or NfcAdapter.FLAG_READER_NFC_F or NfcAdapter.FLAG_READER_NFC_V, null)
+            } catch (e: Exception) {
+                result.success(hashMapOf(
+                    "success" to false,
+                    "error" to "启动NFC写入失败: ${e.message}"
+                ))
             }
+        }, 200)
+    }
+
+    private fun startNfcReading(result: Result) {
+        if (nfcAdapter == null || !nfcAdapter!!.isEnabled) {
+            result.success(hashMapOf(
+                "success" to false,
+                "error" to "NFC未启用"
+            ))
+            return
+        }
+
+        pendingResult = result
+
+        // 延迟一点时间启动，让Flutter有时间显示对话框
+        Handler(Looper.getMainLooper()).postDelayed({
+            try {
+                // 启动前台调度
+                nfcAdapter!!.enableReaderMode(activity, this, NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B or NfcAdapter.FLAG_READER_NFC_F or NfcAdapter.FLAG_READER_NFC_V, null)
+            } catch (e: Exception) {
+                result.success(hashMapOf(
+                    "success" to false,
+                    "error" to "启动NFC读取失败: ${e.message}"
+                ))
+            }
+        }, 200)
+    }
+
+    override fun onTagDiscovered(tag: Tag?) {
+        if (tag == null) {
+            Handler(Looper.getMainLooper()).post {
+                pendingResult?.success(hashMapOf(
+                    "success" to false,
+                    "error" to "未检测到NFC标签"
+                ))
+                stopNfcReading()
+            }
+            return
+        }
+
+        if (isWriteMode) {
+            // 写入模式
+            val writeResult = performWrite(tag, pendingWriteData, pendingWriteFormat)
+            Handler(Looper.getMainLooper()).post {
+                pendingResult?.success(writeResult)
+                stopNfcReading()
+            }
+        } else {
+            // 读取模式
+            val readResult = performRead(tag)
+            Handler(Looper.getMainLooper()).post {
+                pendingResult?.success(readResult)
+                stopNfcReading()
+            }
+        }
+    }
+
+    private fun stopNfcReading() {
+        try {
+            nfcAdapter?.disableReaderMode(activity)
+        } catch (e: Exception) {
+            // 忽略关闭错误
+        }
+        pendingResult = null
+        pendingWriteData = ""
+        pendingWriteFormat = ""
+    }
+
+    private fun performRead(tag: Tag): HashMap<String, Any> {
+        try {
 
             val ndef = Ndef.get(tag)
             if (ndef == null) {
@@ -128,16 +218,8 @@ class MementoNfcPlugin :
         }
     }
 
-    private fun writeNfc(data: String, formatType: String): HashMap<String, Any> {
+    private fun performWrite(tag: Tag, data: String, formatType: String): HashMap<String, Any> {
         return try {
-            val tag = activity?.intent?.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
-            if (tag == null) {
-                val result = HashMap<String, Any>()
-                result["success"] = false
-                result["error"] = "No NFC tag detected"
-                return result
-            }
-
             val ndef = Ndef.get(tag)
             if (ndef == null) {
                 val result = HashMap<String, Any>()
@@ -277,6 +359,7 @@ class MementoNfcPlugin :
     }
 
     override fun onDetachedFromActivity() {
+        stopNfcReading()
         activity = null
     }
 
