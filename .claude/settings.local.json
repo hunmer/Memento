@@ -25,7 +25,8 @@
       "Bash(./verify_refactoring.sh:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"feat: remove memento_widgets/example - not needed for this project\n\nThe example directory was used for demonstration purposes only.\nThe actual widget implementation is in the memento_widgets plugin package,\nand the Android native configuration is in the main Memento app.\n\nCloses #xxx\")",
-      "Bash(git checkout f1b3cc2 -- android/app/src/main/AndroidManifest.xml android/app/src/main/res/values/styles.xml android/app/src/main/kotlin/github/hunmer/memento/MainActivity.kt)"
+      "Bash(git checkout f1b3cc2 -- android/app/src/main/AndroidManifest.xml android/app/src/main/res/values/styles.xml android/app/src/main/kotlin/github/hunmer/memento/MainActivity.kt)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

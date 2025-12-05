@@ -4,6 +4,7 @@ import '../l10n/chat_localizations.dart';
 import '../models/user.dart';
 import '../models/message.dart';
 import 'chat_screen/widgets/message_bubble.dart';
+import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -47,13 +48,15 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = ChatLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.chatRoom), centerTitle: true),
+
+    return SuperCupertinoNavigationWrapper(
+      title: Text(l10n.chatRoom),
+      largeTitle: l10n.chatRoom,
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              padding: EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
               reverse: true, // 从底部开始显示
               itemCount: _messages.length,
               itemBuilder: (context, index) {
@@ -72,39 +75,41 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              border: Border(top: BorderSide(color: Colors.grey.shade300)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.emoji_emotions),
-                    onPressed: () {}, // 表情功能预留
-                  ),
-                  Expanded(
-                    child: TextField(
-                      controller: _textController,
-                      focusNode: _focusNode,
-                      decoration: InputDecoration(
-                        hintText: l10n.enterMessage,
-                        border: InputBorder.none,
-                      ),
-                      onSubmitted: _handleSubmitted,
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.send),
-                    onPressed: () => _handleSubmitted(_textController.text),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
+      ),
+      enableBottomBar: true,
+      bottomBarHeight: 60,
+      bottomBarChild: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          border: Border(top: BorderSide(color: Colors.grey.shade300)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.emoji_emotions),
+                onPressed: () {}, // 表情功能预留
+              ),
+              Expanded(
+                child: TextField(
+                  controller: _textController,
+                  focusNode: _focusNode,
+                  decoration: InputDecoration(
+                    hintText: l10n.enterMessage,
+                    border: InputBorder.none,
+                  ),
+                  onSubmitted: _handleSubmitted,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.send),
+                onPressed: () => _handleSubmitted(_textController.text),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

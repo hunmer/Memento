@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import '../controllers/nodes_controller.dart';
 import '../models/notebook.dart';
 import '../models/node.dart';
@@ -20,41 +21,45 @@ class NodesScreen extends StatelessWidget {
     final controller = Provider.of<NodesController>(context, listen: true);
     final l10n = NodesLocalizations.of(context);
     final currentNotebook = controller.getNotebook(notebook.id);
+    final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(notebook.title),
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected:
-                (value) => _handleMenuAction(
-                  value,
-                  context,
-                  controller,
-                  currentNotebook,
-                ),
-            itemBuilder:
-                (BuildContext context) => [
-                  PopupMenuItem<String>(
-                    value: 'copy',
-                    child: ListTile(
-                      leading: const Icon(Icons.copy),
-                      title: Text(l10n.copyToText),
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'clear',
-                    child: ListTile(
-                      leading: const Icon(Icons.clear_all),
-                      title: Text(l10n.clearNodes),
-                    ),
-                  ),
-                ],
-          ),
-        ],
+    return SuperCupertinoNavigationWrapper(
+      title: Text(
+        notebook.title,
+        style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
-      body:
+      largeTitle: '节点',
+      actions: [
+        PopupMenuButton<String>(
+          icon: Icon(Icons.more_vert, color: theme.iconTheme.color),
+          onSelected:
+              (value) => _handleMenuAction(
+                value,
+                context,
+                controller,
+                currentNotebook,
+              ),
+          itemBuilder:
+              (BuildContext context) => [
+                PopupMenuItem<String>(
+                  value: 'copy',
+                  child: ListTile(
+                    leading: const Icon(Icons.copy),
+                    title: Text(l10n.copyToText),
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'clear',
+                  child: ListTile(
+                    leading: const Icon(Icons.clear_all),
+                    title: Text(l10n.clearNodes),
+                  ),
+                ),
+              ],
+        ),
+      ],
+      body: Stack(
+        children: [
           currentNotebook?.nodes.isEmpty ?? true
               ? Center(child: Text(l10n.noNodesYet))
               : ListView.builder(
@@ -68,9 +73,16 @@ class NodesScreen extends StatelessWidget {
                   );
                 },
               ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () => _addRootNode(context),
+          // FAB 覆盖层
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton(
+              child: const Icon(Icons.add),
+              onPressed: () => _addRootNode(context),
+            ),
+          ),
+        ],
       ),
     );
   }

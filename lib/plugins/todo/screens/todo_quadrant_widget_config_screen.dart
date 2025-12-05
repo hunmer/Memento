@@ -1,7 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
-import '../todo_plugin.dart';
+import '../../../core/services/plugin_widget_sync_helper.dart';
 import '../../../widgets/widget_config_editor/index.dart';
 
 /// 任务四象限小组件配置界面
@@ -21,7 +20,6 @@ class TodoQuadrantWidgetConfigScreen extends StatefulWidget {
 }
 
 class _TodoQuadrantWidgetConfigScreenState extends State<TodoQuadrantWidgetConfigScreen> {
-  final TodoPlugin _todoPlugin = TodoPlugin.instance;
   late WidgetConfig _widgetConfig;
   bool _isLoading = true;
 
@@ -86,7 +84,7 @@ class _TodoQuadrantWidgetConfigScreenState extends State<TodoQuadrantWidgetConfi
       if (savedOpacity != null) {
         final opacityValue = double.tryParse(savedOpacity);
         if (opacityValue != null) {
-          _widgetConfig.opacity = opacityValue;
+          _widgetConfig = _widgetConfig.copyWith(opacity: opacityValue);
         }
       }
     } catch (e) {
@@ -102,8 +100,8 @@ class _TodoQuadrantWidgetConfigScreenState extends State<TodoQuadrantWidgetConfi
 
     try {
       // 1. 获取配置值
-      final primaryColor = _widgetConfig.getColor('primary')?.currentValue ?? const Color(0xFF2196F3);
-      final accentColor = _widgetConfig.getColor('accent')?.currentValue ?? Colors.white;
+      final primaryColor = _widgetConfig.getColor('primary') ?? const Color(0xFF2196F3);
+      final accentColor = _widgetConfig.getColor('accent') ?? Colors.white;
       final opacity = _widgetConfig.opacity;
 
       // 2. 保存颜色配置（必须使用 String 类型！）
@@ -139,8 +137,7 @@ class _TodoQuadrantWidgetConfigScreenState extends State<TodoQuadrantWidgetConfi
   /// 同步数据到小组件
   Future<void> _syncDataToWidget() async {
     try {
-      await _todoPlugin.taskController._syncWidget?.call();
-      await _todoPlugin.taskController._syncWidgetList?.call();
+      await PluginWidgetSyncHelper.instance.syncTodoQuadrantWidget();
     } catch (e) {
       debugPrint('同步数据到小组件失败: $e');
     }
@@ -148,8 +145,8 @@ class _TodoQuadrantWidgetConfigScreenState extends State<TodoQuadrantWidgetConfi
 
   /// 构建实时预览组件
   Widget _buildPreview(WidgetConfig config) {
-    final primaryColor = config.getColor('primary')?.currentValue ?? const Color(0xFF2196F3);
-    final accentColor = config.getColor('accent')?.currentValue ?? Colors.white;
+    final primaryColor = config.getColor('primary') ?? const Color(0xFF2196F3);
+    final accentColor = config.getColor('accent') ?? Colors.white;
     final opacity = config.opacity;
 
     return Container(
@@ -427,13 +424,15 @@ class _TodoQuadrantWidgetConfigScreenState extends State<TodoQuadrantWidgetConfi
                 ),
                 const SizedBox(height: 16),
                 WidgetConfigEditor(
-                  config: _widgetConfig,
+                  widgetSize: WidgetSize.large,
+                  initialConfig: _widgetConfig,
+                  previewTitle: '四象限预览',
                   onConfigChanged: (newConfig) {
                     setState(() {
                       _widgetConfig = newConfig;
                     });
                   },
-                  previewBuilder: (config) => _buildPreview(config),
+                  previewBuilder: (context, config) => _buildPreview(config),
                 ),
                 const SizedBox(height: 24),
                 // 说明文字

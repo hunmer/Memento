@@ -3,6 +3,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import '../controllers/day_controller.dart';
 import '../l10n/day_localizations.dart';
 import '../widgets/memorial_day_card.dart';
@@ -108,61 +109,70 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
       value: _controller,
       child: Consumer<DayController>(
         builder: (context, controller, child) {
-          return Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              leading:
-                  (Platform.isAndroid || Platform.isIOS)
-                      ? null
-                      : IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: () => PluginManager.toHomeScreen(context),
+          final theme = Theme.of(context);
+          return SuperCupertinoNavigationWrapper(
+            title: Text(
+              DayLocalizations.of(context).memorialDays,
+              style: TextStyle(color: theme.textTheme.titleLarge?.color),
+            ),
+            largeTitle: '纪念日',
+            actions: [
+              // 排序菜单
+              PopupMenuButton<SortMode>(
+                icon: Icon(Icons.sort, color: theme.iconTheme.color),
+                tooltip: DayLocalizations.of(context).sortOptions,
+                onSelected: (mode) => controller.setSortMode(mode),
+                itemBuilder:
+                    (context) => [
+                      PopupMenuItem(
+                        value: SortMode.upcoming,
+                        child: Text(
+                          DayLocalizations.of(context).upcomingSort,
+                        ),
                       ),
-              title: Text(DayLocalizations.of(context).memorialDays),
-              actions: [
-                // 排序菜单
-                PopupMenuButton<SortMode>(
-                  icon: const Icon(Icons.sort),
-                  tooltip: DayLocalizations.of(context).sortOptions,
-                  onSelected: (mode) => controller.setSortMode(mode),
-                  itemBuilder:
-                      (context) => [
-                        PopupMenuItem(
-                          value: SortMode.upcoming,
-                          child: Text(
-                            DayLocalizations.of(context).upcomingSort,
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: SortMode.recent,
-                          child: Text(DayLocalizations.of(context).recentSort),
-                        ),
-                        PopupMenuItem(
-                          value: SortMode.manual,
-                          child: Text(DayLocalizations.of(context).manualSort),
-                        ),
-                      ],
+                      PopupMenuItem(
+                        value: SortMode.recent,
+                        child: Text(DayLocalizations.of(context).recentSort),
+                      ),
+                      PopupMenuItem(
+                        value: SortMode.manual,
+                        child: Text(DayLocalizations.of(context).manualSort),
+                      ),
+                    ],
+              ),
+              // 视图切换按钮
+              IconButton(
+                icon: Icon(
+                  controller.isCardView ? Icons.view_list : Icons.view_module,
+                  color: theme.iconTheme.color,
                 ),
-                // 视图切换按钮
-                IconButton(
-                  icon: Icon(
-                    controller.isCardView ? Icons.view_list : Icons.view_module,
+                onPressed: controller.toggleView,
+                tooltip:
+                    controller.isCardView
+                        ? DayLocalizations.of(context).listView
+                        : DayLocalizations.of(context).cardView,
+              ),
+              // 添加纪念日按钮
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () => _showEditDialog(context),
+                tooltip: DayLocalizations.of(context).addMemorialDay,
+              ),
+            ],
+            body: Stack(
+              children: [
+                _buildBody(controller),
+                // FAB 覆盖层
+                Positioned(
+                  bottom: 16,
+                  right: 16,
+                  child: FloatingActionButton(
+                    onPressed: () => _showEditDialog(context),
+                    child: const Icon(Icons.add),
                   ),
-                  onPressed: controller.toggleView,
-                  tooltip:
-                      controller.isCardView
-                          ? DayLocalizations.of(context).listView
-                          : DayLocalizations.of(context).cardView,
-                ),
-                // 添加纪念日按钮
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => _showEditDialog(context),
-                  tooltip: DayLocalizations.of(context).addMemorialDay,
                 ),
               ],
             ),
-            body: _buildBody(controller),
           );
         },
       ),
