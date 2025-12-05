@@ -30,24 +30,37 @@ class ChatWidgetService {
       final recentChannels = _getRecentChannels(channels);
 
       // 序列化频道数据
-      final channelsData = recentChannels.map((c) => {
-        'id': c.id,
-        'name': c.title,
-        'iconCodePoint': c.icon.codePoint,
-        'colorValue': c.backgroundColor.value,
-        'lastMessage': c.messages.isNotEmpty ? c.messages.last.content : '',
-        'unreadCount': 0, // TODO: 实现未读计数
-      }).toList();
+      final channelsData =
+          recentChannels
+              .map(
+                (c) => {
+                  'id': c.id,
+                  'name': c.title,
+                  'iconCodePoint': c.icon.codePoint,
+                  'colorValue': c.backgroundColor.value,
+                  'lastMessage':
+                      c.messages.isNotEmpty ? c.messages.last.content : '',
+                  'unreadCount': 0, // TODO: 实现未读计数
+                },
+              )
+              .toList();
 
       // 保存到 SharedPreferences（Android）/ UserDefaults（iOS）
-      await HomeWidget.saveWidgetData('channels_json', jsonEncode(channelsData));
+      await HomeWidget.saveWidgetData(
+        'channels_json',
+        jsonEncode(channelsData),
+      );
       await HomeWidget.saveWidgetData('channel_count', channels.length);
-      await HomeWidget.saveWidgetData('last_update', DateTime.now().toIso8601String());
+      await HomeWidget.saveWidgetData(
+        'last_update',
+        DateTime.now().toIso8601String(),
+      );
 
       // 更新快速小组件（使用完整的包名）
       await HomeWidget.updateWidget(
         name: 'ChatQuickWidget',
-        qualifiedAndroidName: 'github.hunmer.memento.widgets.quick.ChatQuickWidgetProvider',
+        qualifiedAndroidName:
+            'github.hunmer.memento.widgets.quick.ChatQuickWidgetProvider',
         iOSName: 'ChatQuickWidget',
       );
 
@@ -62,12 +75,14 @@ class ChatWidgetService {
     // 按最后消息时间排序
     final sorted = List<Channel>.from(channels);
     sorted.sort((a, b) {
-      final aTime = a.messages.isNotEmpty
-          ? a.messages.last.date
-          : DateTime.fromMillisecondsSinceEpoch(0);
-      final bTime = b.messages.isNotEmpty
-          ? b.messages.last.date
-          : DateTime.fromMillisecondsSinceEpoch(0);
+      final aTime =
+          a.messages.isNotEmpty
+              ? a.messages.last.date
+              : DateTime.fromMillisecondsSinceEpoch(0);
+      final bTime =
+          b.messages.isNotEmpty
+              ? b.messages.last.date
+              : DateTime.fromMillisecondsSinceEpoch(0);
       return bTime.compareTo(aTime);
     });
 
@@ -97,7 +112,9 @@ class ChatWidgetService {
   }
 
   /// 注册小组件点击事件监听
-  static void registerWidgetClickListener(Function(String? channelId) callback) {
+  static void registerWidgetClickListener(
+    Function(String? channelId) callback,
+  ) {
     if (!SystemWidgetService.instance.isWidgetSupported()) {
       return;
     }

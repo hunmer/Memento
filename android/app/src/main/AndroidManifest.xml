@@ -80,6 +80,7 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
             <!-- DeepLink 支持 - 用于桌面小组件跳转 -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -106,6 +107,23 @@
                     android:host="habits" />
             </intent-filter>
         </activity>
+
+        <!-- 动态深度链接 Activity - 初始禁用，由 memento_intent 插件动态启用 -->
+        <activity
+            android:name=".DynamicDeepLinkActivity"
+            android:exported="true"
+            android:enabled="false"
+            android:launchMode="singleTop"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- 支持任意 scheme，由插件动态控制 -->
+                <data android:scheme="*" />
+            </intent-filter>
+        </activity>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

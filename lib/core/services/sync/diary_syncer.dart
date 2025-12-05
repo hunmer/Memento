@@ -35,11 +35,7 @@ class DiarySyncer extends PluginWidgetSyncer {
             highlight: todayCount > 0,
             colorValue: todayCount > 0 ? Colors.deepOrange.value : null,
           ),
-          WidgetStatItem(
-            id: 'month',
-            label: '本月字数',
-            value: '$monthCount',
-          ),
+          WidgetStatItem(id: 'month', label: '本月字数', value: '$monthCount'),
           WidgetStatItem(
             id: 'progress',
             label: '本月进度',

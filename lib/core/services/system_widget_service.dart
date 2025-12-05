@@ -4,7 +4,8 @@ import 'package:universal_platform/universal_platform.dart';
 import 'package:memento_widgets/memento_widgets.dart';
 
 // 重新导出数据模型，供其他文件使用
-export 'package:memento_widgets/memento_widgets.dart' show PluginWidgetData, WidgetStatItem;
+export 'package:memento_widgets/memento_widgets.dart'
+    show PluginWidgetData, WidgetStatItem;
 
 /// 系统桌面小组件数据同步服务
 ///

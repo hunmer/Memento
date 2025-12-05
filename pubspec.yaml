@@ -101,6 +101,10 @@ dependencies:
     path: ./plugins/memento_foreground_service
   memento_notifications:
     path: ./plugins/memento_notifications
+  memento_intent:
+    path: ./memento_intent
+  memento_nfc:
+    path: ./memento_nfc
 
 dev_dependencies:
   flutter_test:

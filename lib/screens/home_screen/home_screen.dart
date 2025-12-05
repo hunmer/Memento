@@ -15,6 +15,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../widgets/app_drawer.dart';
 import '../../core/floating_ball/floating_ball_service.dart';
 import '../../core/app_widgets/home_widget_service.dart';
+import '../../core/global_flags.dart';
 import 'managers/home_layout_manager.dart';
 import 'widgets/home_grid.dart';
 import 'widgets/add_widget_dialog.dart';
@@ -82,18 +83,52 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     // 监听布局管理器的变化（包括透明度设置）
     _layoutManager.addListener(_onLayoutChanged);
 
+    // 监听启动状态变化
+    AppStartupState.instance.addListener(_onStartupStateChanged);
+
     // 延迟初始化，确保在布局完成后执行
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         // 显示悬浮球（如果启用的话）
         FloatingBallService().show(context);
-        // 首次加载时打开最后使用的插件（仅在无参数启动时）
+        // 首次加载时打开最后使用的插件（仅在无参数启动且插件已加载时）
         if (!_hasInitialized && !_launchedWithParameters) {
-          _openLastUsedPlugin();
+          _tryOpenLastUsedPlugin();
           _hasInitialized = true;
         }
       }
     });
+  }
+
+  /// 尝试打开最后使用的插件（等待插件加载完成）
+  void _tryOpenLastUsedPlugin() {
+    if (AppStartupState.instance.pluginsReady) {
+      _openLastUsedPlugin();
+    }
+    // 如果插件还没加载完，会通过 _onStartupStateChanged 监听器处理
+  }
+
+  /// 启动状态变化回调
+  void _onStartupStateChanged() {
+    if (mounted) {
+      setState(() {});
+
+      // 当插件加载完成时，尝试打开最后使用的插件
+      if (AppStartupState.instance.pluginsReady &&
+          !_hasInitialized &&
+          !_launchedWithParameters) {
+        _openLastUsedPlugin();
+        _hasInitialized = true;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _layoutManager.removeListener(_onLayoutChanged);
+    AppStartupState.instance.removeListener(_onStartupStateChanged);
+    _pageController?.dispose();
+    super.dispose();
   }
 
   @override

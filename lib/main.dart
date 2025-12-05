@@ -43,12 +43,55 @@ import 'core/app_initializer.dart';
 
 // 从 app_widgets 导入页面过渡构建器
 import 'core/app_widgets/page_transitions.dart';
+import 'core/global_flags.dart';
+import 'screens/home_screen/home_screen.dart';
 
 void main() async {
-  // 执行应用初始化
+  // 执行核心初始化（快速完成）
   await initializeApp();
 
+  // 立即启动应用，其他初始化在后台进行
   runApp(const MyApp());
+}
+
+/// 处理小组件URI的包装组件
+/// 在应用启动时，如果有初始URI，直接返回目标页面而不显示首页
+class WidgetUriHandler extends StatelessWidget {
+  final Widget child;
+
+  const WidgetUriHandler({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: AppStartupState.instance,
+      builder: (context, child) {
+        final startupState = AppStartupState.instance;
+        final initialUri = startupState.initialWidgetUri;
+
+        // 如果有待处理的初始URI，显示加载页面
+        if (initialUri != null && startupState.isHandlingInitialUri) {
+          debugPrint('WidgetUriHandler: 显示加载页面，等待处理初始URI: $initialUri');
+          return const Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('正在启动...'),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // 没有待处理的URI，正常显示子组件
+        return child!;
+      },
+      child: child,
+    );
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -156,12 +199,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       ),
       initial: savedThemeMode ?? AdaptiveThemeMode.light,
       builder:
-          (theme, darkTheme) => MaterialApp(
-            scaffoldMessengerKey: scaffoldMessengerKey,
-            navigatorKey: navigatorKey,
-            title: 'Memento',
-            debugShowCheckedModeBanner: false, // 关闭调试横幅
-            localizationsDelegates: [
+          (theme, darkTheme) => WidgetUriHandler(
+            child: MaterialApp(
+              scaffoldMessengerKey: scaffoldMessengerKey,
+              navigatorKey: navigatorKey,
+              title: 'Memento',
+              debugShowCheckedModeBanner: false, // 关闭调试横幅
+              localizationsDelegates: [
               AppLocalizations.delegate,
               DiaryLocalizations.delegate,
               StoreLocalizations.delegate,
@@ -216,9 +260,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             initialRoute: AppRoutes.initialRoute,
             routes: AppRoutes.routes,
             onGenerateRoute: AppRoutes.generateRoute,
-            onGenerateTitle:
-                (BuildContext context) =>
-                    AppLocalizations.of(context)!.appTitle,
+              onGenerateTitle:
+                  (BuildContext context) =>
+                      AppLocalizations.of(context)!.appTitle,
+            ),
           ),
     );
   }
