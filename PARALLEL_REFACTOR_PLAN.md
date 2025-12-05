@@ -139,7 +139,7 @@ class _GoodsMainScreenState extends State<GoodsMainScreen> {
         children: _screens,
       ),
       enableLargeTitle: false,
-      automaticallyImplyLeading: false,
+            automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
     );
   }
 }

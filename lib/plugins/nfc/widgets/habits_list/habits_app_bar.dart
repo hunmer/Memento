@@ -20,7 +20,7 @@ class HabitsAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppBar(
       title: Text(l10n.habits),
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       leading:
           (Platform.isAndroid || Platform.isIOS)
               ? null

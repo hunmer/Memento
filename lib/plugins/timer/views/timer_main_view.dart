@@ -53,7 +53,7 @@ class _TimerMainViewState extends State<TimerMainView> {
       title: Text(_plugin.getPluginName(context)!),
       largeTitle: '计时器',
       enableLargeTitle: true,
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       backgroundColor: const Color(0xFFF5F6F8),
       actions: [
         IconButton(

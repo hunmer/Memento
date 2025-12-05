@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import '../l10n/openai_localizations.dart';
@@ -20,7 +22,7 @@ class PromptPresetScreen extends StatelessWidget {
       title: Text(OpenAILocalizations.of(context).promptPresetManagement),
       largeTitle: OpenAILocalizations.of(context).promptPresetManagement,
       enableLargeTitle: false,
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         IconButton(
           icon: const Icon(Icons.add),

@@ -49,7 +49,7 @@ SuperCupertinoNavigationWrapper(
   ),
   backgroundColor: bgColor,
   enableLargeTitle: true,
-  automaticallyImplyLeading: (Platform.isAndroid || Platform.isIOS),
+  automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
 )
 ```
 

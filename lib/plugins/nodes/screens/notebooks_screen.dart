@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:ui' show lerpDouble;
@@ -24,7 +26,7 @@ class NotebooksScreen extends StatelessWidget {
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
       largeTitle: l10n.notebooks,
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         IconButton(
           icon: Icon(Icons.add, color: theme.iconTheme.color),

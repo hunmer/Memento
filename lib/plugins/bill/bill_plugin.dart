@@ -1308,7 +1308,8 @@ class _BillMainViewState extends State<BillMainView>
                   padding: EdgeInsets.only(bottom: _bottomBarHeight),
                   child: Scaffold(
                     appBar: AppBar(
-                      automaticallyImplyLeading: false,
+                      automaticallyImplyLeading:
+                          !(Platform.isAndroid || Platform.isIOS),
                       leading:
                           (Platform.isAndroid || Platform.isIOS)
                               ? null

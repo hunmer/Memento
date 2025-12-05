@@ -89,7 +89,7 @@ class _AgentListScreenState extends State<AgentListScreen> {
           ? AgentGridView(agents: _getFilteredAgents())
           : AgentListView(agents: _getFilteredAgents()),
       enableLargeTitle: false,
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       
       actions: [
         IconButton(

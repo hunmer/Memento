@@ -96,7 +96,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
   AppBar _buildAppBar(BuildContext context, HabitsLocalizations l10n) {
     return AppBar(
       title: Text(l10n.skills),
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       leading:
           (Platform.isAndroid || Platform.isIOS)
               ? null

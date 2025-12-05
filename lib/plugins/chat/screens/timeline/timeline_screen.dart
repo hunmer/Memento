@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
@@ -106,7 +108,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
     return SuperCupertinoNavigationWrapper(
       title: Text(l10n.timelineTab),
       largeTitle: l10n.timelineTab,
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         // 视图切换按钮
         IconButton(

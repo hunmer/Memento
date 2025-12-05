@@ -63,7 +63,7 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
         },
       ),
       enableLargeTitle: true,
-      automaticallyImplyLeading: (Platform.isAndroid || Platform.isIOS),
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
     );
   }
 }

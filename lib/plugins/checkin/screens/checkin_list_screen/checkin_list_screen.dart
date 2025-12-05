@@ -117,7 +117,7 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
         ),
       ],
       enableLargeTitle: false,
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
     );
   }
 

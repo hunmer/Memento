@@ -51,7 +51,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
         leading:
             (Platform.isAndroid || Platform.isIOS)
                 ? null

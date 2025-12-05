@@ -219,7 +219,7 @@ class _TodoMainViewState extends State<TodoMainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
         leading:
             (Platform.isAndroid || Platform.isIOS)
                 ? null
