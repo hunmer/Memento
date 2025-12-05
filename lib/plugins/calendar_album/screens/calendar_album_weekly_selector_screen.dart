@@ -132,8 +132,8 @@ class _CalendarAlbumWeeklySelectorScreenState
     if (widgetId == null) return;
 
     try {
-      final primaryColor = _widgetConfig.getColor('primary')?.currentValue ?? const Color(0xFF5A9E9A);
-      final accentColor = _widgetConfig.getColor('accent')?.currentValue ?? Colors.white;
+      final primaryColor = _widgetConfig.getColor('primary') ?? const Color(0xFF5A9E9A);
+      final accentColor = _widgetConfig.getColor('accent') ?? Colors.white;
       final opacity = _widgetConfig.opacity;
 
       await HomeWidget.saveWidgetData<String>(
@@ -258,8 +258,8 @@ class _CalendarAlbumWeeklySelectorScreenState
 
   /// 构建实时预览组件
   Widget _buildPreview(BuildContext context, WidgetConfig config) {
-    final primaryColor = config.getColor('primary')?.currentValue ?? const Color(0xFF5A9E9A);
-    final accentColor = config.getColor('accent')?.currentValue ?? Colors.white;
+    final primaryColor = config.getColor('primary') ?? const Color(0xFF5A9E9A);
+    final accentColor = config.getColor('accent') ?? Colors.white;
     final opacity = config.opacity;
 
     return Container(
