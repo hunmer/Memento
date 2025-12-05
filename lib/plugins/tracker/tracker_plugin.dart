@@ -40,6 +40,7 @@ class _TrackerMainViewState extends State<TrackerMainView> {
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
       title: Text(TrackerLocalizations.of(context).goalTracking),
+      largeTitle: TrackerLocalizations.of(context).goalTracking,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: ChangeNotifierProvider.value(
         value: TrackerPlugin.instance.controller,
