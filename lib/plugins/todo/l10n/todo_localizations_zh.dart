@@ -155,4 +155,16 @@ class TodoLocalizationsZh extends TodoLocalizations {
 
   @override
   String get searchIn => '搜索';
+
+  @override
+  String get createdAt => '创建于';
+
+  @override
+  String get noCompletedTasks => '暂无已完成任务';
+
+  @override
+  String get delete => '删除';
+
+  @override
+  String get cancel => '取消';
 }

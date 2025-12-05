@@ -1,5 +1,6 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
+import 'package:Memento/widgets/icon_picker_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -32,6 +33,7 @@ class _TaskFormState extends State<TaskForm> {
   late List<Subtask> _subtasks;
   late List<DateTime> _reminders;
   late TextEditingController _subtaskController;
+  late IconData? _icon;
 
   // Custom color from HTML
   static const Color _primaryColor = Color(0xFF607AFB);
@@ -52,6 +54,7 @@ class _TaskFormState extends State<TaskForm> {
     _subtasks = widget.task?.subtasks.toList() ?? [];
     _reminders = widget.task?.reminders.toList() ?? [];
     _subtaskController = TextEditingController();
+    _icon = widget.task?.icon ?? Icons.assignment; // 默认使用任务图标
   }
 
   @override
@@ -211,6 +214,7 @@ class _TaskFormState extends State<TaskForm> {
         tags: _tags,
         subtasks: _subtasks,
         reminders: _reminders,
+        icon: _icon,
       );
     } else {
       final updatedTask = widget.task!.copyWith(
@@ -225,6 +229,7 @@ class _TaskFormState extends State<TaskForm> {
         tags: _tags,
         subtasks: _subtasks,
         reminders: _reminders,
+        icon: _icon,
       );
       await widget.taskController.updateTask(updatedTask);
     }
@@ -293,17 +298,31 @@ class _TaskFormState extends State<TaskForm> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.add_reaction_outlined,
-              color: isDark ? Colors.grey[400] : Colors.grey[500],
-              size: 28,
+          GestureDetector(
+            onTap: () async {
+              final selectedIcon = await showIconPickerDialog(
+                context,
+                _icon ?? Icons.assignment,
+              );
+              if (selectedIcon != null && mounted) {
+                setState(() {
+                  _icon = selectedIcon;
+                });
+              }
+            },
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color:
+                    isDark ? Colors.white.withOpacity(0.1) : Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                _icon ?? Icons.assignment,
+                color: isDark ? Colors.grey[400] : Colors.grey[500],
+                size: 28,
+              ),
             ),
           ),
           const SizedBox(width: 16),

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/routing/plugin_route_handler.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/todo/screens/todo_list_selector_screen.dart';
-import 'package:Memento/plugins/todo/widgets/task_detail_view.dart';
 import 'package:Memento/plugins/todo/widgets/task_form.dart';
 import 'package:Memento/plugins/todo/views/todo_main_view.dart';
+import 'package:Memento/plugins/todo/models/task.dart';
+import 'package:intl/intl.dart';
 
 /// 待办插件路由处理器
 class TodoRouteHandler extends PluginRouteHandler {
@@ -90,12 +91,10 @@ class TodoRouteHandler extends PluginRouteHandler {
       final tasks = plugin.taskController.tasks.where((t) => t.id == taskId);
 
       if (tasks.isNotEmpty) {
+        // 打开主界面并显示任务详情对话框
+        final task = tasks.first;
         return createRoute(
-          TaskDetailView(
-            task: tasks.first,
-            taskController: plugin.taskController,
-            reminderController: plugin.reminderController,
-          ),
+          TodoMainViewWithTaskDetail(task: task),
         );
       }
     }
@@ -125,3 +124,200 @@ class TodoRouteHandler extends PluginRouteHandler {
     return createRoute(const TodoMainView());
   }
 }
+
+/// 带任务详情对话框的 TodoMainView
+class TodoMainViewWithTaskDetail extends StatefulWidget {
+  final Task task;
+
+  const TodoMainViewWithTaskDetail({
+    super.key,
+    required this.task,
+  });
+
+  @override
+  State<TodoMainViewWithTaskDetail> createState() =>
+      _TodoMainViewWithTaskDetailState();
+}
+
+class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail> {
+  late TodoPlugin _plugin;
+
+  @override
+  void initState() {
+    super.initState();
+    _plugin = TodoPlugin.instance;
+
+    // 延迟显示对话框，确保页面已加载
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showTaskDetailDialog(context, widget.task);
+    });
+  }
+
+  void _showTaskDetailDialog(BuildContext context, Task task) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(task.title),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (task.description != null && task.description!.isNotEmpty) ...[
+                Text(
+                  '描述',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(task.description!),
+                const SizedBox(height: 16),
+              ],
+              if (task.tags.isNotEmpty) ...[
+                Text(
+                  '标签',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: task.tags
+                      .map((tag) => Chip(
+                            label: Text(tag),
+                            backgroundColor: Colors.blue.shade100,
+                          ))
+                      .toList(),
+                ),
+                const SizedBox(height: 16),
+              ],
+              Text(
+                '计时器',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                task.formattedDuration,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: task.status == TaskStatus.inProgress
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text('开始'),
+                    onPressed: task.status != TaskStatus.inProgress
+                        ? () {
+                            _plugin.taskController.updateTaskStatus(
+                              task.id,
+                              TaskStatus.inProgress,
+                            );
+                            Navigator.of(context).pop();
+                          }
+                        : null,
+                  ),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.pause),
+                    label: const Text('暂停'),
+                    onPressed: task.status == TaskStatus.inProgress
+                        ? () {
+                            _plugin.taskController.updateTaskStatus(
+                              task.id,
+                              TaskStatus.todo,
+                            );
+                            Navigator.of(context).pop();
+                          }
+                        : null,
+                  ),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.check),
+                    label: const Text('完成'),
+                    onPressed: task.status != TaskStatus.done
+                        ? () {
+                            _plugin.taskController.updateTaskStatus(
+                              task.id,
+                              TaskStatus.done,
+                            );
+                            Navigator.of(context).pop();
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('关闭'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // 导航到编辑页面
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => TaskForm(
+                    task: task,
+                    taskController: _plugin.taskController,
+                    reminderController: _plugin.reminderController,
+                  ),
+                ),
+              );
+            },
+            child: const Text('编辑'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('删除任务'),
+                  content: const Text('确定要删除这个任务吗？'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('取消'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('删除'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirmed == true) {
+                await _plugin.taskController.deleteTask(task.id);
+                Navigator.of(context).pop();
+              }
+            },
+            child: const Text(
+              '删除',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const TodoMainView();
+  }
+}
+

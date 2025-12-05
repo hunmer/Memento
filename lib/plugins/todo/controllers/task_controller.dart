@@ -310,6 +310,7 @@ class TaskController extends ChangeNotifier {
     List<String>? tags,
     List<Subtask>? subtasks,
     List<DateTime>? reminders,
+    IconData? icon,
   }) async {
     final task = Task(
       id: const Uuid().v4(),
@@ -323,6 +324,7 @@ class TaskController extends ChangeNotifier {
       tags: tags,
       subtasks: subtasks,
       reminders: reminders,
+      icon: icon,
     );
 
     await addTask(task);
@@ -368,6 +370,14 @@ class TaskController extends ChangeNotifier {
     notifyListeners();
     await _saveTasks();
     await _syncWidget();
+  }
+
+  // 清空历史记录
+  void clearHistory() {
+    _completedTasks.clear();
+    notifyListeners();
+    _saveTasks();
+    _syncWidget();
   }
 
   // 更新任务状态

@@ -9,6 +9,7 @@ class TaskListView extends StatefulWidget {
   final Function(Task) onTaskTap;
   final Function(Task, TaskStatus) onTaskStatusChanged;
   final Function(Task) onTaskDismissed;
+  final Function(Task)? onTaskEdit;
   final Function(String taskId, String subtaskId, bool isCompleted)?
   onSubtaskStatusChanged;
 
@@ -18,6 +19,7 @@ class TaskListView extends StatefulWidget {
     required this.onTaskTap,
     required this.onTaskStatusChanged,
     required this.onTaskDismissed,
+    this.onTaskEdit,
     this.onSubtaskStatusChanged,
   });
 
@@ -49,6 +51,7 @@ class _TaskListViewState extends State<TaskListView> {
                               (status) =>
                                   widget.onTaskStatusChanged(task, status),
                           onDismissed: () => widget.onTaskDismissed(task),
+                          onTaskEdit: widget.onTaskEdit,
                           onSubtaskStatusChanged: widget.onSubtaskStatusChanged,
                         );
                       },
@@ -81,6 +84,7 @@ class _TaskCard extends StatefulWidget {
   final VoidCallback onTap;
   final Function(TaskStatus) onStatusChanged;
   final VoidCallback onDismissed;
+  final Function(Task)? onTaskEdit;
   final Function(String taskId, String subtaskId, bool isCompleted)?
   onSubtaskStatusChanged;
 
@@ -90,6 +94,7 @@ class _TaskCard extends StatefulWidget {
     required this.onTap,
     required this.onStatusChanged,
     required this.onDismissed,
+    this.onTaskEdit,
     this.onSubtaskStatusChanged,
   });
 
@@ -176,14 +181,57 @@ class _TaskCardState extends State<_TaskCard> {
 
     return Dismissible(
       key: widget.key!,
-      direction: DismissDirection.endToStart,
+      direction: DismissDirection.horizontal,
       background: Container(
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 20.0),
+        color: Colors.blue,
+        child: const Icon(Icons.edit, color: Colors.white),
+      ),
+      secondaryBackground: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20.0),
         color: Colors.red,
         child: const Icon(Icons.delete, color: Colors.white),
       ),
-      onDismissed: (_) => widget.onDismissed(),
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          // 左滑进入编辑页面 - 不移除任务
+          if (widget.onTaskEdit != null) {
+            widget.onTaskEdit!(widget.task);
+          }
+          return false;
+        } else if (direction == DismissDirection.endToStart) {
+          // 右滑删除任务 - 显示确认对话框
+          return await showDialog<bool>(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('删除任务'),
+                content: Text('确定要删除任务 "${widget.task.title}" 吗？'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('取消'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    child: const Text('删除'),
+                  ),
+                ],
+              );
+            },
+          ) ?? false;
+        }
+        return false;
+      },
+      onDismissed: (direction) {
+        // 只在确认删除后才执行删除操作
+        if (direction == DismissDirection.endToStart) {
+          widget.onDismissed();
+        }
+      },
       child: Container(
         decoration: BoxDecoration(
           color: isDark ? Colors.white.withOpacity(0.1) : Colors.white,
@@ -229,7 +277,7 @@ class _TaskCardState extends State<_TaskCard> {
                         ),
                         alignment: Alignment.center,
                         child: Icon(
-                          _getCategoryIcon(),
+                          widget.task.icon ?? Icons.assignment, // 使用任务的图标，如果没有则使用默认图标
                           color: isDark ? Colors.white : Colors.grey[900],
                           size: 24,
                         ),

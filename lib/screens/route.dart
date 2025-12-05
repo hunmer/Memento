@@ -1,6 +1,7 @@
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/notes/screens/notes_screen.dart';
 import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
+import 'package:Memento/plugins/todo/views/todo_bottombar_view.dart';
 import 'package:Memento/plugins/tts/screens/tts_services_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/home_screen.dart';
@@ -291,7 +292,7 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const TimerMainView());
       case '/todo':
       case 'todo':
-        return _createRoute(const TodoMainView());
+        return _createRoute(const TodoBottomBarView());
       case '/tracker':
       case 'tracker':
         return _createRoute(const TrackerMainView());
@@ -812,7 +813,7 @@ class AppRoutes extends NavigatorObserver {
     openai: (context) => const OpenAIMainView(),
     scriptsCenter: (context) => const ScriptsCenterMainView(),
     timer: (context) => const TimerMainView(),
-    todo: (context) => const TodoMainView(),
+    todo: (context) => const TodoBottomBarView(),
     tracker: (context) => const TrackerMainView(),
     floatingBall: (context) => const FloatingBallScreen(),
     widgetsConfig: (context) => const WidgetsConfigScreen(),
