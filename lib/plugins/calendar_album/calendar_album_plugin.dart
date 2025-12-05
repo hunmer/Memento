@@ -122,6 +122,70 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     }
   }
 
+  // ==================== 每周相册小组件相关方法 ====================
+
+  /// 获取本周日记条目（用于每周相册小组件）
+  /// @param weekOffset 相对于当前周的偏移量（0=当前周，1=下周，-1=上周）
+  /// @param startDate 起始日期（可选，默认从周一开始）
+  List<CalendarEntry> getWeeklyEntries({int weekOffset = 0, DateTime? startDate}) {
+    try {
+      // 计算目标周的起始日期（周一）
+      final now = DateTime.now();
+      final currentWeekStart = _getWeekStart(now);
+      final targetWeekStart = currentWeekStart.add(Duration(days: weekOffset * 7));
+
+      final entries = <CalendarEntry>[];
+
+      // 获取这一周每一天的日记
+      for (int i = 0; i < 7; i++) {
+        final date = targetWeekStart.add(Duration(days: i));
+        entries.addAll(calendarController.getEntriesForDate(date));
+      }
+
+      // 按日期排序
+      entries.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+      return entries;
+    } catch (e) {
+      debugPrint('获取本周日记失败: $e');
+      return [];
+    }
+  }
+
+  /// 获取指定日期的日记条目（周一到周日点击用）
+  /// @param date 日期
+  List<CalendarEntry> getEntriesForDate(DateTime date) {
+    return calendarController.getEntriesForDate(date);
+  }
+
+  /// 计算指定周的周开始日期（周一）
+  DateTime _getWeekStart(DateTime date) {
+    final weekday = date.weekday;
+    return date.subtract(Duration(days: weekday - 1));
+  }
+
+  /// 获取周信息（用于小组件标题显示）
+  /// @param weekOffset 相对于当前周的偏移量
+  Map<String, dynamic> getWeeklyInfo({int weekOffset = 0}) {
+    final now = DateTime.now();
+    final currentWeekStart = _getWeekStart(now);
+    final targetWeekStart = currentWeekStart.add(Duration(days: weekOffset * 7));
+    final weekEnd = targetWeekStart.add(const Duration(days: 6));
+
+    // 计算这是第几周（基于年份）
+    final yearStart = DateTime(now.year, 1, 1);
+    final yearWeekStart = _getWeekStart(yearStart);
+    final weekNumber = ((targetWeekStart.difference(yearWeekStart).inDays) / 7).floor() + 1;
+
+    return {
+      'weekNumber': weekNumber,
+      'startDate': targetWeekStart,
+      'endDate': weekEnd,
+      'startDateStr': '${targetWeekStart.month}月 ${targetWeekStart.day}日',
+      'endDateStr': '${weekEnd.month}月 ${weekEnd.day}日',
+    };
+  }
+
   @override
   Widget? buildCardView(BuildContext context) {
     final theme = Theme.of(context);

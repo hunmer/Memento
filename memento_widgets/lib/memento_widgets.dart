@@ -115,6 +115,8 @@ class MyWidgetManager {
         'github.hunmer.memento.widgets.providers.ChatWidget2x1Provider',
     'CheckinItemWidgetProvider':
         'github.hunmer.memento.widgets.providers.CheckinItemWidgetProvider',
+    'CalendarAlbumWeeklyWidgetProvider':
+        'github.hunmer.memento.widgets.providers.CalendarAlbumWeeklyWidgetProvider',
     'CheckinMonthWidgetProvider':
         'github.hunmer.memento.widgets.providers.CheckinMonthWidgetProvider',
     'TodoListWidgetProvider':

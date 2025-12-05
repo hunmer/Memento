@@ -117,6 +117,7 @@ class PluginWidgetSyncHelper {
       _activitySyncer.syncActivityDailyWidget(),
       _habitsSyncer.syncHabitsWeeklyWidget(),
       _habitsSyncer.syncHabitGroupListWidget(),
+      _calendarAlbumSyncer.syncCalendarAlbumWeeklyWidget(),
     ]);
   }
 
@@ -225,4 +226,7 @@ class PluginWidgetSyncHelper {
 
   /// 同步活动日视图小组件
   Future<void> syncActivityDailyWidget() => _activitySyncer.syncActivityDailyWidget();
+
+  /// 同步每周相册小组件
+  Future<void> syncCalendarAlbumWeeklyWidget() => _calendarAlbumSyncer.syncCalendarAlbumWeeklyWidget();
 }

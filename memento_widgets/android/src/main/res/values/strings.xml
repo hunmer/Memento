@@ -156,4 +156,8 @@
 
     <!-- 本日活动详细视图小组件 -->
     <string name="activity_daily_widget_description">本日活动详情 - 显示24小时时间轴和活动统计</string>
+
+    <!-- 每周相册小组件 -->
+    <string name="widget_calendar_album_weekly_label">每周相册</string>
+    <string name="widget_calendar_album_weekly_description">显示每周照片日记</string>
 </resources>

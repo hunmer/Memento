@@ -127,6 +127,7 @@ Future<void> _registerBroadcastReceiver() async {
         'github.hunmer.memento.REFRESH_ACTIVITY_DAILY_WIDGET',
         'github.hunmer.memento.REFRESH_HABITS_WEEKLY_WIDGET',
         'github.hunmer.memento.REFRESH_CHECKIN_WEEKLY_WIDGET',
+        'github.hunmer.memento.REFRESH_CALENDAR_ALBUM_WEEKLY_WIDGET',
         'github.hunmer.memento.CLEANUP_WIDGET_IDS',
       ],
     });
@@ -264,6 +265,50 @@ Future<void> _registerBroadcastReceiver() async {
                   'github.hunmer.memento.widgets.providers.CheckinWeeklyWidgetProvider',
             );
           }
+          // 处理每周相册小组件刷新
+          else if (action ==
+              'github.hunmer.memento.REFRESH_CALENDAR_ALBUM_WEEKLY_WIDGET') {
+            final widgetId = data?['widgetId'] as int?;
+            final weekOffset = data?['weekOffset'] as int?;
+
+            debugPrint(
+              '每周相册小组件刷新请求: widgetId=$widgetId, weekOffset=$weekOffset',
+            );
+
+            if (widgetId != null && weekOffset != null) {
+              // 更新 SharedPreferences 中的 weekOffset
+              final widgetDataJson = await HomeWidget.getWidgetData<String>(
+                'calendar_album_weekly_data_$widgetId',
+              );
+
+              if (widgetDataJson != null && widgetDataJson.isNotEmpty) {
+                final widgetData =
+                    jsonDecode(widgetDataJson) as Map<String, dynamic>;
+                widgetData['weekOffset'] = weekOffset;
+
+                // 保存更新后的配置
+                await HomeWidget.saveWidgetData<String>(
+                  'calendar_album_weekly_data_$widgetId',
+                  jsonEncode(widgetData),
+                );
+
+                debugPrint('已更新 weekOffset 为 $weekOffset');
+              }
+
+              // 同步数据
+              await PluginWidgetSyncHelper.instance.syncCalendarAlbumWeeklyWidget();
+
+              // 通知 Android 小组件刷新
+              await HomeWidget.updateWidget(
+                name: 'CalendarAlbumWeeklyWidgetProvider',
+                iOSName: 'CalendarAlbumWeeklyWidget',
+                qualifiedAndroidName:
+                    'github.hunmer.memento.widgets.providers.CalendarAlbumWeeklyWidgetProvider',
+              );
+
+              debugPrint('每周相册小组件刷新完成');
+            }
+          }
           // 处理小组件清理请求（删除时）
           else if (action == 'github.hunmer.memento.CLEANUP_WIDGET_IDS') {
             final widgetType = data?['widgetType'] as String?;
@@ -384,6 +429,14 @@ void handleWidgetClick(String url) {
     if (routePath == '/calendar_month/config') {
       routePath = '/calendar_month_selector';
       debugPrint('日历月视图小组件配置路由转换为: $routePath');
+    }
+
+    // 特殊处理：每周相册小组件配置路由
+    // 从 /calendar_album_weekly/config?widgetId=xxx 转换为 /calendar_album_weekly_selector
+    // widgetId 参数会在后面被提取到 arguments 中
+    if (routePath == '/calendar_album_weekly/config') {
+      routePath = '/calendar_album_weekly_selector';
+      debugPrint('每周相册小组件配置路由转换为: $routePath');
     }
 
     // 特殊处理：日历月视图小组件日期点击

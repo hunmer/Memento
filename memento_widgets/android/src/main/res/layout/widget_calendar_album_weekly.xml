@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/weekly_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_calendar_album_weekly_background"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- 顶部标题区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/weekly_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="一日一拍"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/weekly_week_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="第 45 周・11月 3 - 11月 9"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:alpha="0.8" />
+
+    </LinearLayout>
+
+    <!-- 星期和照片区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- 第一天 -->
+        <LinearLayout
+            android:id="@+id/weekly_day_1_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <RelativeLayout
+                android:layout_width="32dp"
+                android:layout_height="40dp"
+                android:background="@drawable/widget_weekly_day_background"
+                android:padding="4dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_image" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/weekly_day_1_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="一"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:alpha="0.8" />
+
+        </LinearLayout>
+
+        <!-- 第二天 -->
+        <LinearLayout
+            android:id="@+id/weekly_day_2_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <RelativeLayout
+                android:layout_width="32dp"
+                android:layout_height="40dp"
+                android:background="@drawable/widget_weekly_day_background"
+                android:padding="4dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_image" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/weekly_day_2_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="二"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:alpha="0.8" />
+
+        </LinearLayout>
+
+        <!-- 第三天 -->
+        <LinearLayout
+            android:id="@+id/weekly_day_3_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <RelativeLayout
+                android:layout_width="32dp"
+                android:layout_height="40dp"
+                android:background="@drawable/widget_weekly_day_background"
+                android:padding="4dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_image" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/weekly_day_3_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="三"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:alpha="0.8" />
+
+        </LinearLayout>
+
+        <!-- 第四天 -->
+        <LinearLayout
+            android:id="@+id/weekly_day_4_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <RelativeLayout
+                android:layout_width="32dp"
+                android:layout_height="40dp"
+                android:background="@drawable/widget_weekly_day_background"
+                android:padding="4dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_image" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/weekly_day_4_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="四"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:alpha="0.8" />
+
+        </LinearLayout>
+
+        <!-- 第五天 -->
+        <LinearLayout
+            android:id="@+id/weekly_day_5_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <RelativeLayout
+                android:layout_width="32dp"
+                android:layout_height="40dp"
+                android:background="@drawable/widget_weekly_day_background"
+                android:padding="4dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_image" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/weekly_day_5_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="五"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:alpha="0.8" />
+
+        </LinearLayout>
+
+        <!-- 第六天 -->
+        <LinearLayout
+            android:id="@+id/weekly_day_6_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <RelativeLayout
+                android:layout_width="32dp"
+                android:layout_height="40dp"
+                android:background="@drawable/widget_weekly_day_background"
+                android:padding="4dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_image" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/weekly_day_6_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="六"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:alpha="0.8" />
+
+        </LinearLayout>
+
+        <!-- 第七天 -->
+        <LinearLayout
+            android:id="@+id/weekly_day_7_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <RelativeLayout
+                android:layout_width="32dp"
+                android:layout_height="40dp"
+                android:background="@drawable/widget_weekly_day_background"
+                android:padding="4dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_image" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/weekly_day_7_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="日"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:alpha="0.8" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
