@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
-import '../../widgets/widget_config_editor/widget_config_editor.dart';
-import '../../widgets/widget_config_editor/models/color_config.dart';
-import '../../widgets/widget_config_editor/models/widget_config.dart';
+import '../../../widgets/widget_config_editor/widget_config_editor.dart';
+import '../../../widgets/widget_config_editor/models/color_config.dart';
+import '../../../widgets/widget_config_editor/models/widget_config.dart';
+import '../../../widgets/widget_config_editor/models/widget_size.dart';
 import 'entry_editor/entry_editor_ui.dart';
 import 'entry_editor/entry_editor_controller.dart';
 import '../l10n/calendar_album_localizations.dart';
@@ -36,6 +37,8 @@ class _CalendarAlbumWeeklySelectorScreenState
   void initState() {
     super.initState();
     _initWidgetConfig();
+    // 加载配置
+    _loadSavedConfig();
   }
 
   /// 初始化小组件配置
@@ -45,7 +48,7 @@ class _CalendarAlbumWeeklySelectorScreenState
         ColorConfig(
           key: 'primary',
           label: '背景色',
-          defaultValue: const Color(0xFF5A9E9A), // 默认绿色
+          defaultValue: const Color(0xFF5A9E9A),
           currentValue: const Color(0xFF5A9E9A),
         ),
         ColorConfig(
@@ -55,52 +58,63 @@ class _CalendarAlbumWeeklySelectorScreenState
           currentValue: Colors.white,
         ),
       ],
-      opacity: 0.95, // 默认透明度
+      opacity: 0.95,
     );
-
-    // 如果有 widgetId，尝试加载已保存的配置
-    if (widgetId != null) {
-      _loadSavedConfig();
-    }
   }
 
   /// 加载已保存的配置
   Future<void> _loadSavedConfig() async {
+    final widgetId = widget.widgetId;
     if (widgetId == null) return;
 
     try {
-      // 加载颜色配置
       final primaryColorStr = await HomeWidget.getWidgetData<String>(
-        'calendar_album_weekly_primary_color_${widgetId}',
+        'calendar_album_weekly_primary_color_$widgetId',
       );
       final accentColorStr = await HomeWidget.getWidgetData<String>(
-        'calendar_album_weekly_accent_color_${widgetId}',
+        'calendar_album_weekly_accent_color_$widgetId',
       );
       final opacityStr = await HomeWidget.getWidgetData<String>(
-        'calendar_album_weekly_opacity_${widgetId}',
+        'calendar_album_weekly_opacity_$widgetId',
       );
       final weekOffsetStr = await HomeWidget.getWidgetData<String>(
-        'calendar_album_weekly_week_offset_${widgetId}',
+        'calendar_album_weekly_week_offset_$widgetId',
       );
 
       setState(() {
-        // 解析颜色值
+        final colors = <ColorConfig>[];
+
         if (primaryColorStr != null) {
           final colorValue = int.tryParse(primaryColorStr);
           if (colorValue != null) {
-            _widgetConfig.getColor('primary')?.currentValue = Color(colorValue);
+            colors.add(ColorConfig(
+              key: 'primary',
+              label: '背景色',
+              defaultValue: const Color(0xFF5A9E9A),
+              currentValue: Color(colorValue),
+            ));
           }
         }
 
         if (accentColorStr != null) {
           final colorValue = int.tryParse(accentColorStr);
           if (colorValue != null) {
-            _widgetConfig.getColor('accent')?.currentValue = Color(colorValue);
+            colors.add(ColorConfig(
+              key: 'accent',
+              label: '标题色',
+              defaultValue: Colors.white,
+              currentValue: Color(colorValue),
+            ));
           }
         }
 
-        if (opacityStr != null) {
-          _widgetConfig.opacity = double.tryParse(opacityStr) ?? 0.95;
+        if (colors.isNotEmpty) {
+          _widgetConfig = WidgetConfig(
+            colors: colors,
+            opacity: opacityStr != null
+                ? (double.tryParse(opacityStr) ?? 0.95)
+                : 0.95,
+          );
         }
 
         if (weekOffsetStr != null) {
@@ -114,37 +128,34 @@ class _CalendarAlbumWeeklySelectorScreenState
 
   /// 保存配置并完成设置
   Future<void> _saveAndFinish() async {
+    final widgetId = widget.widgetId;
     if (widgetId == null) return;
 
     try {
-      // 1. 获取配置值
       final primaryColor = _widgetConfig.getColor('primary')?.currentValue ?? const Color(0xFF5A9E9A);
       final accentColor = _widgetConfig.getColor('accent')?.currentValue ?? Colors.white;
       final opacity = _widgetConfig.opacity;
 
-      // 2. 保存颜色配置（必须使用 String 类型！）
       await HomeWidget.saveWidgetData<String>(
-        'calendar_album_weekly_primary_color_${widgetId}',
-        primaryColor.value.toString(), // Color.value 转为字符串
+        'calendar_album_weekly_primary_color_$widgetId',
+        primaryColor.value.toString(),
       );
 
       await HomeWidget.saveWidgetData<String>(
-        'calendar_album_weekly_accent_color_${widgetId}',
+        'calendar_album_weekly_accent_color_$widgetId',
         accentColor.value.toString(),
       );
 
       await HomeWidget.saveWidgetData<String>(
-        'calendar_album_weekly_opacity_${widgetId}',
-        opacity.toString(), // double 转为字符串
+        'calendar_album_weekly_opacity_$widgetId',
+        opacity.toString(),
       );
 
-      // 3. 保存当前周偏移量
       await HomeWidget.saveWidgetData<String>(
-        'calendar_album_weekly_week_offset_${widgetId}',
+        'calendar_album_weekly_week_offset_$widgetId',
         _currentWeekOffset.toString(),
       );
 
-      // 4. 同步数据并更新小组件
       await _syncDataToWidget();
       await HomeWidget.updateWidget(
         name: 'CalendarAlbumWeeklyWidgetProvider',
@@ -162,19 +173,20 @@ class _CalendarAlbumWeeklySelectorScreenState
 
   /// 同步数据到小组件
   Future<void> _syncDataToWidget() async {
+    final widgetId = widget.widgetId;
+    if (widgetId == null) return;
+
     try {
       final calendarController = CalendarController();
       final now = DateTime.now();
       final currentWeekStart = _getWeekStart(now);
       final targetWeekStart = currentWeekStart.add(Duration(days: _currentWeekOffset * 7));
 
-      // 获取一周的日记数据
       final List<Map<String, dynamic>> weeklyData = [];
       for (int i = 0; i < 7; i++) {
         final date = targetWeekStart.add(Duration(days: i));
         final entries = calendarController.getEntriesForDate(date);
 
-        // 获取该日期的所有图片
         final List<String> images = [];
         for (final entry in entries) {
           images.addAll(entry.imageUrls);
@@ -185,19 +197,24 @@ class _CalendarAlbumWeeklySelectorScreenState
           'dayIndex': i,
           'date': date.toIso8601String(),
           'dayName': _getDayName(i),
-          'images': images.take(1).toList(), // 只取第一张图片作为缩略图
+          'images': images.take(1).toList(),
           'hasEntry': entries.isNotEmpty,
         });
       }
 
-      // 保存数据
+      final weekInfo = _getWeeklyInfo(weekOffset: _currentWeekOffset);
+
       final widgetData = {
-        'weekOffset': _currentWeekOffset,
+        'weekInfo': {
+          'weekNumber': weekInfo['weekNumber'],
+          'startDateStr': weekInfo['startDateStr'],
+          'endDateStr': weekInfo['endDateStr'],
+        },
         'days': weeklyData,
       };
 
       await HomeWidget.saveWidgetData<String>(
-        'calendar_album_weekly_data_${widgetId}',
+        'calendar_album_weekly_data_$widgetId',
         jsonEncode(widgetData),
       );
 
@@ -205,6 +222,26 @@ class _CalendarAlbumWeeklySelectorScreenState
     } catch (e) {
       debugPrint('同步数据失败: $e');
     }
+  }
+
+  /// 获取周信息
+  Map<String, dynamic> _getWeeklyInfo({int weekOffset = 0}) {
+    final now = DateTime.now();
+    final currentWeekStart = _getWeekStart(now);
+    final targetWeekStart = currentWeekStart.add(Duration(days: weekOffset * 7));
+    final weekEnd = targetWeekStart.add(const Duration(days: 6));
+
+    final yearStart = DateTime(now.year, 1, 1);
+    final yearWeekStart = _getWeekStart(yearStart);
+    final weekNumber = ((targetWeekStart.difference(yearWeekStart).inDays) / 7).floor() + 1;
+
+    return {
+      'weekNumber': weekNumber,
+      'startDate': targetWeekStart,
+      'endDate': weekEnd,
+      'startDateStr': '${targetWeekStart.month}月 ${targetWeekStart.day}日',
+      'endDateStr': '${weekEnd.month}月 ${weekEnd.day}日',
+    };
   }
 
   /// 计算指定日期所在周的周一
@@ -220,7 +257,7 @@ class _CalendarAlbumWeeklySelectorScreenState
   }
 
   /// 构建实时预览组件
-  Widget _buildPreview(WidgetConfig config) {
+  Widget _buildPreview(BuildContext context, WidgetConfig config) {
     final primaryColor = config.getColor('primary')?.currentValue ?? const Color(0xFF5A9E9A);
     final accentColor = config.getColor('accent')?.currentValue ?? Colors.white;
     final opacity = config.opacity;
@@ -356,13 +393,14 @@ class _CalendarAlbumWeeklySelectorScreenState
                   ),
                   const SizedBox(height: 8),
                   WidgetConfigEditor(
-                    config: _widgetConfig,
+                    widgetSize: WidgetSize.large,
+                    initialConfig: _widgetConfig,
                     onConfigChanged: (newConfig) {
                       setState(() {
                         _widgetConfig = newConfig;
                       });
                     },
-                    previewBuilder: (config) => _buildPreview(config),
+                    previewBuilder: _buildPreview,
                   ),
                 ],
               ),
