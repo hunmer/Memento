@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html class="dark" lang="zh"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>任务四象限</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#1392ec",
+            "background-light": "#f6f7f8",
+            "background-dark": "#101a22",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex min-h-screen w-full flex-col">
+<main class="grid flex-1 grid-cols-2 grid-rows-2 gap-2 bg-background-dark p-2">
+<section class="flex flex-col overflow-hidden rounded-lg bg-background-dark">
+<header class="border-b border-red-500/30 bg-red-500/10 px-4 py-3">
+<h2 class="text-sm font-bold leading-tight tracking-[-0.015em] text-red-400">紧急且重要</h2>
+</header>
+<div class="flex-1 overflow-y-auto px-4 pt-2">
+<label class="flex items-center gap-x-3 py-3">
+<input class="h-5 w-5 flex-shrink-0 appearance-none rounded-md border-2 border-white/20 bg-transparent text-primary checked:border-primary checked:bg-primary focus:outline-none focus:ring-0 focus:ring-offset-0" onchange="this.style.backgroundSize = this.checked ? '100%' : '0'" style="--checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e'); background-image: var(--checkbox-tick-svg); background-repeat: no-repeat; background-position: center; background-size: 0;" type="checkbox"/>
+<p class="flex-1 text-base font-normal leading-normal text-white">完成项目报告</p>
+</label>
+<label class="flex items-center gap-x-3 py-3">
+<input class="h-5 w-5 flex-shrink-0 appearance-none rounded-md border-2 border-white/20 bg-transparent text-primary checked:border-primary checked:bg-primary focus:outline-none focus:ring-0 focus:ring-offset-0" onchange="this.style.backgroundSize = this.checked ? '100%' : '0'" style="--checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e'); background-image: var(--checkbox-tick-svg); background-repeat: no-repeat; background-position: center; background-size: 0;" type="checkbox"/>
+<p class="flex-1 text-base font-normal leading-normal text-white">回复紧急邮件</p>
+</label>
+</div>
+</section>
+<section class="flex flex-col overflow-hidden rounded-lg bg-background-dark">
+<header class="border-b border-green-500/30 bg-green-500/10 px-4 py-3">
+<h2 class="text-sm font-bold leading-tight tracking-[-0.015em] text-green-400">重要但不紧急</h2>
+</header>
+<div class="flex-1 overflow-y-auto px-4 pt-2">
+<label class="flex items-center gap-x-3 py-3">
+<input class="h-5 w-5 flex-shrink-0 appearance-none rounded-md border-2 border-white/20 bg-transparent text-primary checked:border-primary checked:bg-primary focus:outline-none focus:ring-0 focus:ring-offset-0" onchange="this.style.backgroundSize = this.checked ? '100%' : '0'" style="--checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e'); background-image: var(--checkbox-tick-svg); background-repeat: no-repeat; background-position: center; background-size: 0;" type="checkbox"/>
+<p class="flex-1 text-base font-normal leading-normal text-white">制定下季度计划</p>
+</label>
+<label class="flex items-center gap-x-3 py-3">
+<input class="h-5 w-5 flex-shrink-0 appearance-none rounded-md border-2 border-white/20 bg-transparent text-primary checked:border-primary checked:bg-primary focus:outline-none focus:ring-0 focus:ring-offset-0" onchange="this.style.backgroundSize = this.checked ? '100%' : '0'" style="--checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(255,255,255)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e'); background-image: var(--checkbox-tick-svg); background-repeat: no-repeat; background-position: center; background-size: 0;" type="checkbox"/>
+<p class="flex-1 text-base font-normal leading-normal text-white">学习新的设计工具</p>
+</label>
+</div>
+</section>
+<section class="flex flex-col overflow-hidden rounded-lg bg-background-dark">
+<header class="border-b border-orange-500/30 bg-orange-500/10 px-4 py-3">
+<h2 class="text-sm font-bold leading-tight tracking-[-0.015em] text-orange-400">紧急但不重要</h2>
+</header>
+<div class="flex flex-1 flex-col items-center justify-center p-4">
+<span class="material-symbols-outlined text-4xl text-white/20">inbox</span>
+<p class="mt-2 text-sm text-white/40">无待办事项</p>
+</div>
+</section>
+<section class="flex flex-col overflow-hidden rounded-lg bg-background-dark">
+<header class="border-b border-blue-500/30 bg-blue-500/10 px-4 py-3">
+<h2 class="text-sm font-bold leading-tight tracking-[-0.015em] text-blue-400">不紧急不重要</h2>
+</header>
+<div class="flex flex-1 flex-col items-center justify-center p-4">
+<span class="material-symbols-outlined text-4xl text-white/20">archive</span>
+<p class="mt-2 text-sm text-white/40">无待办事项</p>
+</div>
+</section>
+</main>
+</div>
+
+</body></html>

@@ -79,40 +79,46 @@ class ProductCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Image Section
-                AspectRatio(
-                  aspectRatio: 1.5,
+                SizedBox(
+                  height: 100, // 给图片区域固定高度
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: product.image.isEmpty
-                        ? _buildErrorImage()
-                        : FutureBuilder<String>(
-                            future: ImageUtils.getAbsolutePath(product.image),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                if (snapshot.hasData) {
-                                  final imagePath = snapshot.data!;
-                                  return isNetworkImage(imagePath)
-                                      ? Image.network(
-                                          imagePath,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  _buildErrorImage(),
-                                        )
-                                      : Image.file(
-                                          File(imagePath),
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  _buildErrorImage(),
-                                        );
-                                }
-                                return _buildErrorImage();
-                              }
-                              return _buildLoadingIndicator();
-                            },
-                          ),
+                    child: Center(
+                      // 添加居中对齐
+                      child:
+                          product.image.isEmpty
+                              ? _buildErrorImage()
+                              : FutureBuilder<String>(
+                                future: ImageUtils.getAbsolutePath(
+                                  product.image,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.done) {
+                                    if (snapshot.hasData) {
+                                      final imagePath = snapshot.data!;
+                                      return isNetworkImage(imagePath)
+                                          ? Image.network(
+                                            imagePath,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    _buildErrorImage(),
+                                          )
+                                          : Image.file(
+                                            File(imagePath),
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    _buildErrorImage(),
+                                          );
+                                    }
+                                    return _buildErrorImage();
+                                  }
+                                  return _buildLoadingIndicator();
+                                },
+                              ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),

@@ -62,7 +62,7 @@ class TodoPlugin extends BasePlugin {
 
 **路由**: 通过 `TodoPlugin.buildMainView()` 返回 `TodoMainView`,内部支持:
 - **列表视图** (`TaskListView`): 线性展示任务,支持滑动删除
-- **网格视图** (`TaskGridView`): 卡片式展示任务,更直观的视觉呈现
+- **四象限视图** (`TodoFourQuadrantView`): 按紧急重要程度将任务划分为四个象限
 
 ---
 
@@ -336,9 +336,8 @@ class Category {
 |------|------|------|
 | `TodoMainView` | `views/todo_main_view.dart` | 插件主视图容器 |
 | `TaskListView` | `widgets/task_list_view.dart` | 任务列表视图 |
-| `TaskGridView` | `widgets/task_grid_view.dart` | 任务网格视图 |
+| `TodoFourQuadrantView` | `views/todo_four_quadrant_view.dart` | 任务四象限视图 |
 | `TaskListItem` | `widgets/task_list_item.dart` | 列表项组件 |
-| `TaskGridItem` | `widgets/task_grid_item.dart` | 网格卡片组件 |
 | `TaskDetailView` | `widgets/task_detail_view.dart` | 任务详情页 |
 | `TaskForm` | `widgets/task_form.dart` | 任务创建/编辑表单 |
 | `FilterDialog` | `widgets/filter_dialog.dart` | 过滤器对话框 |
@@ -354,14 +353,14 @@ Scaffold
 ├── AppBar
 │   ├── 标题 (待办事项)
 │   ├── 过滤按钮 (filter_alt)
-│   ├── 视图切换按钮 (view_list/grid_view)
+│   ├── 视图切换按钮 (view_list/dashboard)
 │   ├── 历史记录按钮 (history)
 │   └── 排序菜单 (sort)
 │       ├── 按截止日期排序
 │       ├── 按优先级排序
 │       └── 自定义排序
 ├── AnimatedBuilder (监听 TaskController)
-│   └── TaskListView / TaskGridView (动态切换)
+│   └── TaskListView / TodoFourQuadrantView (动态切换)
 └── FloatingActionButton (AddTaskButton)
 ```
 
@@ -883,11 +882,10 @@ todo/
 │   └── reminder_controller.dart                  # 提醒控制器
 ├── views/
 │   └── todo_main_view.dart                       # 主视图(双视图切换)
+│   └── todo_four_quadrant_view.dart              # 四象限视图
 ├── widgets/
 │   ├── task_list_view.dart                       # 列表视图
 │   ├── task_list_item.dart                       # 列表项组件
-│   ├── task_grid_view.dart                       # 网格视图
-│   ├── task_grid_item.dart                       # 网格卡片组件
 │   ├── task_detail_view.dart                     # 任务详情页
 │   ├── task_form.dart                            # 任务表单(创建/编辑)
 │   ├── filter_dialog.dart                        # 过滤器对话框

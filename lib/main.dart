@@ -116,6 +116,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         primarySwatch: Colors.blue,
         useMaterial3: true,
         scaffoldBackgroundColor: Colors.white,
+        cardColor: Colors.white, // 卡片背景设为纯白色
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white, // AppBar 背景设为纯白色
+          foregroundColor: Colors.black,
+          elevation: 0,
+        ),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.light,
+        ).copyWith(
+          surface: Colors.white, // 表面颜色设为纯白色
+          secondaryContainer: Colors.white, // 次要容器颜色设为纯白色
+        ),
         // 使用无动画构建器以提升性能,特别是键盘弹出时
         pageTransitionsTheme: const PageTransitionsTheme(
           builders: {

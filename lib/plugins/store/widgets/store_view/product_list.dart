@@ -1,6 +1,7 @@
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/widgets/add_product_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/store/widgets/product_card.dart';
@@ -32,6 +33,14 @@ class _ProductListState extends State<ProductList> {
 
   void _onControllerUpdate() {
     if (mounted) setState(() {});
+  }
+
+  /// 检查是否应该显示返回按钮（仅在非移动端显示）
+  bool get _shouldShowBackButton {
+    return kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux;
   }
 
   @override
@@ -67,6 +76,12 @@ class _ProductListState extends State<ProductList> {
           ),
           child: Row(
             children: [
+              if (_shouldShowBackButton)
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.of(context).pop(),
+                  tooltip: '返回',
+                ),
               Icon(
                 Icons.shopping_bag,
                 color: Colors.purple,
@@ -136,7 +151,7 @@ class _ProductListState extends State<ProductList> {
                   padding: const EdgeInsets.all(8),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                          childAspectRatio: 0.8,
+                          childAspectRatio: 0.82,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
                   ),
