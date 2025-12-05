@@ -142,7 +142,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       onSearchChanged: (query) {
         _controller.setSearchQuery(query);
       },
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         // 工具管理按钮
         IconButton(

@@ -799,6 +799,7 @@ class ContactMainViewState extends State<ContactMainView> {
     return SuperCupertinoNavigationWrapper(
       title: Text(ContactLocalizations.of(context).contacts),
       largeTitle: ContactLocalizations.of(context).contacts,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: FutureBuilder<List<Contact>>(
         future: _controller.getFilteredAndSortedContacts(),
         builder: (context, snapshot) {
@@ -860,7 +861,6 @@ class ContactMainViewState extends State<ContactMainView> {
         ),
       ],
       enableLargeTitle: true,
-      automaticallyImplyLeading: false,
     );
   }
 }

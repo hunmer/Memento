@@ -144,6 +144,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
     return SuperCupertinoNavigationWrapper(
       title: Text(DiaryLocalizations.of(context).myDiary),
       largeTitle: DiaryLocalizations.of(context).myDiary,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -487,7 +488,6 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       ),
       backgroundColor: bgColor,
       enableLargeTitle: true,
-      automaticallyImplyLeading: (Platform.isAndroid || Platform.isIOS),
     );
   }
 

@@ -1019,6 +1019,7 @@ class _CalendarMainViewState extends State<CalendarMainView> {
             style: TextStyle(color: theme.textTheme.titleLarge?.color),
           ),
           largeTitle: CalendarLocalizations.of(context).calendar,
+          automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
           body: Stack(
             children: [
               Column(
@@ -1073,7 +1074,6 @@ class _CalendarMainViewState extends State<CalendarMainView> {
           ),
           enableLargeTitle: true,
           enableSearchBar: false,
-          automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
           actions: [
             // 跳转到今天按钮
             IconButton(

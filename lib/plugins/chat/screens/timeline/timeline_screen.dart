@@ -1,7 +1,6 @@
-import 'dart:io' show Platform;
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 import '../../l10n/chat_localizations.dart';
 import '../../chat_plugin.dart';
 import '../../utils/message_operations.dart';
@@ -104,36 +103,26 @@ class _TimelineScreenState extends State<TimelineScreen> {
   Widget build(BuildContext context) {
     final l10n = ChatLocalizations.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        title: Text(l10n.timelineTab),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
-        actions: [
-          // 添加视图切换按钮
-          IconButton(
-            icon: Icon(_isGridView ? Icons.view_agenda : Icons.grid_view),
-            tooltip: _isGridView ? '切换到卡片视图' : '切换到瀑布流视图',
-            onPressed: () {
-              setState(() {
-                _isGridView = !_isGridView;
-                // 保存视图模式到插件配置
-                widget.chatPlugin.settingsService.setTimelineIsGridView(
-                  _isGridView,
-                );
-              });
-            },
-          ),
-        ],
-      ),
+    return SuperCupertinoNavigationWrapper(
+      title: Text(l10n.timelineTab),
+      largeTitle: l10n.timelineTab,
+      automaticallyImplyLeading: false,
+      actions: [
+        // 视图切换按钮
+        IconButton(
+          icon: Icon(_isGridView ? Icons.view_agenda : Icons.grid_view),
+          tooltip: _isGridView ? '切换到卡片视图' : '切换到瀑布流视图',
+          onPressed: () {
+            setState(() {
+              _isGridView = !_isGridView;
+              // 保存视图模式到插件配置
+              widget.chatPlugin.settingsService.setTimelineIsGridView(
+                _isGridView,
+              );
+            });
+          },
+        ),
+      ],
       body: Column(
         children: [
           // 搜索栏

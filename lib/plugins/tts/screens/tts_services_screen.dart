@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import '../tts_plugin.dart';
@@ -217,6 +218,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
       largeTitle: 'TTS 服务',
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         IconButton(
           icon: Icon(Icons.refresh, color: theme.iconTheme.color),

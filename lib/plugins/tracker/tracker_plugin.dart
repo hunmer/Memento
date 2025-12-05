@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +40,7 @@ class _TrackerMainViewState extends State<TrackerMainView> {
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
       title: Text(TrackerLocalizations.of(context).goalTracking),
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: ChangeNotifierProvider.value(
         value: TrackerPlugin.instance.controller,
         child: const HomeScreen(),

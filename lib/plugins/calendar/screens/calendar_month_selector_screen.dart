@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
@@ -500,6 +502,7 @@ class _CalendarMonthSelectorScreenState
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
       largeTitle: '日历小组件',
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: Stack(
         children: [
           _isLoading

@@ -2,7 +2,7 @@
 
 ## 重构状态
 
-### ✅ 已完成 (15个)
+### ✅ 已完成 (18个)
 1. ✅ settings - lib/screens/settings_screen/settings_screen.dart
 2. ✅ tts - lib/plugins/tts/screens/tts_services_screen.dart
 3. ✅ day - lib/plugins/day/screens/day_home_screen.dart
@@ -18,16 +18,18 @@
 13. ✅ checkin - lib/plugins/checkin/screens/checkin_list_screen/checkin_list_screen.dart
 14. ✅ goods - lib/plugins/goods/screens/goods_main_screen.dart
 15. ✅ habits - lib/plugins/habits/widgets/habits_bottom_bar.dart (双Tab页面各自使用SuperCupertinoNavigationWrapper)
+16. ✅ openai/AgentListScreen - lib/plugins/openai/screens/agent_list_screen.dart
+17. ✅ openai/PromptPresetScreen - lib/plugins/openai/screens/prompt_preset_screen.dart
+18. ✅ chat/TimelineScreen - lib/plugins/chat/screens/timeline/timeline_screen.dart
 
-### 🔄 进行中 / 待处理 (8个)
+### 🔄 进行中 / 待处理 (7个)
 1. 🔄 activity - lib/plugins/activity/activity_plugin.dart (ActivityMainView)
 2. ⏳ agentChat - 待查找主界面
 3. ⏳ database - 待查找主界面
 4. ⏳ store - 待查找主界面
-5. ⏳ openai - 待查找主界面
-6. ⏳ scriptsCenter - 待查找主界面
-7. ⏳ todo - 待查找主界面
-8. ⏳ tracker - 待查找主界面
+5. ⏳ scriptsCenter - 待查找主界面
+6. ⏳ todo - 待查找主界面
+7. ⏳ tracker - 待查找主界面
 
 ---
 
@@ -302,4 +304,4 @@ class _ActivityMainViewState extends State<ActivityMainView> {
 2. 再处理复杂结构的插件 (Activity等)
 3. 最后查找和重构剩余插件
 
-**当前进度**: 15/23 完成 (65%)
+**当前进度**: 18/24 完成 (75%)

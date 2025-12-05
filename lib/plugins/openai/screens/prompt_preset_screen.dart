@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import '../l10n/openai_localizations.dart';
 import '../models/prompt_preset.dart';
 import '../services/prompt_preset_service.dart';
@@ -15,25 +16,26 @@ class PromptPresetScreen extends StatelessWidget {
       service.loadPresets();
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(OpenAILocalizations.of(context).promptPresetManagement),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () async {
-              final result = await showDialog<PromptPreset>(
-                context: context,
-                builder: (context) => const _PresetEditDialog(),
-              );
+    return SuperCupertinoNavigationWrapper(
+      title: Text(OpenAILocalizations.of(context).promptPresetManagement),
+      largeTitle: OpenAILocalizations.of(context).promptPresetManagement,
+      enableLargeTitle: false,
+      automaticallyImplyLeading: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () async {
+            final result = await showDialog<PromptPreset>(
+              context: context,
+              builder: (context) => const _PresetEditDialog(),
+            );
 
-              if (result != null) {
-                await service.addPreset(result);
-              }
-            },
-          ),
-        ],
-      ),
+            if (result != null) {
+              await service.addPreset(result);
+            }
+          },
+        ),
+      ],
       body: AnimatedBuilder(
         animation: service,
         builder: (context, _) {

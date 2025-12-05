@@ -12,7 +12,9 @@ import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
 import 'controls/bill_controller.dart';
 import 'screens/bill_list_screen.dart';
+import 'screens/bill_list_screen_supercupertino.dart';
 import 'screens/bill_stats_screen.dart';
+import 'screens/bill_stats_screen_supercupertino.dart';
 import 'screens/account_list_screen.dart';
 import 'screens/bill_edit_screen.dart';
 import 'models/account.dart';
@@ -1333,11 +1335,11 @@ class _BillMainViewState extends State<BillMainView>
                       dragStartBehavior: DragStartBehavior.down,
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
-                        BillListScreen(
+                        BillListScreenSupercupertino(
                           billPlugin: billPlugin,
                           accountId: billPlugin.selectedAccount?.id ?? '',
                         ),
-                        BillStatsScreen(
+                        BillStatsScreenSupercupertino(
                           billPlugin: billPlugin,
                           accountId: billPlugin.selectedAccount?.id ?? '',
                           startDate: DateTime.now().subtract(

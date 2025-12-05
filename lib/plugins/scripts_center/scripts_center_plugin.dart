@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
@@ -431,6 +433,7 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
       title: const Text('脚本中心'),
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: ScriptsListScreen(
         scriptManager: _plugin.scriptManager,
         scriptExecutor: _plugin.scriptExecutor,
