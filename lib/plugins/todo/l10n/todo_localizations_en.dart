@@ -155,4 +155,16 @@ class TodoLocalizationsEn extends TodoLocalizations {
 
   @override
   String get searchIn => 'Search in';
+
+  @override
+  String get createdAt => 'Created at';
+
+  @override
+  String get noCompletedTasks => 'No completed tasks';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get cancel => 'Cancel';
 }

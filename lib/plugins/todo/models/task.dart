@@ -21,6 +21,9 @@ class Task {
   DateTime? startTime; // 记录任务开始时间
   Duration? duration; // 记录任务持续时间
 
+  // 任务图标
+  IconData? icon;
+
   Task({
     required this.id,
     required this.title,
@@ -36,6 +39,7 @@ class Task {
     this.completedDate,
     this.startTime,
     this.duration,
+    this.icon,
   })  : subtasks = subtasks ?? [],
         reminders = reminders ?? [],
         tags = tags ?? [];
@@ -55,6 +59,7 @@ class Task {
     DateTime? completedDate,
     DateTime? startTime,
     Duration? duration,
+    IconData? icon,
   }) {
     return Task(
       id: id ?? this.id,
@@ -71,6 +76,7 @@ class Task {
       completedDate: completedDate ?? this.completedDate,
       startTime: startTime ?? this.startTime,
       duration: duration ?? this.duration,
+      icon: icon ?? this.icon,
     );
   }
 
@@ -89,6 +95,8 @@ class Task {
         'completedDate': completedDate?.toIso8601String(),
         'startTime': startTime?.toIso8601String(),
         'duration': duration?.inMilliseconds, // 将持续时间转换为毫秒存储
+        'iconCodePoint': icon?.codePoint, // 存储图标的 codePoint
+        'iconFontFamily': icon?.fontFamily, // 存储图标的字体族
       };
 
   factory Task.fromJson(Map<String, dynamic> json) => Task(
@@ -100,8 +108,8 @@ class Task {
         dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
         priority: TaskPriority.values[json['priority']],
         status: TaskStatus.values[json['status']],
-        tags: json['tags'] != null 
-            ? List<String>.from(json['tags']) 
+        tags: json['tags'] != null
+            ? List<String>.from(json['tags'])
             : [],
         subtasks: (json['subtasks'] as List)
             .map((e) => Subtask.fromJson(e))
@@ -109,14 +117,20 @@ class Task {
         reminders: (json['reminders'] as List)
             .map((e) => DateTime.parse(e))
             .toList(),
-        completedDate: json['completedDate'] != null 
-            ? DateTime.parse(json['completedDate']) 
+        completedDate: json['completedDate'] != null
+            ? DateTime.parse(json['completedDate'])
             : null,
-        startTime: json['startTime'] != null 
-            ? DateTime.parse(json['startTime']) 
+        startTime: json['startTime'] != null
+            ? DateTime.parse(json['startTime'])
             : null,
-        duration: json['duration'] != null 
-            ? Duration(milliseconds: json['duration']) 
+        duration: json['duration'] != null
+            ? Duration(milliseconds: json['duration'])
+            : null,
+        icon: json['iconCodePoint'] != null && json['iconFontFamily'] != null
+            ? IconData(
+                json['iconCodePoint'],
+                fontFamily: json['iconFontFamily'],
+              )
             : null,
       );
 

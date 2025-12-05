@@ -223,6 +223,78 @@ class TodoFourQuadrantView extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              // 计时器显示区域（右上角）
+                              GestureDetector(
+                                onTap: () {
+                                  if (task.status == TaskStatus.inProgress) {
+                                    // 进行中任务点击直接标记为完成
+                                    onTaskStatusChanged(task, TaskStatus.done);
+                                  } else {
+                                    // 待办或已完成任务点击开始计时
+                                    onTaskStatusChanged(task, TaskStatus.inProgress);
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      if (task.status == TaskStatus.inProgress) ...[
+                                        Icon(
+                                          Icons.timer,
+                                          size: 16,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          task.formattedDuration,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontFamily: 'monospace',
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(context).colorScheme.primary,
+                                          ),
+                                        ),
+                                      ] else if (task.status == TaskStatus.done &&
+                                          task.duration != null) ...[
+                                        Icon(
+                                          Icons.check_circle,
+                                          size: 16,
+                                          color: Colors.green,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          task.formattedDuration,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontFamily: 'monospace',
+                                            color: Colors.green,
+                                          ),
+                                        ),
+                                      ] else ...[
+                                        Icon(
+                                          Icons.play_circle_outline,
+                                          size: 16,
+                                          color: isDark
+                                              ? Colors.white
+                                              : Colors.grey[600],
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '00:00',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontFamily: 'monospace',
+                                            color: isDark
+                                                ? Colors.grey[500]
+                                                : Colors.grey[400],
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),

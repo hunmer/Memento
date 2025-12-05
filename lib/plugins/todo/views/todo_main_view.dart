@@ -12,7 +12,6 @@ import '../models/models.dart';
 import 'package:Memento/plugins/todo/views/todo_four_quadrant_view.dart';
 import '../widgets/task_list_view.dart';
 import '../widgets/add_task_button.dart';
-import '../widgets/task_detail_view.dart';
 import '../widgets/task_form.dart';
 import '../widgets/filter_dialog.dart';
 import '../widgets/history_completed_view.dart';
@@ -54,6 +53,166 @@ class _TodoMainViewState extends State<TodoMainView> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  void _showTaskDetailDialog(BuildContext context, Task task) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(task.title),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (task.description != null && task.description!.isNotEmpty) ...[
+                Text(
+                  '描述',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(task.description!),
+                const SizedBox(height: 16),
+              ],
+              if (task.tags.isNotEmpty) ...[
+                Text(
+                  '标签',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: task.tags
+                      .map((tag) => Chip(
+                            label: Text(tag),
+                            backgroundColor: Colors.blue.shade100,
+                          ))
+                      .toList(),
+                ),
+                const SizedBox(height: 16),
+              ],
+              Text(
+                '计时器',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                task.formattedDuration,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: task.status == TaskStatus.inProgress
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.play_arrow),
+                    label: const Text('开始'),
+                    onPressed: task.status != TaskStatus.inProgress
+                        ? () {
+                            _plugin.taskController.updateTaskStatus(
+                              task.id,
+                              TaskStatus.inProgress,
+                            );
+                            Navigator.of(context).pop();
+                          }
+                        : null,
+                  ),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.pause),
+                    label: const Text('暂停'),
+                    onPressed: task.status == TaskStatus.inProgress
+                        ? () {
+                            _plugin.taskController.updateTaskStatus(
+                              task.id,
+                              TaskStatus.todo,
+                            );
+                            Navigator.of(context).pop();
+                          }
+                        : null,
+                  ),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.check),
+                    label: const Text('完成'),
+                    onPressed: task.status != TaskStatus.done
+                        ? () {
+                            _plugin.taskController.updateTaskStatus(
+                              task.id,
+                              TaskStatus.done,
+                            );
+                            Navigator.of(context).pop();
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('关闭'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              NavigationHelper.push(
+                context,
+                TaskForm(
+                  task: task,
+                  taskController: _plugin.taskController,
+                  reminderController: _plugin.reminderController,
+                ),
+              );
+            },
+            child: const Text('编辑'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('删除任务'),
+                  content: const Text('确定要删除这个任务吗？'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('取消'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('删除'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirmed == true) {
+                await _plugin.taskController.deleteTask(task.id);
+                Navigator.of(context).pop();
+              }
+            },
+            child: const Text(
+              '删除',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -140,31 +299,29 @@ class _TodoMainViewState extends State<TodoMainView> {
           return _plugin.taskController.isGridView
               ? TodoFourQuadrantView(
                 tasks: _plugin.taskController.tasks,
-                onTaskTap: (task) {
-                  NavigationHelper.push(context, TaskDetailView(
-                            task: task,
-                            taskController: _plugin.taskController,
-                            reminderController: _plugin.reminderController,),
-                  );
-                },
+                onTaskTap: (task) => _showTaskDetailDialog(context, task),
                 onTaskStatusChanged: (task, status) {
                   _plugin.taskController.updateTaskStatus(task.id, status);
                 },
               )
               : TaskListView(
                 tasks: _plugin.taskController.tasks,
-                onTaskTap: (task) {
-                  NavigationHelper.push(context, TaskDetailView(
-                            task: task,
-                            taskController: _plugin.taskController,
-                            reminderController: _plugin.reminderController,),
-                  );
-                },
+                onTaskTap: (task) => _showTaskDetailDialog(context, task),
                 onTaskStatusChanged: (task, status) {
                   _plugin.taskController.updateTaskStatus(task.id, status);
                 },
                 onTaskDismissed: (task) {
                   _plugin.taskController.deleteTask(task.id);
+                },
+                onTaskEdit: (task) {
+                  NavigationHelper.push(
+                    context,
+                    TaskForm(
+                      task: task,
+                      taskController: _plugin.taskController,
+                      reminderController: _plugin.reminderController,
+                    ),
+                  );
                 },
                 onSubtaskStatusChanged: (taskId, subtaskId, isCompleted) {
                   _plugin.taskController.updateSubtaskStatus(
