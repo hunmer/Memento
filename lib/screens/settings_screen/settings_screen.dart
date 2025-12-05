@@ -3,6 +3,7 @@ import 'package:Memento/core/theme_controller.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import './controllers/settings_screen_controller.dart';
 import './widgets/webdav_settings_dialog.dart';
 import './controllers/webdav_controller.dart';
@@ -91,10 +92,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(SettingsScreenLocalizations.of(context).settingsTitle),
+    return SuperCupertinoNavigationWrapper(
+      title: Text(
+        SettingsScreenLocalizations.of(context).settingsTitle,
+        style: TextStyle(color: Theme.of(context).textTheme.titleLarge?.color),
       ),
+      largeTitle: '设置',
       body: ListView(
         children: [
           // 界面设置

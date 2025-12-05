@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/widgets/enhanced_calendar/index.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import '../controllers/calendar_controller.dart';
 import '../controllers/tag_controller.dart';
 import '../l10n/calendar_album_localizations.dart';
@@ -57,59 +58,44 @@ class _CalendarScreenState extends State<CalendarScreen>
     final calendarController = Provider.of<CalendarController>(context);
     final tagController = Provider.of<TagController>(context);
     final selectedDate = calendarController.selectedDate;
+    final theme = Theme.of(context);
 
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: calendarController),
         ChangeNotifierProvider.value(value: tagController),
       ],
-      child: Scaffold(
-        appBar: _buildAppBar(context, l10n),
+      child: SuperCupertinoNavigationWrapper(
+        title: Text(
+          CalendarAlbumLocalizations.of(context).calendarDiary,
+          style: TextStyle(
+            fontSize: 18,
+            color: theme.textTheme.titleLarge?.color,
+          ),
+        ),
+        largeTitle: '日历日记',
+        actions: [
+          IconButton(
+            icon: Icon(Icons.today, color: theme.iconTheme.color),
+            onPressed: () {
+              setState(() {
+                _focusedDay = DateTime.now();
+                Provider.of<CalendarController>(
+                  context,
+                  listen: false,
+                ).selectDate(DateTime.now());
+              });
+            },
+            tooltip: '回到当前月份',
+          ),
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _navigateToNewEntry(context),
+            tooltip: '新建日记',
+          ),
+        ],
         body: _buildCalendarListView(calendarController, selectedDate),
-        // floatingActionButton: _buildFloatingActionButton(
-        //   context,
-        //   calendarController,
-        //   tagController,
-        //   selectedDate,
-        // ),
       ),
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context, dynamic l10n) {
-    return AppBar(
-      automaticallyImplyLeading: false,
-      leading:
-          (Platform.isAndroid || Platform.isIOS)
-              ? null
-              : IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => PluginManager.toHomeScreen(context),
-              ),
-      title: Text(
-        CalendarAlbumLocalizations.of(context).calendarDiary,
-        style: const TextStyle(fontSize: 18),
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.today),
-          onPressed: () {
-            setState(() {
-              _focusedDay = DateTime.now();
-              Provider.of<CalendarController>(
-                context,
-                listen: false,
-              ).selectDate(DateTime.now());
-            });
-          },
-          tooltip: '回到当前月份',
-        ),
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: () => _navigateToNewEntry(context),
-          tooltip: '新建日记',
-        ),
-      ],
     );
   }
 

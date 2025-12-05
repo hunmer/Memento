@@ -8,6 +8,7 @@ import '../../../widgets/widget_config_editor/widget_config_editor.dart';
 import '../../../widgets/widget_config_editor/models/widget_config.dart';
 import '../../../widgets/widget_config_editor/models/color_config.dart';
 import '../../../widgets/widget_config_editor/models/widget_size.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 
 /// 日历月视图小组件配置界面
 ///
@@ -492,27 +493,40 @@ class _CalendarMonthSelectorScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('配置日历月视图小组件'),
+    final theme = Theme.of(context);
+    return SuperCupertinoNavigationWrapper(
+      title: Text(
+        '配置日历月视图小组件',
+        style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : WidgetConfigEditor(
-              widgetSize: WidgetSize.extraLarge,
-              initialConfig: _widgetConfig,
-              previewBuilder: _buildPreview,
-              onConfigChanged: (newConfig) {
-                setState(() => _widgetConfig = newConfig);
-              },
-              previewTitle: '小组件预览',
-              themeSettingsLabel: '主题设置',
-              opacityLabel: '背景透明度',
+      largeTitle: '日历小组件',
+      body: Stack(
+        children: [
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : WidgetConfigEditor(
+                  widgetSize: WidgetSize.extraLarge,
+                  initialConfig: _widgetConfig,
+                  previewBuilder: _buildPreview,
+                  onConfigChanged: (newConfig) {
+                    setState(() => _widgetConfig = newConfig);
+                  },
+                  previewTitle: '小组件预览',
+                  themeSettingsLabel: '主题设置',
+                  opacityLabel: '背景透明度',
+                ),
+          // FAB 覆盖层
+          if (!_isLoading)
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: FloatingActionButton.extended(
+                onPressed: _saveAndFinish,
+                icon: const Icon(Icons.check),
+                label: const Text('完成'),
+              ),
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _isLoading ? null : _saveAndFinish,
-        icon: const Icon(Icons.check),
-        label: const Text('完成'),
+        ],
       ),
     );
   }
