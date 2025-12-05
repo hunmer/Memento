@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/todo/models/task.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -254,6 +256,13 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
       appBar: AppBar(
         title: const Text('待办事项'),
         automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_alt),
@@ -337,6 +346,13 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
       appBar: AppBar(
         title: const Text('历史记录'),
         automaticallyImplyLeading: false,
+        leading:
+            (Platform.isAndroid || Platform.isIOS)
+                ? null
+                : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => PluginManager.toHomeScreen(context),
+                ),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_sweep),
