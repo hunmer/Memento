@@ -12,6 +12,9 @@ class CalendarSyncer extends PluginWidgetSyncer {
 
   @override
   Future<void> sync() async {
+    if (!isWidgetSupported()) {
+      return;
+    }
     await syncSafely('calendar', () async {
       final plugin = PluginManager.instance.getPlugin('calendar') as CalendarPlugin?;
       if (plugin == null) return;

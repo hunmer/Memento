@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:uuid/uuid.dart';
@@ -16,7 +17,6 @@ class HabitsSyncer extends PluginWidgetSyncer {
   @override
   Future<void> sync() async {
     if (!isWidgetSupported()) {
-      debugPrint('Widget not supported on this platform, skipping update for habits');
       return;
     }
 
@@ -206,6 +206,11 @@ class HabitsSyncer extends PluginWidgetSyncer {
   ///
   /// 遍历所有已配置的周视图小组件,更新其数据
   Future<void> syncHabitsWeeklyWidget() async {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return;
+    }
+
     try {
       final plugin = PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
       if (plugin == null) {

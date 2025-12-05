@@ -783,7 +783,7 @@ class AppRoutes extends NavigatorObserver {
       default:
         return _createRoute(
           Scaffold(
-            body: Center(child: Text('No route defined for ${settings.name}')),
+            body: Center(child: CircularProgressIndicator()),
           ),
         );
     }

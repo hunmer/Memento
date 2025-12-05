@@ -28,7 +28,6 @@ class SkillsList extends StatefulWidget {
 
 class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
   List<Skill> _skills = [];
-  bool _isCardView = false;
   int _refreshKey = 0; // 用于强制刷新统计数据
 
   @override
@@ -84,10 +83,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
       children: [
         _buildAppBar(context, l10n),
         Expanded(
-          child:
-              _isCardView
-                  ? _buildCardView(_skills, l10n)
-                  : _buildListView(_skills, l10n),
+          child: _buildCardView(_skills, l10n),
         ),
       ],
     );
@@ -107,88 +103,10 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
       actions: [
         IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
         IconButton(
-          icon: Icon(_isCardView ? Icons.list : Icons.grid_view),
-          onPressed: () => setState(() => _isCardView = !_isCardView),
-        ),
-        IconButton(
           icon: const Icon(Icons.add),
           onPressed: () => _showSkillForm(context),
         ),
       ],
-    );
-  }
-
-  Widget _buildListView(List<Skill> skills, HabitsLocalizations l10n) {
-    // 按group分组
-    final groupedSkills = <String, List<Skill>>{};
-    for (final skill in skills) {
-      final group = skill.group ?? '未分组';
-      groupedSkills.putIfAbsent(group, () => []).add(skill);
-    }
-
-    return ListView(
-      children:
-          groupedSkills.entries.expand((entry) {
-            return [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                child: Text(
-                  entry.key,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-              ...entry.value.map((skill) {
-                return FutureBuilder(
-                  key: ValueKey('${skill.id}_$_refreshKey'),
-                  future: Future.wait([
-                    widget.recordController.getCompletionCount(skill.id),
-                    widget.recordController.getTotalDuration(skill.id),
-                  ]),
-                  builder: (context, snapshot) {
-                    final count = snapshot.data?[0] ?? 0;
-                    final duration = snapshot.data?[1] ?? 0;
-
-                    return Material(
-                      child: ListTile(
-                        leading:
-                            skill.icon != null
-                                ? CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                  child: Icon(
-                                    IconData(
-                                      int.parse(skill.icon!),
-                                      fontFamily: 'MaterialIcons',
-                                    ),
-                                    size: 16,
-                                    color: Colors.white,
-                                  ),
-                                )
-                                : null,
-                        title: Text(skill.title),
-                        subtitle: Text(
-                          '$count completions • ${HabitsUtils.formatDuration(duration)}',
-                        ),
-                        onTap: () async {
-                          await NavigationHelper.push(context, SkillDetailPage(
-                                    skill: skill,
-                                    skillController: widget.skillController,
-                                    recordController: widget.recordController,),
-                          );
-                          if (mounted) _loadSkills();
-                        },
-                      ),
-                    );
-                  },
-                );
-              }),
-            ];
-          }).toList(),
     );
   }
 
