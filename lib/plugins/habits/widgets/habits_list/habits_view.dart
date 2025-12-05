@@ -1,3 +1,4 @@
+import 'dart:io';
 
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -170,7 +171,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
       title: Text(l10n.habits),
       largeTitle: l10n.habits,
       enableLargeTitle: true,
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         IconButton(
           icon: const Icon(Icons.add),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:flutter/material.dart';
 import '../models/home_folder_item.dart';
@@ -47,7 +49,8 @@ class _FolderDialogState extends State<FolderDialog> {
                   ),
                 ],
               ),
-              automaticallyImplyLeading: false,
+              automaticallyImplyLeading:
+                  !(Platform.isAndroid || Platform.isIOS),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.add),

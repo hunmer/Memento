@@ -41,7 +41,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
       title: Text(l10n.databaseListTitle),
       largeTitle: l10n.databaseListTitle,
       enableLargeTitle: true,
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: FutureBuilder<List<DatabaseModel>>(
         future: _databasesFuture,
         builder: (context, snapshot) {

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../managers/home_widget_registry.dart';
 import '../managers/home_layout_manager.dart';
@@ -112,7 +114,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
         child: Scaffold(
           appBar: AppBar(
             title: const Text('添加组件'),
-            automaticallyImplyLeading: false,
+            automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
             actions: [
               IconButton(
                 icon: const Icon(Icons.close),

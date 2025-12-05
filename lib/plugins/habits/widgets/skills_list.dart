@@ -83,7 +83,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
       title: Text(l10n.skills),
       largeTitle: l10n.skills,
       enableLargeTitle: true,
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         IconButton(
           icon: const Icon(Icons.sort),

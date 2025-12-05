@@ -48,6 +48,8 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
     // 确保默认选中今天
     _selectedDay = DateTime.now();
     _focusedDay = DateTime.now();
+    // 初始化日历格式为月视图
+    _calendarFormat = CalendarFormat.month;
 
     // 监听插件数据变化，自动刷新
     _billPluginListener = () {

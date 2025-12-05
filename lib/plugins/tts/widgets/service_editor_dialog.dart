@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/tts_service_config.dart';
@@ -702,7 +704,8 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
             // 标题栏
             AppBar(
               title: Text(isEditing ? loc.editService : loc.addService),
-              automaticallyImplyLeading: false,
+              automaticallyImplyLeading:
+                  !(Platform.isAndroid || Platform.isIOS),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.close),

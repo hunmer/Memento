@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import '../../models/goods_item.dart';
@@ -52,7 +54,7 @@ class _GoodsItemFormState extends State<GoodsItemForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
         title: Text(
           widget.initialData == null
               ? GoodsLocalizations.of(context).addItem

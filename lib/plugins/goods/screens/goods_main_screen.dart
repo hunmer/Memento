@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 import 'warehouse_list_screen.dart';
@@ -41,7 +43,7 @@ class _GoodsMainScreenState extends State<GoodsMainScreen> {
         children: _screens,
       ),
       enableLargeTitle: true,
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       enableBottomBar: true,
       bottomBarHeight: 60,
       bottomBarChild: Container(

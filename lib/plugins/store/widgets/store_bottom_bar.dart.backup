@@ -260,7 +260,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
     StoreLocalizations l10n,
   ) {
     return AppBar(
-      automaticallyImplyLeading: false,
+            automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       leading:
           (Platform.isAndroid || Platform.isIOS)
               ? null

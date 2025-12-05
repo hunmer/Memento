@@ -169,7 +169,7 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
           _searchQuery = value;
         });
       },
-      automaticallyImplyLeading: (Platform.isAndroid || Platform.isIOS),
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       // 将原有的 AppBar actions 移到右上角
       actions: [
         // 仓库筛选按钮
