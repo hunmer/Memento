@@ -19,7 +19,6 @@ class ChatWidgetService {
   static Future<void> updateWidget() async {
     // 统一平台检查
     if (!SystemWidgetService.instance.isWidgetSupported()) {
-      _logger.fine('Widget not supported on this platform, skipping ChatQuickWidget update');
       return;
     }
 
@@ -126,7 +125,6 @@ class ChatWidgetService {
   /// 初始化小组件服务
   static Future<void> initialize() async {
     if (!SystemWidgetService.instance.isWidgetSupported()) {
-      _logger.fine('Widget not supported on this platform, skipping ChatWidgetService initialization');
       return;
     }
 

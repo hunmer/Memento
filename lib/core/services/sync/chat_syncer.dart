@@ -9,7 +9,6 @@ class ChatSyncer extends PluginWidgetSyncer {
   @override
   Future<void> sync() async {
     if (!isWidgetSupported()) {
-      debugPrint('Widget not supported on this platform, skipping update for chat');
       return;
     }
 

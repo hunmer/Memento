@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:home_widget/home_widget.dart';
 import 'package:flutter/material.dart';
 import 'memento_widgets_platform_interface.dart';
@@ -151,6 +152,11 @@ class MyWidgetManager {
 
   /// 保存字符串数据到小组件共享存储
   Future<bool> saveString(String key, String value) async {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return false;
+    }
+
     try {
       if (value.isEmpty) return false;
       final result = await HomeWidget.saveWidgetData<String>(key, value);
@@ -163,6 +169,11 @@ class MyWidgetManager {
 
   /// 保存整数数据到小组件共享存储
   Future<bool> saveInt(String key, int value) async {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return false;
+    }
+
     try {
       final result = await HomeWidget.saveWidgetData<int>(key, value);
       return result == true;
@@ -174,6 +185,11 @@ class MyWidgetManager {
 
   /// 保存布尔数据到小组件共享存储
   Future<bool> saveBool(String key, bool value) async {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return false;
+    }
+
     try {
       final result = await HomeWidget.saveWidgetData<bool>(key, value);
       return result == true;
@@ -185,6 +201,11 @@ class MyWidgetManager {
 
   /// 保存双精度数据到小组件共享存储
   Future<bool> saveDouble(String key, double value) async {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return false;
+    }
+
     try {
       final result = await HomeWidget.saveWidgetData<double>(key, value);
       return result == true;
@@ -196,6 +217,11 @@ class MyWidgetManager {
 
   /// 从共享存储读取数据
   Future<T?> getData<T>(String key) async {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return null;
+    }
+
     return await HomeWidget.getWidgetData<T>(key);
   }
 
@@ -205,6 +231,11 @@ class MyWidgetManager {
   /// - 'ImageWidgetProvider' 或 '图像小组件' (图像小组件)
   /// 如果不指定，将同时更新两个小组件
   Future<bool> updateWidget({String? widgetName}) async {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return false;
+    }
+
     try {
       final targets = widgetName == null
           ? ['TextWidgetProvider', 'ImageWidgetProvider']
@@ -238,6 +269,11 @@ class MyWidgetManager {
     required Size logicalSize,
     double pixelRatio = 1.0,
   }) async {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return false;
+    }
+
     try {
       final result = await HomeWidget.renderFlutterWidget(
         flutterWidget,
@@ -254,11 +290,21 @@ class MyWidgetManager {
 
   /// 注册交互回调（用于处理小组件点击等事件）
   void registerInteractivityCallback(Function(Uri?) callback) {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return;
+    }
+
     HomeWidget.registerInteractivityCallback(callback);
   }
 
   /// 获取初始 Uri（用于应用启动时）
   Future<Uri?> getInitialUri() async {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return null;
+    }
+
     return await HomeWidget.initiallyLaunchedFromHomeWidget();
   }
 
@@ -269,6 +315,11 @@ class MyWidgetManager {
     String pluginId,
     PluginWidgetData data,
   ) async {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return;
+    }
+
     try {
       final jsonData = jsonEncode(data.toJson());
       await saveString('${pluginId}_widget_data', jsonData);
@@ -280,6 +331,11 @@ class MyWidgetManager {
 
   /// 更新指定插件的小组件（同时更新1x1和2x2尺寸）
   Future<void> updatePluginWidget(String pluginId) async {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return;
+    }
+
     final providerNames = _getProviderNames(pluginId);
     for (final providerName in providerNames) {
       try {
@@ -292,6 +348,11 @@ class MyWidgetManager {
 
   /// 更新所有插件小组件
   Future<void> updateAllPluginWidgets() async {
+    // 检测平台是否为移动平台（Android 或 iOS）
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return;
+    }
+
     final providers = _getAllProviderNames();
     for (final provider in providers) {
       try {
