@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/store/widgets/user_item_card.dart';
@@ -38,6 +39,14 @@ class _UserItemsState extends State<UserItems> {
 
   void _onControllerUpdate() {
     if (mounted) setState(() {});
+  }
+
+  /// 检查是否应该显示返回按钮（仅在非移动端显示）
+  bool get _shouldShowBackButton {
+    return kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux;
   }
 
   void updateStatusFilter(int statusIndex) {
@@ -105,6 +114,12 @@ class _UserItemsState extends State<UserItems> {
           ),
           child: Row(
             children: [
+              if (_shouldShowBackButton)
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.of(context).pop(),
+                  tooltip: '返回',
+                ),
               Icon(
                 Icons.inventory,
                 color: Colors.blue.shade600,

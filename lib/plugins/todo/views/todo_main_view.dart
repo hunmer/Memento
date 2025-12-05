@@ -9,8 +9,8 @@ import 'dart:async';
 import '../controllers/controllers.dart';
 import '../controllers/task_controller.dart'; // 直接导入以获取 SortBy 枚举
 import '../models/models.dart';
+import 'package:Memento/plugins/todo/views/todo_four_quadrant_view.dart';
 import '../widgets/task_list_view.dart';
-import '../widgets/task_grid_view.dart';
 import '../widgets/add_task_button.dart';
 import '../widgets/task_detail_view.dart';
 import '../widgets/task_form.dart';
@@ -97,7 +97,7 @@ class _TodoMainViewState extends State<TodoMainView> {
             icon: Icon(
               _plugin.taskController.isGridView
                   ? Icons.view_list
-                  : Icons.grid_view,
+                  : Icons.dashboard,
             ),
             onPressed: _plugin.taskController.toggleViewMode,
           ),
@@ -138,7 +138,7 @@ class _TodoMainViewState extends State<TodoMainView> {
         animation: _plugin.taskController,
         builder: (context, _) {
           return _plugin.taskController.isGridView
-              ? TaskGridView(
+              ? TodoFourQuadrantView(
                 tasks: _plugin.taskController.tasks,
                 onTaskTap: (task) {
                   NavigationHelper.push(context, TaskDetailView(

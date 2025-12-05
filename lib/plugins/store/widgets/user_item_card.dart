@@ -87,40 +87,42 @@ class UserItemCard extends StatelessWidget {
                 // Image Section with Badge
                 Stack(
                   children: [
-                    AspectRatio(
-                      aspectRatio: 1.5,
+                    SizedBox(
+                      height: 100, // 给图片区域固定高度
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: item.productImage.isEmpty
-                            ? _buildErrorImage()
-                            : FutureBuilder<String>(
-                                future: ImageUtils.getAbsolutePath(item.productImage),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.done) {
-                                    if (snapshot.hasData) {
-                                      final imagePath = snapshot.data!;
-                                      return isNetworkImage(imagePath)
-                                          ? Image.network(
-                                              imagePath,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) =>
-                                                      _buildErrorImage(),
-                                            )
-                                          : Image.file(
-                                              File(imagePath),
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) =>
-                                                      _buildErrorImage(),
-                                            );
+                        child: Center(  // 添加居中对齐
+                          child: item.productImage.isEmpty
+                              ? _buildErrorImage()
+                              : FutureBuilder<String>(
+                                  future: ImageUtils.getAbsolutePath(item.productImage),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.done) {
+                                      if (snapshot.hasData) {
+                                        final imagePath = snapshot.data!;
+                                        return isNetworkImage(imagePath)
+                                            ? Image.network(
+                                                imagePath,
+                                                fit: BoxFit.cover,
+                                                errorBuilder:
+                                                    (context, error, stackTrace) =>
+                                                        _buildErrorImage(),
+                                              )
+                                            : Image.file(
+                                                File(imagePath),
+                                                fit: BoxFit.cover,
+                                                errorBuilder:
+                                                    (context, error, stackTrace) =>
+                                                        _buildErrorImage(),
+                                              );
+                                      }
+                                      return _buildErrorImage();
                                     }
-                                    return _buildErrorImage();
-                                  }
-                                  return _buildLoadingIndicator();
-                                },
-                              ),
+                                    return _buildLoadingIndicator();
+                                  },
+                                ),
+                        ),
                       ),
                     ),
                     // Badge showing count
@@ -261,11 +263,10 @@ class UserItemCard extends StatelessWidget {
                 const SizedBox(height: 8),
 
                 // Purchase Date & Expiry Date
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           '购买日期',
@@ -277,8 +278,9 @@ class UserItemCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           '过期日期',

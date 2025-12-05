@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/models.dart';
@@ -26,14 +28,7 @@ class TaskListView extends StatefulWidget {
 class _TaskListViewState extends State<TaskListView> {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final backgroundColor =
-        isDark ? const Color(0xFF0F1323) : const Color(0xFFF5F6F8);
-
-    return Container(
-      color: backgroundColor,
-      child: Column(
+    return Column(
         children: [
           Expanded(
             child:
@@ -59,8 +54,7 @@ class _TaskListViewState extends State<TaskListView> {
                       },
                     ),
           ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -106,6 +100,42 @@ class _TaskCard extends StatefulWidget {
 class _TaskCardState extends State<_TaskCard> {
   bool _isExpanded = false;
   static const primaryColor = Color(0xFF607AFB);
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    // 检查是否有正在计时的任务
+    if (widget.task.status == TaskStatus.inProgress &&
+        widget.task.startTime != null) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(_TaskCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 当任务状态改变时，重新启动定时器
+    if (oldWidget.task.status != widget.task.status ||
+        oldWidget.task.startTime != widget.task.startTime) {
+      _startTimer();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -210,15 +240,93 @@ class _TaskCardState extends State<_TaskCard> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              widget.task.title,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: isDark ? Colors.white : Colors.grey[900],
-                                decoration:
-                                    isDone ? TextDecoration.lineThrough : null,
-                              ),
+                            // Top Row: Title + Timer
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    widget.task.title,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: isDark ? Colors.white : Colors.grey[900],
+                                      decoration:
+                                          isDone ? TextDecoration.lineThrough : null,
+                                    ),
+                                  ),
+                                ),
+                                // 计时器显示区域（右上角）
+                                GestureDetector(
+                                  onTap: () {
+                                    if (widget.task.status == TaskStatus.inProgress) {
+                                      // 进行中任务点击直接标记为完成
+                                      widget.onStatusChanged(TaskStatus.done);
+                                    } else {
+                                      // 待办或已完成任务点击开始计时
+                                      widget.onStatusChanged(TaskStatus.inProgress);
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        if (widget.task.status == TaskStatus.inProgress) ...[
+                                          Icon(
+                                            Icons.timer,
+                                            size: 16,
+                                            color: primaryColor,
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            widget.task.formattedDuration,
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontFamily: 'monospace',
+                                              fontWeight: FontWeight.bold,
+                                              color: primaryColor,
+                                            ),
+                                          ),
+                                        ] else if (widget.task.status == TaskStatus.done &&
+                                            widget.task.duration != null) ...[
+                                          Icon(
+                                            Icons.check_circle,
+                                            size: 16,
+                                            color: Colors.green,
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            widget.task.formattedDuration,
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontFamily: 'monospace',
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                        ] else ...[
+                                          Icon(
+                                            Icons.play_circle_outline,
+                                            size: 16,
+                                            color: primaryColor,
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            '00:00',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontFamily: 'monospace',
+                                              color: isDark
+                                                  ? Colors.grey[500]
+                                                  : Colors.grey[400],
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 6),
                             // Tags
@@ -302,58 +410,66 @@ class _TaskCardState extends State<_TaskCard> {
                         ),
                       ),
                       // Checkbox & Expand Icon
-                      Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              final newStatus =
-                                  isDone ? TaskStatus.todo : TaskStatus.done;
-                              widget.onStatusChanged(newStatus);
-                            },
-                            child: SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: Checkbox(
-                                value: isDone,
-                                activeColor: primaryColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                side: BorderSide(
-                                  color:
-                                      isDark
-                                          ? Colors.white.withOpacity(0.2)
-                                          : Colors.grey[400]!,
-                                  width: 2,
-                                ),
-                                onChanged: (value) {
-                                  final newStatus =
-                                      value == true
-                                          ? TaskStatus.done
-                                          : TaskStatus.todo;
-                                  widget.onStatusChanged(newStatus);
-                                },
-                              ),
-                            ),
-                          ),
-                          if (widget.task.subtasks.isNotEmpty) ...[
-                            const SizedBox(height: 16),
+                      SizedBox(
+                        width: 60,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Checkbox
                             GestureDetector(
                               onTap: () {
-                                setState(() {
-                                  _isExpanded = !_isExpanded;
-                                });
+                                final newStatus =
+                                    isDone ? TaskStatus.todo : TaskStatus.done;
+                                widget.onStatusChanged(newStatus);
                               },
-                              child: Icon(
-                                _isExpanded
-                                    ? Icons.expand_less
-                                    : Icons.expand_more,
-                                color:
-                                    isDark ? Colors.grey[500] : Colors.grey[400],
+                              child: SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: Checkbox(
+                                  value: isDone,
+                                  activeColor: primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  side: BorderSide(
+                                    color:
+                                        isDark
+                                            ? Colors.white.withOpacity(0.2)
+                                            : Colors.grey[400]!,
+                                    width: 2,
+                                  ),
+                                  onChanged: (value) {
+                                    final newStatus =
+                                        value == true
+                                            ? TaskStatus.done
+                                            : TaskStatus.todo;
+                                    widget.onStatusChanged(newStatus);
+                                  },
+                                ),
                               ),
                             ),
+                            // Expand Icon
+                            if (widget.task.subtasks.isNotEmpty) ...[
+                              const SizedBox(height: 16),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _isExpanded = !_isExpanded;
+                                  });
+                                },
+                                child: Icon(
+                                  _isExpanded
+                                      ? Icons.expand_less
+                                      : Icons.expand_more,
+                                  color:
+                                      isDark
+                                          ? Colors.grey[500]
+                                          : Colors.grey[400],
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ],
                   ),

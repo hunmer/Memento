@@ -1,4 +1,5 @@
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/store_controller.dart';
 import '../../models/points_log.dart';
@@ -39,6 +40,14 @@ class _PointsHistoryState extends State<PointsHistory> {
     if (mounted) {
       _loadInitialData();
     }
+  }
+
+  /// 检查是否应该显示返回按钮（仅在非移动端显示）
+  bool get _shouldShowBackButton {
+    return kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux;
   }
 
   void _scrollListener() {
@@ -155,6 +164,12 @@ class _PointsHistoryState extends State<PointsHistory> {
             children: [
               Row(
                 children: [
+                  if (_shouldShowBackButton)
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.of(context).pop(),
+                      tooltip: '返回',
+                    ),
                   Icon(
                     Icons.history,
                     color: Colors.green.shade600,
