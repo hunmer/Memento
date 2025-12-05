@@ -3,6 +3,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 import '../../controllers/checkin_list_controller.dart';
 import '../../l10n/checkin_localizations.dart';
 import '../../widgets/checkin_record_dialog.dart';
@@ -56,37 +57,9 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
   Widget build(BuildContext context) {
     final filteredItems = controller.filteredItems;
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor:
-            Theme.of(context).brightness == Brightness.dark
-                ? null
-                : Colors.grey[50],
-        scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        title: Text(CheckinLocalizations.of(context).name),
-        actions: [
-          // 排序按钮
-          IconButton(
-            icon: const Icon(Icons.sort),
-            onPressed: () async {
-              await controller.showGroupSortDialog();
-              if (mounted) setState(() {});
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.folder),
-            onPressed: controller.showGroupManagementDialog,
-          ),
-        ],
-      ),
+    return SuperCupertinoNavigationWrapper(
+      title: Text(CheckinLocalizations.of(context).name),
+      largeTitle: '签到记录',
       body: Column(
         children: [
           // 分组过滤器
@@ -129,17 +102,22 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
           ),
         ],
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () async {
-      //     await controller.showAddCheckinItemDialog(
-      //       group:
-      //           controller.selectedGroup == '全部'
-      //               ? null
-      //               : controller.selectedGroup,
-      //     );
-      //   },
-      //   child: const Icon(Icons.add),
-      // ),
+      actions: [
+        // 排序按钮
+        IconButton(
+          icon: const Icon(Icons.sort),
+          onPressed: () async {
+            await controller.showGroupSortDialog();
+            if (mounted) setState(() {});
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.folder),
+          onPressed: controller.showGroupManagementDialog,
+        ),
+      ],
+      enableLargeTitle: false,
+      automaticallyImplyLeading: false,
     );
   }
 

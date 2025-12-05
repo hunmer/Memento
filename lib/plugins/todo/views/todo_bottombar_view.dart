@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/todo/models/task.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import '../widgets/task_list_view.dart';
 import '../widgets/add_task_button.dart';
 import '../widgets/task_form.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import '../views/todo_four_quadrant_view.dart';
 import '../widgets/filter_dialog.dart';
 import '../widgets/history_completed_view.dart';
@@ -252,51 +252,43 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   // 构建任务列表视图（第一个tab）
   Widget _buildTaskListView() {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('待办事项'),
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
+    return SuperCupertinoNavigationWrapper(
+      title: const Text('待办事项'),
+      largeTitle: '待办事项',
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.filter_alt),
+          onPressed: _showFilterDialog,
+        ),
+        IconButton(
+          icon: Icon(
+            _plugin.taskController.isGridView
+                ? Icons.view_list
+                : Icons.dashboard,
+          ),
+          onPressed: _plugin.taskController.toggleViewMode,
+        ),
+        PopupMenuButton<SortBy>(
+          icon: const Icon(Icons.sort),
+          onSelected: _plugin.taskController.setSortBy,
+          itemBuilder:
+              (context) => [
+                PopupMenuItem(
+                  value: SortBy.dueDate,
+                  child: Text(TodoLocalizations.of(context).sortByDueDate),
                 ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_alt),
-            onPressed: _showFilterDialog,
-          ),
-          IconButton(
-            icon: Icon(
-              _plugin.taskController.isGridView
-                  ? Icons.view_list
-                  : Icons.dashboard,
-            ),
-            onPressed: _plugin.taskController.toggleViewMode,
-          ),
-          PopupMenuButton<SortBy>(
-            icon: const Icon(Icons.sort),
-            onSelected: _plugin.taskController.setSortBy,
-            itemBuilder:
-                (context) => [
-                  PopupMenuItem(
-                    value: SortBy.dueDate,
-                    child: Text(TodoLocalizations.of(context).sortByDueDate),
-                  ),
-                  PopupMenuItem(
-                    value: SortBy.priority,
-                    child: Text(TodoLocalizations.of(context).sortByPriority),
-                  ),
-                  PopupMenuItem(
-                    value: SortBy.custom,
-                    child: Text(TodoLocalizations.of(context).customSort),
-                  ),
-                ],
-          ),
-        ],
-      ),
+                PopupMenuItem(
+                  value: SortBy.priority,
+                  child: Text(TodoLocalizations.of(context).sortByPriority),
+                ),
+                PopupMenuItem(
+                  value: SortBy.custom,
+                  child: Text(TodoLocalizations.of(context).customSort),
+                ),
+              ],
+        ),
+      ],
       body: AnimatedBuilder(
         animation: _plugin.taskController,
         builder: (context, _) {
@@ -342,50 +334,42 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   // 构建历史记录视图（第二个tab）
   Widget _buildHistoryView() {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('历史记录'),
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_sweep),
-            onPressed: () async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder:
-                    (context) => AlertDialog(
-                      title: const Text('清空历史记录'),
-                      content: const Text('确定要清空所有历史记录吗？此操作不可撤销。'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('取消'),
+    return SuperCupertinoNavigationWrapper(
+      title: const Text('历史记录'),
+      largeTitle: '历史记录',
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.delete_sweep),
+          onPressed: () async {
+            final confirmed = await showDialog<bool>(
+              context: context,
+              builder:
+                  (context) => AlertDialog(
+                    title: const Text('清空历史记录'),
+                    content: const Text('确定要清空所有历史记录吗？此操作不可撤销。'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('取消'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text(
+                          '清空',
+                          style: TextStyle(color: Colors.red),
                         ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: const Text(
-                            '清空',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        ),
-                      ],
-                    ),
-              );
+                      ),
+                    ],
+                  ),
+            );
 
-              if (confirmed == true) {
-                _plugin.taskController.clearHistory();
-              }
-            },
-          ),
-        ],
-      ),
+            if (confirmed == true) {
+              _plugin.taskController.clearHistory();
+            }
+          },
+        ),
+      ],
       body: HistoryCompletedView(
         completedTasks: _plugin.taskController.completedTasks,
         taskController: _plugin.taskController,

@@ -3,6 +3,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import '../l10n/openai_localizations.dart';
 import '../openai_plugin.dart';
 import '../widgets/agent_list_view.dart';
@@ -81,46 +82,41 @@ class _AgentListScreenState extends State<AgentListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        title: Text(OpenAILocalizations.of(context).agentListTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: _showFilterDialog,
-          ),
-          IconButton(
-            icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
-            onPressed: () {
-              setState(() {
-                _isGridView = !_isGridView;
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () async {
-              await NavigationHelper.push<bool>(
-                context,
-                const AgentEditScreen(),
-              );
-              // 不需要手动刷新，因为AgentController会通知变化
-            },
-          ),
-        ],
-      ),
-      body:
-          _isGridView
-              ? AgentGridView(agents: _getFilteredAgents())
-              : AgentListView(agents: _getFilteredAgents()),
+    return SuperCupertinoNavigationWrapper(
+      title: Text(OpenAILocalizations.of(context).agentListTitle),
+      largeTitle: OpenAILocalizations.of(context).agentListTitle,
+      body: _isGridView
+          ? AgentGridView(agents: _getFilteredAgents())
+          : AgentListView(agents: _getFilteredAgents()),
+      enableLargeTitle: false,
+      automaticallyImplyLeading: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.filter_list),
+          onPressed: _showFilterDialog,
+          tooltip: '筛选',
+        ),
+        IconButton(
+          icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
+          onPressed: () {
+            setState(() {
+              _isGridView = !_isGridView;
+            });
+          },
+          tooltip: '切换视图',
+        ),
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () async {
+            await NavigationHelper.push<bool>(
+              context,
+              const AgentEditScreen(),
+            );
+            // 不需要手动刷新，因为AgentController会通知变化
+          },
+          tooltip: '添加助手',
+        ),
+      ],
     );
   }
 }

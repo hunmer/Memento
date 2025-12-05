@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 import '../../agent_chat_plugin.dart';
 import '../../controllers/conversation_controller.dart';
 import '../../models/conversation.dart';
@@ -119,77 +120,54 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        title:
-            _isSearching
-                ? TextField(
-                  controller: _searchController,
-                  focusNode: _searchFocusNode,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintText: '搜索会话...',
-                    border: InputBorder.none,
-                    hintStyle: TextStyle(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onPrimary.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    fontSize: 16,
-                  ),
-                  cursorColor: Theme.of(context).colorScheme.onPrimary,
-                  onChanged: (query) {
-                    _controller.setSearchQuery(query);
-                  },
-                )
-                : const Text('Agent Chat'),
-        actions: [
-          // 搜索按钮
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search, size: 24),
-            onPressed: _toggleSearch,
-          ),
-          // 工具管理按钮
-          IconButton(
-            icon: const Icon(Icons.build, size: 24),
-            tooltip: '工具管理',
-            onPressed: _openToolManagement,
-          ),
-          // 工具模板按钮
-          IconButton(
-            icon: const Icon(Icons.inventory_2, size: 24),
-            tooltip: '工具模板',
-            onPressed: _openToolTemplate,
-          ),
-          // 设置按钮
-          IconButton(
-            icon: const Icon(Icons.settings, size: 24),
-            onPressed: _openSettings,
-          ),
-        ],
-      ),
+    return SuperCupertinoNavigationWrapper(
+      title: _isSearching
+          ? TextField(
+              controller: _searchController,
+              focusNode: _searchFocusNode,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: '搜索会话...',
+                border: InputBorder.none,
+              ),
+              onChanged: (query) {
+                _controller.setSearchQuery(query);
+              },
+            )
+          : const Text('AI 对话'),
+      largeTitle: 'AI 对话',
+      enableLargeTitle: true,
+      enableSearchBar: _isSearching,
+      searchPlaceholder: '搜索会话...',
+      onSearchChanged: (query) {
+        _controller.setSearchQuery(query);
+      },
+      automaticallyImplyLeading: false,
+      actions: [
+        // 工具管理按钮
+        IconButton(
+          icon: const Icon(Icons.build, size: 24),
+          tooltip: '工具管理',
+          onPressed: _openToolManagement,
+        ),
+        // 工具模板按钮
+        IconButton(
+          icon: const Icon(Icons.inventory_2, size: 24),
+          tooltip: '工具模板',
+          onPressed: _openToolTemplate,
+        ),
+        // 设置按钮
+        IconButton(
+          icon: const Icon(Icons.settings, size: 24),
+          onPressed: _openSettings,
+        ),
+      ],
       body:
           _controller.isLoading
               ? const Center(child: CircularProgressIndicator())
               : _controller.conversations.isEmpty
               ? _buildEmptyState()
               : _buildConversationList(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showCreateConversationDialog,
-        tooltip: '新建会话',
-        child: const Icon(Icons.add),
-      ),
     );
   }
 

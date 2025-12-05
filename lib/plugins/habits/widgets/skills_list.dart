@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -11,6 +10,7 @@ import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/plugins/habits/widgets/skill_form.dart';
 import 'package:Memento/plugins/habits/widgets/skill_detail_page.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 
 class SkillsList extends StatefulWidget {
   final SkillController skillController;
@@ -79,34 +79,90 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final l10n = HabitsLocalizations.of(context);
-    return Column(
-      children: [
-        _buildAppBar(context, l10n),
-        Expanded(
-          child: _buildCardView(_skills, l10n),
-        ),
-      ],
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context, HabitsLocalizations l10n) {
-    return AppBar(
+    return SuperCupertinoNavigationWrapper(
       title: Text(l10n.skills),
+      largeTitle: l10n.skills,
+      enableLargeTitle: true,
       automaticallyImplyLeading: false,
-      leading:
-          (Platform.isAndroid || Platform.isIOS)
-              ? null
-              : IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () => PluginManager.toHomeScreen(context),
-              ),
       actions: [
-        IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
+        IconButton(
+          icon: const Icon(Icons.sort),
+          onPressed: _showSortMenu,
+        ),
         IconButton(
           icon: const Icon(Icons.add),
           onPressed: () => _showSkillForm(context),
         ),
       ],
+      body: _buildCardView(_skills, l10n),
+    );
+  }
+
+  /// 显示排序菜单
+  void _showSortMenu() {
+    final l10n = HabitsLocalizations.of(context);
+    showModalBottomSheet(
+      context: context,
+      builder:
+          (context) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.sort_by_alpha),
+                title: Text(l10n.sortByName),
+                onTap: () {
+                  setState(() {
+                    _skills.sort((a, b) => a.title.compareTo(b.title));
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.format_list_numbered),
+                title: Text(l10n.sortByCompletions),
+                onTap: () async {
+                  final counts = await Future.wait(
+                    _skills.map(
+                      (s) => widget.recordController.getCompletionCount(s.id),
+                    ),
+                  );
+                  final sortedSkills =
+                      _skills
+                          .asMap()
+                          .entries
+                          .map((e) => (e.value, counts[e.key]))
+                          .toList()
+                        ..sort((a, b) => b.$2.compareTo(a.$2));
+                  setState(() {
+                    _skills = sortedSkills.map((e) => e.$1).toList();
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.timer),
+                title: Text(l10n.sortByDuration),
+                onTap: () async {
+                  final durations = await Future.wait(
+                    _skills.map(
+                      (s) => widget.recordController.getTotalDuration(s.id),
+                    ),
+                  );
+                  final sortedSkills =
+                      _skills
+                          .asMap()
+                          .entries
+                          .map((e) => (e.value, durations[e.key]))
+                          .toList()
+                        ..sort((a, b) => b.$2.compareTo(a.$2));
+                  setState(() {
+                    _skills = sortedSkills.map((e) => e.$1).toList();
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
     );
   }
 
@@ -307,73 +363,6 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
               ],
             );
           }).toList(),
-    );
-  }
-
-  void _showSortMenu() {
-    final l10n = HabitsLocalizations.of(context);
-    showModalBottomSheet(
-      context: context,
-      builder:
-          (context) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.sort_by_alpha),
-                title: Text(l10n.sortByName),
-                onTap: () {
-                  setState(() {
-                    _skills.sort((a, b) => a.title.compareTo(b.title));
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.format_list_numbered),
-                title: Text(l10n.sortByCompletions),
-                onTap: () async {
-                  final counts = await Future.wait(
-                    _skills.map(
-                      (s) => widget.recordController.getCompletionCount(s.id),
-                    ),
-                  );
-                  final sortedSkills =
-                      _skills
-                          .asMap()
-                          .entries
-                          .map((e) => (e.value, counts[e.key]))
-                          .toList()
-                        ..sort((a, b) => b.$2.compareTo(a.$2));
-                  setState(() {
-                    _skills = sortedSkills.map((e) => e.$1).toList();
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.timer),
-                title: Text(l10n.sortByDuration),
-                onTap: () async {
-                  final durations = await Future.wait(
-                    _skills.map(
-                      (s) => widget.recordController.getTotalDuration(s.id),
-                    ),
-                  );
-                  final sortedSkills =
-                      _skills
-                          .asMap()
-                          .entries
-                          .map((e) => (e.value, durations[e.key]))
-                          .toList()
-                        ..sort((a, b) => b.$2.compareTo(a.$2));
-                  setState(() {
-                    _skills = sortedSkills.map((e) => e.$1).toList();
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
     );
   }
 

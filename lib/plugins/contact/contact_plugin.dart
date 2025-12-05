@@ -8,6 +8,7 @@ import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
+import '../../widgets/super_cupertino_navigation_wrapper.dart';
 import 'controllers/contact_controller.dart';
 import 'models/contact_model.dart';
 import 'models/interaction_record_model.dart';
@@ -795,25 +796,9 @@ class ContactMainViewState extends State<ContactMainView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        title: Text(ContactLocalizations.of(context).contacts),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: _showFilterDialog,
-          ),
-          IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
-        ],
-      ),
+    return SuperCupertinoNavigationWrapper(
+      title: Text(ContactLocalizations.of(context).contacts),
+      largeTitle: ContactLocalizations.of(context).contacts,
       body: FutureBuilder<List<Contact>>(
         future: _controller.getFilteredAndSortedContacts(),
         builder: (context, snapshot) {
@@ -863,10 +848,19 @@ class ContactMainViewState extends State<ContactMainView> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _addOrEditContact(),
-        child: const Icon(Icons.add),
-      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.filter_list),
+          onPressed: _showFilterDialog,
+        ),
+        IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () => _addOrEditContact(),
+        ),
+      ],
+      enableLargeTitle: true,
+      automaticallyImplyLeading: false,
     );
   }
 }

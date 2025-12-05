@@ -5,6 +5,7 @@ import '../../core/config_manager.dart';
 import '../../core/event/event_manager.dart';
 import '../../core/event/event_args.dart';
 import '../../core/event/item_event_args.dart';
+import '../../widgets/super_cupertino_navigation_wrapper.dart';
 import 'services/script_loader.dart';
 import 'services/script_manager.dart';
 import 'services/script_executor.dart';
@@ -428,9 +429,12 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
 
   @override
   Widget build(BuildContext context) {
-    return ScriptsListScreen(
-      scriptManager: _plugin.scriptManager,
-      scriptExecutor: _plugin.scriptExecutor,
+    return SuperCupertinoNavigationWrapper(
+      title: const Text('脚本中心'),
+      body: ScriptsListScreen(
+        scriptManager: _plugin.scriptManager,
+        scriptExecutor: _plugin.scriptExecutor,
+      ),
     );
   }
 }

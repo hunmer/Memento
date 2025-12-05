@@ -1,9 +1,8 @@
-import 'dart:io' show Platform;
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:ui' show lerpDouble;
 import 'package:provider/provider.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import '../controllers/nodes_controller.dart';
 import '../models/notebook.dart';
 import '../l10n/nodes_localizations.dart';
@@ -17,25 +16,21 @@ class NotebooksScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Provider.of<NodesController>(context);
     final l10n = NodesLocalizations.of(context);
+    final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        title: Text(l10n.notebooks),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _showAddNotebookDialog(context),
-          ),
-        ],
+    return SuperCupertinoNavigationWrapper(
+      title: Text(
+        l10n.notebooks,
+        style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
+      largeTitle: l10n.notebooks,
+      automaticallyImplyLeading: false,
+      actions: [
+        IconButton(
+          icon: Icon(Icons.add, color: theme.iconTheme.color),
+          onPressed: () => _showAddNotebookDialog(context),
+        ),
+      ],
       body: ReorderableListView.builder(
         proxyDecorator: (Widget child, int index, Animation<double> animation) {
           return AnimatedBuilder(

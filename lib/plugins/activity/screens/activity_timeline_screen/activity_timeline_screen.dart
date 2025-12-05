@@ -1,11 +1,12 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import '../../../../core/storage/storage_manager.dart';
 import '../../../../core/event/event.dart';
 import '../../../../widgets/calendar_strip_date_picker.dart';
 import '../../services/activity_service.dart';
 import '../../widgets/activity_timeline.dart';
+import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 import 'components/activity_grid_view.dart';
-import 'components/timeline_app_bar.dart';
 import 'controllers/activity_controller.dart';
 import 'controllers/tag_controller.dart';
 import 'controllers/view_mode_controller.dart';
@@ -155,83 +156,155 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
         ),
       );
     }
-    
-    return Scaffold(
-      appBar: TimelineAppBar(
-        tagController: _tagController,
-        activityController: _activityController,
-        viewModeController: _viewModeController,
+
+    return SuperCupertinoNavigationWrapper(
+      title: Text(
+        _viewModeController.isGridMode && _viewModeController.selectedMinutes > 0
+            ? '${_viewModeController.selectedMinutes}分钟已选择'
+            : '活动',
       ),
-      body: Column(
+      largeTitle: '活动',
+      body: Stack(
         children: [
-          // Calendar Strip Date Picker
-          CalendarStripDatePicker(
-            selectedDate: _selectedDate,
-            onDateChanged: _onDateChanged,
-            displayDaysCount: 7,
-            height: 70,
-            itemWidth: 54,
-            itemSpacing: 12,
-            listPadding: const EdgeInsets.only(left: 16, right: 8),
-            calendarButtonPadding: const EdgeInsets.only(right: 16),
-            showCalendarButton: true,
+          Column(
+            children: [
+              // Calendar Strip Date Picker
+              CalendarStripDatePicker(
+                selectedDate: _selectedDate,
+                onDateChanged: _onDateChanged,
+                displayDaysCount: 7,
+                height: 70,
+                itemWidth: 54,
+                itemSpacing: 12,
+                listPadding: const EdgeInsets.only(left: 16, right: 8),
+                calendarButtonPadding: const EdgeInsets.only(right: 16),
+                showCalendarButton: true,
+              ),
+              // 根据视图模式显示不同的视图
+              Expanded(
+                child: _viewModeController.isGridMode
+                    ? ActivityGridView(
+                        activities: _activityController.activities,
+                        selectedDate: _selectedDate,
+                        onActivityTap: (activity) => _activityController.editActivity(context, activity),
+                        onUnrecordedTimeTap: (start, end) {
+                          _activityController.addActivity(
+                            context,
+                            _selectedDate,
+                            TimeOfDay(hour: start.hour, minute: start.minute),
+                            TimeOfDay(hour: end.hour, minute: end.minute),
+                            _tagController.updateRecentTags,
+                          ).then((_) {
+                            _viewModeController.clearSelectedMinutes();
+                          });
+                        },
+                        onSelectionChanged: (start, end) {
+                          if (start != null && end != null) {
+                            final minutes = end.difference(start).inMinutes;
+                            _viewModeController.updateSelectedMinutes(minutes);
+                          } else {
+                            _viewModeController.clearSelectedMinutes();
+                          }
+                        },
+                      )
+                    : ActivityTimeline(
+                        activities: _activityController.activities,
+                        onDeleteActivity: _activityController.deleteActivity,
+                        onActivityTap: (activity) => _activityController.editActivity(context, activity),
+                        onUnrecordedTimeTap: (start, end) {
+                          _activityController.addActivity(
+                            context,
+                            _selectedDate,
+                            TimeOfDay(hour: start.hour, minute: start.minute),
+                            TimeOfDay(hour: end.hour, minute: end.minute),
+                            _tagController.updateRecentTags,
+                          );
+                        },
+                      ),
+              ),
+            ],
           ),
-            // 根据视图模式显示不同的视图
-          Expanded(
-            child: _viewModeController.isGridMode
-                ? ActivityGridView(
-                    activities: _activityController.activities,
-                    selectedDate: _selectedDate,
-                    onActivityTap: (activity) => _activityController.editActivity(context, activity),
-                    onUnrecordedTimeTap: (start, end) {
-                      _activityController.addActivity(
-                        context,
-                        _selectedDate,
-                        TimeOfDay(hour: start.hour, minute: start.minute),
-                        TimeOfDay(hour: end.hour, minute: end.minute),
-                        _tagController.updateRecentTags,
-                      ).then((_) {
-                        _viewModeController.clearSelectedMinutes();
-                      });
-                    },
-                    onSelectionChanged: (start, end) {
-                      if (start != null && end != null) {
-                        final minutes = end.difference(start).inMinutes;
-                        _viewModeController.updateSelectedMinutes(minutes);
-                      } else {
-                        _viewModeController.clearSelectedMinutes();
-                      }
-                    },
-                  )
-                : ActivityTimeline(
-                    activities: _activityController.activities,
-                    onDeleteActivity: _activityController.deleteActivity,
-                    onActivityTap: (activity) => _activityController.editActivity(context, activity),
-                    onUnrecordedTimeTap: (start, end) {
-                      _activityController.addActivity(
-                        context,
-                        _selectedDate,
-                        TimeOfDay(hour: start.hour, minute: start.minute),
-                        TimeOfDay(hour: end.hour, minute: end.minute),
-                        _tagController.updateRecentTags,
-                      );
-                    },
-                  ),
-          ),
+          // FloatingActionButton - 移到右上角作为 actions
         ],
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () => _activityController.addActivity(
-      //     context,
-      //     _selectedDate,
-      //     null,
-      //     null,
-      //     _tagController.updateRecentTags,
-      //   ),
-      //   tooltip:
-      //       ActivityLocalizations.of(context).addActivity,
-      //   child: const Icon(Icons.add),
-      // ),
+      enableLargeTitle: true,
+      automaticallyImplyLeading: (Platform.isAndroid || Platform.isIOS),
+      // 将原有的 AppBar actions 移到右上角
+      actions: [
+        // 视图切换按钮
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton(
+            icon: Icon(
+              _viewModeController.isGridMode ? Icons.timeline : Icons.grid_on,
+            ),
+            onPressed: _viewModeController.toggleViewMode,
+            tooltip: _viewModeController.isGridMode ? '切换到时间轴视图' : '切换到网格视图',
+          ),
+        ),
+        // 标签管理按钮
+        IconButton(
+          icon: const Icon(Icons.label),
+          onPressed: () => _tagController.showTagManagerDialog(context),
+          tooltip: '标签管理',
+        ),
+        // 排序下拉菜单
+        PopupMenuButton<int>(
+          icon: const Icon(Icons.sort),
+          tooltip: '排序',
+          initialValue: _activityController.sortMode,
+          onSelected: (int index) {
+            _activityController.setSortMode(index);
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 0,
+              child: Row(
+                children: [
+                  Icon(Icons.arrow_upward, size: 16),
+                  SizedBox(width: 8),
+                  Text('按开始时间升序'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 1,
+              child: Row(
+                children: [
+                  Icon(Icons.timer, size: 16),
+                  SizedBox(width: 8),
+                  Text('按持续时间'),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 2,
+              child: Row(
+                children: [
+                  Icon(Icons.arrow_downward, size: 16),
+                  SizedBox(width: 8),
+                  Text('按开始时间降序'),
+                ],
+              ),
+            ),
+          ],
+        ),
+        // 添加活动的按钮（使用IconButton避免Hero冲突）
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton(
+            icon: const Icon(Icons.add_circle_outline, size: 28),
+            onPressed: () => _activityController.addActivity(
+              context,
+              _selectedDate,
+              null,
+              null,
+              _tagController.updateRecentTags,
+            ),
+            tooltip: '添加活动',
+          ),
+        ),
+      ],
     );
   }
 }

@@ -10,6 +10,7 @@ import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
+import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 import '../models/database_model.dart';
 import '../services/database_service.dart';
 
@@ -33,43 +34,14 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        title: Text(DatabaseLocalizations.of(context).databaseListTitle),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final date = DateTime.now();
-          final result = await NavigationHelper.push<bool>(
-            context,
-            DatabaseEditWidget(
-              controller: DatabaseController(widget.service),
-              database: DatabaseModel(
-                id: '',
-                name: DatabaseLocalizations.of(context).newDatabaseDefaultName,
-                description: '',
-                fields: [],
-                createdAt: date,
-                updatedAt: date,
-              ),
-            ),
-          );
-          if (result == true && mounted) {
-            setState(() {
-              _databasesFuture = widget.service.getAllDatabases();
-            });
-          }
-        },
-        child: const Icon(Icons.add),
-      ),
+    final l10n = DatabaseLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    return SuperCupertinoNavigationWrapper(
+      title: Text(l10n.databaseListTitle),
+      largeTitle: l10n.databaseListTitle,
+      enableLargeTitle: true,
+      automaticallyImplyLeading: false,
       body: FutureBuilder<List<DatabaseModel>>(
         future: _databasesFuture,
         builder: (context, snapshot) {
@@ -85,15 +57,13 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
                   Text(
-                    DatabaseLocalizations.of(context).loadFailedMessage,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleMedium?.copyWith(color: Colors.red),
+                    l10n.loadFailedMessage,
+                    style: theme.textTheme.titleMedium?.copyWith(color: Colors.red),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '${snapshot.error}',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),

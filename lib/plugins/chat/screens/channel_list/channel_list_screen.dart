@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import '../../models/channel.dart';
 import '../../chat_plugin.dart';
 import '../../l10n/chat_localizations.dart';
@@ -50,24 +51,9 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        title: Text(ChatLocalizations.of(context).channelList),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _showAddChannelDialog,
-          ),
-        ],
-      ),
+    return SuperCupertinoNavigationWrapper(
+      title: Text(ChatLocalizations.of(context).channelList),
+      largeTitle: '频道列表',
       body: Column(
         children: [
           ChannelGroupSelector(
@@ -104,6 +90,16 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
           ),
         ],
       ),
+      enableLargeTitle: true,
+      automaticallyImplyLeading:
+          (Platform.isAndroid || Platform.isIOS) ? false : true,
+      previousPageTitle: '返回',
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: _showAddChannelDialog,
+        ),
+      ],
     );
   }
 

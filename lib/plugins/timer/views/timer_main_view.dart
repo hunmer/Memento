@@ -4,6 +4,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import '../timer_plugin.dart';
 import '../models/timer_task.dart';
 import '../models/timer_item.dart';
@@ -48,53 +49,58 @@ class _TimerMainViewState extends State<TimerMainView> {
   Widget build(BuildContext context) {
     final groups = _groupedTasks.keys.toList();
 
-    return DefaultTabController(
-      length: groups.length,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF5F6F8), // Light background
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          leading:
-              (Platform.isAndroid || Platform.isIOS)
-                  ? null
-                  : IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => PluginManager.toHomeScreen(context),
-                  ),
-
-          title: Text(_plugin.getPluginName(context)!),
-          bottom: TabBar(
-            isScrollable: true,
-            tabs: groups.map((group) => Tab(text: group)).toList(),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: _showAddTaskDialog,
+    return SuperCupertinoNavigationWrapper(
+      title: Text(_plugin.getPluginName(context)!),
+      largeTitle: '计时器',
+      enableLargeTitle: true,
+      automaticallyImplyLeading: false,
+      backgroundColor: const Color(0xFFF5F6F8),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: _showAddTaskDialog,
+        ),
+      ],
+      body: DefaultTabController(
+        length: groups.length,
+        child: Column(
+          children: [
+            // 分组标签栏
+            Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: TabBar(
+                isScrollable: true,
+                labelColor: Theme.of(context).colorScheme.primary,
+                unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                indicatorColor: Theme.of(context).colorScheme.primary,
+                tabs: groups.map((group) => Tab(text: group)).toList(),
+              ),
+            ),
+            // 任务列表
+            Expanded(
+              child: TabBarView(
+                children: groups.map((group) {
+                  final tasksInGroup = _groupedTasks[group]!;
+                  return ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: tasksInGroup.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      final task = tasksInGroup[index];
+                      return _TimerTaskCard(
+                        task: task,
+                        onTap: _showTaskDetails,
+                        onEdit: _editTask,
+                        onReset: _resetTask,
+                        onDelete: _deleteTask,
+                      );
+                    },
+                  );
+                }).toList(),
+              ),
             ),
           ],
-        ),
-        body: TabBarView(
-          children:
-              groups.map((group) {
-                final tasksInGroup = _groupedTasks[group]!;
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: tasksInGroup.length,
-                  separatorBuilder:
-                      (context, index) => const SizedBox(height: 16),
-                  itemBuilder: (context, index) {
-                    final task = tasksInGroup[index];
-                    return _TimerTaskCard(
-                      task: task,
-                      onTap: _showTaskDetails,
-                      onEdit: _editTask,
-                      onReset: _resetTask,
-                      onDelete: _deleteTask,
-                    );
-                  },
-                );
-              }).toList(),
         ),
       ),
     );

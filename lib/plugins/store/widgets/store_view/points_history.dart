@@ -1,8 +1,8 @@
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../controllers/store_controller.dart';
 import '../../models/points_log.dart';
+import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 
 class PointsHistory extends StatefulWidget {
   final StoreController controller;
@@ -40,14 +40,6 @@ class _PointsHistoryState extends State<PointsHistory> {
     if (mounted) {
       _loadInitialData();
     }
-  }
-
-  /// 检查是否应该显示返回按钮（仅在非移动端显示）
-  bool get _shouldShowBackButton {
-    return kIsWeb ||
-        defaultTargetPlatform == TargetPlatform.windows ||
-        defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.linux;
   }
 
   void _scrollListener() {
@@ -108,31 +100,41 @@ class _PointsHistoryState extends State<PointsHistory> {
   }
 
   Widget _buildEmptyView() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.history_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            StoreLocalizations.of(context).noRecords,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '完成应用内活动即可获得积分',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.grey[500],
-            ),
-          ),
-        ],
+    return SuperCupertinoNavigationWrapper(
+      title: Icon(
+        Icons.history,
+        color: Colors.green.shade600,
+        size: 24,
       ),
+      largeTitle: StoreLocalizations.of(context).pointsHistory,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.history_outlined,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              StoreLocalizations.of(context).noRecords,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '完成应用内活动即可获得积分',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[500],
+              ),
+            ),
+          ],
+        ),
+      ),
+      enableLargeTitle: true,
+      enableSearchBar: false,
     );
   }
 
@@ -144,154 +146,130 @@ class _PointsHistoryState extends State<PointsHistory> {
         .where((log) => log.type == '消耗')
         .fold<int>(0, (sum, log) => sum + log.value);
 
-    return Column(
-      children: [
-        // 顶部标题栏和统计信息
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  if (_shouldShowBackButton)
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.of(context).pop(),
-                      tooltip: '返回',
-                    ),
-                  Icon(
-                    Icons.history,
-                    color: Colors.green.shade600,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      StoreLocalizations.of(context).pointsHistory,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+    return SuperCupertinoNavigationWrapper(
+      title: Icon(
+        Icons.history,
+        color: Colors.green.shade600,
+        size: 24,
+      ),
+      largeTitle: StoreLocalizations.of(context).pointsHistory,
+      body: Column(
+        children: [
+          // 统计信息
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatCard(
+                        '当前积分',
+                        widget.controller.currentPoints.toString(),
+                        Colors.purple,
+                        Icons.account_balance_wallet,
                       ),
                     ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      _showClearLogsDialog(context);
-                    },
-                    child: Text(
-                      '清空',
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildStatCard(
+                        '总获得',
+                        '+$totalEarned',
+                        Colors.green,
+                        Icons.add_circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildStatCard(
+                        '总消耗',
+                        '-$totalSpent',
+                        Colors.red,
+                        Icons.remove_circle,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // 积分历史列表
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(8),
+              itemCount: _displayedLogs.length +
+                  (_currentPage * _pageSize < widget.controller.pointsLogs.length ? 1 : 0),
+              itemBuilder: (context, index) {
+                // 如果是最后一个项目且还有更多数据可加载，显示加载指示器
+                if (index == _displayedLogs.length) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                final log = _displayedLogs[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 4),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: log.type == '获得' ? Colors.green.shade100 : Colors.red.shade100,
+                      child: Icon(
+                        log.type == '获得' ? Icons.add : Icons.remove,
+                        color: log.type == '获得' ? Colors.green : Colors.red,
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(
+                      StoreLocalizations.of(context).pointsHistoryEntry
+                          .replaceFirst('{value}', log.value.toString())
+                          .replaceFirst('{type}', log.type),
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    subtitle: Text(
+                      log.reason,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.red[400],
+                        color: Colors.grey[600],
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      '当前积分',
-                      widget.controller.currentPoints.toString(),
-                      Colors.purple,
-                      Icons.account_balance_wallet,
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${log.timestamp.hour.toString().padLeft(2, '0')}:${log.timestamp.minute.toString().padLeft(2, '0')}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        Text(
+                          '${log.timestamp.month}/${log.timestamp.day}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildStatCard(
-                      '总获得',
-                      '+$totalEarned',
-                      Colors.green,
-                      Icons.add_circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _buildStatCard(
-                      '总消耗',
-                      '-$totalSpent',
-                      Colors.red,
-                      Icons.remove_circle,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        // 积分历史列表
-        Expanded(
-          child: ListView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.all(8),
-            itemCount: _displayedLogs.length +
-                (_currentPage * _pageSize < widget.controller.pointsLogs.length ? 1 : 0),
-            itemBuilder: (context, index) {
-              // 如果是最后一个项目且还有更多数据可加载，显示加载指示器
-              if (index == _displayedLogs.length) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: CircularProgressIndicator(),
                   ),
                 );
-              }
-
-              final log = _displayedLogs[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 4),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: log.type == '获得' ? Colors.green.shade100 : Colors.red.shade100,
-                    child: Icon(
-                      log.type == '获得' ? Icons.add : Icons.remove,
-                      color: log.type == '获得' ? Colors.green : Colors.red,
-                      size: 20,
-                    ),
-                  ),
-                  title: Text(
-                    StoreLocalizations.of(context).pointsHistoryEntry
-                        .replaceFirst('{value}', log.value.toString())
-                        .replaceFirst('{type}', log.type),
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  subtitle: Text(
-                    log.reason,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '${log.timestamp.hour.toString().padLeft(2, '0')}:${log.timestamp.minute.toString().padLeft(2, '0')}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      Text(
-                        '${log.timestamp.month}/${log.timestamp.day}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+              },
+            ),
+          ),
+        ],
+      ),
+      enableLargeTitle: true,
+      enableSearchBar: false,
+      actions: [
+        TextButton(
+          onPressed: () {
+            _showClearLogsDialog(context);
+          },
+          child: Text(
+            '清空',
+            style: TextStyle(
+              color: Colors.red[400],
+            ),
           ),
         ),
       ],

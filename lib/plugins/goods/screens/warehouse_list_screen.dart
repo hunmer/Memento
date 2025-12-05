@@ -1,8 +1,8 @@
 import 'dart:io' show Platform;
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import '../../../widgets/super_cupertino_navigation_wrapper.dart';
 import '../goods_plugin.dart';
 import 'warehouse_detail_screen.dart';
 import '../widgets/warehouse_card.dart';
@@ -40,18 +40,9 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
   Widget build(BuildContext context) {
     final warehouses = GoodsPlugin.instance.warehouses;
 
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        title: Text(GoodsLocalizations.of(context).allWarehouses),
-      ),
+    return SuperCupertinoNavigationWrapper(
+      title: Text(GoodsLocalizations.of(context).allWarehouses),
+      largeTitle: GoodsLocalizations.of(context).allWarehouses,
       body: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 24, 16, 96),
         itemCount: warehouses.length,
@@ -71,10 +62,8 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
           );
         },
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _showAddWarehouseDialog,
-      //   child: const Icon(Icons.add),
-      // ),
+      enableLargeTitle: true,
+      automaticallyImplyLeading: (Platform.isAndroid || Platform.isIOS),
     );
   }
 }

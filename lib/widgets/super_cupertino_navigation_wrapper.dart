@@ -143,8 +143,9 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
           title: widget.title,
           previousPageTitle: widget.previousPageTitle ?? "返回",
           actions: widget.actions != null && widget.actions!.isNotEmpty
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
+              ? Wrap(
+                  spacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: widget.actions!,
                 )
               : null,
