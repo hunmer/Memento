@@ -1,9 +1,7 @@
-import 'dart:io';
-
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
+import '../../../widgets/super_cupertino_navigation_wrapper.dart';
 import '../l10n/notes_localizations.dart';
 import 'notes_screen/folder_item.dart';
 import 'notes_screen/folder_operations.dart';
@@ -34,54 +32,196 @@ class _NotesMainViewState extends NotesMainViewState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        title:
-            isSearching
-                ? TextField(
-                  controller: searchController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintText: NotesLocalizations.of(context).search,
-                    border: InputBorder.none,
-                  ),
-                  onChanged: handleSearch,
-                )
-                : Text(
-                  currentFolder?.name ?? 'Root',
-                  style: TextStyle(color: theme.textTheme.titleLarge?.color),
-                ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              isSearching ? Icons.close : Icons.search,
-              color: theme.iconTheme.color,
-            ),
-            onPressed: () {
-              setState(() {
-                if (isSearching) {
-                  searchController.clear();
-                  loadCurrentFolder();
-                }
-                isSearching = !isSearching;
-              });
-            },
-          ),
-        ],
+    return SuperCupertinoNavigationWrapper(
+      title: Text(
+        currentFolder?.name ?? '笔记',
+        style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
+      largeTitle: '我的笔记',
       body: _buildBody(),
-      floatingActionButton: _buildExpandableFab(),
+      enableLargeTitle: true,
+      enableSearchBar: true,
+      enableFilterBar: true,
+      filterBarHeight: 50,
+      filterBarChild: _buildFilterBar(),
+      searchPlaceholder: '搜索笔记、标签、内容...',
+      onSearchChanged: _handleSearchChanged,
+      onSearchSubmitted: _handleSearchSubmitted,
+      actions: [
+        IconButton(
+          icon: Icon(
+            isSearching ? Icons.close : Icons.more_vert,
+            color: theme.iconTheme.color,
+          ),
+          onPressed: () {
+            if (isSearching) {
+              setState(() {
+                searchController.clear();
+                loadCurrentFolder();
+                isSearching = false;
+              });
+            } else {
+              _showMoreOptions();
+            }
+          },
+        ),
+      ],
+      largeTitleActions: [
+        IconButton(
+          icon: const Icon(Icons.grid_view),
+          onPressed: _toggleViewMode,
+        ),
+        IconButton(
+          icon: const Icon(Icons.filter_list),
+          onPressed: _showAdvancedFilters,
+        ),
+      ],
+      onCollapsed: (isCollapsed) {
+        if (isCollapsed) {
+          _saveScrollPosition();
+        }
+      },
+    );
+  }
+
+  /// 处理搜索文本变化
+  void _handleSearchChanged(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        isSearching = false;
+        loadCurrentFolder();
+      });
+    } else {
+      setState(() {
+        isSearching = true;
+      });
+      // 使用基类的搜索方法，然后应用标签和日期过滤
+      handleSearch(query);
+      // 应用额外的过滤条件
+      if (_selectedTag != null || _selectedDate != null) {
+        setState(() {
+          notes = plugin.controller.searchNotes(
+            query: query,
+            tags: _selectedTag != null ? [_selectedTag!] : null,
+            startDate: _selectedDate,
+            endDate: _selectedDate,
+          );
+        });
+      }
+    }
+  }
+
+  /// 处理搜索提交
+  void _handleSearchSubmitted(String query) {
+    if (query.isNotEmpty) {
+      _handleSearchChanged(query);
+    }
+  }
+
+  /// 显示更多选项菜单
+  void _showMoreOptions() {
+    // 实现更多选项菜单
+  }
+
+  /// 切换视图模式（网格/列表）
+  void _toggleViewMode() {
+    // 实现视图模式切换
+  }
+
+  /// 显示高级过滤器
+  void _showAdvancedFilters() {
+    // 实现高级过滤器
+  }
+
+  /// 保存滚动位置
+  void _saveScrollPosition() {
+    // 实现滚动位置保存
+  }
+
+  /// 构建过滤栏
+  Widget _buildFilterBar() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            _buildFilterChip(
+              icon: Icons.folder_outlined,
+              label: currentFolder?.name ?? 'Root',
+              onTap: () {
+                _showFolderPicker();
+              },
+            ),
+            const SizedBox(width: 8),
+            _buildFilterChip(
+              icon: Icons.label_outline,
+              label: _selectedTag ?? 'All Tags',
+              onTap: () {
+                _showTagPicker();
+              },
+            ),
+            const SizedBox(width: 8),
+            _buildFilterChip(
+              icon: Icons.calendar_today,
+              label:
+                  _selectedDate != null
+                      ? DateFormat('yyyy/MM/dd').format(_selectedDate!)
+                      : 'All Dates',
+              onTap: () {
+                _showDatePicker();
+              },
+            ),
+            const SizedBox(width: 8),
+            // 添加清除过滤器按钮
+            if (_selectedTag != null || _selectedDate != null)
+              _buildClearFilterButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 构建清除过滤器按钮
+  Widget _buildClearFilterButton() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedTag = null;
+          _selectedDate = null;
+          loadCurrentFolder();
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Theme.of(context).primaryColor.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.clear_all,
+              size: 16,
+              color: Theme.of(context).primaryColor,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '清除',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -161,121 +301,90 @@ class _NotesMainViewState extends NotesMainViewState
   }
 
   Widget _buildBody() {
-    return CustomScrollView(
-      slivers: [
-        // Filter Bar
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildFilterChip(
-                    icon: Icons.folder_outlined,
-                    label: currentFolder?.name ?? 'Root',
-                    onTap: () {
-                      _showFolderPicker();
+    return Stack(
+      children: [
+        CustomScrollView(
+          slivers: [
+            // Subfolders Horizontal List (if any)
+            if (subFolders.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 50,
+                  margin: const EdgeInsets.only(bottom: 16, top: 16),
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: subFolders.length,
+                    separatorBuilder:
+                        (context, index) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final folder = subFolders[index];
+                      return ActionChip(
+                        avatar: const Icon(Icons.folder, size: 18),
+                        label: Text(folder.name),
+                        onPressed: () => navigateToFolder(folder),
+                        backgroundColor: Theme.of(context).cardColor,
+                        side: BorderSide(
+                          color: Theme.of(
+                            context,
+                          ).dividerColor.withOpacity(0.1),
+                        ),
+                      );
                     },
                   ),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    icon: Icons.label_outline,
-                    label: _selectedTag ?? 'All Tags',
-                    onTap: () {
-                      _showTagPicker();
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  _buildFilterChip(
-                    icon: Icons.calendar_today,
-                    label:
-                        _selectedDate != null
-                            ? DateFormat('yyyy/MM/dd').format(_selectedDate!)
-                            : DateFormat('yyyy/MM/dd').format(DateTime.now()),
-                    onTap: () {
-                      _showDatePicker();
-                    },
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ),
 
-        // Subfolders Horizontal List (if any)
-        if (subFolders.isNotEmpty)
-          SliverToBoxAdapter(
-            child: Container(
-              height: 50, // Adjust height as needed
-              margin: const EdgeInsets.only(bottom: 16),
-              child: ListView.separated(
+            // Notes Grid
+            if (notes.isNotEmpty)
+              SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                scrollDirection: Axis.horizontal,
-                itemCount: subFolders.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final folder = subFolders[index];
-                  return ActionChip(
-                    avatar: const Icon(Icons.folder, size: 18),
-                    label: Text(folder.name),
-                    onPressed: () => navigateToFolder(folder),
-                    backgroundColor: Theme.of(context).cardColor,
-                    side: BorderSide(
-                      color: Theme.of(context).dividerColor.withOpacity(0.1),
-                    ),
-                  );
-                },
+                sliver: SliverMasonryGrid.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childCount: notes.length,
+                  itemBuilder: (context, index) {
+                    return NoteCard(
+                      note: notes[index],
+                      onTap: () => editNote(notes[index]),
+                    );
+                  },
+                ),
               ),
-            ),
-          ),
 
-        // Notes Grid
-        if (notes.isNotEmpty)
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverMasonryGrid.count(
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childCount: notes.length,
-              itemBuilder: (context, index) {
-                return NoteCard(
-                  note: notes[index],
-                  onTap: () => editNote(notes[index]),
-                );
-              },
-            ),
-          ),
-
-        // Empty State
-        if (subFolders.isEmpty && notes.isEmpty)
-          SliverFillRemaining(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.note_outlined,
-                    size: 64,
-                    color: Theme.of(context).disabledColor,
+            // Empty State
+            if (subFolders.isEmpty && notes.isEmpty)
+              SliverFillRemaining(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.note_outlined,
+                        size: 64,
+                        color: Theme.of(context).disabledColor,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        isSearching
+                            ? NotesLocalizations.of(context).noSearchResults
+                            : NotesLocalizations.of(context).emptyFolder,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).disabledColor,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    isSearching
-                        ? NotesLocalizations.of(context).noSearchResults
-                        : NotesLocalizations.of(context).emptyFolder,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).disabledColor,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
 
-        // Bottom padding for FAB
-        const SliverToBoxAdapter(child: SizedBox(height: 80)),
+            // Bottom padding
+            const SliverToBoxAdapter(child: SizedBox(height: 80)),
+          ],
+        ),
+        // FAB
+        Positioned(bottom: 16, right: 16, child: _buildExpandableFab()),
       ],
     );
   }
@@ -369,7 +478,7 @@ class _NotesMainViewState extends NotesMainViewState
     );
   }
 
-  // 显示标签选择器
+  /// 显示标签选择器
   void _showTagPicker() {
     // 获取所有笔记中的标签
     final allTags = <String>{};
@@ -395,7 +504,7 @@ class _NotesMainViewState extends NotesMainViewState
             height: 300,
             child:
                 tagsList.isEmpty
-                    ? Center(child: Text('暂无标签'))
+                    ? const Center(child: Text('暂无标签'))
                     : ListView.builder(
                       itemCount:
                           tagsList.length + 1, // +1 for "All Tags" option
@@ -403,12 +512,12 @@ class _NotesMainViewState extends NotesMainViewState
                         if (index == 0) {
                           // "All Tags" option
                           return ListTile(
-                            leading: Icon(Icons.label),
-                            title: Text('All Tags'),
+                            leading: const Icon(Icons.label),
+                            title: const Text('All Tags'),
                             onTap: () {
                               setState(() {
                                 _selectedTag = null;
-                                // 这里可以添加清除标签过滤的逻辑
+                                _applyFilters();
                               });
                               Navigator.pop(context);
                             },
@@ -417,12 +526,12 @@ class _NotesMainViewState extends NotesMainViewState
 
                         final tag = tagsList[index - 1];
                         return ListTile(
-                          leading: Icon(Icons.label_outline),
+                          leading: const Icon(Icons.label_outline),
                           title: Text(tag),
                           onTap: () {
                             setState(() {
                               _selectedTag = tag;
-                              // 这里可以添加按标签过滤的逻辑
+                              _applyFilters();
                             });
                             Navigator.pop(context);
                           },
@@ -433,7 +542,7 @@ class _NotesMainViewState extends NotesMainViewState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('取消'),
+              child: const Text('取消'),
             ),
           ],
         );
@@ -441,7 +550,7 @@ class _NotesMainViewState extends NotesMainViewState
     );
   }
 
-  // 显示日期选择器
+  /// 显示日期选择器
   void _showDatePicker() {
     showDatePicker(
       context: context,
@@ -452,8 +561,35 @@ class _NotesMainViewState extends NotesMainViewState
       if (selectedDate != null) {
         setState(() {
           _selectedDate = selectedDate;
-          // 这里可以添加按日期过滤的逻辑
+          _applyFilters();
         });
+      }
+    });
+  }
+
+  /// 应用当前过滤条件
+  void _applyFilters() {
+    setState(() {
+      if (searchController.text.isNotEmpty) {
+        // 如果有搜索文本，应用搜索 + 过滤
+        notes = plugin.controller.searchNotes(
+          query: searchController.text,
+          tags: _selectedTag != null ? [_selectedTag!] : null,
+          startDate: _selectedDate,
+          endDate: _selectedDate,
+        );
+      } else {
+        // 如果没有搜索文本，仅应用过滤
+        if (_selectedTag != null || _selectedDate != null) {
+          notes = plugin.controller.searchNotes(
+            query: '',
+            tags: _selectedTag != null ? [_selectedTag!] : null,
+            startDate: _selectedDate,
+            endDate: _selectedDate,
+          );
+        } else {
+          loadCurrentFolder();
+        }
       }
     });
   }

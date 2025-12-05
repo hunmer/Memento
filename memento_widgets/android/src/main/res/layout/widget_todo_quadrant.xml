@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_todo_quadrant_background"
+    android:padding="12dp">
+
+    <!-- 标题栏 - 点击跳转到待办列表 -->
+    <RelativeLayout
+        android:id="@+id/widget_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:text="任务四象限"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- 日期范围切换按钮 -->
+        <TextView
+            android:id="@+id/date_range_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="本日"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="@drawable/widget_date_range_button_background" />
+
+    </RelativeLayout>
+
+    <!-- 四象限网格布局 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- 第一行：紧急且重要 | 不紧急但重要 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layout_marginBottom="4dp">
+
+            <!-- 紧急且重要象限 -->
+            <RelativeLayout
+                android:id="@+id/quadrant_urgent_important"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="2dp"
+                android:background="@drawable/widget_quadrant_background"
+                android:padding="8dp">
+
+                <CheckBox
+                    android:id="@+id/task_urgent_important"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginEnd="4dp"
+                    android:button="@drawable/widget_checkbox"
+                    android:focusable="false" />
+
+                <TextView
+                    android:id="@+id/label_urgent_important"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/task_urgent_important"
+                    android:layout_toStartOf="@+id/count_urgent_important"
+                    android:layout_alignParentTop="true"
+                    android:text="紧急且重要"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/count_urgent_important"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:text="0"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+            <!-- 不紧急但重要象限 -->
+            <RelativeLayout
+                android:id="@+id/quadrant_not_urgent_important"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="2dp"
+                android:background="@drawable/widget_quadrant_background"
+                android:padding="8dp">
+
+                <CheckBox
+                    android:id="@+id/task_not_urgent_important"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginEnd="4dp"
+                    android:button="@drawable/widget_checkbox"
+                    android:focusable="false" />
+
+                <TextView
+                    android:id="@+id/label_not_urgent_important"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/task_not_urgent_important"
+                    android:layout_toStartOf="@+id/count_not_urgent_important"
+                    android:layout_alignParentTop="true"
+                    android:text="不紧急但重要"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/count_not_urgent_important"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:text="0"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <!-- 第二行：紧急但不重要 | 不紧急且不重要 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <!-- 紧急但不重要象限 -->
+            <RelativeLayout
+                android:id="@+id/quadrant_urgent_not_important"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="2dp"
+                android:background="@drawable/widget_quadrant_background"
+                android:padding="8dp">
+
+                <CheckBox
+                    android:id="@+id/task_urgent_not_important"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginEnd="4dp"
+                    android:button="@drawable/widget_checkbox"
+                    android:focusable="false" />
+
+                <TextView
+                    android:id="@+id/label_urgent_not_important"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/task_urgent_not_important"
+                    android:layout_toStartOf="@+id/count_urgent_not_important"
+                    android:layout_alignParentTop="true"
+                    android:text="紧急但不重要"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/count_urgent_not_important"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:text="0"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+            <!-- 不紧急且不重要象限 -->
+            <RelativeLayout
+                android:id="@+id/quadrant_not_urgent_not_important"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="2dp"
+                android:background="@drawable/widget_quadrant_background"
+                android:padding="8dp">
+
+                <CheckBox
+                    android:id="@+id/task_not_urgent_not_important"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginEnd="4dp"
+                    android:button="@drawable/widget_checkbox"
+                    android:focusable="false" />
+
+                <TextView
+                    android:id="@+id/label_not_urgent_not_important"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/task_not_urgent_not_important"
+                    android:layout_toStartOf="@+id/count_not_urgent_not_important"
+                    android:layout_alignParentTop="true"
+                    android:text="不紧急且不重要"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/count_not_urgent_not_important"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:text="0"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

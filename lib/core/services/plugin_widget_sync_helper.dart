@@ -88,6 +88,7 @@ class PluginWidgetSyncHelper {
     await Future.wait([
       // 基础插件
       _todoSyncer.sync(),
+      _todoSyncer.syncTodoQuadrantWidget(),
       _timerSyncer.sync(),
       _billSyncer.sync(),
       _calendarSyncer.sync(),
@@ -193,6 +194,12 @@ class PluginWidgetSyncHelper {
   /// 应用启动时同步待处理的小组件任务变更
   /// 在 main.dart 中调用，确保用户在小组件上完成的任务能立即同步到应用
   Future<void> syncPendingTaskChangesOnStartup() => _todoSyncer.syncPendingTaskChangesOnStartup();
+
+  /// 同步四象限自定义小组件
+  Future<void> syncTodoQuadrantWidget() => _todoSyncer.syncTodoQuadrantWidget();
+
+  /// 同步待处理的四象限任务变更
+  Future<void> syncPendingQuadrantChangesOnStartup() => _todoSyncer.syncPendingQuadrantChangesOnStartup();
 
   /// 应用启动或恢复时同步待处理的日历事件完成操作
   /// 在 main.dart 中调用，确保用户在小组件上完成的日历事件能立即同步到应用

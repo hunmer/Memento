@@ -13,6 +13,10 @@
     <string name="widget_todo_2x2_label">待办事项 (2x2)</string>
     <string name="widget_todo_description">查看待办任务统计</string>
 
+    <!-- 待办四象限小组件 -->
+    <string name="widget_todo_quadrant_label">任务四象限</string>
+    <string name="widget_todo_quadrant_description">查看任务四象限视图，支持快速完成</string>
+
     <!-- 计时器小组件 -->
     <string name="widget_timer_1x1_label">计时器</string>
     <string name="widget_timer_2x2_label">计时器 (2x2)</string>

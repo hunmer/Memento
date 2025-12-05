@@ -129,6 +129,7 @@ Future<void> _registerBroadcastReceiver() async {
         'github.hunmer.memento.REFRESH_HABITS_WEEKLY_WIDGET',
         'github.hunmer.memento.REFRESH_CHECKIN_WEEKLY_WIDGET',
         'github.hunmer.memento.REFRESH_CALENDAR_ALBUM_WEEKLY_WIDGET',
+        'github.hunmer.memento.REFRESH_TODO_QUADRANT_WIDGET',
         'github.hunmer.memento.CLEANUP_WIDGET_IDS',
       ],
     });
@@ -309,6 +310,18 @@ Future<void> _registerBroadcastReceiver() async {
 
               debugPrint('每周相册小组件刷新完成');
             }
+          }
+          // 处理四象限任务小组件刷新
+          else if (action ==
+              'github.hunmer.memento.REFRESH_TODO_QUADRANT_WIDGET') {
+            debugPrint('四象限任务小组件刷新请求');
+            await PluginWidgetSyncHelper.instance.syncTodoQuadrantWidget();
+            await HomeWidget.updateWidget(
+              name: 'TodoQuadrantWidgetProvider',
+              iOSName: 'TodoQuadrantWidgetProvider',
+              qualifiedAndroidName:
+                  'github.hunmer.memento.widgets.providers.TodoQuadrantWidgetProvider',
+            );
           }
           // 处理小组件清理请求（删除时）
           else if (action == 'github.hunmer.memento.CLEANUP_WIDGET_IDS') {
