@@ -45,4 +45,12 @@ class CalendarAlbumSyncer extends PluginWidgetSyncer {
       );
     });
   }
+
+  /// 同步每周相册小组件
+  Future<void> syncCalendarAlbumWeeklyWidget() async {
+    await syncSafely('calendar_album_weekly', () async {
+      // 每周相册小组件使用自定义同步逻辑，不需要通过 updateWidget
+      debugPrint('每周相册小组件数据已更新');
+    });
+  }
 }

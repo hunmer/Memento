@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Gradient background consistent with widget -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#5A9E9A"
+                android:endColor="#457C78"
+                android:angle="135" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+
+    <!-- Title -->
+    <item
+        android:gravity="top|start"
+        android:left="16dp"
+        android:top="16dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#00000000" />
+        </shape>
+    </item>
+
+    <!-- Week info -->
+    <item
+        android:gravity="top|start"
+        android:left="16dp"
+        android:top="36dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#00000000" />
+        </shape>
+    </item>
+
+    <!-- Photo thumbnails (simulated with white rectangles) -->
+    <item
+        android:gravity="center"
+        android:top="60dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#00000000" />
+        </shape>
+    </item>
+</layer-list>
