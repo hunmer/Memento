@@ -228,7 +228,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
         ],
       ),
       enableLargeTitle: true,
-      automaticallyImplyLeading: (Platform.isAndroid || Platform.isIOS),
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       // 将原有的 AppBar actions 移到右上角
       actions: [
         // 视图切换按钮

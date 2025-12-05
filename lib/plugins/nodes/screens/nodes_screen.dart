@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/services.dart';
@@ -29,6 +30,7 @@ class NodesScreen extends StatelessWidget {
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
       largeTitle: '节点',
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         PopupMenuButton<String>(
           icon: Icon(Icons.more_vert, color: theme.iconTheme.color),

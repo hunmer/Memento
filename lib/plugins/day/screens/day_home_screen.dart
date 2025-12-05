@@ -116,6 +116,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
               style: TextStyle(color: theme.textTheme.titleLarge?.color),
             ),
             largeTitle: '纪念日',
+            automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
             actions: [
               // 排序菜单
               PopupMenuButton<SortMode>(

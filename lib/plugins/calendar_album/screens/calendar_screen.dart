@@ -74,6 +74,7 @@ class _CalendarScreenState extends State<CalendarScreen>
           ),
         ),
         largeTitle: '日历日记',
+        automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
         actions: [
           IconButton(
             icon: Icon(Icons.today, color: theme.iconTheme.color),

@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../l10n/chat_localizations.dart';
@@ -52,6 +53,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return SuperCupertinoNavigationWrapper(
       title: Text(l10n.chatRoom),
       largeTitle: l10n.chatRoom,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: Column(
         children: [
           Expanded(

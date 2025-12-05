@@ -91,8 +91,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
         ],
       ),
       enableLargeTitle: true,
-      automaticallyImplyLeading:
-          (Platform.isAndroid || Platform.isIOS) ? false : true,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       previousPageTitle: '返回',
       actions: [
         IconButton(

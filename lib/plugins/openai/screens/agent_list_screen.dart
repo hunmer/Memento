@@ -90,6 +90,7 @@ class _AgentListScreenState extends State<AgentListScreen> {
           : AgentListView(agents: _getFilteredAgents()),
       enableLargeTitle: false,
       automaticallyImplyLeading: false,
+      
       actions: [
         IconButton(
           icon: const Icon(Icons.filter_list),
