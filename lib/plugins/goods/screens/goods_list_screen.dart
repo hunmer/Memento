@@ -1,4 +1,6 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import '../../../widgets/super_cupertino_navigation_wrapper.dart';
 import '../l10n/goods_localizations.dart';
 import '../models/goods_item.dart';
 import '../models/warehouse.dart';
@@ -20,8 +22,6 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
   bool _isGridView = true;
   String _sortBy = 'none'; // none, price, lastUsed
   String? _filterWarehouseId;
-  bool _isSearching = false;
-  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
   @override
@@ -34,7 +34,6 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
   @override
   void dispose() {
     GoodsPlugin.instance.removeListener(_onDataChanged);
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -157,152 +156,100 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
       ),
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title:
-            _isSearching
-                ? TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintText: GoodsLocalizations.of(context).searchGoods,
-                    border: InputBorder.none,
-                    hintStyle: TextStyle(color: Theme.of(context).hintColor),
-                  ),
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.titleLarge?.color,
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
-                  },
-                )
-                : Row(
-                  children: [
-                    Text(GoodsLocalizations.of(context).allItems),
-                    const SizedBox(width: 8),
-                    Text(
-                      '(${allItems.length})',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-        actions:
-            _isSearching
-                ? [
-                  // 搜索模式下只显示关闭按钮
-                  IconButton(
-                    icon: Icon(
-                      Icons.close,
-                      semanticLabel: GoodsLocalizations.of(context).close,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isSearching = false;
-                        _searchController.clear();
-                        _searchQuery = '';
-                      });
-                    },
-                  ),
-                ]
-                : [
-                  // 搜索按钮
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () {
-                      setState(() {
-                        _isSearching = true;
-                      });
-                    },
-                  ),
-                  // 仓库筛选按钮
-                  PopupMenuButton<String?>(
-                    icon: Icon(
-                      Icons.filter_list,
-                      semanticLabel: GoodsLocalizations.of(context).filter,
-                      // 当有筛选时显示不同的图标颜色
-                      color:
-                          _filterWarehouseId != null
-                              ? Theme.of(context).colorScheme.primary
-                              : null,
-                    ),
-                    initialValue: _filterWarehouseId,
-                    onSelected: _onWarehouseFilterChanged,
-                    itemBuilder:
-                        (context) => [
-                          // 删除单独的"所有仓库"选项，因为现在它已经包含在warehouses列表中
-                          ...warehouses.map(
-                            (warehouse) => PopupMenuItem(
-                              value: warehouse['id'],
-                              child: Row(
-                                children: [
-                                  Text(warehouse['title']!),
-                                  if (_filterWarehouseId == warehouse['id'])
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 8.0),
-                                      child: Icon(
-                                        Icons.check,
-                                        color:
-                                            Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
-                                        size: 20,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                  ),
-                  // 视图切换按钮
-                  IconButton(
-                    icon: Icon(
-                      _isGridView ? Icons.view_list : Icons.grid_view,
-                      semanticLabel:
-                          _isGridView
-                              ? GoodsLocalizations.of(context).viewAsList
-                              : GoodsLocalizations.of(context).viewAsGrid,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isGridView = !_isGridView;
-                      });
-                    },
-                  ),
-                  // 排序按钮
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.sort),
-                    onSelected: (value) {
-                      setState(() {
-                        _sortBy = value;
-                      });
-                    },
-                    itemBuilder:
-                        (context) => [
-                          PopupMenuItem(
-                            value: 'none',
-                            child: Text(
-                              GoodsLocalizations.of(context).defaultSort,
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'price',
-                            child: Text(
-                              GoodsLocalizations.of(context).sortByPrice,
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'lastUsed',
-                            child: Text(
-                              GoodsLocalizations.of(context).sortByLastUsedTime,
-                            ),
-                          ),
-                        ],
-                  ),
-                ],
+    return SuperCupertinoNavigationWrapper(
+      title: Text(
+        '${GoodsLocalizations.of(context).allItems} (${allItems.length})',
       ),
+      largeTitle: '物品',
+      enableLargeTitle: true,
+      enableSearchBar: true,
+      searchPlaceholder: GoodsLocalizations.of(context).searchGoods,
+      onSearchChanged: (value) {
+        setState(() {
+          _searchQuery = value;
+        });
+      },
+      automaticallyImplyLeading: (Platform.isAndroid || Platform.isIOS),
+      // 将原有的 AppBar actions 移到右上角
+      actions: [
+        // 仓库筛选按钮
+        PopupMenuButton<String?>(
+          icon: Icon(
+            Icons.filter_list,
+            semanticLabel: GoodsLocalizations.of(context).filter,
+            // 当有筛选时显示不同的图标颜色
+            color:
+                _filterWarehouseId != null
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
+          ),
+          initialValue: _filterWarehouseId,
+          onSelected: _onWarehouseFilterChanged,
+          itemBuilder:
+              (context) => [
+                ...warehouses.map(
+                  (warehouse) => PopupMenuItem(
+                    value: warehouse['id'],
+                    child: Row(
+                      children: [
+                        Text(warehouse['title']!),
+                        if (_filterWarehouseId == warehouse['id'])
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Icon(
+                              Icons.check,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 20,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+        ),
+        // 视图切换按钮
+        IconButton(
+          icon: Icon(
+            _isGridView ? Icons.view_list : Icons.grid_view,
+            semanticLabel:
+                _isGridView
+                    ? GoodsLocalizations.of(context).viewAsList
+                    : GoodsLocalizations.of(context).viewAsGrid,
+          ),
+          onPressed: () {
+            setState(() {
+              _isGridView = !_isGridView;
+            });
+          },
+        ),
+        // 排序按钮
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.sort),
+          onSelected: (value) {
+            setState(() {
+              _sortBy = value;
+            });
+          },
+          itemBuilder:
+              (context) => [
+                PopupMenuItem(
+                  value: 'none',
+                  child: Text(GoodsLocalizations.of(context).defaultSort),
+                ),
+                PopupMenuItem(
+                  value: 'price',
+                  child: Text(GoodsLocalizations.of(context).sortByPrice),
+                ),
+                PopupMenuItem(
+                  value: 'lastUsed',
+                  child: Text(
+                    GoodsLocalizations.of(context).sortByLastUsedTime,
+                  ),
+                ),
+              ],
+        ),
+      ],
       body:
           allItems.isEmpty
               ? Center(child: Text(GoodsLocalizations.of(context).noItems))
@@ -313,7 +260,8 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
                   builder: (context, constraints) {
                     return GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: constraints.maxWidth > 600 ? 3 : 2, // 响应式列数
+                        crossAxisCount:
+                            constraints.maxWidth > 600 ? 3 : 2, // 响应式列数
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
                         childAspectRatio: 0.8, // 调整卡片比例
@@ -321,7 +269,8 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
                       itemCount: allItems.length,
                       itemBuilder: (context, index) {
                         final item = allItems[index]['item'] as GoodsItem;
-                        final warehouse = allItems[index]['warehouse'] as Warehouse;
+                        final warehouse =
+                            allItems[index]['warehouse'] as Warehouse;
                         return GoodsItemCard(
                           item: item,
                           warehouseTitle: warehouse.title,

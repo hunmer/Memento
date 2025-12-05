@@ -1,11 +1,11 @@
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/widgets/add_product_page.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/store/widgets/product_card.dart';
 import '../../controllers/store_controller.dart';
+import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 
 class ProductList extends StatefulWidget {
   final StoreController controller;
@@ -35,14 +35,6 @@ class _ProductListState extends State<ProductList> {
     if (mounted) setState(() {});
   }
 
-  /// 检查是否应该显示返回按钮（仅在非移动端显示）
-  bool get _shouldShowBackButton {
-    return kIsWeb ||
-        defaultTargetPlatform == TargetPlatform.windows ||
-        defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.linux;
-  }
-
   @override
   Widget build(BuildContext context) {
     // 去重处理
@@ -59,141 +51,97 @@ class _ProductListState extends State<ProductList> {
     // 应用排序
     final sortedProducts = _applySort(uniqueProducts);
 
-    return Column(
-      children: [
-        // 顶部标题栏
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              if (_shouldShowBackButton)
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.of(context).pop(),
-                  tooltip: '返回',
-                ),
-              Icon(
-                Icons.shopping_bag,
-                color: Colors.purple,
-                size: 24,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '商品列表',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+    return SuperCupertinoNavigationWrapper(
+      title: Icon(
+        Icons.shopping_bag,
+        color: Colors.purple,
+        size: 24,
+      ),
+      largeTitle: '商品列表',
+      body: sortedProducts.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.inventory_2_outlined,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    StoreLocalizations.of(context).noProducts,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey[600],
                     ),
-                    Text(
-                      '共 ${sortedProducts.length} 件商品',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuButton<int>(
-                icon: const Icon(Icons.sort),
-                tooltip: '排序方式',
-                onSelected: (index) {
-                  setState(() {
-                    _sortIndex = index;
-                  });
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(value: 0, child: Text('默认排序')),
-                  const PopupMenuItem(value: 1, child: Text('按库存排序')),
-                  const PopupMenuItem(value: 2, child: Text('按价格排序')),
-                  const PopupMenuItem(value: 3, child: Text('按兑换期限')),
+                  ),
                 ],
               ),
-            ],
-          ),
-        ),
-        // 商品列表
-        Expanded(
-          child: sortedProducts.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.inventory_2_outlined,
-                        size: 64,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        StoreLocalizations.of(context).noProducts,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : GridView.builder(
-                  padding: const EdgeInsets.all(8),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                          childAspectRatio: 0.82,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                  ),
-                  itemCount: sortedProducts.length,
-                  itemBuilder: (context, index) {
-                    final product = sortedProducts[index];
-                    return GestureDetector(
-                      onTap: () {
-                        NavigationHelper.push(context, AddProductPage(
-                              controller: widget.controller,
-                              product: product,),
-                        ).then((_) {
-                          if (mounted) setState(() {});
-                        });
-                      },
-                      child: ProductCard(
-                        key: ValueKey(product.id),
-                        product: product,
-                        onExchange: () async {
-                          if (await widget.controller.exchangeProduct(product)) {
-                            if (mounted) setState(() {});
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  StoreLocalizations.of(context).redeemSuccess,
-                                ),
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  StoreLocalizations.of(context).redeemFailed,
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    );
+            )
+          : GridView.builder(
+              padding: const EdgeInsets.all(8),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.82,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: sortedProducts.length,
+              itemBuilder: (context, index) {
+                final product = sortedProducts[index];
+                return GestureDetector(
+                  onTap: () {
+                    NavigationHelper.push(context, AddProductPage(
+                          controller: widget.controller,
+                          product: product,),
+                    ).then((_) {
+                      if (mounted) setState(() {});
+                    });
                   },
-                ),
+                  child: ProductCard(
+                    key: ValueKey(product.id),
+                    product: product,
+                    onExchange: () async {
+                      if (await widget.controller.exchangeProduct(product)) {
+                        if (mounted) setState(() {});
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              StoreLocalizations.of(context).redeemSuccess,
+                            ),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              StoreLocalizations.of(context).redeemFailed,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
+      enableLargeTitle: true,
+      enableSearchBar: false,
+      actions: [
+        PopupMenuButton<int>(
+          icon: const Icon(Icons.sort),
+          tooltip: '排序方式',
+          onSelected: (index) {
+            setState(() {
+              _sortIndex = index;
+            });
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(value: 0, child: Text('默认排序')),
+            const PopupMenuItem(value: 1, child: Text('按库存排序')),
+            const PopupMenuItem(value: 2, child: Text('按价格排序')),
+            const PopupMenuItem(value: 3, child: Text('按兑换期限')),
+          ],
         ),
       ],
     );

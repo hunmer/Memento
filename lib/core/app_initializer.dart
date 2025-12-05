@@ -40,6 +40,8 @@ import '../plugins/nfc/nfc_plugin.dart';
 import '../screens/settings_screen/controllers/auto_update_controller.dart';
 import '../screens/settings_screen/controllers/permission_controller.dart';
 import '../core/event/event.dart';
+import '../core/action/action_manager.dart';
+import '../core/floating_ball/floating_ball_service.dart';
 import 'app_widgets/home_widget_service.dart';
 import 'app_widgets/floating_ball_service.dart';
 import '../screens/route.dart';
@@ -199,6 +201,9 @@ Future<void> _initializeBackgroundServices() async {
     startupState._setLoadingMessage('正在加载插件...');
     await _registerPlugins();
     startupState._setPluginsReady();
+
+    // === 初始化悬浮球动作管理器 ===
+    unawaited(_initializeFloatingBallActions());
 
     // === 后续初始化（低优先级） ===
     startupState._setLoadingMessage('正在完成初始化...');
@@ -383,6 +388,19 @@ void _navigateToWidgetUri(String url) {
   }
 }
 
+/// 初始化悬浮球动作管理器
+Future<void> _initializeFloatingBallActions() async {
+  try {
+    debugPrint('初始化悬浮球动作管理器...');
+    final actionManager = ActionManager();
+    await actionManager.initialize();
+    debugPrint('悬浮球动作管理器初始化完成');
+  } catch (e, stack) {
+    debugPrint('悬浮球动作管理器初始化失败: $e');
+    debugPrint('堆栈: $stack');
+  }
+}
+
 /// 注册所有内置插件
 Future<void> _registerPlugins() async {
   final plugins = [
@@ -436,3 +454,45 @@ late final PluginManager globalPluginManager;
 late final AppShortcutManager globalShortcutManager;
 
 late PermissionController _permissionController;
+
+/// 初始化并显示Flutter悬浮球（应用内Overlay）
+/// 在应用启动完成后，导航器可用时调用
+Future<void> initializeFlutterFloatingBall() async {
+  try {
+    debugPrint('初始化Flutter悬浮球...');
+
+    // 等待一小段时间确保导航器已初始化
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    final context = navigatorKey.currentContext;
+    if (context == null) {
+      debugPrint('导航器上下文未就绪，延迟重试');
+      // 延迟一帧后重试
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        initializeFlutterFloatingBall();
+      });
+      return;
+    }
+
+    // 初始化悬浮球服务
+    final floatingBallService = FloatingBallService();
+    await floatingBallService.initialize(context);
+
+    // 设置悬浮球动作上下文，使手势动作生效
+    floatingBallService.manager.setActionContext(context);
+
+    // 检查悬浮球是否启用，如果启用则显示
+    final isEnabled = await floatingBallService.manager.isEnabled();
+    if (isEnabled) {
+      debugPrint('悬浮球已启用，显示悬浮球');
+      await floatingBallService.show(context);
+    } else {
+      debugPrint('悬浮球未启用，跳过显示');
+    }
+
+    debugPrint('Flutter悬浮球初始化完成');
+  } catch (e, stack) {
+    debugPrint('Flutter悬浮球初始化失败: $e');
+    debugPrint('堆栈: $stack');
+  }
+}

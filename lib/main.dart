@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:Memento/core/app_widgets/page_transitions.dart';
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
@@ -40,11 +41,6 @@ import 'screens/settings_screen/controllers/auto_update_controller.dart';
 
 // 从 app_initializer 导入全局变量
 import 'core/app_initializer.dart';
-
-// 从 app_widgets 导入页面过渡构建器
-import 'core/app_widgets/page_transitions.dart';
-import 'core/global_flags.dart';
-import 'screens/home_screen/home_screen.dart';
 
 void main() async {
   // 执行核心初始化（快速完成）
@@ -112,6 +108,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _setupAutoUpdate();
+      // 初始化Flutter悬浮球
+      await initializeFlutterFloatingBall();
     });
   }
 

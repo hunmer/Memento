@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
-import 'package:Memento/plugins/habits/widgets/habits_list/habits_app_bar.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habit_card.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class CombinedHabitsView extends StatefulWidget {
@@ -166,17 +166,18 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
   @override
   Widget build(BuildContext context) {
     final l10n = HabitsLocalizations.of(context);
-    return Column(
-      children: [
-        HabitsAppBar(
-          l10n: l10n,
-          onAddPressed: () => _showHabitForm(context),
-          onBackPressed: () => PluginManager.toHomeScreen(context),
-        ),
-        Expanded(
-          child: _buildCardView(_habits, l10n),
+    return SuperCupertinoNavigationWrapper(
+      title: Text(l10n.habits),
+      largeTitle: l10n.habits,
+      enableLargeTitle: true,
+      automaticallyImplyLeading: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () => _showHabitForm(context),
         ),
       ],
+      body: _buildCardView(_habits, l10n),
     );
   }
 }

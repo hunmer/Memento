@@ -310,241 +310,129 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: widget.scriptManager,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Consumer<ScriptManager>(
-            builder: (context, manager, child) {
-              final currentFolder = manager.currentFolder;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text('脚本中心'),
-                  if (currentFolder != null)
-                    Text(
-                      currentFolder.name,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.normal,
-                      ),
+      child: Column(
+        children: [
+          // 搜索栏
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: '搜索脚本...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                        },
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: Colors.grey[100],
+              ),
+            ),
+          ),
+
+          // 脚本列表
+          Expanded(
+            child: Consumer<ScriptManager>(
+              builder: (context, manager, child) {
+                if (manager.isLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final scripts = _getFilteredScripts();
+
+                if (scripts.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.code_off,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _searchQuery.isNotEmpty
+                              ? '未找到匹配的脚本'
+                              : '暂无脚本\n点击右下角按钮创建新脚本',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
-                ],
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: _refreshScripts,
+                  child: ListView.builder(
+                    itemCount: scripts.length,
+                    itemBuilder: (context, index) {
+                      final script = scripts[index];
+                      return ScriptCard(
+                        script: script,
+                        onTap: () => _showScriptDialog(script: script),
+                        onToggle: (enabled) => _toggleScript(script),
+                        onRun: () => _runScript(script),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // 底部统计信息
+          Consumer<ScriptManager>(
+            builder: (context, manager, child) {
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  border: Border(
+                    top: BorderSide(color: Colors.grey[300]!),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStatChip(
+                      '总数',
+                      manager.scriptCount.toString(),
+                      Colors.blue,
+                    ),
+                    _buildStatChip(
+                      '已启用',
+                      manager.enabledScriptCount.toString(),
+                      Colors.green,
+                    ),
+                    _buildStatChip(
+                      '已禁用',
+                      (manager.scriptCount - manager.enabledScriptCount)
+                          .toString(),
+                      Colors.grey,
+                    ),
+                  ],
+                ),
               );
             },
           ),
-          backgroundColor: Colors.deepPurple,
-          foregroundColor: Colors.white,
-          actions: [
-            // 文件夹选择器
-            Consumer<ScriptManager>(
-              builder: (context, manager, child) {
-                final folders = manager.folders;
-                final currentFolder = manager.currentFolder;
-
-                if (folders.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-
-                return PopupMenuButton<ScriptFolder>(
-                  icon: const Icon(Icons.folder),
-                  tooltip: '选择文件夹',
-                  onSelected: (folder) async {
-                    await manager.setCurrentFolder(folder);
-                  },
-                  itemBuilder: (context) {
-                    return folders.map((folder) {
-                      final isSelected = folder.id == currentFolder?.id;
-                      return PopupMenuItem<ScriptFolder>(
-                        value: folder,
-                        child: Row(
-                          children: [
-                            if (isSelected)
-                              const Icon(
-                                Icons.check,
-                                size: 20,
-                                color: Colors.deepPurple,
-                              ),
-                            if (isSelected) const SizedBox(width: 8),
-                            Icon(
-                              folder.isBuiltIn
-                                  ? Icons.folder_special
-                                  : Icons.folder,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                folder.name,
-                                style: TextStyle(
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList();
-                  },
-                );
-              },
-            ),
-
-            // 筛选按钮
-            IconButton(
-              icon: Icon(
-                _showOnlyEnabled
-                    ? Icons.filter_alt
-                    : Icons.filter_alt_outlined,
-              ),
-              tooltip: '仅显示已启用',
-              onPressed: () {
-                setState(() {
-                  _showOnlyEnabled = !_showOnlyEnabled;
-                });
-              },
-            ),
-
-            // 刷新按钮
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              tooltip: '刷新',
-              onPressed: _refreshScripts,
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            // 搜索栏
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: '搜索脚本...',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                          },
-                        )
-                      : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-              ),
-            ),
-
-            // 脚本列表
-            Expanded(
-              child: Consumer<ScriptManager>(
-                builder: (context, manager, child) {
-                  if (manager.isLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  final scripts = _getFilteredScripts();
-
-                  if (scripts.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.code_off,
-                            size: 64,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _searchQuery.isNotEmpty
-                                ? '未找到匹配的脚本'
-                                : '暂无脚本\n点击右下角按钮创建新脚本',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return RefreshIndicator(
-                    onRefresh: _refreshScripts,
-                    child: ListView.builder(
-                      itemCount: scripts.length,
-                      itemBuilder: (context, index) {
-                        final script = scripts[index];
-                        return ScriptCard(
-                          script: script,
-                          onTap: () => _showScriptDialog(script: script),
-                          onToggle: (enabled) => _toggleScript(script),
-                          onRun: () => _runScript(script),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            // 底部统计信息
-            Consumer<ScriptManager>(
-              builder: (context, manager, child) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    border: Border(
-                      top: BorderSide(color: Colors.grey[300]!),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildStatChip(
-                        '总数',
-                        manager.scriptCount.toString(),
-                        Colors.blue,
-                      ),
-                      _buildStatChip(
-                        '已启用',
-                        manager.enabledScriptCount.toString(),
-                        Colors.green,
-                      ),
-                      _buildStatChip(
-                        '已禁用',
-                        (manager.scriptCount - manager.enabledScriptCount)
-                            .toString(),
-                        Colors.grey,
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-
-        // FAB - 创建新脚本
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _showScriptDialog(),
-          backgroundColor: Colors.deepPurple,
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
+        ],
       ),
     );
   }

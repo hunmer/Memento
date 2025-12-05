@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:provider/provider.dart';
@@ -20,102 +17,41 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(TrackerLocalizations.of(context).goalTracking),
-        automaticallyImplyLeading: false,
-        leading:
-            (Platform.isAndroid || Platform.isIOS)
-                ? null
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => PluginManager.toHomeScreen(context),
-                ),
-        actions: [
-          IconButton(
-            icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),
-            onPressed: () => setState(() => _isGridView = !_isGridView),
+    return Column(
+      children: [
+        // 分组切换器
+        Container(
+          height: 50,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Consumer<TrackerController>(
+            builder: (context, controller, child) {
+              final groups = ['全部', ...controller.getAllGroups()];
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: groups.length,
+                itemBuilder: (context, index) {
+                  final group = groups[index];
+                  final isSelected = _currentGroup == group;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: ChoiceChip(
+                      label: Text(group),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() => _currentGroup = group);
+                        }
+                      },
+                    ),
+                  );
+                },
+              );
+            },
           ),
-          PopupMenuButton<String>(
-            onSelected: (value) => setState(() => _filterStatus = value),
-            itemBuilder:
-                (context) => [
-                  PopupMenuItem(
-                    value: '全部',
-                    child: Text(TrackerLocalizations.of(context).all),
-                  ),
-                  PopupMenuItem(
-                    value: '进行中',
-                    child: Text(TrackerLocalizations.of(context).inProgress),
-                  ),
-                  PopupMenuItem(
-                    value: '已完成',
-                    child: Text(TrackerLocalizations.of(context).completed),
-                  ),
-                ],
-            icon: const Icon(Icons.filter_list),
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) => setState(() => {}),
-            itemBuilder:
-                (context) => [
-                  PopupMenuItem(
-                    value: '最近',
-                    child: Text(TrackerLocalizations.of(context).recent),
-                  ),
-                  PopupMenuItem(
-                    value: '本周',
-                    child: Text(TrackerLocalizations.of(context).thisWeek),
-                  ),
-                  PopupMenuItem(
-                    value: '本月',
-                    child: Text(TrackerLocalizations.of(context).thisMonth),
-                  ),
-                ],
-            icon: const Icon(Icons.calendar_today),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // 分组切换器
-          Container(
-            height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Consumer<TrackerController>(
-              builder: (context, controller, child) {
-                final groups = ['全部', ...controller.getAllGroups()];
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: groups.length,
-                  itemBuilder: (context, index) {
-                    final group = groups[index];
-                    final isSelected = _currentGroup == group;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: ChoiceChip(
-                        label: Text(group),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() => _currentGroup = group);
-                          }
-                        },
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          // 目标列表
-          Expanded(child: _buildGoalsList(context)),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddGoalDialog(context),
-        child: const Icon(Icons.add),
-      ),
+        ),
+        // 目标列表
+        Expanded(child: _buildGoalsList(context)),
+      ],
     );
   }
 
@@ -217,11 +153,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showAddGoalDialog(BuildContext context) {
-    final controller = Provider.of<TrackerController>(context, listen: false);
-    showDialog(
-      context: context,
-      builder: (context) => GoalEditPage(controller: controller),
-    );
-  }
 }

@@ -9,7 +9,9 @@ import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
 import 'package:Memento/plugins/tracker/models/record.dart';
 import 'package:Memento/plugins/tracker/screens/goal_detail_screen.dart';
+import 'package:Memento/plugins/tracker/widgets/goal_edit_page.dart';
 import 'package:provider/provider.dart';
+import '../../widgets/super_cupertino_navigation_wrapper.dart';
 import 'controllers/tracker_controller.dart';
 import 'screens/home_screen.dart';
 
@@ -34,9 +36,12 @@ class TrackerMainView extends StatefulWidget {
 class _TrackerMainViewState extends State<TrackerMainView> {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: TrackerPlugin.instance.controller,
-      child: const HomeScreen(),
+    return SuperCupertinoNavigationWrapper(
+      title: Text(TrackerLocalizations.of(context).goalTracking),
+      body: ChangeNotifierProvider.value(
+        value: TrackerPlugin.instance.controller,
+        child: const HomeScreen(),
+      ),
     );
   }
 }
@@ -85,10 +90,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _controller,
-      child: const TrackerMainView(),
-    );
+    return const TrackerMainView();
   }
 
   /// 打开目标详情页

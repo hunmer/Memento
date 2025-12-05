@@ -19,6 +19,7 @@ import './services/todo_event_service.dart';
 import '../todo/todo_plugin.dart';
 import './l10n/calendar_localizations.dart';
 import '../../core/services/plugin_widget_sync_helper.dart';
+import '../../widgets/super_cupertino_navigation_wrapper.dart';
 
 class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   static CalendarPlugin? _instance;
@@ -1008,86 +1009,93 @@ class _CalendarMainViewState extends State<CalendarMainView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ListenableBuilder(
       listenable: plugin.controller,
       builder: (context, child) {
-        return Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            leading:
-                (Platform.isAndroid || Platform.isIOS)
-                    ? null
-                    : IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => PluginManager.toHomeScreen(context),
-                    ),
-            title: Text(CalendarLocalizations.of(context).calendar),
-            actions: [
-              // 跳转到今天按钮
-              IconButton(
-                icon: const Icon(Icons.today),
-                tooltip: CalendarLocalizations.of(context).backToToday,
-                onPressed: () {
-                  plugin.sfController.displayDate = DateTime.now();
-                },
-              ),
-              // 查看所有事件按钮
-              IconButton(
-                icon: const Icon(Icons.list_alt),
-                tooltip: CalendarLocalizations.of(context).allEvents,
-                onPressed: () => plugin.showAllEvents(context),
-              ),
-              // 查看已完成事件按钮
-              IconButton(
-                icon: const Icon(Icons.done_all),
-                tooltip: CalendarLocalizations.of(context).completedEvents,
-
-                onPressed: () => plugin.showCompletedEvents(context),
-              ),
-            ],
+        return SuperCupertinoNavigationWrapper(
+          title: Text(
+            CalendarLocalizations.of(context).calendar,
+            style: TextStyle(color: theme.textTheme.titleLarge?.color),
           ),
-          body: Column(
+          largeTitle: CalendarLocalizations.of(context).calendar,
+          body: Stack(
             children: [
-              Expanded(
-                child: syncfusion.SfCalendar(
-                  view:
-                      plugin.sfController.view ?? syncfusion.CalendarView.month,
-                  controller: plugin.sfController,
-                  allowedViews: plugin.allowedViews,
-                  allowViewNavigation: true,
-                  dataSource: _AppointmentDataSource(
-                    plugin.getUserAppointments(),
-                  ),
-                  initialDisplayDate: plugin.controller.focusedMonth,
-                  onViewChanged: plugin.onViewChanged,
-                  onTap:
-                      (details) => plugin.handleCalendarTap(context, details),
-                  monthViewSettings: const syncfusion.MonthViewSettings(
-                    showAgenda: true,
-                    agendaViewHeight: 200,
-                    appointmentDisplayMode:
-                        syncfusion.MonthAppointmentDisplayMode.appointment,
-                  ),
-                  timeSlotViewSettings: const syncfusion.TimeSlotViewSettings(
-                    startHour: 6,
-                    endHour: 23,
-                    timeInterval: Duration(minutes: 30),
-                  ),
-                  todayHighlightColor: Theme.of(context).primaryColor,
-                  selectionDecoration: BoxDecoration(
-                    border: Border.all(
-                      color: Theme.of(context).primaryColor,
-                      width: 2,
+              Column(
+                children: [
+                  Expanded(
+                    child: syncfusion.SfCalendar(
+                      view: plugin.sfController.view ??
+                          syncfusion.CalendarView.month,
+                      controller: plugin.sfController,
+                      allowedViews: plugin.allowedViews,
+                      allowViewNavigation: true,
+                      dataSource: _AppointmentDataSource(
+                        plugin.getUserAppointments(),
+                      ),
+                      initialDisplayDate: plugin.controller.focusedMonth,
+                      onViewChanged: plugin.onViewChanged,
+                      onTap: (details) =>
+                          plugin.handleCalendarTap(context, details),
+                      monthViewSettings: const syncfusion.MonthViewSettings(
+                        showAgenda: true,
+                        agendaViewHeight: 200,
+                        appointmentDisplayMode:
+                            syncfusion.MonthAppointmentDisplayMode.appointment,
+                      ),
+                      timeSlotViewSettings:
+                          const syncfusion.TimeSlotViewSettings(
+                        startHour: 6,
+                        endHour: 23,
+                        timeInterval: Duration(minutes: 30),
+                      ),
+                      todayHighlightColor: Theme.of(context).primaryColor,
+                      selectionDecoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).primaryColor,
+                          width: 2,
+                        ),
+                      ),
                     ),
                   ),
+                ],
+              ),
+              // FAB
+              Positioned(
+                right: 16,
+                bottom: 16,
+                child: FloatingActionButton(
+                  onPressed: () => plugin.showEventEditPage(context),
+                  child: const Icon(Icons.add),
                 ),
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => plugin.showEventEditPage(context),
-            child: const Icon(Icons.add),
-          ),
+          enableLargeTitle: true,
+          enableSearchBar: false,
+          automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+          actions: [
+            // 跳转到今天按钮
+            IconButton(
+              icon: Icon(Icons.today, color: theme.iconTheme.color),
+              tooltip: CalendarLocalizations.of(context).backToToday,
+              onPressed: () {
+                plugin.sfController.displayDate = DateTime.now();
+              },
+            ),
+            // 查看所有事件按钮
+            IconButton(
+              icon: Icon(Icons.list_alt, color: theme.iconTheme.color),
+              tooltip: CalendarLocalizations.of(context).allEvents,
+              onPressed: () => plugin.showAllEvents(context),
+            ),
+            // 查看已完成事件按钮
+            IconButton(
+              icon: Icon(Icons.done_all, color: theme.iconTheme.color),
+              tooltip: CalendarLocalizations.of(context).completedEvents,
+              onPressed: () => plugin.showCompletedEvents(context),
+            ),
+          ],
         );
       },
     );
