@@ -61,6 +61,31 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
   /// 是否启用拉伸效果
   final bool stretch;
 
+  /// ========== 过滤栏相关配置 ==========
+
+  /// 是否启用过滤栏
+  final bool enableFilterBar;
+
+  /// 过滤栏高度
+  final double filterBarHeight;
+
+  /// 过滤栏内容Widget
+  final Widget? filterBarChild;
+
+  /// 过滤条件变更回调
+  final Function(Map<String, dynamic>)? onFilterChanged;
+
+  /// ========== 高级搜索相关配置 ==========
+
+  /// 是否启用高级搜索
+  final bool enableAdvancedSearch;
+
+  /// 搜索条件筛选器Widget列表
+  final List<Widget>? searchFilters;
+
+  /// 高级搜索变更回调
+  final Function(Map<String, dynamic>)? onAdvancedSearchChanged;
+
   const SuperCupertinoNavigationWrapper({
     super.key,
     required this.title,
@@ -81,6 +106,15 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
     this.previousPageTitle,
     this.onCollapsed,
     this.stretch = true,
+    // 过滤栏参数
+    this.enableFilterBar = false,
+    this.filterBarHeight = 50,
+    this.filterBarChild,
+    this.onFilterChanged,
+    // 高级搜索参数
+    this.enableAdvancedSearch = false,
+    this.searchFilters,
+    this.onAdvancedSearchChanged,
   });
 
   @override
@@ -114,25 +148,8 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
                   children: widget.actions!,
                 )
               : null,
-          bottom: widget.enableBottomBar
-              ? SuperAppBarBottom(
-                  enabled: true,
-                  height: widget.bottomBarHeight,
-                  color: Colors.transparent,
-                  child: widget.bottomBarChild ?? const SizedBox(),
-                )
-              : null,
-          searchBar: widget.enableSearchBar
-              ? SuperSearchBar(
-                  enabled: true,
-                  scrollBehavior: SearchBarScrollBehavior.pinned,
-                  resultBehavior: SearchBarResultBehavior.neverVisible,
-                  placeholderText: widget.searchPlaceholder,
-                  searchController: _searchController,
-                  onChanged: widget.onSearchChanged,
-                  onSubmitted: widget.onSearchSubmitted,
-                )
-              : null,
+          bottom: _buildBottomBar(),
+          searchBar: _buildSearchBar(),
           largeTitle: widget.enableLargeTitle
               ? SuperLargeTitle(
                   height: 50,
@@ -142,8 +159,58 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
                 )
               : null,
         ),
-        body: widget.body,
+        body: Column(
+          children: [
+            // 高级搜索条件筛选器
+            if (widget.enableAdvancedSearch && widget.searchFilters != null && widget.searchFilters!.isNotEmpty)
+              Container(
+                height: 60,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: widget.searchFilters!,
+                ),
+              ),
+            // 过滤栏
+            if (widget.enableFilterBar && widget.filterBarChild != null)
+              Container(
+                height: widget.filterBarHeight,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: widget.filterBarChild,
+              ),
+            // 主体内容
+            Expanded(child: widget.body),
+          ],
+        ),
       ),
+    );
+  }
+
+  /// 构建底部栏（保持向后兼容）
+  SuperAppBarBottom? _buildBottomBar() {
+    if (!widget.enableBottomBar) return null;
+    return SuperAppBarBottom(
+      enabled: true,
+      height: widget.bottomBarHeight,
+      color: Colors.transparent,
+      child: widget.filterBarChild ?? const SizedBox(),
+    );
+  }
+
+  /// 构建搜索栏
+  SuperSearchBar? _buildSearchBar() {
+    if (!widget.enableSearchBar) return null;
+    return SuperSearchBar(
+      enabled: true,
+      scrollBehavior: SearchBarScrollBehavior.pinned,
+      resultBehavior: SearchBarResultBehavior.neverVisible,
+      placeholderText: widget.searchPlaceholder,
+      searchController: _searchController,
+      onChanged: (value) {
+        widget.onSearchChanged?.call(value);
+        widget.onAdvancedSearchChanged?.call({'query': value});
+      },
+      onSubmitted: widget.onSearchSubmitted,
     );
   }
 }

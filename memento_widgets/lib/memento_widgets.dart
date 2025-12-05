@@ -121,6 +121,8 @@ class MyWidgetManager {
         'github.hunmer.memento.widgets.providers.CheckinMonthWidgetProvider',
     'TodoListWidgetProvider':
         'github.hunmer.memento.widgets.providers.TodoListWidgetProvider',
+    'TodoQuadrantWidgetProvider':
+        'github.hunmer.memento.widgets.providers.TodoQuadrantWidgetProvider',
     'CheckinWeeklyListWidgetProvider':
         'github.hunmer.memento.widgets.providers.CheckinWeeklyListWidgetProvider',
     'TrackerGoalWidgetProvider':
@@ -376,6 +378,9 @@ class MyWidgetManager {
     if (pluginId == 'todo_list') {
       return ['TodoListWidgetProvider'];
     }
+    if (pluginId == 'todo_quadrant') {
+      return ['TodoQuadrantWidgetProvider'];
+    }
     if (pluginId == 'checkin_weekly_list') {
       return ['CheckinWeeklyListWidgetProvider'];
     }
@@ -496,6 +501,7 @@ class MyWidgetManager {
       'CheckinItemWidgetProvider',
       'CheckinMonthWidgetProvider',
       'TodoListWidgetProvider',
+      'TodoQuadrantWidgetProvider',
       'CheckinWeeklyListWidgetProvider',
       'TrackerGoalWidgetProvider',
       'HabitTimerWidgetProvider',
