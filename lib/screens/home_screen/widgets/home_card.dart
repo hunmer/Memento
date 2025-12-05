@@ -41,24 +41,25 @@ class HomeCard extends StatelessWidget {
           elevation: isSelected ? 8 : 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: isSelected
-                ? BorderSide(color: Theme.of(context).primaryColor, width: 2)
-                : BorderSide.none,
+            side:
+                isSelected
+                    ? BorderSide(
+                      color: Theme.of(context).primaryColor,
+                      width: 2,
+                    )
+                    : BorderSide.none,
           ),
           // 对小组件卡片使用透明的 Card 背景色，这样内部背景颜色的透明度
           // 能够作用到整体（否则会被 Card 自身的背景色遮挡）
           color: isWidgetItem ? Colors.transparent : null,
-          child: isWidgetItem
-              ? _buildWidgetCard(context, item as HomeWidgetItem)
-              : _buildFolderCard(context, item as HomeFolderItem),
+          child:
+              isWidgetItem
+                  ? _buildWidgetCard(context, item as HomeWidgetItem)
+                  : _buildFolderCard(context, item as HomeFolderItem),
         ),
         // 编辑模式下显示拖拽手柄
         if (isEditMode && dragHandle != null)
-          Positioned(
-            top: 4,
-            right: 4,
-            child: dragHandle!,
-          ),
+          Positioned(top: 4, right: 4, child: dragHandle!),
         // 批量选择模式下显示选中标记
         if (isBatchMode)
           Positioned(
@@ -111,20 +112,24 @@ class HomeCard extends StatelessWidget {
     final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
 
     if (widgetDef == null) {
-      return _buildErrorCard(context, '小组件未找到: ${widgetItem.widgetId}');
+      // 如果小组件未找到，可能是插件还在初始化中，显示加载状态
+      return _buildLoadingCard(context);
     }
 
     try {
       // 获取全局透明度设置
       final layoutManager = HomeLayoutManager();
       final globalWidgetOpacity = layoutManager.globalWidgetOpacity;
-      final globalBackgroundOpacity = layoutManager.globalWidgetBackgroundOpacity;
+      final globalBackgroundOpacity =
+          layoutManager.globalWidgetBackgroundOpacity;
 
       // 获取背景配置
       Color backgroundColor;
       if (widgetItem.config['backgroundColor'] != null) {
         // 用户设置了自定义背景颜色
-        final originalColor = Color(widgetItem.config['backgroundColor'] as int);
+        final originalColor = Color(
+          widgetItem.config['backgroundColor'] as int,
+        );
         backgroundColor = originalColor.withValues(
           alpha: originalColor.a * globalBackgroundOpacity,
         );
@@ -136,7 +141,8 @@ class HomeCard extends StatelessWidget {
         );
       }
 
-      final backgroundImagePath = widgetItem.config['backgroundImage'] as String?;
+      final backgroundImagePath =
+          widgetItem.config['backgroundImage'] as String?;
 
       Widget content = widgetDef.build(context, widgetItem.config);
 
@@ -144,12 +150,14 @@ class HomeCard extends StatelessWidget {
       content = Container(
         decoration: BoxDecoration(
           color: backgroundColor,
-          image: backgroundImagePath != null && File(backgroundImagePath).existsSync()
-              ? DecorationImage(
-                  image: FileImage(File(backgroundImagePath)),
-                  fit: BoxFit.cover,
-                )
-              : null,
+          image:
+              backgroundImagePath != null &&
+                      File(backgroundImagePath).existsSync()
+                  ? DecorationImage(
+                    image: FileImage(File(backgroundImagePath)),
+                    fit: BoxFit.cover,
+                  )
+                  : null,
           borderRadius: BorderRadius.circular(12),
         ),
         child: content,
@@ -157,16 +165,10 @@ class HomeCard extends StatelessWidget {
 
       // 应用整体小组件透明度（影响整个卡片包括内容）
       if (globalWidgetOpacity < 1.0) {
-        content = Opacity(
-          opacity: globalWidgetOpacity,
-          child: content,
-        );
+        content = Opacity(opacity: globalWidgetOpacity, child: content);
       }
 
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: content,
-      );
+      return ClipRRect(borderRadius: BorderRadius.circular(12), child: content);
     } catch (e) {
       return _buildErrorCard(context, '加载失败: $e');
     }
@@ -188,11 +190,7 @@ class HomeCard extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  Icon(
-                    folder.icon,
-                    size: 40,
-                    color: folder.color,
-                  ),
+                  Icon(folder.icon, size: 40, color: folder.color),
                   if (folder.children.isNotEmpty)
                     Positioned(
                       right: 0,
@@ -241,11 +239,37 @@ class HomeCard extends StatelessWidget {
     );
   }
 
+  /// 构建加载中卡片
+  Widget _buildLoadingCard(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 32,
+            height: 32,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                theme.colorScheme.primary.withValues(alpha: 0.6),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// 构建错误卡片
   Widget _buildErrorCard(BuildContext context, String error) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
@@ -254,7 +278,7 @@ class HomeCard extends StatelessWidget {
             error,
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
-            maxLines: 3,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ],
