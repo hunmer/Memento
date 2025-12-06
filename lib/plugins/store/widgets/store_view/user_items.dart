@@ -23,6 +23,7 @@ class UserItems extends StatefulWidget {
 
 class _UserItemsState extends State<UserItems> {
   late int _statusIndex; // 0:全部, 1:可使用, 2:已过期
+  String _searchQuery = ''; // 搜索查询文本
 
   @override
   void initState() {
@@ -45,6 +46,25 @@ class _UserItemsState extends State<UserItems> {
     setState(() {
       _statusIndex = statusIndex;
     });
+  }
+
+  /// 处理搜索文本变化
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
+
+  /// 搜索过滤物品（按名称和描述）
+  List<UserItem> _searchItems(List<UserItem> items) {
+    if (_searchQuery.isEmpty) return items;
+
+    final query = _searchQuery.toLowerCase();
+    return items.where((item) {
+      final name = item.productName.toLowerCase();
+      final description = (item.productSnapshot['description'] ?? '').toLowerCase();
+      return name.contains(query) || description.contains(query);
+    }).toList();
   }
 
   @override
@@ -91,7 +111,12 @@ class _UserItemsState extends State<UserItems> {
         ),
       ),
       enableLargeTitle: true,
-      enableSearchBar: false,
+      // 即使没有物品也启用搜索栏，让用户可以搜索（虽然不会有结果）
+      enableSearchBar: true,
+      searchPlaceholder: '搜索物品名称或描述',
+      onSearchChanged: _onSearchChanged,
+      // 提供空的搜索结果页面
+      searchBody: _buildSearchResultsView(),
     );
   }
 
@@ -179,8 +204,13 @@ class _UserItemsState extends State<UserItems> {
                 );
               },
             ),
+      // 启用搜索栏
+      enableSearchBar: true,
+      searchPlaceholder: '搜索物品名称或描述',
+      onSearchChanged: _onSearchChanged,
+      // 搜索结果页面
+      searchBody: _buildSearchResultsView(),
       enableLargeTitle: true,
-      enableSearchBar: false,
       actions: [
         PopupMenuButton<int>(
           icon: const Icon(Icons.filter_list),
@@ -227,6 +257,122 @@ class _UserItemsState extends State<UserItems> {
     }
 
     return groups.values.toList();
+  }
+
+  /// 构建搜索结果页面
+  Widget _buildSearchResultsView() {
+    // 获取所有物品并应用搜索过滤
+    final allItems = widget.controller.userItems;
+    final filteredItems = _searchItems(allItems);
+    final groupedItems = _groupItems(filteredItems);
+
+    // 如果没有搜索查询，显示提示
+    if (_searchQuery.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '输入关键词搜索物品',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 如果搜索结果为空，显示空状态
+    if (groupedItems.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '未找到相关物品',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '尝试使用其他关键词',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey[500],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 显示搜索结果
+    return GridView.builder(
+      padding: const EdgeInsets.all(8),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.8,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemCount: groupedItems.length,
+      itemBuilder: (context, index) {
+        final group = groupedItems[index];
+        return GestureDetector(
+          onTap: () {
+            // 获取同类型的所有物品
+            final sameTypeItems = widget.controller.userItems
+                .where((item) => item.productId == group.item.productId)
+                .toList();
+
+            NavigationHelper.push(context, UserItemDetailPage(
+                  controller: widget.controller,
+                  items: sameTypeItems,),
+            ).then((_) {
+              if (mounted) setState(() {});
+            });
+          },
+          child: UserItemCard(
+            item: group.item,
+            count: group.count,
+            onUse: () async {
+              // 优先使用最早过期的物品
+              final itemToUse = widget.controller.sortedUserItems.firstWhere(
+                (item) => item.productId == group.item.productId,
+              );
+
+              if (await widget.controller.useItem(itemToUse)) {
+                setState(() {});
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(StoreLocalizations.of(context).useSuccess),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(StoreLocalizations.of(context).itemExpired),
+                  ),
+                );
+              }
+            },
+          ),
+        );
+      },
+    );
   }
 }
 

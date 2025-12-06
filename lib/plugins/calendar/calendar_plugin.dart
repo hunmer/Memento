@@ -1000,11 +1000,130 @@ class CalendarMainView extends StatefulWidget {
 
 class _CalendarMainViewState extends State<CalendarMainView> {
   late CalendarPlugin plugin;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     plugin = PluginManager.instance.getPlugin('calendar') as CalendarPlugin;
+  }
+
+  /// 搜索事件：基于标题和描述进行模糊搜索
+  List<CalendarEvent> _searchEvents(String query) {
+    if (query.isEmpty) return [];
+
+    final allEvents = plugin.controller.getAllEvents();
+    final lowerQuery = query.toLowerCase();
+
+    return allEvents.where((event) {
+      return event.title.toLowerCase().contains(lowerQuery) ||
+             event.description.toLowerCase().contains(lowerQuery);
+    }).toList();
+  }
+
+  /// 构建搜索结果列表
+  Widget _buildSearchResults(List<CalendarEvent> events) {
+    if (events.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '未找到匹配的事件',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: events.length,
+      itemBuilder: (context, index) {
+        final event = events[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: event.color.withOpacity(0.2),
+              child: Icon(event.icon, color: event.color),
+            ),
+            title: Text(
+              event.title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text(
+                  _formatDateTime(event.startTime),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                if (event.description.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    event.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            onTap: () {
+              // 清除搜索并显示事件详情
+              setState(() {
+                _searchQuery = '';
+              });
+              plugin.showEventDetails(context, event);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  /// 格式化日期时间显示
+  String _formatDateTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    String dateStr;
+    if (dateTime.isAtSameMomentAs(today)) {
+      dateStr = '今天';
+    } else if (dateTime.isAtSameMomentAs(tomorrow)) {
+      dateStr = '明天';
+    } else if (dateTime.isAtSameMomentAs(yesterday)) {
+      dateStr = '昨天';
+    } else {
+      dateStr = '${dateTime.month}-${dateTime.day}';
+    }
+
+    final timeStr = '${dateTime.hour.toString().padLeft(2, '0')}:'
+                   '${dateTime.minute.toString().padLeft(2, '0')}';
+
+    return '$dateStr $timeStr';
   }
 
   @override
@@ -1013,6 +1132,9 @@ class _CalendarMainViewState extends State<CalendarMainView> {
     return ListenableBuilder(
       listenable: plugin.controller,
       builder: (context, child) {
+        // 获取搜索结果
+        final searchResults = _searchEvents(_searchQuery);
+
         return SuperCupertinoNavigationWrapper(
           title: Text(
             CalendarLocalizations.of(context).calendar,
@@ -1073,7 +1195,14 @@ class _CalendarMainViewState extends State<CalendarMainView> {
             ],
           ),
           enableLargeTitle: true,
-          enableSearchBar: false,
+          enableSearchBar: true,
+          searchPlaceholder: '搜索事件标题或描述...',
+          searchBody: _buildSearchResults(searchResults),
+          onSearchChanged: (query) {
+            setState(() {
+              _searchQuery = query;
+            });
+          },
           actions: [
             // 跳转到今天按钮
             IconButton(

@@ -24,6 +24,10 @@ class CheckinListController {
 
   String selectedGroup = '全部'; // 当前选中的分组
 
+  // ========== 搜索相关状态 ==========
+  String searchQuery = ''; // 搜索文本
+  bool get isSearching => searchQuery.isNotEmpty;
+
   CheckinListController({
     required this.context,
     required this.checkinItems,
@@ -43,7 +47,36 @@ class CheckinListController {
     onStateChanged();
   }
 
-  // 获取过滤后的打卡项目
+  // ========== 搜索功能 ==========
+
+  /// 处理搜索文本变化
+  void onSearchChanged(String query) {
+    searchQuery = query;
+    onStateChanged();
+  }
+
+  /// 清除搜索
+  void clearSearch() {
+    searchQuery = '';
+    onStateChanged();
+  }
+
+  /// 获取搜索结果（按名称和分组搜索）
+  List<CheckinItem> getSearchResults() {
+    if (searchQuery.isEmpty) return [];
+
+    final query = searchQuery.toLowerCase();
+    return checkinItems.where((item) {
+      // 搜索名称和分组
+      final nameMatch = item.name.toLowerCase().contains(query);
+      final groupMatch = item.group.toLowerCase().contains(query);
+      return nameMatch || groupMatch;
+    }).toList();
+  }
+
+  // ========== 原有过滤逻辑 ==========
+
+  /// 获取过滤后的打卡项目（普通视图）
   List<CheckinItem> get filteredItems {
     List<CheckinItem> items;
     if (selectedGroup == '全部') {

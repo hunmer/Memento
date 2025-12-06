@@ -19,6 +19,9 @@ class DayHomeScreen extends StatefulWidget {
 }
 
 class _DayHomeScreenState extends State<DayHomeScreen> {
+  // 搜索查询状态
+  String _searchQuery = '';
+
   Future<void> _showEditDialog(
     BuildContext context, [
     MemorialDay? memorialDay,
@@ -117,6 +120,20 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
             ),
             largeTitle: '纪念日',
             automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+            // 启用搜索栏
+            enableSearchBar: true,
+            searchPlaceholder: '搜索纪念日标题和笔记',
+            // 搜索回调
+            onSearchChanged: (query) {
+              setState(() {
+                _searchQuery = query;
+              });
+            },
+            onSearchSubmitted: (query) {
+              // 搜索提交时的逻辑
+            },
+            // 搜索结果页面
+            searchBody: _buildSearchResults(controller),
             actions: [
               // 排序菜单
               PopupMenuButton<SortMode>(
@@ -290,6 +307,130 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
             );
           },
           child: child,
+        );
+      },
+    );
+  }
+
+  /// 构建搜索结果列表
+  Widget _buildSearchResults(DayController controller) {
+    // 如果没有搜索查询，显示提示
+    if (_searchQuery.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search,
+              size: 64,
+              color: Theme.of(context).disabledColor,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '输入关键词搜索纪念日',
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).disabledColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '支持搜索标题和笔记内容',
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).disabledColor.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 过滤纪念日（标题和笔记中包含搜索关键词）
+    final filteredDays = controller.memorialDays.where((memorialDay) {
+      // 检查标题是否匹配
+      final titleMatch = memorialDay.title
+          .toLowerCase()
+          .contains(_searchQuery.toLowerCase());
+
+      // 检查笔记是否匹配（笔记列表中的任意一个笔记包含关键词）
+      final notesMatch = memorialDay.notes.any((note) =>
+          note.toLowerCase().contains(_searchQuery.toLowerCase()));
+
+      return titleMatch || notesMatch;
+    }).toList();
+
+    // 如果没有搜索结果，显示空状态
+    if (filteredDays.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inbox_outlined,
+              size: 64,
+              color: Theme.of(context).disabledColor,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '未找到匹配的纪念日',
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).disabledColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '尝试使用其他关键词搜索',
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).disabledColor.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 显示搜索结果列表（使用与主界面相同的视图模式）
+    return controller.isCardView
+        ? _buildSearchCardView(filteredDays)
+        : _buildSearchListView(filteredDays);
+  }
+
+  /// 构建搜索结果的卡片视图
+  Widget _buildSearchCardView(List<MemorialDay> filteredDays) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(8),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.85,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemCount: filteredDays.length,
+      itemBuilder: (context, index) {
+        return MemorialDayCard(
+          key: ValueKey(filteredDays[index].id),
+          memorialDay: filteredDays[index],
+          isDraggable: false,
+          onTap: () => _showEditDialog(context, filteredDays[index]),
+        );
+      },
+    );
+  }
+
+  /// 构建搜索结果的列表视图
+  Widget _buildSearchListView(List<MemorialDay> filteredDays) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(8),
+      itemCount: filteredDays.length,
+      itemBuilder: (context, index) {
+        return MemorialDayListItem(
+          key: ValueKey(filteredDays[index].id),
+          memorialDay: filteredDays[index],
+          isDraggable: false,
+          onTap: () => _showEditDialog(context, filteredDays[index]),
         );
       },
     );

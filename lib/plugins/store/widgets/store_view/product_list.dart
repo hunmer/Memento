@@ -18,6 +18,7 @@ class ProductList extends StatefulWidget {
 
 class _ProductListState extends State<ProductList> {
   int _sortIndex = 0; // 0:默认, 1:库存, 2:价格, 3:兑换期限
+  String _searchQuery = ''; // 搜索查询关键词
 
   @override
   void initState() {
@@ -33,6 +34,24 @@ class _ProductListState extends State<ProductList> {
 
   void _onControllerUpdate() {
     if (mounted) setState(() {});
+  }
+
+  /// 搜索商品（根据名称和描述）
+  List<Product> _searchProducts(String query, List<Product> products) {
+    if (query.isEmpty) return products;
+
+    final lowercaseQuery = query.toLowerCase();
+    return products.where((product) {
+      return product.name.toLowerCase().contains(lowercaseQuery) ||
+             product.description.toLowerCase().contains(lowercaseQuery);
+    }).toList();
+  }
+
+  /// 处理搜索文本变化
+  void _handleSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
   }
 
   @override
@@ -51,14 +70,12 @@ class _ProductListState extends State<ProductList> {
     // 应用排序
     final sortedProducts = _applySort(uniqueProducts);
 
-    return SuperCupertinoNavigationWrapper(
-      title: Icon(
-        Icons.shopping_bag,
-        color: Colors.purple,
-        size: 24,
-      ),
-      largeTitle: '商品列表',
-      body: sortedProducts.isEmpty
+    // 应用搜索筛选
+    final filteredProducts = _searchProducts(_searchQuery, sortedProducts);
+
+    // 构建商品列表Widget
+    Widget _buildProductGrid(List<Product> products) {
+      return products.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -70,7 +87,9 @@ class _ProductListState extends State<ProductList> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    StoreLocalizations.of(context).noProducts,
+                    _searchQuery.isEmpty
+                        ? StoreLocalizations.of(context).noProducts
+                        : '未找到匹配的商品',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -86,9 +105,9 @@ class _ProductListState extends State<ProductList> {
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
               ),
-              itemCount: sortedProducts.length,
+              itemCount: products.length,
               itemBuilder: (context, index) {
-                final product = sortedProducts[index];
+                final product = products[index];
                 return GestureDetector(
                   onTap: () {
                     NavigationHelper.push(context, AddProductPage(
@@ -124,9 +143,22 @@ class _ProductListState extends State<ProductList> {
                   ),
                 );
               },
-            ),
+            );
+    }
+
+    return SuperCupertinoNavigationWrapper(
+      title: Icon(
+        Icons.shopping_bag,
+        color: Colors.purple,
+        size: 24,
+      ),
+      largeTitle: '商品列表',
+      body: _buildProductGrid(filteredProducts),
+      searchBody: _buildProductGrid(filteredProducts), // 搜索结果页面
       enableLargeTitle: true,
-      enableSearchBar: false,
+      enableSearchBar: true,
+      searchPlaceholder: '搜索商品名称或描述',
+      onSearchChanged: _handleSearchChanged,
       actions: [
         PopupMenuButton<int>(
           icon: const Icon(Icons.sort),
