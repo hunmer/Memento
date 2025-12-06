@@ -447,7 +447,7 @@ class UnifiedTimerController {
       final unifiedEvent = UnifiedTimerEventArgs(state, type);
       EventManager.instance.broadcast(
         TimerEventHelper.getEventName(type),
-        unifiedEvent,
+        unifiedEvent as EventArgs,
       );
 
       // 转发给插件专用事件系统

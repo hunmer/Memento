@@ -3,23 +3,12 @@ import 'dart:async';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/core/notification_controller.dart';
 import '../../../../core/event/event_manager.dart';
+import '../../../../core/services/timer/models/timer_state.dart';
 
 class TimerItemEventArgs extends EventArgs {
   final TimerItem timer;
   TimerItemEventArgs(this.timer, [String eventName = 'timer_item_changed'])
     : super(eventName);
-}
-
-/// 计时器类型枚举
-enum TimerType {
-  /// 正计时 - 从0开始向上计时
-  countUp,
-
-  /// 倒计时 - 从设定时间开始向下计时
-  countDown,
-
-  /// 番茄钟 - 工作和休息交替的计时方式
-  pomodoro,
 }
 
 /// 计时器项，表示一个具体的计时器
