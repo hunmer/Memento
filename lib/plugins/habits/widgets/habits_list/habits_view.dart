@@ -14,6 +14,52 @@ import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
+/// 搜索结果Widget
+class HabitSearchResultsWidget extends StatelessWidget {
+  final List<Habit> habits;
+  final HabitController controller;
+  final HabitsLocalizations l10n;
+  final Function(Habit)? onHabitTap;
+
+  const HabitSearchResultsWidget({
+    super.key,
+    required this.habits,
+    required this.controller,
+    required this.l10n,
+    this.onHabitTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final habitsPlugin =
+        PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+    final skillController = habitsPlugin?.getSkillController();
+
+    return MasonryGridView.count(
+      padding: const EdgeInsets.all(8),
+      crossAxisCount: 2,
+      mainAxisSpacing: 8,
+      crossAxisSpacing: 8,
+      itemCount: habits.length,
+      itemBuilder: (context, index) {
+        final habit = habits[index];
+        final skill =
+            habit.skillId != null
+                ? skillController?.getSkillById(habit.skillId!)
+                : null;
+
+        return HabitCard(
+          key: ValueKey('${habit.id}_search'),
+          habit: habit,
+          skill: skill,
+          controller: controller,
+          onTap: () => onHabitTap?.call(habit),
+        );
+      },
+    );
+  }
+}
+
 class CombinedHabitsView extends StatefulWidget {
   final HabitController controller;
 
@@ -26,6 +72,7 @@ class CombinedHabitsView extends StatefulWidget {
 class _CombinedHabitsViewState extends State<CombinedHabitsView>
     with WidgetsBindingObserver {
   List<Habit> _habits = [];
+  List<Habit> _filteredHabits = []; // 搜索过滤后的习惯列表
   final Map<String, bool> _timingStatus = {};
   int _refreshKey = 0; // 用于强制刷新 HabitCard
 
@@ -102,7 +149,25 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
   Future<void> _loadHabits() async {
     final habits = widget.controller.getHabits();
     if (mounted) {
-      setState(() => _habits = habits);
+      setState(() {
+        _habits = habits;
+        _filteredHabits = habits; // 初始化时显示所有习惯
+      });
+    }
+  }
+
+  /// 根据搜索关键词过滤习惯
+  void _filterHabits(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _filteredHabits = _habits;
+      });
+    } else {
+      setState(() {
+        _filteredHabits = _habits
+            .where((habit) => habit.title.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      });
     }
   }
 
@@ -172,6 +237,22 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
       largeTitle: l10n.habits,
       enableLargeTitle: true,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      enableSearchBar: true, // 启用搜索栏
+      searchPlaceholder: '搜索习惯标题', // 搜索栏占位符
+      onSearchChanged: (query) {
+        // 实时搜索，无需等待用户提交
+        _filterHabits(query);
+      },
+      onSearchSubmitted: (query) {
+        // 搜索提交时的回调（可选）
+        _filterHabits(query);
+      },
+      searchBody: HabitSearchResultsWidget(
+        habits: _filteredHabits,
+        controller: widget.controller,
+        l10n: l10n,
+        onHabitTap: (habit) => _showHabitForm(context, habit),
+      ), // 搜索结果页面
       actions: [
         IconButton(
           icon: const Icon(Icons.add),

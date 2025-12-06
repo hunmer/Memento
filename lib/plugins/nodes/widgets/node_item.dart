@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/widgets/quill_viewer/quill_viewer.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../controllers/nodes_controller.dart';
@@ -257,14 +258,15 @@ class NodeItem extends StatelessWidget {
                           // Notes (Description)
                           if (node.notes.isNotEmpty) ...[
                             const SizedBox(height: 6),
-                            Text(
-                              node.notes,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                            Container(
+                              height: 36,
+                              padding: const EdgeInsets.only(right: 8),
+                              child: ClipRect(
+                                child: QuillViewer(
+                                  data: node.notes,
+                                  selectable: false,
+                                ),
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ],

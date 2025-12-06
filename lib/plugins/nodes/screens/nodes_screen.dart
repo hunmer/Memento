@@ -4,6 +4,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/quill_viewer/quill_viewer.dart';
 import '../controllers/nodes_controller.dart';
 import '../models/notebook.dart';
 import '../models/node.dart';
@@ -12,26 +13,47 @@ import '../widgets/node_item.dart';
 import 'node_edit_screen.dart';
 import 'package:uuid/uuid.dart';
 
-class NodesScreen extends StatelessWidget {
+class NodesScreen extends StatefulWidget {
   final Notebook notebook;
 
   const NodesScreen({super.key, required this.notebook});
 
   @override
+  State<NodesScreen> createState() => _NodesScreenState();
+}
+
+class _NodesScreenState extends State<NodesScreen> {
+  String _searchQuery = '';
+
+  @override
   Widget build(BuildContext context) {
     final controller = Provider.of<NodesController>(context, listen: true);
     final l10n = NodesLocalizations.of(context);
-    final currentNotebook = controller.getNotebook(notebook.id);
+    final currentNotebook = controller.getNotebook(widget.notebook.id);
     final theme = Theme.of(context);
 
     return SuperCupertinoNavigationWrapper(
       title: Text(
-        notebook.title,
+        widget.notebook.title,
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
       largeTitle: '节点',
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      enableSearchBar: true,
+      searchPlaceholder: '搜索节点标题或笔记',
+      onSearchChanged: (value) {
+        setState(() {
+          _searchQuery = value;
+        });
+      },
       actions: [
+        IconButton(
+          icon: Icon(Icons.search, color: theme.iconTheme.color),
+          tooltip: '搜索节点',
+          onPressed: () {
+            // 点击搜索图标会触发搜索框聚焦，实际搜索逻辑由 onSearchChanged 处理
+          },
+        ),
         PopupMenuButton<String>(
           icon: Icon(Icons.more_vert, color: theme.iconTheme.color),
           onSelected:
@@ -70,7 +92,7 @@ class NodesScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return NodeItem(
                     node: currentNotebook!.nodes[index],
-                    notebookId: notebook.id,
+                    notebookId: widget.notebook.id,
                     depth: 0,
                   );
                 },
@@ -86,6 +108,7 @@ class NodesScreen extends StatelessWidget {
           ),
         ],
       ),
+      searchBody: _buildSearchBody(controller, currentNotebook, _searchQuery),
     );
   }
 
@@ -180,10 +203,184 @@ class NodesScreen extends StatelessWidget {
     NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
               value: controller,
               child: NodeEditScreen(
-                notebookId: notebook.id,
+                notebookId: widget.notebook.id,
                 node: newNode,
                 isNew: true,),
       ),
     );
+  }
+
+  /// 构建搜索结果页面
+  Widget _buildSearchBody(NodesController controller, Notebook? currentNotebook, String query) {
+    if (query.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              '输入关键词搜索节点',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 执行搜索：匹配节点标题或笔记内容
+    final allNodes = _getAllNodes(currentNotebook?.nodes ?? []);
+    final matchedNodes = allNodes.where((node) {
+      return node.title.toLowerCase().contains(query.toLowerCase()) ||
+             node.notes.toLowerCase().contains(query.toLowerCase());
+    }).toList();
+
+    if (matchedNodes.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.find_replace, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              '未找到匹配的节点',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '试试其他关键词',
+              style: TextStyle(color: Colors.grey[500], fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 显示搜索结果
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: matchedNodes.length,
+      itemBuilder: (context, index) {
+        final node = matchedNodes[index];
+        // 获取节点路径显示
+        final path = controller.getNodePath(widget.notebook.id, node.id);
+        final pathText = path.join(' / ');
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: ListTile(
+            leading: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: node.color.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _getStatusIcon(node.status),
+                color: _getStatusColor(node.status),
+                size: 20,
+              ),
+            ),
+            title: Text(
+              node.title.isEmpty ? '(无标题)' : node.title,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (pathText.isNotEmpty) ...[
+                  Text(
+                    pathText,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                if (node.notes.isNotEmpty) ...[
+                  Container(
+                    height: 60,
+                    padding: const EdgeInsets.only(top: 4, bottom: 4),
+                    child: ClipRect(
+                      child: SingleChildScrollView(
+                        child: QuillViewer(
+                          data: node.notes,
+                          selectable: false,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                ],
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    if (node.tags.isNotEmpty)
+                      ...node.tags.map((tag) => Chip(
+                        label: Text(tag, style: const TextStyle(fontSize: 11)),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      )),
+                  ],
+                ),
+              ],
+            ),
+            onTap: () {
+              // 点击搜索结果进入编辑界面
+              NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
+                value: controller,
+                child: NodeEditScreen(
+                  notebookId: widget.notebook.id,
+                  node: node,
+                  isNew: false,
+                ),
+              ));
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  /// 递归获取所有节点（包括子节点）
+  List<Node> _getAllNodes(List<Node> nodes) {
+    final result = <Node>[];
+    for (final node in nodes) {
+      result.add(node);
+      if (node.children.isNotEmpty) {
+        result.addAll(_getAllNodes(node.children));
+      }
+    }
+    return result;
+  }
+
+  /// 根据节点状态获取图标
+  IconData _getStatusIcon(NodeStatus status) {
+    switch (status) {
+      case NodeStatus.todo:
+        return Icons.radio_button_unchecked;
+      case NodeStatus.doing:
+        return Icons.access_time;
+      case NodeStatus.done:
+        return Icons.check_circle;
+      case NodeStatus.none:
+        return Icons.circle_outlined;
+    }
+  }
+
+  /// 根据节点状态获取颜色
+  Color _getStatusColor(NodeStatus status) {
+    switch (status) {
+      case NodeStatus.todo:
+        return Colors.grey;
+      case NodeStatus.doing:
+        return Colors.blue;
+      case NodeStatus.done:
+        return Colors.green;
+      case NodeStatus.none:
+        return Colors.grey.shade400;
+    }
   }
 }

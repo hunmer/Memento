@@ -28,6 +28,8 @@ class SkillsList extends StatefulWidget {
 
 class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
   List<Skill> _skills = [];
+  List<Skill> _filteredSkills = [];
+  String _searchQuery = '';
   int _refreshKey = 0; // 用于强制刷新统计数据
 
   @override
@@ -64,16 +66,44 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
     if (mounted) {
       setState(() {
         _skills = skills;
+        _filteredSkills = _searchQuery.isEmpty ? skills : _filterSkillsList(skills, _searchQuery);
         _refreshKey++; // 增加 key 强制刷新 FutureBuilder
       });
     }
   }
 
+  /// 过滤技能列表的内部方法
+  List<Skill> _filterSkillsList(List<Skill> skills, String query) {
+    if (query.isEmpty) {
+      return skills;
+    }
+    return skills.where((skill) {
+      final title = skill.title.toLowerCase();
+      final description = (skill.description ?? '').toLowerCase();
+      final group = (skill.group ?? '').toLowerCase();
+      final searchLower = query.toLowerCase();
+      return title.contains(searchLower) ||
+             description.contains(searchLower) ||
+             group.contains(searchLower);
+    }).toList();
+  }
+
   Future<void> _loadSkills() async {
     final skills = widget.skillController.getSkills();
     if (mounted) {
-      setState(() => _skills = skills);
+      setState(() {
+        _skills = skills;
+        _filteredSkills = skills;
+      });
     }
+  }
+
+  /// 搜索过滤技能列表
+  void _filterSkills(String query) {
+    setState(() {
+      _searchQuery = query;
+      _filteredSkills = _filterSkillsList(_skills, query);
+    });
   }
 
   @override
@@ -83,6 +113,11 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
       title: Text(l10n.skills),
       largeTitle: l10n.skills,
       enableLargeTitle: true,
+      enableSearchBar: true,
+      searchPlaceholder: '搜索技能标题、描述或分组',
+      onSearchChanged: _filterSkills,
+      onSearchSubmitted: _filterSkills,
+      searchBody: _buildSearchResults(),
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         IconButton(
@@ -96,6 +131,65 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
       ],
       body: _buildCardView(_skills, l10n),
     );
+  }
+
+  /// 构建搜索结果页面
+  Widget _buildSearchResults() {
+    if (_searchQuery.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '输入关键词搜索技能',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_filteredSkills.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inbox,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '未找到匹配的技能',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '搜索词: $_searchQuery',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return _buildCardView(_filteredSkills, HabitsLocalizations.of(context)!);
   }
 
   /// 显示排序菜单
