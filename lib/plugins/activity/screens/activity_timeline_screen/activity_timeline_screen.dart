@@ -30,6 +30,8 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     'tag': true,
     'comment': true,
   };
+  String _searchQuery = '';
+  List<dynamic> _searchResults = [];
 
   @override
   void initState() {
@@ -159,11 +161,220 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
 
     debugPrint('[ActivityTimelineScreen] 搜索过滤器变更: $_searchFilters');
 
-    // TODO: 根据过滤器状态执行实际搜索逻辑
-    // 例如：根据 activity、tag、comment 的勾选状态过滤搜索结果
+    // 如果有搜索词，重新执行搜索
+    if (_searchQuery.isNotEmpty) {
+      _performSearch();
+    }
   }
 
-  
+  /// 执行搜索
+  void _performSearch() {
+    if (_searchQuery.isEmpty) {
+      setState(() {
+        _searchResults = [];
+      });
+      return;
+    }
+
+    debugPrint('[ActivityTimelineScreen] 执行搜索: "$_searchQuery"');
+
+    final results = <dynamic>[];
+
+    // 搜索活动标题
+    if (_searchFilters['activity'] == true) {
+      for (final activity in _activityController.activities) {
+        if (activity.title.toLowerCase().contains(_searchQuery.toLowerCase())) {
+          results.add({
+            'type': 'activity',
+            'data': activity,
+            'title': activity.title,
+            'subtitle': '活动',
+          });
+        }
+      }
+    }
+
+    // 搜索标签
+    if (_searchFilters['tag'] == true) {
+      for (final activity in _activityController.activities) {
+        for (final tag in activity.tags) {
+          if (tag.toLowerCase().contains(_searchQuery.toLowerCase())) {
+            final existing = results.firstWhere(
+              (item) => item['data'] == activity,
+              orElse: () => null,
+            );
+            if (existing == null) {
+              results.add({
+                'type': 'activity_tag',
+                'data': activity,
+                'title': activity.title,
+                'subtitle': '标签匹配',
+                'tag': tag,
+              });
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    // 搜索注释/描述
+    if (_searchFilters['comment'] == true) {
+      for (final activity in _activityController.activities) {
+        if (activity.description?.toLowerCase().contains(_searchQuery.toLowerCase()) == true) {
+          results.add({
+            'type': 'activity_comment',
+            'data': activity,
+            'title': activity.title,
+            'subtitle': '注释匹配',
+            'description': activity.description,
+          });
+        }
+      }
+    }
+
+    setState(() {
+      _searchResults = results;
+    });
+
+    debugPrint('[ActivityTimelineScreen] 搜索完成，找到 ${results.length} 个结果');
+  }
+
+  /// 处理搜索内容变更
+  void _onSearchChanged(String value) {
+    _searchQuery = value;
+    _performSearch();
+  }
+
+  /// 构建搜索结果列表
+  Widget _buildSearchResults() {
+    if (_searchResults.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _searchQuery.isEmpty ? '输入关键词搜索' : '未找到匹配结果',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '尝试调整搜索条件或过滤器',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _searchResults.length,
+      itemBuilder: (context, index) {
+        final result = _searchResults[index];
+        final activity = result['data'];
+        final type = result['type'];
+        final title = result['title'];
+        final subtitle = result['subtitle'];
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: _getActivityColor(activity),
+              child: Icon(
+                _getActivityIcon(type),
+                color: Colors.white,
+              ),
+            ),
+            title: Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(subtitle),
+                if (result['tag'] != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Chip(
+                      label: Text(
+                        result['tag'],
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                if (result['description'] != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      result['description'],
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+            ),
+            trailing: Text(
+              '${activity.startTime.hour.toString().padLeft(2, '0')}:${activity.startTime.minute.toString().padLeft(2, '0')}',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 12,
+              ),
+            ),
+            onTap: () {
+              _activityController.editActivity(context, activity);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  /// 获取活动颜色
+  Color _getActivityColor(dynamic activity) {
+    if (activity.color != null) {
+      return activity.color;
+    }
+    return Colors.blue;
+  }
+
+  /// 获取活动图标
+  IconData _getActivityIcon(String type) {
+    switch (type) {
+      case 'activity':
+        return Icons.event;
+      case 'activity_tag':
+        return Icons.label;
+      case 'activity_comment':
+        return Icons.comment;
+      default:
+        return Icons.event;
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
@@ -183,6 +394,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       largeTitle: '活动',
       enableSearchBar: true,
       searchPlaceholder: '搜索活动、标签或注释...',
+      onSearchChanged: _onSearchChanged,
       enableSearchFilter: true,
       onSearchFilterChanged: _onSearchFilterChanged,
       body: Stack(
@@ -203,45 +415,47 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
               ),
               // 根据视图模式显示不同的视图
               Expanded(
-                child: _viewModeController.isGridMode
-                    ? ActivityGridView(
-                        activities: _activityController.activities,
-                        selectedDate: _selectedDate,
-                        onActivityTap: (activity) => _activityController.editActivity(context, activity),
-                        onUnrecordedTimeTap: (start, end) {
-                          _activityController.addActivity(
-                            context,
-                            _selectedDate,
-                            TimeOfDay(hour: start.hour, minute: start.minute),
-                            TimeOfDay(hour: end.hour, minute: end.minute),
-                            _tagController.updateRecentTags,
-                          ).then((_) {
-                            _viewModeController.clearSelectedMinutes();
-                          });
-                        },
-                        onSelectionChanged: (start, end) {
-                          if (start != null && end != null) {
-                            final minutes = end.difference(start).inMinutes;
-                            _viewModeController.updateSelectedMinutes(minutes);
-                          } else {
-                            _viewModeController.clearSelectedMinutes();
-                          }
-                        },
-                      )
-                    : ActivityTimeline(
-                        activities: _activityController.activities,
-                        onDeleteActivity: _activityController.deleteActivity,
-                        onActivityTap: (activity) => _activityController.editActivity(context, activity),
-                        onUnrecordedTimeTap: (start, end) {
-                          _activityController.addActivity(
-                            context,
-                            _selectedDate,
-                            TimeOfDay(hour: start.hour, minute: start.minute),
-                            TimeOfDay(hour: end.hour, minute: end.minute),
-                            _tagController.updateRecentTags,
-                          );
-                        },
-                      ),
+                child: _searchQuery.isNotEmpty
+                    ? _buildSearchResults()
+                    : (_viewModeController.isGridMode
+                        ? ActivityGridView(
+                            activities: _activityController.activities,
+                            selectedDate: _selectedDate,
+                            onActivityTap: (activity) => _activityController.editActivity(context, activity),
+                            onUnrecordedTimeTap: (start, end) {
+                              _activityController.addActivity(
+                                context,
+                                _selectedDate,
+                                TimeOfDay(hour: start.hour, minute: start.minute),
+                                TimeOfDay(hour: end.hour, minute: end.minute),
+                                _tagController.updateRecentTags,
+                              ).then((_) {
+                                _viewModeController.clearSelectedMinutes();
+                              });
+                            },
+                            onSelectionChanged: (start, end) {
+                              if (start != null && end != null) {
+                                final minutes = end.difference(start).inMinutes;
+                                _viewModeController.updateSelectedMinutes(minutes);
+                              } else {
+                                _viewModeController.clearSelectedMinutes();
+                              }
+                            },
+                          )
+                        : ActivityTimeline(
+                            activities: _activityController.activities,
+                            onDeleteActivity: _activityController.deleteActivity,
+                            onActivityTap: (activity) => _activityController.editActivity(context, activity),
+                            onUnrecordedTimeTap: (start, end) {
+                              _activityController.addActivity(
+                                context,
+                                _selectedDate,
+                                TimeOfDay(hour: start.hour, minute: start.minute),
+                                TimeOfDay(hour: end.hour, minute: end.minute),
+                                _tagController.updateRecentTags,
+                              );
+                            },
+                          )),
               ),
             ],
           ),
