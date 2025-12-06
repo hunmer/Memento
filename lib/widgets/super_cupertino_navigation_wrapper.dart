@@ -40,6 +40,10 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
   final Function(String)? onSearchChanged;
   final Function(String)? onSearchSubmitted;
 
+  /// 搜索结果页面内容Widget
+  /// 当搜索框聚焦或有内容时显示此Widget
+  final Widget? searchBody;
+
   /// 导航栏操作按钮
   final List<Widget>? actions;
 
@@ -110,6 +114,7 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
     this.searchPlaceholder = '搜索',
     this.onSearchChanged,
     this.onSearchSubmitted,
+    this.searchBody,
     this.actions,
     this.largeTitleActions,
     this.backgroundColor,
@@ -142,6 +147,7 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
 
 class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigationWrapper> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   bool _isSearchFocused = false;
   final Map<String, bool> _searchFilters = {
     'activity': true,
@@ -152,6 +158,7 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -162,15 +169,24 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
     _searchFilters.addAll(widget.filterLabels.keys.where((key) => !_searchFilters.containsKey(key))
         .fold<Map<String, bool>>({}, (map, key) => map..[key] = true));
 
-    // 监听搜索框内容变化
+    // 监听搜索框内容变化和焦点变化
     _searchController.addListener(() {
-      if (mounted) {
-        setState(() {
-          // 当搜索框有内容时显示过滤器
-          _isSearchFocused = _searchController.text.isNotEmpty;
-        });
-      }
+      _updateSearchFocusState();
     });
+
+    _searchFocusNode.addListener(() {
+      _updateSearchFocusState();
+    });
+  }
+
+  /// 更新搜索聚焦状态
+  void _updateSearchFocusState() {
+    if (mounted) {
+      setState(() {
+        // 当搜索框聚焦或有文本内容时认为处于搜索状态
+        _isSearchFocused = _searchFocusNode.hasFocus || _searchController.text.isNotEmpty;
+      });
+    }
   }
 
   /// 更新搜索过滤器状态
@@ -250,6 +266,12 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
 
   @override
   Widget build(BuildContext context) {
+    // 根据搜索状态选择显示哪个body
+    final shouldShowSearchBody = widget.enableSearchBar &&
+                                  widget.searchBody != null &&
+                                  _isSearchFocused;
+    final currentBody = shouldShowSearchBody ? widget.searchBody! : widget.body;
+
     return Scaffold(
       backgroundColor: widget.backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       body: SuperScaffold(
@@ -290,17 +312,17 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
                   children: widget.searchFilters!,
                 ),
               ),
-            // 搜索过滤器
-            if (widget.enableSearchFilter) _buildSearchFilter(),
-            // 过滤栏
-            if (widget.enableFilterBar && widget.filterBarChild != null)
+            // 搜索过滤器 - 只在非搜索状态下显示
+            if (widget.enableSearchFilter && !_isSearchFocused) _buildSearchFilter(),
+            // 过滤栏 - 只在非搜索状态下显示
+            if (widget.enableFilterBar && widget.filterBarChild != null && !_isSearchFocused)
               Container(
                 height: widget.filterBarHeight,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: widget.filterBarChild,
               ),
-            // 主体内容
-            Expanded(child: widget.body),
+            // 主体内容 - 根据搜索状态切换
+            Expanded(child: currentBody),
           ],
         ),
       ),

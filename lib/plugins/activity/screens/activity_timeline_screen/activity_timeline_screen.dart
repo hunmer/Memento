@@ -415,53 +415,53 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
               ),
               // 根据视图模式显示不同的视图
               Expanded(
-                child: _searchQuery.isNotEmpty
-                    ? _buildSearchResults()
-                    : (_viewModeController.isGridMode
-                        ? ActivityGridView(
-                            activities: _activityController.activities,
-                            selectedDate: _selectedDate,
-                            onActivityTap: (activity) => _activityController.editActivity(context, activity),
-                            onUnrecordedTimeTap: (start, end) {
-                              _activityController.addActivity(
-                                context,
-                                _selectedDate,
-                                TimeOfDay(hour: start.hour, minute: start.minute),
-                                TimeOfDay(hour: end.hour, minute: end.minute),
-                                _tagController.updateRecentTags,
-                              ).then((_) {
-                                _viewModeController.clearSelectedMinutes();
-                              });
-                            },
-                            onSelectionChanged: (start, end) {
-                              if (start != null && end != null) {
-                                final minutes = end.difference(start).inMinutes;
-                                _viewModeController.updateSelectedMinutes(minutes);
-                              } else {
-                                _viewModeController.clearSelectedMinutes();
-                              }
-                            },
-                          )
-                        : ActivityTimeline(
-                            activities: _activityController.activities,
-                            onDeleteActivity: _activityController.deleteActivity,
-                            onActivityTap: (activity) => _activityController.editActivity(context, activity),
-                            onUnrecordedTimeTap: (start, end) {
-                              _activityController.addActivity(
-                                context,
-                                _selectedDate,
-                                TimeOfDay(hour: start.hour, minute: start.minute),
-                                TimeOfDay(hour: end.hour, minute: end.minute),
-                                _tagController.updateRecentTags,
-                              );
-                            },
-                          )),
+                child: _viewModeController.isGridMode
+                    ? ActivityGridView(
+                        activities: _activityController.activities,
+                        selectedDate: _selectedDate,
+                        onActivityTap: (activity) => _activityController.editActivity(context, activity),
+                        onUnrecordedTimeTap: (start, end) {
+                          _activityController.addActivity(
+                            context,
+                            _selectedDate,
+                            TimeOfDay(hour: start.hour, minute: start.minute),
+                            TimeOfDay(hour: end.hour, minute: end.minute),
+                            _tagController.updateRecentTags,
+                          ).then((_) {
+                            _viewModeController.clearSelectedMinutes();
+                          });
+                        },
+                        onSelectionChanged: (start, end) {
+                          if (start != null && end != null) {
+                            final minutes = end.difference(start).inMinutes;
+                            _viewModeController.updateSelectedMinutes(minutes);
+                          } else {
+                            _viewModeController.clearSelectedMinutes();
+                          }
+                        },
+                      )
+                    : ActivityTimeline(
+                        activities: _activityController.activities,
+                        onDeleteActivity: _activityController.deleteActivity,
+                        onActivityTap: (activity) => _activityController.editActivity(context, activity),
+                        onUnrecordedTimeTap: (start, end) {
+                          _activityController.addActivity(
+                            context,
+                            _selectedDate,
+                            TimeOfDay(hour: start.hour, minute: start.minute),
+                            TimeOfDay(hour: end.hour, minute: end.minute),
+                            _tagController.updateRecentTags,
+                          );
+                        },
+                      ),
               ),
             ],
           ),
           // FloatingActionButton - 移到右上角作为 actions
         ],
       ),
+      // 搜索结果页面
+      searchBody: _buildSearchResults(),
       enableLargeTitle: true,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       // 将原有的 AppBar actions 移到右上角
