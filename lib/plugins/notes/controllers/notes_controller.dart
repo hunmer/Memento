@@ -7,6 +7,7 @@ import '../../../core/event/item_event_args.dart';
 import '../../../core/services/plugin_widget_sync_helper.dart';
 import '../models/folder.dart';
 import '../models/note.dart';
+import '../data/notes_sample_data.dart';
 
 class NotesController {
   final StorageManager _storage;
@@ -47,15 +48,11 @@ class NotesController {
           _folders[folder.id] = folder;
         }
       } else {
-        // 创建根文件夹
-        final rootFolder = Folder(
-          id: 'root',
-          name: 'Root',
-          parentId: null,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-        _folders[rootFolder.id] = rootFolder;
+        // 加载示例文件夹数据
+        final sampleFolders = NotesSampleData.getSampleFolders();
+        for (var folder in sampleFolders) {
+          _folders[folder.id] = folder;
+        }
         await _saveFolders();
       }
     } catch (e) {
@@ -77,6 +74,13 @@ class NotesController {
           final note = Note.fromJson(item);
           _notes.putIfAbsent(note.folderId, () => []).add(note);
         }
+      } else {
+        // 加载示例笔记数据
+        final sampleNotes = NotesSampleData.getSampleNotes();
+        for (var note in sampleNotes) {
+          _notes.putIfAbsent(note.folderId, () => []).add(note);
+        }
+        await _saveNotes();
       }
     } catch (e) {
       debugPrint('Error loading notes: $e');

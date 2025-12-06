@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/agent_chat/data/sample_data_old.dart';
 import 'package:flutter/foundation.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../../../core/services/plugin_widget_sync_helper.dart';
@@ -44,11 +45,15 @@ class ConversationService extends ChangeNotifier {
   Future<void> _loadConversations() async {
     try {
       final data = await storage.read('agent_chat/conversations');
-      if (data is List) {
+      if (data is List && data.isNotEmpty) {
+        // 有数据，正常加载
         _conversations = data
             .map((json) => Conversation.fromJson(json as Map<String, dynamic>))
             .toList();
         _conversations.sort(Conversation.compare);
+      } else {
+        // 没有数据，可能是首次使用，已在_loadGroups中处理
+        _conversations = [];
       }
     } catch (e) {
       debugPrint('加载会话失败: $e');
@@ -60,18 +65,101 @@ class ConversationService extends ChangeNotifier {
   Future<void> _loadGroups() async {
     try {
       final data = await storage.read('agent_chat/groups');
-      if (data is List) {
+      if (data is List && data.isNotEmpty) {
+        // 有数据，正常加载
         _groups = data
             .map((json) =>
                 ConversationGroup.fromJson(json as Map<String, dynamic>))
             .toList();
         _groups.sort(ConversationGroup.compare);
       } else {
-        _groups = [];
+        // 首次使用，加载示例数据
+        debugPrint('AgentChat插件: 首次初始化，正在加载示例数据...');
+        await _loadSampleData();
       }
     } catch (e) {
       debugPrint('加载分组失败: $e');
-      _groups = [];
+      // 加载失败时，加载示例数据
+      await _loadSampleData();
+    }
+  }
+
+  /// 加载示例数据
+  Future<void> _loadSampleData() async {
+    try {
+      // 获取示例数据
+      final sampleData = AgentChatSampleData.getFullSampleData();
+
+      // 保存分组数据
+      final groupsJson = sampleData['groups'] as List;
+      await storage.write('agent_chat/groups', groupsJson);
+
+      // 保存会话数据
+      final conversationsJson = sampleData['conversations'] as List;
+      await storage.write('agent_chat/conversations', conversationsJson);
+
+      // 保存消息数据
+      final messagesJson = sampleData['messages'] as Map<String, dynamic>;
+      for (var entry in messagesJson.entries) {
+        final conversationId = entry.key;
+        final messages = entry.value as List;
+        await storage.write('agent_chat/messages/$conversationId', messages);
+      }
+
+      debugPrint(
+        'AgentChat插件: 示例数据加载完成！共加载 ${groupsJson.length} 个分组，${conversationsJson.length} 个会话',
+      );
+
+      // 直接加载数据到内存，避免递归调用
+      _groups =
+          groupsJson
+              .map(
+                (json) =>
+                    ConversationGroup.fromJson(json as Map<String, dynamic>),
+              )
+              .toList();
+      _groups.sort(ConversationGroup.compare);
+
+      _conversations =
+          conversationsJson
+              .map(
+                (json) => Conversation.fromJson(json as Map<String, dynamic>),
+              )
+              .toList();
+      _conversations.sort(Conversation.compare);
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('AgentChat插件: 加载示例数据失败: $e');
+      // 如果加载示例数据失败，至少创建一个默认分组
+      await _createDefaultGroup();
+    }
+  }
+
+  /// 创建默认分组（作为示例数据加载失败时的备用方案）
+  Future<void> _createDefaultGroup() async {
+    try {
+      final defaultGroup = ConversationGroup.create(
+        name: '默认分组',
+        icon: 'folder',
+        color: '#9E9E9E',
+        order: 0,
+      );
+
+      // 保存分组
+      await storage.write('agent_chat/groups', [defaultGroup.toJson()]);
+
+      // 保存空会话列表
+      await storage.write('agent_chat/conversations', []);
+
+      // 直接加载到内存
+      _groups = [defaultGroup];
+      _conversations = [];
+
+      debugPrint('AgentChat插件: 已创建默认分组');
+      notifyListeners();
+    } catch (e) {
+      debugPrint('AgentChat插件: 创建默认分组失败: $e');
     }
   }
 

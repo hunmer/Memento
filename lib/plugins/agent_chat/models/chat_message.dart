@@ -71,6 +71,7 @@ class ChatMessage {
     required String content,
     List<FileAttachment>? attachments,
     int tokenCount = 0,
+    Map<String, dynamic>? metadata,
   }) {
     return ChatMessage(
       id: _uuid.v4(),
@@ -80,6 +81,7 @@ class ChatMessage {
       timestamp: DateTime.now(),
       tokenCount: tokenCount,
       attachments: attachments ?? [],
+      metadata: metadata,
     );
   }
 
@@ -89,6 +91,7 @@ class ChatMessage {
     String content = '',
     int tokenCount = 0,
     bool isGenerating = true,
+    Map<String, dynamic>? metadata,
   }) {
     return ChatMessage(
       id: _uuid.v4(),
@@ -98,6 +101,7 @@ class ChatMessage {
       timestamp: DateTime.now(),
       tokenCount: tokenCount,
       isGenerating: isGenerating,
+      metadata: metadata,
     );
   }
 
