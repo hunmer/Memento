@@ -12,7 +12,7 @@
 /// - [RankingList] - 排行榜列表
 /// - [TimeSeriesChart] - 时间序列趋势图
 /// - [StatisticsCalculator] - 统计计算工具
-library statistics;
+library;
 
 export 'models/statistics_models.dart';
 export 'components/statistics_screen.dart';

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
@@ -10,11 +9,8 @@ import 'package:flutter/gestures.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
-import '../../widgets/super_cupertino_navigation_wrapper.dart';
 import 'controls/bill_controller.dart';
-import 'screens/bill_list_screen.dart';
 import 'screens/bill_list_screen_supercupertino.dart';
-import 'screens/bill_stats_screen.dart';
 import 'screens/bill_stats_screen_supercupertino.dart';
 import 'screens/account_list_screen.dart';
 import 'screens/bill_edit_screen.dart';

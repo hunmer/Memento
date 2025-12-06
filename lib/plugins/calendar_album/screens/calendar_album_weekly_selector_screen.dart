@@ -1,18 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
 import '../../../widgets/widget_config_editor/widget_config_editor.dart';
 import '../../../widgets/widget_config_editor/models/color_config.dart';
 import '../../../widgets/widget_config_editor/models/widget_config.dart';
 import '../../../widgets/widget_config_editor/models/widget_size.dart';
-import 'entry_editor/entry_editor_ui.dart';
-import 'entry_editor/entry_editor_controller.dart';
-import '../l10n/calendar_album_localizations.dart';
 import '../controllers/calendar_controller.dart';
-import '../controllers/tag_controller.dart';
-import 'package:provider/provider.dart';
 
 /// 每周相册小组件配置界面
 class CalendarAlbumWeeklySelectorScreen extends StatefulWidget {
@@ -340,7 +333,6 @@ class _CalendarAlbumWeeklySelectorScreenState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = CalendarAlbumLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(

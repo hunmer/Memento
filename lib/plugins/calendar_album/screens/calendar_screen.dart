@@ -1,5 +1,4 @@
 import 'dart:io' show Platform, File;
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +130,6 @@ class _CalendarScreenState extends State<CalendarScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final l10n = CalendarAlbumLocalizations.of(context);
     final calendarController = Provider.of<CalendarController>(context);
     final tagController = Provider.of<TagController>(context);
     final selectedDate = calendarController.selectedDate;

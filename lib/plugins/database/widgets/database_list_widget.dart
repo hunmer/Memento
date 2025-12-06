@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/database/controllers/database_controller.dart';

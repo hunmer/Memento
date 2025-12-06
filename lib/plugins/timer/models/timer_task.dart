@@ -135,7 +135,6 @@ class TimerTask {
   /// 使用统一控制器启动计时器
   void _startUnifiedTimer() {
     // 将 TimerTask 转换为统一状态
-    final timerState = _convertToUnifiedTimerState();
     final state = unifiedTimerController.getTimer(id);
 
     if (state == null) {
@@ -170,25 +169,6 @@ class TimerTask {
     );
   }
 
-  /// 转换为统一计时器状态
-  TimerItemConfig _convertToUnifiedTimerState() {
-    if (timerItems.isEmpty) {
-      return TimerItemConfig(
-        name: name,
-        duration: Duration.zero,
-        color: color,
-        icon: icon,
-      );
-    }
-
-    // 对于多阶段计时器，返回第一个阶段
-    return TimerItemConfig(
-      name: timerItems.first.name,
-      duration: timerItems.first.duration,
-      color: color,
-      icon: icon,
-    );
-  }
 
   /// 获取计时器类型
   TimerType _getTimerType() {

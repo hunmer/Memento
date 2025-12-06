@@ -357,7 +357,6 @@ class TimeSeriesChart extends StatelessWidget {
 
     // 收集所有数据点
     final allSpots = <FlSpot>[];
-    final spotIndex = <String, int>{};
 
     for (final serie in series) {
       for (final point in serie.points) {
@@ -493,7 +492,7 @@ class HourlyDistributionBar extends StatelessWidget {
                     alignment: Alignment.center,
                     child: value > 0 && flex > 10
                         ? Text(
-                            '${index.toString().padLeft(2, '0')}',
+                              index.toString().padLeft(2, '0'),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,

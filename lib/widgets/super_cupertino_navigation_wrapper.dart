@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.dart';
 
-import '../core/plugin_manager.dart';
 
 /// Super Cupertino Navigation Bar 的封装组件
 ///
@@ -201,16 +200,6 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
     });
   }
 
-  /// 清除搜索状态和文本
-  void _clearSearch() {
-    if (mounted) {
-      setState(() {
-        _searchController.clear();
-        _isTextFieldFocused = false;
-        _isSearchFocused = false;
-      });
-    }
-  }
 
   /// 更新搜索过滤器状态
   void _updateSearchFilter(String key, bool value) {

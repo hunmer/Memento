@@ -74,7 +74,7 @@ class _ProductListState extends State<ProductList> {
     final filteredProducts = _searchProducts(_searchQuery, sortedProducts);
 
     // 构建商品列表Widget
-    Widget _buildProductGrid(List<Product> products) {
+    Widget buildProductGrid(List<Product> products) {
       return products.isEmpty
           ? Center(
               child: Column(
@@ -153,8 +153,8 @@ class _ProductListState extends State<ProductList> {
         size: 24,
       ),
       largeTitle: '商品列表',
-      body: _buildProductGrid(filteredProducts),
-      searchBody: _buildProductGrid(filteredProducts), // 搜索结果页面
+      body: buildProductGrid(filteredProducts),
+      searchBody: buildProductGrid(filteredProducts), // 搜索结果页面
       enableLargeTitle: true,
       enableSearchBar: true,
       searchPlaceholder: '搜索商品名称或描述',

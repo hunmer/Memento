@@ -81,8 +81,6 @@ class StatisticsCalculator {
       final value = (record[valueField] ?? 0.0).toDouble();
       final group =
           groupField != null ? record[groupField]?.toString() ?? '' : 'default';
-      final label =
-          labelField != null ? record[labelField]?.toString() ?? group : group;
 
       if (!groupedData.containsKey(group)) {
         groupedData[group] = {};
@@ -150,7 +148,6 @@ class StatisticsCalculator {
     List<Color> colorPalette,
   ) {
     return data.asMap().entries.map((entry) {
-      final index = entry.key;
       final item = entry.value;
 
       if (item.color != null) return item;

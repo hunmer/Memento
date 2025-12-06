@@ -73,34 +73,7 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
     }
   }
 
-  DateTime _getStartDate(DateTime now, DateTime todayEnd, DateRangeOption range) {
-    final today = DateTime(now.year, now.month, now.day);
 
-    switch (range) {
-      case DateRangeOption.today:
-        return today;
-      case DateRangeOption.thisWeek:
-        return today.subtract(Duration(days: now.weekday - 1));
-      case DateRangeOption.thisMonth:
-        return DateTime(now.year, now.month, 1);
-      case DateRangeOption.thisYear:
-        return DateTime(now.year, 1, 1);
-      case DateRangeOption.custom:
-        return widget.state.startDate ?? today;
-    }
-  }
-
-  DateTime _getEndDate(DateTime now, DateTime todayEnd, DateRangeOption range) {
-    switch (range) {
-      case DateRangeOption.today:
-      case DateRangeOption.thisWeek:
-      case DateRangeOption.thisMonth:
-      case DateRangeOption.thisYear:
-        return todayEnd;
-      case DateRangeOption.custom:
-        return widget.state.endDate ?? now;
-    }
-  }
 
   void _handleRangeChanged(DateRangeOption range) {
     if (range == DateRangeOption.custom) {
