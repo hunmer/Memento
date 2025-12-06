@@ -85,7 +85,7 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return const ConversationListScreen();
+    return const AgentChatMainView();
   }
 
   @override

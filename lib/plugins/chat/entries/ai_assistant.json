@@ -1,0 +1,50 @@
+{
+  "messages": [
+    {
+      "id": "msg_ai_001",
+      "channelId": "ai_assistant",
+      "content": "你好！我是你的AI助手。有什么可以帮助你的吗？",
+      "type": "assistant",
+      "sender": "ai",
+      "senderName": "AI助手",
+      "timestamp": "2024-12-05T10:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": {"👋": 1},
+      "metadata": {
+        "model": "gpt-3.5-turbo",
+        "responseTime": 1.2
+      }
+    },
+    {
+      "id": "msg_ai_002",
+      "channelId": "ai_assistant",
+      "content": "如何提高工作效率？",
+      "type": "user",
+      "sender": "user",
+      "senderName": "我",
+      "timestamp": "2024-12-05T10:01:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": [],
+      "metadata": {}
+    },
+    {
+      "id": "msg_ai_003",
+      "channelId": "ai_assistant",
+      "content": "## 提高工作效率的建议\n\n### 🎯 设定明确目标\n- 使用SMART原则设定目标\n- 将大任务分解为小任务\n- 设定优先级（重要且紧急 > 重要不紧急 > 紧急不重要 > 既不重要也不紧急）\n\n### ⏰ 时间管理\n- 使用番茄工作法（25分钟专注 + 5分钟休息）\n- 批处理相似任务\n- 设定固定的工作时间\n\n### 🛠️ 工具推荐\n- 任务管理：Todoist, Notion\n- 时间追踪：Toggl, RescueTime\n- 笔记整理：Obsidian, Evernote\n\n### 💪 其他建议\n- 保持工作环境整洁\n- 定期休息，避免过度疲劳\n- 学会说\"不\"，避免承担过多任务",
+      "type": "assistant",
+      "sender": "ai",
+      "senderName": "AI助手",
+      "timestamp": "2024-12-05T10:02:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": {"👍": 3, "💡": 2, "🔖": 1},
+      "metadata": {
+        "model": "gpt-3.5-turbo",
+        "responseTime": 3.5,
+        "tokensUsed": 256
+      }
+    }
+  ]
+}

@@ -9,6 +9,7 @@ import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import '../models/product.dart';
 import '../models/user_item.dart';
 import '../models/points_log.dart';
+import '../sample_data.dart';
 
 class StoreController with ChangeNotifier {
   List<Product> _products = [];
@@ -345,9 +346,26 @@ class StoreController with ChangeNotifier {
     await loadUsedItems();
 
     _products.clear();
+    _archivedProducts.clear();
     _pointsLogs.clear();
     _userItems.clear();
+
+    // 检查是否有数据，没有则初始化默认数据
+    final hasProducts = storedProducts is Map<String, dynamic> &&
+        storedProducts['products'] is List &&
+        (storedProducts['products'] as List).isNotEmpty;
+    final hasPoints = storedPoints is Map<String, dynamic>;
+    final hasUserItems = storedUserItems is Map<String, dynamic> &&
+        storedUserItems['items'] is List;
+
+    if (!hasProducts && !hasPoints && !hasUserItems) {
+      debugPrint('No existing data found, initializing with default data');
+      await initializeDefaultData();
+      return;
+    }
+
     try {
+      // 加载商品数据
       if (storedProducts is Map<String, dynamic>) {
         final productsList =
             storedProducts['products'] is List
@@ -360,13 +378,12 @@ class StoreController with ChangeNotifier {
         }
       }
 
-      // 加载存档产品
+      // 加载存档商品
       if (storedArchivedProducts is Map<String, dynamic>) {
         final archivedList =
             storedArchivedProducts['products'] is List
                 ? storedArchivedProducts['products'] as List
                 : [];
-        _archivedProducts.clear();
         for (final productData in archivedList) {
           if (productData is Map<String, dynamic>) {
             _archivedProducts.add(Product.fromJson(productData));
@@ -376,8 +393,10 @@ class StoreController with ChangeNotifier {
     } catch (e) {
       debugPrint('Failed to load products: $e');
       await initializeDefaultData();
+      return;
     }
 
+    // 加载积分数据
     if (storedPoints is Map<String, dynamic>) {
       _userPoints =
           storedPoints['value'] is int ? storedPoints['value'] as int : 0;
@@ -391,6 +410,7 @@ class StoreController with ChangeNotifier {
       }
     }
 
+    // 加载用户物品
     if (storedUserItems is Map<String, dynamic>) {
       final itemsData = storedUserItems['items'];
       if (itemsData is List) {
@@ -445,10 +465,51 @@ class StoreController with ChangeNotifier {
 
   // 初始化默认数据
   Future<void> initializeDefaultData() async {
-    _products.clear();
-    _archivedProducts.clear();
-    _userPoints = 0;
+    // 加载默认示例数据
+    final defaultData = StoreDefaultData.getAllData();
+
+    // 加载默认商品
+    final productsData = defaultData['products'] as Map<String, dynamic>;
+    final productsList = productsData['products'] as List;
+    for (final productData in productsList) {
+      if (productData is Map<String, dynamic>) {
+        addProductFromJson(productData);
+      }
+    }
+
+    // 加载默认积分
+    final pointsData = defaultData['points'] as Map<String, dynamic>;
+    _userPoints = pointsData['value'] as int;
+    final logsList = pointsData['logs'] as List;
+    for (final logData in logsList) {
+      if (logData is Map<String, dynamic>) {
+        _pointsLogs.add(PointsLog.fromJson(logData));
+      }
+    }
+
+    // 加载默认用户物品
+    final userItemsData = defaultData['user_items'] as Map<String, dynamic>;
+    final itemsList = userItemsData['items'] as List;
+    for (final itemData in itemsList) {
+      if (itemData is Map<String, dynamic>) {
+        _userItems.add(UserItem.fromJson(itemData));
+      }
+    }
+
+    // 加载默认已使用物品
+    final usedItemsData = defaultData['used_items'] as Map<String, dynamic>;
+    final usedItemsList = usedItemsData['items'] as List;
+    for (final itemData in usedItemsList) {
+      if (itemData is Map<String, dynamic>) {
+        _usedItems.add(UsedItem.fromJson(itemData));
+      }
+    }
+
+    // 保存到存储
     await saveToStorage();
+
+    // 更新流数据
+    _updateStreams();
   }
 
   // 清空用户物品

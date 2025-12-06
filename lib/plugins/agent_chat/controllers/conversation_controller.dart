@@ -48,6 +48,7 @@ class ConversationController extends ChangeNotifier {
 
   List<Conversation> get conversations => _getFilteredConversations();
   List<ConversationGroup> get groups => conversationService.groups;
+  int get groupsCount => conversationService.groups.length;
 
   String? get currentConversationId => _currentConversationId;
   Conversation? get currentConversation =>
@@ -162,16 +163,24 @@ class ConversationController extends ChangeNotifier {
     String? icon,
     String? color,
   }) async {
-    return await conversationService.createGroup(
-      name: name,
-      icon: icon,
-      color: color,
-    );
+    try {
+      final group = await conversationService.createGroup(
+        name: name,
+        icon: icon,
+        color: color,
+      );
+      notifyListeners();
+      return group;
+    } catch (e) {
+      debugPrint('创建分组失败: $e');
+      rethrow; // 重新抛出异常，让UI层知道
+    }
   }
 
   /// 更新分组
   Future<void> updateGroup(ConversationGroup group) async {
     await conversationService.updateGroup(group);
+    notifyListeners();
   }
 
   /// 删除分组

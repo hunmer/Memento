@@ -6,6 +6,8 @@ class PromptPreset {
   final String description;
   final String content;
   final List<String> tags;
+  final String? category;
+  final bool isDefault;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -15,6 +17,8 @@ class PromptPreset {
     required this.description,
     required this.content,
     required this.tags,
+    this.category,
+    this.isDefault = false,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -25,6 +29,8 @@ class PromptPreset {
     'description': description,
     'content': content,
     'tags': tags,
+    'category': category,
+    'isDefault': isDefault,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
   };
@@ -35,6 +41,8 @@ class PromptPreset {
     description: json['description'] as String? ?? '',
     content: json['content'] as String,
     tags: (json['tags'] as List?)?.cast<String>() ?? [],
+    category: json['category'] as String?,
+    isDefault: json['isDefault'] as bool? ?? false,
     createdAt: DateTime.parse(json['createdAt'] as String),
     updatedAt: DateTime.parse(json['updatedAt'] as String),
   );
@@ -45,6 +53,8 @@ class PromptPreset {
     String? description,
     String? content,
     List<String>? tags,
+    String? category,
+    bool? isDefault,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -54,6 +64,8 @@ class PromptPreset {
       description: description ?? this.description,
       content: content ?? this.content,
       tags: tags ?? this.tags,
+      category: category ?? this.category,
+      isDefault: isDefault ?? this.isDefault,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

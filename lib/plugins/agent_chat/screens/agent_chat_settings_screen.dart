@@ -69,12 +69,6 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
       final settings = widget.plugin.settings;
       final asrConfig = settings['asrConfig'] as Map<String, dynamic>?;
 
-      if (asrConfig != null) {
-        _appIdController.text = asrConfig['appId'] as String? ?? '';
-        _secretIdController.text = asrConfig['secretId'] as String? ?? '';
-        _secretKeyController.text = asrConfig['secretKey'] as String? ?? '';
-      }
-
       // 加载工具模版设置
       _preferToolTemplates = settings['preferToolTemplates'] as bool? ?? false;
 
@@ -83,6 +77,15 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
           settings['enableBackgroundService'] as bool? ?? true;
       _showTokenInNotification =
           settings['showTokenInNotification'] as bool? ?? true;
+
+      // 在 setState 回调中设置控制器文本，确保状态正确更新
+      if (asrConfig != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _appIdController.text = asrConfig['appId'] as String? ?? '';
+          _secretIdController.text = asrConfig['secretId'] as String? ?? '';
+          _secretKeyController.text = asrConfig['secretKey'] as String? ?? '';
+        });
+      }
     } catch (e) {
       _showError('加载设置失败: $e');
     } finally {
@@ -181,10 +184,21 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Agent Chat 设置'),
+        actions: [
+          if (_hasChanges)
+            IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: _saveSettings,
+            ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // 工具调用设置标题
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -426,7 +440,8 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

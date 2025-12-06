@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/node.dart';
 import '../models/notebook.dart';
+import '../sample_data.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../../../core/services/plugin_widget_sync_helper.dart';
 
@@ -54,11 +55,33 @@ class NodesController extends ChangeNotifier {
         if (_notebooks.isNotEmpty && _selectedNotebook == null) {
           _selectedNotebook = _notebooks.first;
         }
+      } else {
+        // 如果数据为空，加载示例数据
+        debugPrint('【NodesController】未找到现有数据，加载示例数据');
+        await _loadSampleData();
       }
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading notebooks: $e');
+      // 加载失败时，加载示例数据
+      debugPrint('【NodesController】加载数据失败，加载示例数据');
+      await _loadSampleData();
       notifyListeners();
+    }
+  }
+
+  /// 加载示例数据
+  Future<void> _loadSampleData() async {
+    try {
+      _notebooks = NodesSampleData.getSampleNotebooks();
+      if (_notebooks.isNotEmpty) {
+        _selectedNotebook = _notebooks.first;
+      }
+      // 保存示例数据到存储
+      await _saveData();
+      debugPrint('【NodesController】示例数据加载完成，共 ${_notebooks.length} 个笔记本');
+    } catch (e) {
+      debugPrint('Error loading sample data: $e');
     }
   }
 

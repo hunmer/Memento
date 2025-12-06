@@ -1,0 +1,53 @@
+{
+  "messages": [
+    {
+      "id": "msg_work_001",
+      "channelId": "work_notes",
+      "content": "## 项目进展\n\n- ✅ 完成需求分析文档\n- 🔄 正在进行UI设计（预计本周完成）\n- ⏳ 等待客户反馈\n\n### 下周计划\n1. 完成原型设计\n2. 开始前端开发\n3. 准备技术方案评审",
+      "type": "user",
+      "sender": "user",
+      "senderName": "我",
+      "timestamp": "2024-12-02T09:00:00.000Z",
+      "isEdited": true,
+      "editedAt": "2024-12-02T11:00:00.000Z",
+      "attachments": [],
+      "reactions": {"📝": 1},
+      "metadata": {
+        "projectId": "PROJ-001",
+        "priority": "high"
+      }
+    },
+    {
+      "id": "msg_work_002",
+      "channelId": "work_notes",
+      "content": "💭 **会议纪要**\n\n**日期**: 2024-12-03\n**主题**: Q4规划讨论\n\n### 决策事项\n- 新产品线启动时间：2025年1月\n- 预算已批准：500万\n- 团队扩招：5人（3前端，2后端）\n\n### 待办\n- [ ] 更新项目计划\n- [ ] 发布招聘信息\n- [ ] 准备启动会议",
+      "type": "user",
+      "sender": "user",
+      "senderName": "我",
+      "timestamp": "2024-12-03T14:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": {"📌": 1},
+      "metadata": {
+        "meetingId": "MTG-045",
+        "actionItems": 3
+      }
+    },
+    {
+      "id": "msg_work_003",
+      "channelId": "work_notes",
+      "content": "⚠️ **紧急**: 客户反馈生产环境有Bug，需要立即处理\n\n影响范围：用户登录模块\n优先级：P0（最高）\n已通知相关开发人员",
+      "type": "user",
+      "sender": "user",
+      "senderName": "我",
+      "timestamp": "2024-12-05T16:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": {"🚨": 1},
+      "metadata": {
+        "severity": "critical",
+        "bugId": "BUG-789"
+      }
+    }
+  ]
+}

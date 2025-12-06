@@ -66,6 +66,8 @@ class ConversationService extends ChangeNotifier {
                 ConversationGroup.fromJson(json as Map<String, dynamic>))
             .toList();
         _groups.sort(ConversationGroup.compare);
+      } else {
+        _groups = [];
       }
     } catch (e) {
       debugPrint('加载分组失败: $e');
@@ -80,6 +82,7 @@ class ConversationService extends ChangeNotifier {
       await storage.write('agent_chat/conversations', data);
     } catch (e) {
       debugPrint('保存会话失败: $e');
+      rethrow; // 重新抛出异常，让调用者知道保存失败
     }
   }
 
@@ -90,6 +93,7 @@ class ConversationService extends ChangeNotifier {
       await storage.write('agent_chat/groups', data);
     } catch (e) {
       debugPrint('保存分组失败: $e');
+      rethrow; // 重新抛出异常，让调用者知道保存失败
     }
   }
 
@@ -211,6 +215,8 @@ class ConversationService extends ChangeNotifier {
     );
 
     _groups.add(group);
+    _groups.sort(ConversationGroup.compare);
+
     await _saveGroups();
     notifyListeners();
 

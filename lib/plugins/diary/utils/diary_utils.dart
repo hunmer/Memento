@@ -5,6 +5,7 @@ import '../../../core/services/plugin_widget_sync_helper.dart';
 import '../../../core/event/event_manager.dart';
 import '../models/diary_entry.dart';
 import '../diary_plugin.dart';
+import '../sample_data.dart';
 
 class DiaryUtils {
   static const String _pluginDir = 'diary';
@@ -32,10 +33,14 @@ class DiaryUtils {
       // 使用索引文件来管理日记条目
       final indexPath = path.join(_pluginDir, 'diary_index.json');
 
-      // 如果索引文件不存在，创建一个空的索引
+      // 如果索引文件不存在，创建一个空的索引并添加示例数据
       if (!await storage.fileExists(indexPath)) {
         await storage.writeJson(indexPath, {});
-        return entries;
+        // 创建示例日记
+        await _createSampleEntries();
+        // 重新加载索引
+        final newIndex = await storage.readJson(indexPath);
+        if (newIndex == null) return entries;
       }
 
       // 读取索引文件
@@ -141,6 +146,31 @@ class DiaryUtils {
     } catch (e) {
       debugPrint('Error saving diary entry: $e');
       throw Exception('Failed to save diary entry: $e');
+    }
+  }
+
+  /// 创建示例日记条目
+  static Future<void> _createSampleEntries() async {
+    final storage = _storage;
+    try {
+      // 获取示例日记数据
+      final sampleEntries = DiarySampleData.getSampleDiaryEntries();
+
+      // 保存示例日记
+      for (final entry in sampleEntries) {
+        final normalizedDate = _normalizeDate(entry.date);
+        final dateStr = _formatDate(normalizedDate);
+
+        final entryPath = _getEntryPath(normalizedDate);
+        await storage.writeJson(entryPath, entry.toJson());
+
+        // 更新索引
+        await _updateDiaryIndex(dateStr);
+      }
+
+      debugPrint('Created ${sampleEntries.length} sample diary entries');
+    } catch (e) {
+      debugPrint('Error creating sample entries: $e');
     }
   }
 

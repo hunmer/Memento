@@ -21,6 +21,7 @@ import 'controllers/model_controller.dart';
 import 'services/request_service.dart';
 import 'models/prompt_preset.dart';
 import 'services/prompt_preset_service.dart';
+import 'sample_data.dart';
 
 class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   static OpenAIPlugin? _instance;
@@ -57,27 +58,34 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   @override
   Future<void> initializeDefaultData() async {
     // 确保 agents.json 文件存在并初始化默认智能体
-    final agentData = await storage.read('openai/agents.json');
+    final agentData = await storage.read('$storageDir/agents.json');
     if (agentData.isEmpty) {
-      // 如果文件为空，创建包含默认智能体的文件
-      final defaultAgents = [
-        {
-          'id': 'assistant-1',
-          'name': '通用助手',
-          'description': '一个友好的AI助手，可以帮助回答各种问题和完成各种任务。',
-          'serviceProviderId': 'ollama',
-          'baseUrl': 'http://localhost:11434',
-          'headers': {'api-key': 'ollama'},
-          'model': 'llama3',
-          'systemPrompt': '你是一个乐于助人的AI助手，擅长回答问题并提供有用的建议。请用友好的语气与用户交流。',
-          'tags': ['通用', '问答', '建议'],
-          'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
-        },
-      ];
+      // 如果文件为空，使用示例数据中的默认智能体
+      final defaultAgents = OpenAISampleData.defaultAgents;
 
       await storage.write('$storageDir/agents.json', {'agents': defaultAgents});
-      debugPrint('已初始化默认智能体');
+      debugPrint('已初始化 ${defaultAgents.length} 个默认智能体');
+    }
+
+    // 初始化提示词预设数据
+    await _initializePromptPresets();
+  }
+
+  /// 初始化提示词预设数据
+  Future<void> _initializePromptPresets() async {
+    try {
+      final presetData = await storage.read('openai/prompt_presets.json');
+      if (presetData.isEmpty || presetData['presets'] == null) {
+        // 如果没有预设数据，使用示例数据中的默认预设
+        final defaultPresets = OpenAISampleData.defaultPresets;
+
+        await storage.write('openai/prompt_presets.json', {
+          'presets': defaultPresets.map((p) => p.toJson()).toList(),
+        });
+        debugPrint('已初始化 ${defaultPresets.length} 个默认提示词预设');
+      }
+    } catch (e) {
+      debugPrint('初始化提示词预设失败: $e');
     }
   }
 

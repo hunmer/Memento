@@ -1,0 +1,84 @@
+{
+  "messages": [
+    {
+      "id": "msg_default_001",
+      "channelId": "default",
+      "content": "🎉 欢迎使用 **Memento Chat**!\n\n这是您的默认频道。在这里您可以：\n- 💬 记录日常想法\n- 🤝 与AI助手对话\n- 📝 管理多个频道\n- 🏷️ 使用Markdown格式\n\n试试输入 **/help** 查看更多命令！",
+      "type": "system",
+      "sender": "system",
+      "senderName": "系统",
+      "timestamp": "2024-12-06T00:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": {"👋": 1},
+      "metadata": {
+        "isWelcomeMessage": true,
+        "style": "info"
+      }
+    },
+    {
+      "id": "msg_default_002",
+      "channelId": "default",
+      "content": "### 📚 Markdown 支持展示\n\n您可以使用以下格式：\n\n1. **粗体文本** 或 __粗体文本__\n2. *斜体文本* 或 _斜体文本_\n3. ~~删除线~~\n4. `行内代码`\n\n```dart\n// 代码块示例\nvoid main() {\n  print('Hello, Memento!');\n}\n```\n\n> 💡 提示：所有消息都支持 Markdown 格式！",
+      "type": "user",
+      "sender": "user",
+      "senderName": "我",
+      "timestamp": "2024-12-06T01:00:00.000Z",
+      "isEdited": true,
+      "editedAt": "2024-12-06T01:15:00.000Z",
+      "attachments": [],
+      "reactions": {"👍": 2, "❤️": 1},
+      "metadata": {
+        "wordCount": 68,
+        "hasCode": true
+      }
+    },
+    {
+      "id": "msg_default_003",
+      "channelId": "default",
+      "content": "✅ 功能列表\n\n- [x] 创建频道\n- [x] 发送消息\n- [x] Markdown支持\n- [x] 消息搜索\n- [ ] 图片附件（即将推出）\n- [ ] 语音消息（计划中）",
+      "type": "user",
+      "sender": "user",
+      "senderName": "我",
+      "timestamp": "2024-12-06T02:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": {"📋": 1},
+      "metadata": {
+        "isChecklist": true
+      }
+    },
+    {
+      "id": "msg_default_004",
+      "channelId": "default",
+      "content": "🔍 **搜索功能说明**\n\n使用搜索栏可以快速找到历史消息：\n- 支持关键词搜索\n- 支持正则表达式\n- 可以按频道筛选\n- 可以按时间范围筛选",
+      "type": "system",
+      "sender": "system",
+      "senderName": "系统",
+      "timestamp": "2024-12-06T12:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": {"🔍": 1},
+      "metadata": {
+        "style": "tip"
+      }
+    },
+    {
+      "id": "msg_default_005",
+      "channelId": "default",
+      "content": "📊 **使用统计**\n\n您已经创建了 **5** 个频道，发送了 **60** 条消息。最活跃的频道是「日常记录」。\n\n继续保持记录的习惯吧！",
+      "type": "system",
+      "sender": "system",
+      "senderName": "系统",
+      "timestamp": "2024-12-06T22:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": {"📈": 1},
+      "metadata": {
+        "style": "stats",
+        "totalChannels": 5,
+        "totalMessages": 60
+      }
+    }
+  ]
+}

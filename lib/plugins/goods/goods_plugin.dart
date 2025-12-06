@@ -12,6 +12,7 @@ import 'models/warehouse.dart';
 import 'models/goods_item.dart';
 import 'models/find_item_result.dart';
 import 'l10n/goods_localizations.dart';
+import 'sample_data.dart';
 
 /// 物品相关事件的基类
 abstract class GoodsEventArgs extends EventArgs {
@@ -228,9 +229,29 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
             _warehouses.add(warehouse);
           }
         }
+      } else {
+        // 没有仓库数据，创建示例仓库
+        await _createSampleWarehouses();
       }
     } catch (e) {
       debugPrint('Error loading warehouses: $e');
+    }
+  }
+
+  /// 创建示例仓库数据
+  Future<void> _createSampleWarehouses() async {
+    try {
+      // 获取示例仓库数据
+      final sampleWarehouses = GoodsSampleData.getSampleWarehouses();
+
+      // 保存示例仓库
+      for (final warehouse in sampleWarehouses) {
+        await saveWarehouse(warehouse);
+      }
+
+      debugPrint('Created ${sampleWarehouses.length} sample warehouses');
+    } catch (e) {
+      debugPrint('Error creating sample warehouses: $e');
     }
   }
 

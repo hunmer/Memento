@@ -36,6 +36,8 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   @override
   Future<void> initialize() async {
     _controller = ContactController(this);
+    // 初始化默认数据
+    await _controller.createDefaultContacts();
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
