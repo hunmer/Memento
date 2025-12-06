@@ -30,7 +30,6 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   // 搜索相关状态
   String _searchQuery = '';
   List<DiaryEntry> _searchResults = [];
-  bool _isSearching = false;
 
   // Colors from design
   static const Color _primaryColor = Color(0xFFD8BFD8); // Dusty Rose
@@ -63,7 +62,6 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   Future<void> _handleSearch(String query) async {
     setState(() {
       _searchQuery = query;
-      _isSearching = query.isNotEmpty;
     });
 
     if (query.trim().isEmpty) {
@@ -156,7 +154,8 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       searchPlaceholder: '搜索日记内容...',
       onSearchChanged: _handleSearch,
       onSearchSubmitted: _handleSearch,
-      body: _isSearching ? _buildSearchResults() : _buildCalendarView(),
+      body: _buildCalendarView(),
+      searchBody: _buildSearchResults(),
     );
   }
 
