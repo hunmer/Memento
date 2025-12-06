@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:provider/provider.dart';
 import '../services/script_manager.dart';
 import '../services/script_executor.dart';
@@ -76,25 +77,15 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
       await widget.scriptManager.toggleScript(script.id, !script.enabled);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              script.enabled
-                  ? '已启用脚本: ${script.name}'
-                  : '已禁用脚本: ${script.name}',
-            ),
-            duration: const Duration(seconds: 2),
-          ),
+        Toast.success(
+          script.enabled
+              ? '已启用脚本: ${script.name}'
+              : '已禁用脚本: ${script.name}',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('操作失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        Toast.error('操作失败: $e');
       }
     }
   }
@@ -154,9 +145,7 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
         }
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('脚本创建成功！')),
-          );
+          Toast.success('脚本创建成功！');
         }
       } else {
         // 解析触发器数据
@@ -190,19 +179,12 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
         await widget.scriptManager.saveScriptCode(script.id, code);
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('脚本更新成功！')),
-          );
+          Toast.success('脚本更新成功！');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('操作失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        Toast.error('操作失败: $e');
       }
     }
   }
@@ -210,12 +192,7 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
   /// 运行脚本
   Future<void> _runScript(ScriptInfo script) async {
     if (widget.scriptExecutor == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('脚本执行器未初始化'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      Toast.error('脚本执行器未初始化');
       return;
     }
 
@@ -235,25 +212,7 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
 
     // 显示加载提示
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text('正在运行脚本: ${script.name}...'),
-            ],
-          ),
-          duration: const Duration(seconds: 30),
-        ),
-      );
+      Toast.loading('正在运行脚本: ${script.name}...');
     }
 
     try {
@@ -265,42 +224,31 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
 
       if (mounted) {
         // 清除加载提示
-        ScaffoldMessenger.of(context).clearSnackBars();
+        Toast.dismiss();
 
         // 显示结果
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  result.success ? '✅ 脚本执行成功' : '❌ 脚本执行失败',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text('脚本: ${script.name}'),
-                Text('耗时: ${result.duration.inMilliseconds}ms'),
-                if (!result.success && result.error != null)
-                  Text('错误: ${result.error}'),
-                if (result.result != null)
-                  Text('结果: ${result.result}'),
-              ],
-            ),
-            backgroundColor: result.success ? Colors.green : Colors.red,
+        if (result.success) {
+          Toast.success(
+            '脚本执行成功\n'
+            '脚本: ${script.name}\n'
+            '耗时: ${result.duration.inMilliseconds}ms'
+            '${result.result != null ? '\n结果: ${result.result}' : ''}',
             duration: const Duration(seconds: 5),
-          ),
-        );
+          );
+        } else {
+          Toast.error(
+            '脚本执行失败\n'
+            '脚本: ${script.name}\n'
+            '耗时: ${result.duration.inMilliseconds}ms'
+            '${result.error != null ? '\n错误: ${result.error}' : ''}',
+            duration: const Duration(seconds: 5),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('执行异常: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        Toast.dismiss();
+        Toast.error('执行异常: $e');
       }
     }
   }

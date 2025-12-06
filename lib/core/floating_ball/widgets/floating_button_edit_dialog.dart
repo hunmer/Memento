@@ -9,6 +9,7 @@ import '../../../constants/app_icons.dart';
 import '../../action/action_manager.dart';
 import '../../action/widgets/action_selector_dialog.dart';
 import '../../action/models/action_instance.dart';
+import '../../services/toast_service.dart';
 
 /// 悬浮按钮编辑对话框
 class FloatingButtonEditDialog extends StatefulWidget {
@@ -223,9 +224,7 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
   /// 保存按钮
   void _save() {
     if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入按钮标题')),
-      );
+      toastService.showToast('请输入按钮标题');
       return;
     }
 
@@ -237,9 +236,7 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
         data = jsonDecode(dataText) as Map<String, dynamic>;
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('执行数据格式错误: $e')),
-      );
+      toastService.showToast('执行数据格式错误: $e');
       return;
     }
 

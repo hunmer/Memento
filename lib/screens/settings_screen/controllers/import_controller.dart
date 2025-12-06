@@ -7,6 +7,7 @@ import 'package:archive/archive.dart';
 import '../../../core/utils/file_utils.dart';
 import '../widgets/folder_selection_dialog.dart';
 import '../../../core/l10n/import_localizations.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class ImportController {
   final BuildContext context;
@@ -35,11 +36,7 @@ class ImportController {
       final filePath = result.files.first.path;
       if (filePath == null) {
         if (_mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(ImportLocalizations.of(context).filePathError),
-            ),
-          );
+          Toast.error(ImportLocalizations.of(context).filePathError);
         }
         return;
       }
@@ -84,11 +81,7 @@ class ImportController {
 
         if (availablePlugins.isEmpty) {
           if (_mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context)!.noPluginDataFound),
-              ),
-            );
+            Toast.error(AppLocalizations.of(context)!.noPluginDataFound);
           }
           return;
         }
@@ -169,13 +162,7 @@ class ImportController {
         }
       } catch (e) {
         if (_mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${ImportLocalizations.of(context).importFailed}: $e',
-              ),
-            ),
-          );
+          Toast.error('${ImportLocalizations.of(context).importFailed}: $e');
         }
       } finally {
         // 清理临时目录
@@ -183,13 +170,7 @@ class ImportController {
       }
     } catch (e) {
       if (_mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.importFailedWithError(e.toString()),
-            ),
-          ),
-        );
+        Toast.error(AppLocalizations.of(context)!.importFailedWithError(e.toString()));
       }
     }
   }

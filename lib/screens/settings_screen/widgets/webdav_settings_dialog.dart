@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../controllers/webdav_controller.dart';
 import '../../../core/storage/storage_manager.dart';
 import 'l10n/webdav_localizations.dart';
+import '../../../../core/services/toast_service.dart';
 
 class WebDAVSettingsDialog extends StatefulWidget {
   final WebDAVController controller;
@@ -339,14 +340,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               Navigator.of(currentContext).pop(true);
 
               // 显示提示
-              ScaffoldMessenger.of(currentContext).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    WebDAVLocalizations.of(context).settingsSavedMessage,
-                  ),
-                  backgroundColor: Colors.green,
-                ),
-              );
+              toastService.showToast(WebDAVLocalizations.of(currentContext).settingsSavedMessage);
             },
             child: Text(AppLocalizations.of(context)!.done),
           ),

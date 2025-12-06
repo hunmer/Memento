@@ -3,6 +3,7 @@ import 'package:Memento/plugins/diary/l10n/diary_localizations.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../../../core/storage/storage_manager.dart';
@@ -111,12 +112,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
 
     // Check if target date is in the future
     if (normalizedTargetDay.isAfter(normalizedToday)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(DiaryLocalizations.of(context).cannotSelectFutureDate),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      Toast.warning(DiaryLocalizations.of(context).cannotSelectFutureDate);
       return;
     }
 

@@ -12,6 +12,7 @@ import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../../widgets/app_drawer.dart';
 import '../../core/floating_ball/floating_ball_service.dart';
 import '../../core/global_flags.dart';
@@ -419,11 +420,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                     setState(() {
                       _isEditMode = !_isEditMode;
                     });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(_isEditMode ? '长按拖拽可调整顺序' : '已退出编辑模式'),
-                        duration: const Duration(seconds: 1),
-                      ),
+                    Toast.info(
+                      _isEditMode ? '长按拖拽可调整顺序' : '已退出编辑模式',
+                      duration: const Duration(seconds: 1),
                     );
                   },
                 ),
@@ -534,9 +533,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               setState(() {
                 _layoutManager.clear();
               });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('布局已清空')),
-              );
+              Toast.success('布局已清空');
             },
             child: const Text('确定'),
           ),
@@ -570,9 +567,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             onPressed: () async {
               final name = nameController.text.trim();
               if (name.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('请输入布局名称')),
-                );
+                Toast.error('请输入布局名称');
                 return;
               }
 
@@ -584,15 +579,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 await _loadSavedLayouts();
                 await _updateCurrentLayoutName();
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('布局"$name"已保存')),
-                  );
+                  Toast.success('布局"$name"已保存');
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('保存失败：$e')),
-                  );
+                  Toast.error('保存失败：$e');
                 }
               }
             },
@@ -688,17 +679,13 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     final widget = registry.getWidget(item.widgetId);
 
     if (widget == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('未找到小组件定义')));
+      Toast.error('未找到小组件定义');
       return;
     }
 
     // 检查是否提供了统计项
     if (widget.availableStatsProvider == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('该小组件不支持自定义设置')));
+      Toast.warning('该小组件不支持自定义设置');
       return;
     }
 
@@ -706,9 +693,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     final availableItems = widget.availableStatsProvider!();
 
     if (availableItems.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('该小组件没有可配置的项目')));
+      Toast.warning('该小组件没有可配置的项目');
       return;
     }
 
@@ -754,9 +739,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       await _layoutManager.saveLayout();
       setState(() {});
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('设置已保存')));
+      Toast.success('设置已保存');
     }
   }
 
@@ -766,18 +749,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     final widget = registry.getWidget(item.widgetId);
 
     if (widget == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('未找到小组件定义')));
+      Toast.error('未找到小组件定义');
       return;
     }
 
     final supportedSizes = widget.supportedSizes;
 
     if (supportedSizes.length <= 1) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('该小组件不支持调整大小')));
+      Toast.warning('该小组件不支持调整大小');
       return;
     }
 
@@ -840,9 +819,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     _layoutManager.updateItem(item.id, updatedItem);
     await _layoutManager.saveLayout();
     setState(() {});
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('组件大小已更新')));
+    ToastService.instance.showToast('组件大小已更新');
   }
 
   /// 确认删除项目
@@ -867,9 +844,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 onPressed: () {
                   Navigator.pop(context);
                   _layoutManager.removeItem(item.id);
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('"$itemName" 已删除')));
+                  ToastService.instance.showToast('"$itemName" 已删除');
                 },
                 child: const Text('删除', style: TextStyle(color: Colors.red)),
               ),
@@ -930,9 +905,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               for (final itemId in _selectedItemIds) {
                 _layoutManager.removeItem(itemId);
               }
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('已删除 ${_selectedItemIds.length} 个项目')),
-              );
+              Toast.success('已删除 ${_selectedItemIds.length} 个项目');
               _exitBatchMode();
             },
             child: const Text('删除', style: TextStyle(color: Colors.red)),
@@ -951,9 +924,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         .toList();
 
     if (folders.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('没有可用的文件夹，请先创建文件夹')),
-      );
+      Toast.warning('没有可用的文件夹，请先创建文件夹');
       return;
     }
 
@@ -995,9 +966,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     for (final itemId in _selectedItemIds) {
       _layoutManager.moveToFolder(itemId, folderId);
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('已将 ${_selectedItemIds.length} 个项目移动到文件夹')),
-    );
+    Toast.success('已将 ${_selectedItemIds.length} 个项目移动到文件夹');
     _exitBatchMode();
   }
 
@@ -1011,11 +980,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           setState(() {
             _isEditMode = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('已退出编辑模式'),
-              duration: Duration(seconds: 1),
-            ),
+          Toast.info(
+            '已退出编辑模式',
+            duration: const Duration(seconds: 1),
           );
         }
       },
@@ -1249,9 +1216,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               },
               onAddToFolder: (itemId, folderId) {
                 _layoutManager.moveToFolder(itemId, folderId);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('已添加到文件夹')),
-                );
+                Toast.success('已添加到文件夹');
               },
               onItemTap: _isBatchMode
                   ? (item) => _toggleItemSelection(item.id)
@@ -1284,9 +1249,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     } catch (e) {
       debugPrint('切换布局失败: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('切换布局失败：$e')),
-        );
+        Toast.error('切换布局失败：$e');
       }
     }
   }

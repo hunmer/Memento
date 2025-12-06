@@ -4,6 +4,7 @@ import 'package:home_widget/home_widget.dart';
 import '../checkin_plugin.dart';
 import '../models/checkin_item.dart';
 import '../../../widgets/widget_config_editor/index.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 打卡项目选择器界面（用于小组件配置）
 ///
@@ -568,12 +569,7 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
       debugPrint('CheckinMonthWidgetProvider 更新完成');
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('已配置 "${selectedItem.name}"'),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        toastService.showToast('已配置 "${selectedItem.name}"');
 
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
@@ -582,12 +578,7 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('配置失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        toastService.showToast('配置失败: $e');
       }
     }
   }

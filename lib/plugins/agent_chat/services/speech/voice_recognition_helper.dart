@@ -4,6 +4,7 @@ import '../../agent_chat_plugin.dart';
 import '../../screens/chat_screen/components/voice_input_dialog.dart';
 import 'speech_recognition_config.dart';
 import 'tencent_asr_service.dart';
+import '../../../../core/services/toast_service.dart';
 
 /// 语音识别辅助类
 ///
@@ -48,12 +49,7 @@ class VoiceRecognitionHelper {
     } catch (e) {
       debugPrint('显示语音输入对话框失败: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('打开语音输入失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        toastService.showToast('打开语音输入失败: $e');
       }
       return false;
     }
@@ -89,12 +85,7 @@ class VoiceRecognitionHelper {
       if (!success) {
         recognitionService.dispose();
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('开始录音失败'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          toastService.showToast('开始录音失败');
         }
         return null;
       }
@@ -103,12 +94,7 @@ class VoiceRecognitionHelper {
     } catch (e) {
       debugPrint('开始语音识别失败: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('开始语音识别失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        toastService.showToast('开始语音识别失败: $e');
       }
       return null;
     }
@@ -145,12 +131,7 @@ class VoiceRecognitionHelper {
       if (asrConfigMap == null) {
         debugPrint('⚠️ [语音识别] ASR配置为空');
         if (showError && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('请先在设置中配置腾讯云语音识别服务'),
-              backgroundColor: Colors.orange,
-            ),
-          );
+          toastService.showToast('请先在设置中配置腾讯云语音识别服务');
         }
         return null;
       }
@@ -162,12 +143,7 @@ class VoiceRecognitionHelper {
       // 验证配置
       if (!asrConfig.isValid()) {
         if (showError && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('语音识别配置无效，请检查设置'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          toastService.showToast('语音识别配置无效，请检查设置');
         }
         return null;
       }
@@ -182,12 +158,7 @@ class VoiceRecognitionHelper {
     } catch (e) {
       debugPrint('创建语音识别服务失败: $e');
       if (showError && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('创建语音识别服务失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        toastService.showToast('创建语音识别服务失败: $e');
       }
       return null;
     }

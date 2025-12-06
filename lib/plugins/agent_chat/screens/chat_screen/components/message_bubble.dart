@@ -9,6 +9,7 @@ import '../../../services/token_counter_service.dart';
 import '../../../services/message_detail_service.dart';
 import '../../../../../core/storage/storage_manager.dart';
 import '../../../../../widgets/file_preview/file_preview_screen.dart';
+import '../../../../../core/services/toast_service.dart';
 import 'markdown_content.dart';
 import 'tool_detail_dialog.dart';
 import 'tool_call_steps.dart';
@@ -461,9 +462,7 @@ class MessageBubble extends StatelessWidget {
         switch (value) {
           case 'copy':
             Clipboard.setData(ClipboardData(text: message.content));
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('已复制到剪贴板')));
+            toastService.showToast('已复制到剪贴板');
             break;
           case 'edit':
             _showEditDialog(context);
@@ -651,9 +650,7 @@ class MessageBubble extends StatelessWidget {
   /// 显示工具调用详情对话框
   Future<void> _showToolDetailDialog(BuildContext context) async {
     if (storage == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('无法加载详情数据')));
+      toastService.showToast('无法加载详情数据');
       return;
     }
 
@@ -676,9 +673,7 @@ class MessageBubble extends StatelessWidget {
 
       if (detail == null) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('未找到详细数据，可能此消息是在更新前创建的')),
-          );
+          toastService.showToast('未找到详细数据，可能此消息是在更新前创建的');
         }
         return;
       }
@@ -698,9 +693,7 @@ class MessageBubble extends StatelessWidget {
       // 关闭加载指示器
       if (context.mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('加载详情失败: $e')));
+        toastService.showToast('加载详情失败: $e');
       }
     }
   }

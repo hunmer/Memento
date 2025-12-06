@@ -6,6 +6,7 @@ import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class UserItemDetailPage extends StatefulWidget {
   final StoreController controller;
@@ -269,17 +270,9 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
     final item = widget.items[_currentIndex];
     if (await widget.controller.useItem(item)) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(StoreLocalizations.of(context).useSuccessMessage),
-        ),
-      );
+      Toast.success(StoreLocalizations.of(context).useSuccessMessage);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(StoreLocalizations.of(context).itemExpiredMessage),
-        ),
-      );
+      Toast.error(StoreLocalizations.of(context).itemExpiredMessage);
     }
   }
 

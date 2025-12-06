@@ -5,6 +5,7 @@ import '../../models/tool_config.dart';
 import '../../services/tool_config_manager.dart';
 import 'components/plugin_section.dart';
 import 'components/tool_editor_dialog.dart';
+import '../../../../core/services/toast_service.dart';
 
 /// 工具管理界面
 class ToolManagementScreen extends StatefulWidget {
@@ -272,22 +273,12 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
 
   /// 显示错误消息
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
+    toastService.showToast(message);
   }
 
   /// 显示成功消息
   void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-      ),
-    );
+    toastService.showToast(message);
   }
 
   /// 构建插件分组列表

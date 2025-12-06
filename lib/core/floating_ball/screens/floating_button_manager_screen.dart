@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
 import '../floating_widget_controller.dart';
 import '../widgets/floating_button_edit_dialog.dart';
+import '../../services/toast_service.dart';
 
 /// 悬浮按钮管理界面
 class FloatingButtonManagerScreen extends StatefulWidget {
@@ -102,9 +103,7 @@ class _FloatingButtonManagerScreenState
     }
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('保存成功')),
-      );
+      toastService.showToast('保存成功');
     }
   }
 

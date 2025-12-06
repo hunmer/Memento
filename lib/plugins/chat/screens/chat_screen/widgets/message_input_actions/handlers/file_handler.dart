@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import '../../../../../models/file_message.dart';
 import '../../../../../services/file_service.dart';
 import '../types.dart';
+import '../../../../../../../../core/services/toast_service.dart';
 
 Future<void> handleFileSelection({
   required BuildContext context,
   required FileService fileService,
   required OnFileSelected? onFileSelected,
 }) async {
-  final scaffoldMessenger = ScaffoldMessenger.of(context);
 
   try {
     // 使用FileService选择文件
@@ -24,13 +24,7 @@ Future<void> handleFileSelection({
 
         // 验证文件是否存在
         if (!await file.exists()) {
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text(ChatLocalizations.of(context).fileNotAccessible),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          toastService.showToast(ChatLocalizations.of(context).fileNotAccessible);
           return;
         }
 
@@ -52,36 +46,12 @@ Future<void> handleFileSelection({
         onFileSelected?.call(metadata);
 
         // 显示文件选择成功的提示
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              '${ChatLocalizations.of(context).fileSelected}: ${fileMessage.originalFileName}',
-            ),
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        toastService.showToast('${ChatLocalizations.of(context).fileSelected}: ${fileMessage.originalFileName}');
       } catch (processingError) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              '${ChatLocalizations.of(context).fileProcessingFailed}: $processingError',
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        toastService.showToast('${ChatLocalizations.of(context).fileProcessingFailed}: $processingError');
       }
     }
   } catch (e) {
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          '${ChatLocalizations.of(context).fileSelectionFailed}: $e',
-        ),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    toastService.showToast('${ChatLocalizations.of(context).fileSelectionFailed}: $e');
   }
 }

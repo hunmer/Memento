@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:share_plus/share_plus.dart';
@@ -86,11 +87,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
       debugPrint('文件路径: $_absoluteFilePath');
       if (!fileExists) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(FilePreviewLocalizations.of(context).fileNotExist),
-            ),
-          );
+          Toast.error(FilePreviewLocalizations.of(context).fileNotExist);
           // 清空文件路径，这样 _buildPreviewContent 会显示错误界面
           setState(() {
             _absoluteFilePath = '';
@@ -104,13 +101,9 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              FilePreviewLocalizations.of(context).errorFilePreviewFailed +
-                  e.toString(),
-            ),
-          ),
+        Toast.error(
+          FilePreviewLocalizations.of(context).errorFilePreviewFailed +
+              e.toString(),
         );
         // 出错时也清空文件路径
         setState(() {
@@ -145,22 +138,14 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
         ], text: '分享文件：${widget.fileName}');
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(FilePreviewLocalizations.of(context).fileNotExist),
-            ),
-          );
+          Toast.error(FilePreviewLocalizations.of(context).fileNotExist);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              FilePreviewLocalizations.of(context).errorFilePreviewFailed +
-                  e.toString(),
-            ),
-          ),
+        Toast.error(
+          FilePreviewLocalizations.of(context).errorFilePreviewFailed +
+              e.toString(),
         );
       }
     }
@@ -206,18 +191,12 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(FilePreviewLocalizations.of(context).fileNotExist),
-            ),
-          );
+          Toast.error(FilePreviewLocalizations.of(context).fileNotExist);
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        Toast.error(e.toString());
       }
     }
   }

@@ -3,6 +3,7 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:universal_platform/universal_platform.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class PermissionController {
   final BuildContext context;
@@ -125,16 +126,9 @@ class PermissionController {
             if (!granted) {
               if (!_mounted) return false;
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    AppLocalizations.of(
-                      context,
-                    )!.permissionRequiredInSettings(permissionName),
-                  ),
-                  duration: const Duration(seconds: 3),
-                ),
-              );
+              Toast.error(AppLocalizations.of(
+                context,
+              )!.permissionRequiredInSettings(permissionName));
               return false;
             }
           }
@@ -155,14 +149,7 @@ class PermissionController {
           if (!granted) {
             if (!_mounted) return false;
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  AppLocalizations.of(context)!.storagePermissionRequired,
-                ),
-                duration: const Duration(seconds: 3),
-              ),
-            );
+            Toast.error(AppLocalizations.of(context)!.storagePermissionRequired);
             return false;
           }
         }

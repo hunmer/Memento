@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../models/folder.dart';
 import '../../models/note.dart';
 import 'notes_screen_state.dart';
+import '../../../../../../core/services/toast_service.dart';
 
 mixin FolderSelectionDialog on NotesMainViewState {
   // 递归构建文件夹树形结构
@@ -106,17 +107,11 @@ mixin FolderSelectionDialog on NotesMainViewState {
     if (targetFolder != null) {
       await plugin.controller.moveNote(note.id, targetFolder.id);
       loadCurrentFolder(); // 刷新当前文件夹视图
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              NotesLocalizations.of(
-                context,
-              ).movedToFolder.replaceFirst('{folderName}', targetFolder.name),
-            ),
-          ),
-        );
-      }
+      toastService.showToast(
+        NotesLocalizations.of(
+          context,
+        ).movedToFolder.replaceFirst('{folderName}', targetFolder.name),
+      );
     }
   }
 }

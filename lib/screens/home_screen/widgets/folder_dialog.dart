@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../models/home_folder_item.dart';
 import '../managers/home_layout_manager.dart';
 import '../managers/home_widget_registry.dart';
@@ -155,9 +156,7 @@ class _FolderDialogState extends State<FolderDialog> {
         .toList();
 
     if (homeItems.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('主页上没有可移入的项目')),
-      );
+          Toast.warning('主页上没有可移入的项目');
       return;
     }
 
@@ -196,9 +195,7 @@ class _FolderDialogState extends State<FolderDialog> {
               onTap: () {
                 Navigator.pop(context);
                 _layoutManager.removeFromFolder(item.id, widget.folder.id);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('已移出到主页')),
-                );
+                              Toast.success('已移出到主页');
               },
             ),
             ListTile(
@@ -236,9 +233,7 @@ class _FolderDialogState extends State<FolderDialog> {
                 children: folder.children.where((c) => c.id != item.id).toList(),
               );
               _layoutManager.updateItem(widget.folder.id, updatedFolder);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('已删除')),
-              );
+                          Toast.success('已删除');
             },
             child: const Text('删除', style: TextStyle(color: Colors.red)),
           ),
@@ -392,9 +387,7 @@ class _MoveFromHomeDialogState extends State<_MoveFromHomeDialog> {
       widget.layoutManager.moveToFolder(itemId, widget.folderId);
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('已移入 ${_selectedIds.length} 个项目')),
-    );
+      Toast.success('已移入 ${_selectedIds.length} 个项目');
   }
 }
 
@@ -592,9 +585,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
   void _saveFolderChanges() {
     final newName = _nameController.text.trim();
     if (newName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入文件夹名称')),
-      );
+          Toast.error('请输入文件夹名称');
       return;
     }
 
@@ -609,8 +600,6 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
     widget.layoutManager.updateItem(widget.folder.id, updatedFolder);
 
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('文件夹已更新')),
-    );
+    Toast.success('文件夹已更新');
   }
 }

@@ -3,6 +3,7 @@ import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/database/controllers/field_controller.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:uuid/uuid.dart';
 import '../controllers/database_controller.dart';
 import '../models/database_model.dart';
@@ -319,15 +320,9 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
     } catch (e, stackTrace) {
       debugPrint('Save failed: $e\n$stackTrace');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              DatabaseLocalizations.of(
-                context,
-              ).saveFailedMessage.replaceFirst('%s', e.toString()),
-            ),
-          ),
-        );
+        Toast.error(DatabaseLocalizations.of(
+          context,
+        ).saveFailedMessage.replaceFirst('%s', e.toString()));
       }
     }
   }

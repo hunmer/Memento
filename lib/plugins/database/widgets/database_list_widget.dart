@@ -8,6 +8,7 @@ import 'package:Memento/plugins/database/widgets/database_edit_widget.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 import '../models/database_model.dart';
@@ -235,13 +236,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   final newDatabase = database.copyWith(id: Uuid().v4());
                   await widget.service.createDatabase(newDatabase);
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          DatabaseLocalizations.of(context).copySuccess,
-                        ),
-                      ),
-                    );
+                    Toast.success(DatabaseLocalizations.of(context).copySuccess);
                     setState(() {
                       _databasesFuture = widget.service.getAllDatabases();
                     });
@@ -289,30 +284,18 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                     try {
                       await widget.service.deleteDatabase(database.id);
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              DatabaseLocalizations.of(
-                                context,
-                              ).deleteSuccessMessage,
-                            ),
-                          ),
-                        );
+                        Toast.success(DatabaseLocalizations.of(
+                          context,
+                        ).deleteSuccessMessage);
                         setState(() {
                           _databasesFuture = widget.service.getAllDatabases();
                         });
                       }
                     } catch (e) {
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              DatabaseLocalizations.of(context)
-                                  .deleteFailedMessage
-                                  .replaceFirst('%s', e.toString()),
-                            ),
-                          ),
-                        );
+                        Toast.error(DatabaseLocalizations.of(context)
+                            .deleteFailedMessage
+                            .replaceFirst('%s', e.toString()));
                       }
                     }
                   }

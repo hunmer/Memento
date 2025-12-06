@@ -8,6 +8,7 @@ import '../models/tts_voice.dart';
 import '../services/system_tts_service.dart';
 import '../tts_plugin.dart';
 import '../l10n/tts_localizations.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// TTS服务编辑对话框（支持新建和编辑）
 class ServiceEditorDialog extends StatefulWidget {
@@ -129,9 +130,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
     } catch (e) {
       setState(() => _loadingVoices = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载语音列表失败: $e')),
-        );
+        Toast.error('加载语音列表失败: $e');
       }
     }
   }
@@ -670,9 +669,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
       // 验证配置
       if (!service.validate()) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('配置验证失败，请检查必填项')),
-          );
+          Toast.error('配置验证失败，请检查必填项');
         }
         return;
       }
@@ -683,9 +680,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
-        );
+        Toast.error('保存失败: $e');
       }
     }
   }

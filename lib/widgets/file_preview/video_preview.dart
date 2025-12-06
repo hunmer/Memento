@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../../../utils/image_utils.dart';
@@ -68,13 +69,8 @@ class _VideoPreviewState extends State<VideoPreview> {
           _isInitialized = false;
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${AppLocalizations.of(context)!.videoLoadFailed}: ${e.toString()}',
-            ),
-            duration: const Duration(seconds: 5),
-          ),
+        Toast.error(
+          '${AppLocalizations.of(context)!.videoLoadFailed}: ${e.toString()}',
         );
       }
     }

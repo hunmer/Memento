@@ -8,6 +8,7 @@ import '../models/warehouse.dart';
 import '../../../widgets/icon_picker_dialog.dart';
 import '../../../widgets/image_picker_dialog.dart';
 import '../../../utils/image_utils.dart';
+import '../../../core/services/toast_service.dart';
 
 class WarehouseForm extends StatefulWidget {
   final Warehouse? warehouse;
@@ -159,9 +160,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
   void _save() async {
     final title = _titleController.text.trim();
     if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(GoodsLocalizations.of(context).warehouseName)),
-      );
+      toastService.showToast(GoodsLocalizations.of(context).warehouseName);
       return;
     }
 

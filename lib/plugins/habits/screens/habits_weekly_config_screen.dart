@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../habits_plugin.dart';
 import '../models/habit.dart';
 import '../models/habits_weekly_widget_config.dart';
@@ -541,9 +542,7 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
   /// 保存配置并完成
   Future<void> _saveAndFinish() async {
     if (_selectedHabitIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请至少选择一个习惯')),
-      );
+      Toast.error('请至少选择一个习惯');
       return;
     }
 
@@ -640,9 +639,7 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
       debugPrint('保存配置失败: $e');
       debugPrint('堆栈: $stackTrace');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
-        );
+        Toast.error('保存失败: $e');
       }
     } finally {
       if (mounted) {

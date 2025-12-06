@@ -11,6 +11,8 @@ import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart'
 import 'package:Memento/screens/notification_test/notification_test_page.dart';
 import 'package:Memento/screens/super_cupertino_test_screen/super_cupertino_test_screen.dart';
 import 'package:Memento/screens/floating_widget_screen/floating_widget_screen.dart';
+import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/core/app_initializer.dart';
 
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
@@ -719,11 +721,7 @@ class AppRoutes extends NavigatorObserver {
                     Navigator.of(navigatorKey.currentContext!).pop();
                     if (isTodoEvent && taskId != null) {
                       // Todo 任务事件不允许编辑
-                      ScaffoldMessenger.of(
-                        navigatorKey.currentContext!,
-                      ).showSnackBar(
-                        const SnackBar(content: Text('任务事件不支持编辑，请前往待办事项中修改')),
-                      );
+                      Toast.warning('任务事件不支持编辑，请前往待办事项中修改');
                     } else {
                       // 普通日历事件可以编辑
                       calendarPlugin.showEventEditPage(
@@ -757,11 +755,7 @@ class AppRoutes extends NavigatorObserver {
                         taskId,
                         TaskStatus.done,
                       );
-                      ScaffoldMessenger.of(
-                        navigatorKey.currentContext!,
-                      ).showSnackBar(
-                        const SnackBar(content: Text('任务已完成并移入历史记录')),
-                      );
+                      Toast.success('任务已完成并移入历史记录');
                     } else {
                       // 普通日历事件
                       calendarController.deleteEvent(eventData);

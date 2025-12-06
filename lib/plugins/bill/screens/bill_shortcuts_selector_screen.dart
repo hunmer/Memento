@@ -4,6 +4,7 @@ import '../models/bill_shortcut.dart';
 import '../services/bill_shortcuts_widget_service.dart';
 import '../bill_plugin.dart';
 import '../../../core/plugin_manager.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 快捷记账小组件配置页面
 ///
@@ -91,17 +92,13 @@ class _BillShortcutsSelectorScreenState
   /// 添加快捷预设
   Future<void> _addShortcut() async {
     if (_billPlugin == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('账单插件未加载')),
-      );
+      toastService.showToast('账单插件未加载');
       return;
     }
 
     final accounts = _billPlugin!.accounts;
     if (accounts.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先创建账户')),
-      );
+      toastService.showToast('请先创建账户');
       return;
     }
 
@@ -150,9 +147,7 @@ class _BillShortcutsSelectorScreenState
   /// 保存配置
   Future<void> _saveConfig() async {
     if (_shortcuts.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请至少添加一个快捷预设')),
-      );
+      toastService.showToast('请至少添加一个快捷预设');
       return;
     }
 
@@ -167,9 +162,7 @@ class _BillShortcutsSelectorScreenState
 
     if (!saveResult) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('保存配置失败')),
-        );
+        toastService.showToast('保存配置失败');
       }
       return;
     }
@@ -183,9 +176,7 @@ class _BillShortcutsSelectorScreenState
     );
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('配置已保存')),
-      );
+      toastService.showToast('配置已保存');
       Navigator.of(context).pop();
     }
   }

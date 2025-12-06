@@ -8,6 +8,7 @@ import 'package:Memento/widgets/quill_viewer/quill_viewer.dart';
 import '../controllers/nodes_controller.dart';
 import '../models/notebook.dart';
 import '../models/node.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../l10n/nodes_localizations.dart';
 import '../widgets/node_item.dart';
 import 'node_edit_screen.dart';
@@ -148,12 +149,7 @@ class _NodesScreenState extends State<NodesScreen> {
     }
 
     Clipboard.setData(ClipboardData(text: buffer.toString()));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(NodesLocalizations.of(context).copiedToClipboard),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    Toast.success(NodesLocalizations.of(context).copiedToClipboard);
   }
 
   void _showClearConfirmDialog(
@@ -177,12 +173,7 @@ class _NodesScreenState extends State<NodesScreen> {
                 onPressed: () {
                   controller.clearNodes(notebook.id);
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.nodesCleared),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
+                  Toast.success(l10n.nodesCleared);
                 },
                 child: Text(l10n.clear),
               ),

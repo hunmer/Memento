@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../models/tool_call_step.dart';
 import '../../../services/tool_service.dart';
 import '../../../../../core/js_bridge/js_bridge_manager.dart';
+import '../../../../../core/services/toast_service.dart';
 
 const _uuid = Uuid();
 
@@ -361,9 +362,7 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
 
     Clipboard.setData(ClipboardData(text: text));
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('已复制到剪贴板'), duration: Duration(seconds: 1)),
-    );
+    toastService.showToast('已复制到剪贴板');
   }
 
   /// 复制所有结果
@@ -389,11 +388,6 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
 
     Clipboard.setData(ClipboardData(text: buffer.toString()));
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('已复制所有结果到剪贴板'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    toastService.showToast('已复制所有结果到剪贴板');
   }
 }

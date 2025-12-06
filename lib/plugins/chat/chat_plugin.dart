@@ -6,6 +6,7 @@ import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/chat/widgets/chat_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:uuid/uuid.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
@@ -59,12 +60,7 @@ class _ChatMainViewState extends State<ChatMainView> {
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('打开频道失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        Toast.error('打开频道失败: $e');
       }
     }
   }

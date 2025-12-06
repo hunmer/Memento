@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:uuid/uuid.dart';
 import '../chat_plugin.dart';
+import '../../../core/services/toast_service.dart';
 
 /// Chat 插件的底部栏组件
 /// 提供频道列表和时间线两个 Tab 的切换功能
@@ -121,18 +122,11 @@ class _ChatBottomBarState extends State<ChatBottomBar>
         await widget.plugin.channelService.createChannel(channel);
 
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(l10n.channelCreated)));
+          toastService.showToast(l10n.channelCreated);
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${l10n.createChannelFailed}: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          toastService.showToast('${l10n.createChannelFailed}: $e');
         }
       }
     }

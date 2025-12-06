@@ -2,6 +2,7 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../bill_plugin.dart';
 import '../models/account.dart';
@@ -263,11 +264,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
   void _saveAccount() async {
     final title = _titleController.text.trim();
     if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(BillLocalizations.of(context).enterAccountName),
-        ),
-      );
+      Toast.error(BillLocalizations.of(context).enterAccountName);
       return;
     }
 

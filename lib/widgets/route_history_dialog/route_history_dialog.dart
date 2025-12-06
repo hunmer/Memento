@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../../core/route/route_history_manager.dart';
 import '../../core/route/page_visit_record.dart';
 import '../../plugins/agent_chat/agent_chat_plugin.dart';
@@ -62,9 +63,7 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
         break;
       default:
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('未知页面类型: ${record.pageId}')),
-          );
+          Toast.show('未知页面类型: ${record.pageId}');
         }
     }
   }

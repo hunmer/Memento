@@ -14,6 +14,7 @@ import '../../../../core/js_bridge/js_bridge_manager.dart';
 import '../../../../core/route/route_history_manager.dart';
 import '../../../tts/tts_plugin.dart';
 import '../../../../widgets/tts_settings_dialog.dart';
+import '../../../../core/services/toast_service.dart';
 import 'components/message_bubble.dart';
 import 'components/message_input.dart';
 import 'components/save_tool_dialog.dart';
@@ -236,12 +237,7 @@ class _ChatScreenState extends State<ChatScreen> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('生成问题失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        toastService.showToast('生成问题失败: $e');
       }
     }
   }
@@ -262,13 +258,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
       // 显示提示
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              result.enabled ? '已开启自动朗读' : '已关闭自动朗读',
-            ),
-            duration: const Duration(seconds: 1),
-          ),
+        toastService.showToast(
+          result.enabled ? '已开启自动朗读' : '已关闭自动朗读',
         );
       }
     }
@@ -842,23 +833,11 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       await _controller.rerunToolCall(messageId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('工具重新执行完成'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        toastService.showToast('工具重新执行完成');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('重新执行工具失败: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        toastService.showToast('重新执行工具失败: $e');
       }
     }
   }
@@ -868,23 +847,11 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       await _controller.rerunSingleStep(messageId, stepIndex);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('步骤 ${stepIndex + 1} 重新执行完成'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        toastService.showToast('步骤 ${stepIndex + 1} 重新执行完成');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('重新执行步骤失败: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        toastService.showToast('重新执行步骤失败: $e');
       }
     }
   }
@@ -924,13 +891,7 @@ class _ChatScreenState extends State<ChatScreen> {
               config.title,
             );
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('已添加工具: ${config.title}'),
-                  backgroundColor: Colors.green,
-                  duration: const Duration(seconds: 2),
-              )
-              );
+              toastService.showToast('已添加工具: ${config.title}');
             }
           },
       ),
@@ -1025,9 +986,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             .updateConversation(updatedConversation);
                         if (mounted) {
                           Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('设置已保存')),
-                          );
+                          toastService.showToast('设置已保存');
                         }
                       },
                       child: const Text('保存'),
@@ -1041,9 +1000,7 @@ class _ChatScreenState extends State<ChatScreen> {
   /// 显示清空聊天记录确认对话框
   Future<void> _showClearMessagesConfirm() async {
     if (_controller.messages.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('当前没有消息记录')));
+      toastService.showToast('当前没有消息记录');
       return;
     }
 
@@ -1073,15 +1030,11 @@ class _ChatScreenState extends State<ChatScreen> {
       try {
         await _controller.clearAllMessages();
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('聊天记录已清空')));
+          toastService.showToast('聊天记录已清空');
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('清空失败: $e'), backgroundColor: Colors.red),
-          );
+          toastService.showToast('清空失败: $e');
         }
       }
     }
@@ -1095,12 +1048,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (!mounted) return;
 
       if (agents.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('未找到可用的Agent，请先在OpenAI插件中创建'),
-            duration: Duration(seconds: 3),
-          ),
-        );
+        toastService.showToast('未找到可用的Agent，请先在OpenAI插件中创建');
         return;
       }
 
@@ -1167,32 +1115,17 @@ class _ChatScreenState extends State<ChatScreen> {
           // 切换 agent 后重新加载建议问题
           await _loadSuggestedQuestions();
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('已切换到 ${_controller.currentAgent?.name}'),
-                duration: const Duration(seconds: 2),
-              ),
-            );
+            toastService.showToast('已切换到 ${_controller.currentAgent?.name}');
           }
         } catch (e) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('切换Agent失败: $e'),
-                backgroundColor: Colors.red,
-              ),
-            );
+            toastService.showToast('切换Agent失败: $e');
           }
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('加载Agent列表失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        toastService.showToast('加载Agent列表失败: $e');
       }
     }
   }

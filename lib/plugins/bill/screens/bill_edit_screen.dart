@@ -1,6 +1,7 @@
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:uuid/uuid.dart';
 import '../bill_plugin.dart';
 import '../models/bill.dart';
@@ -162,25 +163,13 @@ class _BillEditScreenState extends State<BillEditScreen> {
         await widget.billPlugin.controller.saveBill(bill);
 
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(BillLocalizations.of(context).billSaved),
-            backgroundColor: Colors.green,
-          ),
-        );
+        Toast.success(BillLocalizations.of(context).billSaved);
 
         Navigator.of(context).pop();
         widget.onSaved?.call();
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${BillLocalizations.of(context).billSaveFailed}: $e',
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
+        Toast.error('${BillLocalizations.of(context).billSaveFailed}: $e');
       }
     }
   }

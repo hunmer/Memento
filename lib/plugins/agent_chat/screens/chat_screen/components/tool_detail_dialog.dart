@@ -4,6 +4,7 @@ import '../../../models/tool_call_step.dart';
 import '../../../services/message_detail_service.dart';
 import 'markdown_content.dart';
 import 'tool_call_steps.dart';
+import '../../../../../core/services/toast_service.dart';
 
 /// 工具调用详情对话框
 ///
@@ -248,11 +249,6 @@ class _ToolDetailDialogState extends State<ToolDetailDialog>
   /// 复制到剪贴板
   void _copyToClipboard(String text, String label) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$label已复制到剪贴板'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    toastService.showToast('$label已复制到剪贴板');
   }
 }

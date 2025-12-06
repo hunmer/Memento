@@ -6,6 +6,7 @@ import '../models/activity_daily_widget_config.dart';
 import '../models/activity_daily_widget_data.dart';
 import '../services/activity_widget_service.dart';
 import '../../../widgets/widget_config_editor/index.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 日视图活动列表小组件配置界面
 ///
@@ -184,16 +185,12 @@ class _ActivityDailyConfigScreenState
       debugPrint('ActivityDailyConfig: updateWidget result=$result');
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('配置已保存')),
-        );
+        ToastService.instance.showToast('配置已保存');
       }
     } catch (e) {
       debugPrint('保存配置失败: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
-        );
+        ToastService.instance.showToast('保存失败: $e');
       }
     } finally {
       setState(() => _isSaving = false);

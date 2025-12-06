@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -122,11 +123,7 @@ class _QuillEditorWidgetState extends State<QuillEditorWidget> {
             final title = _titleController.text.trim();
             final content = _getContentAsJson();
             if (widget.showTitle && title.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(AppLocalizations.of(context)!.pleaseEnterTitle),
-                ),
-              );
+              Toast.error(AppLocalizations.of(context)!.pleaseEnterTitle);
               return;
             }
             widget.onSave(title, content);

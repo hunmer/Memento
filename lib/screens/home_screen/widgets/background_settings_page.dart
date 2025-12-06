@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../managers/home_layout_manager.dart';
 import '../models/layout_config.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 主页主题设置页面
 class BackgroundSettingsPage extends StatefulWidget {
@@ -83,9 +84,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
     } catch (e) {
       debugPrint('选择图片失败: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('选择图片失败：$e')),
-        );
+        toastService.showToast('选择图片失败：$e');
       }
     }
     return null;
@@ -103,15 +102,11 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('主题设置已保存')),
-        );
+        toastService.showToast('主题设置已保存');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败：$e')),
-        );
+        toastService.showToast('保存失败：$e');
       }
     }
   }
@@ -141,16 +136,12 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
         await _loadSettings();
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('布局"${layout.name}"的背景已更新')),
-          );
+          toastService.showToast('布局"${layout.name}"的背景已更新');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('更新失败：$e')),
-        );
+        toastService.showToast('更新失败：$e');
       }
     }
   }

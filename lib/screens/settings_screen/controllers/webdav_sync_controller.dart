@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 import 'package:path/path.dart' as path;
@@ -153,25 +154,13 @@ class WebDAVSyncController {
   // 显示错误提示
   void _showErrorSnackBar(String message) {
     if (!_mounted) return;
-
-    final context = _safeContext;
-    if (context == null) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
-    );
+    Toast.error(message);
   }
 
   // 显示成功提示
   void _showSuccessSnackBar(String message) {
     if (!_mounted) return;
-
-    final context = _safeContext;
-    if (context == null) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green),
-    );
+    Toast.success(message);
   }
 
   // 递归获取所有文件

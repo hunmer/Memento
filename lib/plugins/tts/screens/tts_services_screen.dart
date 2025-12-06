@@ -6,6 +6,7 @@ import '../models/tts_service_config.dart';
 import '../models/tts_service_type.dart';
 import '../l10n/tts_localizations.dart';
 import '../widgets/service_editor_dialog.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// TTS服务列表界面
 class TTSServicesScreen extends StatefulWidget {
@@ -38,9 +39,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载服务失败: $e')),
-        );
+        Toast.error('加载服务失败: $e');
       }
     }
   }
@@ -70,15 +69,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         await _plugin.managerService.deleteService(service.id);
         _loadServices();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('服务已删除')),
-          );
+          Toast.success('服务已删除');
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('删除失败: $e')),
-          );
+          Toast.error('删除失败: $e');
         }
       }
     }
@@ -91,23 +86,17 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         serviceId: service.id,
         onError: (error) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('测试失败: $error')),
-            );
+            Toast.error('测试失败: $error');
           }
         },
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(TTSLocalizations.of(context).testSuccess)),
-        );
+        Toast.success(TTSLocalizations.of(context).testSuccess);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${TTSLocalizations.of(context).testFailed}: $e')),
-        );
+        Toast.error('${TTSLocalizations.of(context).testFailed}: $e');
       }
     }
   }
@@ -119,9 +108,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
       _loadServices();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('更新失败: $e')),
-        );
+        Toast.error('更新失败: $e');
       }
     }
   }
@@ -140,15 +127,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
       _loadServices();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('已设置为默认服务')),
-        );
+        Toast.success('已设置为默认服务');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('设置失败: $e')),
-        );
+        Toast.error('设置失败: $e');
       }
     }
   }
@@ -166,15 +149,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         _loadServices();
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('服务已添加')),
-          );
+          Toast.success('服务已添加');
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('添加失败: $e')),
-          );
+          Toast.error('添加失败: $e');
         }
       }
     }
@@ -193,15 +172,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         _loadServices();
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('服务已更新')),
-          );
+          Toast.success('服务已更新');
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('更新失败: $e')),
-          );
+          Toast.error('更新失败: $e');
         }
       }
     }

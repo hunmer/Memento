@@ -1,3 +1,4 @@
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../core/plugin_base.dart';
@@ -245,12 +246,7 @@ class _AgentChatMainViewState extends State<AgentChatMainView> {
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('打开对话失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        toastService.showToast('打开对话失败: $e');
       }
     }
   }

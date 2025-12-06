@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/custom_field.dart';
 import '../../l10n/goods_localizations.dart';
+import '../../../../core/services/toast_service.dart';
 
 class CustomFieldsList extends StatefulWidget {
   final List<CustomField> fields;
@@ -122,14 +123,10 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
                     valueController.text.isNotEmpty) {
                   Navigator.of(context).pop(true);
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        GoodsLocalizations.of(
-                          context,
-                        ).fieldNameAndValueCannotBeEmpty,
-                      ),
-                    ),
+                  toastService.showToast(
+                    GoodsLocalizations.of(
+                      context,
+                    ).fieldNameAndValueCannotBeEmpty,
                   );
                 }
               },
@@ -196,14 +193,10 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
                     valueController.text.isNotEmpty) {
                   Navigator.of(context).pop(true);
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        GoodsLocalizations.of(
-                          context,
-                        ).fieldNameAndValueCannotBeEmpty,
-                      ),
-                    ),
+                  toastService.showToast(
+                    GoodsLocalizations.of(
+                      context,
+                    ).fieldNameAndValueCannotBeEmpty,
                   );
                 }
               },

@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../bill_plugin.dart';
 import '../models/account.dart';
 import 'account_edit_screen.dart';
@@ -130,13 +131,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
           },
           onDismissed: (direction) {
             widget.billPlugin.controller.deleteAccount(account.id);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${BillLocalizations.of(context).accountDeleted} "${account.title}"',
-                ),
-              ),
-            );
+            Toast.success('${BillLocalizations.of(context).accountDeleted} "${account.title}"');
           },
           child: _buildAccountCard(context, account),
         );

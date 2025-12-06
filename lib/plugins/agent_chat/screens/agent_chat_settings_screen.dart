@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../core/plugin_base.dart';
 import '../services/speech/speech_recognition_config.dart';
+import '../../../core/services/toast_service.dart';
 
 /// Agent Chat 插件设置界面
 class AgentChatSettingsScreen extends StatefulWidget {
@@ -132,12 +133,7 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('设置保存成功'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        toastService.showToast('设置保存成功');
       }
     } catch (e) {
       debugPrint('❌ [设置页面] 保存失败: $e');
@@ -169,12 +165,7 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
 
       // 显示成功消息
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('配置验证通过！'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        toastService.showToast('配置验证通过！');
       }
     } catch (e) {
       _showError('验证失败: $e');
@@ -185,9 +176,7 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
   void _showError(String message) {
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
-    );
+    toastService.showToast(message);
   }
 
   @override

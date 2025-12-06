@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../controllers/settings_screen_controller.dart';
 import '../models/webdav_config.dart';
 import 'l10n/webdav_localizations.dart';
+import '../../../../core/services/toast_service.dart';
 
 class WebDAVSettingsSection extends StatefulWidget {
   final SettingsScreenController controller;
@@ -73,22 +74,12 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(WebDAVLocalizations.of(context).settingsSaved),
-          backgroundColor: Colors.green,
-        ),
-      );
+      toastService.showToast(WebDAVLocalizations.of(context).settingsSaved);
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${WebDAVLocalizations.of(context).saveFailed}: ${e.toString()}',
-          ),
-          backgroundColor: Colors.red,
-        ),
+      toastService.showToast(
+        '${WebDAVLocalizations.of(context).saveFailed}: ${e.toString()}',
       );
     } finally {
       if (mounted) {

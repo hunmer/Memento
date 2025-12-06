@@ -4,6 +4,7 @@ import '../../models/saved_tool_template.dart';
 import '../chat_screen/components/save_tool_dialog.dart';
 import 'components/template_execution_dialog.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '../../../../core/services/toast_service.dart';
 
 /// 工具模板管理界面
 class ToolTemplateScreen extends StatefulWidget {
@@ -471,21 +472,11 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
       try {
         await widget.templateService.deleteTemplate(template.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('删除成功'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          toastService.showToast('删除成功');
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('删除失败: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          toastService.showToast('删除失败: $e');
         }
       }
     }
@@ -593,19 +584,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
         Navigator.pop(context);
 
         // 显示成功提示
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 8),
-                Text('默认模板已成功重置'),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        toastService.showToast('默认模板已成功重置');
 
         // 刷新界面
         setState(() {});
@@ -616,19 +595,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
         Navigator.pop(context);
 
         // 显示错误提示
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error, color: Colors.white),
-                const SizedBox(width: 8),
-                Expanded(child: Text('重置失败: $e')),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        toastService.showToast('重置失败: $e');
       }
     }
   }

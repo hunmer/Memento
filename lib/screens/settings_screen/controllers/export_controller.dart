@@ -7,6 +7,7 @@ import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as path;
 import '../../../core/utils/file_utils.dart';
 import '../widgets/plugin_selection_dialog.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class ExportController {
   BuildContext? _context;
@@ -89,23 +90,11 @@ class ExportController {
       await tempDir.delete(recursive: true);
       if (savePath != null) {
         if (!_mounted) return;
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context!)!.dataExportedTo(savePath),
-            ),
-          ),
-        );
+        Toast.success(AppLocalizations.of(context!)!.dataExportedTo(savePath));
       }
     } catch (e) {
       if (!_mounted) return;
-      ScaffoldMessenger.of(currentContext).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context!)!.exportFailedWithError(e.toString()),
-          ),
-        ),
-      );
+      Toast.error(AppLocalizations.of(context!)!.exportFailedWithError(e.toString()));
     }
   }
 }

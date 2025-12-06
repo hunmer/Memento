@@ -6,6 +6,7 @@ import 'package:Memento/plugins/store/widgets/user_item_card.dart';
 import 'package:Memento/plugins/store/widgets/user_item_detail_page.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class UserItems extends StatefulWidget {
   final StoreController controller;
@@ -187,17 +188,9 @@ class _UserItemsState extends State<UserItems> {
 
                       if (await widget.controller.useItem(itemToUse)) {
                         setState(() {});
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(StoreLocalizations.of(context).useSuccess),
-                          ),
-                        );
+                        Toast.success(StoreLocalizations.of(context).useSuccess);
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(StoreLocalizations.of(context).itemExpired),
-                          ),
-                        );
+                        Toast.error(StoreLocalizations.of(context).itemExpired);
                       }
                     },
                   ),
@@ -356,17 +349,9 @@ class _UserItemsState extends State<UserItems> {
 
               if (await widget.controller.useItem(itemToUse)) {
                 setState(() {});
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(StoreLocalizations.of(context).useSuccess),
-                  ),
-                );
+                Toast.success(StoreLocalizations.of(context).useSuccess);
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(StoreLocalizations.of(context).itemExpired),
-                  ),
-                );
+                Toast.error(StoreLocalizations.of(context).itemExpired);
               }
             },
           ),

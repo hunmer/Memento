@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../models/script_input.dart';
 
 /// 脚本输入参数编辑对话框
@@ -87,9 +88,7 @@ class _ScriptInputEditDialogState extends State<ScriptInputEditDialog> {
     if (_selectedType == 'select') {
       final optionsText = _optionsController.text.trim();
       if (optionsText.isEmpty) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('选择类型必须提供选项列表')));
+        Toast.error('选择类型必须提供选项列表');
         return;
       }
       options =

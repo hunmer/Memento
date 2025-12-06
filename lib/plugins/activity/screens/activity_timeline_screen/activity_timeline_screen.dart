@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../../../../core/storage/storage_manager.dart';
 import '../../../../core/event/event.dart';
 import '../../../../widgets/calendar_strip_date_picker.dart';
@@ -108,12 +109,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   /// 从通知点击显示活动表单
   void _showActivityFormFromNotification() {
     // 显示一个提示信息
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('正在打开活动记录表单...'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    Toast.show('正在打开活动记录表单...');
 
     // 延迟一点时间确保SnackBar显示后再打开表单
     Future.delayed(const Duration(milliseconds: 500), () {
@@ -143,12 +139,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       debugPrint('[ActivityTimelineScreen] 打开活动表单失败: $e');
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('打开表单失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        Toast.error('打开表单失败: $e');
       }
     }
   }

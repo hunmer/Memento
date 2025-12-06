@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../models/event.dart';
 import '../../../widgets/circle_icon_picker.dart';
 import '../utils/calendar_notification_utils.dart';
+import '../../../core/services/toast_service.dart';
 
 class EventEditPage extends StatefulWidget {
   final CalendarEvent? event;
@@ -148,13 +149,7 @@ class _EventEditPageState extends State<EventEditPage> {
 
   Future<void> _selectEndTime() async {
     if (_endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            CalendarLocalizations.of(context).selectDateRangeFirst,
-          ),
-        ),
-      );
+      toastService.showToast(CalendarLocalizations.of(context).selectDateRangeFirst);
       return;
     }
 
@@ -175,11 +170,7 @@ class _EventEditPageState extends State<EventEditPage> {
 
   Future<void> _saveEvent() async {
     if (_titleController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(CalendarLocalizations.of(context).enterEventTitle),
-        ),
-      );
+      toastService.showToast(CalendarLocalizations.of(context).enterEventTitle);
       return;
     }
 
@@ -197,13 +188,7 @@ class _EventEditPageState extends State<EventEditPage> {
     }
 
     if (endDateTime.isBefore(startDateTime)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            CalendarLocalizations.of(context).endTimeCannotBeEarlier,
-          ),
-        ),
-      );
+      toastService.showToast(CalendarLocalizations.of(context).endTimeCannotBeEarlier);
       return;
     }
 

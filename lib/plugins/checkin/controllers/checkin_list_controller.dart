@@ -13,6 +13,7 @@ import '../services/group_sort_service.dart';
 import '../widgets/group_sort_dialog.dart';
 import '../../../core/event/event_manager.dart';
 import '../../../core/event/item_event_args.dart';
+import '../../../core/services/toast_service.dart';
 
 class CheckinListController {
   final BuildContext context;
@@ -408,14 +409,10 @@ class CheckinListController {
                   Navigator.pop(context);
                   await item.resetRecords();
                   onStateChanged();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        CheckinLocalizations.of(
-                          context,
-                        ).resetSuccessMessage.replaceFirst('%s', item.name),
-                      ),
-                    ),
+                  ToastService.instance.showToast(
+                    CheckinLocalizations.of(
+                      context,
+                    ).resetSuccessMessage.replaceFirst('%s', item.name),
                   );
                 },
                 child: Text(
@@ -453,14 +450,10 @@ class CheckinListController {
                   notifyEvent('deleted', item);
                   await CheckinPlugin.shared.triggerSave();
                   onStateChanged();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        CheckinLocalizations.of(
-                          context,
-                        ).deleteSuccessMessage.replaceFirst('%s', item.name),
-                      ),
-                    ),
+                  ToastService.instance.showToast(
+                    CheckinLocalizations.of(
+                      context,
+                    ).deleteSuccessMessage.replaceFirst('%s', item.name),
                   );
                 },
                 child: Text(

@@ -11,6 +11,7 @@ import '../../../widgets/widget_config_editor/models/widget_config.dart';
 import '../../../widgets/widget_config_editor/models/color_config.dart';
 import '../../../widgets/widget_config_editor/models/widget_size.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 日历月视图小组件配置界面
 ///
@@ -362,17 +363,13 @@ class _CalendarMonthSelectorScreenState
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('配置已保存')),
-        );
+        ToastService.instance.showToast('配置已保存');
         Navigator.of(context).pop();
       }
     } catch (e) {
       debugPrint('保存配置失败: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
-        );
+        ToastService.instance.showToast('保存失败: $e');
       }
     } finally {
       if (mounted) {

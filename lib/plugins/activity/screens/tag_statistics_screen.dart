@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../services/activity_service.dart';
 import '../models/activity_record.dart';
+import '../../../core/services/toast_service.dart';
 
 class TagStatisticsScreen extends StatefulWidget {
   final String tagName;
@@ -160,9 +161,7 @@ class _TagStatisticsScreenState extends State<TagStatisticsScreen> {
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error loading data: $e')));
+        toastService.showToast('Error loading data: $e');
       }
     }
   }

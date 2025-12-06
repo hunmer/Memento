@@ -12,6 +12,7 @@ import '../tool_management_screen/tool_management_screen.dart';
 import '../tool_template_screen/tool_template_screen.dart';
 import '../../services/tool_template_service.dart';
 import '../../../../core/route/route_history_manager.dart';
+import '../../../../core/services/toast_service.dart';
 
 /// 会话列表屏幕
 class ConversationListScreen extends StatefulWidget {
@@ -371,9 +372,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         await _controller.updateConversation(updated);
 
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('会话已更新')));
+          ToastService.instance.showToast('会话已更新');
         }
       }
     } finally {
@@ -410,9 +409,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       await _controller.deleteConversation(conversation.id);
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('会话已删除')));
+        ToastService.instance.showToast('会话已删除');
       }
     }
   }

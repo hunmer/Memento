@@ -3,6 +3,7 @@ import '../../../models/chat_message.dart';
 import '../../../models/saved_tool_template.dart';
 import '../../../models/tool_call_step.dart';
 import '../../../services/tool_template_service.dart';
+import '../../../../../core/services/toast_service.dart';
 
 /// 保存/编辑工具对话框
 ///
@@ -557,12 +558,7 @@ class _SaveToolDialogState extends State<SaveToolDialog>
 
         if (mounted) {
           Navigator.pop(context, true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('工具模板 "$name" 更新成功'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          toastService.showToast('工具模板 "$name" 更新成功');
         }
       } else {
         // 创建模式：新建模板
@@ -576,12 +572,7 @@ class _SaveToolDialogState extends State<SaveToolDialog>
 
         if (mounted) {
           Navigator.pop(context, true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('工具 "$name" 保存成功'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          toastService.showToast('工具 "$name" 保存成功');
         }
       }
     } catch (e) {

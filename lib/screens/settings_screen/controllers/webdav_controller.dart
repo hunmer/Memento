@@ -6,6 +6,7 @@ import '../../../core/storage/storage_manager.dart';
 import 'package:mime/mime.dart';
 import 'dart:async';
 import '../widgets/backup_progress_dialog.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class WebDAVController {
   webdav.Client? _client;
@@ -161,13 +162,7 @@ class WebDAVController {
                 onCancel: () {
                   Navigator.of(dialogContext).pop();
                   if (dialogContext.mounted) {
-                    ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          AppLocalizations.of(context)!.downloadCancelled,
-                        ),
-                      ),
-                    );
+                    Toast.show(AppLocalizations.of(context)!.downloadCancelled);
                   }
                 },
               ),
@@ -324,13 +319,7 @@ class WebDAVController {
                 onCancel: () {
                   Navigator.of(dialogContext).pop();
                   if (dialogContext.mounted) {
-                    ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          AppLocalizations.of(context)!.downloadCancelled,
-                        ),
-                      ),
-                    );
+                    Toast.show(AppLocalizations.of(context)!.downloadCancelled);
                   }
                 },
               ),

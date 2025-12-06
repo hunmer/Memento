@@ -4,6 +4,7 @@ import 'package:Memento/widgets/icon_picker_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../models/models.dart';
 import '../controllers/controllers.dart';
 
@@ -188,11 +189,7 @@ class _TaskFormState extends State<TaskForm> {
 
   Future<void> _saveTask() async {
     if (_titleController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(TodoLocalizations.of(context).pleaseEnterTitle),
-        ),
-      );
+      Toast.error(TodoLocalizations.of(context).pleaseEnterTitle);
       return;
     }
 
