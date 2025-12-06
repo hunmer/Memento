@@ -1,11 +1,9 @@
 /// 统一计时器事件系统
 ///
 /// 定义计时器相关的所有事件类型和参数类
+library;
 
-import 'dart:convert';
 import 'package:Memento/core/event/event_manager.dart';
-import 'package:flutter/material.dart';
-import '../../../../core/event/event_args.dart';
 
 /// 计时器事件类型
 enum TimerEventType {

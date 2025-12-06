@@ -1,5 +1,4 @@
 import 'dart:io' show Platform;
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';

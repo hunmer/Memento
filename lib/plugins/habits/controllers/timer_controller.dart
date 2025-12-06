@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'package:Memento/core/services/timer/events/timer_events.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/services/timer/unified_timer_controller.dart';
@@ -137,19 +135,6 @@ class TimerController {
 
   /// 设置计时器回调
   void _setupTimerCallback(String habitId, TimerUpdateCallback callback) {
-    // 订阅统一计时器事件
-    final subscriptionId = EventManager.instance.subscribe(
-      'unified_timer_updated',
-      (args) {
-        if (args is UnifiedTimerEventArgs) {
-          final state = args.timerState as TimerState;
-          if (state.id == habitId) {
-            callback(state.elapsed.inSeconds);
-          }
-        }
-      },
-    );
-
     // 启动时立即调用一次
     final state = unifiedTimerController.getTimer(habitId);
     if (state != null) {

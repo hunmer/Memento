@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
@@ -9,7 +8,6 @@ import '../../core/js_bridge/js_bridge_plugin.dart';
 import '../base_plugin.dart';
 import 'controllers/controllers.dart';
 import 'models/models.dart';
-import 'views/todo_main_view.dart';
 import 'views/todo_bottombar_view.dart';
 
 class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {

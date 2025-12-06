@@ -6,7 +6,6 @@ import '../services/script_executor.dart';
 import '../models/script_info.dart';
 import '../models/script_input.dart';
 import '../models/script_trigger.dart';
-import '../models/script_folder.dart';
 import '../widgets/script_card.dart';
 import '../widgets/script_run_dialog.dart';
 import 'script_edit_screen.dart';
@@ -31,7 +30,7 @@ class ScriptsListScreen extends StatefulWidget {
 class _ScriptsListScreenState extends State<ScriptsListScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  bool _showOnlyEnabled = false;
+  final bool _showOnlyEnabled = false;
 
   @override
   void initState() {

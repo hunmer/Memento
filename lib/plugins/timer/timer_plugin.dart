@@ -153,6 +153,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     // 查找现有任务
     final existingTask = _tasks.firstWhere(
       (t) => t.id == state.id,
+      // ignore: cast_from_null_always_fails
       orElse: () => null as TimerTask,
     );
 

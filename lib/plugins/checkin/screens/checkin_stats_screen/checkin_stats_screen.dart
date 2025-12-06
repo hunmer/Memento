@@ -1,9 +1,7 @@
 import 'package:Memento/widgets/statistics/statistics.dart';
-import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'widgets/daily_checkin_chart.dart';
 import 'widgets/checkin_streak_ranking.dart';
 import 'widgets/checkin_group_pie_chart.dart';
@@ -115,7 +113,7 @@ Future<StatisticsData> loadStatisticsData(
       'totalItems': checkinItems.length,
       'completedItems': completedItems,
       'completionRate': checkinItems.isNotEmpty
-          ? (completedItems / checkinItems.length * 100).toStringAsFixed(1) + '%'
+              ? '${(completedItems / checkinItems.length * 100).toStringAsFixed(1)}%'
           : '0%',
     },
   );

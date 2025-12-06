@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// 通用前台计时器服务（增强版）
@@ -93,12 +92,6 @@ class ForegroundTimerService {
     }
   }
 
-  /// 字符串ID转数字（确保唯一性）
-  ///
-  /// 将字符串哈希转换为5位数字，确保通知ID的唯一性
-  static int _hashId(String id) {
-    return id.hashCode.abs() % 100000; // 转换为5位数字
-  }
 
   // ========== 兼容旧版本API（已废弃，建议使用新API） ==========
 

@@ -118,15 +118,6 @@ class _NotesMainViewState extends NotesMainViewState
     // 实现更多选项菜单
   }
 
-  /// 切换视图模式（网格/列表）
-  void _toggleViewMode() {
-    // 实现视图模式切换
-  }
-
-  /// 显示高级过滤器
-  void _showAdvancedFilters() {
-    // 实现高级过滤器
-  }
 
   /// 保存滚动位置
   void _saveScrollPosition() {

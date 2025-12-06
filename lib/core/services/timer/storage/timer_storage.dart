@@ -5,9 +5,9 @@
 /// - 应用启动时状态恢复
 /// - 历史计时记录存储
 /// - 版本兼容与迁移
+library;
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:Memento/core/app_initializer.dart';
 import 'package:flutter/material.dart';

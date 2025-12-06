@@ -189,7 +189,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
       );
     }
 
-    return _buildCardView(_filteredSkills, HabitsLocalizations.of(context)!);
+    return _buildCardView(_filteredSkills, HabitsLocalizations.of(context));
   }
 
   /// 显示排序菜单

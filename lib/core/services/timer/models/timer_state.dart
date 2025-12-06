@@ -6,8 +6,8 @@
 /// - 倒计时/正计时模式
 /// - 番茄钟计时器
 /// - JSON 序列化/反序列化
+library;
 
-import 'dart:convert';
 import 'package:flutter/material.dart';
 
 /// 计时器类型
@@ -159,7 +159,7 @@ class TimerState {
     if (stages.isEmpty) {
       return isCountdown
           ? '${_formatDuration(targetDuration ?? elapsed)} / ${_formatDuration(targetDuration ?? Duration.zero)}'
-          : '${_formatDuration(elapsed)}';
+          : _formatDuration(elapsed);
     }
 
     if (_currentStageIndex < stages.length) {

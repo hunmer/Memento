@@ -6,6 +6,7 @@
 /// - 管理通知栏同步
 /// - 处理事件广播
 /// - 状态持久化
+library;
 
 import 'dart:async';
 import 'dart:io';
@@ -308,7 +309,6 @@ class UnifiedTimerController {
   void _updateAllTimers() {
     if (_timers.isEmpty) return;
 
-    final now = DateTime.now();
     final completedTimers = <String>[];
 
     for (final state in _timers.values) {

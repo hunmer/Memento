@@ -3,6 +3,7 @@
 /// Android小组件期望接收图标名称（如 'star', 'home'），
 /// 而Flutter端习惯/技能存储的是Material Icon的codePoint字符串（如 '57344'）
 /// 此工具提供双向转换功能
+library;
 
 class IconNameMapper {
   // 常用Material Icons的codePoint到名称的映射

@@ -224,13 +224,13 @@ class ProductCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${_formatDate(product.exchangeStart)}',
+                          _formatDate(product.exchangeStart),
                           style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
                         ),
                       ],
                     ),
                     Text(
-                      '${_formatDate(product.exchangeEnd)}',
+                      _formatDate(product.exchangeEnd),
                       style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
                     ),
                   ],

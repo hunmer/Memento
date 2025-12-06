@@ -11,9 +11,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _filterStatus = '全部';
+  final String _filterStatus = '全部';
   String _currentGroup = '全部';
-  bool _isGridView = false;
+  final bool _isGridView = false;
 
   @override
   Widget build(BuildContext context) {

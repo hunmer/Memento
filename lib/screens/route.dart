@@ -46,7 +46,6 @@ import 'package:Memento/plugins/nodes/nodes_plugin.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/scripts_center/scripts_center_plugin.dart';
 import 'package:Memento/plugins/timer/views/timer_main_view.dart';
-import 'package:Memento/plugins/todo/views/todo_main_view.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:Memento/plugins/tracker/screens/tracker_goal_selector_screen.dart';
 import 'package:Memento/plugins/tracker/screens/tracker_goal_progress_selector_screen.dart';

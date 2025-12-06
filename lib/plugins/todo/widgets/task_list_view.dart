@@ -692,21 +692,6 @@ class _TaskCardState extends State<_TaskCard> {
     );
   }
 
-  IconData _getCategoryIcon() {
-    // Simple mapping based on tags or random for variety since we don't have category field
-    if (widget.task.tags.contains('Design') ||
-        widget.task.title.toLowerCase().contains('design')) {
-      return Icons.palette;
-    } else if (widget.task.tags.contains('Frontend') ||
-        widget.task.title.toLowerCase().contains('code')) {
-      return Icons.code;
-    } else if (widget.task.tags.contains('Admin') ||
-        widget.task.tags.contains('Reporting')) {
-      return Icons
-          .school; // Close enough to the "school" icon in HTML for Admin/Report
-    }
-    return Icons.assignment;
-  }
 
   Widget _buildTag(
     String text,

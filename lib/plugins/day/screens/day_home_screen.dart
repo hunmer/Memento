@@ -1,5 +1,4 @@
 import 'dart:io' show Platform;
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
