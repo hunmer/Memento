@@ -1,11 +1,15 @@
 import 'dart:io';
 
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../base_plugin.dart';
 import '../../core/plugin_manager.dart';
 import '../../core/config_manager.dart';
 import '../../core/js_bridge/js_bridge_plugin.dart';
+import '../../core/services/timer/unified_timer_controller.dart';
+import '../../core/services/timer/models/timer_state.dart';
+import '../../core/services/timer/events/timer_events.dart';
 import 'models/timer_task.dart';
 import 'models/timer_item.dart';
 import 'views/timer_main_view.dart';
@@ -39,8 +43,17 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Future<void> initialize() async {
+    // 1. 初始化统一计时器控制器
+    await unifiedTimerController.initialize();
+
     timerController = TimerController(storage);
     await _loadTasks();
+
+    // 2. 订阅统一计时器事件，转发给 TimerTask 事件系统
+    _setupEventListeners();
+
+    // 3. 恢复活动计时器状态
+    await _restoreActiveTimers();
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
@@ -62,6 +75,96 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   @override
   Widget buildMainView(BuildContext context) {
     return TimerMainView();
+  }
+
+  /// 设置事件监听器
+  void _setupEventListeners() {
+    // 监听统一计时器事件，转发给现有事件系统
+    EventManager.instance.subscribe(TimerEventNames.timerStarted, (args) {
+      if (args is UnifiedTimerEventArgs) {
+        final state = args.timerState as TimerState;
+        // 转换为 TimerTask 并广播
+        final task = _convertTimerStateToTimerTask(state);
+        if (task != null) {
+          EventManager.instance.broadcast(
+            'timer_task_changed',
+            TimerTaskEventArgs(task),
+          );
+        }
+      }
+    });
+
+    EventManager.instance.subscribe(TimerEventNames.timerUpdated, (args) {
+      if (args is UnifiedTimerEventArgs) {
+        final state = args.timerState as TimerState;
+        final task = _convertTimerStateToTimerTask(state);
+        if (task != null) {
+          EventManager.instance.broadcast(
+            'timer_task_changed',
+            TimerTaskEventArgs(task),
+          );
+        }
+      }
+    });
+
+    EventManager.instance.subscribe(TimerEventNames.timerCompleted, (args) {
+      if (args is UnifiedTimerEventArgs) {
+        final state = args.timerState as TimerState;
+        final task = _convertTimerStateToTimerTask(state);
+        if (task != null) {
+          // 广播计时器完成事件
+          EventManager.instance.broadcast(
+            'timer_item_changed',
+            TimerItemEventArgs(task.activeTimer ?? task.timerItems.first),
+          );
+          EventManager.instance.broadcast(
+            'timer_task_changed',
+            TimerTaskEventArgs(task),
+          );
+        }
+      }
+    });
+  }
+
+  /// 恢复活动计时器状态
+  Future<void> _restoreActiveTimers() async {
+    // 从统一控制器获取活动计时器
+    final activeTimers = unifiedTimerController.getActiveTimersByPlugin(
+      'timer',
+    );
+
+    for (final timerState in activeTimers) {
+      // 将统一状态转换回 TimerTask
+      final task = _convertTimerStateToTimerTask(timerState);
+      if (task != null && task.isRunning) {
+        // 更新本地任务列表
+        final index = _tasks.indexWhere((t) => t.id == task.id);
+        if (index != -1) {
+          _tasks[index] = task;
+        } else {
+          _tasks.add(task);
+        }
+      }
+    }
+  }
+
+  /// 将 TimerState 转换为 TimerTask
+  TimerTask? _convertTimerStateToTimerTask(TimerState state) {
+    // 查找现有任务
+    final existingTask = _tasks.firstWhere(
+      (t) => t.id == state.id,
+      orElse: () => null as TimerTask,
+    );
+
+    if (existingTask != null) {
+      // 更新运行状态和时长
+      existingTask.isRunning = state.status == TimerStatus.running;
+      existingTask._elapsedDuration = state.elapsed;
+      return existingTask;
+    }
+
+    // 如果任务不存在，尝试从 JSON 重建
+    return null;
   }
 
   @override

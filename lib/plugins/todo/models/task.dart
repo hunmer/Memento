@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/timer/unified_timer_controller.dart';
+import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'subtask.dart';
 
 enum TaskPriority { low, medium, high }
@@ -156,21 +158,34 @@ class Task {
     }
   }
   
-  // 启动任务计时
+  // 启动任务计时（委托给统一控制器）
   void startTimer() {
+    // 使用统一计时器控制器启动
+    unifiedTimerController.startTimer(
+      id: id,
+      name: title,
+      type: TimerType.countUp,
+      color: Colors.blue,
+      icon: Icons.task_alt,
+      pluginId: 'todo',
+    );
+
     if (status != TaskStatus.inProgress) {
       status = TaskStatus.inProgress;
     }
     startTime = DateTime.now();
     duration = null; // 重置持续时间
   }
-  
-  // 停止任务计时并计算持续时间
+
+  // 停止任务计时并计算持续时间（委托给统一控制器）
   void stopTimer() {
+    // 委托给统一控制器停止
+    unifiedTimerController.stopTimer(id);
+
     if (startTime != null) {
       final now = DateTime.now();
       final currentDuration = now.difference(startTime!);
-      
+
       // 如果已有记录的持续时间，则累加
       if (duration != null) {
         duration = duration! + currentDuration;
@@ -179,8 +194,8 @@ class Task {
       }
     }
   }
-  
-  // 完成任务，停止计时
+
+  // 完成任务，停止计时（委托给统一控制器）
   void completeTask() {
     stopTimer();
     status = TaskStatus.done;
