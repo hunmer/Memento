@@ -123,11 +123,10 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
         }
       } catch (e) {
         debugPrint('Error deleting item: $e');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(GoodsLocalizations.of(context).saveFailed)),
-          );
-        }
+        toastService.showToast(
+          GoodsLocalizations.of(context).saveFailed,
+          type: ToastType.error,
+        );
       }
     }
   }

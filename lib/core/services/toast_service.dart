@@ -178,6 +178,11 @@ class ToastService implements IToastServiceWithInit {
     }
   }
 
+  @override
+  void dismiss() {
+    cancel();
+  }
+
   /// 使用 FlutterToast 显示消息（移动端）
   void _showFlutterToast(
     String message, {
