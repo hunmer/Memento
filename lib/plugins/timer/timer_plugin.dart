@@ -159,7 +159,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     if (existingTask != null) {
       // 更新运行状态和时长
       existingTask.isRunning = state.status == TimerStatus.running;
-      existingTask._elapsedDuration = state.elapsed;
+      existingTask.updateElapsedDuration(state.elapsed);
       return existingTask;
     }
 

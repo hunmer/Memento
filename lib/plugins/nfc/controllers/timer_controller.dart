@@ -92,7 +92,7 @@ class TimerController {
     _timers[habitId]?.dispose();
     _timers.remove(habitId);
     // 确保停止前台通知服务
-    ForegroundTimerService.stopService(id: habitId);
+    ForegroundTimerService.stopService(habitId);
   }
 
   void updateTimerData(String habitId, Map<String, dynamic> data) {
@@ -146,12 +146,17 @@ class TimerState {
     });
 
     // 启动前台通知服务
+    final totalSeconds = isCountdown ? habit.durationMinutes * 60 : null;
+    final progress = totalSeconds != null && totalSeconds > 0
+        ? (elapsedSeconds / totalSeconds * 100).toInt().clamp(0, 100)
+        : 0;
+
     ForegroundTimerService.startService(
       id: habit.id,
-      name: habit.title,
-      elapsedSeconds: elapsedSeconds,
-      totalSeconds: isCountdown ? habit.durationMinutes * 60 : null,
-      isCountdown: isCountdown,
+      title: habit.title,
+      content: _formatTime(elapsedSeconds),
+      progress: progress,
+      maxProgress: 100,
     );
 
     EventManager.instance.broadcast(
@@ -172,7 +177,7 @@ class TimerState {
     _timer = null;
 
     // 停止前台通知服务
-    ForegroundTimerService.stopService(id: habit.id);
+    ForegroundTimerService.stopService(habit.id);
 
     EventManager.instance.broadcast(
       'habit_timer_stopped',
@@ -191,12 +196,29 @@ class TimerState {
 
   /// 更新前台通知
   void _updateForegroundNotification() {
+    final totalSeconds = isCountdown ? habit.durationMinutes * 60 : null;
+    final progress = totalSeconds != null && totalSeconds > 0
+        ? (elapsedSeconds / totalSeconds * 100).toInt().clamp(0, 100)
+        : 0;
+
     ForegroundTimerService.updateService(
       id: habit.id,
-      name: habit.title,
-      elapsedSeconds: elapsedSeconds,
-      totalSeconds: isCountdown ? habit.durationMinutes * 60 : null,
-      isCompleted: false,
+      content: _formatTime(elapsedSeconds),
+      progress: progress,
+      maxProgress: 100,
     );
+  }
+
+  /// 格式化时间显示
+  String _formatTime(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    final secs = seconds % 60;
+
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+    } else {
+      return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+    }
   }
 }

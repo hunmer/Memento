@@ -3,6 +3,7 @@ import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/timer/views/add_timer_item_dialog.dart';
 import 'package:Memento/widgets/group_selector_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:uuid/uuid.dart';
 import '../models/timer_task.dart' show TimerTask;
 import '../models/timer_item.dart';

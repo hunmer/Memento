@@ -4,6 +4,7 @@ import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/timer_task.dart';
 import '../models/timer_item.dart';
+import 'package:Memento/core/services/timer/models/timer_state.dart';
 
 class TimerTaskCard extends StatefulWidget {
   final TimerTask task;

@@ -1,6 +1,7 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
+import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:flutter/material.dart';
 
 class AddTimerItemDialog extends StatefulWidget {

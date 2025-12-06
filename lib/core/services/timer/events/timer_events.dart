@@ -3,7 +3,9 @@
 /// 定义计时器相关的所有事件类型和参数类
 
 import 'dart:convert';
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/event/event_args.dart';
 
 /// 计时器事件类型
 enum TimerEventType {
@@ -30,7 +32,7 @@ enum TimerEventType {
 }
 
 /// 统一计时器事件参数
-class UnifiedTimerEventArgs {
+class UnifiedTimerEventArgs extends EventArgs {
   /// 事件类型
   final TimerEventType eventType;
 
@@ -49,7 +51,8 @@ class UnifiedTimerEventArgs {
     this.eventType, {
     this.data,
     DateTime? timestamp,
-  }) : timestamp = timestamp ?? DateTime.now();
+  }) : timestamp = timestamp ?? DateTime.now(),
+      super('');
 
   /// 从 JSON 构造
   factory UnifiedTimerEventArgs.fromJson(Map<String, dynamic> json) {
