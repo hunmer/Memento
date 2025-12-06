@@ -46,6 +46,7 @@ import 'app_widgets/home_widget_service.dart';
 import 'app_widgets/floating_ball_service.dart';
 import '../screens/route.dart';
 import 'global_flags.dart';
+import 'services/toast_service.dart';
 
 /// 应用启动状态管理
 class AppStartupState extends ChangeNotifier {
@@ -152,6 +153,9 @@ Future<void> initializeApp() async {
     FlutterError.onError = (details) {
       debugPrint(details.toString());
     };
+
+    // 初始化 Toast 服务
+    Toast.setNavigatorKey(navigatorKey);
 
     // 核心服务就绪，可以显示UI
     AppStartupState.instance._setCoreReady();
