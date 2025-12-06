@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/services/timer/events/timer_events.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:Memento/plugins/tracker/utils/tracker_notification_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:Memento/core/services/timer/unified_timer_controller.dart';
+import 'package:Memento/core/services/timer/models/timer_state.dart';
 import '../models/goal.dart';
 import '../models/record.dart';
 import '../controllers/tracker_controller.dart';
@@ -33,6 +37,9 @@ class _TimerDialogState extends State<TimerDialog> {
     super.initState();
     // 在计时器对话框打开时初始化通知系统
     _initializeNotification();
+
+    // 订阅统一计时器事件
+    _subscribeToTimerEvents();
   }
 
   Future<void> _initializeNotification() async {
@@ -40,6 +47,21 @@ class _TimerDialogState extends State<TimerDialog> {
       await TrackerNotificationUtils.initialize();
       _notificationInitialized = true;
     }
+  }
+
+  /// 订阅统一计时器事件
+  void _subscribeToTimerEvents() {
+    EventManager.instance.subscribe('unified_timer_updated', (args) {
+      if (args is UnifiedTimerEventArgs) {
+        final state = args.timerState as TimerState;
+        if (state.id == widget.goal.id) {
+          setState(() {
+            _seconds = state.elapsed.inSeconds;
+            _isRunning = state.status == TimerStatus.running;
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -56,22 +78,33 @@ class _TimerDialogState extends State<TimerDialog> {
       if (_isRunning) {
         _startTimer();
       } else {
-        _timer?.cancel();
+        _pauseTimer();
       }
     });
   }
 
+  /// 启动计时器（委托给统一控制器）
   void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _seconds++;
-      });
-    });
+    unifiedTimerController.startTimer(
+      id: widget.goal.id,
+      name: widget.goal.name,
+      type: TimerType.countUp,
+      color: Colors.orange,
+      icon: Icons.track_changes,
+      pluginId: 'tracker',
+    );
   }
 
+  /// 暂停计时器（委托给统一控制器）
+  void _pauseTimer() {
+    unifiedTimerController.pauseTimer(widget.goal.id);
+  }
+
+  /// 重置计时器（委托给统一控制器）
   void _resetTimer() {
+    unifiedTimerController.stopTimer(widget.goal.id);
+
     setState(() {
-      _timer?.cancel();
       _seconds = 0;
       _isRunning = false;
     });

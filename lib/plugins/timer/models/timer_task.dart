@@ -3,6 +3,8 @@ import 'timer_item.dart';
 import '../timer_plugin.dart';
 import '../../../../core/notification_controller.dart';
 import '../../../../core/event/event_manager.dart';
+import '../../../../core/services/timer/unified_timer_controller.dart';
+import '../../../../core/services/timer/models/timer_state.dart';
 
 class TimerTaskEventArgs extends EventArgs {
   final TimerTask task;
@@ -125,13 +127,81 @@ class TimerTask {
   // 启动任务
   void start() {
     if (!isRunning) {
-      isRunning = true;
-      _startNextTimer();
-      TimerPlugin.instance.startNotificationService(this);
-      EventManager.instance.broadcast(
-        'timer_task_changed',
-        TimerTaskEventArgs(this),
+      // 使用统一计时器控制器启动
+      _startUnifiedTimer();
+    }
+  }
+
+  /// 使用统一控制器启动计时器
+  void _startUnifiedTimer() {
+    // 将 TimerTask 转换为统一状态
+    final timerState = _convertToUnifiedTimerState();
+    final state = unifiedTimerController.getTimer(id);
+
+    if (state == null) {
+      // 新的计时器，启动统一计时器
+      unifiedTimerController.startTimer(
+        id: id,
+        name: name,
+        type: _getTimerType(),
+        color: color,
+        icon: icon,
+        targetDuration: timerItems.isNotEmpty
+            ? timerItems.first.duration
+            : null,
+        stages: timerItems
+            .map((item) => TimerItemConfig(
+                  name: item.name,
+                  duration: item.duration,
+                  color: color,
+                ))
+            .toList(),
+        pluginId: 'timer',
       );
+    } else {
+      // 已存在，恢复运行
+      unifiedTimerController.resumeTimer(id);
+    }
+
+    isRunning = true;
+    EventManager.instance.broadcast(
+      'timer_task_changed',
+      TimerTaskEventArgs(this),
+    );
+  }
+
+  /// 转换为统一计时器状态
+  TimerItemConfig _convertToUnifiedTimerState() {
+    if (timerItems.isEmpty) {
+      return TimerItemConfig(
+        name: name,
+        duration: Duration.zero,
+        color: color,
+        icon: icon,
+      );
+    }
+
+    // 对于多阶段计时器，返回第一个阶段
+    return TimerItemConfig(
+      name: timerItems.first.name,
+      duration: timerItems.first.duration,
+      color: color,
+      icon: icon,
+    );
+  }
+
+  /// 获取计时器类型
+  TimerType _getTimerType() {
+    if (timerItems.isEmpty) return TimerType.countUp;
+    final firstTimer = timerItems.first;
+
+    switch (firstTimer.type) {
+      case TimerType.countUp:
+        return TimerType.countUp;
+      case TimerType.countDown:
+        return TimerType.countDown;
+      case TimerType.pomodoro:
+        return TimerType.pomodoro;
     }
   }
 
@@ -204,14 +274,9 @@ class TimerTask {
   // 暂停任务
   void pause() {
     if (isRunning) {
+      // 使用统一计时器控制器暂停
+      unifiedTimerController.pauseTimer(id);
       isRunning = false;
-
-      // 暂停当前活动的计时器
-      final active = activeTimer;
-      if (active != null) {
-        active.pause();
-      }
-      TimerPlugin.instance.stopNotificationService();
       EventManager.instance.broadcast(
         'timer_task_changed',
         TimerTaskEventArgs(this),
@@ -222,23 +287,34 @@ class TimerTask {
   // 恢复任务
   void resume() {
     if (!isRunning) {
+      // 使用统一计时器控制器恢复
+      final state = unifiedTimerController.getTimer(id);
+      if (state != null && state.status == TimerStatus.paused) {
+        unifiedTimerController.resumeTimer(id);
+      } else {
+        // 如果没有状态，重新启动
+        _startUnifiedTimer();
+      }
       isRunning = true;
-      _startNextTimer();
-      TimerPlugin.instance.startNotificationService(this);
     }
   }
 
   // 重置任务
   void reset() {
+    // 使用统一计时器控制器停止
+    unifiedTimerController.stopTimer(id);
+
     isRunning = false;
+    _elapsedDuration = Duration.zero;
+    _currentRepeatCount = repeatCount; // 重置当前重复次数为配置值
+
+    // 重置所有计时器
     for (var timer in timerItems) {
       timer.onComplete = null;
       timer.reset();
       timer.resetRepeatCount();
     }
-    _elapsedDuration = Duration.zero;
-    _currentRepeatCount = repeatCount; // 重置当前重复次数为配置值
-    TimerPlugin.instance.stopNotificationService();
+
     EventManager.instance.broadcast(
       'timer_task_changed',
       TimerTaskEventArgs(this),
