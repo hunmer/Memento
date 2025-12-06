@@ -11,6 +11,7 @@ import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
 import 'package:Memento/plugins/tracker/models/record.dart';
 import 'package:Memento/plugins/tracker/screens/goal_detail_screen.dart';
+import 'package:Memento/plugins/tracker/screens/search_results_screen.dart';
 import 'package:Memento/plugins/tracker/widgets/goal_edit_page.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/super_cupertino_navigation_wrapper.dart';
@@ -36,12 +37,27 @@ class TrackerMainView extends StatefulWidget {
 }
 
 class _TrackerMainViewState extends State<TrackerMainView> {
+  String _searchQuery = '';
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
       title: Text(TrackerLocalizations.of(context).goalTracking),
       largeTitle: TrackerLocalizations.of(context).goalTracking,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      enableSearchBar: true,
+      searchPlaceholder: '搜索目标...',
+      onSearchChanged: _onSearchChanged,
+      searchBody: ChangeNotifierProvider.value(
+        value: TrackerPlugin.instance.controller,
+        child: SearchResultsScreen(searchQuery: _searchQuery),
+      ),
       body: ChangeNotifierProvider.value(
         value: TrackerPlugin.instance.controller,
         child: const HomeScreen(),

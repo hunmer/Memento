@@ -1,5 +1,4 @@
 import 'dart:io' show Platform;
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -56,16 +55,14 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
   @override
   Widget build(BuildContext context) {
     final filteredItems = controller.filteredItems;
+    final searchResults = controller.getSearchResults();
 
     return SuperCupertinoNavigationWrapper(
       title: Text(CheckinLocalizations.of(context).name),
       largeTitle: '签到记录',
       body: Column(
         children: [
-          // 分组过滤器
-          _buildFilterBar(),
-
-          // 打卡项目列表
+          // 打卡项目列表（不包含过滤栏）
           Expanded(
             child:
                 filteredItems.isEmpty
@@ -102,6 +99,15 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
           ),
         ],
       ),
+      // ========== 搜索相关配置 ==========
+      enableSearchBar: true,
+      searchPlaceholder: '搜索打卡项目或分组',
+      onSearchChanged: (query) => controller.onSearchChanged(query),
+      onSearchSubmitted: (query) => controller.onSearchChanged(query),
+      searchBody: _buildSearchResults(searchResults),
+      // ========== 过滤栏配置 ==========
+      enableFilterBar: true,
+      filterBarChild: _buildFilterBar(),
       actions: [
         // 排序按钮
         IconButton(
@@ -119,6 +125,73 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
       enableLargeTitle: false,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
     );
+  }
+
+  /// 构建搜索结果视图
+  Widget _buildSearchResults(List<CheckinItem> searchResults) {
+    if (controller.isSearching && searchResults.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '未找到相关打卡项目',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '尝试使用其他关键词搜索',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (controller.isSearching && searchResults.isNotEmpty) {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: StaggeredGrid.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 0,
+            mainAxisSpacing: 0,
+            children: searchResults.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return StaggeredGridTile.fit(
+                crossAxisCellCount: item.cardStyle == CheckinCardStyle.small
+                    ? 1
+                    : 2,
+                child: CheckinItemCard(
+                  item: item,
+                  index: index,
+                  itemIndex: index,
+                  controller: controller,
+                  onStateChanged: _handleStateChanged,
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      );
+    }
+
+    // 默认状态（不显示搜索结果）
+    return const SizedBox.shrink();
   }
 
   Widget _buildFilterBar() {

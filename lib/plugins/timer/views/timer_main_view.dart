@@ -23,6 +23,8 @@ class _TimerMainViewState extends State<TimerMainView> {
   List<TimerTask> _tasks = [];
   late TimerPlugin _plugin;
   Map<String, List<TimerTask>> _groupedTasks = {};
+  List<TimerTask> _searchResults = [];
+  String _currentQuery = '';
 
   @override
   void initState() {
@@ -35,6 +37,22 @@ class _TimerMainViewState extends State<TimerMainView> {
   void _updateTasksAndGroups() {
     _tasks = _plugin.getTasks();
     _groupedTasks = groupBy(_tasks, (TimerTask task) => task.group);
+  }
+
+  /// 执行搜索
+  void _searchTasks(String query) {
+    setState(() {
+      _currentQuery = query;
+      if (query.isEmpty) {
+        _searchResults = [];
+      } else {
+        _searchResults = _tasks.where((task) {
+          final nameMatch = task.name.toLowerCase().contains(query.toLowerCase());
+          final groupMatch = task.group.toLowerCase().contains(query.toLowerCase());
+          return nameMatch || groupMatch;
+        }).toList();
+      }
+    });
   }
 
   Future<void> _loadConfig() async {
@@ -53,6 +71,9 @@ class _TimerMainViewState extends State<TimerMainView> {
       title: Text(_plugin.getPluginName(context)!),
       largeTitle: '计时器',
       enableLargeTitle: true,
+      enableSearchBar: true,
+      searchPlaceholder: '搜索计时器任务...',
+      onSearchChanged: _searchTasks,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       backgroundColor: const Color(0xFFF5F6F8),
       actions: [
@@ -103,6 +124,7 @@ class _TimerMainViewState extends State<TimerMainView> {
           ],
         ),
       ),
+      searchBody: _buildSearchResults(),
     );
   }
 
@@ -161,6 +183,87 @@ class _TimerMainViewState extends State<TimerMainView> {
   void _resetTask(TimerTask task) {
     task.reset();
     setState(() {});
+  }
+
+  /// 构建搜索结果
+  Widget _buildSearchResults() {
+    if (_currentQuery.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search,
+              size: 64,
+              color: Colors.grey,
+            ),
+            SizedBox(height: 16),
+            Text(
+              '搜索计时器任务',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '输入任务名称或分组名称',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_searchResults.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inbox,
+              size: 64,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '未找到匹配的任务',
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '当前查询：$_currentQuery',
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: _searchResults.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        final task = _searchResults[index];
+        return _TimerTaskCard(
+          task: task,
+          onTap: _showTaskDetails,
+          onEdit: _editTask,
+          onReset: _resetTask,
+          onDelete: _deleteTask,
+        );
+      },
+    );
   }
 
   void _deleteTask(TimerTask task) async {
