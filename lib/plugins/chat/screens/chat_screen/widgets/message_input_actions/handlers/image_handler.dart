@@ -7,6 +7,7 @@ import '../../../../../services/file_service.dart';
 import '../../../../../../../utils/image_utils.dart';
 import '../../../../../../../widgets/image_picker_dialog.dart';
 import '../types.dart';
+import '../../../../../../../core/services/toast_service.dart';
 
 Future<void> handleImageSelection({
   required BuildContext context,
@@ -14,7 +15,6 @@ Future<void> handleImageSelection({
   required OnFileSelected? onFileSelected,
   required bool fromCamera,
 }) async {
-  final scaffoldMessenger = ScaffoldMessenger.of(context);
 
   try {
     // 使用 ImagePickerDialog 并启用压缩
@@ -38,13 +38,8 @@ Future<void> handleImageSelection({
         final File imageFile = File(absolutePath);
 
         if (!await imageFile.exists()) {
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text(
-                ChatLocalizations.of(context).imageNotExist,
-              ),
-              backgroundColor: Colors.red,
-            ),
+          toastService.showToast(
+            ChatLocalizations.of(context).imageNotExist,
           );
           return;
         }
@@ -79,22 +74,14 @@ Future<void> handleImageSelection({
 
         onFileSelected?.call(metadata);
       } catch (e) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              '${ChatLocalizations.of(context).imageProcessingFailed}: $e',
-            ),
-          ),
+        toastService.showToast(
+          '${ChatLocalizations.of(context).imageProcessingFailed}: $e',
         );
       }
     }
   } catch (e) {
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          '${ChatLocalizations.of(context).imageSelectionFailed}: $e',
-        ),
-      ),
+    toastService.showToast(
+      '${ChatLocalizations.of(context).imageSelectionFailed}: $e',
     );
   }
 }

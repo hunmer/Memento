@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:Memento/core/floating_ball/models/floating_ball_gesture.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../action_manager.dart';
 import '../action_storage.dart';
 import '../models/action_instance.dart';
@@ -441,11 +442,7 @@ class MigrationTool {
     // 检查是否需要迁移
     final needsMigration = await tool.needsMigration();
     if (!needsMigration) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('无需迁移，未找到旧配置文件'),
-        ),
-      );
+      Toast.info('无需迁移，未找到旧配置文件');
       return null;
     }
 

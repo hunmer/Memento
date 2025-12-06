@@ -4,6 +4,7 @@ import 'package:home_widget/home_widget.dart';
 import '../todo_plugin.dart';
 import '../models/task.dart';
 import '../../../widgets/widget_config_editor/index.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 待办列表小组件配置界面
 ///
@@ -516,13 +517,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                '已配置「${_titleController.text.isEmpty ? _timeRangeOptions[_selectedTimeRange] : _titleController.text}」'),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        toastService.showToast('已配置「${_titleController.text.isEmpty ? _timeRangeOptions[_selectedTimeRange] : _titleController.text}」');
 
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
@@ -531,12 +526,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('配置失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        toastService.showToast('配置失败: $e');
       }
     }
   }

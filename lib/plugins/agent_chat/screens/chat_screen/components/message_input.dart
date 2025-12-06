@@ -11,6 +11,7 @@ import 'suggested_questions_dialog.dart';
 import 'command_selector.dart';
 import 'tool_template_selector.dart';
 import '../../../widgets/press_to_record_button.dart';
+import '../../../../../../core/services/toast_service.dart';
 
 /// 消息输入框组件
 class MessageInput extends StatefulWidget {
@@ -317,12 +318,7 @@ class _MessageInputState extends State<MessageInput> {
                     },
                     onError: (error) {
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('语音识别失败: $error'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        toastService.showToast('语音识别失败: $error');
                       }
                     },
                   )
@@ -910,12 +906,7 @@ class _MessageInputState extends State<MessageInput> {
             _isLoadingToolResults = false;
             _searchResults = [];
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('加载工具模板失败: $error'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          toastService.showToast('加载工具模板失败: $error');
         });
   }
 
@@ -971,9 +962,7 @@ class _MessageInputState extends State<MessageInput> {
       } else {
         // 无效命令
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('无效的命令'), backgroundColor: Colors.red),
-          );
+          toastService.showToast('无效的命令');
         }
         return;
       }
@@ -985,9 +974,7 @@ class _MessageInputState extends State<MessageInput> {
       _focusNode.requestFocus();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('发送失败: $e'), backgroundColor: Colors.red),
-        );
+        toastService.showToast('发送失败: $e');
       }
     }
   }

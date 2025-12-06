@@ -3,6 +3,7 @@ import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import '../models/llm_models.dart';
 import '../controllers/model_controller.dart';
+import '../../../../core/services/toast_service.dart';
 
 class ModelSearchScreen extends StatefulWidget {
   final String? initialModelId;
@@ -50,12 +51,8 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${OpenAILocalizations.of(context).loadModelsFailed}: $e',
-            ),
-          ),
+        toastService.showToast(
+          '${OpenAILocalizations.of(context).loadModelsFailed}: $e',
         );
       }
       setState(() {

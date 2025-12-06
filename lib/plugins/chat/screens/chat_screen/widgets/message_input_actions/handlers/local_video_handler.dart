@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/l10n/local_video_handler_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,7 +13,6 @@ Future<void> handleLocalVideoSelection({
   required FileService fileService,
   required OnFileSelected? onFileSelected,
 }) async {
-  final scaffoldMessenger = ScaffoldMessenger.of(context);
 
   try {
     // 使用ImagePicker从相册选择视频
@@ -24,16 +24,10 @@ Future<void> handleLocalVideoSelection({
         // 将视频转换为文件
         final File videoFile = File(video.path);
         if (!await videoFile.exists()) {
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text(
-                LocalVideoHandlerLocalizations.getText(
-                  context,
-                  LocalVideoHandlerLocalizations.videoFileNotExist,
-                ),
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
+          toastService.showToast(
+            LocalVideoHandlerLocalizations.getText(
+              context,
+              LocalVideoHandlerLocalizations.videoFileNotExist,
             ),
           );
           return;
@@ -72,46 +66,28 @@ Future<void> handleLocalVideoSelection({
         onFileSelected?.call(metadata);
 
         // 显示视频选择成功的提示
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              LocalVideoHandlerLocalizations.getText(
-                context,
-                LocalVideoHandlerLocalizations.videoSent,
-              ),
-            ),
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
+        toastService.showToast(
+          LocalVideoHandlerLocalizations.getText(
+            context,
+            LocalVideoHandlerLocalizations.videoSent,
           ),
         );
       } catch (processingError) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              LocalVideoHandlerLocalizations.getText(
-                context,
-                LocalVideoHandlerLocalizations.videoProcessingFailed,
-                processingError.toString(),
-              ),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
+        toastService.showToast(
+          LocalVideoHandlerLocalizations.getText(
+            context,
+            LocalVideoHandlerLocalizations.videoProcessingFailed,
+            processingError.toString(),
           ),
         );
       }
     }
   } catch (e) {
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          LocalVideoHandlerLocalizations.getText(
-            context,
-            LocalVideoHandlerLocalizations.videoSelectionFailed,
-            e.toString(),
-          ),
-        ),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
+    toastService.showToast(
+      LocalVideoHandlerLocalizations.getText(
+        context,
+        LocalVideoHandlerLocalizations.videoSelectionFailed,
+        e.toString(),
       ),
     );
   }

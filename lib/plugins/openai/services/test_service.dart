@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 // 添加本地化导入
 import '../l10n/openai_localizations.dart';
 import 'request_service.dart';
+import '../../../core/services/toast_service.dart';
 
 class TestService {
   // 用于存储最后一次输入的文本的键
@@ -343,9 +344,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
       debugPrint('加载上次输入失败: $e');
       if (!_isDisposed) {
         final l10n = OpenAILocalizations.of(context);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.lastInputLoadFailed)));
+        toastService.showToast(l10n.lastInputLoadFailed);
       }
     } finally {
       if (!_isDisposed) {
@@ -380,9 +379,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
     if (input.isEmpty) {
       if (!_isDisposed) {
         final l10n = OpenAILocalizations.of(context);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.enterTestText)));
+        toastService.showToast(l10n.enterTestText);
       }
       return;
     }

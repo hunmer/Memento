@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
@@ -510,9 +511,7 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                           );
                           _loadMonthBills();
                         } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('删除失败: $e')),
-                          );
+                          Toast.error('删除失败: $e');
                         }
                       },
                       child: ListTile(

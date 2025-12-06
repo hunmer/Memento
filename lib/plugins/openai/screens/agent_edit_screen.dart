@@ -15,6 +15,7 @@ import '../controllers/provider_controller.dart';
 import '../services/test_service.dart';
 import '../services/prompt_preset_service.dart';
 import '../../../core/plugin_manager.dart';
+import '../../../core/services/toast_service.dart';
 import 'model_search_screen.dart';
 
 class AgentEditScreen extends StatefulWidget {
@@ -138,12 +139,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${OpenAILocalizations.of(context).loadProvidersError}: $e',
-            ),
-          ),
+        ToastService.instance.showToast(
+          '${OpenAILocalizations.of(context).loadProvidersError}: $e',
         );
       }
     } finally {
@@ -165,28 +162,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       }
     });
 
-    // 显示确认更新的 Snackbar
+    // 显示确认更新的消息
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(OpenAILocalizations.of(context).configUpdated),
-          action: SnackBarAction(
-            label: OpenAILocalizations.of(context).undoAction,
-            onPressed: () {
-              // 如果用户选择撤销，则恢复之前的值
-              setState(() {
-                if (widget.agent != null) {
-                  _baseUrlController.text = widget.agent!.baseUrl;
-                  _headersController.text = _formatHeaders(
-                    widget.agent!.headers,
-                  );
-                  _modelController.text = widget.agent!.model;
-                }
-              });
-            },
-          ),
-        ),
-      );
+      ToastService.instance.showToast(OpenAILocalizations.of(context).configUpdated);
     }
   }
 
@@ -287,12 +265,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${OpenAILocalizations.of(context).errorSavingAgent}: $e',
-            ),
-          ),
+        ToastService.instance.showToast(
+          '${OpenAILocalizations.of(context).errorSavingAgent}: $e',
         );
       }
     }
@@ -329,20 +303,14 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       final controller = plugin.controller;
       await controller.deleteAgent(widget.agent!.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(OpenAILocalizations.of(context).agentDeleted)),
-        );
+        ToastService.instance.showToast(OpenAILocalizations.of(context).agentDeleted);
         // 返回true表示删除成功
         Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${OpenAILocalizations.of(context).deleteFailed}: $e',
-            ),
-          ),
+        ToastService.instance.showToast(
+          '${OpenAILocalizations.of(context).deleteFailed}: $e',
         );
       }
     }
@@ -377,18 +345,14 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       final controller = plugin.controller;
       await controller.addAgent(clonedAgent);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(OpenAILocalizations.of(context).agentCloned)),
-        );
+        ToastService.instance.showToast(OpenAILocalizations.of(context).agentCloned);
         // 返回克隆的智能体，以便可能的进一步操作
         Navigator.of(context).pop(clonedAgent);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${OpenAILocalizations.of(context).cloneFailed}: $e'),
-          ),
+        ToastService.instance.showToast(
+          '${OpenAILocalizations.of(context).cloneFailed}: $e',
         );
       }
     }

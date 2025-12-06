@@ -5,6 +5,7 @@ import 'package:Memento/core/config_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:memento_nfc/memento_nfc.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// NFC控制器插件主视图
 class NfcMainView extends StatefulWidget {
@@ -187,21 +188,11 @@ class _NfcMainViewState extends State<NfcMainView> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
+    Toast.error(message);
   }
 
   void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-      ),
-    );
+    Toast.success(message);
   }
 
   void _showWriteDialog() {
@@ -303,9 +294,7 @@ class _NfcMainViewState extends State<NfcMainView> {
             onPressed: () {
               Navigator.pop(context);
               Clipboard.setData(ClipboardData(text: data));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('已复制到剪贴板')),
-              );
+              Toast.success('已复制到剪贴板');
             },
             child: const Text('复制数据'),
           ),

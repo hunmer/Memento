@@ -5,6 +5,7 @@ import 'package:Memento/plugins/store/widgets/product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../controllers/store_controller.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 商品列表内容组件（不包含 Scaffold，用于 TabBarView）
 class ProductListContent extends StatefulWidget {
@@ -78,20 +79,12 @@ class _ProductListContentState extends State<ProductListContent> {
             onExchange: () async {
               if (await widget.controller.exchangeProduct(product)) {
                 if (mounted) setState(() {});
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      StoreLocalizations.of(context).redeemSuccess,
-                    ),
-                  ),
+                Toast.success(
+                  StoreLocalizations.of(context).redeemSuccess,
                 );
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      StoreLocalizations.of(context).redeemFailed,
-                    ),
-                  ),
+                Toast.error(
+                  StoreLocalizations.of(context).redeemFailed,
                 );
               }
             },

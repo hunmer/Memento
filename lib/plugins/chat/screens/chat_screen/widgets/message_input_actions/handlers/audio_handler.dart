@@ -8,14 +8,13 @@ import '../../../../../services/file_service.dart';
 import '../../record_audio_dialog.dart';
 import '../utils.dart';
 import '../types.dart';
+import '../../../../../../../../core/services/toast_service.dart';
 
 Future<void> handleAudioRecording({
   required BuildContext context,
   required FileService fileService,
   required OnFileSelected? onFileSelected,
 }) async {
-  // 保存 context 的引用
-  final scaffoldMessenger = ScaffoldMessenger.of(context);
 
   // 创建录音实例
   final recorder = AudioRecorder();
@@ -79,42 +78,16 @@ Future<void> handleAudioRecording({
                   onFileSelected?.call(metadata);
 
                   // 显示音频发送成功的提示
-                  if (scaffoldMessenger.mounted) {
-                    scaffoldMessenger.showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '${ChatLocalizations.of(context).audioRecording}: ${formatDuration(duration)}',
-                        ),
-                        duration: const Duration(seconds: 2),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
+                  toastService.showToast('${ChatLocalizations.of(context).audioRecording}: ${formatDuration(duration)}');
                 } catch (e) {
                   debugPrint('处理音频时出错: $e');
-                  if (scaffoldMessenger.mounted) {
-                    scaffoldMessenger.showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '${ChatLocalizations.of(context).recordingFailed}: $e',
-                        ),
-                        backgroundColor: Colors.red,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
+                  toastService.showToast('${ChatLocalizations.of(context).recordingFailed}: $e');
                 }
               },
             ),
       );
     }
   } else {
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Text(ChatLocalizations.of(context).recordingFailed),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    toastService.showToast(ChatLocalizations.of(context).recordingFailed);
   }
 }

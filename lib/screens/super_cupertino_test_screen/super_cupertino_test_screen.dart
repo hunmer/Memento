@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/super_cupertino_navigation_wrapper.dart';
+import '../../core/services/toast_service.dart';
 
 class SuperCupertinoTestScreen extends StatefulWidget {
   const SuperCupertinoTestScreen({super.key});
@@ -48,9 +49,7 @@ class _SuperCupertinoTestScreenState extends State<SuperCupertinoTestScreen> {
   }
 
   void _onSearchSubmitted(String query) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('搜索: $query')));
+    toastService.showToast('搜索: $query');
   }
 
   Widget _buildBottomBar() {
@@ -147,9 +146,7 @@ class _SuperCupertinoTestScreenState extends State<SuperCupertinoTestScreen> {
             subtitle: Text('这是第 ${index + 1} 个水果'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text('你选择了: $item')));
+              toastService.showToast('你选择了: $item');
             },
           );
         },
@@ -167,17 +164,13 @@ class _SuperCupertinoTestScreenState extends State<SuperCupertinoTestScreen> {
         IconButton(
           icon: const Icon(Icons.add),
           onPressed: () {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('添加新水果')));
+            toastService.showToast('添加新水果');
           },
         ),
         IconButton(
           icon: const Icon(Icons.filter_list),
           onPressed: () {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('打开筛选器')));
+            toastService.showToast('打开筛选器');
           },
         ),
       ],

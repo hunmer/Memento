@@ -3,6 +3,7 @@ import '../l10n/activity_localizations.dart';
 import '../services/activity_service.dart';
 import '../widgets/activity_form.dart';
 import '../models/activity_record.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 活动编辑界面
 /// 用于创建和编辑活动记录
@@ -71,25 +72,15 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
       if (mounted) {
         Navigator.of(context).pop();
         // 显示保存成功消息
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.activity != null
-                  ? ActivityLocalizations.of(context).editActivity
-                  : ActivityLocalizations.of(context).addActivity
-            ),
-            duration: const Duration(seconds: 2),
-          ),
+        toastService.showToast(
+          widget.activity != null
+              ? ActivityLocalizations.of(context).editActivity
+              : ActivityLocalizations.of(context).addActivity
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('保存失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        toastService.showToast('保存失败: $e');
       }
     }
   }

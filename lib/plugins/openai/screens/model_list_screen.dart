@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/llm_models.dart';
 import '../controllers/model_controller.dart';
 import '../l10n/openai_localizations.dart';
+import '../../../core/services/toast_service.dart';
 
 class ModelListScreen extends StatefulWidget {
   const ModelListScreen({super.key});
@@ -53,13 +54,7 @@ class _ModelListScreenState extends State<ModelListScreen>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${OpenAILocalizations.of(context).loadModelsFailed}: $e',
-            ),
-          ),
-        );
+        toastService.showToast('${OpenAILocalizations.of(context).loadModelsFailed}: $e');
         setState(() {
           _modelGroups = [];
           _tabController?.dispose(); // 在创建新的之前释放旧的
@@ -81,15 +76,11 @@ class _ModelListScreenState extends State<ModelListScreen>
         _defaultModels[groupId] = modelId;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('已设置默认模型: $modelId')),
-        );
+        toastService.showToast('已设置默认模型: $modelId');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('设置默认模型失败: $e')),
-        );
+        toastService.showToast('设置默认模型失败: $e');
       }
     }
   }
@@ -222,13 +213,7 @@ class _ModelListScreenState extends State<ModelListScreen>
         await _loadModels();
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${OpenAILocalizations.of(context).addModelFailed}: $e',
-              ),
-            ),
-          );
+          toastService.showToast('${OpenAILocalizations.of(context).addModelFailed}: $e');
         }
       }
     }
@@ -256,13 +241,7 @@ class _ModelListScreenState extends State<ModelListScreen>
         await _loadModels();
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${OpenAILocalizations.of(context).updateModelFailed}: $e',
-              ),
-            ),
-          );
+          toastService.showToast('${OpenAILocalizations.of(context).updateModelFailed}: $e');
         }
       }
     }
@@ -298,13 +277,7 @@ class _ModelListScreenState extends State<ModelListScreen>
         await _loadModels();
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${OpenAILocalizations.of(context).deleteModelFailed}: $e',
-              ),
-            ),
-          );
+          toastService.showToast('${OpenAILocalizations.of(context).deleteModelFailed}: $e');
         }
       }
     }

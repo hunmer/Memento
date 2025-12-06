@@ -5,6 +5,7 @@ import 'package:Memento/core/utils/network.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class AutoUpdateController extends ChangeNotifier {
   BuildContext? context;
@@ -132,17 +133,9 @@ class AutoUpdateController extends ChangeNotifier {
       return false;
     } catch (e) {
       if (context?.mounted ?? false) {
-        ScaffoldMessenger.of(context!).showSnackBar(
-          SnackBar(
-            content: Text(
-              SettingsScreenLocalizations.of(
-                context!,
-              ).updateCheckFailed.replaceFirst('{error}', e.toString()),
-            ),
-            duration: const Duration(seconds: 3),
-            backgroundColor: Theme.of(context!).colorScheme.error,
-          ),
-        );
+        Toast.error(SettingsScreenLocalizations.of(
+          context!,
+        ).updateCheckFailed.replaceFirst('{error}', e.toString()));
       }
     } finally {
       client.close();
@@ -201,15 +194,7 @@ class AutoUpdateController extends ChangeNotifier {
 
       if (!hasUpdate) {
         if (context != null) {
-          ScaffoldMessenger.of(context!).showSnackBar(
-            SnackBar(
-              content: Text(
-                SettingsScreenLocalizations.of(context!).alreadyLatestVersion,
-              ),
-
-              duration: Duration(seconds: 2),
-            ),
-          );
+          Toast.show(SettingsScreenLocalizations.of(context!).alreadyLatestVersion);
         }
         return;
       }
@@ -260,17 +245,9 @@ class AutoUpdateController extends ChangeNotifier {
       );
     } catch (e) {
       if (context?.mounted ?? false) {
-        ScaffoldMessenger.of(context!).showSnackBar(
-          SnackBar(
-            content: Text(
-              SettingsScreenLocalizations.of(
-                context!,
-              ).updateCheckFailed.replaceFirst('{error}', e.toString()),
-            ),
-            duration: const Duration(seconds: 3),
-            backgroundColor: Theme.of(context!).colorScheme.error,
-          ),
-        );
+        Toast.error(SettingsScreenLocalizations.of(
+          context!,
+        ).updateCheckFailed.replaceFirst('{error}', e.toString()));
       }
     } finally {
       _isShowingUpdateDialog = false;

@@ -3,6 +3,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../models/action_instance.dart';
 import '../models/action_group.dart';
 import 'action_selector_dialog.dart';
@@ -128,11 +129,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
     }
 
     if (_actions.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('请至少添加一个动作'),
-        ),
-      );
+      Toast.show('请至少添加一个动作');
       return;
     }
 

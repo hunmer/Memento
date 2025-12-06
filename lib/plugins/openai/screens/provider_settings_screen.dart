@@ -5,6 +5,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../models/service_provider.dart';
 import '../controllers/provider_controller.dart';
 import 'provider_edit_screen.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class ProviderSettingsScreen extends StatefulWidget {
   const ProviderSettingsScreen({super.key});
@@ -66,9 +67,7 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
 
   void _showErrorSnackBar(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    toastService.showToast(message);
   }
 
   Future<void> _addProvider() async {

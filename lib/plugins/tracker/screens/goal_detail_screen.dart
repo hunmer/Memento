@@ -11,6 +11,7 @@ import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
 import 'package:Memento/plugins/tracker/widgets/goal_edit_page.dart';
 import 'package:Memento/plugins/tracker/widgets/record_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class GoalDetailScreen extends StatelessWidget {
   final Goal goal;
@@ -59,12 +60,8 @@ class GoalDetailScreen extends StatelessWidget {
                   if (confirmed == true) {
                     await controller.clearRecordsForGoal(goal.id);
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            TrackerLocalizations.of(context).recordsCleared,
-                          ),
-                        ),
+                      Toast.success(
+                        TrackerLocalizations.of(context).recordsCleared,
                       );
                     }
                   }
@@ -214,16 +211,10 @@ class GoalDetailScreen extends StatelessWidget {
                                             record.id,
                                           );
                                           if (context.mounted) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  TrackerLocalizations.of(
-                                                    context,
-                                                  ).recordDeleted,
-                                                ),
-                                              ),
+                                            Toast.success(
+                                              TrackerLocalizations.of(
+                                                context,
+                                              ).recordDeleted,
                                             );
                                           }
                                         }

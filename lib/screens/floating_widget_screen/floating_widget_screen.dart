@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:Memento/core/floating_ball/floating_widget_controller.dart';
 import 'package:Memento/core/floating_ball/screens/floating_button_manager_screen.dart';
@@ -440,9 +441,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
   /// 显示消息
   void _showMessage(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
-      );
+      Toast.info(message, duration: const Duration(seconds: 2));
     }
   }
 }

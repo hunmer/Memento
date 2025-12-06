@@ -4,6 +4,7 @@ import 'package:home_widget/home_widget.dart';
 import '../habits_plugin.dart';
 import '../models/habit.dart';
 import '../../../widgets/widget_config_editor/index.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 习惯计时器选择器界面（用于小组件配置）
 ///
@@ -521,9 +522,7 @@ class _HabitTimerSelectorScreenState extends State<HabitTimerSelectorScreen> {
     } catch (e) {
       debugPrint('保存配置失败: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
-        );
+        toastService.showToast('保存失败: $e');
       }
     }
   }

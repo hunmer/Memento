@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/goods_item.dart';
 import '../../goods_plugin.dart';
 import 'goods_item_form.dart';
+import '../../../../core/services/toast_service.dart';
 
 class GoodsItemFormPage extends StatefulWidget {
   final String itemId;
@@ -83,9 +84,7 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
       }
     } catch (e) {
       debugPrint('Error updating item: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(GoodsLocalizations.of(context).saveFailed)),
-      );
+      toastService.showToast(GoodsLocalizations.of(context).saveFailed);
     }
   }
 

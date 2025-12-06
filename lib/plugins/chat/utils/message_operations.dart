@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../chat_plugin.dart';
 import '../models/message.dart';
 import '../l10n/chat_localizations.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 统一管理消息操作的处理器
 class MessageOperations {
@@ -138,11 +139,7 @@ class MessageOperations {
     if (message.type == MessageType.received ||
         message.type == MessageType.sent) {
       Clipboard.setData(ClipboardData(text: message.content));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(ChatLocalizations.of(context).copiedToClipboard),
-        ),
-      );
+      toastService.showToast(ChatLocalizations.of(context).copiedToClipboard);
     }
   }
 
@@ -185,12 +182,7 @@ class MessageOperations {
 
     // 显示操作结果
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(metadata['isFavorite'] ? '已添加到收藏' : '已从收藏中移除'),
-          duration: const Duration(seconds: 1),
-        ),
-      );
+      toastService.showToast(metadata['isFavorite'] ? '已添加到收藏' : '已从收藏中移除');
     }
   }
 

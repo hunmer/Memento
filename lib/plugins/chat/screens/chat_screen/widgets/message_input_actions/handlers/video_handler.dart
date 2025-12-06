@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
@@ -13,20 +14,12 @@ Future<void> handleVideoSelection({
   required FileService fileService,
   required OnFileSelected? onFileSelected,
 }) async {
-  final scaffoldMessenger = ScaffoldMessenger.of(context);
-
   // 检查是否在Web平台上
   if (kIsWeb) {
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          LocalVideoHandlerLocalizations.getText(
-            context,
-            LocalVideoHandlerLocalizations.videoCantBeSelectedOnWeb,
-          ),
-        ),
-        backgroundColor: Colors.orange,
-        behavior: SnackBarBehavior.floating,
+    toastService.showToast(
+      LocalVideoHandlerLocalizations.getText(
+        context,
+        LocalVideoHandlerLocalizations.videoCantBeSelectedOnWeb,
       ),
     );
     return;
@@ -44,16 +37,10 @@ Future<void> handleVideoSelection({
           // 将视频转换为文件
           final File videoFile = File(video.path);
           if (!await videoFile.exists()) {
-            scaffoldMessenger.showSnackBar(
-              SnackBar(
-                content: Text(
-                  LocalVideoHandlerLocalizations.getText(
-                    context,
-                    LocalVideoHandlerLocalizations.videoFileNotExist,
-                  ),
-                ),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
+            toastService.showToast(
+              LocalVideoHandlerLocalizations.getText(
+                context,
+                LocalVideoHandlerLocalizations.videoFileNotExist,
               ),
             );
             return;
@@ -92,33 +79,21 @@ Future<void> handleVideoSelection({
           // 调用回调函数
           onFileSelected?.call(metadata);
         } catch (processingError) {
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text(
-                LocalVideoHandlerLocalizations.getText(
-                  context,
-                  LocalVideoHandlerLocalizations.videoProcessingFailed,
-                  processingError.toString(),
-                ),
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
+          toastService.showToast(
+            LocalVideoHandlerLocalizations.getText(
+              context,
+              LocalVideoHandlerLocalizations.videoProcessingFailed,
+              processingError.toString(),
             ),
           );
         }
       }
     } catch (e) {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            LocalVideoHandlerLocalizations.getText(
-              context,
-              LocalVideoHandlerLocalizations.videoSelectionFailed,
-              e.toString(),
-            ),
-          ),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
+      toastService.showToast(
+        LocalVideoHandlerLocalizations.getText(
+          context,
+          LocalVideoHandlerLocalizations.videoSelectionFailed,
+          e.toString(),
         ),
       );
     }
@@ -138,16 +113,10 @@ Future<void> handleVideoSelection({
         // 将视频转换为文件
         final File videoFile = File(video.path);
         if (!await videoFile.exists()) {
-          scaffoldMessenger.showSnackBar(
-            SnackBar(
-              content: Text(
-                LocalVideoHandlerLocalizations.getText(
-                  context,
-                  LocalVideoHandlerLocalizations.videoFileNotExist,
-                ),
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
+          toastService.showToast(
+            LocalVideoHandlerLocalizations.getText(
+              context,
+              LocalVideoHandlerLocalizations.videoFileNotExist,
             ),
           );
           return;
@@ -187,43 +156,25 @@ Future<void> handleVideoSelection({
         onFileSelected?.call(metadata);
 
         // 显示视频选择成功的提示
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              '${LocalVideoHandlerLocalizations.getText(context, LocalVideoHandlerLocalizations.videoSent)}: ${path.basename(video.path)}',
-            ),
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-          ),
+        toastService.showToast(
+          '${LocalVideoHandlerLocalizations.getText(context, LocalVideoHandlerLocalizations.videoSent)}: ${path.basename(video.path)}',
         );
       } catch (processingError) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text(
-              LocalVideoHandlerLocalizations.getText(
-                context,
-                LocalVideoHandlerLocalizations.videoProcessingFailed,
-                processingError.toString(),
-              ),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
+        toastService.showToast(
+          LocalVideoHandlerLocalizations.getText(
+            context,
+            LocalVideoHandlerLocalizations.videoProcessingFailed,
+            processingError.toString(),
           ),
         );
       }
     }
   } catch (e) {
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Text(
-          LocalVideoHandlerLocalizations.getText(
-            context,
-            LocalVideoHandlerLocalizations.videoSelectionFailed,
-            e.toString(),
-          ),
-        ),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
+    toastService.showToast(
+      LocalVideoHandlerLocalizations.getText(
+        context,
+        LocalVideoHandlerLocalizations.videoSelectionFailed,
+        e.toString(),
       ),
     );
   }

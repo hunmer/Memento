@@ -8,6 +8,7 @@ import '../controllers/form_controller.dart';
 import '../../../models/goods_item.dart';
 import '../../goods_item_selector_dialog.dart';
 import '../custom_fields_list.dart';
+import '../../../../../core/services/toast_service.dart';
 
 class BasicInfoTab extends StatelessWidget {
   final GoodsItemFormController controller;
@@ -818,12 +819,7 @@ class BasicInfoTab extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(GoodsLocalizations.of(context).selectImageFailed),
-            backgroundColor: Colors.red,
-          ),
-        );
+        toastService.showToast(GoodsLocalizations.of(context).selectImageFailed);
       }
       debugPrint('选择图片时出错: $e');
     }

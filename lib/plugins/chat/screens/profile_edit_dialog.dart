@@ -6,6 +6,7 @@ import '../../../utils/image_utils.dart';
 import '../../../widgets/avatar_picker.dart';
 import '../chat_plugin.dart';
 import '../models/user.dart';
+import '../../../core/services/toast_service.dart';
 
 class ProfileEditDialog extends StatefulWidget {
   final User user;
@@ -133,12 +134,8 @@ class _ProfileEditDialogState extends State<ProfileEditDialog>
                   onPressed: () async {
                     final newUsername = _usernameController.text.trim();
                     if (newUsername.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            ChatLocalizations.of(context).usernameCannotBeEmpty,
-                          ),
-                        ),
+                      toastService.showToast(
+                        ChatLocalizations.of(context).usernameCannotBeEmpty,
                       );
                       return;
                     }
@@ -168,12 +165,8 @@ class _ProfileEditDialogState extends State<ProfileEditDialog>
                       }
                     } catch (e) {
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '${ChatLocalizations.of(context).updateFailed}: $e',
-                            ),
-                          ),
+                        toastService.showToast(
+                          '${ChatLocalizations.of(context).updateFailed}: $e',
                         );
                       }
                     }

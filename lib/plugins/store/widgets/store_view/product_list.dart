@@ -6,6 +6,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/store/widgets/product_card.dart';
 import '../../controllers/store_controller.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class ProductList extends StatefulWidget {
   final StoreController controller;
@@ -123,20 +124,12 @@ class _ProductListState extends State<ProductList> {
                     onExchange: () async {
                       if (await widget.controller.exchangeProduct(product)) {
                         if (mounted) setState(() {});
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              StoreLocalizations.of(context).redeemSuccess,
-                            ),
-                          ),
+                        Toast.success(
+                          StoreLocalizations.of(context).redeemSuccess,
                         );
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              StoreLocalizations.of(context).redeemFailed,
-                            ),
-                          ),
+                        Toast.error(
+                          StoreLocalizations.of(context).redeemFailed,
                         );
                       }
                     },

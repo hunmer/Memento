@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/widgets/l10n/image_picker_localizations.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:crop_your_image/crop_your_image.dart';
@@ -257,13 +258,8 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                       debugPrint('选择图片发生异常: $e');
                       debugPrint('异常堆栈: $stackTrace');
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '${ImagePickerLocalizations.of(context)!.selectImageFailed}: $e',
-                            ),
-                            backgroundColor: Colors.red,
-                          ),
+                        Toast.error(
+                          '${ImagePickerLocalizations.of(context)!.selectImageFailed}: $e',
                         );
                       }
                     }
@@ -369,13 +365,8 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                       debugPrint('拍照过程发生异常: $e');
                       debugPrint('异常堆栈: $stackTrace');
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '${ImagePickerLocalizations.of(context)!.takePhotoFailed}: $e',
-                            ),
-                            backgroundColor: Colors.red,
-                          ),
+                        Toast.error(
+                          '${ImagePickerLocalizations.of(context)!.takePhotoFailed}: $e',
                         );
                       }
                     }
@@ -481,28 +472,20 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                                 }
                               } catch (e) {
                                 if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        ImagePickerLocalizations.of(
-                                          context,
-                                        )!.saveCroppedImageFailed,
-                                      ),
-                                    ),
+                                  Toast.error(
+                                    ImagePickerLocalizations.of(
+                                      context,
+                                    )!.saveCroppedImageFailed,
                                   );
                                 }
                                 completer.complete(null);
                               }
                             case CropFailure():
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      ImagePickerLocalizations.of(
-                                        context,
-                                      )!.cropFailed,
-                                    ),
-                                  ),
+                                Toast.error(
+                                  ImagePickerLocalizations.of(
+                                    context,
+                                  )!.cropFailed,
                                 );
                               }
                               completer.complete(null);

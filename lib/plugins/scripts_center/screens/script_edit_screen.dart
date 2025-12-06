@@ -4,6 +4,7 @@ import '../models/script_input.dart';
 import '../models/script_trigger.dart';
 import '../services/script_manager.dart';
 import '../widgets/script_input_edit_dialog.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 脚本编辑屏幕
 ///
@@ -207,12 +208,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
   void _saveScript() {
     if (!_formKey.currentState!.validate()) {
       // 切换到包含错误的Tab
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('请检查并修正表单中的错误'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      toastService.showToast('请检查并修正表单中的错误');
       return;
     }
 
@@ -466,9 +462,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
               TextButton.icon(
                 onPressed: () {
                   // TODO: 添加代码格式化功能
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('代码格式化功能即将推出')),
-                  );
+                  toastService.showToast('代码格式化功能即将推出');
                 },
                 icon: const Icon(Icons.format_align_left, size: 18),
                 label: const Text('格式化'),

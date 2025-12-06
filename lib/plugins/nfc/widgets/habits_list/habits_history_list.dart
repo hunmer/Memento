@@ -3,6 +3,7 @@ import 'package:Memento/plugins/habits/controllers/completion_record_controller.
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/widgets/common_record_list.dart';
+import '../../../../core/services/toast_service.dart';
 
 class HabitsHistoryList extends StatefulWidget {
   final String habitId;
@@ -116,9 +117,7 @@ class _HabitsHistoryListState extends State<HabitsHistoryList> {
 
     if (shouldClear && mounted) {
       await widget.controller.clearAllCompletionRecords(widget.habitId);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.clearAllRecords)));
+      ToastService.instance.showToast(l10n.clearAllRecords);
       await _loadRecords();
     }
   }

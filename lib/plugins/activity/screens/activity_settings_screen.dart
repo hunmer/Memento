@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../activity_plugin.dart';
 import '../l10n/activity_localizations.dart';
 import '../models/activity_record.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 活动插件设置页面
 class ActivitySettingsScreen extends StatefulWidget {
@@ -129,24 +130,14 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
       if (value) {
         await plugin.enableActivityNotification();
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              ActivityLocalizations.of(context).notificationEnabled,
-            ),
-            duration: const Duration(seconds: 2),
-          ),
+        toastService.showToast(
+          ActivityLocalizations.of(context).notificationEnabled,
         );
       } else {
         await plugin.disableActivityNotification();
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              ActivityLocalizations.of(context).notificationDisabled,
-            ),
-            duration: const Duration(seconds: 2),
-          ),
+        toastService.showToast(
+          ActivityLocalizations.of(context).notificationDisabled,
         );
       }
 
@@ -155,13 +146,8 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${ActivityLocalizations.of(context).operationFailed}: $e',
-            ),
-            backgroundColor: Colors.red,
-          ),
+        toastService.showToast(
+          '${ActivityLocalizations.of(context).operationFailed}: $e',
         );
       }
       // 恢复开关状态

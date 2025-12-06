@@ -1,5 +1,6 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class CommonRecordList<T> extends StatelessWidget {
   final List<T> records;
@@ -41,9 +42,7 @@ class CommonRecordList<T> extends StatelessWidget {
               (direction) async => await confirmDismiss(context, record),
           onDismissed: (direction) async {
             await onDelete(itemKey(record).toString());
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(getDeleteMessage())));
+            Toast.success(getDeleteMessage());
           },
           child: ListTile(
             title: Text(getDate(record).split('.').first),

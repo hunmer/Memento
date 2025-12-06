@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../managers/home_layout_manager.dart';
 import '../models/home_folder_item.dart';
+import '../../../../core/services/toast_service.dart';
 
 /// 创建文件夹对话框
 class CreateFolderDialog extends StatefulWidget {
@@ -158,9 +159,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
     final name = _nameController.text.trim();
 
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入文件夹名称')),
-      );
+      toastService.showToast('请输入文件夹名称');
       return;
     }
 
@@ -181,8 +180,6 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
     Navigator.of(context).pop();
 
     // 显示提示
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('已创建文件夹：$name')),
-    );
+    toastService.showToast('已创建文件夹：$name');
   }
 }

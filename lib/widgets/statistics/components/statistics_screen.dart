@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../models/statistics_models.dart';
 import 'date_range_selector.dart';
 import 'chart_components.dart';
@@ -105,9 +106,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load data: $e')),
-        );
+        Toast.error('Failed to load data: $e');
       }
     }
   }

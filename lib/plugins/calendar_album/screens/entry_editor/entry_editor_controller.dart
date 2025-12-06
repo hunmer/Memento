@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/calendar_controller.dart';
 import '../../models/calendar_entry.dart';
+import '../../../../core/services/toast_service.dart';
 
 class EntryEditorController {
   final CalendarEntry? entry;
@@ -46,11 +47,7 @@ class EntryEditorController {
     );
     // 如果标题为空且没有图片,则提示错误
     if (titleController.text.isEmpty && imageUrls.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(ChatLocalizations.of(context).titleCannotBeEmpty),
-        ),
-      );
+      toastService.showToast(ChatLocalizations.of(context).titleCannotBeEmpty);
       return null;
     }
 

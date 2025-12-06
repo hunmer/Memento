@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../habits_plugin.dart';
 import '../models/habit.dart';
 import '../models/skill.dart';
@@ -531,9 +532,7 @@ class _HabitGroupListSelectorScreenState
     } catch (e) {
       debugPrint('保存配置失败: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
-        );
+        Toast.error('保存失败: $e');
       }
     }
   }

@@ -43,8 +43,14 @@ abstract class IToastService {
   /// 显示信息消息
   void showInfo(String message, {Duration? duration});
 
+  /// 显示加载消息
+  void showLoading(String message);
+
   /// 取消当前显示的 Toast
   void cancel();
+
+  /// 取消当前显示的 Toast（dismiss 方法别名）
+  void dismiss() => cancel();
 }
 
 /// Toast 服务扩展接口（包含初始化方法）
@@ -141,6 +147,15 @@ class ToastService implements IToastServiceWithInit {
       message,
       type: ToastType.info,
       duration: duration,
+    );
+  }
+
+  @override
+  void showLoading(String message) {
+    showToast(
+      message,
+      type: ToastType.info,
+      duration: const Duration(seconds: 10), // 加载提示显示更长时间
     );
   }
 
@@ -301,6 +316,10 @@ class ToastService implements IToastServiceWithInit {
   }
 }
 
+/// Toast 服务的全局实例
+/// 提供便捷的单例访问方式
+final ToastService toastService = ToastService.instance;
+
 /// Toast 服务的便捷访问器
 class Toast {
   static final IToastService _service = ToastService.instance;
@@ -357,8 +376,18 @@ class Toast {
     _service.showInfo(message, duration: duration);
   }
 
+  /// 显示加载消息
+  static void loading(String message) {
+    _service.showLoading(message);
+  }
+
   /// 取消当前 Toast
   static void cancel() {
     _service.cancel();
+  }
+
+  /// 取消当前显示的 Toast（dismiss 方法别名）
+  static void dismiss() {
+    _service.dismiss();
   }
 }

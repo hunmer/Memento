@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class FullBackupController {
   final BuildContext _originalContext;
@@ -113,11 +114,7 @@ class FullBackupController {
         if (updatedContext == null) return;
 
         if (result == null) {
-          ScaffoldMessenger.of(updatedContext).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.exportCancelled),
-            ),
-          );
+          Toast.show(AppLocalizations.of(context)!.exportCancelled);
           return;
         }
       } else {
@@ -134,11 +131,7 @@ class FullBackupController {
         if (updatedContext == null) return;
 
         if (savedFile == null) {
-          ScaffoldMessenger.of(updatedContext).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.exportCancelled),
-            ),
-          );
+          Toast.show(AppLocalizations.of(context)!.exportCancelled);
           return;
         }
 
@@ -155,9 +148,7 @@ class FullBackupController {
       if (finalContext == null) return;
 
       Navigator.of(finalContext, rootNavigator: true).pop();
-      ScaffoldMessenger.of(finalContext).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.exportSuccess)),
-      );
+      Toast.success(AppLocalizations.of(context)!.exportSuccess);
     } catch (e) {
       // 关闭进度对话框并显示错误消息
       if (!_mounted) return;
@@ -165,13 +156,7 @@ class FullBackupController {
       if (errorContext == null) return;
 
       Navigator.of(errorContext, rootNavigator: true).pop();
-      ScaffoldMessenger.of(errorContext).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.exportFailed(e.toString()),
-          ),
-        ),
-      );
+      Toast.error(AppLocalizations.of(context)!.exportFailed(e.toString()));
     }
   }
 
@@ -220,11 +205,7 @@ class FullBackupController {
       if (afterDialogContext == null) return;
 
       if (confirmed != true) {
-        ScaffoldMessenger.of(afterDialogContext).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.importCancelled),
-          ),
-        );
+        Toast.show(AppLocalizations.of(context)!.importCancelled);
         return;
       }
 
@@ -234,12 +215,7 @@ class FullBackupController {
       if (beforePickContext == null) return;
 
       // 显示短暂的提示
-      ScaffoldMessenger.of(beforePickContext).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.selectBackupFile),
-          duration: Duration(seconds: 1),
-        ),
-      );
+      Toast.show(AppLocalizations.of(context)!.selectBackupFile);
 
       // 选择备份文件
       try {
@@ -256,11 +232,7 @@ class FullBackupController {
         if (afterPickContext == null) return;
 
         if (result == null || result.files.isEmpty) {
-          ScaffoldMessenger.of(afterPickContext).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.noFileSelected),
-            ),
-          );
+          Toast.show(AppLocalizations.of(context)!.noFileSelected);
           return;
         }
 
@@ -321,9 +293,7 @@ class FullBackupController {
         // 关闭导入进度对话框
         Navigator.of(afterImportContext, rootNavigator: true).pop();
 
-        ScaffoldMessenger.of(afterImportContext).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.importSuccess)),
-        );
+        Toast.success(AppLocalizations.of(context)!.importSuccess);
 
         // 提示重启应用
         await showDialog(
@@ -345,11 +315,7 @@ class FullBackupController {
           errorContext,
           rootNavigator: true,
         ).popUntil((route) => route.isFirst);
-        ScaffoldMessenger.of(errorContext).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.fileSelectionFailed(e)),
-          ),
-        );
+        Toast.error(AppLocalizations.of(context)!.fileSelectionFailed(e));
       }
     } catch (e) {
       // 确保关闭所有可能的对话框
@@ -374,16 +340,7 @@ class FullBackupController {
             '${AppLocalizations.of(context)!.importFailed}: ${e.toString()}';
       }
 
-      ScaffoldMessenger.of(finalErrorContext).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: AppLocalizations.of(context)!.retry,
-            onPressed: () => importAllData(),
-          ),
-        ),
-      );
+      Toast.error(errorMessage);
     }
   }
 

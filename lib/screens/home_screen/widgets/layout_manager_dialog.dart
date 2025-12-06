@@ -5,6 +5,7 @@ import '../managers/home_widget_registry.dart';
 import '../models/layout_config.dart';
 import '../models/home_widget_item.dart';
 import '../models/home_widget_size.dart';
+import '../../../../core/services/toast_service.dart';
 
 /// 布局管理对话框
 ///
@@ -46,9 +47,7 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载布局失败：$e')),
-        );
+        toastService.showToast('加载布局失败：$e');
       }
     }
   }
@@ -62,15 +61,11 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
           _currentLayoutId = layout.id;
         });
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('已切换到"${layout.name}"')),
-        );
+        toastService.showToast('已切换到"${layout.name}"');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('切换失败：$e')),
-        );
+        toastService.showToast('切换失败：$e');
       }
     }
   }
@@ -99,9 +94,7 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
             onPressed: () async {
               final newName = controller.text.trim();
               if (newName.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('请输入布局名称')),
-                );
+                toastService.showToast('请输入布局名称');
                 return;
               }
 
@@ -111,15 +104,11 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
                 await _layoutManager.renameLayoutConfig(layout.id, newName);
                 await _loadLayouts();
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('重命名成功')),
-                  );
+                  toastService.showToast('重命名成功');
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('重命名失败：$e')),
-                  );
+                  toastService.showToast('重命名失败：$e');
                 }
               }
             },
@@ -150,15 +139,11 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
                 await _layoutManager.deleteLayoutConfig(layout.id);
                 await _loadLayouts();
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('删除成功')),
-                  );
+                  toastService.showToast('删除成功');
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('删除失败：$e')),
-                  );
+                  toastService.showToast('删除失败：$e');
                 }
               }
             },
@@ -340,9 +325,7 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
   Future<void> _createLayout() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入布局名称')),
-      );
+      toastService.showToast('请输入布局名称');
       return;
     }
 
@@ -362,17 +345,13 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
       await _layoutManager.saveCurrentLayoutAs(name);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('布局"$name"已创建')),
-        );
+        toastService.showToast('布局"$name"已创建');
         Navigator.pop(context);
         widget.onLayoutCreated();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('创建失败：$e')),
-        );
+        toastService.showToast('创建失败：$e');
       }
     }
   }

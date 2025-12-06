@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:Memento/core/action/action_manager.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 自定义JavaScript动作示例类
 class CustomActionExamples {
@@ -70,19 +71,9 @@ class CustomActionExamples {
     );
 
     if (result.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('JS执行成功: 结果=${result.data?['result']}'),
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      Toast.success('JS执行成功: 结果=${result.data?['result']}');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('JS执行失败: ${result.error}'),
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      Toast.error('JS执行失败: ${result.error}');
     }
   }
 
@@ -198,9 +189,7 @@ class CustomActionExamples {
             );
 
             Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('JavaScript动作已注册')),
-            );
+            Toast.success('JavaScript动作已注册');
           },
           child: const Text('保存'),
         ),

@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../store_plugin.dart';
 
 /// Store 插件的底部栏组件
@@ -119,9 +120,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
             onPressed: () async {
               final points = int.tryParse(pointsController.text);
               if (points == null || points <= 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(StoreLocalizations.of(context).priceInvalid)),
-                );
+                Toast.error(StoreLocalizations.of(context).priceInvalid);
                 return;
               }
 
@@ -133,9 +132,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
               await widget.plugin.controller.addPoints(points, reason);
 
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${StoreLocalizations.of(context).pointsAdded}: +$points')),
-                );
+                Toast.success('${StoreLocalizations.of(context).pointsAdded}: +$points');
               }
             },
             child: Text(StoreLocalizations.of(context).add),

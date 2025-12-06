@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:json_dynamic_widget/json_dynamic_widget.dart';
 import 'package:path/path.dart' as path;
+import 'package:Memento/core/services/toast_service.dart';
 
 /// JSON 动态 UI 测试页面
 /// 用于快速测试和预览 json_dynamic_widget 配置
@@ -340,34 +341,11 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
   }
 
   void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.white),
-            const SizedBox(width: 8),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: Colors.red,
-      ),
-    );
+    Toast.error(message);
   }
 
   void _showSuccessSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle_outline, color: Colors.white),
-            const SizedBox(width: 8),
-            Text(message),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    Toast.success(message, duration: const Duration(seconds: 2));
   }
 
   @override

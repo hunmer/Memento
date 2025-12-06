@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../services/speech/speech_recognition_service.dart';
 import '../../../services/speech/speech_recognition_state.dart';
+import '../../../../../../core/services/toast_service.dart';
 
 /// 语音输入对话框
 ///
@@ -209,13 +210,7 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
   /// 显示错误提示
   void _showErrorSnackBar(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    toastService.showToast(message);
   }
 
   /// 确认发送

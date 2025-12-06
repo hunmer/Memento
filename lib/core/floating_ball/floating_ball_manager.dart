@@ -6,6 +6,7 @@ import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'floating_ball_service.dart';
 import '../../dialogs/plugin_list_dialog.dart';
 import '../plugin_manager.dart';
@@ -68,13 +69,7 @@ class FloatingBallManager {
             if (lastPlugin != null) {
               PluginManager.instance.openPlugin(context, lastPlugin);
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    FloatingBallLocalizations.of(context)!.noRecentPlugin,
-                  ),
-                ),
-              );
+              Toast.info(FloatingBallLocalizations.of(context)!.noRecentPlugin);
             }
           }
         },
@@ -99,13 +94,7 @@ class FloatingBallManager {
     '刷新页面':
         (context) => () {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  FloatingBallLocalizations.of(context)!.pageRefreshed,
-                ),
-              ),
-            );
+            Toast.success(FloatingBallLocalizations.of(context)!.pageRefreshed);
           }
         },
     '路由历史记录':
@@ -124,9 +113,7 @@ class FloatingBallManager {
             if (lastPage != null) {
               await _reopenPage(context, lastPage);
             } else {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('没有历史记录')));
+              Toast.info('没有历史记录');
             }
           }
         },
@@ -158,9 +145,7 @@ class FloatingBallManager {
         break;
       default:
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('未知页面类型: ${lastPage.pageId}')));
+          Toast.error('未知页面类型: ${lastPage.pageId}');
         }
     }
   }

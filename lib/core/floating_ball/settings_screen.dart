@@ -1,5 +1,6 @@
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../action/action_manager.dart';
 import '../action/widgets/action_selector_dialog.dart';
 import 'floating_ball_manager.dart';
@@ -182,9 +183,7 @@ class _FloatingBallSettingsScreenState
                   ElevatedButton(
                     onPressed: () {
                       _manager.resetPosition();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.positionReset)),
-                      );
+                      Toast.success(l10n.positionReset);
                     },
                     child: Text(l10n.resetPosition),
                   ),

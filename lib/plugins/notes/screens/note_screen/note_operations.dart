@@ -7,6 +7,7 @@ import '../../controllers/notes_controller.dart';
 import '../../models/folder.dart';
 import '../../models/note.dart';
 import '../note_edit_screen.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 // 创建新笔记
 Future<void> createNewNote(
@@ -62,14 +63,10 @@ Future<void> moveNoteDialog(
     await controller.moveNote(note.id, targetFolder.id);
     onReload();
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            NotesLocalizations.of(
-              context,
-            ).movedToFolder.replaceFirst('{folderName}', targetFolder.name),
-          ),
-        ),
+      toastService.showToast(
+        NotesLocalizations.of(
+          context,
+        ).movedToFolder.replaceFirst('{folderName}', targetFolder.name),
       );
     }
   }

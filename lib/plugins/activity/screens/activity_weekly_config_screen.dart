@@ -6,6 +6,7 @@ import '../models/activity_weekly_widget_config.dart';
 import '../models/activity_weekly_widget_data.dart';
 import '../services/activity_widget_service.dart';
 import '../../../widgets/widget_config_editor/index.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 周视图活动列表小组件配置界面
 ///
@@ -310,9 +311,7 @@ class _ActivityWeeklyConfigScreenState
     } catch (e) {
       debugPrint('保存配置失败: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
-        );
+        toastService.showToast('保存失败: $e');
       }
     } finally {
       if (mounted) {

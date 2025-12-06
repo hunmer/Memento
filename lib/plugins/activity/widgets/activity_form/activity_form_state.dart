@@ -7,6 +7,7 @@ import '../../../../core/storage/storage_manager.dart';
 import '../../services/activity_service.dart';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'activity_form_utils.dart';
+import '../../../../../../core/services/toast_service.dart';
 
 class ActivityFormState extends State<ActivityFormWidget> {
   late TextEditingController _titleController;
@@ -744,39 +745,21 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
     // 检查时间是否有效
     if (endDateTime.isBefore(startDateTime)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${ActivityLocalizations.of(context).endTime}必须晚于${ActivityLocalizations.of(context).startTime}',
-          ),
-        ),
-      );
+      toastService.showToast('${ActivityLocalizations.of(context).endTime}必须晚于${ActivityLocalizations.of(context).startTime}');
       return;
     }
 
     // 检查时间间隔是否小于1分钟
     final duration = endDateTime.difference(startDateTime);
     if (duration.inMinutes < 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '活动时间必须至少为${ActivityLocalizations.of(context).minutesFormat(1).replaceAll('1 ', '')}',
-          ),
-        ),
-      );
+      toastService.showToast('活动时间必须至少为${ActivityLocalizations.of(context).minutesFormat(1).replaceAll('1 ', '')}');
       return;
     }
 
     // 检查是否超过当天结束时间
     final dayEnd = DateTime(now.year, now.month, now.day, 23, 59);
     if (endDateTime.isAfter(dayEnd)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${ActivityLocalizations.of(context).endTime}不能超过当天23:59',
-          ),
-        ),
-      );
+      toastService.showToast('${ActivityLocalizations.of(context).endTime}不能超过当天23:59');
       return;
     }
 

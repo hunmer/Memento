@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -135,12 +136,8 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           onDismissed: (direction) {
             controller.deleteGoal(goal.id);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${TrackerLocalizations.of(context).goalDeleted} "${goal.name}"',
-                ),
-              ),
+            Toast.success(
+              '${TrackerLocalizations.of(context).goalDeleted} "${goal.name}"',
             );
           },
           child: GoalCard(

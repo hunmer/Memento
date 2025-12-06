@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../controllers/store_controller.dart';
 import '../../models/points_log.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class PointsHistory extends StatefulWidget {
   final StoreController controller;
@@ -332,9 +333,7 @@ class _PointsHistoryState extends State<PointsHistory> {
               await widget.controller.clearPointsLogs();
               _loadInitialData();
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('积分记录已清空')),
-                );
+                Toast.success('积分记录已清空');
               }
             },
             child: Text(

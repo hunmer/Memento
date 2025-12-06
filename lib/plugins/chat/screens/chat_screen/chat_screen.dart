@@ -8,6 +8,7 @@ import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/plugins/openai/handlers/chat_event_handler.dart'; // 导入ValuesEventArgs
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/services.dart';
 import 'dart:io'; // 添加File类支持
 import '../../models/channel.dart';
@@ -267,11 +268,7 @@ class _ChatScreenState extends State<ChatScreen> {
         .join('\n\n');
 
     Clipboard.setData(ClipboardData(text: textToCopy));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(ChatLocalizations.of(context).copiedSelectedMessages),
-      ),
-    );
+    Toast.success(ChatLocalizations.of(context).copiedSelectedMessages);
 
     _controller.toggleMultiSelectMode();
   }
@@ -568,29 +565,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                                   agent: agent,),
                                         );
                                       } else {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              ChatLocalizations.of(
-                                                context,
-                                              ).aiAssistantNotFound,
-                                            ),
-                                          ),
-                                        );
+                                        Toast.error(ChatLocalizations.of(context).aiAssistantNotFound);
                                       }
                                     } catch (e) {
                                       // 插件不可用或类型转换失败时显示提示
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            '无法访问AI编辑界面，OpenAI插件可能未加载',
-                                          ),
-                                        ),
-                                      );
+                                      Toast.error('无法访问AI编辑界面，OpenAI插件可能未加载');
                                     }
                                   }
                                 } else {

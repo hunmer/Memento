@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/utils/file_utils.dart';
 import 'package:Memento/core/utils/zip.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
@@ -37,13 +38,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       });
       await _refreshFiles();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${DataManagementLocalizations.of(context).directoryLoadFailed}: ${e.toString()}',
-          ),
-        ),
-      );
+      Toast.error('${DataManagementLocalizations.of(context).directoryLoadFailed}: ${e.toString()}');
       debugPrint('Documents directory load error: ${e.toString()}');
     }
   }
@@ -62,13 +57,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         });
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${DataManagementLocalizations.of(context).directoryAccessFailed}: ${e.toString()}',
-          ),
-        ),
-      );
+      Toast.error('${DataManagementLocalizations.of(context).directoryAccessFailed}: ${e.toString()}');
       debugPrint('Directory access error: ${e.toString()}');
     }
   }
@@ -137,11 +126,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         selectedItems.clear();
         _refreshFiles();
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(DataManagementLocalizations.of(context).deleteSuccess),
-        ),
-      );
+      Toast.success(DataManagementLocalizations.of(context).deleteSuccess);
     }
   }
 
@@ -175,17 +160,9 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
           selectedItems.clear();
           _refreshFiles();
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.moveSuccess)),
-        );
+        Toast.success(AppLocalizations.of(context)!.moveSuccess);
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.moveFailed(e.toString()),
-            ),
-          ),
-        );
+        Toast.error(AppLocalizations.of(context)!.moveFailed(e.toString()));
       }
     }
   }
@@ -226,13 +203,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         }
         _refreshFiles();
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.renameFailed(e.toString()),
-            ),
-          ),
-        );
+        Toast.error(AppLocalizations.of(context)!.renameFailed(e.toString()));
       }
     }
   }
@@ -251,15 +222,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                   onTap: () {
                     Navigator.pop(context);
                     // 这里可以添加编辑文件的逻辑
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          DataManagementLocalizations.of(
-                            context,
-                          ).editNotImplemented,
-                        ),
-                      ),
-                    );
+                    Toast.show(DataManagementLocalizations.of(context).editNotImplemented);
                   },
                 ),
               ListTile(
@@ -308,13 +271,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
 
       _refreshFiles();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${DataManagementLocalizations.of(context).importSuccess}: $successCount, ${DataManagementLocalizations.of(context).importFailed}: $failCount',
-          ),
-        ),
-      );
+      Toast.show('${DataManagementLocalizations.of(context).importSuccess}: $successCount, ${DataManagementLocalizations.of(context).importFailed}: $failCount');
     }
   }
 
@@ -366,33 +323,15 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       );
 
       if (savePath != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.exportSuccessTo(savePath),
-            ),
-            duration: const Duration(seconds: 5),
-          ),
-        );
+        Toast.success(AppLocalizations.of(context)!.exportSuccessTo(savePath));
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.exportCancelled),
-          ),
-        );
+        Toast.show(AppLocalizations.of(context)!.exportCancelled);
       }
 
       // 删除临时目录
       await tempDir.delete(recursive: true);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${DataManagementLocalizations.of(context).exportFailed}: ${e.toString()}',
-          ),
-          duration: const Duration(seconds: 5),
-        ),
-      );
+      Toast.error('${DataManagementLocalizations.of(context).exportFailed}: ${e.toString()}');
       debugPrint('Export error: ${e.toString()}');
       debugPrintStack();
     }

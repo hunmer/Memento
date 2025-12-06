@@ -8,6 +8,7 @@ import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/event/plugin_action_event_args.dart';
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/dialogs/plugin_list_dialog.dart';
 import 'package:Memento/widgets/route_history_dialog/route_history_dialog.dart';
 import 'package:Memento/screens/settings_screen/settings_screen.dart';
@@ -244,9 +245,7 @@ class BuiltInActionExecutor implements ActionExecutor {
     final lastPage = RouteHistoryManager.getLastVisitedPage();
 
     if (lastPage == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('没有历史记录')));
+      Toast.show('没有历史记录');
       return ExecutionResult.success(
         data: {'action': 'reopenLastRoute', 'message': 'No history'},
       );
@@ -288,9 +287,7 @@ class BuiltInActionExecutor implements ActionExecutor {
     // 其他页面类型可以在这里扩展
 
     if (!navigated) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('无法打开页面: ${lastPage.pageId}')),
-      );
+      Toast.error('无法打开页面: ${lastPage.pageId}');
     }
 
     return ExecutionResult.success(
@@ -318,13 +315,7 @@ class BuiltInActionExecutor implements ActionExecutor {
 
     if (lastPlugin == null) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              FloatingBallLocalizations.of(context)!.noRecentPlugin,
-            ),
-          ),
-        );
+        Toast.show(FloatingBallLocalizations.of(context)!.noRecentPlugin);
       }
       return ExecutionResult.success(
         data: {'action': 'openLastPlugin', 'message': 'No recent plugin'},

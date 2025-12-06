@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import '../tracker_plugin.dart';
 import '../../../widgets/widget_config_editor/index.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 目标进度条小组件选择器界面(用于小组件配置)
 ///
@@ -535,12 +536,7 @@ class _TrackerGoalProgressSelectorScreenState
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('已配置 "${selectedGoal.name}"'),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        Toast.success('已配置 "${selectedGoal.name}"');
 
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
@@ -549,12 +545,7 @@ class _TrackerGoalProgressSelectorScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('配置失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        Toast.error('配置失败: $e');
       }
     }
   }

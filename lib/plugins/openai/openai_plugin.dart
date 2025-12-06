@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
@@ -629,9 +630,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
       await service.addPreset(preset);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(OpenAILocalizations.of(context).presetSaved)),
-        );
+        Toast.success(OpenAILocalizations.of(context).presetSaved);
       }
     }
 

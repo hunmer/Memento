@@ -16,6 +16,7 @@ import 'widgets/contact_card.dart';
 import 'widgets/contact_form.dart';
 import 'widgets/filter_dialog.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/services/toast_service.dart';
 
 class ContactPlugin extends BasePlugin with JSBridgePlugin {
   late ContactController _controller;
@@ -896,22 +897,14 @@ class ContactMainViewState extends State<ContactMainView> {
                     }
                   } catch (e) {
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            ContactLocalizations.of(context).saveFailedMessage,
-                          ),
-                        ),
+                      ToastService.instance.showToast(
+                        ContactLocalizations.of(context).saveFailedMessage,
                       );
                     }
                   }
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        ContactLocalizations.of(context).formValidationMessage,
-                      ),
-                    ),
+                  ToastService.instance.showToast(
+                    ContactLocalizations.of(context).formValidationMessage,
                   );
                 }
               },

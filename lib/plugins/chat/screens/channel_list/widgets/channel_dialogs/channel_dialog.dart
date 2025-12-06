@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../models/channel.dart';
 import '../../../../../../widgets/circle_icon_picker.dart';
 import '../../../../l10n/chat_localizations.dart';
+import '../../../../../../../core/services/toast_service.dart';
 
 class ChannelDialog extends StatefulWidget {
   // 用于区分是添加还是编辑模式
@@ -193,13 +194,7 @@ class _ChannelDialogState extends State<ChannelDialog> {
                   if (context.mounted) {
                     Navigator.of(context).pop();
                     // 显示错误提示
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '${ChatLocalizations.of(context).channelCreationFailed}: $e',
-                        ),
-                      ),
-                    );
+                    toastService.showToast('${ChatLocalizations.of(context).channelCreationFailed}: $e');
                   }
                 }
               }

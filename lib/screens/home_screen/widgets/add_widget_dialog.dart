@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import '../managers/home_widget_registry.dart';
 import '../managers/home_layout_manager.dart';
 import '../widgets/home_widget.dart';
@@ -425,9 +426,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
 
     // 显示提示
     final location = this.widget.folderId != null ? '文件夹' : '主页';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('已添加 ${widget.name} 到$location')),
-    );
+    Toast.success('已添加 ${widget.name} 到$location');
   }
 
   /// 构建空状态

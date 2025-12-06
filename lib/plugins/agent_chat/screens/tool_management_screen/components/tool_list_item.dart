@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../models/tool_config.dart';
 import '../../../services/tool_config_manager.dart';
 import 'tool_editor_dialog.dart';
+import '../../../../../core/services/toast_service.dart';
 
 /// 工具列表项组件
 class ToolListItem extends StatelessWidget {
@@ -30,9 +31,7 @@ class ToolListItem extends StatelessWidget {
       );
       onRefresh();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('切换状态失败: $e'), backgroundColor: Colors.red),
-      );
+      toastService.showToast('切换状态失败: $e');
     }
   }
 
@@ -58,17 +57,10 @@ class ToolListItem extends StatelessWidget {
           updatedConfig,
         );
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('工具更新成功'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        toastService.showToast('工具更新成功');
         onRefresh();
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('更新工具失败: $e'), backgroundColor: Colors.red),
-        );
+        toastService.showToast('更新工具失败: $e');
       }
     }
   }
@@ -106,17 +98,10 @@ class ToolListItem extends StatelessWidget {
       onDismissed: (direction) async {
         try {
           await ToolConfigManager.instance.deleteTool(pluginId, toolId);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('工具已删除'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          toastService.showToast('工具已删除');
           onRefresh();
         } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('删除工具失败: $e'), backgroundColor: Colors.red),
-          );
+          toastService.showToast('删除工具失败: $e');
         }
       },
       background: Container(

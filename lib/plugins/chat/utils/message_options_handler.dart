@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/message.dart';
 import '../models/file_message.dart';
 import '../widgets/message_options_dialog.dart';
+import '../../../core/services/toast_service.dart';
 
 /// 统一管理消息选项的处理逻辑
 class MessageOptionsHandler {
@@ -43,11 +44,7 @@ class MessageOptionsHandler {
     if (message.type == MessageType.received ||
         message.type == MessageType.sent) {
       Clipboard.setData(ClipboardData(text: message.content));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(ChatLocalizations.of(context).copiedToClipboard),
-        ),
-      );
+      toastService.showToast(ChatLocalizations.of(context).copiedToClipboard);
     }
   }
 

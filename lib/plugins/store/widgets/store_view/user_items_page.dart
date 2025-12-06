@@ -5,6 +5,7 @@ import 'package:Memento/plugins/store/widgets/user_item_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../controllers/store_controller.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 我的物品内容组件（不包含 Scaffold，用于 TabBarView）
 class UserItemsContent extends StatefulWidget {
@@ -100,17 +101,9 @@ class _UserItemsContentState extends State<UserItemsContent> {
 
               if (await widget.controller.useItem(itemToUse)) {
                 setState(() {});
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(StoreLocalizations.of(context).useSuccess),
-                  ),
-                );
+                Toast.success(StoreLocalizations.of(context).useSuccess);
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(StoreLocalizations.of(context).itemExpired),
-                  ),
-                );
+                Toast.error(StoreLocalizations.of(context).itemExpired);
               }
             },
           ),
