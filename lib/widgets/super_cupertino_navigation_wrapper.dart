@@ -86,6 +86,17 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
   /// 高级搜索变更回调
   final Function(Map<String, dynamic>)? onAdvancedSearchChanged;
 
+  /// ========== 搜索过滤器相关配置 ==========
+
+  /// 是否启用搜索过滤器
+  final bool enableSearchFilter;
+
+  /// 搜索过滤器标签配置
+  final Map<String, String> filterLabels;
+
+  /// 搜索过滤器状态回调
+  final Function(Map<String, bool>)? onSearchFilterChanged;
+
   const SuperCupertinoNavigationWrapper({
     super.key,
     required this.title,
@@ -115,6 +126,14 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
     this.enableAdvancedSearch = false,
     this.searchFilters,
     this.onAdvancedSearchChanged,
+    // 搜索过滤器参数
+    this.enableSearchFilter = false,
+    this.filterLabels = const {
+      'activity': '活动',
+      'tag': '标签',
+      'comment': '注释',
+    },
+    this.onSearchFilterChanged,
   });
 
   @override
@@ -123,11 +142,110 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
 
 class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigationWrapper> {
   final TextEditingController _searchController = TextEditingController();
+  bool _isSearchFocused = false;
+  final Map<String, bool> _searchFilters = {
+    'activity': true,
+    'tag': true,
+    'comment': true,
+  };
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // 初始化搜索过滤器状态
+    _searchFilters.addAll(widget.filterLabels.keys.where((key) => !_searchFilters.containsKey(key))
+        .fold<Map<String, bool>>({}, (map, key) => map..[key] = true));
+
+    // 监听搜索框内容变化
+    _searchController.addListener(() {
+      if (mounted) {
+        setState(() {
+          // 当搜索框有内容时显示过滤器
+          _isSearchFocused = _searchController.text.isNotEmpty;
+        });
+      }
+    });
+  }
+
+  /// 更新搜索过滤器状态
+  void _updateSearchFilter(String key, bool value) {
+    setState(() {
+      _searchFilters[key] = value;
+    });
+    widget.onSearchFilterChanged?.call(Map.from(_searchFilters));
+  }
+
+  /// 构建搜索过滤器
+  Widget _buildSearchFilter() {
+    if (!widget.enableSearchFilter || !_isSearchFocused) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).dividerColor,
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 4),
+          const Text(
+            '搜索范围',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 16,
+            children: widget.filterLabels.entries.map((entry) {
+              final key = entry.key;
+              final label = entry.value;
+              final value = _searchFilters[key] ?? true;
+
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Checkbox(
+                    value: value,
+                    onChanged: (bool? newValue) {
+                      if (newValue != null) {
+                        _updateSearchFilter(key, newValue);
+                      }
+                    },
+                    visualDensity: VisualDensity.compact,
+                    activeColor: Theme.of(context).colorScheme.primary,
+                  ),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 4),
+        ],
+      ),
+    );
   }
 
   @override
@@ -172,6 +290,8 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
                   children: widget.searchFilters!,
                 ),
               ),
+            // 搜索过滤器
+            if (widget.enableSearchFilter) _buildSearchFilter(),
             // 过滤栏
             if (widget.enableFilterBar && widget.filterBarChild != null)
               Container(

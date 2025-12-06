@@ -25,6 +25,11 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   late TagController _tagController;
   late ViewModeController _viewModeController;
   bool _isInitialized = false;
+  final Map<String, bool> _searchFilters = {
+    'activity': true,
+    'tag': true,
+    'comment': true,
+  };
 
   @override
   void initState() {
@@ -146,6 +151,18 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     }
   }
 
+  /// 处理搜索过滤器变更
+  void _onSearchFilterChanged(Map<String, bool> filters) {
+    setState(() {
+      _searchFilters.addAll(filters);
+    });
+
+    debugPrint('[ActivityTimelineScreen] 搜索过滤器变更: $_searchFilters');
+
+    // TODO: 根据过滤器状态执行实际搜索逻辑
+    // 例如：根据 activity、tag、comment 的勾选状态过滤搜索结果
+  }
+
   
   @override
   Widget build(BuildContext context) {
@@ -164,6 +181,10 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
             : '活动',
       ),
       largeTitle: '活动',
+      enableSearchBar: true,
+      searchPlaceholder: '搜索活动、标签或注释...',
+      enableSearchFilter: true,
+      onSearchFilterChanged: _onSearchFilterChanged,
       body: Stack(
         children: [
           Column(

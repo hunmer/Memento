@@ -40,15 +40,32 @@ class QuillViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final document = _parseDocument();
-    final controller = quill.QuillController(
-      document: document,
-      selection: const TextSelection.collapsed(offset: 0),
-      readOnly: true,
-    );
+    try {
+      final document = _parseDocument();
+      final controller = quill.QuillController(
+        document: document,
+        selection: const TextSelection.collapsed(offset: 0),
+        readOnly: true,
+      );
 
-    return quill.QuillEditor.basic(
-      controller: controller,
-    );
+      return quill.QuillEditor.basic(
+        controller: controller,
+      );
+    } catch (e) {
+      // 如果渲染失败，显示纯文本
+      if (selectable) {
+        return SelectableText(
+          data,
+          style: const TextStyle(fontSize: 14),
+        );
+      } else {
+        return Text(
+          data,
+          style: const TextStyle(fontSize: 14),
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+        );
+      }
+    }
   }
 }

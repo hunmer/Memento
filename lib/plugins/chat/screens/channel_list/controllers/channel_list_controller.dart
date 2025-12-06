@@ -10,6 +10,7 @@ class ChannelListController extends ChangeNotifier {
   String selectedGroup = "all"; // 当前选择的频道组
   late SharedPreferences prefs;
   List<String> availableGroups = ["all", "ungrouped"]; // 可用的频道组列表
+  String searchQuery = ""; // 搜索关键词
 
   ChannelListController({required this.channels, required this.chatPlugin}) {
     _initializePrefs();
@@ -120,6 +121,33 @@ class ChannelListController extends ChangeNotifier {
       }
     }
     ChatPlugin.instance.channelService.saveChannels();
+    notifyListeners();
+  }
+
+  /// 获取过滤后的频道列表（应用搜索和分组过滤）
+  List<Channel> get filteredChannels {
+    List<Channel> filtered = List.from(sortedChannels);
+
+    // 应用搜索过滤
+    if (searchQuery.isNotEmpty) {
+      final query = searchQuery.toLowerCase();
+      filtered = filtered.where((channel) {
+        return channel.title.toLowerCase().contains(query);
+      }).toList();
+    }
+
+    return filtered;
+  }
+
+  /// 设置搜索关键词
+  void setSearchQuery(String query) {
+    searchQuery = query;
+    notifyListeners();
+  }
+
+  /// 清除搜索
+  void clearSearch() {
+    searchQuery = "";
     notifyListeners();
   }
 }

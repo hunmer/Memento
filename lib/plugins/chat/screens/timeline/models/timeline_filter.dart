@@ -125,6 +125,50 @@ class TimelineFilter {
     isAI = null;
     isFavorite = null;
   }
+
+  /// 转换为 Map
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.index,
+      'title': title,
+      'icon': icon.codePoint,
+      'color': color.value,
+      'description': description,
+      'includeChannels': includeChannels,
+      'includeUsernames': includeUsernames,
+      'includeContent': includeContent,
+      'startDate': startDate?.toIso8601String(),
+      'endDate': endDate?.toIso8601String(),
+      'selectedChannelIds': selectedChannelIds.toList(),
+      'selectedUserIds': selectedUserIds.toList(),
+      'isAI': isAI,
+      'isFavorite': isFavorite,
+    };
+  }
+
+  /// 从 Map 创建实例
+  static TimelineFilter fromJson(Map<String, dynamic> json) {
+    return TimelineFilter(
+      type: TimelineFilterType.values[json['type']],
+      title: json['title'],
+      icon: IconData(json['icon'], fontFamily: 'MaterialIcons'),
+      color: Color(json['color']),
+      description: json['description'] ?? '',
+      includeChannels: json['includeChannels'] ?? true,
+      includeUsernames: json['includeUsernames'] ?? true,
+      includeContent: json['includeContent'] ?? true,
+      startDate: json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
+      endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
+      selectedChannelIds: json['selectedChannelIds'] != null
+          ? Set<String>.from(json['selectedChannelIds'])
+          : {},
+      selectedUserIds: json['selectedUserIds'] != null
+          ? Set<String>.from(json['selectedUserIds'])
+          : {},
+      isAI: json['isAI'],
+      isFavorite: json['isFavorite'],
+    );
+  }
 }
 
 /// 时间线筛选器类型
