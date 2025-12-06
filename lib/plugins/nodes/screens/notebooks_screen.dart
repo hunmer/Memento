@@ -11,14 +11,30 @@ import '../l10n/nodes_localizations.dart';
 import 'nodes_screen.dart';
 import '../../../widgets/circle_icon_picker.dart';
 
-class NotebooksScreen extends StatelessWidget {
+class NotebooksScreen extends StatefulWidget {
   const NotebooksScreen({super.key});
+
+  @override
+  State<NotebooksScreen> createState() => _NotebooksScreenState();
+}
+
+class _NotebooksScreenState extends State<NotebooksScreen> {
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<NodesController>(context);
     final l10n = NodesLocalizations.of(context);
     final theme = Theme.of(context);
+
+    // 过滤笔记本列表
+    final filteredNotebooks = _searchQuery.isEmpty
+        ? controller.notebooks
+        : controller.notebooks.where((notebook) {
+            return notebook.title.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                );
+          }).toList();
 
     return SuperCupertinoNavigationWrapper(
       title: Text(
@@ -27,6 +43,14 @@ class NotebooksScreen extends StatelessWidget {
       ),
       largeTitle: l10n.notebooks,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      enableSearchBar: true,
+      searchPlaceholder: l10n.searchNotebooks,
+      onSearchChanged: (query) {
+        setState(() {
+          _searchQuery = query;
+        });
+      },
+      searchBody: _buildSearchResults(context, filteredNotebooks, controller, l10n),
       actions: [
         IconButton(
           icon: Icon(Icons.add, color: theme.iconTheme.color),
@@ -52,9 +76,9 @@ class NotebooksScreen extends StatelessWidget {
             child: child,
           );
         },
-        itemCount: controller.notebooks.length,
+        itemCount: filteredNotebooks.length,
         itemBuilder: (context, index) {
-          final notebook = controller.notebooks[index];
+          final notebook = filteredNotebooks[index];
           return Dismissible(
             key: Key(notebook.id),
             direction: DismissDirection.endToStart,
@@ -134,6 +158,77 @@ class NotebooksScreen extends StatelessWidget {
           controller.reorderNotebooks(oldIndex, newIndex);
         },
       ),
+    );
+  }
+
+  Widget _buildSearchResults(
+    BuildContext context,
+    List<Notebook> notebooks,
+    NodesController controller,
+    NodesLocalizations l10n,
+  ) {
+    if (_searchQuery.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    if (notebooks.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.noResultsFound,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: notebooks.length,
+      itemBuilder: (context, index) {
+        final notebook = notebooks[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(
+            horizontal: 8.0,
+            vertical: 4.0,
+          ),
+          child: ListTile(
+            leading: Icon(notebook.icon, color: notebook.color),
+            title: Text(
+              notebook.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              '${notebook.nodes.length} ${l10n.nodes}',
+            ),
+            trailing: IconButton(
+              icon: const Icon(Icons.more_vert),
+              onPressed: () => _showNotebookActions(context, notebook),
+            ),
+            onTap: () {
+              controller.selectNotebook(notebook);
+              NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
+                            value: controller,
+                            child: NodesScreen(notebook: notebook),
+                  ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 

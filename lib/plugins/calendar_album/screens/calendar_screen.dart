@@ -1,5 +1,7 @@
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, File;
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
+import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
@@ -31,8 +33,15 @@ class _CalendarScreenState extends State<CalendarScreen>
   bool get wantKeepAlive => true;
   DateTime _focusedDay = DateTime.now();
   bool _isInitialized = false;
+  // 搜索相关状态
+  String _searchQuery = '';
+  Map<String, bool> _searchFilters = {
+    'title': true,
+    'content': true,
+    'tag': true,
+  };
+  List<CalendarEntry> _searchResults = [];
   // 移除水平视图，只保留垂直视图
-
 
   @override
   void initState() {
@@ -49,6 +58,74 @@ class _CalendarScreenState extends State<CalendarScreen>
         }
       });
     }
+  }
+
+  /// 获取图片的绝对路径
+  Future<String> _getImagePath(String relativePath) async {
+    try {
+      return await ImageUtils.getAbsolutePath(relativePath);
+    } catch (e) {
+      debugPrint('获取图片路径失败: $e');
+      return relativePath;
+    }
+  }
+
+  /// 执行搜索操作
+  void _performSearch(String query) {
+    _searchQuery = query;
+    if (query.isEmpty) {
+      setState(() {
+        _searchResults = [];
+      });
+      return;
+    }
+
+    final calendarController = Provider.of<CalendarController>(
+      context,
+      listen: false,
+    );
+
+    final allEntries = <CalendarEntry>[];
+    // 获取所有日记条目
+    calendarController.entries.forEach((date, entries) {
+      allEntries.addAll(entries);
+    });
+
+    // 根据过滤器条件搜索
+    _searchResults =
+        allEntries.where((entry) {
+          bool matches = false;
+
+          // 搜索标题
+          if (_searchFilters['title'] == true) {
+            if (entry.title.toLowerCase().contains(query.toLowerCase())) {
+              matches = true;
+            }
+          }
+
+          // 搜索内容
+          if (_searchFilters['content'] == true && !matches) {
+            if (entry.content.toLowerCase().contains(query.toLowerCase())) {
+              matches = true;
+            }
+          }
+
+          // 搜索标签
+          if (_searchFilters['tag'] == true && !matches) {
+            if (entry.tags.any(
+              (tag) => tag.toLowerCase().contains(query.toLowerCase()),
+            )) {
+              matches = true;
+            }
+          }
+
+          return matches;
+        }).toList();
+
+    // 按创建时间倒序排列
+    _searchResults.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    setState(() {});
   }
 
   @override
@@ -75,6 +152,29 @@ class _CalendarScreenState extends State<CalendarScreen>
         ),
         largeTitle: '日历日记',
         automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+        // 启用搜索栏
+        enableSearchBar: true,
+        searchPlaceholder: '搜索日记标题、内容或标签',
+        onSearchChanged: (query) {
+          _performSearch(query);
+        },
+        onSearchSubmitted: (query) {
+          _performSearch(query);
+        },
+        // 启用搜索过滤器
+        enableSearchFilter: true,
+        filterLabels: const {'title': '标题', 'content': '内容', 'tag': '标签'},
+        onSearchFilterChanged: (filters) {
+          setState(() {
+            _searchFilters = Map.from(filters);
+          });
+          // 重新执行搜索以应用新的过滤器
+          if (_searchQuery.isNotEmpty) {
+            _performSearch(_searchQuery);
+          }
+        },
+        // 搜索结果页面
+        searchBody: _buildSearchResults(calendarController, tagController),
         actions: [
           IconButton(
             icon: Icon(Icons.today, color: theme.iconTheme.color),
@@ -97,6 +197,201 @@ class _CalendarScreenState extends State<CalendarScreen>
         ],
         body: _buildCalendarListView(calendarController, selectedDate),
       ),
+    );
+  }
+
+  /// 构建搜索结果列表
+  Widget _buildSearchResults(
+    CalendarController calendarController,
+    TagController tagController,
+  ) {
+    final theme = Theme.of(context);
+
+    if (_searchQuery.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search,
+              size: 64,
+              color: theme.iconTheme.color?.withOpacity(0.3),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '输入关键词搜索日记',
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_searchResults.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inbox,
+              size: 64,
+              color: theme.iconTheme.color?.withOpacity(0.3),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '没有找到匹配的日记',
+              style: TextStyle(
+                fontSize: 16,
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '试试其他关键词',
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _searchResults.length,
+      itemBuilder: (context, index) {
+        final entry = _searchResults[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            title: Text(
+              entry.title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+                Text(
+                  entry.content.length > 100
+                      ? '${entry.content.substring(0, 100)}...'
+                      : entry.content,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
+                ),
+                const SizedBox(height: 8),
+                // 显示图片缩略图
+                if (entry.imageUrls.isNotEmpty)
+                  Container(
+                    height: 80,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount:
+                          entry.imageUrls.length > 3
+                              ? 3
+                              : entry.imageUrls.length,
+                      itemBuilder: (context, index) {
+                        final imageUrl = entry.imageUrls[index];
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: theme.dividerColor.withOpacity(0.3),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: FutureBuilder<String>(
+                              future: _getImagePath(imageUrl),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Image.file(
+                                    File(snapshot.data!),
+                                    fit: BoxFit.cover,
+                                    width: 80,
+                                    height: 80,
+                                  );
+                                }
+                                return Icon(
+                                  Icons.image,
+                                  color: theme.iconTheme.color?.withOpacity(
+                                    0.3,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                if (entry.tags.isNotEmpty)
+                  Wrap(
+                    spacing: 8,
+                    children:
+                        entry.tags.map((tag) {
+                          return Chip(
+                            label: Text(
+                              tag,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            visualDensity: VisualDensity.compact,
+                          );
+                        }).toList(),
+                  ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      size: 14,
+                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      DateFormat('yyyy-MM-dd').format(entry.createdAt),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.textTheme.bodySmall?.color?.withOpacity(
+                          0.6,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            onTap: () async {
+              await NavigationHelper.push(
+                context,
+                MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider.value(value: calendarController),
+                    ChangeNotifierProvider.value(value: tagController),
+                  ],
+                  child: EntryDetailScreen(entry: entry),
+                ),
+              );
+              if (mounted) setState(() {});
+            },
+          ),
+        );
+      },
     );
   }
 

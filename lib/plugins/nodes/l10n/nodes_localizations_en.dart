@@ -189,4 +189,10 @@ class NodesLocalizationsEn extends NodesLocalizations {
 
   @override
   String get dateAndFields => 'Date & Fields';
+
+  @override
+  String get searchNotebooks => 'Search notebooks';
+
+  @override
+  String get noResultsFound => 'No matching notebooks found';
 }

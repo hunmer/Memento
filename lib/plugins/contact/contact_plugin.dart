@@ -657,6 +657,10 @@ class ContactMainViewState extends State<ContactMainView> {
 
   late ContactController _controller;
 
+  List<Contact> _searchResults = [];
+  String _currentSearchQuery = '';
+  bool _isSearching = false;
+
   @override
   void initState() {
     super.initState();
@@ -690,6 +694,144 @@ class ContactMainViewState extends State<ContactMainView> {
               }
             },
           ),
+    );
+  }
+
+  /// 搜索联系人（按姓名和备注搜索）
+  Future<void> _searchContacts(String query) async {
+    _currentSearchQuery = query;
+
+    if (query.isEmpty) {
+      if (mounted) {
+        setState(() {
+          _searchResults = [];
+          _isSearching = false;
+        });
+      }
+      return;
+    }
+
+    setState(() {
+      _isSearching = true;
+    });
+
+    try {
+      final allContacts = await _controller.getAllContacts();
+      final normalizedQuery = query.toLowerCase();
+
+      final results = allContacts.where((contact) {
+        // 搜索姓名
+        final nameMatch = contact.name.toLowerCase().contains(normalizedQuery);
+
+        // 搜索备注
+        final notesMatch = contact.notes != null &&
+            contact.notes!.toLowerCase().contains(normalizedQuery);
+
+        // 搜索电话（精确匹配和模糊匹配）
+        final phoneMatch = contact.phone.contains(query);
+
+        // 搜索组织/公司
+        final orgMatch = contact.organization != null &&
+            contact.organization!.toLowerCase().contains(normalizedQuery);
+
+        // 搜索邮箱
+        final emailMatch = contact.email != null &&
+            contact.email!.toLowerCase().contains(normalizedQuery);
+
+        // 搜索地址
+        final addressMatch = contact.address != null &&
+            contact.address!.toLowerCase().contains(normalizedQuery);
+
+        // 搜索标签
+        final tagsMatch = contact.tags.any(
+          (tag) => tag.toLowerCase().contains(normalizedQuery),
+        );
+
+        return nameMatch ||
+            notesMatch ||
+            phoneMatch ||
+            orgMatch ||
+            emailMatch ||
+            addressMatch ||
+            tagsMatch;
+      }).toList();
+
+      if (mounted && _currentSearchQuery == query) {
+        setState(() {
+          _searchResults = results;
+          _isSearching = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _searchResults = [];
+          _isSearching = false;
+        });
+      }
+    }
+  }
+
+  /// 构建搜索结果列表
+  Widget _buildSearchResults() {
+    if (_isSearching) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_currentSearchQuery.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.search,
+              size: 64,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '输入关键词搜索联系人',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.grey,
+                  ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_searchResults.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.search_off,
+              size: 64,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '没有找到匹配的联系人',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.grey,
+                  ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: _searchResults.length,
+      itemBuilder: (context, index) {
+        final contact = _searchResults[index];
+        return ContactCard(
+          contact: contact,
+          controller: _controller,
+          onTap: () => _addOrEditContact(contact),
+        );
+      },
     );
   }
 
@@ -849,6 +991,14 @@ class ContactMainViewState extends State<ContactMainView> {
           );
         },
       ),
+      // 启用搜索栏
+      enableSearchBar: true,
+      searchPlaceholder: '搜索联系人姓名、电话、备注...',
+      onSearchChanged: (query) {
+        _searchContacts(query);
+      },
+      // 搜索结果页面
+      searchBody: _buildSearchResults(),
       actions: [
         IconButton(
           icon: const Icon(Icons.filter_list),

@@ -183,4 +183,10 @@ class NodesLocalizationsZh extends NodesLocalizations {
 
   @override
   String get dateAndFields => '时间与字段';
+
+  @override
+  String get searchNotebooks => '搜索笔记本';
+
+  @override
+  String get noResultsFound => '未找到匹配的笔记本';
 }

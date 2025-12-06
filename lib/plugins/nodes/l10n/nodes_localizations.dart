@@ -131,6 +131,10 @@ abstract class NodesLocalizations {
   String get basicInfo;
 
   String get dateAndFields;
+
+  String get searchNotebooks;
+
+  String get noResultsFound;
 }
 
 class _NodesLocalizationsDelegate

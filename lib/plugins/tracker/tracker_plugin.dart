@@ -45,6 +45,18 @@ class _TrackerMainViewState extends State<TrackerMainView> {
     });
   }
 
+  void _addGoal() {
+    // 打开目标编辑页面
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => GoalEditPage(
+        controller: TrackerPlugin.instance.controller,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
@@ -54,6 +66,13 @@ class _TrackerMainViewState extends State<TrackerMainView> {
       enableSearchBar: true,
       searchPlaceholder: '搜索目标...',
       onSearchChanged: _onSearchChanged,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: _addGoal,
+          tooltip: '添加目标',
+        ),
+      ],
       searchBody: ChangeNotifierProvider.value(
         value: TrackerPlugin.instance.controller,
         child: SearchResultsScreen(searchQuery: _searchQuery),
