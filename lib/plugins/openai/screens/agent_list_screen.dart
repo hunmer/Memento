@@ -1,5 +1,4 @@
 import 'dart:io' show Platform;
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -25,6 +24,15 @@ class _AgentListScreenState extends State<AgentListScreen> {
   Set<String> _selectedProviders = {};
   Set<String> _selectedTags = {};
 
+  // 搜索相关状态
+  final TextEditingController _searchController = TextEditingController();
+  final Map<String, bool> _searchFilters = {
+    'name': true,
+    'description': true,
+    'tags': true,
+  };
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +44,7 @@ class _AgentListScreenState extends State<AgentListScreen> {
   @override
   void dispose() {
     _agentController.removeListener(_onAgentsChanged);
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -45,6 +54,20 @@ class _AgentListScreenState extends State<AgentListScreen> {
         // 智能体列表已更新，UI需要刷新
       });
     }
+  }
+
+  /// 处理搜索查询变化
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
+
+  /// 处理搜索过滤器变化
+  void _onSearchFilterChanged(Map<String, bool> filters) {
+    setState(() {
+      _searchFilters.addAll(filters);
+    });
   }
 
   Future<void> _loadAgents() async {
@@ -70,13 +93,47 @@ class _AgentListScreenState extends State<AgentListScreen> {
 
   List<AIAgent> _getFilteredAgents() {
     return _agentController.agents.where((agent) {
+      // 服务商筛选
       bool providerMatch =
           _selectedProviders.isEmpty ||
           _selectedProviders.contains(agent.serviceProviderId);
+
+      // 标签筛选
       bool tagMatch =
           _selectedTags.isEmpty ||
           agent.tags.any((tag) => _selectedTags.contains(tag));
-      return providerMatch && tagMatch;
+
+      // 搜索筛选
+      bool searchMatch = true;
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        final nameMatch = agent.name.toLowerCase().contains(query);
+        final descriptionMatch = agent.description.toLowerCase().contains(query);
+        final tagsMatch = agent.tags.any((tag) =>
+            tag.toLowerCase().contains(query));
+
+        // 根据启用的搜索过滤器进行匹配
+        final enabledFilters = _searchFilters.entries
+            .where((entry) => entry.value)
+            .map((entry) => entry.key)
+            .toList();
+
+        final matches = <bool>[];
+        if (enabledFilters.contains('name')) {
+          matches.add(nameMatch);
+        }
+        if (enabledFilters.contains('description')) {
+          matches.add(descriptionMatch);
+        }
+        if (enabledFilters.contains('tags')) {
+          matches.add(tagsMatch);
+        }
+
+        // 如果有启用的过滤器，只要有一个匹配就算匹配
+        searchMatch = matches.isEmpty ? true : matches.any((match) => match);
+      }
+
+      return providerMatch && tagMatch && searchMatch;
     }).toList();
   }
 
@@ -90,7 +147,21 @@ class _AgentListScreenState extends State<AgentListScreen> {
           : AgentListView(agents: _getFilteredAgents()),
       enableLargeTitle: false,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
-      
+
+      // 启用搜索栏
+      enableSearchBar: true,
+      searchPlaceholder: '搜索智能体',
+      onSearchChanged: _onSearchChanged,
+
+      // 启用搜索过滤器
+      enableSearchFilter: true,
+      filterLabels: const {
+        'name': '名称',
+        'description': '描述',
+        'tags': '标签',
+      },
+      onSearchFilterChanged: _onSearchFilterChanged,
+
       actions: [
         IconButton(
           icon: const Icon(Icons.filter_list),

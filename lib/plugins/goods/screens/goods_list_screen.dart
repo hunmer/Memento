@@ -264,7 +264,7 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
                             constraints.maxWidth > 600 ? 3 : 2, // 响应式列数
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
-                        childAspectRatio: 0.8, // 调整卡片比例
+                        childAspectRatio: 0.75, // 调整卡片比例
                       ),
                       itemCount: allItems.length,
                       itemBuilder: (context, index) {

@@ -272,8 +272,25 @@ class ConversationService extends ChangeNotifier {
 
     final lowerQuery = query.toLowerCase();
     return _conversations.where((c) {
-      return c.title.toLowerCase().contains(lowerQuery) ||
-          (c.lastMessagePreview?.toLowerCase().contains(lowerQuery) ?? false);
+      // 搜索会话标题
+      final titleMatch = c.title.toLowerCase().contains(lowerQuery);
+
+      // 搜索最后消息预览
+      final messagePreviewMatch =
+          c.lastMessagePreview?.toLowerCase().contains(lowerQuery) ?? false;
+
+      // 搜索所属分组的名称
+      final groupMatch = c.groups.any((groupId) {
+        try {
+          final group = _groups.firstWhere((g) => g.id == groupId);
+          return group.name.toLowerCase().contains(lowerQuery);
+        } catch (e) {
+          // 如果分组不存在，跳过
+          return false;
+        }
+      });
+
+      return titleMatch || messagePreviewMatch || groupMatch;
     }).toList();
   }
 

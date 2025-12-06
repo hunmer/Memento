@@ -69,14 +69,7 @@ class _NotesMainViewState extends NotesMainViewState
         ),
       ],
       largeTitleActions: [
-        IconButton(
-          icon: const Icon(Icons.grid_view),
-          onPressed: _toggleViewMode,
-        ),
-        IconButton(
-          icon: const Icon(Icons.filter_list),
-          onPressed: _showAdvancedFilters,
-        ),
+       
       ],
       onCollapsed: (isCollapsed) {
         if (isCollapsed) {
