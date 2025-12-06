@@ -27,6 +27,11 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   Map<DateTime, DiaryEntry> _diaryEntries = {};
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
+  // 搜索相关状态
+  String _searchQuery = '';
+  List<DiaryEntry> _searchResults = [];
+  bool _isSearching = false;
+
   // Colors from design
   static const Color _primaryColor = Color(0xFFD8BFD8); // Dusty Rose
   static const Color _primaryTextColor = Color(0xFF4A4A4A); // Soft charcoal
@@ -50,6 +55,29 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
     if (mounted) {
       setState(() {
         _diaryEntries = entries;
+      });
+    }
+  }
+
+  /// 处理搜索查询
+  Future<void> _handleSearch(String query) async {
+    setState(() {
+      _searchQuery = query;
+      _isSearching = query.isNotEmpty;
+    });
+
+    if (query.trim().isEmpty) {
+      setState(() {
+        _searchResults = [];
+      });
+      return;
+    }
+
+    // 执行搜索
+    final results = await DiaryUtils.searchDiaryEntries(query);
+    if (mounted) {
+      setState(() {
+        _searchResults = results;
       });
     }
   }
@@ -120,6 +148,183 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return SuperCupertinoNavigationWrapper(
+      title: Text(DiaryLocalizations.of(context).myDiary),
+      largeTitle: DiaryLocalizations.of(context).myDiary,
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      enableSearchBar: true,
+      searchPlaceholder: '搜索日记内容...',
+      onSearchChanged: _handleSearch,
+      onSearchSubmitted: _handleSearch,
+      body: _isSearching ? _buildSearchResults() : _buildCalendarView(),
+    );
+  }
+
+  /// 构建搜索结果视图
+  Widget _buildSearchResults() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor =
+        isDark ? Theme.of(context).scaffoldBackgroundColor : _backgroundColor;
+    final textColor = isDark ? Colors.white : _primaryTextColor;
+    final primaryColor =
+        isDark ? Theme.of(context).colorScheme.primary : _primaryColor;
+
+    return Container(
+      color: bgColor,
+      child:
+          _searchResults.isEmpty
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.search_off,
+                      size: 64,
+                      color: textColor.withValues(alpha: 0.3),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '没有找到匹配的日记',
+                      style: TextStyle(
+                        color: textColor.withValues(alpha: 0.6),
+                        fontSize: 16,
+                      ),
+                    ),
+                    if (_searchQuery.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        '搜索词：$_searchQuery',
+                        style: TextStyle(
+                          color: textColor.withValues(alpha: 0.4),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              )
+              : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _searchResults.length,
+                itemBuilder: (context, index) {
+                  final entry = _searchResults[index];
+                  return _buildSearchResultCard(
+                    entry,
+                    textColor,
+                    primaryColor,
+                    isDark,
+                  );
+                },
+              ),
+    );
+  }
+
+  /// 构建搜索结果卡片
+  Widget _buildSearchResultCard(
+    DiaryEntry entry,
+    Color textColor,
+    Color primaryColor,
+    bool isDark,
+  ) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: isDark ? 2 : 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: () => _navigateToEntry(entry),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 日期和心情
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    DateFormat('yyyy年MM月dd日').format(entry.date),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor,
+                    ),
+                  ),
+                  if (entry.mood != null)
+                    Text(entry.mood!, style: const TextStyle(fontSize: 20)),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // 标题
+              if (entry.title.isNotEmpty) ...[
+                Text(
+                  entry.title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+              ],
+
+              // 内容预览（使用QuillViewer，支持Markdown格式化显示）
+              SizedBox(
+                height: 80, // 限制高度，显示3-4行内容
+                child: QuillViewer(
+                  data: entry.content,
+                  selectable: false, // 只读模式
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // 底部信息
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${entry.content.length} 字',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: textColor.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 12,
+                        color: textColor.withValues(alpha: 0.3),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 跳转到指定日记条目
+  void _navigateToEntry(DiaryEntry entry) {
+    NavigationHelper.push(
+      context,
+      DiaryEditorScreen(
+        date: entry.date,
+        storage: widget.storage,
+        initialTitle: entry.title,
+        initialContent: entry.content,
+      ),
+    ).then((_) => _loadDiaryEntries());
+  }
+
+  /// 构建日历视图
+  Widget _buildCalendarView() {
     // 确保_selectedDay也是标准化的
     final normalizedSelectedDay =
         _selectedDay != null
@@ -135,19 +340,13 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
             : null;
     // Check if current theme is dark
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor =
-        isDark ? Theme.of(context).scaffoldBackgroundColor : _backgroundColor;
     final textColor = isDark ? Colors.white : _primaryTextColor;
     final primaryColor =
         isDark ? Theme.of(context).colorScheme.primary : _primaryColor;
 
-    return SuperCupertinoNavigationWrapper(
-      title: Text(DiaryLocalizations.of(context).myDiary),
-      largeTitle: DiaryLocalizations.of(context).myDiary,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
+    return Stack(
+      children: [
+        SingleChildScrollView(
             child: Column(
               children: [
                 // Month Selector
@@ -484,10 +683,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
               child: const Icon(Icons.add, color: Colors.white, size: 32),
             ),
           ),
-        ],
-      ),
-      backgroundColor: bgColor,
-      enableLargeTitle: true,
+      ],
     );
   }
 

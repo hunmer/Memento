@@ -285,7 +285,7 @@ class _FilterDialogState extends State<FilterDialog> {
         ),
         FilledButton(
           onPressed: () {
-            Navigator.of(context).pop(_filter);
+            Navigator.of(context).pop(_filter.toJson());
           },
           child: Text(appL10n.apply),
         ),

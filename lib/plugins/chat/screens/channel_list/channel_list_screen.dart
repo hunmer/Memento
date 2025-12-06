@@ -1,5 +1,4 @@
 import 'dart:io' show Platform;
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
@@ -54,6 +53,14 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
     return SuperCupertinoNavigationWrapper(
       title: Text(ChatLocalizations.of(context).channelList),
       largeTitle: '频道列表',
+      enableSearchBar: true,
+      searchPlaceholder: '搜索频道名称',
+      onSearchChanged: (query) {
+        _controller.setSearchQuery(query);
+      },
+      onSearchSubmitted: (query) {
+        _controller.setSearchQuery(query);
+      },
       body: Column(
         children: [
           ChannelGroupSelector(
@@ -64,29 +71,28 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
             },
           ),
           Expanded(
-            child:
-                _controller.sortedChannels.isEmpty
-                    ? EmptyChannelView(onAddChannel: _showAddChannelDialog)
-                    : ReorderableListView.builder(
-                      itemCount: _controller.sortedChannels.length,
-                      onReorder: _controller.reorderChannels,
-                      itemBuilder: (context, index) {
-                        final channel = _controller.sortedChannels[index];
-                        return Padding(
-                          key: ValueKey(channel.id),
-                          padding: const EdgeInsets.symmetric(vertical: 2),
-                          child: ChannelTile(
-                            channel: channel,
-                            onTap: () => _navigateToChat(channel),
-                            onEdit:
-                                (channel) => _showEditChannelDialog(channel),
-                            onDelete:
-                                (channel) => _showDeleteChannelDialog(channel),
-                          ),
-                        );
-                      },
-                      buildDefaultDragHandles: false,
-                    ),
+            child: _controller.filteredChannels.isEmpty
+                ? EmptyChannelView(onAddChannel: _showAddChannelDialog)
+                : ReorderableListView.builder(
+                    itemCount: _controller.filteredChannels.length,
+                    onReorder: _controller.reorderChannels,
+                    itemBuilder: (context, index) {
+                      final channel = _controller.filteredChannels[index];
+                      return Padding(
+                        key: ValueKey(channel.id),
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: ChannelTile(
+                          channel: channel,
+                          onTap: () => _navigateToChat(channel),
+                          onEdit: (channel) =>
+                              _showEditChannelDialog(channel),
+                          onDelete: (channel) =>
+                              _showDeleteChannelDialog(channel),
+                        ),
+                      );
+                    },
+                    buildDefaultDragHandles: false,
+                  ),
           ),
         ],
       ),

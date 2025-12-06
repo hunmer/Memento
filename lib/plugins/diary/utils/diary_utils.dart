@@ -334,6 +334,38 @@ class DiaryUtils {
     }
   }
 
+  /// 搜索日记条目
+  /// 支持按标题和内容搜索（不区分大小写）
+  static Future<List<DiaryEntry>> searchDiaryEntries(String query) async {
+    if (query.trim().isEmpty) {
+      return [];
+    }
+
+    try {
+      final allEntries = await loadDiaryEntries();
+      final searchTerm = query.toLowerCase().trim();
+      final List<DiaryEntry> results = [];
+
+      for (final entry in allEntries.values) {
+        final titleMatch = entry.title.toLowerCase().contains(searchTerm);
+        final contentMatch = entry.content.toLowerCase().contains(searchTerm);
+
+        if (titleMatch || contentMatch) {
+          results.add(entry);
+        }
+      }
+
+      // 按日期降序排序，最新的在前
+      results.sort((a, b) => b.date.compareTo(a.date));
+
+      debugPrint('Search for "$query" found ${results.length} entries');
+      return results;
+    } catch (e) {
+      debugPrint('Error searching diary entries: $e');
+      return [];
+    }
+  }
+
   /// 同步小组件数据
   static Future<void> _syncWidget() async {
     await PluginWidgetSyncHelper.instance.syncDiary();

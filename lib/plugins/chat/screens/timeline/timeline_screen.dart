@@ -7,8 +7,9 @@ import '../../l10n/chat_localizations.dart';
 import '../../chat_plugin.dart';
 import '../../utils/message_operations.dart';
 import 'controllers/timeline_controller.dart';
+import 'models/timeline_filter.dart';
 import 'widgets/timeline_message_card.dart';
-import 'widgets/timeline_search_bar.dart';
+import 'widgets/filter_dialog.dart';
 
 /// Timeline 主屏幕，显示所有频道的消息时间线
 class TimelineScreen extends StatefulWidget {
@@ -108,8 +109,23 @@ class _TimelineScreenState extends State<TimelineScreen> {
     return SuperCupertinoNavigationWrapper(
       title: Text(l10n.timelineTab),
       largeTitle: l10n.timelineTab,
+      enableSearchBar: true,
+      searchPlaceholder: '搜索消息...',
+      onSearchChanged: (query) {
+        // 搜索防抖处理已在控制器中实现
+        _controller.searchController.text = query;
+      },
+      onSearchSubmitted: (query) {
+        _controller.searchController.text = query;
+      },
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
+        // 过滤器按钮
+        IconButton(
+          icon: Icon(Icons.filter_list),
+          tooltip: '过滤器',
+          onPressed: () => _showFilterDialog(context),
+        ),
         // 视图切换按钮
         IconButton(
           icon: Icon(_isGridView ? Icons.view_agenda : Icons.grid_view),
@@ -125,42 +141,30 @@ class _TimelineScreenState extends State<TimelineScreen> {
           },
         ),
       ],
-      body: Column(
-        children: [
-          // 搜索栏
-          TimelineSearchBar(
-            controller: _controller,
-            chatPlugin: widget.chatPlugin,
-          ),
+      body: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) {
+          if (_controller.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-          // 消息列表
-          Expanded(
-            child: ListenableBuilder(
-              listenable: _controller,
-              builder: (context, _) {
-                if (_controller.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+          if (_controller.displayMessages.isEmpty) {
+            if (_controller.searchQuery.isNotEmpty ||
+                _controller.isFilterActive) {
+              return Center(
+                child: Text(
+                  '${l10n.noMessagesFound} "${_controller.searchQuery}"',
+                ),
+              );
+            }
+            return Center(child: Text(l10n.noMessagesYet));
+          }
 
-                if (_controller.messages.isEmpty) {
-                  if (_controller.searchQuery.isNotEmpty) {
-                    return Center(
-                      child: Text(
-                        '${l10n.noMessagesFound} "${_controller.searchQuery}"',
-                      ),
-                    );
-                  }
-                  return Center(child: Text(l10n.noMessagesYet));
-                }
-
-                return RefreshIndicator(
-                  onRefresh: _controller.refreshTimeline,
-                  child: _isGridView ? _buildGridView() : _buildListView(),
-                );
-              },
-            ),
-          ),
-        ],
+          return RefreshIndicator(
+            onRefresh: _controller.refreshTimeline,
+            child: _isGridView ? _buildGridView() : _buildListView(),
+          );
+        },
       ),
     );
   }
@@ -268,5 +272,24 @@ class _TimelineScreenState extends State<TimelineScreen> {
       isGridView: true,
       settingsService: widget.chatPlugin.settingsService,
     );
+  }
+
+  /// 显示高级过滤器对话框
+  Future<void> _showFilterDialog(BuildContext context) async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder:
+          (context) => FilterDialog(
+            filter: _controller.filter,
+            chatPlugin: widget.chatPlugin,
+          ),
+    );
+
+    if (result != null) {
+      // 从 Map 更新过滤器
+      _controller.filter.updateFrom(TimelineFilter.fromJson(result));
+      // 应用过滤器
+      _controller.applyFilter(_controller.filter);
+    }
   }
 }
