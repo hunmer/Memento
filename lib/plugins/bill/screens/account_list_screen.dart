@@ -60,7 +60,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
                     Icons.arrow_back_ios_new,
                     color: Colors.black,
                   ),
-                  onPressed: () => PluginManager.toHomeScreen(context),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
       ),
       body: _buildAccountList(),

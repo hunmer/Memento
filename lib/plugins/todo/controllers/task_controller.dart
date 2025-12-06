@@ -84,12 +84,33 @@ class TaskController extends ChangeNotifier {
           // 关键词过滤
           final keyword = filter['keyword'] as String?;
           if (keyword != null && keyword.isNotEmpty) {
-            final keywordMatch =
-                task.title.toLowerCase().contains(keyword.toLowerCase()) ||
-                (task.description != null &&
-                    task.description!.toLowerCase().contains(
-                      keyword.toLowerCase(),
-                    ));
+            // 获取搜索过滤器设置
+            final searchFilters = filter['searchFilters'] as Map<String, bool>?;
+
+            bool keywordMatch = false;
+
+            // 根据搜索过滤器设置决定搜索范围
+            if (searchFilters == null || searchFilters.isEmpty) {
+              // 默认搜索所有字段
+              keywordMatch = _matchesKeyword(task, keyword);
+            } else {
+              // 根据过滤器设置逐个检查字段
+              if (searchFilters['title'] == true) {
+                keywordMatch = keywordMatch || task.title.toLowerCase().contains(keyword.toLowerCase());
+              }
+              if (searchFilters['description'] == true && !keywordMatch) {
+                keywordMatch = task.description != null &&
+                    task.description!.toLowerCase().contains(keyword.toLowerCase());
+              }
+              if (searchFilters['tag'] == true && !keywordMatch) {
+                keywordMatch = task.tags.any((tag) => tag.toLowerCase().contains(keyword.toLowerCase()));
+              }
+              if (searchFilters['subtask'] == true && !keywordMatch) {
+                keywordMatch = task.subtasks.any((subtask) =>
+                    subtask.title.toLowerCase().contains(keyword.toLowerCase()));
+              }
+            }
+
             if (!keywordMatch) return false;
           }
 
@@ -156,6 +177,16 @@ class TaskController extends ChangeNotifier {
           return true;
         }).toList();
     _sortTasks();
+  }
+
+  // 检查任务是否匹配关键词（默认搜索所有字段）
+  bool _matchesKeyword(Task task, String keyword) {
+    final keywordLower = keyword.toLowerCase();
+    return task.title.toLowerCase().contains(keywordLower) ||
+        (task.description != null &&
+            task.description!.toLowerCase().contains(keywordLower)) ||
+        task.tags.any((tag) => tag.toLowerCase().contains(keywordLower)) ||
+        task.subtasks.any((subtask) => subtask.title.toLowerCase().contains(keywordLower));
   }
 
   // 根据当前排序方式对任务进行排序

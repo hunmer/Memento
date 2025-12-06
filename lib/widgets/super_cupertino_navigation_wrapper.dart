@@ -351,6 +351,16 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
 
   /// 构建 SuperAppBar，根据 enableSearchBar 条件决定是否包含 searchBar
   SuperAppBar _buildSuperAppBar() {
+    // 构建 searchBar，当 enableSearchBar 为 false 时传入 disabled 的 SuperSearchBar
+    final searchBar =
+        widget.enableSearchBar
+            ? _buildSearchBar()
+            : SuperSearchBar(
+              enabled: false,
+              scrollBehavior: SearchBarScrollBehavior.pinned,
+              resultBehavior: SearchBarResultBehavior.neverVisible,
+            );
+
     return SuperAppBar(
       backgroundColor: widget.backgroundColor ?? Theme.of(context).appBarTheme.backgroundColor,
       automaticallyImplyLeading: widget.automaticallyImplyLeading,
@@ -374,12 +384,12 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
       bottom: _buildBottomBar(),
       largeTitle: SuperLargeTitle(
         height: 50,
-        enabled: true,
+        enabled: widget.enableLargeTitle,
         largeTitle: _getDisplayTitle(),
         actions: widget.largeTitleActions,
       ),
       // 只有当启用搜索栏时才传递 searchBar 参数
-      searchBar: widget.enableSearchBar ? _buildSearchBar() : null,
+      searchBar: searchBar,
     );
   }
 
