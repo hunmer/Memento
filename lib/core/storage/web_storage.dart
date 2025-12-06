@@ -46,19 +46,29 @@ class WebStorage implements StorageInterface {
   /// 保存数据到文件系统
   @override
   Future<void> saveData(String key, String value) async {
-    final file = fs.file(join(_rootDir, key));
-    await _ensureDirectoryExists(file.path);
-    await file.writeAsString(value);
+    try {
+      final file = fs.file(join(_rootDir, key));
+      await _ensureDirectoryExists(file.path);
+      await file.writeAsString(value);
+    } catch (e) {
+      print('Web存储保存数据失败: $key - $e');
+      rethrow;
+    }
   }
 
   /// 从文件系统读取数据
   @override
   Future<String?> loadData(String key) async {
-    final file = fs.file(join(_rootDir, key));
-    if (await file.exists()) {
-      return file.readAsString();
+    try {
+      final file = fs.file(join(_rootDir, key));
+      if (await file.exists()) {
+        return file.readAsString();
+      }
+      return null;
+    } catch (e) {
+      print('Web存储读取数据失败: $key - $e');
+      return null;
     }
-    return null;
   }
 
   /// 从文件系统删除数据
@@ -80,20 +90,30 @@ class WebStorage implements StorageInterface {
   /// 保存JSON对象到文件系统
   @override
   Future<void> saveJson(String key, dynamic data) async {
-    final file = fs.file(join(_rootDir, key));
-    await _ensureDirectoryExists(file.path);
-    await file.writeAsString(jsonEncode(data));
+    try {
+      final file = fs.file(join(_rootDir, key));
+      await _ensureDirectoryExists(file.path);
+      await file.writeAsString(jsonEncode(data));
+    } catch (e) {
+      print('Web存储保存JSON失败: $key - $e');
+      rethrow; // 重新抛出异常，让调用者知道保存失败
+    }
   }
 
   /// 从文件系统读取JSON对象
   @override
   Future<dynamic> loadJson(String key, [dynamic defaultValue]) async {
-    final file = fs.file(join(_rootDir, key));
-    if (await file.exists()) {
-      final content = await file.readAsString();
-      return jsonDecode(content);
+    try {
+      final file = fs.file(join(_rootDir, key));
+      if (await file.exists()) {
+        final content = await file.readAsString();
+        return jsonDecode(content);
+      }
+      return defaultValue ?? {};
+    } catch (e) {
+      print('Web存储读取JSON失败: $key - $e');
+      return defaultValue ?? {};
     }
-    return defaultValue ?? {};
   }
 
   /// 获取所有以指定前缀开头的键

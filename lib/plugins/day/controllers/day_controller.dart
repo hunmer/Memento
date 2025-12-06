@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/memorial_day.dart';
 import '../day_plugin.dart';
+import '../sample_data.dart';
 
 enum SortMode {
   upcoming, // 即将发生
@@ -96,11 +97,26 @@ class DayController extends ChangeNotifier {
     // 确保目录存在
     await _plugin.storage.createDirectory('day');
 
+    final filePath = '${'day'}/memorial_days.json';
+
+    // 检查文件是否存在
+    final fileExists = await _plugin.storage.fileExists(filePath);
+
+    if (!fileExists) {
+      // 文件不存在，写入示例数据
+      final sampleDays = DaySampleData.getSampleMemorialDays();
+      _memorialDays.clear();
+      _memorialDays.addAll(sampleDays);
+      await _saveMemorialDays();
+      _sortMemorialDays();
+      return;
+    }
+
     // 设置默认的空数组JSON字符串
     final defaultContent = '[]';
 
     final content = await _plugin.storage.readFile(
-      '${'day'}/memorial_days.json',
+      filePath,
       defaultContent,
     );
 

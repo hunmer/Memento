@@ -5,6 +5,7 @@ import '../models/filter_sort_config.dart';
 import '../../base_plugin.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as path;
+import '../sample_data.dart';
 
 class ContactController {
   final BasePlugin plugin;
@@ -380,7 +381,6 @@ class ContactController {
   // 创建默认联系人数据
   Future<void> createDefaultContacts() async {
     final storage = plugin.storage;
-    final uuid = const Uuid();
 
     // 检查是否已有联系人数据
     final existingContacts = await storage.readJson(contactsKey);
@@ -390,59 +390,23 @@ class ContactController {
       return;
     }
 
-    // 添加一些默认联系人
-    final defaultContacts = [
-      Contact(
-        id: uuid.v4(),
-        name: '张三',
-        icon: Icons.person,
-        iconColor: Colors.blue,
-        phone: '13800138000',
-        address: '北京市海淀区',
-        tags: ['家人'],
-        customFields: {'公司': '北京科技有限公司'},
-      ),
-      Contact(
-        id: uuid.v4(),
-        name: '李四',
-        icon: Icons.work,
-        iconColor: Colors.green,
-        phone: '13900139000',
-        address: '上海市浦东新区',
-        tags: ['同事', '朋友'],
-        customFields: {'职位': '技术总监'},
-      ),
-    ];
+    // 获取示例数据
+    final sampleContacts = ContactSampleData.getSampleContacts();
+    final sampleInteractions = ContactSampleData.getSampleInteractions();
 
-    // 保存默认联系人
+    // 保存示例联系人
     await storage.writeJson(
       contactsKey,
-      defaultContacts.map((c) => c.toJson()).toList(),
+      sampleContacts.map((c) => c.toJson()).toList(),
     );
 
-    // 创建一些默认交互记录
-    final defaultInteractions = [
-      InteractionRecord(
-        id: uuid.v4(),
-        contactId: defaultContacts[0].id,
-        date: DateTime.now().subtract(const Duration(days: 5)),
-        notes: '讨论了项目进度',
-        participants: [],
-      ),
-      InteractionRecord(
-        id: uuid.v4(),
-        contactId: defaultContacts[1].id,
-        date: DateTime.now().subtract(const Duration(days: 2)),
-        notes: '电话讨论了合作事宜',
-        participants: [defaultContacts[0].id],
-      ),
-    ];
-
-    // 保存默认交互记录
+    // 保存示例交互记录
     await storage.writeJson(
       interactionsKey,
-      defaultInteractions.map((i) => i.toJson()).toList(),
+      sampleInteractions.map((i) => i.toJson()).toList(),
     );
+
+    debugPrint('Created ${sampleContacts.length} sample contacts and ${sampleInteractions.length} interactions');
   }
 
   // 在应用退出前保存所有更改

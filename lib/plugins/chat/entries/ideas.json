@@ -1,0 +1,52 @@
+{
+  "messages": [
+    {
+      "id": "msg_ideas_001",
+      "channelId": "ideas",
+      "content": "💡 **新功能想法**：智能标签建议\n\n基于消息内容自动推荐标签，提高整理效率。\n\n实现思路：\n1. 使用NLP提取关键词\n2. 建立标签库\n3. 相似度匹配\n\n优势：减少手动整理时间",
+      "type": "user",
+      "sender": "user",
+      "senderName": "我",
+      "timestamp": "2024-11-22T10:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": {"💡": 2, "👍": 1},
+      "metadata": {
+        "ideaStatus": "concept",
+        "estimatedEffort": "medium"
+      }
+    },
+    {
+      "id": "msg_ideas_002",
+      "channelId": "ideas",
+      "content": "🚀 **产品改进**：消息模板功能\n\n场景：经常发送相似内容（日报、周报、会议纪要等）\n\n功能设计：\n- 预设模板库\n- 自定义模板\n- 快捷插入\n- 变量替换（日期、姓名等）",
+      "type": "user",
+      "sender": "user",
+      "senderName": "我",
+      "timestamp": "2024-11-27T09:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": {"📋": 1, "🔄": 1},
+      "metadata": {
+        "ideaStatus": "design",
+        "userRequests": 5
+      }
+    },
+    {
+      "id": "msg_ideas_003",
+      "channelId": "ideas",
+      "content": "🌟 **创意灵感**：AI思维导图\n\n将聊天记录自动转换为思维导图，帮助整理思路。\n\n特点：\n- 自动识别主题\n- 提取关键点\n- 建立关联关系\n- 可编辑调整\n\n应用场景：\n- 会议总结\n- 项目规划\n- 学习笔记",
+      "type": "user",
+      "sender": "user",
+      "senderName": "我",
+      "timestamp": "2024-12-06T08:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": {"🧠": 1, "✨": 1},
+      "metadata": {
+        "ideaStatus": "research",
+        "innovationScore": 9
+      }
+    }
+  ]
+}

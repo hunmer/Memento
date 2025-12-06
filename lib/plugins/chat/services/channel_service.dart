@@ -7,6 +7,7 @@ import '../chat_plugin.dart';
 import '../../../core/event/event.dart';
 import '../../../core/services/plugin_widget_sync_helper.dart';
 import 'widget_service.dart';
+import '../sample_data.dart';
 
 /// 负责管理频道相关的功能
 class ChannelService {
@@ -40,7 +41,100 @@ class ChannelService {
     // 确保channels数据存在
     final channelsListData = await _plugin.storage.read('chat/channels');
     if (channelsListData.isEmpty) {
-      await _plugin.storage.write('chat/channels', {'channels': []});
+      // 首次使用，加载示例数据
+      debugPrint('Chat插件: 首次初始化，正在加载示例数据...');
+      await _loadSampleData();
+    }
+  }
+
+  /// 加载示例数据
+  Future<void> _loadSampleData() async {
+    try {
+      // 获取示例数据
+      final sampleData = getSampleChannelsData();
+      final sampleMessages = getSampleMessagesData();
+
+      // 确保必要的目录存在
+      await Future.wait([
+        _plugin.storage.createDirectory('chat/channel'),
+        _plugin.storage.createDirectory('chat/messages'),
+      ]);
+
+      // 保存频道列表
+      final channelIds = (sampleData['channels'] as List)
+          .map((channel) => channel['id'] as String)
+          .toList();
+      await _plugin.storage.write('chat/channels', {'channels': channelIds});
+
+      // 保存每个频道的详细信息和消息
+      for (var channelJson in sampleData['channels'] as List) {
+        final channelId = channelJson['id'] as String;
+
+        // 保存频道信息
+        await _plugin.storage.write('chat/channel/$channelId', {
+          'channel': channelJson,
+        });
+
+        // 保存频道消息
+        final messages = sampleMessages[channelId];
+        if (messages != null && messages.isNotEmpty) {
+          await _plugin.storage.write('chat/messages/$channelId', {
+            'messages': messages,
+          });
+          debugPrint('Chat插件: 已加载频道 "${channelJson['name']}" 的 ${messages.length} 条消息');
+        } else {
+          // 创建空消息列表
+          await _plugin.storage.write('chat/messages/$channelId', {
+            'messages': [],
+          });
+        }
+      }
+
+      // 保存全局设置
+      if (sampleData.containsKey('settings')) {
+        await _plugin.storage.write('chat/settings', sampleData['settings']);
+      }
+
+      debugPrint('Chat插件: 示例数据加载完成！共加载 ${channelIds.length} 个频道');
+    } catch (e) {
+      debugPrint('Chat插件: 加载示例数据失败: $e');
+      // 如果加载示例数据失败，至少创建一个默认频道
+      await _createDefaultChannel();
+    }
+  }
+
+  /// 创建默认频道（作为示例数据加载失败时的备用方案）
+  Future<void> _createDefaultChannel() async {
+    try {
+      final defaultChannel = {
+        'id': 'default',
+        'name': '默认频道',
+        'description': '系统的默认频道',
+        'color': Colors.blue.value,
+        'icon': 'chat',
+        'isDefault': true,
+        'createdAt': DateTime.now().toIso8601String(),
+        'lastActivity': DateTime.now().toIso8601String(),
+        'messageCount': 0,
+        'unreadCount': 0
+      };
+
+      // 保存频道列表
+      await _plugin.storage.write('chat/channels', {'channels': ['default']});
+
+      // 保存频道信息
+      await _plugin.storage.write('chat/channel/default', {
+        'channel': defaultChannel,
+      });
+
+      // 创建空消息列表
+      await _plugin.storage.write('chat/messages/default', {
+        'messages': [],
+      });
+
+      debugPrint('Chat插件: 已创建默认频道');
+    } catch (e) {
+      debugPrint('Chat插件: 创建默认频道失败: $e');
     }
   }
 

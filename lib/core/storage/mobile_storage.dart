@@ -123,6 +123,7 @@ class MobileStorage implements StorageInterface {
       await saveData(key, jsonString);
     } catch (e) {
       debugPrint('移动存储保存JSON失败: $key - $e');
+      rethrow; // 重新抛出异常，让调用者知道保存失败
     }
   }
 

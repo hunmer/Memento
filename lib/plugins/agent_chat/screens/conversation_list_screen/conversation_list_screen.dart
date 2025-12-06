@@ -95,6 +95,61 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     );
   }
 
+  /// 打开添加频道对话框
+  void _openAddChannel() {
+    _showAddChannelDialog();
+  }
+
+  /// 显示添加频道对话框
+  Future<void> _showAddChannelDialog() async {
+    final nameController = TextEditingController();
+
+    try {
+      final result = await showDialog<bool>(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: const Text('添加频道'),
+              content: TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: '频道名称',
+                  hintText: '请输入频道名称',
+                ),
+                autofocus: true,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('取消'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('创建'),
+                ),
+              ],
+            ),
+      );
+
+      if (result == true && nameController.text.isNotEmpty) {
+        try {
+          await _controller.createGroup(name: nameController.text);
+
+          if (mounted) {
+            ToastService.instance.showToast('频道已创建');
+          }
+        } catch (e) {
+          if (mounted) {
+            ToastService.instance.showToast('创建频道失败: $e');
+          }
+          debugPrint('创建频道失败: $e');
+        }
+      }
+    } finally {
+      nameController.dispose();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
@@ -111,13 +166,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       },
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
-        // 搜索按钮
+        // 添加频道按钮
         IconButton(
-          icon: const Icon(Icons.search, size: 24),
-          tooltip: '搜索',
-          onPressed: () {
-            // 搜索栏已经通过 enableSearchBar 启用，这里不需要额外操作
-          },
+          icon: const Icon(Icons.add_circle_outline, size: 24),
+          tooltip: '添加频道',
+          onPressed: _openAddChannel,
         ),
         // 工具管理按钮
         IconButton(

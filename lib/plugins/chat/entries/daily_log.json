@@ -1,0 +1,55 @@
+{
+  "messages": [
+    {
+      "id": "msg_daily_001",
+      "channelId": "daily_log",
+      "content": "## 2025-01-06 周一 ☀️\n\n### 今日完成\n- 晨跑 5公里 ✅\n- 完成项目提案 ✅\n- 阅读30页《深度工作》 ✅\n\n### 明日计划\n- 团队会议\n- 代码审查\n- 健身房\n\n### 心情\n精力充沛，新的一周加油！💪",
+      "type": "user",
+      "sender": "user",
+      "senderName": "我",
+      "timestamp": "2025-01-06T00:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": ["☀️", "💪"],
+      "metadata": {
+        "logType": "daily",
+        "mood": "energetic",
+        "completedTasks": 3
+      }
+    },
+    {
+      "id": "msg_daily_002",
+      "channelId": "daily_log",
+      "content": "### 今日感悟 🤔\n\n\"深度工作\"的概念很有启发：\n\n> 在无干扰的状态下专注进行职业活动，使个人的认知能力达到极限。\n\n今天尝试了2个番茄钟的深度工作，效率确实提升了50%。要养成这个习惯！",
+      "type": "user",
+      "sender": "user",
+      "senderName": "我",
+      "timestamp": "2025-01-06T12:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": ["💭", "📚"],
+      "metadata": {
+        "logType": "reflection",
+        "topic": "deep_work",
+        "insight": true
+      }
+    },
+    {
+      "id": "msg_daily_003",
+      "channelId": "daily_log",
+      "content": "### 晚间总结 🌙\n\n今日成就：\n1. ⏰ 提前完成所有任务\n2. 💬 与团队有效沟通\n3. 📝 写满3页笔记\n4. 🏃 坚持运动\n\n感恩：\n- 团队的支持\n- 客户的认可\n- 健康的身体\n\n明天继续！🚀",
+      "type": "user",
+      "sender": "user",
+      "senderName": "我",
+      "timestamp": "2025-01-06T22:00:00.000Z",
+      "isEdited": false,
+      "attachments": [],
+      "reactions": ["🌙", "🙏", "🚀"],
+      "metadata": {
+        "logType": "summary",
+        "achievements": 4,
+        "gratitudeItems": 3
+      }
+    }
+  ]
+}
