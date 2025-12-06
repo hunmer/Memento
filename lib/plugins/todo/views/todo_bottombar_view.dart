@@ -8,7 +8,6 @@ import '../todo_plugin.dart';
 import '../l10n/todo_localizations.dart';
 import '../controllers/task_controller.dart';
 import '../widgets/task_list_view.dart';
-import '../widgets/add_task_button.dart';
 import '../widgets/task_form.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
@@ -34,6 +33,9 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
   // 用于测量底部栏高度
   double _bottomBarHeight = 0.0;
   final GlobalKey _bottomBarKey = GlobalKey();
+
+  // 搜索查询变量
+  String _searchQuery = '';
 
   // 获取页面颜色
   List<Color> get _colors => [
@@ -256,6 +258,40 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
       title: const Text('待办事项'),
       largeTitle: '待办事项',
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      enableSearchBar: true,
+      searchPlaceholder: '搜索任务标题、备注、标签...',
+      enableSearchFilter: true,
+      filterLabels: const {
+        'title': '标题',
+        'description': '备注',
+        'tag': '标签',
+        'subtask': '子任务',
+      },
+      onSearchChanged: (query) {
+        // 实时搜索功能
+        setState(() {
+          _searchQuery = query;
+          if (query.isEmpty) {
+            _plugin.taskController.clearFilter();
+          } else {
+            _plugin.taskController.applyFilter({'keyword': query});
+          }
+        });
+      },
+      onSearchFilterChanged: (filters) {
+        // 处理搜索过滤器变化
+        setState(() {
+          final currentQuery = _searchQuery;
+          if (currentQuery.isNotEmpty) {
+            // 重新应用搜索，使用当前过滤设置
+            _plugin.taskController.applyFilter({
+              'keyword': currentQuery,
+              'searchFilters': filters,
+            });
+          }
+        });
+      },
+      searchBody: _buildSearchResults(),
       actions: [
         IconButton(
           icon: const Icon(Icons.filter_alt),
@@ -407,6 +443,106 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
         task: task,
         taskController: _plugin.taskController,
       ),
+    );
+  }
+
+  // 构建搜索结果视图
+  Widget _buildSearchResults() {
+    return AnimatedBuilder(
+      animation: _plugin.taskController,
+      builder: (context, _) {
+        final searchTasks = _plugin.taskController.tasks;
+
+        if (_searchQuery.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '输入关键词开始搜索',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '支持搜索：标题、备注、标签、子任务',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (searchTasks.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.inbox,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '未找到匹配的任务',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '尝试使用其他关键词',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return TaskListView(
+          tasks: searchTasks,
+          onTaskTap: (task) => _showTaskDetailDialog(context, task),
+          onTaskStatusChanged: (task, status) {
+            _plugin.taskController.updateTaskStatus(task.id, status);
+          },
+          onTaskDismissed: (task) {
+            _plugin.taskController.deleteTask(task.id);
+          },
+          onTaskEdit: (task) {
+            NavigationHelper.push(
+              context,
+              TaskForm(
+                task: task,
+                taskController: _plugin.taskController,
+                reminderController: _plugin.reminderController,
+              ),
+            );
+          },
+          onSubtaskStatusChanged: (taskId, subtaskId, isCompleted) {
+            _plugin.taskController.updateSubtaskStatus(
+              taskId,
+              subtaskId,
+              isCompleted,
+            );
+          },
+        );
+      },
     );
   }
 }
