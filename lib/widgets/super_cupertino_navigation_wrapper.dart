@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.dart';
+
+import '../core/plugin_manager.dart';
 
 /// Super Cupertino Navigation Bar 的封装组件
 ///
@@ -101,6 +104,10 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
   /// 搜索过滤器状态回调
   final Function(Map<String, bool>)? onSearchFilterChanged;
 
+  /// 返回按钮点击回调
+  /// 如果提供此回调，在非移动端（桌面平台）将显示自定义返回按钮
+  final VoidCallback? onLeadingPressed;
+
   const SuperCupertinoNavigationWrapper({
     super.key,
     required this.title,
@@ -139,6 +146,7 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
       'comment': '注释',
     },
     this.onSearchFilterChanged,
+    this.onLeadingPressed,
   });
 
   @override
@@ -148,7 +156,8 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
 class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigationWrapper> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  bool _isSearchFocused = false;
+  bool _isSearchFocused = false; // 搜索状态：基于文本内容判断
+  bool _isTextFieldFocused = false; // 焦点状态：跟踪输入框是否获得焦点
   final Map<String, bool> _searchFilters = {
     'activity': true,
     'tag': true,
@@ -169,22 +178,36 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
     _searchFilters.addAll(widget.filterLabels.keys.where((key) => !_searchFilters.containsKey(key))
         .fold<Map<String, bool>>({}, (map, key) => map..[key] = true));
 
-    // 监听搜索框内容变化和焦点变化
+    // 监听搜索框内容变化 - 使用 setState 强制重建 UI
     _searchController.addListener(() {
-      _updateSearchFocusState();
+      final hasText = _searchController.text.isNotEmpty;
+      if (mounted) {
+        setState(() {
+          _isSearchFocused = hasText || _isTextFieldFocused;
+        });
+      }
     });
 
+    // 监听焦点变化 - 使用 setState 强制重建 UI
     _searchFocusNode.addListener(() {
-      _updateSearchFocusState();
+      if (mounted) {
+        setState(() {
+          _isTextFieldFocused = _searchFocusNode.hasFocus;
+          // 更新搜索状态：文本存在或输入框获得焦点
+          _isSearchFocused =
+              _searchController.text.isNotEmpty || _isTextFieldFocused;
+        });
+      }
     });
   }
 
-  /// 更新搜索聚焦状态
-  void _updateSearchFocusState() {
+  /// 清除搜索状态和文本
+  void _clearSearch() {
     if (mounted) {
       setState(() {
-        // 当搜索框聚焦或有文本内容时认为处于搜索状态
-        _isSearchFocused = _searchFocusNode.hasFocus || _searchController.text.isNotEmpty;
+        _searchController.clear();
+        _isTextFieldFocused = false;
+        _isSearchFocused = false;
       });
     }
   }
@@ -199,7 +222,7 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
 
   /// 构建搜索过滤器
   Widget _buildSearchFilter() {
-    if (!widget.enableSearchFilter || !_isSearchFocused) {
+    if (!widget.enableSearchFilter) {
       return const SizedBox.shrink();
     }
 
@@ -234,6 +257,7 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
               final label = entry.value;
               final value = _searchFilters[key] ?? true;
 
+                  // 简化过滤项：让点击直接触发更新，不影响焦点
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -264,9 +288,26 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
     );
   }
 
+  /// 获取显示用的标题文本
+  String _getDisplayTitle() {
+    // 如果启用大标题，使用 largeTitle
+    if (widget.enableLargeTitle) {
+      return widget.largeTitle;
+    }
+
+    // 如果没有启用大标题，尝试从 widget.title 中提取文本
+    if (widget.title is Text) {
+      final textWidget = widget.title as Text;
+      return textWidget.data ?? '';
+    }
+
+    // 如果是其他类型的 Widget，使用 largeTitle 或空字符串
+    return widget.largeTitle.isNotEmpty ? widget.largeTitle : '';
+  }
+
   @override
   Widget build(BuildContext context) {
-    // 根据搜索状态选择显示哪个body
+    // 根据搜索状态选择显示哪个body - 使用 setState 保证实时更新
     final shouldShowSearchBody = widget.enableSearchBar &&
                                   widget.searchBody != null &&
                                   _isSearchFocused;
@@ -277,29 +318,7 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
       body: SuperScaffold(
         onCollapsed: widget.onCollapsed,
         stretch: widget.stretch,
-        appBar: SuperAppBar(
-          backgroundColor: widget.backgroundColor ?? Theme.of(context).appBarTheme.backgroundColor,
-          automaticallyImplyLeading: widget.automaticallyImplyLeading,
-          title: widget.title,
-          previousPageTitle: widget.previousPageTitle ?? "返回",
-          actions: widget.actions != null && widget.actions!.isNotEmpty
-              ? Wrap(
-                  spacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: widget.actions!,
-                )
-              : null,
-          bottom: _buildBottomBar(),
-          searchBar: _buildSearchBar(),
-          largeTitle: widget.enableLargeTitle
-              ? SuperLargeTitle(
-                  height: 50,
-                  enabled: true,
-                  largeTitle: widget.largeTitle,
-                  actions: widget.largeTitleActions,
-                )
-              : null,
-        ),
+        appBar: _buildSuperAppBar(),
         body: Column(
           children: [
             // 高级搜索条件筛选器
@@ -312,8 +331,9 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
                   children: widget.searchFilters!,
                 ),
               ),
-            // 搜索过滤器 - 只在非搜索状态下显示
-            if (widget.enableSearchFilter && !_isSearchFocused) _buildSearchFilter(),
+            // 搜索过滤器 - 依赖 _isSearchFocused 状态
+            if (widget.enableSearchFilter && _isSearchFocused)
+              _buildSearchFilter(),
             // 过滤栏 - 只在非搜索状态下显示
             if (widget.enableFilterBar && widget.filterBarChild != null && !_isSearchFocused)
               Container(
@@ -329,6 +349,40 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
     );
   }
 
+  /// 构建 SuperAppBar，根据 enableSearchBar 条件决定是否包含 searchBar
+  SuperAppBar _buildSuperAppBar() {
+    return SuperAppBar(
+      backgroundColor: widget.backgroundColor ?? Theme.of(context).appBarTheme.backgroundColor,
+      automaticallyImplyLeading: widget.automaticallyImplyLeading,
+      leading: (Platform.isAndroid || Platform.isIOS)
+          ? null
+          : (widget.onLeadingPressed != null
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: widget.onLeadingPressed,
+                )
+              : null),
+      title: widget.title,
+      previousPageTitle: widget.previousPageTitle ?? "返回",
+      actions: widget.actions != null && widget.actions!.isNotEmpty
+          ? Wrap(
+              spacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: widget.actions!,
+            )
+          : null,
+      bottom: _buildBottomBar(),
+      largeTitle: SuperLargeTitle(
+        height: 50,
+        enabled: true,
+        largeTitle: _getDisplayTitle(),
+        actions: widget.largeTitleActions,
+      ),
+      // 只有当启用搜索栏时才传递 searchBar 参数
+      searchBar: widget.enableSearchBar ? _buildSearchBar() : null,
+    );
+  }
+
   /// 构建底部栏（保持向后兼容）
   SuperAppBarBottom? _buildBottomBar() {
     if (!widget.enableBottomBar) return null;
@@ -341,8 +395,8 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
   }
 
   /// 构建搜索栏
-  SuperSearchBar? _buildSearchBar() {
-    if (!widget.enableSearchBar) return null;
+  SuperSearchBar _buildSearchBar() {
+    // 注意：此方法仅在 enableSearchBar=true 时被调用
     return SuperSearchBar(
       enabled: true,
       scrollBehavior: SearchBarScrollBehavior.pinned,
@@ -352,6 +406,7 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
       onChanged: (value) {
         widget.onSearchChanged?.call(value);
         widget.onAdvancedSearchChanged?.call({'query': value});
+        // onChanged 回调已经在 _searchController.addListener 中处理了
       },
       onSubmitted: widget.onSearchSubmitted,
     );

@@ -182,6 +182,7 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
     return SuperCupertinoNavigationWrapper(
       title: const Text('统计分析'),
       largeTitle: '统计分析',
+      enableSearchBar: false,
       body: SingleChildScrollView(
         child: Column(
           children: [

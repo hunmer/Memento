@@ -16,7 +16,13 @@ class WarehouseCard extends StatelessWidget {
       elevation: 0,
       margin: EdgeInsets.zero,
       color: Theme.of(context).cardColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withOpacity(0.3),
+          width: 1.0,
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),

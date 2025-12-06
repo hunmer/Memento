@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/plugin_base.dart';
 import '../../core/plugin_manager.dart';
+import '../../widgets/super_cupertino_navigation_wrapper.dart';
 import 'controls/bill_controller.dart';
 import 'screens/bill_list_screen.dart';
 import 'screens/bill_list_screen_supercupertino.dart';
@@ -1306,32 +1307,7 @@ class _BillMainViewState extends State<BillMainView>
               Positioned.fill(
                 child: Padding(
                   padding: EdgeInsets.only(bottom: _bottomBarHeight),
-                  child: Scaffold(
-                    appBar: AppBar(
-                      automaticallyImplyLeading:
-                          !(Platform.isAndroid || Platform.isIOS),
-                      leading:
-                          (Platform.isAndroid || Platform.isIOS)
-                              ? null
-                              : IconButton(
-                                icon: const Icon(Icons.arrow_back),
-                                onPressed: () => PluginManager.toHomeScreen(context),
-                              ),
-                      title: Text(
-                        billPlugin.selectedAccount?.title ??
-                            BillLocalizations.of(context).accountTitle,
-                      ),
-                      actions: [
-                        IconButton(
-                          icon: const Icon(Icons.list),
-                          onPressed: () {
-                            NavigationHelper.pushReplacement(context, AccountListScreen(billPlugin: billPlugin),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    body: TabBarView(
+                  child: TabBarView(
                       controller: _tabController,
                       dragStartBehavior: DragStartBehavior.down,
                       physics: const NeverScrollableScrollPhysics(),
@@ -1348,8 +1324,7 @@ class _BillMainViewState extends State<BillMainView>
                           ), // 默认显示最近30天
                           endDate: DateTime.now(),
                         ),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
               ),

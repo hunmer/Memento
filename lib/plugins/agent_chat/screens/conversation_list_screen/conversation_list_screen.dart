@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
@@ -26,11 +25,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   late ConversationController _controller;
   late ToolTemplateService _templateService;
 
-  // 搜索相关
-  bool _isSearching = false;
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode();
-
   @override
   void initState() {
     super.initState();
@@ -55,8 +49,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   @override
   void dispose() {
     _controller.removeListener(_onControllerChanged);
-    _searchController.dispose();
-    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -64,22 +56,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     if (mounted) {
       setState(() {});
     }
-  }
-
-  /// 切换搜索状态
-  void _toggleSearch() {
-    setState(() {
-      _isSearching = !_isSearching;
-      if (!_isSearching) {
-        // 退出搜索时清空搜索内容
-        _searchController.clear();
-        _controller.setSearchQuery('');
-        _searchFocusNode.unfocus();
-      } else {
-        // 进入搜索时自动聚焦
-        _searchFocusNode.requestFocus();
-      }
-    });
   }
 
   /// 打开设置页面
@@ -121,29 +97,27 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
-      title: _isSearching
-          ? TextField(
-              controller: _searchController,
-              focusNode: _searchFocusNode,
-              autofocus: true,
-              decoration: const InputDecoration(
-                hintText: '搜索会话...',
-                border: InputBorder.none,
-              ),
-              onChanged: (query) {
-                _controller.setSearchQuery(query);
-              },
-            )
-          : const Text('AI 对话'),
+      title: const Text('AI 对话'),
       largeTitle: 'AI 对话',
       enableLargeTitle: true,
-      enableSearchBar: _isSearching,
+      enableSearchBar: true,
       searchPlaceholder: '搜索会话...',
       onSearchChanged: (query) {
         _controller.setSearchQuery(query);
       },
+      onSearchSubmitted: (query) {
+        _controller.setSearchQuery(query);
+      },
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
+        // 搜索按钮
+        IconButton(
+          icon: const Icon(Icons.search, size: 24),
+          tooltip: '搜索',
+          onPressed: () {
+            // 搜索栏已经通过 enableSearchBar 启用，这里不需要额外操作
+          },
+        ),
         // 工具管理按钮
         IconButton(
           icon: const Icon(Icons.build, size: 24),
