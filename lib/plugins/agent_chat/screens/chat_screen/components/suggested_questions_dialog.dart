@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../services/suggested_questions_service.dart';
 import '../../../../../core/storage/storage_manager.dart';
+import '../../../../../core/services/toast_service.dart';
 
 /// 预设问题选择对话框
 class SuggestedQuestionsDialog extends StatefulWidget {
@@ -62,8 +63,9 @@ class _SuggestedQuestionsDialogState extends State<SuggestedQuestionsDialog> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载问题失败: $e'), backgroundColor: Colors.red),
+        toastService.showToast(
+          '加载问题失败: $e',
+          type: ToastType.error,
         );
       }
     }

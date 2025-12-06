@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import '../goods_plugin.dart';
 
@@ -80,20 +81,11 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
                 try {
                   await widget.plugin.saveWarehouse(warehouse);
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.warehouseCreated ?? '仓库已创建')),
-                    );
+                    Toast.success(l10n.warehouseCreated ?? '仓库已创建');
                   }
                 } catch (e) {
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '${l10n.createWarehouseFailed ?? '创建仓库失败'}: $e',
-                        ),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
+                    Toast.error('${l10n.createWarehouseFailed ?? '创建仓库失败'}: $e');
                   }
                 }
               },
@@ -116,21 +108,7 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
 
     // 如果没有仓库，提示先创建仓库
     if (widget.plugin.warehouses.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.createWarehouseFirst ?? '请先创建仓库'),
-          action: SnackBarAction(
-            label: l10n.createWarehouse ?? '创建仓库',
-            onPressed: () {
-              // 切换到仓库 Tab 并创建仓库
-              _tabController.animateTo(0);
-              Future.delayed(const Duration(milliseconds: 300), () {
-                _createWarehouse();
-              });
-            },
-          ),
-        ),
-      );
+      Toast.info(l10n.createWarehouseFirst ?? '请先创建仓库');
       return;
     }
 
@@ -142,20 +120,11 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
                   final warehouseId = widget.plugin.warehouses.first.id;
                   await widget.plugin.saveGoodsItem(warehouseId, item);
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.itemCreated ?? '物品已创建')),
-                    );
+                    Toast.success(l10n.itemCreated ?? '物品已创建');
                   }
                 } catch (e) {
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '${l10n.createItemFailed ?? '创建物品失败'}: $e',
-                        ),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
+                    Toast.error('${l10n.createItemFailed ?? '创建物品失败'}: $e');
                   }
                 }
               },
