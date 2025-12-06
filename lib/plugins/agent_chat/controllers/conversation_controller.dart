@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/agent_chat/data/sample_data_old.dart';
 import 'package:flutter/foundation.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../services/conversation_service.dart';
@@ -32,6 +33,9 @@ class ConversationController extends ChangeNotifier {
   /// 默认上下文消息数量（全局设置）
   int _defaultContextMessageCount = 10;
 
+  /// 缓存的分组列表，确保UI稳定性
+  List<ConversationGroup> _cachedGroups = [];
+
   ConversationController({required this.storage}) {
     conversationService = ConversationService(storage: storage);
     messageService = MessageService(storage: storage);
@@ -47,8 +51,9 @@ class ConversationController extends ChangeNotifier {
   bool get isLoading => conversationService.isLoading;
 
   List<Conversation> get conversations => _getFilteredConversations();
-  List<ConversationGroup> get groups => conversationService.groups;
-  int get groupsCount => conversationService.groups.length;
+  List<ConversationGroup> get groups =>
+      _cachedGroups.isNotEmpty ? _cachedGroups : conversationService.groups;
+  int get groupsCount => groups.length;
 
   String? get currentConversationId => _currentConversationId;
   Conversation? get currentConversation =>
@@ -71,11 +76,22 @@ class ConversationController extends ChangeNotifier {
 
     await conversationService.initialize();
 
+    // 缓存分组列表，确保UI稳定性
+    _updateCachedGroups();
+
     // 加载全局配置
     await _loadGlobalConfig();
 
     _isInitialized = true;
     notifyListeners();
+  }
+
+  /// 更新缓存的分组列表
+  void _updateCachedGroups() {
+    final serviceGroups = conversationService.groups;
+    if (serviceGroups.isNotEmpty || _cachedGroups.isEmpty) {
+      _cachedGroups = List.from(serviceGroups);
+    }
   }
 
   /// 加载全局配置
@@ -106,6 +122,8 @@ class ConversationController extends ChangeNotifier {
 
   /// 服务变化回调
   void _onServiceChanged() {
+    // 更新缓存的分组列表，确保UI稳定性
+    _updateCachedGroups();
     notifyListeners();
   }
 
@@ -118,12 +136,22 @@ class ConversationController extends ChangeNotifier {
     List<String>? groups,
     int? contextMessageCount,
   }) async {
-    return await conversationService.createConversation(
+    final conversation = await conversationService.createConversation(
       title: title,
       agentId: agentId,
       groups: groups,
       contextMessageCount: contextMessageCount,
     );
+
+    // 为新会话添加欢迎消息
+    final welcomeMessages = AgentChatSampleData.getWelcomeMessages(
+      conversation.id,
+    );
+    for (var message in welcomeMessages) {
+      await messageService.addMessage(message);
+    }
+
+    return conversation;
   }
 
   /// 选择会话
@@ -169,6 +197,8 @@ class ConversationController extends ChangeNotifier {
         icon: icon,
         color: color,
       );
+      // 立即更新缓存
+      _updateCachedGroups();
       notifyListeners();
       return group;
     } catch (e) {
@@ -180,6 +210,8 @@ class ConversationController extends ChangeNotifier {
   /// 更新分组
   Future<void> updateGroup(ConversationGroup group) async {
     await conversationService.updateGroup(group);
+    // 立即更新缓存
+    _updateCachedGroups();
     notifyListeners();
   }
 
@@ -188,6 +220,8 @@ class ConversationController extends ChangeNotifier {
     // 从筛选器中移除
     _selectedGroupFilters.remove(groupId);
     await conversationService.deleteGroup(groupId);
+    // 立即更新缓存
+    _updateCachedGroups();
     notifyListeners();
   }
 
@@ -206,12 +240,16 @@ class ConversationController extends ChangeNotifier {
     } else {
       _selectedGroupFilters.add(groupId);
     }
+    // 确保分组列表保持稳定
+    _updateCachedGroups();
     notifyListeners();
   }
 
   /// 清除分组过滤器
   void clearGroupFilters() {
     _selectedGroupFilters.clear();
+    // 确保分组列表保持稳定
+    _updateCachedGroups();
     notifyListeners();
   }
 

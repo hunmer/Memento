@@ -5,6 +5,7 @@ import '../models/account.dart';
 import '../models/bill.dart';
 import '../models/bill_statistics.dart';
 import '../models/statistic_range.dart';
+import '../data/sample_data.dart';
 import '../../../core/event/event_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 
@@ -141,11 +142,44 @@ class BillController with ChangeNotifier {
         _accounts.addAll(
           accountsJson.map((json) => Account.fromJson(jsonDecode(json))),
         );
+      } else {
+        // 如果没有数据，加载示例数据
+        await _loadSampleData();
       }
 
       notifyListeners();
     } catch (e) {
       debugPrint('加载账户失败: $e');
+      // 加载失败时尝试使用示例数据
+      try {
+        await _loadSampleData();
+        notifyListeners();
+      } catch (sampleError) {
+        debugPrint('加载示例数据失败: $sampleError');
+      }
+    }
+  }
+
+  // 加载示例数据
+  Future<void> _loadSampleData() async {
+    try {
+      // 获取示例数据
+      final sampleData = BillSampleData.getSampleData();
+      final sampleAccountsJson = List<String>.from(sampleData['accounts'] ?? []);
+
+      if (sampleAccountsJson.isNotEmpty) {
+        _accounts.addAll(
+          sampleAccountsJson.map((json) => Account.fromJson(jsonDecode(json))),
+        );
+
+        // 保存示例数据到存储
+        await _saveAccounts();
+
+        debugPrint('已加载示例数据，包含 ${_accounts.length} 个账户');
+      }
+    } catch (e) {
+      debugPrint('加载示例数据失败: $e');
+      rethrow;
     }
   }
 
