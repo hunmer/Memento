@@ -39,7 +39,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        Toast.error('加载服务失败: $e');
+        Toast.error('${TTSLocalizations.of(context).loadServicesFailed}: $e');
       }
     }
   }
@@ -69,11 +69,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         await _plugin.managerService.deleteService(service.id);
         _loadServices();
         if (mounted) {
-          Toast.success('服务已删除');
+          Toast.success(TTSLocalizations.of(context).serviceDeleted);
         }
       } catch (e) {
         if (mounted) {
-          Toast.error('删除失败: $e');
+          Toast.error('${TTSLocalizations.of(context).deleteFailed}: $e');
         }
       }
     }
@@ -82,11 +82,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
   Future<void> _testService(TTSServiceConfig service) async {
     try {
       await _plugin.speak(
-        '你好，这是语音测试',
+        TTSLocalizations.of(context).voiceTestText,
         serviceId: service.id,
         onError: (error) {
           if (mounted) {
-            Toast.error('测试失败: $error');
+            Toast.error('${TTSLocalizations.of(context).testFailedPrefix}: $error');
           }
         },
       );
@@ -96,7 +96,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
       }
     } catch (e) {
       if (mounted) {
-        Toast.error('${TTSLocalizations.of(context).testFailed}: $e');
+        Toast.error('${TTSLocalizations.of(context).testFailedPrefix}: $e');
       }
     }
   }
@@ -108,7 +108,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
       _loadServices();
     } catch (e) {
       if (mounted) {
-        Toast.error('更新失败: $e');
+        Toast.error('${TTSLocalizations.of(context).updateFailed}: $e');
       }
     }
   }
@@ -127,11 +127,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
       _loadServices();
 
       if (mounted) {
-        Toast.success('已设置为默认服务');
+        Toast.success(TTSLocalizations.of(context).setAsDefaultService);
       }
     } catch (e) {
       if (mounted) {
-        Toast.error('设置失败: $e');
+        Toast.error('${TTSLocalizations.of(context).setDefaultFailed}: $e');
       }
     }
   }
@@ -149,11 +149,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         _loadServices();
 
         if (mounted) {
-          Toast.success('服务已添加');
+          Toast.success(TTSLocalizations.of(context).serviceAdded);
         }
       } catch (e) {
         if (mounted) {
-          Toast.error('添加失败: $e');
+          Toast.error('${TTSLocalizations.of(context).addFailed}: $e');
         }
       }
     }
@@ -172,11 +172,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         _loadServices();
 
         if (mounted) {
-          Toast.success('服务已更新');
+          Toast.success(TTSLocalizations.of(context).serviceUpdated);
         }
       } catch (e) {
         if (mounted) {
-          Toast.error('更新失败: $e');
+          Toast.error('${TTSLocalizations.of(context).updateFailed}: $e');
         }
       }
     }
@@ -198,7 +198,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         IconButton(
           icon: Icon(Icons.refresh, color: theme.iconTheme.color),
           onPressed: _loadServices,
-          tooltip: '刷新',
+          tooltip: TTSLocalizations.of(context).refresh,
         ),
       ],
       body: Stack(
@@ -212,7 +212,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                         children: [
                           const Icon(Icons.record_voice_over_outlined, size: 64, color: Colors.grey),
                           const SizedBox(height: 16),
-                          Text('暂无服务', style: TextStyle(color: Colors.grey[600])),
+                          Text(TTSLocalizations.of(context).noServicesAvailable, style: TextStyle(color: Colors.grey[600])),
                           const SizedBox(height: 8),
                           ElevatedButton.icon(
                             onPressed: () => _createDefaultService(),
@@ -334,7 +334,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                                       children: [
                                         const Icon(Icons.star_outline, size: 20),
                                         const SizedBox(width: 8),
-                                        Text('设为默认'),
+                                        Text(TTSLocalizations.of(context).setAsDefault),
                                       ],
                                     ),
                                   ),

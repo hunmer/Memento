@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:json_dynamic_widget/json_dynamic_widget.dart';
 import 'package:path/path.dart' as path;
 import 'package:Memento/core/services/toast_service.dart';
+import '../l10n/screens_localizations.dart';
 
 /// JSON 动态 UI 测试页面
 /// 用于快速测试和预览 json_dynamic_widget 配置
@@ -276,7 +277,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                 padding: const EdgeInsets.all(16),
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('取消'),
+                  child: Text(ScreensLocalizations.of(context)!.cancel),
                 ),
               ),
             ],
@@ -352,12 +353,12 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('JSON 动态 UI 测试'),
+        title: Text(ScreensLocalizations.of(context)!.jsonDynamicUITest),
         actions: [
           IconButton(
             onPressed: _showTemplateDialog,
             icon: const Icon(Icons.folder_open),
-            tooltip: '加载文件',
+            tooltip: ScreensLocalizations.of(context)!.loadFile,
           ),
           IconButton(
             onPressed: _formatJson,
@@ -488,7 +489,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                 ElevatedButton.icon(
                   onPressed: _showTemplateDialog,
                   icon: const Icon(Icons.folder_open),
-                  label: const Text('加载文件'),
+                  label: Text(ScreensLocalizations.of(context)!.loadFile),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -500,7 +501,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                 FilledButton.icon(
                   onPressed: _showPreviewDialog,
                   icon: const Icon(Icons.visibility),
-                  label: const Text('预览效果'),
+                  label: Text(ScreensLocalizations.of(context)!.previewEffect),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -584,7 +585,7 @@ class _JsonDynamicPreviewScreenState extends State<JsonDynamicPreviewScreen> {
           icon: const Icon(Icons.arrow_back),
           tooltip: '返回',
         ),
-        title: const Text('UI 预览'),
+        title: Text(ScreensLocalizations.of(context)!.uiPreview),
         actions: [
           IconButton(
             onPressed: () => Navigator.of(context).pop(),

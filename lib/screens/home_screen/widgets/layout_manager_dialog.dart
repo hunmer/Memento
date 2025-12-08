@@ -5,6 +5,7 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/layout_config.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 import '../../../../core/services/toast_service.dart';
 import 'layout_type_selector.dart';
 
@@ -48,13 +49,15 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
         setState(() {
           _isLoading = false;
         });
-        toastService.showToast('加载布局失败：$e');
+        final l10n = ScreensLocalizations.of(context)!;
+        toastService.showToast('${l10n.loadLayoutFailed}：$e');
       }
     }
   }
 
   /// 切换到指定布局
   Future<void> _switchLayout(LayoutConfig layout) async {
+    final l10n = ScreensLocalizations.of(context)!;
     try {
       await _layoutManager.loadLayoutConfig(layout.id);
       if (mounted) {
@@ -62,40 +65,41 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
           _currentLayoutId = layout.id;
         });
         Navigator.pop(context);
-        toastService.showToast('已切换到"${layout.name}"');
+        toastService.showToast('${l10n.switchedToLayout}"${layout.name}"');
       }
     } catch (e) {
       if (mounted) {
-        toastService.showToast('切换失败：$e');
+        toastService.showToast('${l10n.switchFailed}：$e');
       }
     }
   }
 
   /// 显示重命名对话框
   void _showRenameDialog(LayoutConfig layout) {
+    final l10n = ScreensLocalizations.of(context)!;
     final TextEditingController controller = TextEditingController(text: layout.name);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('重命名布局'),
+        title: Text(l10n.renameLayout),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: '布局名称',
+          decoration: InputDecoration(
+            labelText: l10n.layoutName,
           ),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
               final newName = controller.text.trim();
               if (newName.isEmpty) {
-                toastService.showToast('请输入布局名称');
+                toastService.showToast(l10n.pleaseEnterLayoutName);
                 return;
               }
 
@@ -105,15 +109,15 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
                 await _layoutManager.renameLayoutConfig(layout.id, newName);
                 await _loadLayouts();
                 if (mounted) {
-                  toastService.showToast('重命名成功');
+                  toastService.showToast(l10n.renameSuccess);
                 }
               } catch (e) {
                 if (mounted) {
-                  toastService.showToast('重命名失败：$e');
+                  toastService.showToast(l10n.saveFailed);
                 }
               }
             },
-            child: const Text('确定'),
+            child: Text(l10n.confirm),
           ),
         ],
       ),
@@ -122,15 +126,16 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
 
   /// 确认删除布局
   void _confirmDelete(LayoutConfig layout) {
+    final l10n = ScreensLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除布局"${layout.name}"吗？此操作不可恢复。'),
+        title: Text(l10n.confirmDelete),
+        content: Text(l10n.confirmDeleteLayout(layout.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -140,15 +145,15 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
                 await _layoutManager.deleteLayoutConfig(layout.id);
                 await _loadLayouts();
                 if (mounted) {
-                  toastService.showToast('删除成功');
+                  toastService.showToast(l10n.deleteSuccess);
                 }
               } catch (e) {
                 if (mounted) {
-                  toastService.showToast('删除失败：$e');
+                  toastService.showToast(l10n.saveFailed);
                 }
               }
             },
-            child: const Text('删除', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -170,29 +175,30 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ScreensLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('布局管理'),
+      title: Text(l10n.layoutManagement),
       content: SizedBox(
         width: double.maxFinite,
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _layouts.isEmpty
-                ? const Center(
+                ? Center(
                     child: Padding(
-                      padding: EdgeInsets.all(32.0),
+                      padding: const EdgeInsets.all(32.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.layers_outlined, size: 64, color: Colors.grey),
-                          SizedBox(height: 16),
+                          const Icon(Icons.layers_outlined, size: 64, color: Colors.grey),
+                          const SizedBox(height: 16),
                           Text(
-                            '暂无保存的布局',
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                            l10n.noSavedLayouts,
+                            style: const TextStyle(fontSize: 16, color: Colors.grey),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
-                            '点击右上角菜单中的"保存当前布局"来创建第一个布局配置',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            l10n.saveFirstLayoutHint,
+                            style: const TextStyle(fontSize: 12, color: Colors.grey),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -248,33 +254,33 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
                             },
                             itemBuilder: (context) => [
                               if (!isActive)
-                                const PopupMenuItem(
+                                PopupMenuItem(
                                   value: 'switch',
                                   child: Row(
                                     children: [
-                                      Icon(Icons.swap_horiz),
-                                      SizedBox(width: 8),
-                                      Text('切换到此布局'),
+                                      const Icon(Icons.swap_horiz),
+                                      const SizedBox(width: 8),
+                                      Text(l10n.switchToThisLayout),
                                     ],
                                   ),
                                 ),
-                              const PopupMenuItem(
+                              PopupMenuItem(
                                 value: 'rename',
                                 child: Row(
                                   children: [
-                                    Icon(Icons.edit),
-                                    SizedBox(width: 8),
-                                    Text('重命名'),
+                                    const Icon(Icons.edit),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.rename),
                                   ],
                                 ),
                               ),
-                              const PopupMenuItem(
+                              PopupMenuItem(
                                 value: 'delete',
                                 child: Row(
                                   children: [
-                                    Icon(Icons.delete, color: Colors.red),
-                                    SizedBox(width: 8),
-                                    Text('删除', style: TextStyle(color: Colors.red)),
+                                    const Icon(Icons.delete, color: Colors.red),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.delete, style: const TextStyle(color: Colors.red)),
                                   ],
                                 ),
                               ),
@@ -290,11 +296,11 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
         TextButton.icon(
           onPressed: _showCreateLayoutDialog,
           icon: const Icon(Icons.add),
-          label: const Text('新建布局'),
+          label: Text(l10n.newLayout),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('关闭'),
+          child: Text(l10n.close),
         ),
       ],
     );
@@ -324,9 +330,10 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
 
   /// 创建布局
   Future<void> _createLayout() async {
+    final l10n = ScreensLocalizations.of(context)!;
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      toastService.showToast('请输入布局名称');
+      toastService.showToast(l10n.pleaseEnterLayoutName);
       return;
     }
 
@@ -346,13 +353,13 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
       await _layoutManager.saveCurrentLayoutAs(name);
 
       if (mounted) {
-        toastService.showToast('布局"$name"已创建');
+        toastService.showToast(l10n.layoutSaved(name));
         Navigator.pop(context);
         widget.onLayoutCreated();
       }
     } catch (e) {
       if (mounted) {
-        toastService.showToast('创建失败：$e');
+        toastService.showToast(l10n.saveFailed);
       }
     }
   }
@@ -381,8 +388,9 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ScreensLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('新建布局'),
+      title: Text(l10n.newLayout),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -390,9 +398,9 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
           children: [
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: '布局名称',
-                hintText: '例如：工作布局、娱乐布局',
+              decoration: InputDecoration(
+                labelText: l10n.layoutName,
+                hintText: l10n.layoutNameHint,
               ),
               autofocus: true,
             ),
@@ -411,11 +419,11 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(l10n.cancel),
         ),
         TextButton(
           onPressed: _createLayout,
-          child: const Text('创建'),
+          child: Text(l10n.create),
         ),
       ],
     );

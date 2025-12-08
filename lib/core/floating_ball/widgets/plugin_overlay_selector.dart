@@ -53,7 +53,7 @@ class PluginOverlaySelector extends StatelessWidget {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('取消'),
+                    child: Text(CoreLocalizations.of(context)!.cancel),
                   ),
                 ],
               ),

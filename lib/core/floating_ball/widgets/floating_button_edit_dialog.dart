@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:Memento/widgets/icon_picker_dialog.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';

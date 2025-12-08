@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/models/layout_config.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 
 /// 主页主题设置页面
 class BackgroundSettingsPage extends StatefulWidget {
@@ -155,8 +156,10 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('全局背景设置'),
+        builder: (context, setDialogState) {
+          final l10n = ScreensLocalizations.of(context)!;
+          return AlertDialog(
+          title: Text(l10n.globalBackgroundSettings),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -210,7 +213,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           }
                         },
                         icon: const Icon(Icons.image),
-                        label: const Text('选择图片'),
+                        label: Text(l10n.selectImage),
                       ),
                     ),
                     if (tempPath != null) ...[
@@ -222,7 +225,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           });
                         },
                         icon: const Icon(Icons.clear),
-                        tooltip: '清除',
+                        tooltip: l10n.clear,
                       ),
                     ],
                   ],
@@ -231,19 +234,19 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                 const SizedBox(height: 24),
 
                 // 填充方式
-                const Text('填充方式', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(l10n.fillMode, style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 DropdownButton<BoxFit>(
                   value: tempFit,
                   isExpanded: true,
-                  items: const [
-                    DropdownMenuItem(value: BoxFit.cover, child: Text('覆盖 (Cover)')),
-                    DropdownMenuItem(value: BoxFit.contain, child: Text('包含 (Contain)')),
-                    DropdownMenuItem(value: BoxFit.fill, child: Text('填充 (Fill)')),
-                    DropdownMenuItem(value: BoxFit.fitWidth, child: Text('适应宽度 (Fit Width)')),
-                    DropdownMenuItem(value: BoxFit.fitHeight, child: Text('适应高度 (Fit Height)')),
-                    DropdownMenuItem(value: BoxFit.none, child: Text('无缩放 (None)')),
-                    DropdownMenuItem(value: BoxFit.scaleDown, child: Text('缩小 (Scale Down)')),
+                  items: [
+                    DropdownMenuItem(value: BoxFit.cover, child: Text(l10n.cover)),
+                    DropdownMenuItem(value: BoxFit.contain, child: Text(l10n.contain)),
+                    DropdownMenuItem(value: BoxFit.fill, child: Text(l10n.fill)),
+                    DropdownMenuItem(value: BoxFit.fitWidth, child: Text(l10n.fitWidth)),
+                    DropdownMenuItem(value: BoxFit.fitHeight, child: Text(l10n.fitHeight)),
+                    DropdownMenuItem(value: BoxFit.none, child: Text(l10n.none)),
+                    DropdownMenuItem(value: BoxFit.scaleDown, child: Text(l10n.scaleDown)),
                   ],
                   onChanged: (value) {
                     if (value != null) {
@@ -257,7 +260,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                 const SizedBox(height: 24),
 
                 // 模糊程度
-                const Text('模糊程度', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(l10n.blurLevel, style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -291,7 +294,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -303,7 +306,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                 _saveGlobalBackground();
                 Navigator.pop(context);
               },
-              child: const Text('保存'),
+              child: Text(l10n.save),
             ),
           ],
         ),
@@ -320,8 +323,10 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text('${layout.name} - 背景设置'),
+        builder: (context, setDialogState) {
+          final l10n = ScreensLocalizations.of(context)!;
+          return AlertDialog(
+          title: Text(l10n.layoutBackgroundSettings(layout.name)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -340,8 +345,8 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          '单独设置的背景图优先级高于全局背景图',
-                          style: TextStyle(fontSize: 12),
+                          l10n.customBackgroundHasPriority,
+                          style: const TextStyle(fontSize: 12),
                         ),
                       ),
                     ],
@@ -398,7 +403,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           }
                         },
                         icon: const Icon(Icons.image),
-                        label: const Text('选择图片'),
+                        label: Text(l10n.selectImage),
                       ),
                     ),
                     if (tempPath != null) ...[
@@ -410,7 +415,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           });
                         },
                         icon: const Icon(Icons.clear),
-                        tooltip: '清除（使用全局背景）',
+                        tooltip: l10n.clearUseGlobalBackground,
                       ),
                     ],
                   ],
@@ -419,19 +424,19 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                 const SizedBox(height: 24),
 
                 // 填充方式
-                const Text('填充方式', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(l10n.fillMode, style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 DropdownButton<BoxFit>(
                   value: tempFit,
                   isExpanded: true,
-                  items: const [
-                    DropdownMenuItem(value: BoxFit.cover, child: Text('覆盖 (Cover)')),
-                    DropdownMenuItem(value: BoxFit.contain, child: Text('包含 (Contain)')),
-                    DropdownMenuItem(value: BoxFit.fill, child: Text('填充 (Fill)')),
-                    DropdownMenuItem(value: BoxFit.fitWidth, child: Text('适应宽度 (Fit Width)')),
-                    DropdownMenuItem(value: BoxFit.fitHeight, child: Text('适应高度 (Fit Height)')),
-                    DropdownMenuItem(value: BoxFit.none, child: Text('无缩放 (None)')),
-                    DropdownMenuItem(value: BoxFit.scaleDown, child: Text('缩小 (Scale Down)')),
+                  items: [
+                    DropdownMenuItem(value: BoxFit.cover, child: Text(l10n.cover)),
+                    DropdownMenuItem(value: BoxFit.contain, child: Text(l10n.contain)),
+                    DropdownMenuItem(value: BoxFit.fill, child: Text(l10n.fill)),
+                    DropdownMenuItem(value: BoxFit.fitWidth, child: Text(l10n.fitWidth)),
+                    DropdownMenuItem(value: BoxFit.fitHeight, child: Text(l10n.fitHeight)),
+                    DropdownMenuItem(value: BoxFit.none, child: Text(l10n.none)),
+                    DropdownMenuItem(value: BoxFit.scaleDown, child: Text(l10n.scaleDown)),
                   ],
                   onChanged: (value) {
                     if (value != null) {
@@ -445,7 +450,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                 const SizedBox(height: 24),
 
                 // 模糊程度
-                const Text('模糊程度', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(l10n.blurLevel, style: const TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -479,14 +484,14 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
                 _updateLayoutBackground(layout, tempPath, tempFit, tempBlur);
                 Navigator.pop(context);
               },
-              child: const Text('保存'),
+              child: Text(l10n.save),
             ),
           ],
         ),
@@ -498,7 +503,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('主题设置'),
+        title: Text(ScreensLocalizations.of(context)!.themeSettings),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -509,11 +514,11 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.wallpaper),
-                    title: const Text('全局背景图'),
+                    title: Text(ScreensLocalizations.of(context)!.globalBackgroundImage),
                     subtitle: Text(
                       _globalBackgroundPath != null
-                          ? '已设置背景图'
-                          : '未设置背景图',
+                          ? ScreensLocalizations.of(context)!.backgroundImageSet
+                          : ScreensLocalizations.of(context)!.backgroundImageNotSet,
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: _showGlobalBackgroundDialog,
@@ -533,9 +538,9 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           children: [
                             const Icon(Icons.opacity),
                             const SizedBox(width: 12),
-                            const Text(
-                                '小组件整体透明度',
-                              style: TextStyle(
+                            Text(
+                                ScreensLocalizations.of(context)!.widgetOverallOpacity,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -552,7 +557,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                            '调整整个小组件的透明度（包括文字和内容）',
+                            ScreensLocalizations.of(context)!.widgetOverallOpacityDescription,
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context).hintColor,
@@ -578,14 +583,14 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              '0%（完全透明）',
+                              ScreensLocalizations.of(context)!.zeroPercentFullyTransparent,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Theme.of(context).hintColor,
                               ),
                             ),
                             Text(
-                              '100%（不透明）',
+                              ScreensLocalizations.of(context)!.oneHundredPercentOpaque,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Theme.of(context).hintColor,
@@ -611,9 +616,9 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                             children: [
                               const Icon(Icons.format_color_fill),
                               const SizedBox(width: 12),
-                              const Text(
-                                '背景颜色透明度',
-                                style: TextStyle(
+                              Text(
+                                ScreensLocalizations.of(context)!.backgroundColorOpacity,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -630,7 +635,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '仅调整小组件背景颜色的透明度，不影响文字',
+                            ScreensLocalizations.of(context)!.backgroundColorOpacityDescription,
                             style: TextStyle(
                               fontSize: 12,
                               color: Theme.of(context).hintColor,
@@ -657,14 +662,14 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                '0%（完全透明）',
+                                ScreensLocalizations.of(context)!.zeroPercentFullyTransparent,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Theme.of(context).hintColor,
                                 ),
                               ),
                               Text(
-                                '100%（不透明）',
+                                ScreensLocalizations.of(context)!.oneHundredPercentOpaque,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Theme.of(context).hintColor,
@@ -683,8 +688,8 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
-                    '布局背景设置',
-                    style: TextStyle(
+                    ScreensLocalizations.of(context)!.layoutBackgroundSettings,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -697,7 +702,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
-                    '为每个布局单独设置背景图，优先级高于全局背景图',
+                    ScreensLocalizations.of(context)!.layoutBackgroundSettingsDescription,
                     style: TextStyle(
                       fontSize: 12,
                       color: Theme.of(context).hintColor,
@@ -717,13 +722,13 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           Icon(Icons.layers_outlined, size: 64, color: Colors.grey),
                           SizedBox(height: 16),
                           Text(
-                            '暂无保存的布局',
-                            style: TextStyle(color: Colors.grey),
+                            ScreensLocalizations.of(context)!.noSavedLayouts,
+                            style: const TextStyle(color: Colors.grey),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
-                            '请先在主页保存布局',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            ScreensLocalizations.of(context)!.saveLayoutFirst,
+                            style: const TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                         ],
                       ),
@@ -743,8 +748,8 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           title: Text(layout.name),
                           subtitle: Text(
                             layout.backgroundImagePath != null
-                                ? '已设置独立背景图'
-                                : '使用全局背景图',
+                                ? ScreensLocalizations.of(context)!.customBackgroundImage
+                                : ScreensLocalizations.of(context)!.useGlobalBackgroundImage,
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => _showLayoutBackgroundDialog(layout),

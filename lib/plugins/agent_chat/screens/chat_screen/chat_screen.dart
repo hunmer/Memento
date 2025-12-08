@@ -505,7 +505,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   }
                                 },
                                 icon: const Icon(Icons.clear_all, size: 14),
-                                label: const Text('清空', style: TextStyle(fontSize: 12)),
+                                label: Text(AgentChatLocalizations.of(context)!.clear, style: TextStyle(fontSize: 12)),
                                 style: TextButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(horizontal: 8),
                                   minimumSize: const Size(0, 28),
@@ -1091,7 +1091,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('清空'),
+                child: Text(AgentChatLocalizations.of(context)!.clear),
               ),
             ],
           ),

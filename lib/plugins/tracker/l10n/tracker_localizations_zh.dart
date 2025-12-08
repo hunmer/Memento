@@ -107,6 +107,9 @@ class TrackerLocalizationsZh extends TrackerLocalizations {
   String get recordValue => '记录值';
 
   @override
+  String recordValueDisplay(double value) => '$value';
+
+  @override
   String get note => '备注';
 
   @override
@@ -195,4 +198,26 @@ class TrackerLocalizationsZh extends TrackerLocalizations {
 
   @override
   String get name => '进度';
+
+  // Widget configuration
+  @override
+  String get configureGoalProgressBarWidget => '配置目标进度条小组件';
+
+  @override
+  String get configureGoalTrackingWidget => '配置目标追踪小组件';
+
+  @override
+  String get backgroundColor => '背景色';
+
+  @override
+  String get accentColor => '强调色';
+
+  @override
+  String get progressBarColor => '进度条颜色';
+
+  @override
+  String get configured => '已配置';
+
+  @override
+  String get configurationFailed => '配置失败';
 }

@@ -64,6 +64,18 @@ abstract class TodoLocalizations {
   String get noCompletedTasks; // 暂无已完成任务
   String get delete; // 删除
   String get cancel; // 取消
+  String get close; // 关闭
+  String get edit; // 编辑
+  String get deleteTask; // 删除任务
+  String get confirmDeleteThisTask; // 确定要删除这个任务吗？
+  String get configureTodoListWidget; // 配置待办列表小组件
+  String get configureQuadrantWidget; // 配置四象限小组件
+
+  // 时间范围选项
+  String get today; // 今日
+  String get thisWeek; // 本周
+  String get thisMonth; // 本月
+  String get all; // 所有
 
   // Tab 标签
   String get todoTab; // 待办
@@ -88,6 +100,13 @@ abstract class TodoLocalizations {
 
   // 其他
   String get todoTasks; // 待办事项
+  String get widgetTitle; // 小组件标题
+  String get timeRange; // 时间范围
+  String get noTodoTasks; // 暂无待办任务
+  String get confirmConfiguration; // 确认配置
+  String get leaveEmptyForDefaultTitle; // 留空则使用默认标题
+  String get loading; // 加载中
+  String get done; // 完成
 
   static const LocalizationsDelegate<TodoLocalizations> delegate =
       _TodoLocalizationsDelegate();

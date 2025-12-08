@@ -168,6 +168,37 @@ class TodoLocalizationsEn extends TodoLocalizations {
   @override
   String get cancel => 'Cancel';
 
+  @override
+  String get close => 'Close';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get deleteTask => 'Delete Task';
+
+  @override
+  String get confirmDeleteThisTask => 'Are you sure you want to delete this task?';
+
+  @override
+  String get configureTodoListWidget => 'Configure Todo List Widget';
+
+  @override
+  String get configureQuadrantWidget => 'Configure Quadrant Widget';
+
+  // 时间范围选项
+  @override
+  String get today => 'Today';
+
+  @override
+  String get thisWeek => 'This Week';
+
+  @override
+  String get thisMonth => 'This Month';
+
+  @override
+  String get all => 'All';
+
   // Tab 标签
   @override
   String get todoTab => 'Todo';
@@ -219,4 +250,25 @@ class TodoLocalizationsEn extends TodoLocalizations {
   // 其他
   @override
   String get todoTasks => 'Todo Tasks';
+
+  @override
+  String get widgetTitle => 'Widget Title';
+
+  @override
+  String get timeRange => 'Time Range';
+
+  @override
+  String get noTodoTasks => 'No Todo Tasks';
+
+  @override
+  String get confirmConfiguration => 'Confirm Configuration';
+
+  @override
+  String get leaveEmptyForDefaultTitle => 'Leave empty for default title';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get done => 'Done';
 }

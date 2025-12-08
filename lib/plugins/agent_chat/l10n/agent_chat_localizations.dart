@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AgentChatLocalizations {
@@ -90,7 +89,7 @@ class AgentChatLocalizations {
 
   // 新增的硬编码文本
   String initializationFailed(String error) => '初始化失败: $error';
-  String get return => '返回';
+  String get goBack => '返回';
 
   // 消息操作
   String get copy => '复制';
@@ -123,13 +122,20 @@ class AgentChatLocalizations {
   String get deleteConfirmation => '删除确认';
   String confirmDeleteTemplate(String templateName) => '确定要删除工具模板"$templateName"吗？';
   String get resetConfirmation => '重置确认';
-  String get reset => '重置';
   String get resettingDefaultTemplates => '正在重置默认模板...';
 
   // 创建对话框
   String get selectTypeToCreate => '选择要创建的类型';
   String get createNewConversationChannel => '创建新的对话频道';
   String get createNewGroupCategory => '创建新的分组分类';
+  String confirmDeleteGroup(String groupName) => '确定要删除分组 "$groupName" 吗？\n\n此操作将同时清除该分组的筛选状态。';
+  String get aiChat => 'AI 对话';
+
+  // 插件信息
+  String pluginInfo(String pluginId, int enabledCount, int totalCount) => '$pluginId ($enabledCount/$totalCount)';
+
+  // 确认删除会话
+  String confirmDeleteConversation(String title) => '确定要删除会话 "$title" 吗？\n\n此操作将同时删除所有消息记录，且不可恢复。';
 
   // 空状态
   String get loadingToolTemplates => '正在加载工具模板...';

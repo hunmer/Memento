@@ -275,7 +275,7 @@ class _ToolCallStepsState extends State<ToolCallSteps> {
                       child: ElevatedButton.icon(
                         onPressed: () => widget.onRerunStep!(index),
                         icon: const Icon(Icons.replay, size: 16),
-                        label: const Text('重新执行此步骤'),
+                        label: Text(AgentChatLocalizations.of(context)!.executeAgain),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange[50],
                           foregroundColor: Colors.orange[700],

@@ -71,7 +71,7 @@ class _FloatingButtonManagerScreenState
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
+        title: Text(CoreLocalizations.of(context)!.confirmDelete),
             content: Text(
               CoreLocalizations.of(
                 context,
@@ -80,11 +80,11 @@ class _FloatingButtonManagerScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+            child: Text(CoreLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('删除', style: TextStyle(color: Colors.red)),
+            child: Text(CoreLocalizations.of(context)!.delete, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

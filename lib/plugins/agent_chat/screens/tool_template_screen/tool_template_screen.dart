@@ -5,6 +5,7 @@ import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/save_t
 import 'components/template_execution_dialog.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 
 /// 工具模板管理界面
 class ToolTemplateScreen extends StatefulWidget {
@@ -66,7 +67,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('工具模板'),
+        title: Text(AgentChatLocalizations.of(context)!.toolTemplate),
         actions: [
           // 标签过滤按钮
           if (allTags.isNotEmpty)
@@ -161,8 +162,8 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                             });
                           },
                           icon: const Icon(Icons.clear_all, size: 16),
-                          label: const Text(
-                            '清空',
+                          label: Text(
+                            AgentChatLocalizations.of(context)!.clear,
                             style: TextStyle(fontSize: 12),
                           ),
                         ),
@@ -259,7 +260,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                         Navigator.pop(context);
                       },
                       icon: const Icon(Icons.send, size: 18),
-                      label: const Text('使用'),
+                      label: Text(AgentChatLocalizations.of(context)!.use),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -288,7 +289,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                           children: [
                             Icon(Icons.edit, size: 18, color: Colors.blue),
                             SizedBox(width: 8),
-                            Text('编辑', style: TextStyle(color: Colors.blue)),
+                            Text(AgentChatLocalizations.of(context)!.edit, style: TextStyle(color: Colors.blue)),
                           ],
                         ),
                       ),
@@ -298,7 +299,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                           children: [
                             Icon(Icons.delete, size: 18, color: Colors.red),
                             SizedBox(width: 8),
-                            Text('删除', style: TextStyle(color: Colors.red)),
+                            Text(AgentChatLocalizations.of(context)!.delete, style: TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),
@@ -450,19 +451,19 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('删除确认'),
-        content: Text('确定要删除工具模板"${template.name}"吗？'),
+        title: Text(AgentChatLocalizations.of(context)!.deleteConfirmation),
+        content: Text(AgentChatLocalizations.of(context)!.confirmDeleteTemplate(template.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(AgentChatLocalizations.of(context)!.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: const Text('删除'),
+            child: Text(AgentChatLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -525,7 +526,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.orange),
             SizedBox(width: 8),
-            Text('重置确认'),
+            Text(AgentChatLocalizations.of(context)!.resetConfirmation),
           ],
         ),
         content: const Text(
@@ -536,7 +537,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(AgentChatLocalizations.of(context)!.cancel),
           ),
           FilledButton.icon(
             onPressed: () => Navigator.pop(context, true),
@@ -544,7 +545,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
               backgroundColor: Colors.orange,
             ),
             icon: const Icon(Icons.restore),
-            label: const Text('重置'),
+            label: Text(AgentChatLocalizations.of(context)!.reset),
           ),
         ],
       ),
@@ -567,7 +568,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(height: 16),
-                    Text('正在重置默认模板...'),
+                    Text(AgentChatLocalizations.of(context)!.resettingDefaultTemplates),
                   ],
                 ),
               ),
@@ -633,7 +634,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
         children: [
           const Icon(Icons.filter_list, size: 24),
           const SizedBox(width: 8),
-          const Text('选择标签过滤'),
+          Text(AgentChatLocalizations.of(context)!.selectTagFilter),
           const Spacer(),
           if (_selectedTags.isNotEmpty)
             TextButton(
@@ -642,7 +643,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
                   _selectedTags.clear();
                 });
               },
-              child: const Text('清空'),
+              child: Text(AgentChatLocalizations.of(context)!.clear),
             ),
         ],
       ),
@@ -718,7 +719,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(AgentChatLocalizations.of(context)!.cancel),
         ),
         FilledButton.icon(
           onPressed: () => Navigator.pop(context, _selectedTags),
@@ -729,7 +730,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
                     label: Text(_selectedTags.length.toString()),
                     child: const Icon(Icons.check),
                   ),
-          label: const Text('确定'),
+          label: Text(AgentChatLocalizations.of(context)!.confirm),
         ),
       ],
     );

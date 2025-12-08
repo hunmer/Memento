@@ -67,7 +67,7 @@ class _TodoMainViewState extends State<TodoMainView> {
             children: [
               if (task.description != null && task.description!.isNotEmpty) ...[
                 Text(
-                  '描述',
+                  TodoLocalizations.of(context).description,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -78,7 +78,7 @@ class _TodoMainViewState extends State<TodoMainView> {
               ],
               if (task.tags.isNotEmpty) ...[
                 Text(
-                  '标签',
+                  TodoLocalizations.of(context).tags,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -97,7 +97,7 @@ class _TodoMainViewState extends State<TodoMainView> {
                 const SizedBox(height: 16),
               ],
               Text(
-                '计时器',
+                TodoLocalizations.of(context).timer,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -119,7 +119,7 @@ class _TodoMainViewState extends State<TodoMainView> {
                 children: [
                   ElevatedButton.icon(
                     icon: const Icon(Icons.play_arrow),
-                    label: const Text('开始'),
+                    label: Text(TodoLocalizations.of(context).start),
                     onPressed: task.status != TaskStatus.inProgress
                         ? () {
                             _plugin.taskController.updateTaskStatus(
@@ -132,7 +132,7 @@ class _TodoMainViewState extends State<TodoMainView> {
                   ),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.pause),
-                    label: const Text('暂停'),
+                    label: Text(TodoLocalizations.of(context).pause),
                     onPressed: task.status == TaskStatus.inProgress
                         ? () {
                             _plugin.taskController.updateTaskStatus(
@@ -145,7 +145,7 @@ class _TodoMainViewState extends State<TodoMainView> {
                   ),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.check),
-                    label: const Text('完成'),
+                    label: Text(TodoLocalizations.of(context).complete),
                     onPressed: task.status != TaskStatus.done
                         ? () {
                             _plugin.taskController.updateTaskStatus(
@@ -164,7 +164,7 @@ class _TodoMainViewState extends State<TodoMainView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('关闭'),
+            child: Text(TodoLocalizations.of(context).close),
           ),
           TextButton(
             onPressed: () {
@@ -178,23 +178,23 @@ class _TodoMainViewState extends State<TodoMainView> {
                 ),
               );
             },
-            child: const Text('编辑'),
+            child: Text(TodoLocalizations.of(context).edit),
           ),
           TextButton(
             onPressed: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('删除任务'),
-                  content: const Text('确定要删除这个任务吗？'),
+                  title: Text(TodoLocalizations.of(context).deleteTask),
+                  content: Text(TodoLocalizations.of(context).confirmDeleteThisTask),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('取消'),
+                      child: Text(TodoLocalizations.of(context).cancel),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('删除'),
+                      child: Text(TodoLocalizations.of(context).delete),
                     ),
                   ],
                 ),

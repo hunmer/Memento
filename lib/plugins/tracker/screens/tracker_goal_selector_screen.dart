@@ -4,6 +4,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 
 /// 目标选择器界面(用于小组件配置)
 ///
@@ -37,13 +38,13 @@ class _TrackerGoalSelectorScreenState
       colors: [
         ColorConfig(
           key: 'primary',
-          label: '背景色',
+          label: 'Background Color',
           defaultValue: Colors.red,
           currentValue: Colors.red,
         ),
         ColorConfig(
           key: 'accent',
-          label: '强调色',
+          label: 'Accent Color',
           defaultValue: Colors.white,
           currentValue: Colors.white,
         ),
@@ -123,6 +124,7 @@ class _TrackerGoalSelectorScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = TrackerLocalizations.of(context);
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -133,7 +135,7 @@ class _TrackerGoalSelectorScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('配置目标追踪小组件'),
+        title: Text(l10n.configureGoalTrackingWidget),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
@@ -517,7 +519,8 @@ class _TrackerGoalSelectorScreenState
       );
 
       if (mounted) {
-        Toast.success('已配置 "${selectedGoal.name}"');
+        final l10n = TrackerLocalizations.of(context);
+        Toast.success('${l10n.configured} "${selectedGoal.name}"');
 
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
@@ -526,7 +529,8 @@ class _TrackerGoalSelectorScreenState
       }
     } catch (e) {
       if (mounted) {
-        Toast.error('配置失败: $e');
+        final l10n = TrackerLocalizations.of(context);
+        Toast.error('${l10n.configurationFailed}: $e');
       }
     }
   }

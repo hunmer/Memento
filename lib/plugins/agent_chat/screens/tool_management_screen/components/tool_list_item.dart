@@ -3,6 +3,7 @@ import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_config_manager.dart';
 import 'tool_editor_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 
 /// 工具列表项组件
 class ToolListItem extends StatelessWidget {
@@ -76,12 +77,12 @@ class ToolListItem extends StatelessWidget {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: const Text('确认删除'),
-                content: Text('确定要删除工具 "$toolId" 吗？'),
+                title: Text(AgentChatLocalizations.of(context)!.confirmDelete),
+                content: Text(AgentChatLocalizations.of(context)!.confirmDeleteTool(toolId)),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: const Text('取消'),
+                    child: Text(AgentChatLocalizations.of(context)!.cancel),
                   ),
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context, true),
@@ -89,7 +90,7 @@ class ToolListItem extends StatelessWidget {
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('删除'),
+                    child: Text(AgentChatLocalizations.of(context)!.delete),
                   ),
                 ],
               ),

@@ -630,7 +630,7 @@ class MessageBubble extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(AgentChatLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () {

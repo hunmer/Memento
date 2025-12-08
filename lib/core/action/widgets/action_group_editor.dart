@@ -130,7 +130,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
     }
 
     if (_actions.isEmpty) {
-      Toast.show('请至少添加一个动作');
+      Toast.show(CoreLocalizations.of(context)!.pleaseAddAtLeastOneAction);
       return;
     }
 
@@ -177,7 +177,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      widget.group != null ? '编辑动作组' : '创建动作组',
+                      widget.group != null ? CoreLocalizations.of(context)!.editActionGroup : CoreLocalizations.of(context)!.createActionGroupTitle,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -204,7 +204,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                     children: [
                       // 基本信息
                       Text(
-                        '基本信息',
+                        CoreLocalizations.of(context)!.basicInfo,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -212,14 +212,14 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: _titleController,
-                        decoration: const InputDecoration(
-                          labelText: '组标题',
-                          hintText: '输入动作组标题',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: CoreLocalizations.of(context)!.groupTitle,
+                          hintText: CoreLocalizations.of(context)!.enterActionGroupTitle,
+                          border: const OutlineInputBorder(),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return '请输入组标题';
+                            return CoreLocalizations.of(context)!.pleaseEnterGroupTitle;
                           }
                           return null;
                         },
@@ -227,10 +227,10 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                       const SizedBox(height: 12),
                       TextFormField(
                         controller: _descriptionController,
-                        decoration: const InputDecoration(
-                          labelText: '组描述',
-                          hintText: '输入动作组描述（可选）',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: CoreLocalizations.of(context)!.groupDescription,
+                          hintText: CoreLocalizations.of(context)!.enterActionGroupDescription,
+                          border: const OutlineInputBorder(),
                         ),
                         maxLines: 2,
                       ),
@@ -239,7 +239,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
 
                       // 执行配置
                       Text(
-                        '执行配置',
+                        CoreLocalizations.of(context)!.executionConfig,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -247,12 +247,12 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                       const SizedBox(height: 12),
                       DropdownButtonFormField<GroupOperator>(
                         value: _operator,
-                        decoration: const InputDecoration(
-                          labelText: '操作符',
-                          hintText: '选择执行方式',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: CoreLocalizations.of(context)!.operator,
+                          hintText: CoreLocalizations.of(context)!.selectExecutionMethod,
+                          border: const OutlineInputBorder(),
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
                             value: GroupOperator.sequence,
                             child: Text(CoreLocalizations.of(context)!.sequentialExecution),
@@ -277,12 +277,12 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                       const SizedBox(height: 12),
                       DropdownButtonFormField<GroupExecutionMode>(
                         value: _executionMode,
-                        decoration: const InputDecoration(
-                          labelText: '执行模式',
-                          hintText: '选择执行模式',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: CoreLocalizations.of(context)!.executionMode,
+                          hintText: CoreLocalizations.of(context)!.selectExecutionMode,
+                          border: const OutlineInputBorder(),
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
                             value: GroupExecutionMode.all,
                             child: Text(CoreLocalizations.of(context)!.executeAllActions),
@@ -311,10 +311,10 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                       const SizedBox(height: 12),
                       TextFormField(
                         initialValue: _priority.toString(),
-                        decoration: const InputDecoration(
-                          labelText: '优先级',
-                          hintText: '数字越大优先级越高',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          labelText: CoreLocalizations.of(context)!.priority,
+                          hintText: CoreLocalizations.of(context)!.priorityDescription,
+                          border: const OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.number,
                         onChanged: (value) {
@@ -331,7 +331,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '动作列表',
+                            CoreLocalizations.of(context)!.actionList,
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -339,7 +339,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                           ElevatedButton.icon(
                             onPressed: _onAddAction,
                             icon: const Icon(Icons.add),
-                            label: const Text(CoreLocalizations.of(context)!.addAction),
+                            label: Text(CoreLocalizations.of(context)!.addAction),
                           ),
                         ],
                       ),
@@ -357,7 +357,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                               ),
                               child: Center(
                                 child: Text(
-                                  '暂无动作，点击上方按钮添加',
+                                  CoreLocalizations.of(context)!.noActionsAdded,
                                   style: TextStyle(
                                     color: Colors.grey[600],
                                   ),
@@ -407,21 +407,21 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                                         }
                                       },
                                       itemBuilder: (context) => [
-                                        const PopupMenuItem(
+                                        PopupMenuItem(
                                           value: 'edit',
                                           child: Text(CoreLocalizations.of(context)!.edit),
                                         ),
                                         if (index > 0)
-                                          const PopupMenuItem(
+                                          PopupMenuItem(
                                             value: 'moveUp',
                                             child: Text(CoreLocalizations.of(context)!.moveUp),
                                           ),
                                         if (index < _actions.length - 1)
-                                          const PopupMenuItem(
+                                          PopupMenuItem(
                                             value: 'moveDown',
                                             child: Text(CoreLocalizations.of(context)!.moveDown),
                                           ),
-                                        const PopupMenuItem(
+                                        PopupMenuItem(
                                           value: 'remove',
                                           child: Text(CoreLocalizations.of(context)!.delete),
                                         ),

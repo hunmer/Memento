@@ -110,6 +110,9 @@ class TrackerLocalizationsEn extends TrackerLocalizations {
   String get recordValue => 'Record Value';
 
   @override
+  String recordValueDisplay(double value) => '$value';
+
+  @override
   String get note => 'Note';
 
   @override
@@ -198,4 +201,26 @@ class TrackerLocalizationsEn extends TrackerLocalizations {
 
   @override
   String get name => 'Goal Tracker';
+
+  // Widget configuration
+  @override
+  String get configureGoalProgressBarWidget => 'Configure Goal Progress Bar Widget';
+
+  @override
+  String get configureGoalTrackingWidget => 'Configure Goal Tracking Widget';
+
+  @override
+  String get backgroundColor => 'Background Color';
+
+  @override
+  String get accentColor => 'Accent Color';
+
+  @override
+  String get progressBarColor => 'Progress Bar Color';
+
+  @override
+  String get configured => 'Configured';
+
+  @override
+  String get configurationFailed => 'Configuration failed';
 }

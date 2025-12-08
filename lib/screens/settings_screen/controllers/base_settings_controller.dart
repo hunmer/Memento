@@ -1,18 +1,21 @@
 import 'package:Memento/core/app_initializer.dart' show globalConfigManager;
 import 'package:Memento/core/utils/app.dart';
 import 'package:flutter/material.dart';
+import '../l10n/screens_localizations.dart';
 
 class BaseSettingsController extends ChangeNotifier {
   Locale _currentLocale = globalConfigManager.getLocale();
   BaseSettingsController();
 
   // 切换语言
-  Future<void> toggleLanguage(BuildContext context) async {
+  Future<Locale?> showLanguageSelectionDialog(BuildContext context) async {
+    final localizations = ScreensLocalizations.of(context)!;
+
     final result = await showDialog<Locale>(
       context: context,
       builder:
           (context) => SimpleDialog(
-            title: Text('Select Language'),
+            title: Text(localizations.selectLanguage),
             children: [
               SimpleDialogOption(
                 onPressed: () => Navigator.pop(context, const Locale('zh')),
@@ -20,8 +23,8 @@ class BaseSettingsController extends ChangeNotifier {
                   children: [
                     if (_currentLocale.languageCode == 'zh')
                       Icon(Icons.check, color: Colors.blue),
-                    SizedBox(width: 8),
-                    Text('中文'),
+                    const SizedBox(width: 8),
+                    Text(localizations.chinese),
                   ],
                 ),
               ),
@@ -31,8 +34,8 @@ class BaseSettingsController extends ChangeNotifier {
                   children: [
                     if (_currentLocale.languageCode == 'en')
                       Icon(Icons.check, color: Colors.blue),
-                    SizedBox(width: 8),
-                    Text('English'),
+                    const SizedBox(width: 8),
+                    Text(localizations.english),
                   ],
                 ),
               ),
@@ -47,5 +50,7 @@ class BaseSettingsController extends ChangeNotifier {
       // 重启应用以应用语言设置
       restartApplication();
     }
+
+    return result;
   }
 }

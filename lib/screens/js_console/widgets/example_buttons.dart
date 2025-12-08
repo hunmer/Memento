@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
 import 'package:provider/provider.dart';
 import 'package:Memento/screens/js_console/controllers/js_console_controller.dart';
+import '../../l10n/screens_localizations.dart';
 
 class ExampleButtons extends StatelessWidget {
   const ExampleButtons({super.key});
@@ -23,7 +24,7 @@ class ExampleButtons extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             color: Colors.grey[200],
             child: const Center(
-              child: Text('加载示例中...', style: TextStyle(fontSize: 12)),
+              child: Text(ScreensLocalizations.of(context)!.loadingExamples, style: TextStyle(fontSize: 12)),
             ),
           );
         }
@@ -33,8 +34,8 @@ class ExampleButtons extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             color: Colors.grey[200],
-            child: const Center(
-              child: Text('没有可用示例', style: TextStyle(fontSize: 12)),
+            child: Center(
+              child: Text(ScreensLocalizations.of(context)!.noAvailableExamples, style: TextStyle(fontSize: 12)),
             ),
           );
         }
@@ -55,18 +56,18 @@ class ExampleButtons extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Row(
                     children: [
-                      const Text('选择示例文件: ', style: TextStyle(fontSize: 12)),
+                      Text(ScreensLocalizations.of(context)!.selectExampleFile, style: TextStyle(fontSize: 12)),
                       const SizedBox(width: 8),
                       Expanded(
                         child: DropdownButton<String>(
                           value: controller.selectedFilePath,
                           isExpanded: true,
-                          hint: const Text('全部示例', style: TextStyle(fontSize: 12)),
+                          hint: Text(ScreensLocalizations.of(context)!.allExamples, style: TextStyle(fontSize: 12)),
                           items: [
                             // "全部" 选项
-                            const DropdownMenuItem<String>(
+                            DropdownMenuItem<String>(
                               value: null,
-                              child: Text('全部示例', style: TextStyle(fontSize: 12)),
+                              child: Text(ScreensLocalizations.of(context)!.allExamples, style: TextStyle(fontSize: 12)),
                             ),
                             // 各个文件选项
                             ...controller.exampleFiles.map((file) {

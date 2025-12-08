@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
+import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 
 /// 任务四象限小组件配置界面
 ///
@@ -385,14 +386,16 @@ class _TodoQuadrantWidgetConfigScreenState extends State<TodoQuadrantWidgetConfi
 
   @override
   Widget build(BuildContext context) {
+    final l10n = TodoLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('配置四象限小组件'),
+        title: Text(l10n.configureQuadrantWidget),
         actions: [
           TextButton(
             onPressed: _isLoading ? null : _saveAndFinish,
             child: Text(
-              _isLoading ? '加载中...' : '完成',
+              _isLoading ? l10n.loading ?? 'Loading...' : 'Done',
               style: const TextStyle(color: Colors.white),
             ),
           ),

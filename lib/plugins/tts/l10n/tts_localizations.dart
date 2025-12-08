@@ -99,6 +99,120 @@ abstract class TTSLocalizations {
   /// 清空队列
   String get clearQueue;
 
+  /// 加载中
+  String get loading;
+
+  /// 设为默认朗读服务
+  String get setAsDefaultTTSService;
+
+  /// 音频Base64编码
+  String get audioBase64Encoded;
+
+  /// 音频数据是否为Base64编码
+  String get audioIsBase64Encoded;
+
+  /// 启用此服务
+  String get enableThisService;
+
+  /// 禁用此服务
+  String get disableThisService;
+
+  /// 基础配置
+  String get basicConfig;
+
+  /// 朗读参数
+  String get readingParameters;
+
+  /// HTTP 配置
+  String get httpConfig;
+
+  /// 直接返回音频
+  String get directAudioReturn;
+
+  /// JSON 包裹
+  String get jsonWrapped;
+
+  /// 加载语音列表失败
+  String get loadVoiceListFailed;
+
+  /// 请输入API URL
+  String get pleaseEnterApiUrl;
+
+  /// URL必须以http://或https://开头
+  String get urlMustStartWithHttp;
+
+  /// 配置验证失败，请检查必填项
+  String get configValidationFailed;
+
+  /// 保存失败
+  String get saveFailed;
+
+  /// 暂无服务
+  String get noServicesAvailable;
+
+  /// 设为默认
+  String get setAsDefault;
+
+  /// 加载服务失败
+  String get loadServicesFailed;
+
+  /// 服务已删除
+  String get serviceDeleted;
+
+  /// 删除失败
+  String get deleteFailed;
+
+  /// 更新失败
+  String get updateFailed;
+
+  /// 已设置为默认服务
+  String get setAsDefaultService;
+
+  /// 设置失败
+  String get setDefaultFailed;
+
+  /// 服务已添加
+  String get serviceAdded;
+
+  /// 添加失败
+  String get addFailed;
+
+  /// 服务已更新
+  String get serviceUpdated;
+
+  /// 语音测试文本
+  String get voiceTestText;
+
+  /// 测试失败
+  String get testFailedPrefix;
+
+  /// 刷新
+  String get refresh;
+
+  /// 正在加载语音列表
+  String get loadingVoiceList;
+
+  /// 共 {count} 个可用语音
+  String availableVoiceCount(int count);
+
+  /// 重新加载语音列表
+  String get reloadVoiceList;
+
+  /// 根据API要求填写
+  String get fillAccordingToApi;
+
+  /// 响应类型
+  String get responseType;
+
+  /// 音频字段路径
+  String get audioFieldPath;
+
+  /// 音频格式
+  String get audioFormat;
+
+  /// 请输入音频字段路径
+  String get pleaseEnterAudioFieldPath;
+
   /// 获取本地化实例
   static TTSLocalizations of(BuildContext context) {
     final localizations = Localizations.of<TTSLocalizations>(

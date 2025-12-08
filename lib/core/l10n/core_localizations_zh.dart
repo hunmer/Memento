@@ -96,6 +96,9 @@ class CoreLocalizationsZh extends CoreLocalizations {
   String get confirm => '确认';
 
   @override
+  String get noActionsFound => '没有找到动作';
+
+  @override
   String get confirmDelete => '确认删除';
 
   @override
@@ -127,4 +130,88 @@ class CoreLocalizationsZh extends CoreLocalizations {
 
   @override
   String get createActionGroup => '创建动作组';
+
+  @override
+  String get pleaseAddAtLeastOneAction => '请至少添加一个动作';
+
+  @override
+  String get singleAction => '单动作';
+
+  @override
+  String get actionGroup => '动作组';
+
+  @override
+  String get customAction => '自定义';
+
+  @override
+  String get noActionGroups => '没有动作组';
+
+  @override
+  String get noCustomActions => '没有自定义动作';
+
+  @override
+  String get selectAction => '选择动作';
+
+  @override
+  String get searchActions => '搜索动作...';
+
+  @override
+  String get actionConfig => '动作配置';
+
+  @override
+  String get noDescription => '无描述';
+
+  @override
+  String actionsCount(int count) => '$count 个动作';
+
+  @override
+  String get editActionGroup => '编辑动作组';
+
+  @override
+  String get createActionGroupTitle => '创建动作组';
+
+  @override
+  String get basicInfo => '基本信息';
+
+  @override
+  String get groupTitle => '组标题';
+
+  @override
+  String get enterActionGroupTitle => '输入动作组标题';
+
+  @override
+  String get pleaseEnterGroupTitle => '请输入组标题';
+
+  @override
+  String get groupDescription => '组描述';
+
+  @override
+  String get enterActionGroupDescription => '输入动作组描述（可选）';
+
+  @override
+  String get executionConfig => '执行配置';
+
+  @override
+  String get operator => '操作符';
+
+  @override
+  String get selectExecutionMethod => '选择执行方式';
+
+  @override
+  String get executionMode => '执行模式';
+
+  @override
+  String get selectExecutionMode => '选择执行模式';
+
+  @override
+  String get priority => '优先级';
+
+  @override
+  String get priorityDescription => '数字越大优先级越高';
+
+  @override
+  String get actionList => '动作列表';
+
+  @override
+  String get noActionsAdded => '暂无动作，点击上方按钮添加';
 }

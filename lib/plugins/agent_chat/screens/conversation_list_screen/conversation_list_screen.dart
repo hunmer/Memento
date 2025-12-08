@@ -15,6 +15,7 @@ import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_tem
 import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 
 /// 会话列表屏幕
 class ConversationListScreen extends StatefulWidget {
@@ -130,7 +131,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('分组管理'),
+            title: Text(AgentChatLocalizations.of(context)!.groupManagement),
             content: SizedBox(
               width: double.maxFinite,
               child: ListView.builder(
@@ -151,7 +152,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                                 children: [
                                   Icon(Icons.edit),
                                   SizedBox(width: 8),
-                                  Text('编辑'),
+                                  Text(AgentChatLocalizations.of(context)!.edit),
                                 ],
                               ),
                             ),
@@ -162,7 +163,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                                   Icon(Icons.delete, color: Colors.red),
                                   SizedBox(width: 8),
                                   Text(
-                                    '删除',
+                                    AgentChatLocalizations.of(context)!.delete,
                                     style: TextStyle(color: Colors.red),
                                   ),
                                 ],
@@ -177,7 +178,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('关闭'),
+                child: Text(AgentChatLocalizations.of(context)!.close),
               ),
             ],
           ),
@@ -209,7 +210,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: const Text('编辑分组'),
+              title: Text(AgentChatLocalizations.of(context)!.editGroup),
               content: TextField(
                 controller: nameController,
                 decoration: const InputDecoration(labelText: '分组名称'),
@@ -218,11 +219,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('取消'),
+                  child: Text(AgentChatLocalizations.of(context)!.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('保存'),
+                  child: Text(AgentChatLocalizations.of(context)!.save),
                 ),
               ],
             ),
@@ -247,17 +248,17 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认删除'),
-            content: Text('确定要删除分组 "${group.name}" 吗？\n\n此操作将同时清除该分组的筛选状态。'),
+            title: Text(AgentChatLocalizations.of(context)!.confirmDelete),
+            content: Text(AgentChatLocalizations.of(context)!.confirmDeleteGroup(group.name)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
+                child: Text(AgentChatLocalizations.of(context)!.cancel),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text('删除'),
+                child: Text(AgentChatLocalizations.of(context)!.delete),
               ),
             ],
           ),
@@ -283,20 +284,20 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('选择要创建的类型'),
+            title: Text(AgentChatLocalizations.of(context)!.selectTypeToCreate),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
                   leading: const Icon(Icons.chat),
-                  title: const Text('频道'),
-                  subtitle: const Text('创建新的对话频道'),
+                  title: Text(AgentChatLocalizations.of(context)!.channel),
+                  subtitle: Text(AgentChatLocalizations.of(context)!.createNewConversationChannel),
                   onTap: () => Navigator.pop(context, 'channel'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.folder),
-                  title: const Text('分组'),
-                  subtitle: const Text('创建新的分组分类'),
+                  title: Text(AgentChatLocalizations.of(context)!.group),
+                  subtitle: Text(AgentChatLocalizations.of(context)!.createNewGroupCategory),
                   onTap: () => Navigator.pop(context, 'group'),
                 ),
               ],
@@ -320,7 +321,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: const Text('添加频道'),
+              title: Text(AgentChatLocalizations.of(context)!.addChannel),
               content: TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
@@ -332,11 +333,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('取消'),
+                  child: Text(AgentChatLocalizations.of(context)!.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('创建'),
+                  child: Text(AgentChatLocalizations.of(context)!.create),
                 ),
               ],
             ),
@@ -370,7 +371,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: const Text('添加分组'),
+              title: Text(AgentChatLocalizations.of(context)!.addGroup),
               content: TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
@@ -382,11 +383,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('取消'),
+                  child: Text(AgentChatLocalizations.of(context)!.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('创建'),
+                  child: Text(AgentChatLocalizations.of(context)!.create),
                 ),
               ],
             ),
@@ -417,8 +418,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         _controller.conversationService.conversations.isNotEmpty;
 
     return SuperCupertinoNavigationWrapper(
-      title: const Text('AI 对话'),
-      largeTitle: 'AI 对话',
+      title: Text(AgentChatLocalizations.of(context)!.aiChat),
+      largeTitle: AgentChatLocalizations.of(context)!.aiChat,
       enableLargeTitle: true,
       enableSearchBar: true,
       searchPlaceholder: '搜索会话...',
@@ -439,7 +440,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         // 分组管理按钮
         IconButton(
           icon: const Icon(Icons.folder_outlined, size: 24),
-          tooltip: '分组管理',
+          tooltip: AgentChatLocalizations.of(context)!.groupManagement,
           onPressed: _openGroupManagement,
         ),
         // 工具管理按钮
@@ -599,7 +600,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Text('清除', style: TextStyle(fontSize: 12)),
+                  child: Text(AgentChatLocalizations.of(context)!.clear, style: TextStyle(fontSize: 12)),
                 ),
             ],
           ),
@@ -758,7 +759,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                         children: [
                           Icon(Icons.edit),
                           SizedBox(width: 8),
-                          Text('编辑'),
+                          Text(AgentChatLocalizations.of(context)!.edit),
                         ],
                       ),
                     ),
@@ -768,7 +769,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                         children: [
                           Icon(Icons.delete, color: Colors.red),
                           SizedBox(width: 8),
-                          Text('删除', style: TextStyle(color: Colors.red)),
+                          Text(AgentChatLocalizations.of(context)!.delete, style: TextStyle(color: Colors.red)),
                         ],
                       ),
                     ),
@@ -830,7 +831,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: const Text('编辑会话'),
+              title: Text(AgentChatLocalizations.of(context)!.editConversation),
               content: TextField(
                 controller: titleController,
                 decoration: const InputDecoration(labelText: '会话标题'),
@@ -839,11 +840,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('取消'),
+                  child: Text(AgentChatLocalizations.of(context)!.cancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('保存'),
+                  child: Text(AgentChatLocalizations.of(context)!.save),
                 ),
               ],
             ),
@@ -869,19 +870,19 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认删除'),
+            title: Text(AgentChatLocalizations.of(context)!.confirmDelete),
             content: Text(
-              '确定要删除会话 "${conversation.title}" 吗？\n\n此操作将同时删除所有消息记录，且不可恢复。',
+              AgentChatLocalizations.of(context)!.confirmDeleteConversation(conversation.title),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
+                child: Text(AgentChatLocalizations.of(context)!.cancel),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text('删除'),
+                child: Text(AgentChatLocalizations.of(context)!.delete),
               ),
             ],
           ),

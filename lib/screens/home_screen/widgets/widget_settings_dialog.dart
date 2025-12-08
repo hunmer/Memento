@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:Memento/l10n/app_localizations.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 
@@ -42,9 +43,10 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final screensL10n = ScreensLocalizations.of(context)!;
 
     return AlertDialog(
-      title: const Text('小组件设置'),
+      title: Text(screensL10n.widgetSettings),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -59,16 +61,16 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
             ),
             const SizedBox(height: 8),
             SegmentedButton<PluginWidgetDisplayStyle>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: PluginWidgetDisplayStyle.oneColumn,
-                  label: Text('一列'),
-                  icon: Icon(Icons.view_agenda),
+                  label: Text(screensL10n.oneColumn),
+                  icon: const Icon(Icons.view_agenda),
                 ),
                 ButtonSegment(
                   value: PluginWidgetDisplayStyle.twoColumns,
-                  label: Text('两列'),
-                  icon: Icon(Icons.view_column),
+                  label: Text(screensL10n.twoColumns),
+                  icon: const Icon(Icons.view_column),
                 ),
               ],
               selected: {_config.displayStyle},
@@ -121,10 +123,10 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
             // 背景图片
             ListTile(
               leading: const Icon(Icons.image),
-              title: const Text('背景图片'),
+              title: Text(screensL10n.backgroundImage),
               subtitle: _config.backgroundImagePath != null
-                ? const Text('已设置')
-                : const Text('未设置'),
+                ? Text(screensL10n.alreadySet)
+                : Text(screensL10n.notSet),
               trailing: _config.backgroundImagePath != null
                 ? IconButton(
                   icon: const Icon(Icons.clear),
@@ -161,10 +163,10 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
             // 图标颜色
             ListTile(
               leading: const Icon(Icons.color_lens),
-              title: const Text('图标颜色'),
+              title: Text(screensL10n.iconColor),
               subtitle: _config.iconColor != null
-                ? const Text('已自定义')
-                : const Text('使用默认'),
+                ? Text(screensL10n.customized)
+                : Text(screensL10n.useDefault),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -207,8 +209,8 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
             // 背景颜色
             ListTile(
               leading: const Icon(Icons.format_color_fill),
-              title: const Text('背景颜色'),
-              subtitle: const Text('无背景图片时生效'),
+              title: Text(screensL10n.backgroundColor),
+              subtitle: Text(screensL10n.effectWhenNoBackgroundImage),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -275,6 +277,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
     Color? currentColor,
     ValueChanged<Color> onColorSelected,
   ) {
+    final screensL10n = ScreensLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -286,9 +289,9 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 预设颜色网格
-              const Text(
-                '预设颜色',
-                style: TextStyle(
+              Text(
+                screensL10n.presetColors,
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
@@ -341,7 +344,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
                     );
                   },
                   icon: const Icon(Icons.palette),
-                  label: const Text('自定义颜色（支持透明度）'),
+                  label: Text(screensL10n.customColorWithTransparency),
                 ),
               ),
             ],
@@ -364,6 +367,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
     Color initialColor,
     ValueChanged<Color> onColorSelected,
   ) {
+    final screensL10n = ScreensLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) {
@@ -405,11 +409,11 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
                     const SizedBox(height: 20),
 
                     // 快速应用预设颜色
-                    const Align(
+                    Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        '快速选择预设颜色',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                        screensL10n.quickSelectPresetColors,
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     ),
                     const SizedBox(height: 8),

@@ -127,7 +127,7 @@ class TTSPlugin extends BasePlugin {
               future: managerService.getAllServices(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const Text('加载中...');
+                  return Text(TTSLocalizations.of(context).loading);
                 }
 
                 final services = snapshot.data!;

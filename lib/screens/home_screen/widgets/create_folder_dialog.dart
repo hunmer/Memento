@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 import '../../../../core/services/toast_service.dart';
 
 /// 创建文件夹对话框
@@ -52,8 +53,9 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ScreensLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('新建文件夹'),
+      title: Text(l10n.createNewFolder),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -62,17 +64,17 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
             // 文件夹名称
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: '文件夹名称',
-                hintText: '输入文件夹名称',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.folderName,
+                hintText: l10n.enterFolderName,
+                border: const OutlineInputBorder(),
               ),
               autofocus: true,
             ),
             const SizedBox(height: 24),
 
             // 图标选择
-            const Text('选择图标', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(l10n.selectIcon, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -110,7 +112,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
             const SizedBox(height: 24),
 
             // 颜色选择
-            const Text('选择颜色', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(l10n.selectColor, style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -144,11 +146,11 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: _createFolder,
-          child: const Text('创建'),
+          child: Text(l10n.create),
         ),
       ],
     );
@@ -157,9 +159,10 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
   /// 创建文件夹
   void _createFolder() {
     final name = _nameController.text.trim();
+    final l10n = ScreensLocalizations.of(context)!;
 
     if (name.isEmpty) {
-      toastService.showToast('请输入文件夹名称');
+      toastService.showToast(l10n.pleaseEnterFolderName);
       return;
     }
 
@@ -180,6 +183,6 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
     Navigator.of(context).pop();
 
     // 显示提示
-    toastService.showToast('已创建文件夹：$name');
+    toastService.showToast(l10n.folderCreated(name));
   }
 }

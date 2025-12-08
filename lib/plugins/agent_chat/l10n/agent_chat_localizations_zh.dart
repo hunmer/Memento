@@ -148,7 +148,7 @@ class AgentChatLocalizationsZh extends AgentChatLocalizations {
   @override
   String initializationFailed(String error) => '初始化失败: $error';
   @override
-  String get return => '返回';
+  String get goBack => '返回';
 
   // 消息操作
   @override
@@ -210,8 +210,6 @@ class AgentChatLocalizationsZh extends AgentChatLocalizations {
   @override
   String get resetConfirmation => '重置确认';
   @override
-  String get reset => '重置';
-  @override
   String get resettingDefaultTemplates => '正在重置默认模板...';
 
   // 创建对话框
@@ -221,6 +219,20 @@ class AgentChatLocalizationsZh extends AgentChatLocalizations {
   String get createNewConversationChannel => '创建新的对话频道';
   @override
   String get createNewGroupCategory => '创建新的分组分类';
+
+  // 分组相关
+  @override
+  String confirmDeleteGroup(String groupName) => '确定要删除分组 "$groupName" 吗？\n\n此操作将同时清除该分组的筛选状态。';
+  @override
+  String get aiChat => 'AI 对话';
+
+  // 插件信息
+  @override
+  String pluginInfo(String pluginId, int enabledCount, int totalCount) => '$pluginId ($enabledCount/$totalCount)';
+
+  // 确认删除会话
+  @override
+  String confirmDeleteConversation(String title) => '确定要删除会话 "$title" 吗？\n\n此操作将同时删除所有消息记录，且不可恢复。';
 
   // 空状态
   @override

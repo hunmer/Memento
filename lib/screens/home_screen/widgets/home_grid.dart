@@ -5,6 +5,7 @@ import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'home_card.dart';
 import 'layout_type_selector.dart';
 
@@ -57,8 +58,9 @@ class _HomeGridState extends State<HomeGrid> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ScreensLocalizations.of(context)!;
     if (widget.items.isEmpty) {
-      return _buildEmptyState(context);
+      return _buildEmptyState(context, l10n);
     }
 
     final gridWidget = Padding(
@@ -295,7 +297,7 @@ class _HomeGridState extends State<HomeGrid> {
   }
 
   /// 构建空状态
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, ScreensLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -307,14 +309,14 @@ class _HomeGridState extends State<HomeGrid> {
           ),
           const SizedBox(height: 16),
           Text(
-            '还没有小组件',
+            l10n.noWidgetsYet,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Theme.of(context).disabledColor,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            '点击右上角的 + 按钮添加',
+            l10n.clickPlusToAdd,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).disabledColor,
             ),
@@ -328,7 +330,7 @@ class _HomeGridState extends State<HomeGrid> {
               }
             },
             icon: const Icon(Icons.add_circle_outline),
-            label: const Text('快速创建布局'),
+            label: Text(l10n.quickCreateLayout),
           ),
         ],
       ),
@@ -339,8 +341,9 @@ class _HomeGridState extends State<HomeGrid> {
   Future<Map<String, String>?> _showQuickCreateLayoutDialog(
     BuildContext context,
   ) async {
+    final l10n = ScreensLocalizations.of(context)!;
     final TextEditingController nameController = TextEditingController(
-      text: '快速布局',
+      text: l10n.quickLayout,
     );
     String selectedType = _quickLayoutType;
 
@@ -348,7 +351,7 @@ class _HomeGridState extends State<HomeGrid> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('快速创建布局'),
+            title: Text(l10n.quickCreateLayout),
             content: SizedBox(
               width: double.maxFinite,
               child: Column(
@@ -356,13 +359,13 @@ class _HomeGridState extends State<HomeGrid> {
                 children: [
                   TextField(
                     controller: nameController,
-                    decoration: const InputDecoration(
-                      labelText: '布局名称',
-                      hintText: '例如：工作布局、娱乐布局',
+                    decoration: InputDecoration(
+                      labelText: l10n.layoutName,
+                      hintText: l10n.layoutNameHint,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text('选择一个布局模板快速开始：'),
+                  Text(l10n.selectLayoutTemplate),
                   const SizedBox(height: 16),
                   LayoutTypeSelector(
                     initialType: selectedType,
@@ -376,7 +379,7 @@ class _HomeGridState extends State<HomeGrid> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(l10n.cancel),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -384,12 +387,12 @@ class _HomeGridState extends State<HomeGrid> {
                   if (name.isEmpty) {
                     ScaffoldMessenger.of(
                       context,
-                    ).showSnackBar(const SnackBar(content: Text('请输入布局名称')));
+                    ).showSnackBar(SnackBar(content: Text(l10n.pleaseEnterLayoutName)));
                     return;
                   }
                   Navigator.pop(context, {'name': name, 'type': selectedType});
                 },
-                child: const Text('创建'),
+                child: Text(l10n.create),
               ),
         ],
       ),
@@ -412,42 +415,43 @@ Future<_DragToFolderAction?> _showDragToFolderDialog(
   HomeItem draggedItem,
   HomeFolderItem targetFolder,
 ) async {
+  final l10n = ScreensLocalizations.of(context)!;
   // 获取拖拽项的名称
   String itemName;
   if (draggedItem is HomeWidgetItem) {
     final registry = HomeWidgetRegistry();
-    itemName = registry.getWidget(draggedItem.widgetId)?.name ?? '组件';
+    itemName = registry.getWidget(draggedItem.widgetId)?.name ?? l10n.component;
   } else if (draggedItem is HomeFolderItem) {
     itemName = draggedItem.name;
   } else {
-    itemName = '项目';
+    itemName = l10n.item;
   }
 
   return showDialog<_DragToFolderAction>(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('拖拽到文件夹'),
+      title: Text(l10n.dragToFolder),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('将 "$itemName" 拖拽到文件夹 "${targetFolder.name}"'),
+          Text(l10n.dragItemToFolder(itemName, targetFolder.name)),
           const SizedBox(height: 16),
-          const Text('请选择操作：'),
+          Text(l10n.pleaseSelectAction),
         ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, _DragToFolderAction.cancel),
-          child: const Text('取消'),
+          child: Text(l10n.cancel),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, _DragToFolderAction.replace),
-          child: const Text('替换位置'),
+          child: Text(l10n.replacePosition),
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(context, _DragToFolderAction.addToFolder),
-          child: const Text('添加到文件夹'),
+          child: Text(l10n.addToFolder),
         ),
       ],
     ),
