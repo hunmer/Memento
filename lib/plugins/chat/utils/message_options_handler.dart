@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/message.dart';
-import '../models/file_message.dart';
-import '../widgets/message_options_dialog.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/models/file_message.dart';
+import 'package:Memento/plugins/chat/widgets/message_options_dialog.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 统一管理消息选项的处理逻辑
 class MessageOptionsHandler {

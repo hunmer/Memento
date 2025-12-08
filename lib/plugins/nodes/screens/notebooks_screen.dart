@@ -5,11 +5,11 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:ui' show lerpDouble;
 import 'package:provider/provider.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import '../controllers/nodes_controller.dart';
-import '../models/notebook.dart';
-import '../l10n/nodes_localizations.dart';
+import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
+import 'package:Memento/plugins/nodes/models/notebook.dart';
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'nodes_screen.dart';
-import '../../../widgets/circle_icon_picker.dart';
+import 'package:Memento/widgets/circle_icon_picker.dart';
 
 class NotebooksScreen extends StatefulWidget {
   const NotebooksScreen({super.key});

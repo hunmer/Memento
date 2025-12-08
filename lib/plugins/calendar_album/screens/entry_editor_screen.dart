@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/calendar_entry.dart';
+import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
 import 'entry_editor/entry_editor_controller.dart';
 import 'entry_editor/entry_editor_ui.dart';
 

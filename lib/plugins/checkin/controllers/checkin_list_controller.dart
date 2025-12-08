@@ -5,15 +5,15 @@ import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/checkin_item.dart';
-import '../screens/checkin_form_screen.dart';
+import 'package:Memento/plugins/checkin/models/checkin_item.dart';
+import 'package:Memento/plugins/checkin/screens/checkin_form_screen.dart';
 import 'package:intl/intl.dart';
-import '../checkin_plugin.dart';
-import '../services/group_sort_service.dart';
-import '../widgets/group_sort_dialog.dart';
-import '../../../core/event/event_manager.dart';
-import '../../../core/event/item_event_args.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/checkin/checkin_plugin.dart';
+import 'package:Memento/plugins/checkin/services/group_sort_service.dart';
+import 'package:Memento/plugins/checkin/widgets/group_sort_dialog.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class CheckinListController {
   final BuildContext context;

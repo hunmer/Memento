@@ -15,7 +15,7 @@ import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/event_args.dart';
 import 'package:flutter/material.dart';
 
-import '../foreground_timer_service.dart';
+import 'package:Memento/core/services/foreground_timer_service.dart';
 import 'events/timer_events.dart';
 import 'models/timer_state.dart';
 import 'storage/timer_storage.dart';

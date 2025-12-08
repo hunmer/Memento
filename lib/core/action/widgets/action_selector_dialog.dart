@@ -4,11 +4,11 @@ library;
 
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../action_manager.dart';
-import '../models/action_definition.dart';
-import '../models/action_instance.dart';
-import '../models/action_group.dart';
-import '../../floating_ball/models/floating_ball_gesture.dart';
+import 'package:Memento/core/action/action_manager.dart';
+import 'package:Memento/core/action/models/action_definition.dart';
+import 'package:Memento/core/action/models/action_instance.dart';
+import 'package:Memento/core/action/models/action_group.dart';
+import 'package:Memento/core/floating_ball/models/floating_ball_gesture.dart';
 import 'action_config_form.dart';
 import 'action_group_editor.dart';
 

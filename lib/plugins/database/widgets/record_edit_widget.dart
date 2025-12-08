@@ -1,10 +1,10 @@
 import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/database/models/database_field.dart';
-import '../controllers/field_controller.dart';
+import 'package:Memento/plugins/database/controllers/field_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../controllers/database_controller.dart';
-import '../models/database_model.dart';
+import 'package:Memento/plugins/database/controllers/database_controller.dart';
+import 'package:Memento/plugins/database/models/database_model.dart';
 import '../models/record.dart' as record_model;
 
 class RecordEditWidget extends StatefulWidget {

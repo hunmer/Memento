@@ -1,4 +1,4 @@
-import '../widgets/home_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 
 /// 主页小组件注册中心（单例）
 ///

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../l10n/day_localizations.dart';
+import 'package:Memento/plugins/day/l10n/day_localizations.dart';
 
 class InformationTab extends StatelessWidget {
   final TextEditingController titleController;

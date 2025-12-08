@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../models/channel.dart';
-import '../../../utils/date_formatter.dart';
-import '../../../l10n/chat_localizations.dart';
+import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/plugins/chat/utils/date_formatter.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 
 class ChannelTile extends StatelessWidget {
   final Channel channel;

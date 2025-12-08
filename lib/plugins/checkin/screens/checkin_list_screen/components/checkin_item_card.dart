@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../../../controllers/checkin_list_controller.dart';
-import '../../../models/checkin_item.dart';
-import '../../../screens/checkin_record_screen.dart';
-import '../../../widgets/checkin_record_dialog.dart';
+import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
+import 'package:Memento/plugins/checkin/models/checkin_item.dart';
+import 'package:Memento/plugins/checkin/screens/checkin_record_screen.dart';
+import 'package:Memento/plugins/checkin/widgets/checkin_record_dialog.dart';
 import 'package:intl/intl.dart';
 import 'weekly_checkin_circles.dart';
 

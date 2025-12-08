@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
-import '../habits_plugin.dart';
-import '../models/habit.dart';
-import '../../../widgets/widget_config_editor/index.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/habits/models/habit.dart';
+import 'package:Memento/widgets/widget_config_editor/index.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 习惯计时器选择器界面（用于小组件配置）
 ///

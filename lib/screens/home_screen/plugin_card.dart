@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../core/plugin_base.dart';
-import '../../core/plugin_manager.dart';
+import 'package:Memento/core/plugin_base.dart';
+import 'package:Memento/core/plugin_manager.dart';
 import 'card_size.dart';
 
 class PluginCard extends StatelessWidget {

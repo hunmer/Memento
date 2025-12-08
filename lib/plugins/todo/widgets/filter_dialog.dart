@@ -1,7 +1,7 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:flutter/material.dart';
-import '../models/models.dart';
+import 'package:Memento/plugins/todo/models/models.dart';
 
 class FilterDialog extends StatefulWidget {
   final Function(Map<String, dynamic>) onFilter;

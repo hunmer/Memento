@@ -6,8 +6,8 @@ import 'platform/js_engine_interface.dart';
 import 'platform/js_engine_factory.dart';
 import 'platform/mobile_js_engine.dart';
 import 'js_ui_handlers.dart';
-import '../plugin_base.dart';
-import '../data_filter/field_filter_service.dart';
+import 'package:Memento/core/plugin_base.dart';
+import 'package:Memento/core/data_filter/field_filter_service.dart';
 
 /// 延迟注册的插件信息
 class PendingPluginRegistration {

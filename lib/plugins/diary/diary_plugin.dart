@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../base_plugin.dart';
-import '../../core/plugin_manager.dart';
-import '../../core/config_manager.dart';
-import '../../core/event/event.dart';
-import '../../core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/plugins/base_plugin.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/config_manager.dart';
+import 'package:Memento/core/event/event.dart';
+import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'l10n/diary_localizations.dart';
 import 'screens/diary_calendar_screen.dart';
 import 'dart:convert';

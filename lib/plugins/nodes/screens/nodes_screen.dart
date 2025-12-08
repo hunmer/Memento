@@ -5,12 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/widgets/quill_viewer/quill_viewer.dart';
-import '../controllers/nodes_controller.dart';
-import '../models/notebook.dart';
-import '../models/node.dart';
+import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
+import 'package:Memento/plugins/nodes/models/notebook.dart';
+import 'package:Memento/plugins/nodes/models/node.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../l10n/nodes_localizations.dart';
-import '../widgets/node_item.dart';
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
+import 'package:Memento/plugins/nodes/widgets/node_item.dart';
 import 'node_edit_screen.dart';
 import 'package:uuid/uuid.dart';
 

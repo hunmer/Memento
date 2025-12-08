@@ -1,13 +1,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import '../models/channel.dart';
-import '../models/message.dart';
-import '../chat_plugin.dart';
-import '../../../core/event/event.dart';
-import '../../../core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/core/event/event.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'widget_service.dart';
-import '../sample_data.dart';
+import 'package:Memento/plugins/chat/sample_data.dart';
 
 /// 负责管理频道相关的功能
 class ChannelService {

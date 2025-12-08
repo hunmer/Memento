@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
-import '../checkin_plugin.dart';
-import '../models/checkin_item.dart';
-import '../../../widgets/widget_config_editor/index.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/checkin/checkin_plugin.dart';
+import 'package:Memento/plugins/checkin/models/checkin_item.dart';
+import 'package:Memento/widgets/widget_config_editor/index.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 打卡项目选择器界面（用于小组件配置）
 ///

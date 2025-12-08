@@ -1,13 +1,13 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import '../../../widgets/super_cupertino_navigation_wrapper.dart';
-import '../l10n/goods_localizations.dart';
-import '../models/goods_item.dart';
-import '../models/warehouse.dart';
-import '../goods_plugin.dart';
-import '../widgets/goods_item_card.dart';
-import '../widgets/goods_item_list_tile.dart';
-import '../widgets/goods_item_form/goods_item_form.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
+import 'package:Memento/plugins/goods/models/goods_item.dart';
+import 'package:Memento/plugins/goods/models/warehouse.dart';
+import 'package:Memento/plugins/goods/goods_plugin.dart';
+import 'package:Memento/plugins/goods/widgets/goods_item_card.dart';
+import 'package:Memento/plugins/goods/widgets/goods_item_list_tile.dart';
+import 'package:Memento/plugins/goods/widgets/goods_item_form/goods_item_form.dart';
 
 class GoodsListScreen extends StatefulWidget {
   const GoodsListScreen({super.key, this.initialFilterWarehouseId});

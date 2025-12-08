@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../../widgets/super_cupertino_navigation_wrapper.dart';
-import '../../core/services/toast_service.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class SuperCupertinoTestScreen extends StatefulWidget {
   const SuperCupertinoTestScreen({super.key});

@@ -1,7 +1,7 @@
 import 'package:Memento/core/floating_ball/models/floating_ball_gesture.dart';
 import 'package:flutter/material.dart';
-import '../config/floating_ball_config.dart';
-import '../floating_ball_manager.dart';
+import 'package:Memento/core/floating_ball/config/floating_ball_config.dart';
+import 'package:Memento/core/floating_ball/floating_ball_manager.dart';
 
 /// 悬浮球渲染器抽象基类
 ///

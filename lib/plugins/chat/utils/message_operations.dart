@@ -1,10 +1,10 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../chat_plugin.dart';
-import '../models/message.dart';
-import '../l10n/chat_localizations.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 统一管理消息操作的处理器
 class MessageOperations {

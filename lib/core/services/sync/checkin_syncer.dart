@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:memento_widgets/memento_widgets.dart';
-import '../../../plugins/checkin/checkin_plugin.dart';
-import '../../plugin_manager.dart';
+import 'package:Memento/plugins/checkin/checkin_plugin.dart';
+import 'package:Memento/core/plugin_manager.dart';
 import 'plugin_widget_syncer.dart';
-import '../system_widget_service.dart';
+import 'package:Memento/core/services/system_widget_service.dart';
 
 /// 签到插件同步器
 class CheckinSyncer extends PluginWidgetSyncer {

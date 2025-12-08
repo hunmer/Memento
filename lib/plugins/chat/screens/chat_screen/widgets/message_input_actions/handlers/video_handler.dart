@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
-import '../../../../../models/file_message.dart';
-import '../../../../../services/file_service.dart';
-import '../types.dart';
-import '../l10n/local_video_handler_localizations.dart';
+import 'package:Memento/plugins/chat/models/file_message.dart';
+import 'package:Memento/plugins/chat/services/file_service.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/types.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/l10n/local_video_handler_localizations.dart';
 
 Future<void> handleVideoSelection({
   required BuildContext context,

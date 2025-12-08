@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../../../core/event/event.dart';
-import '../../../../../../plugins/chat/chat_plugin.dart';
-import '../../../../../../plugins/chat/models/message.dart';
+import 'package:Memento/core/event/event.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
 import 'components/avatar.dart';
 import 'components/favorite_icon.dart';
 import 'components/fixed_symbol.dart';

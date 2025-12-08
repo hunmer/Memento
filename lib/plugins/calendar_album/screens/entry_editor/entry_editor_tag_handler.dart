@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/plugin_manager.dart';
-import '../../controllers/tag_controller.dart';
-import '../../l10n/calendar_album_localizations.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
+import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'entry_editor_controller.dart';
 
 class EntryEditorTagHandler extends StatelessWidget {

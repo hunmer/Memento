@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/script_info.dart';
+import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 
 /// 脚本卡片组件
 ///

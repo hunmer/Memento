@@ -6,10 +6,10 @@ import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
-import '../models/product.dart';
-import '../models/user_item.dart';
-import '../models/points_log.dart';
-import '../sample_data.dart';
+import 'package:Memento/plugins/store/models/product.dart';
+import 'package:Memento/plugins/store/models/user_item.dart';
+import 'package:Memento/plugins/store/models/points_log.dart';
+import 'package:Memento/plugins/store/sample_data.dart';
 
 class StoreController with ChangeNotifier {
   List<Product> _products = [];

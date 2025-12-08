@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/folder.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
 
 class FolderItem extends StatelessWidget {
   final Folder folder;

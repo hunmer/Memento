@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../../../core/storage/storage_manager.dart';
-import '../../../core/services/plugin_widget_sync_helper.dart';
-import '../models/activity_record.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 
 class ActivityService {

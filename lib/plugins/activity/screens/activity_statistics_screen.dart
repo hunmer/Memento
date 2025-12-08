@@ -1,6 +1,6 @@
 import 'package:Memento/widgets/statistics/statistics.dart';
 import 'package:flutter/material.dart';
-import '../services/activity_service.dart';
+import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'tag_statistics_screen.dart';
 
 /// 加载活动统计数据

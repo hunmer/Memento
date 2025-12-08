@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/goods_item.dart';
-import '../models/usage_record.dart';
+import 'package:Memento/plugins/goods/models/goods_item.dart';
+import 'package:Memento/plugins/goods/models/usage_record.dart';
 
 class GoodsItemHistoryPage extends StatefulWidget {
   final GoodsItem item;

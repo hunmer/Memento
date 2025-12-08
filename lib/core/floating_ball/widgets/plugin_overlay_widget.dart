@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/gestures.dart';
-import '../../plugin_base.dart';
+import 'package:Memento/core/plugin_base.dart';
 
 /// 插件覆盖层窗口组件
 /// 用于在应用内显示插件的独立小窗口，支持路由隔离、拖动和最小化

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/filter_sort_config.dart';
-import '../l10n/contact_localizations.dart';
+import 'package:Memento/plugins/contact/models/filter_sort_config.dart';
+import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 
 class FilterDialog extends StatefulWidget {
   final FilterConfig initialFilter;

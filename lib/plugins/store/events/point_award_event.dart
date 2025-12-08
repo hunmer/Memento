@@ -1,5 +1,5 @@
-import '../../../core/event/event_manager.dart';
-import '../store_plugin.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/plugins/store/store_plugin.dart';
 
 /// 积分奖励事件处理器
 class PointAwardEvent {

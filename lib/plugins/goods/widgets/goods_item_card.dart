@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:io';
-import '../models/goods_item.dart';
-import '../l10n/goods_localizations.dart';
-import '../dialogs/add_usage_record_dialog.dart';
-import '../screens/goods_item_history_page.dart';
-import '../goods_plugin.dart';
+import 'package:Memento/plugins/goods/models/goods_item.dart';
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
+import 'package:Memento/plugins/goods/dialogs/add_usage_record_dialog.dart';
+import 'package:Memento/plugins/goods/screens/goods_item_history_page.dart';
+import 'package:Memento/plugins/goods/goods_plugin.dart';
 
 class GoodsItemCard extends StatefulWidget {
   final GoodsItem item;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../utils/time_formatter.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_bubble/utils/time_formatter.dart';
 
 class MessageTimestamp extends StatelessWidget {
   final DateTime date;

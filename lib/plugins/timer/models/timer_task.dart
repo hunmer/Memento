@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'timer_item.dart';
-import '../timer_plugin.dart';
+import 'package:Memento/plugins/timer/timer_plugin.dart';
 import '../../../../core/notification_controller.dart';
 import '../../../../core/event/event_manager.dart';
 import '../../../../core/services/timer/unified_timer_controller.dart';

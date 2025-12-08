@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../models/message.dart';
-import '../../models/timeline_filter.dart';
-import '../../../../chat_plugin.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/screens/timeline/models/timeline_filter.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
 
 /// Timeline 基础控制器，包含共享状态和基本功能
 abstract class BaseTimelineController extends ChangeNotifier {

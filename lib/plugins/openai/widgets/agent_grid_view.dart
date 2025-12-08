@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/ai_agent.dart';
+import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'agent_card.dart';
 
 class AgentGridView extends StatelessWidget {

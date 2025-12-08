@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import '../bill_plugin.dart';
-import '../models/account.dart';
-import '../models/bill.dart';
-import '../models/bill_statistics.dart';
-import '../models/statistic_range.dart';
-import '../data/sample_data.dart';
-import '../../../core/event/event_manager.dart';
+import 'package:Memento/plugins/bill/bill_plugin.dart';
+import 'package:Memento/plugins/bill/models/account.dart';
+import 'package:Memento/plugins/bill/models/bill.dart';
+import 'package:Memento/plugins/bill/models/bill_statistics.dart';
+import 'package:Memento/plugins/bill/models/statistic_range.dart';
+import 'package:Memento/plugins/bill/data/sample_data.dart';
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 
 /// 账单添加事件参数

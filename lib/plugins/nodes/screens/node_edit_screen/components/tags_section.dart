@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../dialogs/add_tag_dialog.dart';
+import 'package:Memento/plugins/nodes/screens/node_edit_screen/dialogs/add_tag_dialog.dart';
 
 class TagsSection extends StatelessWidget {
   final List<String> tags;

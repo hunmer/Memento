@@ -1,6 +1,6 @@
 import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 
-import '../models/checkin_item.dart';
+import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 
 enum GroupSortType {
   upcoming, // 按即将发生排序

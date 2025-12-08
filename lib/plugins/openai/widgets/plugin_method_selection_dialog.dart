@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
-import '../models/plugin_analysis_method.dart';
+import 'package:Memento/plugins/openai/models/plugin_analysis_method.dart';
 
 class PluginMethodSelectionDialog extends StatefulWidget {
   const PluginMethodSelectionDialog({super.key});

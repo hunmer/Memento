@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../models/tool_config.dart';
-import '../../../services/tool_config_manager.dart';
+import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
+import 'package:Memento/plugins/agent_chat/services/tool_config_manager.dart';
 import 'tool_editor_dialog.dart';
-import '../../../../../core/services/toast_service.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 工具列表项组件
 class ToolListItem extends StatelessWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/floating_ball_gesture.dart';
+import 'package:Memento/core/floating_ball/models/floating_ball_gesture.dart';
 
 /// 悬浮球平台适配器抽象基类
 abstract class FloatingBallPlatformAdapter {

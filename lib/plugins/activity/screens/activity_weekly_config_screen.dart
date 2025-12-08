@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
-import '../activity_plugin.dart';
-import '../models/activity_weekly_widget_config.dart';
-import '../models/activity_weekly_widget_data.dart';
-import '../services/activity_widget_service.dart';
-import '../../../widgets/widget_config_editor/index.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/activity/activity_plugin.dart';
+import 'package:Memento/plugins/activity/models/activity_weekly_widget_config.dart';
+import 'package:Memento/plugins/activity/models/activity_weekly_widget_data.dart';
+import 'package:Memento/plugins/activity/services/activity_widget_service.dart';
+import 'package:Memento/widgets/widget_config_editor/index.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 周视图活动列表小组件配置界面
 ///

@@ -7,8 +7,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:uuid/uuid.dart';
-import '../chat_plugin.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// Chat 插件的底部栏组件
 /// 提供频道列表和时间线两个 Tab 的切换功能

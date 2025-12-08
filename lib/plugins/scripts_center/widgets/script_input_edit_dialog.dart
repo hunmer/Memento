@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../models/script_input.dart';
+import 'package:Memento/plugins/scripts_center/models/script_input.dart';
 
 /// 脚本输入参数编辑对话框
 class ScriptInputEditDialog extends StatefulWidget {

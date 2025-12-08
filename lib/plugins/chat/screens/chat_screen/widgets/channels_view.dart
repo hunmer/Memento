@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../models/channel.dart';
-import '../../../models/message.dart';
-import '../controllers/chat_screen_controller.dart';
+import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/controllers/chat_screen_controller.dart';
 import './message_list.dart';
 import './message_input/message_input.dart';
-import '../utils/message_list_builder.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/utils/message_list_builder.dart';
 
 class ChannelsView extends StatelessWidget {
   final Channel channel;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../controllers/notes_controller.dart';
-import '../models/note.dart';
-import '../widgets/search_note_item.dart';
-import '../l10n/notes_localizations.dart';
+import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
+import 'package:Memento/plugins/notes/models/note.dart';
+import 'package:Memento/plugins/notes/widgets/search_note_item.dart';
+import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 
 class SearchScreen extends StatefulWidget {
   final NotesController controller;

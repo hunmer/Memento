@@ -1,11 +1,11 @@
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../controllers/notes_controller.dart';
-import '../models/folder.dart';
-import '../models/note.dart';
-import '../widgets/folder_item.dart';
-import '../widgets/note_item.dart';
+import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
+import 'package:Memento/plugins/notes/models/note.dart';
+import 'package:Memento/plugins/notes/widgets/folder_item.dart';
+import 'package:Memento/plugins/notes/widgets/note_item.dart';
 import 'note_edit_screen.dart';
 import 'search_screen.dart';
 

@@ -3,8 +3,8 @@ import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../bill_plugin.dart';
-import '../models/account.dart';
+import 'package:Memento/plugins/bill/bill_plugin.dart';
+import 'package:Memento/plugins/bill/models/account.dart';
 import 'account_edit_screen.dart';
 
 class AccountListScreen extends StatefulWidget {

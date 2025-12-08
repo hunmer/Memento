@@ -5,7 +5,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/store/widgets/user_item_card.dart';
 import 'package:Memento/plugins/store/widgets/user_item_detail_page.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
-import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 class UserItems extends StatefulWidget {

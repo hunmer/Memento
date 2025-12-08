@@ -5,8 +5,8 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as path;
-import '../../../core/utils/file_utils.dart';
-import '../widgets/plugin_selection_dialog.dart';
+import 'package:Memento/core/utils/file_utils.dart';
+import 'package:Memento/screens/settings_screen/widgets/plugin_selection_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 class ExportController {

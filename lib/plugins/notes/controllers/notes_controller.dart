@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
-import '../../../core/storage/storage_manager.dart';
-import '../../../core/event/event_manager.dart';
-import '../../../core/event/item_event_args.dart';
-import '../../../core/services/plugin_widget_sync_helper.dart';
-import '../models/folder.dart';
-import '../models/note.dart';
-import '../data/notes_sample_data.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
+import 'package:Memento/plugins/notes/models/note.dart';
+import 'package:Memento/plugins/notes/data/notes_sample_data.dart';
 
 class NotesController {
   final StorageManager _storage;

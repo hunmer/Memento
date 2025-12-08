@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../models/node.dart';
-import '../../../l10n/nodes_localizations.dart';
+import 'package:Memento/plugins/nodes/models/node.dart';
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 
 class StatusDropdown extends StatelessWidget {
   final NodeStatus value;

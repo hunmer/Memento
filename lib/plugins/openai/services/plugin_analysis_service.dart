@@ -1,4 +1,4 @@
-import '../models/plugin_analysis_method.dart';
+import 'package:Memento/plugins/openai/models/plugin_analysis_method.dart';
 
 /// 插件分析服务
 ///

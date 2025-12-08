@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
-import '../base_plugin.dart';
-import '../../core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/plugins/base_plugin.dart';
+import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'controllers/notes_controller.dart';
 import 'screens/notes_screen.dart';
 import 'l10n/notes_localizations.dart';

@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../models/warehouse.dart';
+import 'package:Memento/plugins/goods/models/warehouse.dart';
 import 'package:intl/intl.dart';
-import '../../../utils/image_utils.dart';
+import 'package:Memento/utils/image_utils.dart';
 
 class WarehouseCard extends StatelessWidget {
   final Warehouse warehouse;

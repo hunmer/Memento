@@ -2,13 +2,13 @@ import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../../../models/message.dart';
-import '../../../models/file_message.dart';
-import '../../../utils/message_options_handler.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/models/file_message.dart';
+import 'package:Memento/plugins/chat/utils/message_options_handler.dart';
 import 'message_bubble.dart';
-import '../widgets/date_separator.dart';
-import '../../../utils/date_formatter.dart';
-import '../../../../../widgets/file_preview/index.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/widgets/date_separator.dart';
+import 'package:Memento/plugins/chat/utils/date_formatter.dart';
+import 'package:Memento/widgets/file_preview/index.dart';
 
 class MessageList extends StatefulWidget {
   final List<dynamic> items;

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:provider/provider.dart';
-import '../services/script_manager.dart';
-import '../services/script_executor.dart';
-import '../models/script_info.dart';
-import '../models/script_input.dart';
-import '../models/script_trigger.dart';
-import '../widgets/script_card.dart';
-import '../widgets/script_run_dialog.dart';
+import 'package:Memento/plugins/scripts_center/services/script_manager.dart';
+import 'package:Memento/plugins/scripts_center/services/script_executor.dart';
+import 'package:Memento/plugins/scripts_center/models/script_info.dart';
+import 'package:Memento/plugins/scripts_center/models/script_input.dart';
+import 'package:Memento/plugins/scripts_center/models/script_trigger.dart';
+import 'package:Memento/plugins/scripts_center/widgets/script_card.dart';
+import 'package:Memento/plugins/scripts_center/widgets/script_run_dialog.dart';
 import 'script_edit_screen.dart';
 
 /// 脚本列表界面

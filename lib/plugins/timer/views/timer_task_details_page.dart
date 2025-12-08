@@ -1,6 +1,6 @@
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:flutter/material.dart';
-import '../models/timer_task.dart';
+import 'package:Memento/plugins/timer/models/timer_task.dart';
 import '../../../../core/event/event_manager.dart';
 
 class TimerTaskDetailsPage extends StatefulWidget {

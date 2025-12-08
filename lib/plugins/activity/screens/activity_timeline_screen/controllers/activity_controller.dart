@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../models/activity_record.dart';
-import '../../../services/activity_service.dart';
-import '../../../widgets/activity_form.dart';
-import '../../../../../core/event/event_manager.dart';
-import '../../../../../core/event/item_event_args.dart';
+import 'package:Memento/plugins/activity/models/activity_record.dart';
+import 'package:Memento/plugins/activity/services/activity_service.dart';
+import 'package:Memento/plugins/activity/widgets/activity_form.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 
 class ActivityController {
   final ActivityService activityService;

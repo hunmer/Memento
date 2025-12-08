@@ -1,9 +1,9 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../../core/storage/storage_manager.dart';
-import '../../../widgets/memento_editor/memento_editor.dart';
-import '../utils/diary_utils.dart';
-import '../l10n/diary_localizations.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/widgets/memento_editor/memento_editor.dart';
+import 'package:Memento/plugins/diary/utils/diary_utils.dart';
+import 'package:Memento/plugins/diary/l10n/diary_localizations.dart';
 
 class DiaryEditorScreen extends StatefulWidget {
   final DateTime date;

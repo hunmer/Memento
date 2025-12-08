@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../models/channel.dart';
-import '../../../chat_plugin.dart';
+import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
 
 class ChannelListController extends ChangeNotifier {
   final List<Channel> channels;

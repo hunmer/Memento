@@ -1,9 +1,9 @@
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../models/goods_item.dart';
-import '../../goods_plugin.dart';
+import 'package:Memento/plugins/goods/models/goods_item.dart';
+import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'goods_item_form.dart';
-import '../../../../core/services/toast_service.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class GoodsItemFormPage extends StatefulWidget {
   final String itemId;

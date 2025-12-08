@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
-import '../models/plugin_widget_config.dart';
+import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 
 /// 小组件设置对话框
 class WidgetSettingsDialog extends StatefulWidget {

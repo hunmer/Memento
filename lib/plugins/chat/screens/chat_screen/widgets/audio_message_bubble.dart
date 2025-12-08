@@ -1,7 +1,7 @@
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../../models/message.dart';
-import '../../../widgets/audio_player_widget.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/widgets/audio_player_widget.dart';
 
 class AudioMessageBubble extends StatelessWidget {
   final Message message;

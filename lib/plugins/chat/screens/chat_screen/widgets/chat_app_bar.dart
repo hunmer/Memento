@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
-import '../../../models/channel.dart';
-import '../../../l10n/chat_localizations.dart';
-import '../../../chat_plugin.dart';
-import '../../../../../widgets/image_picker_dialog.dart';
+import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/widgets/image_picker_dialog.dart';
 
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Channel channel;

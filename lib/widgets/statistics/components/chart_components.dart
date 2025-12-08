@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import '../models/statistics_models.dart';
+import 'package:Memento/widgets/statistics/models/statistics_models.dart';
 
 /// 通用卡片构建器
 Widget buildStatisticsCard({

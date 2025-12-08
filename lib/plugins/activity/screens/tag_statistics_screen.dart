@@ -2,9 +2,9 @@ import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import '../services/activity_service.dart';
-import '../models/activity_record.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/activity/services/activity_service.dart';
+import 'package:Memento/plugins/activity/models/activity_record.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class TagStatisticsScreen extends StatefulWidget {
   final String tagName;

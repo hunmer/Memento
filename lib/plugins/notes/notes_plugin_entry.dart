@@ -1,4 +1,4 @@
-import '../base_plugin.dart';
+import 'package:Memento/plugins/base_plugin.dart';
 import 'notes_plugin.dart';
 
 /// Notes插件的入口点

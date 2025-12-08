@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/group_sort_service.dart';
-import '../l10n/checkin_localizations.dart';
+import 'package:Memento/plugins/checkin/services/group_sort_service.dart';
+import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 
 class GroupSortDialog extends StatefulWidget {
   final GroupSortType currentSortType;

@@ -1,8 +1,8 @@
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
-import '../models/tool_app.dart';
+import 'package:Memento/plugins/openai/models/tool_app.dart';
 import 'tool_app_card.dart';
-import '../controllers/tool_app_controller.dart';
+import 'package:Memento/plugins/openai/controllers/tool_app_controller.dart';
 
 class ToolAppGridView extends StatelessWidget {
   final List<ToolApp> apps;

@@ -4,7 +4,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../base_plugin.dart';
+import 'package:Memento/plugins/base_plugin.dart';
 import './l10n/database_localizations.dart';
 import './models/database_model.dart';
 import './models/database_field.dart';

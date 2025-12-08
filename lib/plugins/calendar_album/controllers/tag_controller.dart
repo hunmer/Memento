@@ -3,7 +3,7 @@ import 'package:Memento/widgets/tag_manager_dialog/widgets/tag_manager_dialog.da
 import 'package:flutter/material.dart';
 import '../../../../widgets/tag_manager_dialog/models/tag_group.dart' as dialog;
 import 'dart:convert';
-import '../../../core/storage/storage_manager.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
 
 class TagController extends ChangeNotifier {
   final VoidCallback? onTagsChanged;

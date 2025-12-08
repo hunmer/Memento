@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/goods_item.dart';
-import '../goods_plugin.dart';
-import '../l10n/goods_localizations.dart';
+import 'package:Memento/plugins/goods/models/goods_item.dart';
+import 'package:Memento/plugins/goods/goods_plugin.dart';
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 
 class GoodsItemSelectorDialog extends StatefulWidget {
   final String? excludeItemId; // 要排除的物品ID（避免选择自己或已选择的子物品）

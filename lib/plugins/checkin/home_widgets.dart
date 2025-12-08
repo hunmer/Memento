@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../screens/home_screen/models/home_widget_size.dart';
-import '../../screens/home_screen/widgets/home_widget.dart';
-import '../../screens/home_screen/widgets/generic_plugin_widget.dart';
-import '../../screens/home_screen/models/plugin_widget_config.dart';
-import '../../screens/home_screen/managers/home_widget_registry.dart';
-import '../../core/plugin_manager.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
+import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
+import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
+import 'package:Memento/core/plugin_manager.dart';
 import 'checkin_plugin.dart';
 import 'l10n/checkin_localizations.dart';
 

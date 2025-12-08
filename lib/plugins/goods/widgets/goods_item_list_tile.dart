@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import '../models/goods_item.dart';
+import 'package:Memento/plugins/goods/models/goods_item.dart';
 
 class GoodsItemListTile extends StatefulWidget {
   final GoodsItem item;

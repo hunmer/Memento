@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../models/node.dart';
-import '../../../l10n/nodes_localizations.dart';
+import 'package:Memento/plugins/nodes/models/node.dart';
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 
 class AddCustomFieldDialog extends StatefulWidget {
   final Function(CustomField) onCustomFieldAdded;

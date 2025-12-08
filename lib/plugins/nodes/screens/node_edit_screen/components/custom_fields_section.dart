@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../models/node.dart';
-import '../../../l10n/nodes_localizations.dart';
-import '../dialogs/add_custom_field_dialog.dart';
+import 'package:Memento/plugins/nodes/models/node.dart';
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
+import 'package:Memento/plugins/nodes/screens/node_edit_screen/dialogs/add_custom_field_dialog.dart';
 
 class CustomFieldsSection extends StatelessWidget {
   final List<CustomField> customFields;

@@ -1,8 +1,8 @@
 import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../controllers/notes_controller.dart';
-import '../../models/folder.dart';
-import '../../models/note.dart';
+import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
+import 'package:Memento/plugins/notes/models/note.dart';
 import 'folder_list_tile.dart';
 import 'note_list_tile.dart';
 

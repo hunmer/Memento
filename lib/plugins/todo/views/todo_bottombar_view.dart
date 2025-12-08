@@ -4,16 +4,16 @@ import 'package:Memento/plugins/todo/models/task.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
-import '../todo_plugin.dart';
-import '../l10n/todo_localizations.dart';
-import '../controllers/task_controller.dart';
-import '../widgets/task_list_view.dart';
-import '../widgets/task_form.dart';
+import 'package:Memento/plugins/todo/todo_plugin.dart';
+import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
+import 'package:Memento/plugins/todo/controllers/task_controller.dart';
+import 'package:Memento/plugins/todo/widgets/task_list_view.dart';
+import 'package:Memento/plugins/todo/widgets/task_form.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import '../views/todo_four_quadrant_view.dart';
-import '../widgets/filter_dialog.dart';
-import '../widgets/history_completed_view.dart';
+import 'package:Memento/plugins/todo/views/todo_four_quadrant_view.dart';
+import 'package:Memento/plugins/todo/widgets/filter_dialog.dart';
+import 'package:Memento/plugins/todo/widgets/history_completed_view.dart';
 import 'todo_item_detail.dart';
 
 class TodoBottomBarView extends StatefulWidget {

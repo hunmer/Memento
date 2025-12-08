@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../plugin_base.dart';
+import 'package:Memento/core/plugin_base.dart';
 
 /// 最小化状态的插件图标
 /// 复用FloatingBallWidget的拖拽逻辑，用于显示最小化的插件

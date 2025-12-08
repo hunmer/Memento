@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/storage/storage_manager.dart';
-import '../../../core/services/plugin_widget_sync_helper.dart';
-import '../models/event.dart';
-import '../services/todo_event_service.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/plugins/calendar/models/event.dart';
+import 'package:Memento/plugins/calendar/services/todo_event_service.dart';
 
 /// 日历总控制器，负责管理日历的所有状态和服务
 class CalendarController extends ChangeNotifier {

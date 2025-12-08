@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
-import '../../core/plugin_base.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'card_size.dart';
 import 'plugin_card.dart';
 

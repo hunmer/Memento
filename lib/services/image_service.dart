@@ -6,7 +6,7 @@ import 'package:universal_platform/universal_platform.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 
-import '../core/storage/storage_manager.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
 
 class ImageService {
   static final ImageService _instance = ImageService._internal();

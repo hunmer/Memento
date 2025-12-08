@@ -1,16 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../../controllers/chat_controller.dart';
-import '../../../models/chat_command.dart';
-import '../../../models/saved_tool_template.dart';
-import '../../../../../utils/file_picker_helper.dart';
-import '../../../services/speech/tencent_asr_service.dart';
-import '../../../services/speech/voice_recognition_helper.dart';
-import '../../../agent_chat_plugin.dart';
+import 'package:Memento/plugins/agent_chat/controllers/chat_controller.dart';
+import 'package:Memento/plugins/agent_chat/models/chat_command.dart';
+import 'package:Memento/plugins/agent_chat/models/saved_tool_template.dart';
+import 'package:Memento/utils/file_picker_helper.dart';
+import 'package:Memento/plugins/agent_chat/services/speech/tencent_asr_service.dart';
+import 'package:Memento/plugins/agent_chat/services/speech/voice_recognition_helper.dart';
+import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'suggested_questions_dialog.dart';
 import 'command_selector.dart';
 import 'tool_template_selector.dart';
-import '../../../widgets/press_to_record_button.dart';
+import 'package:Memento/plugins/agent_chat/widgets/press_to_record_button.dart';
 import '../../../../../../core/services/toast_service.dart';
 
 /// 消息输入框组件

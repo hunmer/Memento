@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import '../../openai/models/ai_agent.dart';
-import '../../openai/services/request_service.dart';
+import 'package:Memento/plugins/openai/models/ai_agent.dart';
+import 'package:Memento/plugins/openai/services/request_service.dart';
 
 /// 预设问题管理服务
 /// 根据工具配置动态生成预设问题示例

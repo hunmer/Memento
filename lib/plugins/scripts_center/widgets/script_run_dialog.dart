@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/script_info.dart';
-import '../models/script_input.dart';
+import 'package:Memento/plugins/scripts_center/models/script_info.dart';
+import 'package:Memento/plugins/scripts_center/models/script_input.dart';
 
 /// 脚本运行参数输入对话框
 ///

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import '../../../models/tool_config.dart';
-import '../../../../../core/js_bridge/js_bridge_manager.dart';
+import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
+import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 
 /// 工具编辑对话框
 class ToolEditorDialog extends StatefulWidget {

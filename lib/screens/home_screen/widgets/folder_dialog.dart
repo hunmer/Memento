@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../models/home_folder_item.dart';
-import '../managers/home_layout_manager.dart';
-import '../managers/home_widget_registry.dart';
-import '../models/home_item.dart';
+import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
+import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
+import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
+import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'home_grid.dart';
 import 'add_widget_dialog.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../controllers/settings_screen_controller.dart';
-import '../models/webdav_config.dart';
+import 'package:Memento/screens/settings_screen/controllers/settings_screen_controller.dart';
+import 'package:Memento/screens/settings_screen/models/webdav_config.dart';
 import 'l10n/webdav_localizations.dart';
 import '../../../../core/services/toast_service.dart';
 

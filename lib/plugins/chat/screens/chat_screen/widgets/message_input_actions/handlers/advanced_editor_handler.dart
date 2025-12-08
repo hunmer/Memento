@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../../../widgets/markdown_editor/index.dart';
-import '../types.dart';
+import 'package:Memento/widgets/markdown_editor/index.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/types.dart';
 
 Future<void> handleAdvancedEditor({
   required BuildContext context,

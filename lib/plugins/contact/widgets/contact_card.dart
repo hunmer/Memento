@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:io';
-import '../controllers/contact_controller.dart';
-import '../models/contact_model.dart';
-import '../../../utils/image_utils.dart';
-import '../screens/contact_records_screen.dart';
+import 'package:Memento/plugins/contact/controllers/contact_controller.dart';
+import 'package:Memento/plugins/contact/models/contact_model.dart';
+import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/plugins/contact/screens/contact_records_screen.dart';
 
 class ContactCard extends StatelessWidget {
   final Contact contact;

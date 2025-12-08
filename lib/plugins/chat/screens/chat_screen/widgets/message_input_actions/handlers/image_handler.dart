@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
-import '../../../../../models/file_message.dart';
-import '../../../../../services/file_service.dart';
-import '../../../../../../../utils/image_utils.dart';
-import '../../../../../../../widgets/image_picker_dialog.dart';
-import '../types.dart';
-import '../../../../../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/chat/models/file_message.dart';
+import 'package:Memento/plugins/chat/services/file_service.dart';
+import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/types.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 Future<void> handleImageSelection({
   required BuildContext context,

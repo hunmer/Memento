@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../controllers/js_console_controller.dart';
+import 'package:Memento/screens/js_console/controllers/js_console_controller.dart';
 
 class OutputViewer extends StatelessWidget {
   const OutputViewer({super.key});

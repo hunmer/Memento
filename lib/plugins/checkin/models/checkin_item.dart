@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../checkin_plugin.dart';
+import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 
 enum CheckinCardStyle {
   weekly,

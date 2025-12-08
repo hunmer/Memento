@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:uuid/uuid.dart';
-import '../../../plugins/habits/habits_plugin.dart';
-import '../../../plugins/habits/models/completion_record.dart';
-import '../../../plugins/habits/services/habits_widget_service.dart';
-import '../../plugin_manager.dart';
+import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/habits/models/completion_record.dart';
+import 'package:Memento/plugins/habits/services/habits_widget_service.dart';
+import 'package:Memento/core/plugin_manager.dart';
 import 'plugin_widget_syncer.dart';
 import 'package:memento_widgets/memento_widgets.dart';
-import '../system_widget_service.dart';
+import 'package:Memento/core/services/system_widget_service.dart';
 import 'icon_name_mapper.dart';
 
 /// 习惯插件同步器

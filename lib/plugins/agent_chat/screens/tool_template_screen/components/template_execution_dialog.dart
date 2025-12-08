@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
-import '../../../models/tool_call_step.dart';
-import '../../../services/tool_service.dart';
-import '../../../../../core/js_bridge/js_bridge_manager.dart';
-import '../../../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
+import 'package:Memento/plugins/agent_chat/services/tool_service.dart';
+import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 const _uuid = Uuid();
 

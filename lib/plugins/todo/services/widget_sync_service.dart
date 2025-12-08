@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/services/system_widget_service.dart';
-import '../../../core/plugin_manager.dart';
-import '../todo_plugin.dart';
+import 'package:Memento/core/services/system_widget_service.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/todo/todo_plugin.dart';
 
 /// 待办事项插件的小组件数据同步服务
 class TodoWidgetSyncService {

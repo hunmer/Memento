@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../services/tool_template_service.dart';
-import '../../models/saved_tool_template.dart';
-import '../chat_screen/components/save_tool_dialog.dart';
+import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
+import 'package:Memento/plugins/agent_chat/models/saved_tool_template.dart';
+import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/save_tool_dialog.dart';
 import 'components/template_execution_dialog.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import '../../../../core/services/toast_service.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 工具模板管理界面
 class ToolTemplateScreen extends StatefulWidget {

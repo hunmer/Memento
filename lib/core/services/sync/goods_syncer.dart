@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../plugins/goods/goods_plugin.dart';
-import '../../plugin_manager.dart';
+import 'package:Memento/plugins/goods/goods_plugin.dart';
+import 'package:Memento/core/plugin_manager.dart';
 import 'plugin_widget_syncer.dart';
 import 'package:memento_widgets/memento_widgets.dart';
 

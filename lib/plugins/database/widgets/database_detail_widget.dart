@@ -2,9 +2,9 @@ import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/database/widgets/record_edit_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../controllers/database_controller.dart';
-import '../models/database_model.dart';
-import '../widgets/database_edit_widget.dart';
+import 'package:Memento/plugins/database/controllers/database_controller.dart';
+import 'package:Memento/plugins/database/models/database_model.dart';
+import 'package:Memento/plugins/database/widgets/database_edit_widget.dart';
 import '../models/record.dart' as record_model;
 import 'record_detail_widget.dart';
 

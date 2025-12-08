@@ -9,7 +9,7 @@ library;
 
 import 'dart:convert';
 
-import '../analysis/field_utils.dart';
+import 'package:Memento/core/analysis/field_utils.dart';
 import 'filter_options.dart';
 
 /// 字段过滤服务

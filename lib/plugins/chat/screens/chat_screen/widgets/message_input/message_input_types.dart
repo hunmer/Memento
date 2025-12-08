@@ -1,4 +1,4 @@
-import '../../../../models/message.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
 
 // 定义发送消息的回调函数类型
 typedef OnSendMessage =

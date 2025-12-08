@@ -1,7 +1,7 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import '../controllers/webdav_controller.dart';
-import '../../../core/storage/storage_manager.dart';
+import 'package:Memento/screens/settings_screen/controllers/webdav_controller.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'l10n/webdav_localizations.dart';
 import '../../../../core/services/toast_service.dart';
 

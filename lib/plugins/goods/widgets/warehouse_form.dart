@@ -4,11 +4,11 @@ import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:uuid/uuid.dart';
-import '../models/warehouse.dart';
-import '../../../widgets/icon_picker_dialog.dart';
-import '../../../widgets/image_picker_dialog.dart';
-import '../../../utils/image_utils.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/goods/models/warehouse.dart';
+import 'package:Memento/widgets/icon_picker_dialog.dart';
+import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class WarehouseForm extends StatefulWidget {
   final Warehouse? warehouse;

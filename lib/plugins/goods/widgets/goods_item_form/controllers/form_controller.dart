@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../../../models/goods_item.dart';
-import '../../../models/usage_record.dart';
-import '../../../models/custom_field.dart';
-import '../../../goods_plugin.dart';
-import '../../../../../core/event/event_manager.dart';
-import '../../../../../core/event/item_event_args.dart';
+import 'package:Memento/plugins/goods/models/goods_item.dart';
+import 'package:Memento/plugins/goods/models/usage_record.dart';
+import 'package:Memento/plugins/goods/models/custom_field.dart';
+import 'package:Memento/plugins/goods/goods_plugin.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 
 class GoodsItemFormController {
   final formKey = GlobalKey<FormState>();

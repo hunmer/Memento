@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../services/file_service.dart';
+import 'package:Memento/plugins/chat/services/file_service.dart';
 import 'message_input_actions/index.dart';
 
 /// 消息输入动作工具栏

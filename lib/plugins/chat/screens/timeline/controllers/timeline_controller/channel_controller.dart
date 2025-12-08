@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../models/channel.dart';
-import '../../../../models/message.dart';
+import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
 import 'base_controller.dart';
 
 /// 频道相关功能的混入类

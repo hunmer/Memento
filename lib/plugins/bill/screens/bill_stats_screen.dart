@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../bill_plugin.dart';
-import '../models/bill_model.dart';
-import '../widgets/month_selector.dart';
+import 'package:Memento/plugins/bill/bill_plugin.dart';
+import 'package:Memento/plugins/bill/models/bill_model.dart';
+import 'package:Memento/plugins/bill/widgets/month_selector.dart';
 
 class BillStatsScreen extends StatefulWidget {
   final BillPlugin billPlugin;

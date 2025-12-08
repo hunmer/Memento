@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/llm_models.dart';
+import 'package:Memento/plugins/openai/models/llm_models.dart';
 
 class ModelController {
   // 单例模式

@@ -14,7 +14,7 @@ import 'package:Memento/plugins/tracker/screens/goal_detail_screen.dart';
 import 'package:Memento/plugins/tracker/screens/search_results_screen.dart';
 import 'package:Memento/plugins/tracker/widgets/goal_edit_page.dart';
 import 'package:provider/provider.dart';
-import '../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'controllers/tracker_controller.dart';
 import 'screens/home_screen.dart';
 

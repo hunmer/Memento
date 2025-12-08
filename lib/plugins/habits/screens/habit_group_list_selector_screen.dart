@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../habits_plugin.dart';
-import '../models/habit.dart';
-import '../models/skill.dart';
-import '../../../widgets/widget_config_editor/index.dart';
+import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/habits/models/habit.dart';
+import 'package:Memento/plugins/habits/models/skill.dart';
+import 'package:Memento/widgets/widget_config_editor/index.dart';
 
 /// 习惯分组列表小组件配置界面
 ///

@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:developer' as developer;
-import '../../../core/event/event.dart';
-import '../../../core/plugin_manager.dart';
+import 'package:Memento/core/event/event.dart';
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:openai_dart/openai_dart.dart';
-import '../../chat/chat_plugin.dart';
-import '../openai_plugin.dart';
-import '../services/request_service.dart';
-import '../../chat/models/message.dart';
-import '../../chat/models/user.dart';
-import '../../../utils/image_utils.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/plugins/openai/openai_plugin.dart';
+import 'package:Memento/plugins/openai/services/request_service.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/models/user.dart';
+import 'package:Memento/utils/image_utils.dart';
 
 /// 用于传递多个值的事件参数
 class ValuesEventArgs<T1, T2> implements EventArgs {

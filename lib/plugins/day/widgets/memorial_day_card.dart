@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import '../models/memorial_day.dart';
-import '../l10n/day_localizations.dart';
-import '../../../utils/image_utils.dart';
+import 'package:Memento/plugins/day/models/memorial_day.dart';
+import 'package:Memento/plugins/day/l10n/day_localizations.dart';
+import 'package:Memento/utils/image_utils.dart';
 
 class MemorialDayCard extends StatefulWidget {
   final MemorialDay memorialDay;

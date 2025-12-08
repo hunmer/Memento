@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
-import '../../../core/services/plugin_widget_sync_helper.dart';
-import '../../../widgets/widget_config_editor/index.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/widgets/widget_config_editor/index.dart';
 
 /// 任务四象限小组件配置界面
 ///

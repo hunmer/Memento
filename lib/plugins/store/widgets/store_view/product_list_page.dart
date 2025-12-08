@@ -4,7 +4,7 @@ import 'package:Memento/plugins/store/widgets/add_product_page.dart';
 import 'package:Memento/plugins/store/widgets/product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../../controllers/store_controller.dart';
+import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 /// 商品列表内容组件（不包含 Scaffold，用于 TabBarView）

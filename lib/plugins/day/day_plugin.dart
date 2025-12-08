@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:Memento/plugins/day/l10n/day_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../core/plugin_manager.dart';
-import '../../core/config_manager.dart';
-import '../../core/js_bridge/js_bridge_plugin.dart';
-import '../base_plugin.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/config_manager.dart';
+import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/plugins/base_plugin.dart';
 import 'screens/day_home_screen.dart';
 import 'controllers/day_controller.dart';
 import 'models/memorial_day.dart';

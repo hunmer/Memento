@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/tag_group.dart';
-import '../models/tag_manager_config.dart';
-import '../states/tag_manager_dialog_state.dart';
+import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart';
+import 'package:Memento/widgets/tag_manager_dialog/models/tag_manager_config.dart';
+import 'package:Memento/widgets/tag_manager_dialog/states/tag_manager_dialog_state.dart';
 import 'dialog_toolbar.dart';
 import 'tag_list.dart';
 import 'dialog_actions.dart';

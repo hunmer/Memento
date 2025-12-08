@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../../core/route/route_history_manager.dart';
-import '../../core/route/page_visit_record.dart';
-import '../../plugins/agent_chat/agent_chat_plugin.dart';
-import '../../plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
-import '../../plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
+import 'package:Memento/core/route/page_visit_record.dart';
+import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
+import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
+import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
 
 /// 路由历史记录对话框
 ///

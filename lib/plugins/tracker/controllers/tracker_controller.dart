@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import '../../../core/event/event.dart';
-import '../../../core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/core/event/event.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import '../utils/date_utils.dart' as tracker_date_utils;
-import '../tracker_plugin.dart';
+import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 
 class TrackerController with ChangeNotifier {
   List<Goal> _goals = [];

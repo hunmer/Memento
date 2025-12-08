@@ -1,8 +1,8 @@
 import 'package:Memento/plugins/notes/notes_plugin.dart';
 import 'package:flutter/material.dart';
-import '../../models/folder.dart';
-import '../../models/note.dart';
-import '../notes_screen.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
+import 'package:Memento/plugins/notes/models/note.dart';
+import 'package:Memento/plugins/notes/screens/notes_screen.dart';
 
 class NotesMainViewState extends State<NotesMainView> {
   @protected

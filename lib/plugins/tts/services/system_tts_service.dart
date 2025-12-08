@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:logging/logging.dart';
 import 'tts_base_service.dart';
-import '../models/tts_voice.dart';
+import 'package:Memento/plugins/tts/models/tts_voice.dart';
 
 /// 系统TTS服务实现 (使用flutter_tts)
 class SystemTTSService extends TTSBaseService {

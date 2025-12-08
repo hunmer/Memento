@@ -1,10 +1,10 @@
 import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../models/event.dart';
-import '../../../widgets/circle_icon_picker.dart';
-import '../utils/calendar_notification_utils.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/calendar/models/event.dart';
+import 'package:Memento/widgets/circle_icon_picker.dart';
+import 'package:Memento/plugins/calendar/utils/calendar_notification_utils.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class EventEditPage extends StatefulWidget {
   final CalendarEvent? event;

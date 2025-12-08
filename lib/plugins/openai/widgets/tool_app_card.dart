@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/tool_app.dart';
+import 'package:Memento/plugins/openai/models/tool_app.dart';
 
 class ToolAppCard extends StatelessWidget {
   final ToolApp app;

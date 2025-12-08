@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import '../../../core/plugin_manager.dart';
-import '../openai_plugin.dart';
-import '../models/prompt_preset.dart';
-import '../sample_data.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/openai/openai_plugin.dart';
+import 'package:Memento/plugins/openai/models/prompt_preset.dart';
+import 'package:Memento/plugins/openai/sample_data.dart';
 
 /// Prompt 预设管理服务
 /// 提供 CRUD 操作和预设获取功能
