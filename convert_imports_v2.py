@@ -26,32 +26,37 @@ class DartImportConverter:
 
         relative_path = match.group(1)
 
-        # Calculate depth relative to lib/
+        # Get current file path relative to lib/
         current_path = Path(current_file)
         try:
             lib_idx = current_path.parts.index('lib')
         except ValueError:
-            lib_depth = 0
-        else:
-            lib_depth = len(current_path.parts[lib_idx + 1:])
-
-        # Count ../ levels
-        upward_count = 0
-        temp_path = relative_path
-        while temp_path.startswith('../'):
-            upward_count += 1
-            temp_path = temp_path[3:]
-
-        # Skip if upward count is too high
-        if upward_count >= lib_depth:
             return None
 
-        # Build absolute path
-        remaining_path = temp_path
-        if remaining_path.startswith('lib/'):
-            remaining_path = remaining_path[4:]
+        # Current file directory parts relative to lib/ (exclude filename)
+        file_parts = list(current_path.parts[lib_idx + 1:-1])  # Exclude the filename
 
-        package_path = remaining_path
+        # Parse relative path
+        remaining_parts = []
+        temp_path = relative_path
+
+        # Process ../ components
+        while temp_path.startswith('../'):
+            temp_path = temp_path[3:]  # Remove '../'
+            if file_parts:
+                file_parts.pop()  # Go up one level
+            else:
+                # Can't go up further
+                return None
+
+        # Add remaining path parts
+        if temp_path:
+            remaining_parts = temp_path.split('/')
+
+        # Build final path
+        final_parts = file_parts + remaining_parts
+        package_path = '/'.join(final_parts)
+
         new_import = f"import 'package:{self.package_name}/{package_path}';"
         conversion_note = f"{import_line.strip()} -> {new_import}"
 
