@@ -321,10 +321,7 @@ class ScriptsCenterPlugin extends BasePlugin {
 
   @override
   Widget buildMainView(BuildContext context) {
-    return ScriptsListScreen(
-      scriptManager: _scriptManager,
-      scriptExecutor: _scriptExecutor,
-    );
+    return const ScriptsCenterMainView();
   }
 
   @override

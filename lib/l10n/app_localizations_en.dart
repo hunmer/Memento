@@ -368,4 +368,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get projectLink => 'https://github.com/hunmer/memento';
+
+  @override
+  String get feedbackTitle => 'Feedback & Issues';
+
+  @override
+  String get feedbackLink => 'https://github.com/hunmer/Memento/issues';
+
+  @override
+  String get documentationTitle => 'Documentation';
+
+  @override
+  String get documentationLink => 'https://github.com/hunmer/Memento#readme';
+
+  @override
+  String get version => 'Version';
 }

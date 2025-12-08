@@ -110,5 +110,10 @@
   "aboutTitle": "关于",
   "aboutDescription": "Memento是一款生产力应用，旨在帮助您组织和记住重要事项。",
   "projectLinkTitle": "项目链接",
-  "projectLink": "https://github.com/hunmer/memento"
+  "projectLink": "https://github.com/hunmer/memento",
+  "feedbackTitle": "反馈与建议",
+  "feedbackLink": "https://github.com/hunmer/Memento/issues",
+  "documentationTitle": "项目文档",
+  "documentationLink": "https://github.com/hunmer/Memento#readme",
+  "version": "版本"
 }

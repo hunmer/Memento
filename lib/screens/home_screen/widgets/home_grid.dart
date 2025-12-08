@@ -6,6 +6,7 @@ import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'home_card.dart';
+import 'layout_type_selector.dart';
 
 /// 主页网格布局组件
 ///
@@ -21,6 +22,7 @@ class HomeGrid extends StatefulWidget {
   final bool isBatchMode;
   final Set<String> selectedItemIds;
   final Alignment alignment;
+  final void Function(Map<String, String>)? onQuickCreateLayout;
 
   const HomeGrid({
     super.key,
@@ -34,6 +36,7 @@ class HomeGrid extends StatefulWidget {
     this.isBatchMode = false,
     this.selectedItemIds = const {},
     this.alignment = Alignment.topCenter,
+    this.onQuickCreateLayout,
   });
 
   @override
@@ -43,6 +46,7 @@ class HomeGrid extends StatefulWidget {
 class _HomeGridState extends State<HomeGrid> {
   int? _draggingIndex;
   int? _hoveringIndex;
+  String _quickLayoutType = 'empty';
 
   /// 处理添加到文件夹的操作
   void _handleAddToFolder(String itemId, String folderId) {
@@ -315,9 +319,83 @@ class _HomeGridState extends State<HomeGrid> {
               color: Theme.of(context).disabledColor,
             ),
           ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () async {
+              final result = await _showQuickCreateLayoutDialog(context);
+              if (result != null && widget.onQuickCreateLayout != null) {
+                widget.onQuickCreateLayout!(result);
+              }
+            },
+            icon: const Icon(Icons.add_circle_outline),
+            label: const Text('快速创建布局'),
+          ),
         ],
       ),
     );
+  }
+
+  /// 显示快速创建布局对话框
+  Future<Map<String, String>?> _showQuickCreateLayoutDialog(
+    BuildContext context,
+  ) async {
+    final TextEditingController nameController = TextEditingController(
+      text: '快速布局',
+    );
+    String selectedType = _quickLayoutType;
+
+    final result = await showDialog<Map<String, String>>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('快速创建布局'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: '布局名称',
+                      hintText: '例如：工作布局、娱乐布局',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('选择一个布局模板快速开始：'),
+                  const SizedBox(height: 16),
+                  LayoutTypeSelector(
+                    initialType: selectedType,
+                    onTypeChanged: (type) {
+                      selectedType = type;
+                    },
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final name = nameController.text.trim();
+                  if (name.isEmpty) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('请输入布局名称')));
+                    return;
+                  }
+                  Navigator.pop(context, {'name': name, 'type': selectedType});
+                },
+                child: const Text('创建'),
+              ),
+        ],
+      ),
+    );
+
+    return result;
   }
 }
 

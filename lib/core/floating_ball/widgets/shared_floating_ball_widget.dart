@@ -360,7 +360,6 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
     final now = DateTime.now();
     final currentPosition = details.globalPosition;
 
-    print('[悬浮球] 点击检测: position=${currentPosition.dx.toStringAsFixed(1)},${currentPosition.dy.toStringAsFixed(1)}');
 
     // 检查是否是双击
     if (_lastTapTime != null) {
@@ -369,12 +368,9 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
           ? (currentPosition - _lastTapPosition!).distance
           : double.infinity;
 
-      print('[悬浮球] 第二次点击检测: timeDiff=${timeDiff}ms, positionDiff=${positionDiff.toStringAsFixed(1)}px, threshold=${_doubleTapThresholdMs}ms/${_doubleTapDistanceThreshold}px');
-
       if (timeDiff < _doubleTapThresholdMs &&
           positionDiff < _doubleTapDistanceThreshold) {
         // 确认为双击
-        print('[悬浮球] >>> 识别为双击，触发回调 <<<');
         widget.onGesture?.call(FloatingBallGesture.doubleTap);
 
         // 重置双击检测状态
@@ -383,21 +379,17 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
         _doubleTapTimer?.cancel();
         _doubleTapTimer = null;
         return;
-      } else {
-        print('[悬浮球] 不满足双击条件，重新开始计时');
-      }
+      } 
     }
 
     // 记录第一次点击
-    print('[悬浮球] 记录第一次点击');
     _lastTapTime = now;
     _lastTapPosition = currentPosition;
 
     // 启动定时器，如果超时则认为是单击
     _doubleTapTimer?.cancel();
     _doubleTapTimer = Timer(const Duration(milliseconds: _doubleTapThresholdMs), () {
-      // 超时认为是单击
-      print('[悬浮球] >>> 超时，触发单击 <<<');
+        // 超时认为是单击
       widget.onGesture?.call(FloatingBallGesture.tap);
       _lastTapTime = null;
       _lastTapPosition = null;

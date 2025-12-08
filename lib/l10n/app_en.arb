@@ -107,5 +107,10 @@
   "aboutTitle": "About",
   "aboutDescription": "Memento is a productivity app designed to help you organize and remember important things.",
   "projectLinkTitle": "Project Link",
-  "projectLink": "https://github.com/hunmer/memento"
+  "projectLink": "https://github.com/hunmer/memento",
+  "feedbackTitle": "Feedback & Issues",
+  "feedbackLink": "https://github.com/hunmer/Memento/issues",
+  "documentationTitle": "Documentation",
+  "documentationLink": "https://github.com/hunmer/Memento#readme",
+  "version": "Version"
 }

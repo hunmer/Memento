@@ -739,6 +739,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'https://github.com/hunmer/memento'**
   String get projectLink;
+
+  /// No description provided for @feedbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback & Issues'**
+  String get feedbackTitle;
+
+  /// No description provided for @feedbackLink.
+  ///
+  /// In en, this message translates to:
+  /// **'https://github.com/hunmer/Memento/issues'**
+  String get feedbackLink;
+
+  /// No description provided for @documentationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Documentation'**
+  String get documentationTitle;
+
+  /// No description provided for @documentationLink.
+  ///
+  /// In en, this message translates to:
+  /// **'https://github.com/hunmer/Memento#readme'**
+  String get documentationLink;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get version;
 }
 
 class _AppLocalizationsDelegate

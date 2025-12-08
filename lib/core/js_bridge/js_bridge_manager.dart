@@ -8,6 +8,8 @@ import 'platform/mobile_js_engine.dart';
 import 'js_ui_handlers.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/data_filter/field_filter_service.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 
 /// 延迟注册的插件信息
 class PendingPluginRegistration {
@@ -35,6 +37,9 @@ class JSBridgeManager {
   final Map<String, Map<String, dynamic>> _toolCallContexts = {};
   String? _currentToolCallId;
   int _currentStepIndex = -1;
+
+  // 事件队列管理 - 存储待传递给 JavaScript 的事件
+  final Map<String, List<Map<String, dynamic>>> _eventQueue = {};
 
   // 延迟注册队列 - 存储等待 JS Bridge 初始化完成后注册的插件
   final List<PendingPluginRegistration> _pendingRegistrations = [];
@@ -305,6 +310,9 @@ class JSBridgeManager {
 
     // 注册系统级 API
     await _registerSystemAPIs();
+
+    // 注册事件系统 API
+    await _registerEventAPIs();
 
     // 注册工具调用 API
     await _registerToolCallAPIs();
@@ -619,6 +627,185 @@ class JSBridgeManager {
         };
       })();
     ''');
+  }
+
+  /// 注册事件系统 API
+  Future<void> _registerEventAPIs() async {
+    if (_engine == null) return;
+
+    // 1. events.on - 订阅事件
+    await _engine!.registerFunction('Memento_events_on', ([
+      dynamic a,
+      dynamic b,
+    ]) async {
+      try {
+        final eventName = a as String?;
+        // b 是 JavaScript 函数,无法直接传递到 Dart
+        // 这里需要使用回调机制
+
+        if (eventName == null || eventName.isEmpty) {
+          throw Exception('on() 需要提供事件名称参数');
+        }
+
+        // 先声明订阅 ID 变量
+        late String subscriptionId;
+
+        // 生成唯一的订阅 ID
+        subscriptionId = EventManager.instance.subscribe(
+          eventName,
+          (args) {
+            // 将事件参数序列化并传递给 JavaScript
+            final eventData = {
+              'eventName': args.eventName,
+              'whenOccurred': args.whenOccurred.toIso8601String(),
+              'data': args is ItemEventArgs
+                  ? {
+                      'itemId': args.itemId,
+                      'title': args.title,
+                      'action': args.action,
+                    }
+                  : {},
+            };
+
+            // 调用 JavaScript 回调
+            // 注意: 这里需要通过事件队列机制来触发 JS 回调
+            // 当前实现仅返回订阅 ID,实际回调需要在 JS 端轮询事件队列
+            _eventQueue.putIfAbsent(subscriptionId, () => []).add(eventData);
+          },
+        );
+
+        return subscriptionId;
+      } catch (e) {
+        print('[Events API] on 失败: $e');
+        return jsonEncode({'error': e.toString()});
+      }
+    });
+
+    // 2. events.off - 取消订阅
+    await _engine!.registerFunction('Memento_events_off', ([
+      dynamic a,
+    ]) async {
+      try {
+        final subscriptionId = a as String?;
+
+        if (subscriptionId == null || subscriptionId.isEmpty) {
+          throw Exception('off() 需要提供订阅 ID 参数');
+        }
+
+        // 使用 EventManager 的 unsubscribeById 方法
+        final success = EventManager.instance.unsubscribeById(subscriptionId);
+
+        // 清理事件队列
+        _eventQueue.remove(subscriptionId);
+
+        return jsonEncode({'success': success});
+      } catch (e) {
+        print('[Events API] off 失败: $e');
+        return jsonEncode({'error': e.toString()});
+      }
+    });
+
+    // 3. events.getEvents - 获取队列中的事件
+    await _engine!.registerFunction('Memento_events_getEvents', ([
+      dynamic a,
+    ]) async {
+      try {
+        final subscriptionId = a as String?;
+
+        if (subscriptionId == null || subscriptionId.isEmpty) {
+          throw Exception('getEvents() 需要提供订阅 ID 参数');
+        }
+
+        final events = _eventQueue[subscriptionId] ?? [];
+        _eventQueue[subscriptionId] = []; // 清空队列
+
+        return jsonEncode(events);
+      } catch (e) {
+        print('[Events API] getEvents 失败: $e');
+        return jsonEncode({'error': e.toString()});
+      }
+    });
+
+    // 在 JS 中创建事件 API 代理
+    await _engine!.evaluateDirect('''
+      (function() {
+        var namespace = globalThis.Memento;
+
+        // 创建 events 命名空间
+        namespace.events = {
+          _subscriptions: {},
+          _pollingIntervals: {}
+        };
+
+        // on - 订阅事件
+        namespace.events.on = function(eventName, handler) {
+          if (!eventName || typeof handler !== 'function') {
+            throw new Error('on(eventName, handler) 需要事件名称和处理函数');
+          }
+
+          // 调用 Dart 端注册订阅
+          return Memento_events_on(eventName).then(function(subscriptionId) {
+            if (typeof subscriptionId === 'string' && subscriptionId.startsWith('sub_')) {
+              // 保存订阅信息
+              namespace.events._subscriptions[subscriptionId] = {
+                eventName: eventName,
+                handler: handler
+              };
+
+              // 启动轮询(每500ms检查一次新事件)
+              namespace.events._pollingIntervals[subscriptionId] = setInterval(function() {
+                Memento_events_getEvents(subscriptionId).then(function(result) {
+                  var events = typeof result === 'string' ? JSON.parse(result) : result;
+                  if (Array.isArray(events)) {
+                    events.forEach(function(event) {
+                      try {
+                        handler(event);
+                      } catch (e) {
+                        console.error('事件处理函数错误:', e);
+                      }
+                    });
+                  }
+                });
+              }, 500);
+
+              return subscriptionId;
+            } else {
+              throw new Error('订阅失败: ' + subscriptionId);
+            }
+          });
+        };
+
+        // off - 取消订阅
+        namespace.events.off = function(subscriptionId) {
+          if (!subscriptionId) {
+            throw new Error('off(subscriptionId) 需要订阅 ID');
+          }
+
+          // 停止轮询
+          if (namespace.events._pollingIntervals[subscriptionId]) {
+            clearInterval(namespace.events._pollingIntervals[subscriptionId]);
+            delete namespace.events._pollingIntervals[subscriptionId];
+          }
+
+          // 移除订阅信息
+          delete namespace.events._subscriptions[subscriptionId];
+
+          // 调用 Dart 端取消订阅
+          return Memento_events_off(subscriptionId).then(function(result) {
+            if (typeof result === 'string') {
+              try {
+                return JSON.parse(result);
+              } catch (e) {
+                return result;
+              }
+            }
+            return result;
+          });
+        };
+      })();
+    ''');
+
+    print('✓ 事件系统 API 已注册 (events.on/off)');
   }
 
   /// 注册工具调用 API（步骤间结果传递）

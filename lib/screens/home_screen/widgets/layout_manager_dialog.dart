@@ -6,6 +6,7 @@ import 'package:Memento/screens/home_screen/models/layout_config.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import '../../../../core/services/toast_service.dart';
+import 'layout_type_selector.dart';
 
 /// 布局管理对话框
 ///
@@ -396,43 +397,11 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
               autofocus: true,
             ),
             const SizedBox(height: 24),
-            Text(
-              '布局类型',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            RadioListTile<String>(
-              title: const Text('空白布局'),
-              subtitle: const Text('不包含任何小组件的空白布局'),
-              value: 'empty',
-              groupValue: _selectedLayoutType,
-              onChanged: (value) {
+            LayoutTypeSelector(
+              initialType: _selectedLayoutType,
+              onTypeChanged: (value) {
                 setState(() {
-                  _selectedLayoutType = value!;
-                });
-              },
-            ),
-            RadioListTile<String>(
-              title: const Text('所有 1x1 小组件'),
-              subtitle: const Text('添加所有支持 1x1 尺寸的小组件'),
-              value: '1x1',
-              groupValue: _selectedLayoutType,
-              onChanged: (value) {
-                setState(() {
-                  _selectedLayoutType = value!;
-                });
-              },
-            ),
-            RadioListTile<String>(
-              title: const Text('所有 2x2 小组件'),
-              subtitle: const Text('添加所有支持 2x2 尺寸的小组件'),
-              value: '2x2',
-              groupValue: _selectedLayoutType,
-              onChanged: (value) {
-                setState(() {
-                  _selectedLayoutType = value!;
+                  _selectedLayoutType = value;
                 });
               },
             ),

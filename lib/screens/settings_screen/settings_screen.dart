@@ -99,6 +99,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       largeTitle: '设置',
       body: ListView(
+        padding: const EdgeInsets.all(16.0),
         children: [
           // 界面设置
           Text(

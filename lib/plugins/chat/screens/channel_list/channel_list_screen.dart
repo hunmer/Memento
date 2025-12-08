@@ -1,11 +1,9 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
-import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'controllers/channel_list_controller.dart';
 import 'widgets/channel_tile.dart';
 import 'widgets/empty_channel_view.dart';
@@ -83,7 +81,11 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 2),
                         child: ChannelTile(
                           channel: channel,
-                          onTap: () => _navigateToChat(channel),
+                          onBeforeOpen: () {
+                            // 在打开聊天页面之前设置当前频道
+                            widget.chatPlugin.channelService
+                                .setCurrentChannel(channel);
+                          },
                           onEdit: (channel) =>
                               _showEditChannelDialog(channel),
                           onDelete: (channel) =>
@@ -147,12 +149,6 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
             channel: channel,
             onDeleteChannel: _controller.deleteChannel,
           ),
-    );
-  }
-
-  void _navigateToChat(Channel channel) {
-    widget.chatPlugin.channelService.setCurrentChannel(channel);
-    NavigationHelper.push(context, ChatScreen(channel: channel),
     );
   }
 }
