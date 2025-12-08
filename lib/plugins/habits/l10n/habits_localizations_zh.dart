@@ -319,4 +319,32 @@ class HabitsLocalizationsZh extends HabitsLocalizations {
   String get habitFeedback => '反馈';
 
   String get habitAbout => '关于';
+
+  // 添加的字符串
+  @override
+  String get configureHabitGroupListWidget => '配置习惯分组列表小组件';
+
+  @override
+  String get configureHabitTimerWidget => '配置习惯计时器小组件';
+
+  @override
+  String get configureHabitWeeklyWidget => '配置习惯周视图小组件';
+
+  @override
+  String get cancelTimer => '取消计时';
+
+  @override
+  String get continueTimer => '继续计时';
+
+  @override
+  String get confirmCancel => '确定取消';
+
+  @override
+  String get completeTimer => '完成计时';
+
+  @override
+  String get continueAdjust => '继续调整';
+
+  @override
+  String get confirmComplete => '确定完成';
 }

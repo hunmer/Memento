@@ -16,6 +16,7 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/widgets/app_drawer.dart';
 import 'package:Memento/core/floating_ball/floating_ball_service.dart';
 import 'package:Memento/core/global_flags.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'managers/home_layout_manager.dart';
 import 'widgets/home_grid.dart';
 import 'widgets/add_widget_dialog.dart';
@@ -1020,6 +1021,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ScreensLocalizations.of(context);
     return PopScope(
       canPop: !_isEditMode, // 编辑模式下不允许直接返回
       onPopInvokedWithResult: (didPop, result) {

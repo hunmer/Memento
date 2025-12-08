@@ -54,4 +54,23 @@ class FloatingBallLocalizationsEn extends FloatingBallLocalizations {
 
   @override
   String get swipeRightGesture => 'Swipe Right';
+
+  // Button Edit Dialog
+  @override
+  String get clearIconImage => 'Clear Icon/Image';
+
+  @override
+  String get confirmClearIconImage => 'Are you sure to clear the current icon and image settings?';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get selectIcon => 'Select Icon';
+
+  @override
+  String get save => 'Save';
 }

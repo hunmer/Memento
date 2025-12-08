@@ -13,6 +13,7 @@ import 'services/script_manager.dart';
 import 'services/script_executor.dart';
 import 'models/script_folder.dart';
 import 'screens/scripts_list_screen.dart';
+import 'l10n/scripts_center_localizations.dart';
 
 /// 深度序列化对象为 JSON 兼容的 Map/List/基本类型（异步版本）
 Future<dynamic> _deepSerializeAsync(dynamic value) async {
@@ -141,7 +142,7 @@ class ScriptsCenterPlugin extends BasePlugin {
 
   @override
   String? getPluginName(context) {
-    return '脚本中心';
+    return ScriptsCenterLocalizations.of(context).scriptCenter;
   }
 
   // 获取服务实例的访问器
@@ -342,7 +343,7 @@ class ScriptsCenterPlugin extends BasePlugin {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      '脚本中心',
+                      ScriptsCenterLocalizations.of(context).scriptCenter,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: color,
                         fontWeight: FontWeight.bold,
@@ -429,7 +430,7 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
-      title: const Text('脚本中心'),
+      title: Text(ScriptsCenterLocalizations.of(context).scriptCenter),
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: ScriptsListScreen(
         scriptManager: _plugin.scriptManager,

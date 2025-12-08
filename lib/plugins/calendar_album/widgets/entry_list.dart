@@ -94,7 +94,7 @@ class EntryList extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onCreateNew,
                 icon: const Icon(Icons.add),
-                label: const Text('新建日记'),
+                label: Text(l10n.createNewDiary),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,

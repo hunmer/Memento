@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_config.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 
 /// Agent Chat 插件设置界面
 class AgentChatSettingsScreen extends StatefulWidget {
@@ -140,7 +141,7 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
       }
     } catch (e) {
       debugPrint('❌ [设置页面] 保存失败: $e');
-      _showError('保存设置失败: $e');
+      _showError('${AgentChatLocalizations.of(context).saveSettings} failed: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -186,7 +187,7 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agent Chat 设置'),
+        title: Text(AgentChatLocalizations.of(context).agentChatSettings),
         actions: [
           if (_hasChanges)
             IconButton(
@@ -215,10 +216,8 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Card(
               child: SwitchListTile(
-                title: const Text('优先使用工具模版'),
-                subtitle: const Text(
-                  '开启后，AI 会优先尝试匹配已保存的工具模版，提升响应速度。如无匹配则继续正常的工具调用流程。',
-                ),
+                title: Text(AgentChatLocalizations.of(context).prioritizeToolTemplate),
+                subtitle: Text(AgentChatLocalizations.of(context).prioritizeToolTemplateDescription),
                 value: _preferToolTemplates,
                 onChanged: (value) {
                   setState(() {
@@ -253,8 +252,8 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
                 child: Column(
                   children: [
                     SwitchListTile(
-                      title: const Text('启用后台服务'),
-                      subtitle: const Text('切换到其他应用后继续接收AI回复。会显示前台通知以保持服务运行。'),
+                      title: Text(AgentChatLocalizations.of(context).enableBackgroundService),
+                      subtitle: Text(AgentChatLocalizations.of(context).enableBackgroundServiceDescription),
                       value: _enableBackgroundService,
                       onChanged: (value) {
                         setState(() {
@@ -269,8 +268,8 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
 
                       // Token消耗显示开关
                       SwitchListTile(
-                        title: const Text('显示Token消耗'),
-                        subtitle: const Text('在通知中实时显示输入/输出token数量和总消耗。'),
+                        title: Text(AgentChatLocalizations.of(context).showTokenConsumption),
+                        subtitle: Text(AgentChatLocalizations.of(context).showTokenConsumptionDescription),
                         value: _showTokenInNotification,
                         onChanged: (value) {
                           setState(() {
@@ -422,14 +421,14 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: _testConnection,
-                            child: const Text('测试配置'),
+                            child: Text(AgentChatLocalizations.of(context).testConfiguration),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: FilledButton(
                             onPressed: _hasChanges ? _saveSettings : null,
-                            child: const Text('保存设置'),
+                            child: Text(AgentChatLocalizations.of(context).saveSettings),
                           ),
                         ),
                       ],

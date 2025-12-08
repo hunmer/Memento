@@ -11,6 +11,7 @@ import 'package:Memento/core/action/action_manager.dart';
 import 'package:Memento/core/action/action_storage.dart';
 import 'package:Memento/core/action/models/action_instance.dart';
 import 'package:Memento/core/action/models/action_definition.dart';
+import 'package:Memento/core/l10n/core_localizations.dart';
 
 /// 迁移结果
 class MigrationResult {
@@ -470,7 +471,7 @@ class _MigrationDialogState extends State<_MigrationDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('配置迁移'),
+      title: Text(CoreLocalizations.of(context)!.configMigration),
       content: SizedBox(
         width: 400,
         child: Column(
@@ -526,21 +527,21 @@ class _MigrationDialogState extends State<_MigrationDialog> {
         if (_isMigrating)
           TextButton(
             onPressed: null,
-            child: const Text('迁移中...'),
+            child: const Text(CoreLocalizations.of(context)!.migrating),
           )
         else if (_result == null) ...[
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(CoreLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: _startMigration,
-            child: const Text('开始迁移'),
+            child: const Text(CoreLocalizations.of(context)!.startMigration),
           ),
         ] else ...[
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
+            child: Text(CoreLocalizations.of(context)!.close),
           ),
         ],
       ],

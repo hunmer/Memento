@@ -214,9 +214,9 @@ class _UserItemsState extends State<UserItems> {
             });
           },
           itemBuilder: (context) => [
-            const PopupMenuItem(value: 0, child: Text('全部物品')),
-            const PopupMenuItem(value: 1, child: Text('可使用')),
-            const PopupMenuItem(value: 2, child: Text('已过期')),
+            PopupMenuItem(value: 0, child: Text(StoreLocalizations.of(context).allItems)),
+            PopupMenuItem(value: 1, child: Text(StoreLocalizations.of(context).usable)),
+            PopupMenuItem(value: 2, child: Text(StoreLocalizations.of(context).expired)),
           ],
         ),
       ],

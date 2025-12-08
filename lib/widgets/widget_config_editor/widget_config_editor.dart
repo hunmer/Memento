@@ -3,6 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'models/widget_config.dart';
 import 'models/widget_size.dart';
 import 'models/color_config.dart';
+import 'package:Memento/widgets/l10n/widgets_localizations.dart';
 
 /// 通用小组件配置编辑器
 ///
@@ -288,7 +289,7 @@ class _ColorPickerWithLabel extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('选择颜色'),
+          title: Text(WidgetsLocalizations.of(context).selectColor),
           content: SingleChildScrollView(
             child: ColorPicker(
               pickerColor: pickerColor,
@@ -303,13 +304,13 @@ class _ColorPickerWithLabel extends StatelessWidget {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('取消'),
+              child: Text(WidgetsLocalizations.of(context).cancel),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('确定'),
+              child: Text(WidgetsLocalizations.of(context).confirm),
               onPressed: () {
                 onColorChanged(pickerColor);
                 Navigator.of(context).pop();

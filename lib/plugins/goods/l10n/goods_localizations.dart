@@ -159,6 +159,10 @@ abstract class GoodsLocalizations {
   String get days;
   String get inPlace;
   String get times;
+
+  // 添加的字符串
+  String get dateTime;
+  String get usageHistory;
 }
 
 class _GoodsLocalizationsDelegate

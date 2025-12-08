@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/widgets/statistics/models/statistics_models.dart';
+import 'package:Memento/widgets/l10n/widgets_localizations.dart';
 
 /// 通用卡片构建器
 Widget buildStatisticsCard({
@@ -75,7 +76,7 @@ class DistributionPieChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (data.isEmpty) {
-      return const Center(child: Text('No data available'));
+      return Center(child: Text(WidgetsLocalizations.of(context).noDataAvailable));
     }
 
     // 如果数据项过多，合并小的分段
@@ -239,7 +240,7 @@ class RankingList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (data.isEmpty) {
-      return emptyWidget ?? const Center(child: Text('No data available'));
+      return emptyWidget ?? Center(child: Text(WidgetsLocalizations.of(context).noDataAvailable));
     }
 
     final maxValue = data.first.value;
@@ -368,7 +369,7 @@ class TimeSeriesChart extends StatelessWidget {
     if (allSpots.isEmpty) {
       return SizedBox(
         height: height,
-        child: const Center(child: Text('No data points')),
+        child: Center(child: Text(WidgetsLocalizations.of(context).noDataPoints)),
       );
     }
 
@@ -456,7 +457,7 @@ class HourlyDistributionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (hourlyData.isEmpty) {
-      return const Center(child: Text('No data available'));
+      return Center(child: Text(WidgetsLocalizations.of(context).noDataAvailable));
     }
 
     // 转换为 24 小时的分布
@@ -508,12 +509,12 @@ class HourlyDistributionBar extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text('00:00', style: TextStyle(fontSize: 10, color: Colors.grey)),
-            Text('06:00', style: TextStyle(fontSize: 10, color: Colors.grey)),
-            Text('12:00', style: TextStyle(fontSize: 10, color: Colors.grey)),
-            Text('18:00', style: TextStyle(fontSize: 10, color: Colors.grey)),
-            Text('24:00', style: TextStyle(fontSize: 10, color: Colors.grey)),
+          children: [
+            Text(WidgetsLocalizations.of(context).time0000, style: TextStyle(fontSize: 10, color: Colors.grey)),
+            Text(WidgetsLocalizations.of(context).time0600, style: TextStyle(fontSize: 10, color: Colors.grey)),
+            Text(WidgetsLocalizations.of(context).time1200, style: TextStyle(fontSize: 10, color: Colors.grey)),
+            Text(WidgetsLocalizations.of(context).time1800, style: TextStyle(fontSize: 10, color: Colors.grey)),
+            Text(WidgetsLocalizations.of(context).time2400, style: TextStyle(fontSize: 10, color: Colors.grey)),
           ],
         ),
       ],

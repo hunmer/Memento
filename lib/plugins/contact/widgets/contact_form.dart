@@ -6,6 +6,7 @@ import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/plugins/contact/models/contact_model.dart';
 import 'package:Memento/plugins/contact/models/custom_activity_event_model.dart';
 import 'package:Memento/plugins/contact/controllers/contact_controller.dart';
+import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 class ContactForm extends StatefulWidget {
@@ -478,7 +479,7 @@ class ContactFormState extends State<ContactForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Custom Fields', style: theme.textTheme.titleMedium),
+        Text(ContactLocalizations.of(context).customFields, style: theme.textTheme.titleMedium),
         ..._customFieldControllers.asMap().entries.map((entry) {
           int idx = entry.key;
           var controller = entry.value;
@@ -510,7 +511,7 @@ class ContactFormState extends State<ContactForm> {
         const SizedBox(height: 8),
         TextButton.icon(
           icon: const Icon(Icons.add_circle),
-          label: const Text('Add custom field'),
+          label: Text(ContactLocalizations.of(context).addCustomField),
           onPressed: () {
             setState(() {
               _customFieldControllers.add(
@@ -528,7 +529,7 @@ class ContactFormState extends State<ContactForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Custom Activity Events', style: theme.textTheme.titleMedium),
+        Text(ContactLocalizations.of(context).customActivityEvents, style: theme.textTheme.titleMedium),
         ..._customEventControllers.asMap().entries.map((entry) {
           int idx = entry.key;
           var controller = entry.value;
@@ -557,7 +558,7 @@ class ContactFormState extends State<ContactForm> {
         const SizedBox(height: 8),
         TextButton.icon(
           icon: const Icon(Icons.add_circle),
-          label: const Text('Add custom event'),
+          label: Text(ContactLocalizations.of(context).addCustomEvent),
           onPressed: () {
             setState(() {
               _customEventControllers.add(
@@ -578,7 +579,7 @@ class ContactFormState extends State<ContactForm> {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: const Text('Pick a color'),
+                title: Text(ContactLocalizations.of(context).pickColor),
                 content: SingleChildScrollView(
                   child: ColorPicker(
                     pickerColor: currentColor,
@@ -595,7 +596,7 @@ class ContactFormState extends State<ContactForm> {
                 ),
                 actions: [
                   TextButton(
-                    child: const Text('Done'),
+                    child: Text(ContactLocalizations.of(context).done),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],

@@ -214,8 +214,8 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                 _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
             unselectedLabelColor: unselectedColor,
             tabs: [
-              Tab(icon: const Icon(Icons.check_box_outlined), text: '待办'),
-              Tab(icon: const Icon(Icons.history), text: '历史'),
+              Tab(icon: const Icon(Icons.check_box_outlined), text: TodoLocalizations.of(context).todoTab),
+              Tab(icon: const Icon(Icons.history), text: TodoLocalizations.of(context).historyTab),
             ],
           ),
           Positioned(
@@ -262,18 +262,19 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   // 构建任务列表视图（第一个tab）
   Widget _buildTaskListView() {
+    final l10n = TodoLocalizations.of(context);
     return SuperCupertinoNavigationWrapper(
-      title: const Text('待办事项'),
-      largeTitle: '待办事项',
+      title: Text(l10n.todoTasks),
+      largeTitle: l10n.todoTasks,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       enableSearchBar: true,
-      searchPlaceholder: '搜索任务标题、备注、标签...',
+      searchPlaceholder: l10n.searchTasksHint,
       enableSearchFilter: true,
-      filterLabels: const {
-        'title': '标题',
-        'description': '备注',
-        'tag': '标签',
-        'subtask': '子任务',
+      filterLabels: {
+        'title': l10n.searchTitle,
+        'description': l10n.searchDescription,
+        'tag': l10n.searchTag,
+        'subtask': l10n.searchSubtask,
       },
       onSearchChanged: (query) {
         // 实时搜索功能
@@ -378,9 +379,10 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   // 构建历史记录视图（第二个tab）
   Widget _buildHistoryView() {
+    final l10n = TodoLocalizations.of(context);
     return SuperCupertinoNavigationWrapper(
-      title: const Text('历史记录'),
-      largeTitle: '历史记录',
+      title: Text(l10n.historyTitle),
+      largeTitle: l10n.historyTitle,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         IconButton(
@@ -390,18 +392,18 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
               context: context,
               builder:
                   (context) => AlertDialog(
-                    title: const Text('清空历史记录'),
-                    content: const Text('确定要清空所有历史记录吗？此操作不可撤销。'),
+                    title: Text(l10n.clearHistoryTitle),
+                    content: Text(l10n.clearHistoryMessage),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
-                        child: const Text('取消'),
+                        child: Text(l10n.cancel),
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context, true),
-                        child: const Text(
-                          '清空',
-                          style: TextStyle(color: Colors.red),
+                        child: Text(
+                          l10n.clearHistoryAction,
+                          style: const TextStyle(color: Colors.red),
                         ),
                       ),
                     ],
@@ -456,6 +458,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   // 构建搜索结果视图
   Widget _buildSearchResults() {
+    final l10n = TodoLocalizations.of(context);
     return AnimatedBuilder(
       animation: _plugin.taskController,
       builder: (context, _) {
@@ -473,7 +476,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '输入关键词开始搜索',
+                  l10n.searchInputHint,
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[600],
@@ -481,7 +484,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '支持搜索：标题、备注、标签、子任务',
+                  l10n.searchSupportHint,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[500],
@@ -504,7 +507,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '未找到匹配的任务',
+                  l10n.noMatchingTasks,
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[600],
@@ -512,7 +515,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '尝试使用其他关键词',
+                  l10n.tryOtherKeywords,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[500],

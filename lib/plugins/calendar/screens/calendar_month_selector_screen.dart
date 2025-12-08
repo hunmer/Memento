@@ -12,6 +12,7 @@ import 'package:Memento/widgets/widget_config_editor/models/color_config.dart';
 import 'package:Memento/widgets/widget_config_editor/models/widget_size.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 
 /// 日历月视图小组件配置界面
 ///
@@ -523,7 +524,7 @@ class _CalendarMonthSelectorScreenState
               child: FloatingActionButton.extended(
                 onPressed: _saveAndFinish,
                 icon: const Icon(Icons.check),
-                label: const Text('完成'),
+                label: Text(CalendarLocalizations.of(context).complete),
               ),
             ),
         ],

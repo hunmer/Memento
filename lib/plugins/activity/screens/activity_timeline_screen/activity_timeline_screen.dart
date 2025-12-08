@@ -8,6 +8,7 @@ import 'package:Memento/widgets/calendar_strip_date_picker.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/plugins/activity/widgets/activity_timeline.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'components/activity_grid_view.dart';
 import 'controllers/activity_controller.dart';
 import 'controllers/tag_controller.dart';
@@ -506,7 +507,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                 children: [
                   Icon(Icons.arrow_upward, size: 16),
                   SizedBox(width: 8),
-                  Text('按开始时间升序'),
+                  Text(ActivityLocalizations.of(context).sortByStartTimeAsc),
                 ],
               ),
             ),
@@ -516,7 +517,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                 children: [
                   Icon(Icons.timer, size: 16),
                   SizedBox(width: 8),
-                  Text('按持续时间'),
+                  Text(ActivityLocalizations.of(context).sortByDuration),
                 ],
               ),
             ),
@@ -526,7 +527,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                 children: [
                   Icon(Icons.arrow_downward, size: 16),
                   SizedBox(width: 8),
-                  Text('按开始时间降序'),
+                  Text(ActivityLocalizations.of(context).sortByStartTimeDesc),
                 ],
               ),
             ),

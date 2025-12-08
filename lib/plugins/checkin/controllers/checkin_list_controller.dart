@@ -294,7 +294,7 @@ class CheckinListController {
               children: [
                 ListTile(
                   leading: const Icon(Icons.style),
-                  title: Text('修改卡片显示风格'), // TODO: Localize
+                  title: Text(CheckinLocalizations.of(context).modifyCardDisplayStyle),
                   onTap: () {
                     Navigator.pop(context);
                     _showCardStyleDialog(item);
@@ -341,28 +341,28 @@ class CheckinListController {
       context: context,
       builder:
           (context) => SimpleDialog(
-            title: const Text('选择卡片风格'), // TODO: Localize
+            title: Text(CheckinLocalizations.of(context).selectCardStyle),
             children: [
               SimpleDialogOption(
                 onPressed: () {
                   Navigator.pop(context);
                   updateCardStyle(item, CheckinCardStyle.weekly);
                 },
-                child: const Text('七天显示 (默认)'),
+                child: Text(CheckinLocalizations.of(context).sevenDayDisplay),
               ),
               SimpleDialogOption(
                 onPressed: () {
                   Navigator.pop(context);
                   updateCardStyle(item, CheckinCardStyle.small);
                 },
-                child: const Text('小卡片风格 (1/2宽度)'),
+                child: Text(CheckinLocalizations.of(context).smallCardStyle),
               ),
               SimpleDialogOption(
                 onPressed: () {
                   Navigator.pop(context);
                   updateCardStyle(item, CheckinCardStyle.calendar);
                 },
-                child: const Text('日历风格'),
+                child: Text(CheckinLocalizations.of(context).calendarStyle),
               ),
             ],
           ),

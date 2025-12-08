@@ -565,7 +565,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                     children: [
                       CircularProgressIndicator(),
                       SizedBox(height: 8),
-                      Text('测试中...'),
+                      Text(OpenAILocalizations.of(context).testing),
                     ],
                   ),
                 ),

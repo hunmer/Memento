@@ -250,4 +250,23 @@ class ContactLocalizationsEn extends ContactLocalizations {
 
   @override
   String get done => 'Done';
+
+  // Added strings
+  @override
+  String get separator => ' - ';
+
+  @override
+  String get customFields => 'Custom Fields';
+
+  @override
+  String get addCustomField => 'Add custom field';
+
+  @override
+  String get customActivityEvents => 'Custom Activity Events';
+
+  @override
+  String get addCustomEvent => 'Add custom event';
+
+  @override
+  String get pickColor => 'Pick a color';
 }

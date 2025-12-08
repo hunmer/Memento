@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
+import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 
 class TaskListView extends StatefulWidget {
   final List<Task> tasks;
@@ -271,18 +272,19 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
           return await showDialog<bool>(
             context: context,
             builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('删除任务'),
-                content: Text('确定要删除任务 "${widget.task.title}" 吗？'),
+              final l10n = TodoLocalizations.of(context);
+                return AlertDialog(
+                title: Text(l10n.deleteTaskTitle),
+                content: Text('${l10n.deleteTaskMessage.replaceFirst('此任务', '')}"${widget.task.title}" 吗？'),
                 actions: <Widget>[
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('取消'),
+                    child: Text(l10n.cancel),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
                     style: TextButton.styleFrom(foregroundColor: Colors.red),
-                    child: const Text('删除'),
+                    child: Text(l10n.delete),
                   ),
                 ],
               );

@@ -134,7 +134,7 @@ class _FilterDialogState extends State<FilterDialog> {
                     ),
                   ),
                 ),
-                const Text(' - '),
+                Text(ContactLocalizations.of(context).separator),
                 Expanded(
                   child: TextButton.icon(
                     onPressed: _selectEndDate,
@@ -185,7 +185,7 @@ class _FilterDialogState extends State<FilterDialog> {
       actions: [
         TextButton(
           onPressed: _resetFilters,
-          child: Text(ContactLocalizations.of(context).reset ?? 'Reset'),
+          child: Text(ContactLocalizations.of(context).reset),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),

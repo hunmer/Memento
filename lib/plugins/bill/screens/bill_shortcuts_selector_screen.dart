@@ -3,6 +3,7 @@ import 'package:Memento/widgets/widget_config_editor/index.dart';
 import 'package:Memento/plugins/bill/models/bill_shortcut.dart';
 import 'package:Memento/plugins/bill/services/bill_shortcuts_widget_service.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
+import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
@@ -185,19 +186,19 @@ class _BillShortcutsSelectorScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('快捷记账配置'),
+        title: Text(BillLocalizations.of(context).quickBookkeepingConfig),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: _saveConfig,
-            tooltip: '保存配置',
+            tooltip: BillLocalizations.of(context).saveConfig,
           ),
         ],
       ),
       body: WidgetConfigEditor(
         widgetSize: WidgetSize.large,
         initialConfig: _widgetConfig,
-        previewTitle: '快捷记账预览',
+        previewTitle: BillLocalizations.of(context).quickBookkeepingConfig,
         onConfigChanged: (config) {
           setState(() {
             _widgetConfig = config;
@@ -210,7 +211,7 @@ class _BillShortcutsSelectorScreenState
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addShortcut,
-        tooltip: '添加快捷预设',
+        tooltip: BillLocalizations.of(context).addQuickPreset,
         child: const Icon(Icons.add),
       ),
     );
@@ -232,7 +233,7 @@ class _BillShortcutsSelectorScreenState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '快捷记账',
+                BillLocalizations.of(context).quickBookkeepingConfig,
                 style: TextStyle(
                   color: config.getColor('icon'),
                   fontSize: 22,
@@ -251,7 +252,7 @@ class _BillShortcutsSelectorScreenState
           if (_shortcuts.isEmpty)
             Center(
               child: Text(
-                '暂无快捷预设',
+                BillLocalizations.of(context).noQuickPresets,
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 14,
@@ -325,10 +326,10 @@ class _BillShortcutsSelectorScreenState
   /// 构建快捷列表
   Widget _buildShortcutsList() {
     if (_shortcuts.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          '点击右下角的 + 按钮添加快捷预设',
-          style: TextStyle(color: Colors.grey),
+          BillLocalizations.of(context).clickToAddQuickPreset,
+          style: const TextStyle(color: Colors.grey),
         ),
       );
     }
@@ -462,7 +463,9 @@ class _BillShortcutEditDialogState extends State<BillShortcutEditDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.initialShortcut == null ? '添加快捷预设' : '编辑快捷预设'),
+      title: Text(widget.initialShortcut == null
+          ? BillLocalizations.of(context).addQuickPreset
+          : BillLocalizations.of(context).editQuickPreset),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -472,13 +475,13 @@ class _BillShortcutEditDialogState extends State<BillShortcutEditDialog> {
               // 名称
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: '预设名称',
-                  hintText: '例如: 早餐、打车',
+                decoration: InputDecoration(
+                  labelText: BillLocalizations.of(context).presetName,
+                  hintText: BillLocalizations.of(context).presetNameHint,
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return '请输入预设名称';
+                    return BillLocalizations.of(context).pleaseEnterPresetName;
                   }
                   return null;
                 },
@@ -531,9 +534,9 @@ class _BillShortcutEditDialogState extends State<BillShortcutEditDialog> {
               // 金额(可选)
               TextFormField(
                 controller: _amountController,
-                decoration: const InputDecoration(
-                  labelText: '预设金额(可选)',
-                  hintText: '留空则每次手动输入',
+                decoration: InputDecoration(
+                  labelText: BillLocalizations.of(context).presetAmount,
+                  hintText: BillLocalizations.of(context).presetAmountHint,
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -541,9 +544,9 @@ class _BillShortcutEditDialogState extends State<BillShortcutEditDialog> {
 
               // 收入/支出
               SegmentedButton<bool>(
-                segments: const [
-                  ButtonSegment(value: true, label: Text('支出')),
-                  ButtonSegment(value: false, label: Text('收入')),
+                segments: [
+                  ButtonSegment(value: true, label: Text(BillLocalizations.of(context).expense)),
+                  ButtonSegment(value: false, label: Text(BillLocalizations.of(context).income)),
                 ],
                 selected: {_isExpense},
                 onSelectionChanged: (Set<bool> newSelection) {
@@ -559,11 +562,11 @@ class _BillShortcutEditDialogState extends State<BillShortcutEditDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(BillLocalizations.of(context).cancel),
         ),
         FilledButton(
           onPressed: _save,
-          child: const Text('保存'),
+          child: Text(BillLocalizations.of(context).save),
         ),
       ],
     );

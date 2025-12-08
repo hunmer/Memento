@@ -320,4 +320,37 @@ class StoreLocalizationsEn extends StoreLocalizations {
 
   @override
   String get noProducts => 'No Products';
+
+  @override
+  String labelColon(String label) => '$label: ';
+
+  @override
+  String get clearPointsHistory => 'Clear Points History';
+
+  @override
+  String get confirmClearPointsHistory => 'Are you sure you want to clear all points history? This action cannot be undone.';
+
+  @override
+  String get earnPointsTip => 'Complete activities in the app to earn points';
+
+  @override
+  String get defaultSort => 'Default Sort';
+
+  @override
+  String get sortByStock => 'Sort by Stock';
+
+  @override
+  String get sortByPrice => 'Sort by Price';
+
+  @override
+  String get sortByExpiryDate => 'Sort by Expiry Date';
+
+  @override
+  String get allItems => 'All Items';
+
+  @override
+  String get usable => 'Usable';
+
+  @override
+  String get expired => 'Expired';
 }

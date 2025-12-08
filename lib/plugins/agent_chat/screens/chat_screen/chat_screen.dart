@@ -20,6 +20,7 @@ import 'components/message_input.dart';
 import 'components/save_tool_dialog.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 
 /// 聊天界面
 class ChatScreen extends StatefulWidget {
@@ -345,7 +346,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    _controller.currentAgent?.name ?? '点击选择Agent',
+                    _controller.currentAgent?.name ?? AgentChatLocalizations.of(context).selectAgent,
                     style: TextStyle(
                       fontSize: 12,
                       color:
@@ -409,7 +410,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                     Icon(Icons.build_outlined),
                     SizedBox(width: 12),
-                    Text('工具管理'),
+                    Text(AgentChatLocalizations.of(context).toolManagement),
                   ],
                 ),
               ),
@@ -419,7 +420,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                     Icon(Icons.analytics_outlined),
                     SizedBox(width: 12),
-                    Text('Token统计'),
+                    Text(AgentChatLocalizations.of(context).tokenStatistics),
                   ],
                 ),
               ),
@@ -429,7 +430,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                     Icon(Icons.delete_sweep),
                     SizedBox(width: 12),
-                    Text('清空聊天记录'),
+                    Text(AgentChatLocalizations.of(context).confirmClear),
                   ],
                 ),
               ),
@@ -439,7 +440,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                     Icon(Icons.settings),
                     SizedBox(width: 12),
-                    Text('会话设置'),
+                    Text(AgentChatLocalizations.of(context).conversationSettings),
                   ],
                 ),
               ),
@@ -485,16 +486,16 @@ class _ChatScreenState extends State<ChatScreen> {
                                   final confirm = await showDialog<bool>(
                                     context: context,
                                     builder: (context) => AlertDialog(
-                                      title: const Text('确认清空'),
-                                      content: const Text('确定要清空所有选中的工具吗？'),
+                                      title: Text(AgentChatLocalizations.of(context).confirmClear),
+                                      content: Text(AgentChatLocalizations.of(context).confirmClearTools),
                                       actions: [
                                         TextButton(
                                           onPressed: () => Navigator.pop(context, false),
-                                          child: const Text('取消'),
+                                          child: Text(AgentChatLocalizations.of(context).cancel),
                                         ),
                                         TextButton(
                                           onPressed: () => Navigator.pop(context, true),
-                                          child: const Text('确定'),
+                                          child: Text(AgentChatLocalizations.of(context).confirm),
                                         ),
                                       ],
                                     ),
@@ -781,7 +782,7 @@ class _ChatScreenState extends State<ChatScreen> {
             OutlinedButton.icon(
               onPressed: _showAgentSelector,
               icon: const Icon(Icons.smart_toy),
-              label: const Text('选择Agent'),
+              label: Text(AgentChatLocalizations.of(context).selectAgent),
             ),
         ],
       ),
@@ -828,7 +829,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   });
                 },
                 icon: const Icon(Icons.add_circle_outline, size: 18),
-                label: const Text('创建新聊天'),
+                label: Text(AgentChatLocalizations.of(context).createNewChat),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     side: BorderSide(color: Colors.blue.withValues(alpha: 0.5)),
@@ -848,7 +849,7 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Token统计'),
+            title: Text(AgentChatLocalizations.of(context).tokenStatistics),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -868,7 +869,7 @@ class _ChatScreenState extends State<ChatScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('关闭'),
+                child: Text(AgentChatLocalizations.of(context).close),
               ),
             ],
           ),
@@ -978,7 +979,7 @@ class _ChatScreenState extends State<ChatScreen> {
           (context) => StatefulBuilder(
             builder:
                 (context, setDialogState) => AlertDialog(
-                  title: const Text('会话设置'),
+                  title: Text(AgentChatLocalizations.of(context).conversationSettings),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -992,7 +993,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         children: [
                           Expanded(
                             child: RadioListTile<int?>(
-                              title: const Text('使用全局设置'),
+                              title: Text(AgentChatLocalizations.of(context).useGlobalSettings),
                               value: null,
                             ),
                           ),
@@ -1002,7 +1003,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         children: [
                           Expanded(
                             child: RadioListTile<int?>(
-                              title: const Text('自定义'),
+                              title: Text(AgentChatLocalizations.of(context).custom),
                               value: -1, // 用-1表示自定义模式
                             ),
                           ),
@@ -1045,7 +1046,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('取消'),
+                      child: Text(AgentChatLocalizations.of(context).cancel),
                     ),
                     TextButton(
                       onPressed: () async {
@@ -1056,10 +1057,10 @@ class _ChatScreenState extends State<ChatScreen> {
                             .updateConversation(updatedConversation);
                         if (mounted) {
                           Navigator.pop(context);
-                          toastService.showToast('设置已保存');
+                          toastService.showToast('Settings saved');
                         }
                       },
-                      child: const Text('保存'),
+                      child: Text(AgentChatLocalizations.of(context).save),
                     ),
                   ],
                 ),
@@ -1078,7 +1079,7 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认清空'),
+            title: Text(AgentChatLocalizations.of(context).confirmClear),
             content: Text(
               '确定要清空当前会话的所有消息吗？\n\n'
               '当前共有 ${_controller.messages.length} 条消息，此操作不可恢复。',
@@ -1086,7 +1087,7 @@ class _ChatScreenState extends State<ChatScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
+                child: Text(AgentChatLocalizations.of(context).cancel),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -1126,7 +1127,7 @@ class _ChatScreenState extends State<ChatScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: const Text('选择Agent'),
+              title: Text(AgentChatLocalizations.of(context).selectAgent),
               content: SizedBox(
                 width: double.maxFinite,
                 child: ListView.builder(
@@ -1173,7 +1174,7 @@ class _ChatScreenState extends State<ChatScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('取消'),
+                  child: Text(AgentChatLocalizations.of(context).cancel),
                 ),
               ],
             ),
@@ -1206,17 +1207,17 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认删除'),
-            content: const Text('确定要删除这条消息吗？'),
+            title: Text(AgentChatLocalizations.of(context).confirmDelete),
+            content: Text(AgentChatLocalizations.of(context).confirmDeleteMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('取消'),
+                child: Text(AgentChatLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('删除'),
+                child: Text(AgentChatLocalizations.of(context).delete),
               ),
             ],
           ),

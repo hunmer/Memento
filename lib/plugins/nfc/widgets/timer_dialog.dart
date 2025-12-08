@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
+import 'package:Memento/plugins/nfc/l10n/nfc_localizations.dart';
 
 class TimerDialog extends StatefulWidget {
   final Habit habit;
@@ -73,6 +74,7 @@ class _TimerDialogState extends State<TimerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = NfcLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF0F1323) : const Color(0xFFF5F6F8);
     final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
@@ -179,7 +181,7 @@ class _TimerDialogState extends State<TimerDialog> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            _isRunning ? 'Pause' : 'Start',
+                            _isRunning ? l10n.pause : l10n.start,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -217,7 +219,7 @@ class _TimerDialogState extends State<TimerDialog> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Quick Notes',
+                  l10n.quickNotes,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -259,7 +261,7 @@ class _TimerDialogState extends State<TimerDialog> {
                       child: TextField(
                         controller: _notesController,
                         decoration: InputDecoration(
-                          hintText: 'Add a quick note...',
+                          hintText: l10n.addQuickNote,
                           hintStyle: TextStyle(color: subTextColor),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -299,7 +301,7 @@ class _TimerDialogState extends State<TimerDialog> {
                             Icon(Icons.cancel_outlined, size: 22, color: isDark ? Colors.white70 : Colors.grey[700]),
                             const SizedBox(width: 8),
                             Text(
-                              'Cancel',
+                              l10n.cancelBtn,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -332,7 +334,7 @@ class _TimerDialogState extends State<TimerDialog> {
                             Icon(Icons.check_circle, size: 22),
                             SizedBox(width: 8),
                             Text(
-                              'Complete',
+                              l10n.complete,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -435,23 +437,21 @@ class _TimerDialogState extends State<TimerDialog> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('取消计时'),
+        title: Text(l10n.cancelTimer),
         content: Text(
-          '确定要取消计时吗？\n'
-          '已计时: ${_formatDuration(_elapsed)}\n\n'
-          '⚠️ 本次计时记录将不会保存',
+          l10n.pauseTimerConfirm.replaceAll('{time}', _formatDuration(_elapsed)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('继续计时'),
+            child: Text(l10n.continueTimer),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text('确定取消'),
+            child: Text(l10n.confirmCancel),
           ),
         ],
       ),
@@ -475,24 +475,25 @@ class _TimerDialogState extends State<TimerDialog> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('完成计时'),
+        title: Text(l10n.completeTimer),
         content: Text(
-          '确定要完成计时并保存记录吗？\n'
-          '已计时: ${_formatDuration(_elapsed)}\n'
-          '${_notesController.text.isNotEmpty ? '备注: ${_notesController.text}\n' : ''}\n'
-          '✅ 本次计时将保存到历史记录',
+          l10n.completeTimerConfirm
+              .replaceAll('{time}', _formatDuration(_elapsed))
+              .replaceAll('{note}', _notesController.text.isNotEmpty
+                  ? '${l10n.timerNotePrefix}${_notesController.text}\n'
+                  : ''),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('继续调整'),
+            child: Text(l10n.continueAdjust),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: _themeColor,
             ),
-            child: const Text('确定完成'),
+            child: Text(l10n.confirmComplete),
           ),
         ],
       ),

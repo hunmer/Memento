@@ -113,4 +113,16 @@ class NotesLocalizationsEn extends NotesLocalizations {
 
   @override
   String get selectSubfolder => 'Select subfolder';
+
+  @override
+  String get selectFolder => 'Select Folder';
+
+  @override
+  String get selectTag => 'Select Tag';
+
+  @override
+  String noTagsAvailable(String tagType) => 'No Tags Available';
+
+  @override
+  String get allTags => 'All Tags';
 }

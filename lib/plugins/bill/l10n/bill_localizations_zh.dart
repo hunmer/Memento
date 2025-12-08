@@ -194,4 +194,72 @@ class BillLocalizationsZh extends BillLocalizations {
 
   @override
   String get accountName => '账户名称';
+
+  // 新增遗漏的国际化字符串
+  @override
+  String get statisticsAnalysis => '统计分析';
+
+  @override
+  String get confirmDeleteThisBill => '确定要删除这条账单吗？';
+
+  @override
+  String get shortcutsAccountingConfig => '快捷记账配置';
+
+  @override
+  String get configDailyWidget => '配置日视图小组件';
+
+  @override
+  String get configWeeklyWidget => '配置周视图小组件';
+
+  @override
+  String get saveConfig => '保存配置';
+
+  // 新增的硬编码文本
+  @override
+  String get quickBookkeepingConfig => '快捷记账配置';
+
+  @override
+  String get income => '收入';
+
+  @override
+  String get save => '保存';
+
+  @override
+  String get addQuickPreset => '添加快捷预设';
+
+  @override
+  String get quickAccountingPreview => '快捷记账预览';
+
+  @override
+  String get noQuickPresets => '暂无快捷预设';
+
+  @override
+  String get clickToAddQuickPreset => '点击右下角的 + 按钮添加快捷预设';
+
+  @override
+  String get editQuickPreset => '编辑快捷预设';
+
+  @override
+  String get presetName => '预设名称';
+
+  @override
+  String get presetNameHint => '例如: 早餐、打车';
+
+  @override
+  String get pleaseEnterPresetName => '请输入预设名称';
+
+  @override
+  String get presetAmount => '预设金额(可选)';
+
+  @override
+  String get presetAmountHint => '留空则每次手动输入';
+
+  @override
+  String get expense => '支出';
+
+  @override
+  String get add => '添加';
+
+  @override
+  String get edit => '编辑';
 }

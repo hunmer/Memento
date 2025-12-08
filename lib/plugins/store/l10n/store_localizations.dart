@@ -152,6 +152,25 @@ abstract class StoreLocalizations {
   String get filterConditions;
   String get notSelected;
   String get noProducts;
+
+  // 带参数的方法
+  String labelColon(String label);
+
+  // 积分历史相关
+  String get clearPointsHistory;
+  String get confirmClearPointsHistory;
+  String get earnPointsTip;
+
+  // 商品排序相关
+  String get defaultSort;
+  String get sortByStock;
+  String get sortByPrice;
+  String get sortByExpiryDate;
+
+  // 物品状态相关
+  String get allItems;
+  String get usable;
+  String get expired;
 }
 
 class _StoreLocalizationsDelegate

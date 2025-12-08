@@ -7,6 +7,7 @@ import 'package:Memento/plugins/activity/models/activity_weekly_widget_data.dart
 import 'package:Memento/plugins/activity/services/activity_widget_service.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 
 /// 周视图活动列表小组件配置界面
 ///
@@ -119,14 +120,14 @@ class _ActivityWeeklyConfigScreenState
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('配置周视图小组件')),
+        appBar: AppBar(title: Text(ActivityLocalizations.of(context).configWeeklyWidget)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('配置周视图小组件'),
+        title: Text(ActivityLocalizations.of(context).configWeeklyWidget),
         actions: [
           if (_isSaving)
             const Center(
@@ -152,7 +153,7 @@ class _ActivityWeeklyConfigScreenState
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isSaving ? null : _saveAndFinish,
         icon: const Icon(Icons.check),
-        label: const Text('保存'),
+        label: Text(ActivityLocalizations.of(context).save),
       ),
     );
   }

@@ -7,6 +7,7 @@ import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/habits_weekly_widget_config.dart';
 import 'package:Memento/plugins/habits/models/habits_weekly_widget_data.dart';
 import 'package:Memento/plugins/habits/services/habits_widget_service.dart';
+import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 
 /// 习惯周视图小组件配置界面
@@ -146,7 +147,7 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('配置习惯周视图小组件')),
+        appBar: AppBar(title: Text(HabitsLocalizations.of(context).configureHabitWeeklyWidget)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -155,7 +156,7 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('配置习惯周视图小组件'),
+        title: Text(HabitsLocalizations.of(context).configureHabitWeeklyWidget),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),

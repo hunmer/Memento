@@ -287,21 +287,21 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
                   return Scaffold(
                     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                     appBar: AppBar(
-                      title: const Text('相册统计'),
+                      title: Text(CalendarAlbumLocalizations.of(context).albumStatistics),
                       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                     ),
                     body: AlertDialog(
-                      title: const Text('相册统计'),
+                      title: Text(CalendarAlbumLocalizations.of(context).albumStatistics),
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('总图片数量: ${allImages.length}'),
+                          Text('${CalendarAlbumLocalizations.of(context).totalPhotoCount}: ${allImages.length}'),
                           const SizedBox(height: 16),
                           if (allImages.isNotEmpty) ...[
-                            const Text(
-                              '最近的照片：',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                            Text(
+                              CalendarAlbumLocalizations.of(context).recentPhotos,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),
                             SizedBox(
@@ -341,7 +341,7 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('关闭'),
+                          child: Text(CalendarAlbumLocalizations.of(context).close),
                         ),
                       ],
                     ),

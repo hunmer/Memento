@@ -765,8 +765,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             ),
             const SizedBox(height: 24),
             SwitchListTile(
-              title: const Text('启用插件功能调用'),
-              subtitle: const Text('允许 AI 调用插件功能获取数据'),
+              title: Text(OpenAILocalizations.of(context).enablePluginFunctionCalls),
+              subtitle: Text(OpenAILocalizations.of(context).allowAICallPluginFunctions),
               value: _enableFunctionCalling,
               onChanged: (value) {
                 setState(() {
@@ -776,8 +776,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text('启用猜你想问功能'),
-              subtitle: const Text('在聊天界面显示预设的开场白问题'),
+              title: Text(OpenAILocalizations.of(context).enableGuessWhatYouWantToAsk),
+              subtitle: Text(OpenAILocalizations.of(context).showPresetOpeningQuestions),
               value: _enableOpeningQuestions,
               onChanged: (value) {
                 setState(() {

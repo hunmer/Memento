@@ -167,4 +167,56 @@ class TodoLocalizationsEn extends TodoLocalizations {
 
   @override
   String get cancel => 'Cancel';
+
+  // Tab 标签
+  @override
+  String get todoTab => 'Todo';
+
+  @override
+  String get historyTab => 'History';
+
+  // 搜索相关
+  @override
+  String get searchTasksHint => 'Search task titles, notes, tags...';
+
+  @override
+  String get searchTitle => 'Title';
+
+  @override
+  String get searchDescription => 'Notes';
+
+  @override
+  String get searchTag => 'Tag';
+
+  @override
+  String get searchSubtask => 'Subtask';
+
+  @override
+  String get searchInputHint => 'Enter keywords to start searching';
+
+  @override
+  String get searchSupportHint => 'Supports searching: title, notes, tags, subtasks';
+
+  @override
+  String get noMatchingTasks => 'No matching tasks found';
+
+  @override
+  String get tryOtherKeywords => 'Try other keywords';
+
+  // 历史记录相关
+  @override
+  String get historyTitle => 'History';
+
+  @override
+  String get clearHistoryTitle => 'Clear History';
+
+  @override
+  String get clearHistoryMessage => 'Are you sure you want to clear all history? This action cannot be undone.';
+
+  @override
+  String get clearHistoryAction => 'Clear';
+
+  // 其他
+  @override
+  String get todoTasks => 'Todo Tasks';
 }

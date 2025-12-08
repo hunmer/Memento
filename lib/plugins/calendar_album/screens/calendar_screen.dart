@@ -134,6 +134,7 @@ class _CalendarScreenState extends State<CalendarScreen>
     final tagController = Provider.of<TagController>(context);
     final selectedDate = calendarController.selectedDate;
     final theme = Theme.of(context);
+    final l10n = CalendarAlbumLocalizations.of(context);
 
     return MultiProvider(
       providers: [
@@ -148,11 +149,11 @@ class _CalendarScreenState extends State<CalendarScreen>
             color: theme.textTheme.titleLarge?.color,
           ),
         ),
-        largeTitle: '日历日记',
+        largeTitle: l10n.calendarDiary,
         automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
         // 启用搜索栏
         enableSearchBar: true,
-        searchPlaceholder: '搜索日记标题、内容或标签',
+        searchPlaceholder: l10n.searchDiaryPlaceholder,
         onSearchChanged: (query) {
           _performSearch(query);
         },
@@ -161,7 +162,7 @@ class _CalendarScreenState extends State<CalendarScreen>
         },
         // 启用搜索过滤器
         enableSearchFilter: true,
-        filterLabels: const {'title': '标题', 'content': '内容', 'tag': '标签'},
+        filterLabels: {'title': l10n.title, 'content': l10n.content, 'tag': l10n.tag},
         onSearchFilterChanged: (filters) {
           setState(() {
             _searchFilters = Map.from(filters);
@@ -185,7 +186,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                 ).selectDate(DateTime.now());
               });
             },
-            tooltip: '回到当前月份',
+            tooltip: l10n.backToCurrentMonth,
           ),
         ],
         body: _buildCalendarListView(calendarController, selectedDate),
@@ -212,7 +213,7 @@ class _CalendarScreenState extends State<CalendarScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              '输入关键词搜索日记',
+              l10n.enterKeywordToSearch,
               style: TextStyle(
                 fontSize: 16,
                 color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
@@ -235,7 +236,7 @@ class _CalendarScreenState extends State<CalendarScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              '没有找到匹配的日记',
+              l10n.noMatchingDiaries,
               style: TextStyle(
                 fontSize: 16,
                 color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
@@ -243,7 +244,7 @@ class _CalendarScreenState extends State<CalendarScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              '试试其他关键词',
+              l10n.tryOtherKeywords,
               style: TextStyle(
                 fontSize: 14,
                 color: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
@@ -501,7 +502,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                             children: [
                               Expanded(
                                 child: Text(
-                                  ' ${DateFormat('yyyy年MM月dd日').format(selectedDate)} 的日记',
+                                  ' ${DateFormat('yyyy年MM月dd日').format(selectedDate)}${l10n.diaryForDate}',
                                   style: Theme.of(context).textTheme.titleMedium
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
@@ -527,7 +528,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                   });
                                 },
                                 icon: const Icon(Icons.add),
-                                tooltip: '新建日记',
+                                tooltip: l10n.newDiary,
                               ),
                               IconButton(
                                 onPressed: () => Navigator.pop(context),
@@ -647,9 +648,9 @@ class _CalendarScreenState extends State<CalendarScreen>
       lastDate: _calendarMaxMonth,
       initialEntryMode: DatePickerEntryMode.calendarOnly,
       initialDatePickerMode: DatePickerMode.year,
-      helpText: '选择年月',
-      cancelText: '取消',
-      confirmText: '确定',
+      helpText: l10n.selectMonth,
+      cancelText: l10n.cancel,
+      confirmText: l10n.confirm,
     );
     if (selectedDate != null) {
       setState(() {

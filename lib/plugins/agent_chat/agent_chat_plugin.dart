@@ -12,7 +12,7 @@ import 'services/tool_service.dart';
 import 'services/tool_template_service.dart';
 import 'services/widget_service.dart';
 import 'models/chat_message.dart';
-// import 'l10n/agent_chat_localizations.dart';
+import 'l10n/agent_chat_localizations.dart';
 
 /// Agent Chat 插件
 ///
@@ -270,11 +270,11 @@ class _AgentChatMainViewState extends State<AgentChatMainView> {
                 children: [
                   const Icon(Icons.error_outline, size: 48, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text('初始化失败: ${snapshot.error}'),
+                  Text(AgentChatLocalizations.of(context).initializationFailed('${snapshot.error}')),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('返回'),
+                    child: Text(AgentChatLocalizations.of(context).return),
                   ),
                 ],
               ),

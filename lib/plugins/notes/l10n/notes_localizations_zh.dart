@@ -111,4 +111,16 @@ class NotesLocalizationsZh extends NotesLocalizations {
 
   @override
   String get selectSubfolder => '选择子文件夹';
+
+  @override
+  String get selectFolder => '选择文件夹';
+
+  @override
+  String get selectTag => '选择标签';
+
+  @override
+  String noTagsAvailable(String tagType) => '暂无标签';
+
+  @override
+  String get allTags => 'All Tags';
 }

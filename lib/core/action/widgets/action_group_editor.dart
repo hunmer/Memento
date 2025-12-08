@@ -7,6 +7,7 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/action/models/action_instance.dart';
 import 'package:Memento/core/action/models/action_group.dart';
 import 'action_selector_dialog.dart';
+import 'package:Memento/core/l10n/core_localizations.dart';
 
 /// 动作组编辑器
 class ActionGroupEditor extends StatefulWidget {
@@ -254,15 +255,15 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                         items: const [
                           DropdownMenuItem(
                             value: GroupOperator.sequence,
-                            child: Text('顺序执行'),
+                            child: Text(CoreLocalizations.of(context)!.sequentialExecution),
                           ),
                           DropdownMenuItem(
                             value: GroupOperator.parallel,
-                            child: Text('并行执行'),
+                            child: Text(CoreLocalizations.of(context)!.parallelExecution),
                           ),
                           DropdownMenuItem(
                             value: GroupOperator.condition,
-                            child: Text('条件执行'),
+                            child: Text(CoreLocalizations.of(context)!.conditionalExecution),
                           ),
                         ],
                         onChanged: (value) {
@@ -284,19 +285,19 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                         items: const [
                           DropdownMenuItem(
                             value: GroupExecutionMode.all,
-                            child: Text('执行所有动作'),
+                            child: Text(CoreLocalizations.of(context)!.executeAllActions),
                           ),
                           DropdownMenuItem(
                             value: GroupExecutionMode.any,
-                            child: Text('执行任一动作'),
+                            child: Text(CoreLocalizations.of(context)!.executeAnyAction),
                           ),
                           DropdownMenuItem(
                             value: GroupExecutionMode.first,
-                            child: Text('只执行第一个'),
+                            child: Text(CoreLocalizations.of(context)!.executeFirstOnly),
                           ),
                           DropdownMenuItem(
                             value: GroupExecutionMode.last,
-                            child: Text('只执行最后一个'),
+                            child: Text(CoreLocalizations.of(context)!.executeLastOnly),
                           ),
                         ],
                         onChanged: (value) {
@@ -338,7 +339,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                           ElevatedButton.icon(
                             onPressed: _onAddAction,
                             icon: const Icon(Icons.add),
-                            label: const Text('添加动作'),
+                            label: const Text(CoreLocalizations.of(context)!.addAction),
                           ),
                         ],
                       ),
@@ -408,21 +409,21 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                                       itemBuilder: (context) => [
                                         const PopupMenuItem(
                                           value: 'edit',
-                                          child: Text('编辑'),
+                                          child: Text(CoreLocalizations.of(context)!.edit),
                                         ),
                                         if (index > 0)
                                           const PopupMenuItem(
                                             value: 'moveUp',
-                                            child: Text('上移'),
+                                            child: Text(CoreLocalizations.of(context)!.moveUp),
                                           ),
                                         if (index < _actions.length - 1)
                                           const PopupMenuItem(
                                             value: 'moveDown',
-                                            child: Text('下移'),
+                                            child: Text(CoreLocalizations.of(context)!.moveDown),
                                           ),
                                         const PopupMenuItem(
                                           value: 'remove',
-                                          child: Text('删除'),
+                                          child: Text(CoreLocalizations.of(context)!.delete),
                                         ),
                                       ],
                                     ),
@@ -446,13 +447,13 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('取消'),
+                    child: Text(CoreLocalizations.of(context)!.cancel),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: _onSave,
                     icon: const Icon(Icons.save),
-                    label: const Text('保存'),
+                    label: Text(CoreLocalizations.of(context)!.save),
                   ),
                 ],
               ),

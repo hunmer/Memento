@@ -132,6 +132,44 @@ abstract class CalendarAlbumLocalizations {
   String get deleteEntry;
 
   String get noEntries;
+
+  // 新增遗漏的国际化字符串 - 保留以兼容现有代码
+  String get configWeeklyWidget;
+  String get complete;
+
+  // 相册统计相关
+  String get albumStatistics;
+  String get totalPhotoCount;
+  String get recentPhotos;
+  String get close;
+
+  // 新建日记
+  String get createNewDiary;
+
+  // 小组件配置相关
+  String get configWeeklyAlbumWidget;
+  String get configDescription;
+  String get configDescriptionText;
+  String get widgetStyle;
+  String get backgroundLabel;
+  String get titleLabel;
+  String get oneDayOnePhoto;
+
+  String get weekInfo;
+
+  // 搜索相关
+  String get searchDiaryPlaceholder;
+  String get enterKeywordToSearch;
+  String get noMatchingDiaries;
+  String get tryOtherKeywords;
+  String get title;
+  String get content;
+  String get tag;
+  String get backToCurrentMonth;
+  String get selectMonth;
+  String get confirm;
+  String get diaryForDate;
+  String get newDiary;
 }
 
 class _CalendarAlbumLocalizationsDelegate

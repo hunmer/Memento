@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
 import 'package:Memento/plugins/tts/models/tts_service_config.dart';
 import 'package:Memento/plugins/tts/models/tts_service_type.dart';
+import 'package:Memento/widgets/l10n/widgets_localizations.dart';
 
 /// TTS设置对话框
 ///
@@ -71,11 +72,11 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Row(
+      title: Row(
         children: [
           Icon(Icons.record_voice_over, size: 24),
           SizedBox(width: 8),
-          Text('语音播报设置'),
+          Text(WidgetsLocalizations.of(context).voiceBroadcastSettings),
         ],
       ),
       content:
@@ -92,8 +93,8 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                   children: [
                     // 启用开关
                     SwitchListTile(
-                      title: const Text('启用自动朗读'),
-                      subtitle: const Text('AI回复完成后自动朗读消息内容'),
+                      title: Text(WidgetsLocalizations.of(context).enableAutoRead),
+                      subtitle: Text(WidgetsLocalizations.of(context).autoReadAIMessage),
                       value: _enabled,
                       onChanged: (value) {
                         setState(() {
@@ -105,9 +106,9 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
 
                     // 服务选择
                     if (_enabled && _services.isNotEmpty) ...[
-                      const Text(
-                        '选择TTS服务',
-                        style: TextStyle(
+                      Text(
+                        WidgetsLocalizations.of(context).selectTTSService,
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -143,9 +144,9 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                                             4,
                                           ),
                                         ),
-                                        child: const Text(
-                                          '默认',
-                                          style: TextStyle(
+                                        child: Text(
+                                          WidgetsLocalizations.of(context).defaultLabel,
+                                          style: const TextStyle(
                                             fontSize: 10,
                                             color: Colors.blue,
                                           ),
@@ -155,7 +156,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                                 ],
                               ),
                               subtitle: Text(
-                                _getServiceTypeText(service),
+                                _getServiceTypeText(context, service),
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey.shade600,
@@ -193,8 +194,8 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                             SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                '暂无可用的TTS服务，请先在TTS插件中配置',
-                                style: TextStyle(fontSize: 12),
+                                WidgetsLocalizations.of(context).noTTSServiceAvailable,
+                                style: const TextStyle(fontSize: 12),
                               ),
                             ),
                           ],
@@ -206,7 +207,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(WidgetsLocalizations.of(context).cancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -216,17 +217,17 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
             );
             Navigator.of(context).pop(result);
           },
-          child: const Text('确定'),
+          child: Text(WidgetsLocalizations.of(context).confirm),
         ),
       ],
     );
   }
 
   /// 获取服务类型文本
-  String _getServiceTypeText(TTSServiceConfig service) {
+  String _getServiceTypeText(BuildContext context, TTSServiceConfig service) {
     String typeText = service.type.displayName;
     if (!service.isEnabled) {
-      typeText += ' (已禁用)';
+      typeText += WidgetsLocalizations.of(context).disabled;
     }
     if (service.voice != null && service.voice!.isNotEmpty) {
       typeText += ' · ${service.voice}';

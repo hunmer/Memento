@@ -58,7 +58,7 @@ class _AddUsageRecordDialogState extends State<AddUsageRecordDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('日期时间'),
+              title: Text(GoodsLocalizations.of(context).dateTime),
               subtitle: Text(DateFormat('yyyy-MM-dd HH:mm').format(_selectedDate)),
               trailing: const Icon(Icons.calendar_today),
               onTap: _pickDate,

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:memento_nfc/memento_nfc.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/nfc/l10n/nfc_localizations.dart';
 
 /// NFC控制器插件主视图
 class NfcMainView extends StatefulWidget {
@@ -65,7 +66,7 @@ class _NfcMainViewState extends State<NfcMainView> {
             children: [
               const CircularProgressIndicator(),
               const SizedBox(height: 16),
-              const Text('请将手机靠近NFC标签'),
+              Text(NfcLocalizations.of(context).pleaseBringPhoneNearNFC),
               const SizedBox(height: 8),
               Text(
                 '等待读取NFC数据...',
@@ -141,7 +142,7 @@ class _NfcMainViewState extends State<NfcMainView> {
             children: [
               const CircularProgressIndicator(),
               const SizedBox(height: 16),
-              const Text('请将手机靠近NFC标签'),
+              Text(NfcLocalizations.of(context).pleaseBringPhoneNearNFC),
               const SizedBox(height: 8),
               Text(
                 '正在写入数据...\n$data',
@@ -201,7 +202,7 @@ class _NfcMainViewState extends State<NfcMainView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('写入NFC数据'),
+        title: Text(NfcLocalizations.of(context).writeNFCData),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -244,7 +245,7 @@ class _NfcMainViewState extends State<NfcMainView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(NfcLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -253,7 +254,7 @@ class _NfcMainViewState extends State<NfcMainView> {
                 _writeNfc(controller.text);
               }
             },
-            child: const Text('开始写入'),
+            child: Text(NfcLocalizations.of(context).startWriting),
           ),
         ],
       ),
@@ -264,7 +265,7 @@ class _NfcMainViewState extends State<NfcMainView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('NFC数据'),
+        title: Text(NfcLocalizations.of(context).nfcData),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,7 +289,7 @@ class _NfcMainViewState extends State<NfcMainView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
+            child: Text(NfcLocalizations.of(context).close),
           ),
           ElevatedButton(
             onPressed: () {
@@ -296,7 +297,7 @@ class _NfcMainViewState extends State<NfcMainView> {
               Clipboard.setData(ClipboardData(text: data));
               Toast.success('已复制到剪贴板');
             },
-            child: const Text('复制数据'),
+            child: Text(NfcLocalizations.of(context).copyData),
           ),
         ],
       ),
@@ -307,7 +308,7 @@ class _NfcMainViewState extends State<NfcMainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('NFC控制器'),
+        title: Text(NfcLocalizations.of(context).nfcController),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -380,7 +381,7 @@ class _NfcMainViewState extends State<NfcMainView> {
                             }
                           },
                           icon: const Icon(Icons.settings),
-                          label: const Text('启用NFC'),
+                          label: Text(NfcLocalizations.of(context).enableNFC),
                         ),
                       ),
                   ],

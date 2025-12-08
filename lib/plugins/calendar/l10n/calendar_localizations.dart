@@ -80,6 +80,7 @@ abstract class CalendarLocalizations {
   String get endTimeCannotBeEarlier;
 
   String get dateRange;
+  String get complete => '完成';
 }
 
 class _CalendarLocalizationsDelegate

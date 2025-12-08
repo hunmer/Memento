@@ -5,6 +5,7 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
+import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 
 /// 习惯分组列表小组件配置界面
@@ -161,7 +162,7 @@ class _HabitGroupListSelectorScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('配置习惯分组列表小组件'),
+        title: Text(HabitsLocalizations.of(context).configureHabitGroupListWidget),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),

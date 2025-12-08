@@ -320,4 +320,32 @@ class HabitsLocalizationsEn extends HabitsLocalizations {
   String get habitFeedback => 'Feedback';
 
   String get habitAbout => 'About';
+
+  // Added strings
+  @override
+  String get configureHabitGroupListWidget => 'Configure Habit Group List Widget';
+
+  @override
+  String get configureHabitTimerWidget => 'Configure Habit Timer Widget';
+
+  @override
+  String get configureHabitWeeklyWidget => 'Configure Habit Weekly Widget';
+
+  @override
+  String get cancelTimer => 'Cancel Timer';
+
+  @override
+  String get continueTimer => 'Continue Timer';
+
+  @override
+  String get confirmCancel => 'Confirm Cancel';
+
+  @override
+  String get completeTimer => 'Complete Timer';
+
+  @override
+  String get continueAdjust => 'Continue Adjust';
+
+  @override
+  String get confirmComplete => 'Confirm Complete';
 }
