@@ -177,17 +177,6 @@ class _AgentListScreenState extends State<AgentListScreen> {
           },
           tooltip: '切换视图',
         ),
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: () async {
-            await NavigationHelper.push<bool>(
-              context,
-              const AgentEditScreen(),
-            );
-            // 不需要手动刷新，因为AgentController会通知变化
-          },
-          tooltip: '添加助手',
-        ),
       ],
     );
   }

@@ -3,6 +3,7 @@ import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
@@ -1363,20 +1364,30 @@ class _BillMainViewState extends State<BillMainView>
               Tab(icon: Icon(Icons.bar_chart), text: '统计分析'),
             ],
           ),
-          Positioned(
-            top: -25,
-            child: FloatingActionButton(
-              backgroundColor: Color(0xFF3498DB),
-              elevation: 4,
-              shape: const CircleBorder(),
-              child: const Icon(Icons.add, color: Colors.white, size: 32),
-              onPressed: () {
-                NavigationHelper.push(context, BillEditScreen(
-                          billPlugin: billPlugin,
-                          accountId: billPlugin.selectedAccount?.id ?? '',),
-                );
-              },
-            ),
+          OpenContainer<bool>(
+            transitionType: ContainerTransitionType.fade,
+            tappable: false,
+            closedElevation: 0.0,
+            closedShape: const RoundedRectangleBorder(),
+            closedColor: Colors.transparent,
+            openBuilder: (BuildContext context, VoidCallback _) {
+              return BillEditScreen(
+                billPlugin: billPlugin,
+                accountId: billPlugin.selectedAccount?.id ?? '',
+              );
+            },
+            closedBuilder: (BuildContext context, VoidCallback openContainer) {
+              return Positioned(
+                top: -25,
+                child: FloatingActionButton(
+                  onPressed: openContainer,
+                  backgroundColor: Color(0xFF3498DB),
+                  elevation: 4,
+                  shape: const CircleBorder(),
+                  child: const Icon(Icons.add, color: Colors.white, size: 32),
+                ),
+              );
+            },
           ),
         ],
       ),

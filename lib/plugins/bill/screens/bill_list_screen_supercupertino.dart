@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -325,22 +326,26 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
             );
           },
         ),
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: () async {
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => BillEditScreen(
-                  billPlugin: widget.billPlugin,
-                  accountId: widget.accountId,
-                  initialDate: _selectedDay ?? DateTime.now(),
-                ),
-              ),
+        OpenContainer<bool>(
+          transitionType: ContainerTransitionType.fade,
+          closedElevation: 0.0,
+          closedShape: const RoundedRectangleBorder(),
+          closedColor: Colors.transparent,
+          openBuilder: (BuildContext context, VoidCallback _) {
+            return BillEditScreen(
+              billPlugin: widget.billPlugin,
+              accountId: widget.accountId,
+              initialDate: _selectedDay ?? DateTime.now(),
+              onSaved: () {
+                _loadMonthBills();
+              },
             );
-            if (result == true) {
-              _loadMonthBills();
-            }
+          },
+          closedBuilder: (BuildContext context, VoidCallback openContainer) {
+            return IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: openContainer,
+            );
           },
         ),
       ],
@@ -514,26 +519,12 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                           Toast.error('删除失败: $e');
                         }
                       },
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: bill.color.withOpacity(0.2),
-                          child: Icon(
-                            bill.icon,
-                            color: bill.color,
-                          ),
-                        ),
-                        title: Text(bill.title),
-                        subtitle: Text(
-                          DateFormat('yyyy-MM-dd HH:mm').format(bill.date),
-                        ),
-                        trailing: Text(
-                          '${bill.isExpense ? '-' : '+'}${_formatCurrency(bill.amount)}',
-                          style: TextStyle(
-                            color: bill.isExpense ? _expenseColor : _incomeColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        onTap: () async {
+                      child: OpenContainer<bool>(
+                        transitionType: ContainerTransitionType.fade,
+                        closedElevation: 0.0,
+                        closedShape: const RoundedRectangleBorder(),
+                        closedColor: Colors.transparent,
+                        openBuilder: (BuildContext context, VoidCallback _) {
                           final billObject = Bill(
                             id: bill.id,
                             title: bill.title,
@@ -547,20 +538,40 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                             icon: bill.icon,
                             iconColor: bill.color,
                           );
-
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BillEditScreen(
-                                billPlugin: widget.billPlugin,
-                                accountId: widget.accountId,
-                                bill: billObject,
+                          return BillEditScreen(
+                            billPlugin: widget.billPlugin,
+                            accountId: widget.accountId,
+                            bill: billObject,
+                            onSaved: () {
+                              _loadMonthBills();
+                            },
+                          );
+                        },
+                        closedBuilder: (
+                          BuildContext context,
+                          VoidCallback openContainer,
+                        ) {
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: bill.color.withOpacity(0.2),
+                              child: Icon(bill.icon, color: bill.color),
+                            ),
+                            title: Text(bill.title),
+                            subtitle: Text(
+                              DateFormat('yyyy-MM-dd HH:mm').format(bill.date),
+                            ),
+                            trailing: Text(
+                              '${bill.isExpense ? '-' : '+'}${_formatCurrency(bill.amount)}',
+                              style: TextStyle(
+                                color:
+                                    bill.isExpense
+                                        ? _expenseColor
+                                        : _incomeColor,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
+                            onTap: openContainer,
                           );
-                          if (result == true) {
-                            _loadMonthBills();
-                          }
                         },
                       ),
                     ),
@@ -645,68 +656,65 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
       itemCount: filteredBills.length,
       itemBuilder: (context, index) {
         final bill = filteredBills[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: bill.color.withOpacity(0.2),
-              child: Icon(
-                bill.icon,
-                color: bill.color,
-              ),
-            ),
-            title: Text(bill.title),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(DateFormat('yyyy-MM-dd HH:mm').format(bill.date)),
-                if (bill.note?.isNotEmpty == true)
-                  Text(
-                    bill.note!,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  ),
-              ],
-            ),
-            trailing: Text(
-              '${bill.isExpense ? '-' : '+'}${_formatCurrency(bill.amount)}',
-              style: TextStyle(
-                color: bill.isExpense ? _expenseColor : _incomeColor,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            onTap: () async {
-              final billObject = Bill(
-                id: bill.id,
-                title: bill.title,
-                amount: bill.isExpense ? -bill.amount : bill.amount,
-                accountId: widget.accountId,
-                category: bill.category,
-                date: bill.date,
-                tag: bill.category,
-                note: bill.note ?? '',
-                createdAt: bill.date,
-                icon: bill.icon,
-                iconColor: bill.color,
-              );
-
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BillEditScreen(
-                    billPlugin: widget.billPlugin,
-                    accountId: widget.accountId,
-                    bill: billObject,
+        return OpenContainer<bool>(
+          transitionType: ContainerTransitionType.fade,
+          closedElevation: 0.0,
+          closedShape: const RoundedRectangleBorder(),
+          closedColor: Colors.transparent,
+          openBuilder: (BuildContext context, VoidCallback _) {
+            final billObject = Bill(
+              id: bill.id,
+              title: bill.title,
+              amount: bill.isExpense ? -bill.amount : bill.amount,
+              accountId: widget.accountId,
+              category: bill.category,
+              date: bill.date,
+              tag: bill.category,
+              note: bill.note ?? '',
+              createdAt: bill.date,
+              icon: bill.icon,
+              iconColor: bill.color,
+            );
+            return BillEditScreen(
+              billPlugin: widget.billPlugin,
+              accountId: widget.accountId,
+              bill: billObject,
+              onSaved: () {
+                _loadMonthBills();
+              },
+            );
+          },
+          closedBuilder: (BuildContext context, VoidCallback openContainer) {
+            return Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: bill.color.withOpacity(0.2),
+                  child: Icon(bill.icon, color: bill.color),
+                ),
+                title: Text(bill.title),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(DateFormat('yyyy-MM-dd HH:mm').format(bill.date)),
+                    if (bill.note?.isNotEmpty == true)
+                      Text(
+                        bill.note!,
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      ),
+                  ],
+                ),
+                trailing: Text(
+                  '${bill.isExpense ? '-' : '+'}${_formatCurrency(bill.amount)}',
+                  style: TextStyle(
+                    color: bill.isExpense ? _expenseColor : _incomeColor,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              );
-              if (result == true) {
-                _loadMonthBills();
-              }
-            },
-          ),
+                onTap: openContainer,
+              ),
+            );
+          },
         );
       },
     );

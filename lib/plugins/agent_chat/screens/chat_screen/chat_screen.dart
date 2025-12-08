@@ -55,6 +55,9 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isLoadingSuggestions = false;
   final SuggestedQuestionsService _suggestionsService = SuggestedQuestionsService();
 
+  // 消息淡入动画相关
+  final Set<String> _fadingMessages = {}; // 记录正在淡入的消息ID
+
   @override
   void initState() {
     super.initState();
@@ -117,9 +120,29 @@ class _ChatScreenState extends State<ChatScreen> {
       final currentMessageCount = _controller.messages.length;
       final hasNewMessage = currentMessageCount > _lastMessageCount;
       final wasEmpty = _lastMessageCount == 0;
+      final newMessageCount = currentMessageCount - _lastMessageCount;
       _lastMessageCount = currentMessageCount;
 
-      setState(() {});
+      // 如果有新消息，标记它们以添加淡入动画
+      if (hasNewMessage && newMessageCount > 0) {
+        // 标记新消息以添加淡入动画
+        for (
+          int i = currentMessageCount - newMessageCount;
+          i < currentMessageCount;
+          i++
+        ) {
+          if (i >= 0 && i < _controller.messages.length) {
+            _fadingMessages.add(_controller.messages[i].id);
+          }
+        }
+      }
+
+      // 使用 addPostFrameCallback 避免在构建过程中调用 setState
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {});
+        }
+      });
 
       // 在以下情况自动滚动到底部：
       // 1. 有新消息添加时
@@ -269,10 +292,11 @@ class _ChatScreenState extends State<ChatScreen> {
     // 尝试滚动，如果控制器还未准备好则延迟重试
     if (_scrollController.hasClients) {
       if (animate) {
+        // 使用更短的持续时间和更柔和的曲线，减少动画的明显程度
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOutCubic,
         );
       } else {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
@@ -284,8 +308,8 @@ class _ChatScreenState extends State<ChatScreen> {
           if (animate) {
             _scrollController.animateTo(
               _scrollController.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOut,
+              duration: const Duration(milliseconds: 150),
+              curve: Curves.easeOutCubic,
             );
           } else {
             _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
@@ -527,8 +551,9 @@ class _ChatScreenState extends State<ChatScreen> {
                             : ListView.builder(
                               controller: _scrollController,
                               padding: const EdgeInsets.all(16),
-                              itemCount: _controller.messages.length + 1, // +1 for new session button
-                              // 添加反向物理效果，使滚动更自然
+                              itemCount:
+                                  _controller.messages.length +
+                                  1, // +1 for new session button
                               physics: const BouncingScrollPhysics(
                                 parent: AlwaysScrollableScrollPhysics(),
                               ),
@@ -539,44 +564,89 @@ class _ChatScreenState extends State<ChatScreen> {
                                 }
 
                                 final message = _controller.messages[index];
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: MessageBubble(
-                                    message: message,
-                                    hasAgent: _controller.currentAgent != null,
-                                    storage: widget.storage,
-                                    onEdit: (messageId, newContent) async {
-                                      await _controller.editMessage(
+                                final isNewMessage = _fadingMessages.contains(
+                                  message.id,
+                                );
+
+                                return AnimatedOpacity(
+                                  opacity: isNewMessage ? 0.0 : 1.0,
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.easeIn,
+                                  onEnd: () {
+                                    // 动画结束后移除标记
+                                    if (isNewMessage && mounted) {
+                                      // 使用 addPostFrameCallback 避免在构建过程中调用 setState
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                            if (mounted) {
+                                              setState(() {
+                                                _fadingMessages.remove(
+                                                  message.id,
+                                                );
+                                              });
+                                            }
+                                          });
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: MessageBubble(
+                                      message: message,
+                                      hasAgent:
+                                          _controller.currentAgent != null,
+                                      storage: widget.storage,
+                                      onEdit: (messageId, newContent) async {
+                                        await _controller.editMessage(
+                                          messageId,
+                                          newContent,
+                                        );
+                                      },
+                                      onDelete: (messageId) async {
+                                        await _showDeleteConfirmation(
+                                          messageId,
+                                        );
+                                      },
+                                      onRegenerate: (messageId) async {
+                                        await _controller.regenerateResponse(
+                                          messageId,
+                                        );
+                                      },
+                                      onSaveTool: (message) async {
+                                        await _handleSaveTool(message);
+                                      },
+                                      onRerunTool: (messageId) async {
+                                        await _handleRerunTool(messageId);
+                                      },
+                                      onRerunStep: (
                                         messageId,
-                                        newContent,
-                                      );
-                                    },
-                                    onDelete: (messageId) async {
-                                      await _showDeleteConfirmation(messageId);
-                                    },
-                                    onRegenerate: (messageId) async {
-                                      await _controller.regenerateResponse(
+                                        stepIndex,
+                                      ) async {
+                                        await _handleRerunStep(
+                                          messageId,
+                                          stepIndex,
+                                        );
+                                      },
+                                      onExecuteTemplate: (
                                         messageId,
-                                      );
-                                    },
-                                    onSaveTool: (message) async {
-                                      await _handleSaveTool(message);
-                                    },
-                                    onRerunTool: (messageId) async {
-                                      await _handleRerunTool(messageId);
-                                    },
-                                    onRerunStep: (messageId, stepIndex) async {
-                                      await _handleRerunStep(messageId, stepIndex);
-                                    },
-                                    onExecuteTemplate: (messageId, templateId) async {
-                                      await _controller.executeMatchedTemplate(messageId, templateId);
-                                    },
-                                    getTemplateName: (templateId) {
-                                      return _controller.templateService?.getTemplateById(templateId)?.name;
-                                    },
-                                    onCancel: message.isGenerating
-                                        ? () => _controller.cancelSending()
-                                        : null,
+                                        templateId,
+                                      ) async {
+                                        await _controller
+                                            .executeMatchedTemplate(
+                                              messageId,
+                                              templateId,
+                                            );
+                                      },
+                                      getTemplateName: (templateId) {
+                                        return _controller.templateService
+                                            ?.getTemplateById(templateId)
+                                            ?.name;
+                                      },
+                                      onCancel:
+                                          message.isGenerating
+                                              ? () =>
+                                                  _controller.cancelSending()
+                                              : null,
+                                    ),
                                   ),
                                 );
                               },

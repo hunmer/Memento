@@ -72,7 +72,12 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       if (currentGroups.isNotEmpty || _cachedGroups.isEmpty) {
         _cachedGroups = List.from(currentGroups);
       }
-      setState(() {});
+      // 使用 addPostFrameCallback 避免在构建过程中调用 setState
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {});
+        }
+      });
     }
   }
 
