@@ -295,35 +295,6 @@ class TimerForegroundService : Service() {
     // ========== 新增：多计时器支持方法 ==========
 
     /**
-     * 启动多个计时器中的一个
-     */
-    private fun startMultipleTimer(
-        timerId: String,
-        title: String,
-        content: String,
-        progress: Int,
-        maxProgress: Int,
-        color: Int
-    ) {
-        Log.d("TimerForegroundService", "Starting multiple timer: $timerId")
-
-        val notification = createMultipleTimerNotification(
-            timerId = timerId,
-            title = title,
-            content = content,
-            progress = progress,
-            maxProgress = maxProgress,
-            color = color
-        )
-
-        val notificationId = getOrCreateNotificationId(timerId)
-        startForeground(notificationId, notification)
-        activeTimerNotificationIds[timerId] = notificationId
-
-        Log.d("TimerForegroundService", "Started timer $timerId with notification ID: $notificationId")
-    }
-
-    /**
      * 更新多个计时器中的一个
      */
     private fun updateMultipleTimer(

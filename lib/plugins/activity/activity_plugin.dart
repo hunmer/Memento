@@ -12,13 +12,13 @@ import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'l10n/activity_localizations.dart';
 import 'screens/activity_timeline_screen/activity_timeline_screen.dart';
+import 'screens/activity_timeline_screen/controllers/activity_controller.dart';
 import 'screens/activity_statistics_screen.dart';
 import 'screens/activity_edit_screen.dart';
 import 'screens/activity_settings_screen.dart';
 import 'services/activity_service.dart';
 import 'services/activity_notification_service.dart';
 import 'models/activity_record.dart';
-import 'widgets/activity_form.dart';
 import 'dart:io';
 
 class ActivityPlugin extends BasePlugin with JSBridgePlugin {
@@ -1045,54 +1045,24 @@ class _ActivityMainViewState extends State<ActivityMainView>
               child: const Icon(Icons.add, color: Colors.white, size: 32),
               onPressed: () async {
                 final activityService = ActivityPlugin.instance.activityService;
-                final recentMoods = await activityService.getRecentMoods();
-                final recentTags = await activityService.getRecentTags();
-
-                // 获取今天的最后一个活动的结束时间
                 final today = DateTime.now();
-                final todayActivities = await activityService
-                    .getActivitiesForDate(today);
-                DateTime? lastActivityEndTime;
-                if (todayActivities.isNotEmpty) {
-                  // 按结束时间排序，获取最后一个活动
-                  todayActivities.sort(
-                    (a, b) => a.endTime.compareTo(b.endTime),
-                  );
-                  lastActivityEndTime = todayActivities.last.endTime;
-                }
 
                 if (!context.mounted) return;
 
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder:
-                      (context) => DraggableScrollableSheet(
-                        initialChildSize: 0.9,
-                        minChildSize: 0.5,
-                        maxChildSize: 0.95,
-                        expand: false,
-                        builder:
-                            (context, scrollController) => Container(
-                              decoration: BoxDecoration(
-                                color:
-                                    Theme.of(context).scaffoldBackgroundColor,
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(20),
-                                ),
-                              ),
-                              child: ActivityForm(
-                                selectedDate: today,
-                                recentMoods: recentMoods,
-                                recentTags: recentTags,
-                                lastActivityEndTime: lastActivityEndTime,
-                                onSave: (activity) async {
-                                  await activityService.saveActivity(activity);
-                                },
-                              ),
-                            ),
-                      ),
+                // 创建控制器实例并调用 addActivity 方法
+                final controller = ActivityController(
+                  activityService: activityService,
+                  onActivitiesChanged: () {},
+                );
+
+                await controller.addActivity(
+                  context,
+                  today,
+                  null,
+                  null,
+                  (tags) async {
+                    await activityService.saveRecentTags(tags);
+                  },
                 );
               },
             ),

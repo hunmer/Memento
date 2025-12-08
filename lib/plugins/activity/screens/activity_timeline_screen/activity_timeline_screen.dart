@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
@@ -21,6 +22,7 @@ class ActivityTimelineScreen extends StatefulWidget {
 
 class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   late DateTime _selectedDate;
+  late DateTime _previousSelectedDate;
   late ActivityService _activityService;
   late ActivityController _activityController;
   late TagController _tagController;
@@ -38,6 +40,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
+    _previousSelectedDate = _selectedDate;
 
     // 监听通知点击事件
     eventManager.subscribe('activity_notification_tapped', _onNotificationTapped);
@@ -76,7 +79,10 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   }
 
   void _onDateChanged(DateTime date) {
+    if (date == _selectedDate) return;
+
     setState(() {
+      _previousSelectedDate = _selectedDate;
       _selectedDate = date;
     });
     _activityController.loadActivities(_selectedDate);
@@ -406,45 +412,56 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
               ),
               // 根据视图模式显示不同的视图
               Expanded(
-                child: _viewModeController.isGridMode
-                    ? ActivityGridView(
-                        activities: _activityController.activities,
-                        selectedDate: _selectedDate,
-                        onActivityTap: (activity) => _activityController.editActivity(context, activity),
-                        onUnrecordedTimeTap: (start, end) {
-                          _activityController.addActivity(
-                            context,
-                            _selectedDate,
-                            TimeOfDay(hour: start.hour, minute: start.minute),
-                            TimeOfDay(hour: end.hour, minute: end.minute),
-                            _tagController.updateRecentTags,
-                          ).then((_) {
-                            _viewModeController.clearSelectedMinutes();
-                          });
-                        },
-                        onSelectionChanged: (start, end) {
-                          if (start != null && end != null) {
-                            final minutes = end.difference(start).inMinutes;
-                            _viewModeController.updateSelectedMinutes(minutes);
-                          } else {
-                            _viewModeController.clearSelectedMinutes();
-                          }
-                        },
-                      )
-                    : ActivityTimeline(
-                        activities: _activityController.activities,
-                        onDeleteActivity: _activityController.deleteActivity,
-                        onActivityTap: (activity) => _activityController.editActivity(context, activity),
-                        onUnrecordedTimeTap: (start, end) {
-                          _activityController.addActivity(
-                            context,
-                            _selectedDate,
-                            TimeOfDay(hour: start.hour, minute: start.minute),
-                            TimeOfDay(hour: end.hour, minute: end.minute),
-                            _tagController.updateRecentTags,
-                          );
-                        },
-                      ),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (Widget child, Animation<double> animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    );
+                  },
+                  child: _viewModeController.isGridMode
+                      ? ActivityGridView(
+                          key: ValueKey('grid_${_selectedDate.millisecondsSinceEpoch}'),
+                          activities: _activityController.activities,
+                          selectedDate: _selectedDate,
+                          onActivityTap: (activity) => _activityController.editActivity(context, activity),
+                          onUnrecordedTimeTap: (start, end) {
+                            _activityController.addActivity(
+                              context,
+                              _selectedDate,
+                              TimeOfDay(hour: start.hour, minute: start.minute),
+                              TimeOfDay(hour: end.hour, minute: end.minute),
+                              _tagController.updateRecentTags,
+                            ).then((_) {
+                              _viewModeController.clearSelectedMinutes();
+                            });
+                          },
+                          onSelectionChanged: (start, end) {
+                            if (start != null && end != null) {
+                              final minutes = end.difference(start).inMinutes;
+                              _viewModeController.updateSelectedMinutes(minutes);
+                            } else {
+                              _viewModeController.clearSelectedMinutes();
+                            }
+                          },
+                        )
+                      : ActivityTimeline(
+                          key: ValueKey('timeline_${_selectedDate.millisecondsSinceEpoch}'),
+                          activities: _activityController.activities,
+                          onDeleteActivity: _activityController.deleteActivity,
+                          onActivityTap: (activity) => _activityController.editActivity(context, activity),
+                          onUnrecordedTimeTap: (start, end) {
+                            _activityController.addActivity(
+                              context,
+                              _selectedDate,
+                              TimeOfDay(hour: start.hour, minute: start.minute),
+                              TimeOfDay(hour: end.hour, minute: end.minute),
+                              _tagController.updateRecentTags,
+                            );
+                          },
+                        ),
+                ),
               ),
             ],
           ),
