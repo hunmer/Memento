@@ -169,12 +169,6 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
                         ? DayLocalizations.of(context).listView
                         : DayLocalizations.of(context).cardView,
               ),
-              // 添加纪念日按钮
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () => _showEditDialog(context),
-                tooltip: DayLocalizations.of(context).addMemorialDay,
-              ),
             ],
             body: Stack(
               children: [

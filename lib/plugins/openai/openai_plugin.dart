@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
@@ -774,28 +775,46 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
               ),
             ],
           ),
-          Positioned(
-            top: -25,
-            child: FloatingActionButton(
-              backgroundColor: Colors.deepOrange,
-              elevation: 4,
-              shape: const CircleBorder(),
-              child: Icon(
-                _currentPage == 0 ? Icons.smart_toy : Icons.text_snippet,
-                color: Colors.white,
-                size: 32,
-              ),
-              onPressed: () {
-                if (_currentPage == 0) {
-                  // AI助手 tab - 创建新助手
-                  Navigator.of(context).push(AgentEditScreen.route(context));
-                } else {
-                  // 提示词预设 tab - 创建新预设
-                  _showPresetEditDialog();
-                }
+          if (_currentPage == 0)
+            OpenContainer<bool>(
+              transitionType: ContainerTransitionType.fade,
+              openBuilder: (BuildContext context, VoidCallback _) {
+                return AgentEditScreen();
               },
+              closedBuilder: (BuildContext context, VoidCallback openContainer) {
+                return Positioned(
+                  top: -25,
+                  child: FloatingActionButton(
+                    onPressed: openContainer,
+                    backgroundColor: Colors.deepOrange,
+                    elevation: 4,
+                    shape: const CircleBorder(),
+                    child: const Icon(
+                      Icons.smart_toy,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                );
+              },
+            )
+          else
+            Positioned(
+              top: -25,
+              child: FloatingActionButton(
+                onPressed: () {
+                  _showPresetEditDialog();
+                },
+                backgroundColor: Colors.deepOrange,
+                elevation: 4,
+                shape: const CircleBorder(),
+                child: const Icon(
+                  Icons.text_snippet,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
             ),
-          ),
         ],
       ),
     );

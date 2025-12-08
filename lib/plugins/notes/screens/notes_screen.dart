@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
@@ -11,6 +12,7 @@ import 'notes_screen/note_card.dart';
 import 'notes_screen/note_item.dart';
 import 'notes_screen/note_operations.dart';
 import 'notes_screen/notes_screen_state.dart';
+import 'note_edit_screen.dart';
 
 class NotesMainView extends StatefulWidget {
   const NotesMainView({super.key});
@@ -237,14 +239,31 @@ class _NotesMainViewState extends NotesMainViewState
                   },
                 ),
                 const SizedBox(height: 16),
-                _buildFabChild(
-                  icon: Icons.note_add,
-                  label: NotesLocalizations.of(context).newNote,
-                  onPressed: () {
-                    setState(() {
-                      _fabExpanded = false;
-                    });
-                    createNewNote();
+                OpenContainer<bool>(
+                  transitionType: ContainerTransitionType.fade,
+                  openBuilder: (BuildContext context, VoidCallback _) {
+                    return NoteEditScreen(
+                      onSave: (title, content) async {
+                        await plugin.controller.createNote(
+                          title,
+                          content,
+                          currentFolderId,
+                        );
+                        loadCurrentFolder();
+                      },
+                    );
+                  },
+                  closedBuilder: (BuildContext context, VoidCallback openContainer) {
+                    return _buildFabChild(
+                      icon: Icons.note_add,
+                      label: NotesLocalizations.of(context).newNote,
+                      onPressed: () {
+                        setState(() {
+                          _fabExpanded = false;
+                        });
+                        openContainer();
+                      },
+                    );
                   },
                 ),
                 const SizedBox(height: 16),
