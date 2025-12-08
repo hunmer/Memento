@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
@@ -57,25 +58,37 @@ class CheckinItemCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          onTap: () {
-            NavigationHelper.push(context, CheckinRecordScreen(
-                      checkinItem: item,
-                      controller: controller,),
-            ).then((_) => onStateChanged());
-          },
-          onLongPress: () {
-            controller.showItemOptionsDialog(item);
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: content,
-          ),
-        ),
+      child: OpenContainer<bool>(
+        transitionType: ContainerTransitionType.fade,
+        closedElevation: 0.0,
+        closedShape: const RoundedRectangleBorder(),
+        closedColor: Colors.transparent,
+        openBuilder: (BuildContext context, VoidCallback _) {
+          return CheckinRecordScreen(
+            checkinItem: item,
+            controller: controller,
+          );
+        },
+        closedBuilder: (BuildContext context, VoidCallback openContainer) {
+          return Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              onTap: openContainer,
+              onLongPress: () {
+                controller.showItemOptionsDialog(item);
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: content,
+              ),
+            ),
+          );
+        },
+        onClosed: (result) {
+          onStateChanged();
+        },
       ),
     );
   }

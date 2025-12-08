@@ -36,7 +36,14 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
       chatPlugin: widget.chatPlugin,
     );
     _controller.addListener(() {
-      if (mounted) setState(() {});
+      if (mounted) {
+        // 使用 postFrameCallback 确保在构建完成后调用 setState
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {});
+          }
+        });
+      }
     });
   }
 

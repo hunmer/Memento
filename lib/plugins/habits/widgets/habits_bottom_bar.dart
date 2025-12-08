@@ -11,6 +11,7 @@ import 'package:Memento/core/widgets/keep_alive_wrapper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 
@@ -84,39 +85,7 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
     });
   }
 
-  /// 添加习惯
-  Future<void> _addHabit() async {
-    final l10n = HabitsLocalizations.of(context);
-    await NavigationHelper.push(context, Scaffold(
-              appBar: AppBar(
-                title: Text(l10n.newHabit),
-                backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-              ),
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              body: HabitForm(
-                onSave: (habit) async {
-                  await _habitController.saveHabit(habit);
-                },),
-      ),
-    );
-  }
-
-  /// 添加技能
-  Future<void> _addSkill() async {
-    final l10n = HabitsLocalizations.of(context);
-    await NavigationHelper.push(context, Scaffold(
-              appBar: AppBar(
-                title: Text(l10n.createSkill),
-                backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-              ),
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              body: SkillForm(
-                onSave: (skill) async {
-                  await _skillController.saveSkill(skill);
-                },),
-      ),
-    );
-  }
+  // 添加习惯和技能的方法已移至 OpenContainer 的 openBuilder 中
 
   @override
   Widget build(BuildContext context) {
@@ -263,23 +232,52 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
           ),
           Positioned(
             top: -25,
-            child: FloatingActionButton(
-              backgroundColor: widget.plugin.color, // 使用插件主题色
-              elevation: 4,
-              shape: const CircleBorder(),
-              child: Icon(
-                _currentPage == 0 ? Icons.add_task : Icons.add_reaction,
-                color: Colors.white,
-                size: 32,
-              ),
-              onPressed: () {
+            child: OpenContainer(
+              transitionType: ContainerTransitionType.fade,
+              openBuilder: (context, _) {
+                final l10n = HabitsLocalizations.of(context);
                 if (_currentPage == 0) {
                   // Tab0: 添加习惯
-                  _addHabit();
+                  return Scaffold(
+                    appBar: AppBar(
+                      title: Text(l10n.newHabit),
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                    ),
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    body: HabitForm(
+                      onSave: (habit) async {
+                        await _habitController.saveHabit(habit);
+                      },
+                    ),
+                  );
                 } else {
                   // Tab1: 添加技能
-                  _addSkill();
+                  return Scaffold(
+                    appBar: AppBar(
+                      title: Text(l10n.createSkill),
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                    ),
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    body: SkillForm(
+                      onSave: (skill) async {
+                        await _skillController.saveSkill(skill);
+                      },
+                    ),
+                  );
                 }
+              },
+              closedBuilder: (context, VoidCallback openContainer) {
+                return FloatingActionButton(
+                  backgroundColor: widget.plugin.color, // 使用插件主题色
+                  elevation: 4,
+                  shape: const CircleBorder(),
+                  onPressed: openContainer,
+                  child: Icon(
+                    _currentPage == 0 ? Icons.add_task : Icons.add_reaction,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                );
               },
             ),
           ),

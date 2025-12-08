@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:Memento/plugins/todo/models/task.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
@@ -219,18 +220,25 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
           ),
           Positioned(
             top: -25,
-            child: FloatingActionButton(
-              backgroundColor: _colors[_currentPage],
-              elevation: 4,
-              shape: const CircleBorder(),
-              child: Icon(Icons.add, color: Colors.white, size: 32),
-              onPressed: () {
-                NavigationHelper.push(
-                  context,
-                  TaskForm(
-                    taskController: _plugin.taskController,
-                    reminderController: _plugin.reminderController,
-                  ),
+            child: OpenContainer<bool>(
+              transitionType: ContainerTransitionType.fade,
+              tappable: false,
+              closedElevation: 0.0,
+              closedShape: const RoundedRectangleBorder(),
+              closedColor: Colors.transparent,
+              openBuilder: (BuildContext context, VoidCallback _) {
+                return TaskForm(
+                  taskController: _plugin.taskController,
+                  reminderController: _plugin.reminderController,
+                );
+              },
+              closedBuilder: (BuildContext context, VoidCallback openContainer) {
+                return FloatingActionButton(
+                  backgroundColor: _colors[_currentPage],
+                  elevation: 4,
+                  shape: const CircleBorder(),
+                  child: Icon(Icons.add, color: Colors.white, size: 32),
+                  onPressed: openContainer,
                 );
               },
             ),

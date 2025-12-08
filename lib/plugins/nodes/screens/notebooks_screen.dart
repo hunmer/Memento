@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:ui' show lerpDouble;
 import 'package:provider/provider.dart';
@@ -141,9 +142,18 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                 ),
                 onTap: () {
                   controller.selectNotebook(notebook);
-                  NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
-                                value: controller,
-                                child: NodesScreen(notebook: notebook),
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      transitionDuration: Duration(milliseconds: 300),
+                      pageBuilder: (context, animation, secondaryAnimation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: ChangeNotifierProvider<NodesController>.value(
+                            value: controller,
+                            child: NodesScreen(notebook: notebook),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },

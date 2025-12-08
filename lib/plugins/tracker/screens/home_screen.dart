@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
+import 'package:Memento/plugins/tracker/screens/goal_detail_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/core/services/toast_service.dart';
@@ -86,10 +88,21 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: filteredGoals.length,
         itemBuilder: (context, index) {
           final goal = filteredGoals[index];
-          return GoalCard(
-            goal: goal,
-            controller: controller,
-            onTap: () => TrackerPlugin.instance.openGoalDetail(context, goal),
+          return OpenContainer(
+            transitionType: ContainerTransitionType.fade,
+            openBuilder: (context, _) {
+              return ChangeNotifierProvider.value(
+                value: controller,
+                child: GoalDetailScreen(goal: goal),
+              );
+            },
+            closedBuilder: (context, VoidCallback openContainer) {
+              return GoalCard(
+                goal: goal,
+                controller: controller,
+                onTap: openContainer,
+              );
+            },
           );
         },
       );
@@ -140,10 +153,21 @@ class _HomeScreenState extends State<HomeScreen> {
               '${TrackerLocalizations.of(context).goalDeleted} "${goal.name}"',
             );
           },
-          child: GoalCard(
-            goal: goal,
-            controller: controller,
-            onTap: () => TrackerPlugin.instance.openGoalDetail(context, goal),
+          child: OpenContainer(
+            transitionType: ContainerTransitionType.fade,
+            openBuilder: (context, _) {
+              return ChangeNotifierProvider.value(
+                value: controller,
+                child: GoalDetailScreen(goal: goal),
+              );
+            },
+            closedBuilder: (context, VoidCallback openContainer) {
+              return GoalCard(
+                goal: goal,
+                controller: controller,
+                onTap: openContainer,
+              );
+            },
           ),
         );
       },

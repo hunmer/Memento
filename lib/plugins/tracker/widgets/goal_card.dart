@@ -67,7 +67,7 @@ class GoalCard extends StatelessWidget {
             InkWell(
               onTap: onTap,
               child: Container(
-                constraints: const BoxConstraints.expand(), // 为内容容器添加明确约束
+                constraints: const BoxConstraints.expand(),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,

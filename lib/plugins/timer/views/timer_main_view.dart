@@ -6,6 +6,7 @@ import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:Memento/plugins/timer/views/add_timer_task_dialog.dart';
 import 'package:Memento/plugins/timer/views/timer_task_details_page.dart';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/timer/timer_plugin.dart';
@@ -78,9 +79,27 @@ class _TimerMainViewState extends State<TimerMainView> {
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       backgroundColor: const Color(0xFFF5F6F8),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: _showAddTaskDialog,
+        OpenContainer<TimerTask>(
+          transitionType: ContainerTransitionType.fade,
+          openBuilder: (context, _) {
+            final groups = _plugin.timerController.getGroups();
+            return AddTimerTaskDialog(groups: groups);
+          },
+          onClosed: (newTask) async {
+            if (newTask != null) {
+              await _plugin.addTask(newTask);
+              setState(() {
+                _tasks = _plugin.getTasks();
+                _groupedTasks = groupBy(_tasks, (TimerTask task) => task.group);
+              });
+            }
+          },
+          closedBuilder: (context, VoidCallback openContainer) {
+            return IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: openContainer,
+            );
+          },
         ),
       ],
       body: DefaultTabController(
@@ -387,7 +406,7 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          task.group, // Using group as subtitle/description
+                          task.group,
                           style: const TextStyle(
                             fontSize: 14,
                             color: Color(0xFF64748B),
@@ -401,14 +420,12 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
                 ],
               ),
             ),
-
             // Body
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child:
-                  useGridLayout
-                      ? _buildGridLayout(task)
-                      : _buildListLayout(task),
+              child: useGridLayout
+                  ? _buildGridLayout(task)
+                  : _buildListLayout(task),
             ),
           ],
         ),
@@ -418,7 +435,6 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
 
   Widget _buildActionButton(TimerTask task) {
     if (task.isRunning) {
-      // Active state with timer
       final activeTimer = task.activeTimer;
       String timerText = "Running";
       if (activeTimer != null) {
@@ -459,7 +475,6 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
         ),
       );
     } else {
-      // Start button
       return Material(
         color: Colors.transparent,
         child: InkWell(
@@ -484,9 +499,7 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
                 Icon(
                   task.isCompleted ? Icons.replay : Icons.play_arrow,
                   size: 18,
-                  color:
-                      Colors
-                          .white, // Assuming dark text on primary as per HTML, but usually white on primary
+                  color: Colors.white,
                 ),
                 const SizedBox(width: 4),
                 Text(
