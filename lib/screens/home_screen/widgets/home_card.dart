@@ -36,26 +36,46 @@ class HomeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isWidgetItem = item is HomeWidgetItem;
 
-    // 编辑模式下不使用 OpenContainer，直接返回卡片内容
+    // 编辑模式下不使用交互，直接返回卡片内容
     if (isEditMode) {
       return _buildCardContent(context, isWidgetItem);
     }
 
-    // 批量选择模式下使用 GestureDetector
-    if (isBatchMode) {
-      return GestureDetector(
-        onTap: onTap ?? () => _handleTap(context),
-        onLongPress: onLongPress,
-        child: _buildCardContent(context, isWidgetItem),
+    // 小组件卡片使用 OpenContainer 实现展开动画
+    if (isWidgetItem) {
+      final widgetItem = item as HomeWidgetItem;
+      final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
+
+      return OpenContainer<bool>(
+        transitionType: ContainerTransitionType.fade,
+        transitionDuration: const Duration(milliseconds: 400),
+        openBuilder: (BuildContext context, VoidCallback _) {
+          if (widgetDef != null) {
+            final plugin = globalPluginManager.getPlugin(widgetDef.pluginId);
+            if (plugin != null) {
+              return Scaffold(body: plugin.buildMainView(context));
+            }
+          }
+          return Scaffold(body: const Center(child: Text('无法打开插件')));
+        },
+        closedElevation: 0,
+        closedShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        closedColor: Colors.transparent,
+        openElevation: 0,
+        openColor: Theme.of(context).scaffoldBackgroundColor,
+        closedBuilder: (BuildContext context, VoidCallback openContainer) {
+          return GestureDetector(
+            onTap: onTap ?? openContainer,
+            onLongPress: onLongPress,
+            child: _buildCardContent(context, true),
+          );
+        },
       );
     }
 
-    // 对于小组件卡片，使用 OpenContainer 实现过渡动画
-    if (isWidgetItem) {
-      return _buildOpenContainerForWidget(context, item as HomeWidgetItem);
-    }
-
-    // 对于文件夹卡片，使用 GestureDetector（保持原有对话框行为）
+    // 文件夹卡片使用 GestureDetector
     return GestureDetector(
       onTap: onTap ?? () => _handleTap(context),
       onLongPress: onLongPress,
@@ -123,50 +143,6 @@ class HomeCard extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-
-  /// 为小组件构建 OpenContainer
-  Widget _buildOpenContainerForWidget(
-    BuildContext context,
-    HomeWidgetItem widgetItem,
-  ) {
-    final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
-
-    return OpenContainer<bool>(
-      transitionType: ContainerTransitionType.fade,
-      transitionDuration: const Duration(milliseconds: 400),
-      openBuilder: (BuildContext context, VoidCallback _) {
-        // 打开插件页面
-        if (widgetDef != null) {
-          final plugin = globalPluginManager.getPlugin(widgetDef.pluginId);
-          if (plugin != null) {
-            // 返回插件的主界面
-            return Scaffold(body: plugin.buildMainView(context));
-          }
-        }
-        // 如果找不到插件，返回错误页面
-        return Scaffold(body: const Center(child: Text('无法打开插件')));
-      },
-      closedElevation: 0,
-      closedShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      closedColor: Colors.transparent,
-      openElevation: 0,
-      openColor: Theme.of(context).scaffoldBackgroundColor,
-      closedBuilder: (BuildContext context, VoidCallback openContainer) {
-        // 添加长按支持
-        return GestureDetector(
-          onLongPress: onLongPress,
-          // 点击事件由 OpenContainer 处理
-          child: _buildCardContent(context, true),
-        );
-      },
-      onClosed: (result) {
-        // 从插件页面返回时的回调
-        // 可以在这里处理插件返回的数据
-      },
     );
   }
 
@@ -349,21 +325,9 @@ class HomeCard extends StatelessWidget {
     );
   }
 
-  /// 处理点击事件
+  /// 处理点击事件（用于文件夹）
   void _handleTap(BuildContext context) {
-    if (item is HomeWidgetItem) {
-      final widgetItem = item as HomeWidgetItem;
-      final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
-
-      if (widgetDef != null) {
-        // 打开对应的插件
-        final plugin = globalPluginManager.getPlugin(widgetDef.pluginId);
-        if (plugin != null) {
-          globalPluginManager.openPlugin(context, plugin);
-        }
-      }
-    } else if (item is HomeFolderItem) {
-      // 打开文件夹对话框（稍后实现）
+    if (item is HomeFolderItem) {
       _openFolderDialog(context, item as HomeFolderItem);
     }
   }
