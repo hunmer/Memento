@@ -6,7 +6,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
-import '../../../core/storage/storage_manager.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
 import '../../../widgets/quill_viewer/index.dart';
 import '../../../widgets/super_cupertino_navigation_wrapper.dart';
 import 'diary_editor_screen.dart';

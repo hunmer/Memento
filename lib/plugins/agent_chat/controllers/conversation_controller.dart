@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/agent_chat/data/sample_data_old.dart';
+import 'package:Memento/plugins/agent_chat/data/sample_data.dart';
 import 'package:flutter/foundation.dart';
 import '../../../core/storage/storage_manager.dart';
 import '../services/conversation_service.dart';
