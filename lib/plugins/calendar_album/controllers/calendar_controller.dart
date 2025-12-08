@@ -1,11 +1,24 @@
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
+import 'package:Memento/plugins/calendar_album/sample_data.dart';
 import 'dart:convert';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 
 class CalendarController extends ChangeNotifier {
+  // 发送事件通知
+  void _notifyEvent(String action, CalendarEntry entry) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'calendar_entry_$action',
+      itemId: entry.id,
+      title: entry.title,
+      action: action,
+    );
+    EventManager.instance.broadcast('calendar_entry_$action', eventArgs);
+  }
   final Map<DateTime, List<CalendarEntry>> _entries = {};
   DateTime _selectedDate = DateTime.now();
   DateTime _currentMonth = DateTime.now();
@@ -118,6 +131,14 @@ class CalendarController extends ChangeNotifier {
 
   Future<void> _loadEntries() async {
     final data = await _storage.readSafeJson(_storageKey);
+
+    // 检查是否有数据，如果没有则加载示例数据
+    if (data.isEmpty) {
+      await _loadSampleData();
+      return;
+    }
+
+    // 加载现有数据
     data.forEach((key, value) {
       final date = DateTime.parse(key);
       final entries =
@@ -130,6 +151,21 @@ class CalendarController extends ChangeNotifier {
       _entries[date] = entries;
       notifyListeners();
     });
+  }
+
+  /// 加载示例数据
+  Future<void> _loadSampleData() async {
+    final sampleEntries = CalendarAlbumSampleData.getSampleCalendarEntriesGrouped();
+
+    // 将示例数据加载到内存中
+    sampleEntries.forEach((date, entries) {
+      _entries[date] = entries;
+    });
+
+    // 保存示例数据到存储
+    await _saveEntries();
+
+    notifyListeners();
   }
 
   Future<void> _saveEntries() async {
@@ -153,6 +189,9 @@ class CalendarController extends ChangeNotifier {
     await _saveEntries();
     notifyListeners();
 
+    // 广播添加事件
+    _notifyEvent('added', entry);
+
     // 同步小组件数据
     await PluginWidgetSyncHelper.instance.syncCalendarAlbum();
   }
@@ -169,6 +208,9 @@ class CalendarController extends ChangeNotifier {
         _entries[date]![index] = entry;
         await _saveEntries();
         notifyListeners();
+
+        // 广播更新事件
+        _notifyEvent('updated', entry);
 
         // 同步小组件数据
         await PluginWidgetSyncHelper.instance.syncCalendarAlbum();
@@ -189,6 +231,9 @@ class CalendarController extends ChangeNotifier {
       }
       await _saveEntries();
       notifyListeners();
+
+      // 广播删除事件
+      _notifyEvent('deleted', entry);
 
       // 同步小组件数据
       await PluginWidgetSyncHelper.instance.syncCalendarAlbum();

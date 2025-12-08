@@ -542,6 +542,54 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     );
   }
 
+  /// 快速创建布局
+  Future<void> _createQuickLayout(Map<String, String> data) async {
+    final name = data['name']!;
+    final type = data['type']!;
+
+    try {
+      // 清空当前布局
+      _layoutManager.clear();
+
+      // 根据选择的类型添加小组件
+      if (type == '1x1') {
+        await _addAllWidgetsOfSize(HomeWidgetSize.small);
+      } else if (type == '2x2') {
+        await _addAllWidgetsOfSize(HomeWidgetSize.large);
+      }
+      // 空白布局不添加任何内容
+
+      // 保存布局
+      await _layoutManager.saveCurrentLayoutAs(name);
+
+      Toast.success('布局"$name"已创建');
+    } catch (e) {
+      Toast.error('创建失败：$e');
+    }
+  }
+
+  /// 添加所有指定尺寸的小组件
+  Future<void> _addAllWidgetsOfSize(HomeWidgetSize size) async {
+    final registry = HomeWidgetRegistry();
+    final allWidgets = registry.getAllWidgets();
+
+    // 筛选支持指定尺寸的小组件
+    final widgets = allWidgets
+        .where((widget) => widget.supportedSizes.contains(size))
+        .toList();
+
+    // 添加到布局
+    for (final widget in widgets) {
+      final item = HomeWidgetItem(
+        id: _layoutManager.generateId(),
+        widgetId: widget.id,
+        size: size,
+        config: {},
+      );
+      _layoutManager.addItem(item);
+    }
+  }
+
   /// 显示保存布局对话框
   void _showSaveLayoutDialog() {
     final TextEditingController nameController = TextEditingController();
@@ -1222,6 +1270,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                   ? (item) => _toggleItemSelection(item.id)
                   : null,
               onItemLongPress: _handleCardLongPress,
+              onQuickCreateLayout: _createQuickLayout,
             ),
           );
         },

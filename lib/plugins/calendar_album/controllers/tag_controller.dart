@@ -4,8 +4,20 @@ import 'package:flutter/material.dart';
 import '../../../../widgets/tag_manager_dialog/models/tag_group.dart' as dialog;
 import 'dart:convert';
 import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 
 class TagController extends ChangeNotifier {
+  // 发送事件通知
+  void _notifyEvent(String action, String tagName) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'calendar_tag_$action',
+      itemId: tagName,
+      title: tagName,
+      action: action,
+    );
+    EventManager.instance.broadcast('calendar_tag_$action', eventArgs);
+  }
   final VoidCallback? onTagsChanged;
 
   List<dialog.TagGroup> tagGroups = [];
@@ -33,6 +45,7 @@ class TagController extends ChangeNotifier {
       dialog.TagGroup(name: '最近使用', tags: []),
       dialog.TagGroup(name: '地点', tags: ['家', '工作', '旅行']),
       dialog.TagGroup(name: '活动', tags: ['生日', '聚会', '会议']),
+      dialog.TagGroup(name: '心情', tags: ['开心', '平静', '兴奋', '思考']),
     ];
 
     await _loadTagGroups();
@@ -55,6 +68,9 @@ class TagController extends ChangeNotifier {
         if (!tagGroups.any((group) => group.name == '最近使用')) {
           tagGroups.insert(0, dialog.TagGroup(name: '最近使用', tags: []));
         }
+      } else {
+        // 如果文件为空，保存默认标签组
+        await _saveTagGroups();
       }
 
       // 尝试加载最近使用的标签
@@ -173,6 +189,9 @@ class TagController extends ChangeNotifier {
       group.tags.add(tag);
       await _saveTagGroups();
       notifyListeners();
+
+      // 广播添加事件
+      _notifyEvent('added', tag);
     }
   }
 
@@ -184,6 +203,9 @@ class TagController extends ChangeNotifier {
     await _saveTagGroups();
     await _saveRecentTags();
     notifyListeners();
+
+    // 广播删除事件
+    _notifyEvent('deleted', tag);
   }
 
   bool hasTag(String name) {

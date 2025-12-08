@@ -4,7 +4,7 @@ import 'base_controller.dart';
 /// 分页控制相关功能的混入类
 mixin PaginationControllerMixin on BaseTimelineController {
   // 分页相关
-  static const int pageSize = 100; // 每页显示的消息数量
+  static const int pageSize = 50; // 每页显示的消息数量
   int currentPage = 1;
   bool hasMoreMessages = true;
   bool isLoadingMore = false;

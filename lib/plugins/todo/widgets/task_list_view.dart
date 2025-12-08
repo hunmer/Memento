@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
 
 class TaskListView extends StatefulWidget {
@@ -102,20 +103,29 @@ class _TaskCard extends StatefulWidget {
   State<_TaskCard> createState() => _TaskCardState();
 }
 
-class _TaskCardState extends State<_TaskCard> {
+class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixin {
   bool _isExpanded = false;
   static const primaryColor = Color(0xFF607AFB);
   Timer? _timer;
+  late AnimationController _confettiController;
+  OverlayEntry? _confettiOverlay;
 
   @override
   void initState() {
     super.initState();
+    _confettiController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
     _startTimer();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _confettiController.dispose();
+    _confettiOverlay?.remove();
+    _confettiOverlay = null;
     super.dispose();
   }
 
@@ -129,6 +139,61 @@ class _TaskCardState extends State<_TaskCard> {
           setState(() {});
         }
       });
+    }
+  }
+
+  void _showConfettiAnimation() {
+    // 移除之前的 overlay（如果存在）
+    _confettiOverlay?.remove();
+    _confettiOverlay = null;
+
+    _confettiOverlay = OverlayEntry(
+      builder: (context) => Positioned.fill(
+        child: IgnorePointer(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Center(
+                child: SizedBox(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  child: Lottie.asset(
+                    'assets/animations/Confetti.json',
+                    controller: _confettiController,
+                    fit: BoxFit.contain,
+                    frameRate: FrameRate(60), // 使用60FPS提供流畅体验
+                    renderCache: RenderCache.raster, // 启用离屏缓存优化性能
+                    onLoaded: (composition) {
+                      _confettiController.duration = composition.duration;
+                      _confettiController.forward(from: 0).then((_) {
+                        // 动画播放完成后移除 overlay
+                        if (mounted) {
+                          _confettiOverlay?.remove();
+                          _confettiOverlay = null;
+                        }
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    // 插入到 overlay
+    Overlay.of(context).insert(_confettiOverlay!);
+  }
+
+  void _handleStatusChange(TaskStatus newStatus) {
+    final oldStatus = widget.task.status;
+
+    // 先调用状态变更回调
+    widget.onStatusChanged(newStatus);
+
+    // 如果从未完成状态变为完成状态，播放动画
+    if (oldStatus != TaskStatus.done && newStatus == TaskStatus.done) {
+      _showConfettiAnimation();
     }
   }
 
@@ -309,10 +374,10 @@ class _TaskCardState extends State<_TaskCard> {
                                   onTap: () {
                                     if (widget.task.status == TaskStatus.inProgress) {
                                       // 进行中任务点击直接标记为完成
-                                      widget.onStatusChanged(TaskStatus.done);
+                                      _handleStatusChange(TaskStatus.done);
                                     } else {
                                       // 待办或已完成任务点击开始计时
-                                      widget.onStatusChanged(TaskStatus.inProgress);
+                                      _handleStatusChange(TaskStatus.inProgress);
                                     }
                                   },
                                   child: Container(
@@ -468,7 +533,7 @@ class _TaskCardState extends State<_TaskCard> {
                               onTap: () {
                                 final newStatus =
                                     isDone ? TaskStatus.todo : TaskStatus.done;
-                                widget.onStatusChanged(newStatus);
+                                _handleStatusChange(newStatus);
                               },
                               child: SizedBox(
                                 height: 24,
@@ -491,7 +556,7 @@ class _TaskCardState extends State<_TaskCard> {
                                         value == true
                                             ? TaskStatus.done
                                             : TaskStatus.todo;
-                                    widget.onStatusChanged(newStatus);
+                                    _handleStatusChange(newStatus);
                                   },
                                 ),
                               ),

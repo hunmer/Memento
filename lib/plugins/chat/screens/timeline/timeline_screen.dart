@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
@@ -181,8 +182,10 @@ class _TimelineScreenState extends State<TimelineScreen> {
         // 显示加载更多指示器
         if (_controller.hasMoreMessages &&
             index == _controller.displayMessages.length) {
-          // 触发加载更多
-          _controller.loadMoreMessages();
+          // 在构建完成后触发加载更多，避免在 build 期间调用 setState
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _controller.loadMoreMessages();
+          });
 
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -194,13 +197,32 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
         if (channel == null) return const SizedBox.shrink();
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: TimelineMessageCard(
-            message: message,
-            channel: channel,
-            controller: _controller,
-            settingsService: widget.chatPlugin.settingsService,
+        // 限制动画延迟，避免列表过长时延迟过大（最多延迟 500ms）
+        final animationDelay = ((index * 50).clamp(0, 500)).ms;
+
+        return Animate(
+          key: ValueKey(message.id),
+          effects: [
+            FadeEffect(
+              duration: 300.ms,
+              delay: animationDelay,
+            ),
+            SlideEffect(
+              begin: const Offset(0, 0.3),
+              end: Offset.zero,
+              duration: 400.ms,
+              delay: animationDelay,
+              curve: Curves.easeOut,
+            ),
+          ],
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: TimelineMessageCard(
+              message: message,
+              channel: channel,
+              controller: _controller,
+              settingsService: widget.chatPlugin.settingsService,
+            ),
           ),
         );
       },
@@ -223,8 +245,10 @@ class _TimelineScreenState extends State<TimelineScreen> {
                 // 显示加载更多指示器
                 if (index >= _controller.displayMessages.length) {
                   if (_controller.hasMoreMessages) {
-                    // 触发加载更多
-                    _controller.loadMoreMessages();
+                    // 在构建完成后触发加载更多，避免在 build 期间调用 setState
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _controller.loadMoreMessages();
+                    });
                     return Container(
                       height: 80,
                       alignment: Alignment.center,
@@ -265,12 +289,31 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
     if (channel == null) return const SizedBox.shrink();
 
-    return TimelineMessageCard(
-      message: message,
-      channel: channel,
-      controller: _controller,
-      isGridView: true,
-      settingsService: widget.chatPlugin.settingsService,
+    // 限制动画延迟，避免列表过长时延迟过大（最多延迟 500ms）
+    final animationDelay = ((index * 50).clamp(0, 500)).ms;
+
+    return Animate(
+      key: ValueKey(message.id),
+      effects: [
+        FadeEffect(
+          duration: 300.ms,
+          delay: animationDelay,
+        ),
+        SlideEffect(
+          begin: const Offset(0, 0.3),
+          end: Offset.zero,
+          duration: 400.ms,
+          delay: animationDelay,
+          curve: Curves.easeOut,
+        ),
+      ],
+      child: TimelineMessageCard(
+        message: message,
+        channel: channel,
+        controller: _controller,
+        isGridView: true,
+        settingsService: widget.chatPlugin.settingsService,
+      ),
     );
   }
 

@@ -362,4 +362,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get projectLink => 'https://github.com/hunmer/memento';
+
+  @override
+  String get feedbackTitle => '反馈与建议';
+
+  @override
+  String get feedbackLink => 'https://github.com/hunmer/Memento/issues';
+
+  @override
+  String get documentationTitle => '项目文档';
+
+  @override
+  String get documentationLink => 'https://github.com/hunmer/Memento#readme';
+
+  @override
+  String get version => '版本';
 }

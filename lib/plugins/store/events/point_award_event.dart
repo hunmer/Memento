@@ -108,6 +108,6 @@ class PointAwardEvent {
     eventManager.unsubscribe('onMessageSent', _handleMessageSent);
     eventManager.unsubscribe('onRecordAdded', _handleRecordAdded);
     eventManager.unsubscribe('diary_entry_created', _handleDiaryAdded);
-    eventManager.unsubscribe('bill_added', _handleDiaryAdded);
+    eventManager.unsubscribe('bill_added', _handleBillAdded);
   }
 }

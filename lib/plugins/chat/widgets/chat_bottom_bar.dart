@@ -1,14 +1,13 @@
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/plugins/chat/screens/channel_list/channel_list_screen.dart';
 import 'package:Memento/plugins/chat/screens/timeline/timeline_screen.dart';
-import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/plugins/chat/screens/create_channel/create_channel_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:smooth_sheets/smooth_sheets.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
-import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
-import 'package:Memento/core/services/toast_service.dart';
 
 /// Chat 插件的底部栏组件
 /// 提供频道列表和时间线两个 Tab 的切换功能
@@ -70,79 +69,61 @@ class _ChatBottomBarState extends State<ChatBottomBar>
     });
   }
 
-  /// 创建新频道
-  Future<void> _createChannel() async {
-    final l10n = ChatLocalizations.of(context);
-
-    final result = await showDialog<String>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(l10n.createChannel),
-            content: TextField(
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: l10n.channelName,
-                border: const OutlineInputBorder(),
-              ),
-              onSubmitted: (value) => Navigator.of(context).pop(value),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(l10n.cancel),
-              ),
-              TextButton(
-                onPressed: () {
-                  final text =
-                      (context as Element)
-                          .findAncestorWidgetOfExactType<TextField>()
-                          ?.controller
-                          ?.text;
-                  if (text != null && text.isNotEmpty) {
-                    Navigator.of(context).pop(text);
-                  }
-                },
-                child: Text(l10n.create),
-              ),
-            ],
-          ),
-    );
-
-    if (result != null && result.isNotEmpty) {
-      try {
-        // 创建频道对象
-        final channel = Channel(
-          id: const Uuid().v4(),
-          title: result,
-          icon: Icons.chat,
-          backgroundColor: widget.plugin.color,
-          messages: [],
-        );
-        await widget.plugin.channelService.createChannel(channel);
-
-        if (mounted) {
-          toastService.showToast(l10n.channelCreated);
-        }
-      } catch (e) {
-        if (mounted) {
-          toastService.showToast('${l10n.createChannelFailed}: $e');
-        }
-      }
-    }
-  }
-
-  /// 新建聊天
+  /// 新建聊天（时间线 Tab 的 FAB 操作）
   Future<void> _createNewChat() async {
     // 切换到频道列表 Tab
     if (_currentPage != 0) {
       _tabController.animateTo(0);
     }
+  }
 
-    // 延迟执行创建操作，确保 Tab 切换完成
-    Future.delayed(const Duration(milliseconds: 300), () {
-      _createChannel();
-    });
+  /// 显示创建频道的 Sheet
+  void _showCreateChannelSheet() {
+    Navigator.of(context).push(
+      ModalSheetRoute(
+        swipeDismissible: true,
+        builder: (context) => Sheet(
+          decoration: MaterialSheetDecoration(
+            size: SheetSize.fit,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(20),
+            ),
+            clipBehavior: Clip.antiAlias,
+          ),
+          child: CreateChannelSheet(plugin: widget.plugin),
+        ),
+      ),
+    );
+  }
+
+  /// 构建创建频道的 FAB
+  Widget _buildCreateChannelFAB() {
+    return FloatingActionButton(
+      backgroundColor: widget.plugin.color,
+      elevation: 4,
+      shape: const CircleBorder(),
+      onPressed: _showCreateChannelSheet,
+      child: const Icon(
+        Icons.add_comment,
+        color: Colors.white,
+        size: 32,
+      ),
+    );
+  }
+
+  /// 构建新建聊天的 FAB（时间线 Tab）
+  Widget _buildNewChatFAB() {
+    return FloatingActionButton(
+      backgroundColor: widget.plugin.color,
+      elevation: 4,
+      shape: const CircleBorder(),
+      onPressed: _createNewChat,
+      child: const Icon(
+        Icons.chat,
+        color: Colors.white,
+        size: 32,
+      ),
+    );
   }
 
   @override
@@ -286,25 +267,9 @@ class _ChatBottomBarState extends State<ChatBottomBar>
           ),
           Positioned(
             top: -25,
-            child: FloatingActionButton(
-              backgroundColor: widget.plugin.color, // 使用插件主题色
-              elevation: 4,
-              shape: const CircleBorder(),
-              child: Icon(
-                _currentPage == 0 ? Icons.add_comment : Icons.chat,
-                color: Colors.white,
-                size: 32,
-              ),
-              onPressed: () {
-                if (_currentPage == 0) {
-                  // Tab0: 创建频道
-                  _createChannel();
-                } else {
-                  // Tab1: 新建聊天
-                  _createNewChat();
-                }
-              },
-            ),
+            child: _currentPage == 0
+                ? _buildCreateChannelFAB()
+                : _buildNewChatFAB(),
           ),
         ],
       ),

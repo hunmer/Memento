@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/chat/utils/date_formatter.dart';
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 
 class ChannelTile extends StatelessWidget {
   final Channel channel;
-  final VoidCallback onTap;
+  final VoidCallback? onTap; // 改为可选，因为 OpenContainer 会处理导航
+  final VoidCallback? onBeforeOpen; // 在打开页面之前的回调（如设置当前频道）
   final Function(Channel) onEdit;
   final Function(Channel) onDelete;
   final Key? itemKey;
@@ -13,7 +16,8 @@ class ChannelTile extends StatelessWidget {
   const ChannelTile({
     super.key,
     required this.channel,
-    required this.onTap,
+    this.onTap, // 改为可选
+    this.onBeforeOpen, // 新增回调
     required this.onEdit,
     required this.onDelete,
     this.itemKey,
@@ -21,72 +25,99 @@ class ChannelTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          key: itemKey,
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                backgroundColor: channel.backgroundColor,
-                child: Icon(channel.icon, color: Colors.white, size: 20),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+    return OpenContainer<bool>(
+      transitionType: ContainerTransitionType.fade,
+      transitionDuration: const Duration(milliseconds: 400),
+      openBuilder: (BuildContext context, VoidCallback _) {
+        // 在打开之前执行回调（如设置当前频道）
+        onBeforeOpen?.call();
+        // 打开聊天页面
+        return ChatScreen(channel: channel);
+      },
+      closedElevation: 0,
+      closedShape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero, // 列表项使用直角
+      ),
+      closedColor: Colors.transparent,
+      openElevation: 0,
+      openColor: Theme.of(context).scaffoldBackgroundColor,
+      closedBuilder: (BuildContext context, VoidCallback openContainer) {
+        return Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: onTap ?? openContainer, // 如果提供了 onTap 则使用，否则使用 OpenContainer
+            child: _buildTileContent(context),
+          ),
+        );
+      },
+      onClosed: (result) {
+        // 从聊天页面返回时的回调
+      },
+    );
+  }
+
+  /// 构建列表项内容
+  Widget _buildTileContent(BuildContext context) {
+    return Container(
+      key: itemKey,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CircleAvatar(
+            backgroundColor: channel.backgroundColor,
+            child: Icon(channel.icon, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  channel.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                _buildSubtitle(context),
+              ],
+            ),
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, size: 20),
+            onSelected: (value) {
+              if (value == 'edit') {
+                onEdit(channel);
+              } else if (value == 'delete') {
+                onDelete(channel);
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem<String>(
+                value: 'edit',
+                child: Row(
                   children: [
-                    Text(
-                      channel.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 4),
-                    _buildSubtitle(context),
+                    const Icon(Icons.edit, size: 20),
+                    const SizedBox(width: 8),
+                    Text(ChatLocalizations.of(context).edit),
                   ],
                 ),
               ),
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert, size: 20),
-                onSelected: (value) {
-                  if (value == 'edit') {
-                    onEdit(channel);
-                  } else if (value == 'delete') {
-                    onDelete(channel);
-                  }
-                },
-                itemBuilder: (BuildContext context) => [
-                  PopupMenuItem<String>(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.edit, size: 20),
-                        const SizedBox(width: 8),
-                            Text(ChatLocalizations.of(context).edit),
-                      ],
+              PopupMenuItem<String>(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      ChatLocalizations.of(context).delete,
                     ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.delete, size: 20),
-                        const SizedBox(width: 8),
-                            Text(
-                              ChatLocalizations.of(context).delete,
-                            ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

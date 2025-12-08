@@ -11,6 +11,7 @@ import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/widgets/point_settings_view.dart';
 import 'package:Memento/plugins/store/models/product.dart';
+import 'package:Memento/plugins/store/events/point_award_event.dart';
 
 /// 物品兑换插件
 class StorePlugin extends BasePlugin with JSBridgePlugin {
@@ -43,6 +44,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   StoreController? _controller;
+  PointAwardEvent? _pointAwardEvent;
   bool _isInitialized = false;
 
   /// 获取商店控制器
@@ -82,11 +84,21 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       _controller = StoreController(this);
       await _controller!.loadFromStorage();
 
+      // 初始化积分奖励事件处理器
+      _pointAwardEvent = PointAwardEvent(this);
+
       _isInitialized = true;
 
       // 注册 JS API（最后一步）
       await registerJSAPI();
     }
+  }
+
+  /// 清理资源
+  void dispose() {
+    // 清理事件订阅
+    _pointAwardEvent?.dispose();
+    _pointAwardEvent = null;
   }
 
   @override
