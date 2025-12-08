@@ -1364,30 +1364,30 @@ class _BillMainViewState extends State<BillMainView>
               Tab(icon: Icon(Icons.bar_chart), text: '统计分析'),
             ],
           ),
-          OpenContainer<bool>(
-            transitionType: ContainerTransitionType.fade,
-            tappable: false,
-            closedElevation: 0.0,
-            closedShape: const RoundedRectangleBorder(),
-            closedColor: Colors.transparent,
-            openBuilder: (BuildContext context, VoidCallback _) {
-              return BillEditScreen(
-                billPlugin: billPlugin,
-                accountId: billPlugin.selectedAccount?.id ?? '',
-              );
-            },
-            closedBuilder: (BuildContext context, VoidCallback openContainer) {
-              return Positioned(
-                top: -25,
-                child: FloatingActionButton(
+          Positioned(
+            top: -25,
+            child: OpenContainer<bool>(
+              transitionType: ContainerTransitionType.fade,
+              tappable: false,
+              closedElevation: 0.0,
+              closedShape: const RoundedRectangleBorder(),
+              closedColor: Colors.transparent,
+              openBuilder: (BuildContext context, VoidCallback _) {
+                return BillEditScreen(
+                  billPlugin: billPlugin,
+                  accountId: billPlugin.selectedAccount?.id ?? '',
+                );
+              },
+              closedBuilder: (BuildContext context, VoidCallback openContainer) {
+                return FloatingActionButton(
                   onPressed: openContainer,
                   backgroundColor: Color(0xFF3498DB),
                   elevation: 4,
                   shape: const CircleBorder(),
                   child: const Icon(Icons.add, color: Colors.white, size: 32),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ],
       ),

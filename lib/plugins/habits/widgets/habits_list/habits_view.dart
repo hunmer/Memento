@@ -254,10 +254,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
         onHabitTap: (habit) => _showHabitForm(context, habit),
       ), // 搜索结果页面
       actions: [
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: () => _showHabitForm(context),
-        ),
+      
       ],
       body: _buildCardView(_habits, l10n),
     );

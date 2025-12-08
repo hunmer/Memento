@@ -6,6 +6,7 @@ import 'package:Memento/plugins/store/widgets/add_product_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:Memento/core/services/toast_service.dart';
@@ -305,7 +306,16 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                 onPressed: () {
                   if (_currentPage == 0) {
                     // Tab0: 添加商品
-                    _addProduct();
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (context) => Padding(
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
+                        child: AddProductPage(controller: widget.plugin.controller),
+                      ),
+                    );
                   } else if (_currentPage == 2) {
                     // Tab2: 添加积分
                     _showAddPointsDialog();

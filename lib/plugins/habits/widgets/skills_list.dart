@@ -124,10 +124,6 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
           icon: const Icon(Icons.sort),
           onPressed: _showSortMenu,
         ),
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: () => _showSkillForm(context),
-        ),
       ],
       body: _buildCardView(_skills, l10n),
     );

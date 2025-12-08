@@ -775,46 +775,46 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
               ),
             ],
           ),
-          if (_currentPage == 0)
-            OpenContainer<bool>(
-              transitionType: ContainerTransitionType.fade,
-              openBuilder: (BuildContext context, VoidCallback _) {
-                return AgentEditScreen();
-              },
-              closedBuilder: (BuildContext context, VoidCallback openContainer) {
-                return Positioned(
-                  top: -25,
-                  child: FloatingActionButton(
-                    onPressed: openContainer,
+          Positioned(
+            top: -25,
+            child: _currentPage == 0
+                ? OpenContainer<bool>(
+                    transitionType: ContainerTransitionType.fade,
+                    tappable: false,
+                    closedElevation: 0.0,
+                    closedShape: const RoundedRectangleBorder(),
+                    closedColor: Colors.transparent,
+                    openBuilder: (BuildContext context, VoidCallback _) {
+                      return AgentEditScreen();
+                    },
+                    closedBuilder: (BuildContext context, VoidCallback openContainer) {
+                      return FloatingActionButton(
+                        onPressed: openContainer,
+                        backgroundColor: Colors.deepOrange,
+                        elevation: 4,
+                        shape: const CircleBorder(),
+                        child: const Icon(
+                          Icons.smart_toy,
+                          color: Colors.white,
+                          size: 32,
+                        ),
+                      );
+                    },
+                  )
+                : FloatingActionButton(
+                    onPressed: () {
+                      _showPresetEditDialog();
+                    },
                     backgroundColor: Colors.deepOrange,
                     elevation: 4,
                     shape: const CircleBorder(),
                     child: const Icon(
-                      Icons.smart_toy,
+                      Icons.text_snippet,
                       color: Colors.white,
                       size: 32,
                     ),
                   ),
-                );
-              },
-            )
-          else
-            Positioned(
-              top: -25,
-              child: FloatingActionButton(
-                onPressed: () {
-                  _showPresetEditDialog();
-                },
-                backgroundColor: Colors.deepOrange,
-                elevation: 4,
-                shape: const CircleBorder(),
-                child: const Icon(
-                  Icons.text_snippet,
-                  color: Colors.white,
-                  size: 32,
-                ),
-              ),
-            ),
+          ),
         ],
       ),
     );

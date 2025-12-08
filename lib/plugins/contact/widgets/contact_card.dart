@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:io';
 import 'package:Memento/plugins/contact/controllers/contact_controller.dart';
 import 'package:Memento/plugins/contact/models/contact_model.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/plugins/contact/screens/contact_records_screen.dart';
+import 'package:Memento/plugins/contact/widgets/contact_form.dart';
 
 class ContactCard extends StatelessWidget {
   final Contact contact;
@@ -31,38 +33,50 @@ class ContactCard extends StatelessWidget {
         ? const Color(0xFF2C2C2E)
         : const Color(0xFFEFEFF4);
 
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildTopSection(context, primaryTextColor, secondaryTextColor),
-              if (contact.notes != null && contact.notes!.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text(
-                  contact.notes!,
-                  style: TextStyle(fontSize: 14, color: secondaryTextColor),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-              const SizedBox(height: 16),
-              _buildTags(context, chipColor, secondaryTextColor),
-              const SizedBox(height: 12),
-              const Divider(height: 1),
-              const SizedBox(height: 8),
-              _buildBottomSection(context, primaryTextColor),
-            ],
+    return OpenContainer(
+      transitionType: ContainerTransitionType.fade,
+      openBuilder: (context, _) {
+        return ContactForm(
+          contact: contact,
+          controller: controller,
+          onSave: (savedContact) {},
+        );
+      },
+      closedBuilder: (context, VoidCallback openContainer) {
+        return Card(
+          elevation: 0,
+          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: InkWell(
+            onTap: openContainer,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTopSection(context, primaryTextColor, secondaryTextColor),
+                  if (contact.notes != null && contact.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      contact.notes!,
+                      style: TextStyle(fontSize: 14, color: secondaryTextColor),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  _buildTags(context, chipColor, secondaryTextColor),
+                  const SizedBox(height: 12),
+                  const Divider(height: 1),
+                  const SizedBox(height: 8),
+                  _buildBottomSection(context, primaryTextColor),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

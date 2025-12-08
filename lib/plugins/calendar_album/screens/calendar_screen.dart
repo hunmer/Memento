@@ -187,11 +187,6 @@ class _CalendarScreenState extends State<CalendarScreen>
             },
             tooltip: '回到当前月份',
           ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _navigateToNewEntry(context),
-            tooltip: '新建日记',
-          ),
         ],
         body: _buildCalendarListView(calendarController, selectedDate),
       ),

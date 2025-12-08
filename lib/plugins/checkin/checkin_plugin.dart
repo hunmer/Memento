@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
@@ -238,17 +239,12 @@ class _CheckinMainViewState extends State<CheckinMainView>
           ),
           Positioned(
             top: -25,
-            child: FloatingActionButton(
-              backgroundColor: checkinPlugin.color,
-              elevation: 4,
-              shape: const CircleBorder(),
-              child: const Icon(Icons.add, color: Colors.white, size: 32),
-              onPressed: () async {
-                final newItem = await NavigationHelper.push<CheckinItem>(
-                  context,
-                  const CheckinFormScreen(),
-                );
-
+            child: OpenContainer<CheckinItem>(
+              transitionType: ContainerTransitionType.fade,
+              openBuilder: (context, _) {
+                return const CheckinFormScreen();
+              },
+              onClosed: (newItem) async {
                 if (newItem != null) {
                   await checkinPlugin.addCheckinItem(newItem);
                   // 触发界面刷新
@@ -256,6 +252,18 @@ class _CheckinMainViewState extends State<CheckinMainView>
                     setState(() {});
                   }
                 }
+              },
+              closedElevation: 4,
+              closedShape: const CircleBorder(),
+              closedColor: checkinPlugin.color,
+              closedBuilder: (context, VoidCallback openContainer) {
+                return FloatingActionButton(
+                  backgroundColor: checkinPlugin.color,
+                  elevation: 4,
+                  shape: const CircleBorder(),
+                  onPressed: openContainer,
+                  child: const Icon(Icons.add, color: Colors.white, size: 32),
+                );
               },
             ),
           ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 
@@ -1000,9 +1001,20 @@ class ContactMainViewState extends State<ContactMainView> {
           onPressed: _showFilterDialog,
         ),
         IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: () => _addOrEditContact(),
+        OpenContainer(
+          transitionType: ContainerTransitionType.fade,
+          openBuilder: (context, _) {
+            return ContactForm(
+              controller: _controller,
+              onSave: (savedContact) {},
+            );
+          },
+          closedBuilder: (context, VoidCallback openContainer) {
+            return IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: openContainer,
+            );
+          },
         ),
       ],
       enableLargeTitle: true,
