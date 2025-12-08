@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
@@ -499,27 +500,51 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       children: [
         // 分组过滤器区域 - 使用更稳定的判断
         if (hasGroups) _buildGroupFilters(groups) else const SizedBox.shrink(),
-        // 会话列表
+        // 会话列表 - 使用 FadeThroughTransition 实现淡入淡出效果
         Expanded(
-          child:
-              conversations.isEmpty
-                  ? _buildEmptyListState()
-                  : ListView.builder(
-                    padding: const EdgeInsets.all(8),
-                    itemCount: conversations.length,
-                    itemBuilder: (context, index) {
-                      final conversation = conversations[index];
-                      return _buildConversationCard(conversation);
-                    },
-                  ),
+          child: _conversationListTransition(
+            isEmpty: conversations.isEmpty,
+            emptyWidget: _buildEmptyListState(key: const ValueKey('empty')),
+            listWidget: ListView.builder(
+              key: ValueKey('conversation_list_${conversations.length}'),
+              itemCount: conversations.length,
+              itemBuilder: (context, index) {
+                final conversation = conversations[index];
+                return _buildConversationCard(conversation);
+              },
+            ),
+          ),
         ),
       ],
     );
   }
 
+  /// 会话列表过渡动画组件
+  Widget _conversationListTransition({
+    required bool isEmpty,
+    required Widget emptyWidget,
+    required Widget listWidget,
+  }) {
+    return PageTransitionSwitcher(
+      transitionBuilder: (
+        Widget child,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) {
+        return FadeThroughTransition(
+          animation: animation,
+          secondaryAnimation: secondaryAnimation,
+          child: child,
+        );
+      },
+      child: isEmpty ? emptyWidget : listWidget,
+    );
+  }
+
   /// 空列表状态
-  Widget _buildEmptyListState() {
+  Widget _buildEmptyListState({Key? key}) {
     return Center(
+      key: key,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -580,34 +605,28 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
             child: Row(
               children: [
                 // 全部按钮 - 当没有选择任何分组时显示为选中状态
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: const Text('全部'),
-                    selected: _controller.selectedGroupFilters.isEmpty,
-                    onSelected: (selected) {
-                      // 点击"全部"按钮会清除所有过滤器
-                      if (selected ||
-                          _controller.selectedGroupFilters.isNotEmpty) {
-                        _controller.clearGroupFilters();
-                      }
-                    },
-                  ),
+                _animatedFilterChip(
+                  label: '全部',
+                  isSelected: _controller.selectedGroupFilters.isEmpty,
+                  onSelected: (selected) {
+                    // 点击"全部"按钮会清除所有过滤器
+                    if (selected ||
+                        _controller.selectedGroupFilters.isNotEmpty) {
+                      _controller.clearGroupFilters();
+                    }
+                  },
                 ),
                 // 分组按钮
                 ...groups.map((group) {
                   final isSelected = _controller.selectedGroupFilters.contains(
                     group.id,
                   );
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text(group.name),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        _controller.toggleGroupFilter(group.id);
-                      },
-                    ),
+                  return _animatedFilterChip(
+                    label: group.name,
+                    isSelected: isSelected,
+                    onSelected: (selected) {
+                      _controller.toggleGroupFilter(group.id);
+                    },
                   );
                 }),
               ],
@@ -618,104 +637,142 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     );
   }
 
+  /// 动画 FilterChip 组件
+  Widget _animatedFilterChip({
+    required String label,
+    required bool isSelected,
+    required ValueChanged<bool> onSelected,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: AnimatedScale(
+        scale: isSelected ? 1.0 : 0.95,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeInOut,
+        child: FilterChip(
+          label: Text(label),
+          selected: isSelected,
+          onSelected: onSelected,
+        ),
+      ),
+    );
+  }
+
   /// 会话卡片
   Widget _buildConversationCard(Conversation conversation) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.blue[100],
-          child: Icon(
-            conversation.isPinned ? Icons.push_pin : Icons.chat,
-            color: Colors.blue[700],
-          ),
-        ),
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                conversation.title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+    return OpenContainer<bool>(
+      transitionType: ContainerTransitionType.fade,
+      openBuilder: (BuildContext context, VoidCallback _) {
+        // 直接返回聊天页面，OpenContainer 会处理过渡动画
+        return ChatScreen(
+          conversation: conversation,
+          storage: _controller.storage,
+          conversationService: _controller.conversationService,
+          getSettings: () => AgentChatPlugin.instance.settings,
+        );
+      },
+      closedBuilder: (BuildContext context, VoidCallback openContainer) {
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.blue[100],
+              child: Icon(
+                conversation.isPinned ? Icons.push_pin : Icons.chat,
+                color: Colors.blue[700],
               ),
             ),
-            if (conversation.unreadCount > 0)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(12),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    conversation.title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                child: Text(
-                  '${conversation.unreadCount}',
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ),
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (conversation.lastMessagePreview != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                conversation.lastMessagePreview!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-            ],
-            const SizedBox(height: 4),
-            Text(
-              _formatDateTime(conversation.lastMessageAt),
-              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                if (conversation.unreadCount > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${conversation.unreadCount}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+              ],
             ),
-          ],
-        ),
-        trailing: PopupMenuButton<String>(
-          onSelected:
-              (value) => _onConversationMenuSelected(value, conversation),
-          itemBuilder:
-              (context) => [
-                PopupMenuItem(
-                  value: 'pin',
-                  child: Row(
-                    children: [
-                      Icon(
-                        conversation.isPinned
-                            ? Icons.push_pin_outlined
-                            : Icons.push_pin,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(conversation.isPinned ? '取消置顶' : '置顶'),
-                    ],
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (conversation.lastMessagePreview != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    conversation.lastMessagePreview!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.grey[600]),
                   ),
-                ),
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit),
-                      SizedBox(width: 8),
-                      Text('编辑'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('删除', style: TextStyle(color: Colors.red)),
-                    ],
-                  ),
+                ],
+                const SizedBox(height: 4),
+                Text(
+                  _formatDateTime(conversation.lastMessageAt),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                 ),
               ],
-        ),
-        onTap: () => _openConversation(conversation),
-      ),
+            ),
+            trailing: PopupMenuButton<String>(
+              onSelected:
+                  (value) => _onConversationMenuSelected(value, conversation),
+              itemBuilder:
+                  (context) => [
+                    PopupMenuItem(
+                      value: 'pin',
+                      child: Row(
+                        children: [
+                          Icon(
+                            conversation.isPinned
+                                ? Icons.push_pin_outlined
+                                : Icons.push_pin,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(conversation.isPinned ? '取消置顶' : '置顶'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit),
+                          SizedBox(width: 8),
+                          Text('编辑'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('删除', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                    ),
+                  ],
+            ),
+            onTap: openContainer,
+          ),
+        );
+      },
     );
   }
 
@@ -737,22 +794,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     }
   }
 
-  /// 打开会话
-  Future<void> _openConversation(Conversation conversation) async {
-    await _controller.selectConversation(conversation.id);
-
-    if (mounted) {
-      final latestConversation =
-          _controller.currentConversation ?? conversation;
-      // 导航到聊天页面，传递共享的conversationService以保持缓存同步
-      await NavigationHelper.push(context, ChatScreen(
-                conversation: latestConversation,
-                storage: _controller.storage,
-                conversationService: _controller.conversationService,
-                getSettings: () => AgentChatPlugin.instance.settings,),
-      );
-    }
-  }
 
   /// 会话菜单选择
   Future<void> _onConversationMenuSelected(

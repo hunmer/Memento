@@ -1,9 +1,9 @@
 import 'dart:io' show Platform;
+import 'package:animations/animations.dart';
 import 'package:Memento/plugins/diary/l10n/diary_localizations.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import 'package:Memento/core/services/toast_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
@@ -93,44 +93,6 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       _focusedDay = focusedDay;
     });
     // 只选中日期，不直接打开编辑器
-  }
-
-  void _navigateToEditor() async {
-    // If no day is selected, default to today
-    final targetDay = _selectedDay ?? DateTime.now();
-
-    // Standardize today's date
-    final today = DateTime.now();
-    final normalizedToday = DateTime(today.year, today.month, today.day);
-
-    // Standardize target date
-    final normalizedTargetDay = DateTime(
-      targetDay.year,
-      targetDay.month,
-      targetDay.day,
-    );
-
-    // Check if target date is in the future
-    if (normalizedTargetDay.isAfter(normalizedToday)) {
-      Toast.warning(DiaryLocalizations.of(context).cannotSelectFutureDate);
-      return;
-    }
-
-    // 从存储中获取最新的日记条目，而不是依赖内存缓存
-    final entry = await DiaryUtils.loadDiaryEntry(normalizedTargetDay);
-    debugPrint(
-      'Loading editor for $normalizedTargetDay: ${entry != null ? "found" : "not found"}',
-    );
-
-    NavigationHelper.push(
-      context,
-      DiaryEditorScreen(
-        date: normalizedTargetDay,
-        storage: widget.storage,
-        initialTitle: entry?.title ?? '',
-        initialContent: entry?.content ?? '',
-      ),
-    ).then((_) => _loadDiaryEntries());
   }
 
   List<String> _extractImagesFromContent(String content) {
@@ -542,54 +504,61 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                                 color: textColor,
                               ),
                             ),
-                            if (selectedEntry != null)
-                              ElevatedButton.icon(
-                                onPressed: _navigateToEditor,
-                                icon: Icon(
-                                  Icons.edit,
-                                  size: 16,
-                                  color: Colors.white,
-                                ),
-                                label: Text(
-                                  DiaryLocalizations.of(context).edit,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: primaryColor,
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  minimumSize: Size(60, 32),
-                                ),
-                              )
-                            else
-                              ElevatedButton.icon(
-                                onPressed: _navigateToEditor,
-                                icon: Icon(
-                                  Icons.add,
-                                  size: 16,
-                                  color: Colors.white,
-                                ),
-                                label: Text(
-                                  DiaryLocalizations.of(context).create,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: primaryColor,
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  minimumSize: Size(60, 32),
-                                ),
+                            OpenContainer<void>(
+                              transitionType: ContainerTransitionType.fadeThrough,
+                              transitionDuration: const Duration(milliseconds: 400),
+                              closedElevation: 2,
+                              closedShape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
                               ),
+                              closedColor: primaryColor,
+                              onClosed: (_) => _loadDiaryEntries(),
+                              openBuilder: (context, _) {
+                                final targetDay = _selectedDay ?? DateTime.now();
+                                final normalizedTargetDay = DateTime(
+                                  targetDay.year,
+                                  targetDay.month,
+                                  targetDay.day,
+                                );
+                                return DiaryEditorScreen(
+                                  date: normalizedTargetDay,
+                                  storage: widget.storage,
+                                  initialTitle: selectedEntry?.title ?? '',
+                                  initialContent: selectedEntry?.content ?? '',
+                                );
+                              },
+                              closedBuilder: (context, openContainer) {
+                                return InkWell(
+                                  onTap: openContainer,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          selectedEntry != null ? Icons.edit : Icons.add,
+                                          size: 16,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          selectedEntry != null
+                                              ? DiaryLocalizations.of(context).edit
+                                              : DiaryLocalizations.of(context).create,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -667,15 +636,42 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
               ],
             ),
           ),
-          // FAB
+          // FAB with container transform animation
           Positioned(
             bottom: 16,
             right: 16,
-            child: FloatingActionButton(
-              onPressed: _navigateToEditor,
-              backgroundColor: primaryColor,
-              shape: const CircleBorder(),
-              child: const Icon(Icons.add, color: Colors.white, size: 32),
+            child: OpenContainer<void>(
+              transitionType: ContainerTransitionType.fadeThrough,
+              transitionDuration: const Duration(milliseconds: 400),
+              closedElevation: 6,
+              closedShape: const CircleBorder(),
+              closedColor: primaryColor,
+              onClosed: (_) => _loadDiaryEntries(),
+              openBuilder: (context, _) {
+                final targetDay = _selectedDay ?? DateTime.now();
+                final normalizedTargetDay = DateTime(
+                  targetDay.year,
+                  targetDay.month,
+                  targetDay.day,
+                );
+                // 获取当前选中日期的条目
+                final entry = _diaryEntries[normalizedTargetDay];
+                return DiaryEditorScreen(
+                  date: normalizedTargetDay,
+                  storage: widget.storage,
+                  initialTitle: entry?.title ?? '',
+                  initialContent: entry?.content ?? '',
+                );
+              },
+              closedBuilder: (context, openContainer) {
+                return const SizedBox(
+                  height: 56,
+                  width: 56,
+                  child: Center(
+                    child: Icon(Icons.add, color: Colors.white, size: 32),
+                  ),
+                );
+              },
             ),
           ),
       ],
