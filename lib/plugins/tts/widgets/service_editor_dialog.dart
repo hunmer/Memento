@@ -130,7 +130,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
     } catch (e) {
       setState(() => _loadingVoices = false);
       if (mounted) {
-        Toast.error('加载语音列表失败: $e');
+        Toast.error('${loc.loadVoiceListFailed}: $e');
       }
     }
   }
@@ -147,7 +147,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 基础配置
-            _buildSectionTitle('基础配置'),
+            _buildSectionTitle(loc.basicConfig),
             const SizedBox(height: 8),
 
             // 服务名称
@@ -160,7 +160,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return '请输入服务名称';
+                  return loc.serviceName;
                 }
                 return null;
               },
@@ -213,7 +213,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
             // 启用状态
             SwitchListTile(
               title: Text(loc.enabled),
-              subtitle: Text(_isEnabled ? '启用此服务' : '禁用此服务'),
+              subtitle: Text(_isEnabled ? loc.enableThisService : loc.disableThisService),
               value: _isEnabled,
               onChanged: (value) => setState(() => _isEnabled = value),
             ),
@@ -221,7 +221,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
             // 默认服务
             SwitchListTile(
               title: Text(loc.defaultService),
-              subtitle: const Text('设为默认朗读服务'),
+              subtitle: Text(loc.setAsDefaultTTSService),
               value: _isDefault,
               onChanged: (value) => setState(() => _isDefault = value),
             ),
@@ -229,7 +229,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
             const SizedBox(height: 24),
 
             // 通用参数
-            _buildSectionTitle('朗读参数'),
+            _buildSectionTitle(loc.readingParameters),
             const SizedBox(height: 8),
 
             // 音调
@@ -277,7 +277,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                       labelText: loc.voice,
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.language),
-                      helperText: '共 ${_availableVoices.length} 个可用语音',
+                      helperText: TTSLocalizations.of(context).availableVoiceCount(_availableVoices.length),
                     ),
                     isExpanded: true,
                     items: _availableVoices.map((voice) {
@@ -305,7 +305,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
                           SizedBox(width: 8),
-                          Text('正在加载语音列表...', style: TextStyle(fontSize: 12)),
+                          Text(TTSLocalizations.of(context).loadingVoiceList, style: TextStyle(fontSize: 12)),
                         ],
                       ),
                     ),
@@ -335,7 +335,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                         SizedBox(width: 8),
-                        Text('正在加载语音列表...', style: TextStyle(fontSize: 12)),
+                        Text(TTSLocalizations.of(context).loadingVoiceList, style: TextStyle(fontSize: 12)),
                       ],
                     ),
                   ),
@@ -350,12 +350,12 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                   prefixIcon: const Icon(Icons.language),
                   hintText: _selectedType == TTSServiceType.system
                     ? 'zh-CN, en-US, etc.'
-                    : '根据API要求填写',
+                    : TTSLocalizations.of(context).fillAccordingToApi,
                   suffixIcon: _selectedType == TTSServiceType.system && !_loadingVoices
                     ? IconButton(
                         icon: const Icon(Icons.refresh),
                         onPressed: _loadAvailableVoices,
-                        tooltip: '重新加载语音列表',
+                        tooltip: TTSLocalizations.of(context).reloadVoiceList,
                       )
                     : null,
                 ),
@@ -364,7 +364,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
             // HTTP 特有配置
             if (_selectedType == TTSServiceType.http) ...[
               const SizedBox(height: 24),
-              _buildSectionTitle('HTTP 配置'),
+              _buildSectionTitle(loc.httpConfig),
               const SizedBox(height: 8),
 
               // API URL
@@ -380,10 +380,10 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                 validator: (value) {
                   if (_selectedType == TTSServiceType.http) {
                     if (value == null || value.trim().isEmpty) {
-                      return '请输入API URL';
+                      return loc.pleaseEnterApiUrl;
                     }
                     if (!value.startsWith('http://') && !value.startsWith('https://')) {
-                      return 'URL 必须以 http:// 或 https:// 开头';
+                      return loc.urlMustStartWithHttp;
                     }
                   }
                   return null;
@@ -422,19 +422,19 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
               // 响应类型
               DropdownButtonFormField<String>(
                 value: _responseType,
-                decoration: const InputDecoration(
-                  labelText: '响应类型',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.settings_input_composite),
+                decoration: InputDecoration(
+                  labelText: TTSLocalizations.of(context).responseType,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.settings_input_composite),
                 ),
                 items: const [
                   DropdownMenuItem(
                     value: 'audio',
-                    child: Text('直接返回音频'),
+                    child: Text(loc.directAudioReturn),
                   ),
                   DropdownMenuItem(
                     value: 'json',
-                    child: Text('JSON 包裹'),
+                    child: Text(loc.jsonWrapped),
                   ),
                 ],
                 onChanged: (value) {
@@ -449,16 +449,16 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
               if (_responseType == 'json') ...[
                 TextFormField(
                   controller: _audioFieldPathController,
-                  decoration: const InputDecoration(
-                    labelText: '音频字段路径',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.account_tree),
+                  decoration: InputDecoration(
+                    labelText: TTSLocalizations.of(context).audioFieldPath,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.account_tree),
                     hintText: 'data.audio 或 result.audioUrl',
                     helperText: '用点号分隔的JSON路径',
                   ),
                   validator: (value) {
                     if (_responseType == 'json' && (value == null || value.trim().isEmpty)) {
-                      return '请输入音频字段路径';
+                      return loc.pleaseEnterAudioFieldPath;
                     }
                     return null;
                   },
@@ -467,8 +467,8 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
 
                 // Base64 编码
                 SwitchListTile(
-                  title: const Text('音频Base64编码'),
-                  subtitle: const Text('音频数据是否为Base64编码'),
+                  title: Text(loc.audioBase64Encoded),
+                  subtitle: Text(loc.audioIsBase64Encoded),
                   value: _audioIsBase64,
                   onChanged: (value) => setState(() => _audioIsBase64 = value),
                 ),
@@ -477,10 +477,10 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
               // 音频格式
               TextFormField(
                 controller: _audioFormatController,
-                decoration: const InputDecoration(
-                  labelText: '音频格式',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.audiotrack),
+                decoration: InputDecoration(
+                  labelText: TTSLocalizations.of(context).audioFormat,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.audiotrack),
                   hintText: 'mp3, wav, ogg, pcm',
                 ),
               ),
@@ -669,7 +669,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
       // 验证配置
       if (!service.validate()) {
         if (mounted) {
-          Toast.error('配置验证失败，请检查必填项');
+          Toast.error(loc.configValidationFailed);
         }
         return;
       }
@@ -680,7 +680,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
       }
     } catch (e) {
       if (mounted) {
-        Toast.error('保存失败: $e');
+        Toast.error('${loc.saveFailed}: $e');
       }
     }
   }

@@ -4,6 +4,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 
 /// 目标进度条小组件选择器界面(用于小组件配置)
 ///
@@ -38,13 +39,13 @@ class _TrackerGoalProgressSelectorScreenState
       colors: [
         ColorConfig(
           key: 'primary',
-          label: '背景色',
+          label: 'Background Color',
           defaultValue: Colors.white,
           currentValue: Colors.white,
         ),
         ColorConfig(
           key: 'accent',
-          label: '进度条颜色',
+          label: 'Progress Bar Color',
           defaultValue: const Color(0xFF64B5F6), // 蓝色
           currentValue: const Color(0xFF64B5F6),
         ),
@@ -124,6 +125,7 @@ class _TrackerGoalProgressSelectorScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = TrackerLocalizations.of(context);
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -134,7 +136,7 @@ class _TrackerGoalProgressSelectorScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('配置目标进度条小组件'),
+        title: Text(l10n.configureGoalProgressBarWidget),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
@@ -536,7 +538,8 @@ class _TrackerGoalProgressSelectorScreenState
       );
 
       if (mounted) {
-        Toast.success('已配置 "${selectedGoal.name}"');
+        final l10n = TrackerLocalizations.of(context);
+        Toast.success('${l10n.configured} "${selectedGoal.name}"');
 
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
@@ -545,7 +548,8 @@ class _TrackerGoalProgressSelectorScreenState
       }
     } catch (e) {
       if (mounted) {
-        Toast.error('配置失败: $e');
+        final l10n = TrackerLocalizations.of(context);
+        Toast.error('${l10n.configurationFailed}: $e');
       }
     }
   }

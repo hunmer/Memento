@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 
 /// 工具编辑对话框
 class ToolEditorDialog extends StatefulWidget {
@@ -286,12 +287,12 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('取消'),
+                  child: Text(AgentChatLocalizations.of(context)!.cancel),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _save,
-                  child: const Text('保存'),
+                  child: Text(AgentChatLocalizations.of(context)!.save),
                 ),
               ],
             ),
@@ -388,8 +389,8 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
         // 启用工具
         Card(
           child: SwitchListTile(
-            title: const Text('启用工具'),
-            subtitle: const Text('禁用后该工具将不会提供给AI使用'),
+            title: Text(AgentChatLocalizations.of(context)!.enableTool),
+            subtitle: Text(AgentChatLocalizations.of(context)!.disableToolWarning),
             value: _enabled,
             onChanged: (value) {
               setState(() {
@@ -414,7 +415,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
             children: [
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text('添加参数'),
+                label: Text(AgentChatLocalizations.of(context)!.addParameter),
                 onPressed: _addParameter,
               ),
             ],
@@ -425,7 +426,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
         Expanded(
           child: _parameters.isEmpty
               ? const Center(
-                  child: Text('暂无参数，点击上方按钮添加'),
+                  child: Text(AgentChatLocalizations.of(context)!.noParametersClickToAdd),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(8),
@@ -500,7 +501,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
                             ),
                             const SizedBox(height: 8),
                             CheckboxListTile(
-                              title: const Text('可选参数'),
+                              title: Text(AgentChatLocalizations.of(context)!.optionalParameter),
                               value: param.optional,
                               dense: true,
                               contentPadding: EdgeInsets.zero,
@@ -569,7 +570,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
             children: [
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text('添加示例'),
+                label: Text(AgentChatLocalizations.of(context)!.addExample),
                 onPressed: _addExample,
               ),
             ],
@@ -580,7 +581,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
         Expanded(
           child: _examples.isEmpty
               ? const Center(
-                  child: Text('暂无示例，点击上方按钮添加'),
+                  child: Text(AgentChatLocalizations.of(context)!.noExamplesClickToAdd),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(8),
@@ -605,7 +606,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
                                 // 测试按钮
                                 ElevatedButton.icon(
                                   icon: const Icon(Icons.play_arrow, size: 18),
-                                  label: const Text('测试'),
+                                  label: Text(AgentChatLocalizations.of(context)!.test),
                                   onPressed: () =>
                                       _testExample(example.codeController.text),
                                 ),
@@ -671,11 +672,11 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                const Text('正在执行 JS 代码...'),
+                Text(AgentChatLocalizations.of(context)!.executingJSCode),
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.cancel),
-                  label: const Text('取消'),
+                  label: Text(AgentChatLocalizations.of(context)!.cancel),
                   onPressed: () {
                     isCancelled = true;
                     Navigator.pop(context);
@@ -787,7 +788,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
+            child: Text(AgentChatLocalizations.of(context)!.close),
           ),
         ],
       ),

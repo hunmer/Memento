@@ -415,7 +415,7 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
                         );
                       },
                       icon: const Icon(Icons.clear_all, size: 18),
-                      label: const Text(CoreLocalizations.of(context)!.clearSettings),
+                      label: Text(CoreLocalizations.of(context)!.clearSettings),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[300],
                         foregroundColor: Colors.black87,
@@ -430,12 +430,12 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
                     children: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: Text(CoreLocalizations.of(context)!.cancel),
+                        child: const Text('取消'),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: _onConfirm,
-                        child: Text(CoreLocalizations.of(context)!.confirm),
+                        child: const Text('确认'),
                       ),
                     ],
                   ),
@@ -588,7 +588,7 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
               child: OutlinedButton.icon(
                 onPressed: _onCreateGroup,
                 icon: const Icon(Icons.add),
-                label: const Text(CoreLocalizations.of(context)!.createActionGroup),
+                label: Text(CoreLocalizations.of(context)!.createActionGroup),
               ),
             ),
           ),

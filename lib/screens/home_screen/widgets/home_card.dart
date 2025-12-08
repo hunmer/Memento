@@ -7,6 +7,7 @@ import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'folder_dialog.dart';
 
 /// 主页卡片组件
@@ -56,7 +57,7 @@ class HomeCard extends StatelessWidget {
               return Scaffold(body: plugin.buildMainView(context));
             }
           }
-          return Scaffold(body: const Center(child: Text('无法打开插件')));
+          return Scaffold(body: Center(child: Text(ScreensLocalizations.of(context)!.cannotOpenPlugin)));
         },
         closedElevation: 0,
         closedShape: RoundedRectangleBorder(

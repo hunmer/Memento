@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 
 /// 布局类型选择器组件
 class LayoutTypeSelector extends StatefulWidget {
@@ -28,6 +29,7 @@ class _LayoutTypeSelectorState extends State<LayoutTypeSelector> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ScreensLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -39,8 +41,8 @@ class _LayoutTypeSelectorState extends State<LayoutTypeSelector> {
         ),
         const SizedBox(height: 12),
         RadioListTile<String>(
-          title: const Text('空白布局'),
-          subtitle: const Text('不包含任何小组件的空白布局'),
+          title: Text(l10n.emptyLayout),
+          subtitle: Text(l10n.emptyLayoutDescription),
           value: 'empty',
           groupValue: _selectedType,
           onChanged: (value) {
@@ -51,8 +53,8 @@ class _LayoutTypeSelectorState extends State<LayoutTypeSelector> {
           },
         ),
         RadioListTile<String>(
-          title: const Text('所有 1x1 小组件'),
-          subtitle: const Text('添加所有支持 1x1 尺寸的小组件'),
+          title: Text(l10n.all1x1Widgets),
+          subtitle: Text(l10n.all1x1WidgetsDescription),
           value: '1x1',
           groupValue: _selectedType,
           onChanged: (value) {
@@ -63,8 +65,8 @@ class _LayoutTypeSelectorState extends State<LayoutTypeSelector> {
           },
         ),
         RadioListTile<String>(
-          title: const Text('所有 2x2 小组件'),
-          subtitle: const Text('添加所有支持 2x2 尺寸的小组件'),
+          title: Text(l10n.all2x2Widgets),
+          subtitle: Text(l10n.all2x2WidgetsDescription),
           value: '2x2',
           groupValue: _selectedType,
           onChanged: (value) {

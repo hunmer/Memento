@@ -147,7 +147,7 @@ class GoalDetailScreen extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final record = records[index];
                               return flutter.ListTile(
-                                title: Text('${record.value}'),
+                                title: Text(TrackerLocalizations.of(context).recordValueDisplay(record.value)),
                                 subtitle: Text(
                                   record.recordedAt
                                       .toLocal()

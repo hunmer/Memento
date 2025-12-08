@@ -354,7 +354,7 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
       ),
       items: [
         if (!config.required)
-          const DropdownMenuItem<String>(
+          DropdownMenuItem<String>(
             value: null,
             child: Text(CoreLocalizations.of(context)!.notSelected),
           ),
@@ -644,7 +644,7 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
         border: const OutlineInputBorder(),
       ),
       items: [
-        const DropdownMenuItem<String>(
+        DropdownMenuItem<String>(
           value: null,
           child: Text(CoreLocalizations.of(context)!.notSelected),
         ),
@@ -723,7 +723,7 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
               final color = await showDialog<Color>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text(CoreLocalizations.of(context)!.selectColor),
+                        title: const Text('选择颜色'),
                   content: SizedBox(
                     width: double.maxFinite,
                     child: Wrap(
@@ -753,7 +753,7 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text(CoreLocalizations.of(context)!.cancel),
+                            child: const Text('取消'),
                     ),
                   ],
                 ),
@@ -767,7 +767,7 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
 
   Widget _buildIconSelectorField(String fieldName, FormFieldConfig config) {
     // TODO: 实现图标选择器
-    return Text(CoreLocalizations.of(context)!.iconSelectorNotImplemented);
+    return Text('图标选择器（暂未实现）');
   }
 
   @override

@@ -430,7 +430,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 const Divider(),
                 ListTile(
               leading: const Icon(Icons.create_new_folder),
-              title: const Text('新建文件夹'),
+              title: Text(ScreensLocalizations.of(context)!.createNewFolder),
               onTap: () {
                 Navigator.pop(context);
                 _showCreateFolderDialog();
@@ -438,7 +438,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ),
             ListTile(
               leading: const Icon(Icons.add_box),
-              title: const Text('添加组件'),
+              title: Text(ScreensLocalizations.of(context)!.addWidget),
               onTap: () {
                 Navigator.pop(context);
                 _showAddWidgetDialog();
@@ -447,7 +447,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.save),
-              title: const Text('保存当前布局'),
+              title: Text(ScreensLocalizations.of(context)!.saveCurrentLayout),
               onTap: () {
                 Navigator.pop(context);
                 _showSaveLayoutDialog();
@@ -455,7 +455,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ),
             ListTile(
               leading: const Icon(Icons.layers),
-              title: const Text('管理布局'),
+              title: Text(ScreensLocalizations.of(context)!.manageLayouts),
               onTap: () {
                 Navigator.pop(context);
                 _showLayoutManagerDialog();
@@ -463,7 +463,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ),
                 ListTile(
                   leading: const Icon(Icons.palette),
-                  title: const Text('主题设置'),
+                  title: Text(ScreensLocalizations.of(context)!.themeSettings),
                   onTap: () {
                     Navigator.pop(context);
                     _showThemeSettings();
@@ -472,9 +472,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.grid_view),
-                  title: const Text('网格设置'),
+                  title: Text(ScreensLocalizations.of(context)!.gridSettings),
                   subtitle: Text(
-                    '${_layoutManager.gridCrossAxisCount} 列 · ${_layoutManager.gridAlignment == "top" ? "顶部显示" : "居中显示"}',
+                    '${_layoutManager.gridCrossAxisCount} 列 · ${_layoutManager.gridAlignment == "top" ? ScreensLocalizations.of(context)!.topDisplay : ScreensLocalizations.of(context)!.centerDisplay}',
                   ),
               onTap: () {
                 Navigator.pop(context);
@@ -483,7 +483,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ),
             ListTile(
               leading: const Icon(Icons.delete_sweep),
-              title: const Text('清空布局'),
+              title: Text(ScreensLocalizations.of(context)!.clearLayout),
               onTap: () {
                 Navigator.pop(context);
                 _confirmClearLayout();
@@ -521,12 +521,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认清空'),
-        content: const Text('确定要清空所有小组件吗？此操作不可恢复。'),
+        title: Text(ScreensLocalizations.of(context)!.confirmClear),
+        content: Text(ScreensLocalizations.of(context)!.confirmClearAllWidgets),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(ScreensLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -534,9 +534,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               setState(() {
                 _layoutManager.clear();
               });
-              Toast.success('布局已清空');
+              Toast.success(ScreensLocalizations.of(context)!.allWidgetsCleared);
             },
-            child: const Text('确定'),
+            child: Text(ScreensLocalizations.of(context)!.confirm),
           ),
         ],
       ),
@@ -598,25 +598,25 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('保存当前布局'),
+        title: Text(ScreensLocalizations.of(context)!.saveCurrentLayout),
         content: TextField(
           controller: nameController,
-          decoration: const InputDecoration(
-            labelText: '布局名称',
-            hintText: '例如：工作布局、娱乐布局',
+          decoration: InputDecoration(
+            labelText: ScreensLocalizations.of(context)!.layoutName,
+            hintText: ScreensLocalizations.of(context)!.layoutNameHint,
           ),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(ScreensLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () async {
               final name = nameController.text.trim();
               if (name.isEmpty) {
-                Toast.error('请输入布局名称');
+                Toast.error(ScreensLocalizations.of(context)!.pleaseEnterLayoutName);
                 return;
               }
 
@@ -628,15 +628,15 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 await _loadSavedLayouts();
                 await _updateCurrentLayoutName();
                 if (mounted) {
-                  Toast.success('布局"$name"已保存');
+                  Toast.success(ScreensLocalizations.of(context)!.layoutSaved(name));
                 }
               } catch (e) {
                 if (mounted) {
-                  Toast.error('保存失败：$e');
+                  Toast.error('${ScreensLocalizations.of(context)!.saveFailed}: $e');
                 }
               }
             },
-            child: const Text('保存'),
+            child: Text(ScreensLocalizations.of(context)!.save),
           ),
         ],
       ),
@@ -691,7 +691,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 if (item is HomeWidgetItem)
                   ListTile(
                     leading: const Icon(Icons.settings),
-                    title: const Text('小组件设置'),
+                    title: Text(ScreensLocalizations.of(context)!.widgetSettings),
                     onTap: () {
                       Navigator.pop(context);
                       _showWidgetSettings(item);
@@ -700,7 +700,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 if (item is HomeWidgetItem)
                   ListTile(
                     leading: const Icon(Icons.aspect_ratio),
-                    title: const Text('调整大小'),
+                    title: Text(ScreensLocalizations.of(context)!.adjustSize),
                     onTap: () {
                       Navigator.pop(context);
                       _showSizeAdjuster(item);
@@ -709,7 +709,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.delete, color: Colors.red),
-                  title: const Text('删除', style: TextStyle(color: Colors.red)),
+                  title: Text(ScreensLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
                   onTap: () {
                     Navigator.pop(context);
                     _confirmDeleteItem(item);
@@ -813,7 +813,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('选择组件大小'),
+            title: Text(ScreensLocalizations.of(context)!.selectWidgetSize),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children:
@@ -823,7 +823,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
                     return RadioListTile<HomeWidgetSize>(
                       title: Text(sizeLabel),
-                      subtitle: Text('${size.width}x${size.height}'),
+                      subtitle: Text(ScreensLocalizations.of(context)!.widgetSize(size.width, size.height)),
                       value: size,
                       groupValue: item.size,
                       selected: isSelected,
@@ -839,7 +839,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(ScreensLocalizations.of(context)!.cancel),
               ),
             ],
           ),
@@ -848,13 +848,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   /// 获取尺寸标签
   String _getSizeLabel(HomeWidgetSize size) {
+    final l10n = ScreensLocalizations.of(context)!;
     switch (size) {
       case HomeWidgetSize.small:
-        return '小 (图标)';
+        return l10n.smallSize;
       case HomeWidgetSize.medium:
-        return '中 (横向卡片)';
+        return l10n.mediumSize;
       case HomeWidgetSize.large:
-        return '大 (方形卡片)';
+        return l10n.largeSize;
     }
   }
 
@@ -882,20 +883,20 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('确认删除'),
-            content: Text('确定要删除 "$itemName" 吗？'),
+            title: Text(ScreensLocalizations.of(context)!.confirmDelete),
+            content: Text(ScreensLocalizations.of(context)!.confirmDeleteItem(itemName)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('取消'),
+                child: Text(ScreensLocalizations.of(context)!.cancel),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                   _layoutManager.removeItem(item.id);
-                  ToastService.instance.showToast('"$itemName" 已删除');
+                  ToastService.instance.showToast('"$itemName" ${ScreensLocalizations.of(context)!.deleted}');
                 },
-                child: const Text('删除', style: TextStyle(color: Colors.red)),
+                child: Text(ScreensLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
               ),
             ],
           ),
@@ -940,12 +941,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除选中的 ${_selectedItemIds.length} 个项目吗？'),
+        title: Text(ScreensLocalizations.of(context)!.confirmDelete),
+        content: Text(ScreensLocalizations.of(context)!.confirmDeleteSelectedItems(_selectedItemIds.length)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(ScreensLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -954,10 +955,10 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               for (final itemId in _selectedItemIds) {
                 _layoutManager.removeItem(itemId);
               }
-              Toast.success('已删除 ${_selectedItemIds.length} 个项目');
+              Toast.success(ScreensLocalizations.of(context)!.itemsDeleted(_selectedItemIds.length));
               _exitBatchMode();
             },
-            child: const Text('删除', style: TextStyle(color: Colors.red)),
+            child: Text(ScreensLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -973,14 +974,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         .toList();
 
     if (folders.isEmpty) {
-      Toast.warning('没有可用的文件夹，请先创建文件夹');
+      Toast.warning(ScreensLocalizations.of(context)!.noAvailableFolders);
       return;
     }
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('移动到文件夹'),
+        title: Text(ScreensLocalizations.of(context)!.moveToFolder),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -991,7 +992,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               return ListTile(
                 leading: Icon(folder.icon, color: folder.color),
                 title: Text(folder.name),
-                subtitle: Text('${folder.children.length} 个项目'),
+                subtitle: Text(ScreensLocalizations.of(context)!.itemCount(folder.children.length)),
                 onTap: () {
                   Navigator.pop(context);
                   _moveSelectedItemsToFolder(folder.id);
@@ -1003,7 +1004,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(ScreensLocalizations.of(context)!.cancel),
           ),
         ],
       ),
@@ -1015,7 +1016,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     for (final itemId in _selectedItemIds) {
       _layoutManager.moveToFolder(itemId, folderId);
     }
-    Toast.success('已将 ${_selectedItemIds.length} 个项目移动到文件夹');
+    Toast.success(ScreensLocalizations.of(context)!.itemsMovedToFolder(_selectedItemIds.length));
     _exitBatchMode();
   }
 
@@ -1330,8 +1331,9 @@ class _GridSizeDialogState extends State<_GridSizeDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ScreensLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('网格设置'),
+      title: Text(l10n.gridSettings),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1339,21 +1341,21 @@ class _GridSizeDialogState extends State<_GridSizeDialog> {
           children: [
             // 网格大小设置
             Text(
-              '网格大小',
+              l10n.gridSize,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              '选择主页网格的列数 (1-10)',
+              l10n.gridSizeDescription,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
             Row(
               children: [
                 Text(
-                  '$_currentSize 列',
+                  l10n.gridColumns(_currentSize),
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const Spacer(),
@@ -1414,28 +1416,28 @@ class _GridSizeDialogState extends State<_GridSizeDialog> {
 
             // 显示位置设置
             Text(
-              '显示位置',
+              l10n.displayPosition,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              '选择小组件在屏幕上的对齐方式',
+              l10n.displayPositionDescription,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
             SegmentedButton<String>(
-              segments: const [
+              segments: [
                 ButtonSegment<String>(
                   value: 'top',
-                  label: Text('顶部显示'),
-                  icon: Icon(Icons.vertical_align_top),
+                  label: Text(l10n.topDisplay),
+                  icon: const Icon(Icons.vertical_align_top),
                 ),
                 ButtonSegment<String>(
                   value: 'center',
-                  label: Text('居中显示'),
-                  icon: Icon(Icons.vertical_align_center),
+                  label: Text(l10n.centerDisplay),
+                  icon: const Icon(Icons.vertical_align_center),
                 ),
               ],
               selected: {_currentAlignment},
@@ -1452,7 +1454,7 @@ class _GridSizeDialogState extends State<_GridSizeDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('完成'),
+          child: Text(l10n.complete),
         ),
       ],
     );

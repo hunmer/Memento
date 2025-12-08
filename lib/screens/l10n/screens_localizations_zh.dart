@@ -313,7 +313,9 @@ class ScreensLocalizationsZh extends ScreensLocalizations {
   @override
   String get allWidgetsCleared => '已清空所有小组件';
   @override
-  String get layoutSaved => '布局已保存';
+  String layoutSaved(String name) => '布局"$name"已保存';
+  @override
+  String get saveFailed => '保存失败';
   @override
   String get noImage => '没有图片';
   @override
@@ -381,6 +383,12 @@ class ScreensLocalizationsZh extends ScreensLocalizations {
   @override
   String widgetSize(int width, int height) => '${width}x${height}';
   @override
+  String get smallSize => '小 (图标)';
+  @override
+  String get mediumSize => '中 (横向卡片)';
+  @override
+  String get largeSize => '大 (方形卡片)';
+  @override
   String confirmDeleteLayout(String layoutName) => '确定要删除布局"$layoutName"吗？此操作不可恢复。';
   @override
   String get noLayoutName => '没有布局名称';
@@ -390,4 +398,160 @@ class ScreensLocalizationsZh extends ScreensLocalizations {
   String get createNewLayout => '新建布局';
   @override
   String get inputLayoutName => '请输入布局名称';
+  @override
+  String get layoutName => '布局名称';
+  @override
+  String get layoutNameHint => '例如：工作布局、娱乐布局';
+  @override
+  String get deleted => '已删除';
+  @override
+  String itemsDeleted(int count) => '已删除 $count 个项目';
+  @override
+  String get noAvailableFolders => '没有可用的文件夹，请先创建文件夹';
+  @override
+  String itemsMovedToFolder(int count) => '已将 $count 个项目移动到文件夹';
+  @override
+  String get gridSize => '网格大小';
+  @override
+  String get gridSizeDescription => '选择主页网格的列数 (1-10)';
+  @override
+  String gridColumns(int count) => '$count 列';
+  @override
+  String get displayPosition => '显示位置';
+  @override
+  String get displayPositionDescription => '选择小组件在屏幕上的对齐方式';
+  @override
+  String get backgroundImageSet => '已设置背景图';
+  @override
+  String get backgroundImageNotSet => '未设置背景图';
+  @override
+  String get customBackgroundImage => '已设置独立背景图';
+  @override
+  String get useGlobalBackgroundImage => '使用全局背景图';
+
+  // create_folder_dialog
+  @override
+  String get folderName => '文件夹名称';
+  @override
+  String get enterFolderName => '输入文件夹名称';
+  @override
+  String get pleaseEnterFolderName => '请输入文件夹名称';
+  @override
+  String folderCreated(String name) => '已创建文件夹：$name';
+
+  // background_settings_page
+  @override
+  String get widgetOverallOpacity => '小组件整体透明度';
+  @override
+  String get widgetOverallOpacityDescription => '调整整个小组件的透明度（包括文字和内容）';
+  @override
+  String get backgroundColorOpacity => '背景颜色透明度';
+  @override
+  String get backgroundColorOpacityDescription => '仅调整小组件背景颜色的透明度，不影响文字';
+  @override
+  String get layoutBackgroundSettings => '布局背景设置';
+  @override
+  String get layoutBackgroundSettingsDescription => '为每个布局单独设置背景图，优先级高于全局背景图';
+  @override
+  String get noSavedLayouts => '暂无保存的布局';
+  @override
+  String get saveLayoutFirst => '请先在主页保存布局';
+  @override
+  String get clearUseGlobalBackground => '清除（使用全局背景）';
+  @override
+  String get customBackgroundHasPriority => '单独设置的背景图优先级高于全局背景图';
+  @override
+  String get zeroPercentFullyTransparent => '0%（完全透明）';
+  @override
+  String get oneHundredPercentOpaque => '100%（不透明）';
+
+  // folder_dialog
+  @override
+  String get addToFolder => '添加到文件夹';
+  @override
+  String get editFolder => '编辑文件夹';
+  @override
+  String get folderIsEmpty => '文件夹是空的';
+  @override
+  String get selectItemsToMoveToFolder => '选择要移入文件夹的项目';
+  @override
+  String get movedToHomePage => '已移出到主页';
+  @override
+  String get folderUpdated => '文件夹已更新';
+  @override
+  String get clickToAddContent => '点击上方 + 按钮添加内容';
+  @override
+  String get noItemsOnHome => '主页上没有可移入的项目';
+
+  // home_grid
+  @override
+  String get noWidgetsYet => '还没有小组件';
+  @override
+  String get quickLayout => '快速布局';
+  @override
+  String get component => '组件';
+  @override
+  String get item => '项目';
+  @override
+  String get clickPlusToAdd => '点击右上角的 + 按钮添加';
+  @override
+  String get loadLayoutFailed => '加载布局失败';
+  @override
+  String get switchedToLayout => '已切换到';
+  @override
+  String get switchFailed => '切换失败';
+  @override
+  String get saveFirstLayoutHint => '点击右上角菜单中的"保存当前布局"来创建第一个布局配置';
+
+  // layout_manager_dialog
+  @override
+  String get pleaseEnterLayoutName => '请输入布局名称';
+  @override
+  String get renameSuccess => '重命名成功';
+  @override
+  String get deleteSuccess => '删除成功';
+
+  // layout_type_selector
+  @override
+  String get emptyLayout => '空白布局';
+  @override
+  String get emptyLayoutDescription => '不包含任何小组件的空白布局';
+  @override
+  String get all1x1Widgets => '所有 1x1 小组件';
+  @override
+  String get all1x1WidgetsDescription => '添加所有支持 1x1 尺寸的小组件';
+  @override
+  String get all2x2Widgets => '所有 2x2 小组件';
+  @override
+  String get all2x2WidgetsDescription => '添加所有支持 2x2 尺寸的小组件';
+
+  // widget_settings_dialog
+  @override
+  String get widgetSettings => '小组件设置';
+  @override
+  String get oneColumn => '一列';
+  @override
+  String get twoColumns => '两列';
+  @override
+  String get backgroundImage => '背景图片';
+  @override
+  String get alreadySet => '已设置';
+  @override
+  String get notSet => '未设置';
+  @override
+  String get iconColor => '图标颜色';
+  @override
+  String get customized => '已自定义';
+  @override
+  String get useDefault => '使用默认';
+  @override
+  String get backgroundColor => '背景颜色';
+  @override
+  String get effectWhenNoBackgroundImage => '无背景图片时生效';
+  @override
+  String get customColorWithTransparency => '自定义颜色（支持透明度）';
+  @override
+  String get presetColors => '预设颜色';
+  @override
+  String get quickSelectPresetColors => '快速选择预设颜色';
 }

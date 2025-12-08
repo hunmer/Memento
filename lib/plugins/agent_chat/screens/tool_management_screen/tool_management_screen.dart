@@ -6,6 +6,7 @@ import 'package:Memento/plugins/agent_chat/services/tool_config_manager.dart';
 import 'components/plugin_section.dart';
 import 'components/tool_editor_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 
 /// 工具管理界面
 class ToolManagementScreen extends StatefulWidget {
@@ -93,7 +94,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
     final selectedPlugin = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('选择插件'),
+        title: Text(AgentChatLocalizations.of(context)!.selectPlugin),
         content: SizedBox(
           width: double.maxFinite,
           child: ScrollConfiguration(
@@ -167,16 +168,16 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('确认导入'),
-          content: const Text('导入配置将覆盖现有配置，是否继续？'),
+          title: Text(AgentChatLocalizations.of(context)!.confirmImport),
+          content: Text(AgentChatLocalizations.of(context)!.importConfigOverride),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('取消'),
+              child: Text(AgentChatLocalizations.of(context)!.cancel),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('确认'),
+              child: Text(AgentChatLocalizations.of(context)!.confirm),
             ),
           ],
         ),
@@ -233,12 +234,12 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认恢复默认'),
-        content: const Text('此操作将删除所有自定义配置，恢复到默认配置。是否继续？'),
+        title: Text(AgentChatLocalizations.of(context)!.confirmRestoreDefault),
+        content: Text(AgentChatLocalizations.of(context)!.restoreDefaultDescription),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
+            child: Text(AgentChatLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -246,7 +247,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('恢复默认'),
+            child: Text(AgentChatLocalizations.of(context)!.restoreDefault),
           ),
         ],
       ),
@@ -339,7 +340,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: FilterChip(
-                label: const Text('全部'),
+                label: Text(AgentChatLocalizations.of(context)!.all),
                 selected: _selectedPluginFilter == null,
                 onSelected: (selected) {
                   setState(() {
@@ -358,7 +359,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: FilterChip(
-                  label: Text('$pluginId ($enabledCount/$totalCount)'),
+                  label: Text(AgentChatLocalizations.of(context)!.pluginInfo(pluginId, enabledCount, totalCount)),
                   selected: _selectedPluginFilter == pluginId,
                   onSelected: (selected) {
                     setState(() {
@@ -379,7 +380,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('工具管理'),
+        title: Text(AgentChatLocalizations.of(context)!.toolManagement),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
@@ -408,7 +409,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                   children: [
                     Icon(Icons.add),
                     SizedBox(width: 12),
-                    Text('添加工具'),
+                    Text(AgentChatLocalizations.of(context)!.addTool),
                   ],
                 ),
               ),
@@ -418,7 +419,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                   children: [
                     Icon(Icons.file_download),
                     SizedBox(width: 12),
-                    Text('导入配置'),
+                    Text(AgentChatLocalizations.of(context)!.importConfig),
                   ],
                 ),
               ),
@@ -428,7 +429,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                   children: [
                     Icon(Icons.file_upload),
                     SizedBox(width: 12),
-                    Text('导出配置'),
+                    Text(AgentChatLocalizations.of(context)!.exportConfig),
                   ],
                 ),
               ),
@@ -439,7 +440,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                   children: [
                     Icon(Icons.restore, color: Colors.red),
                     SizedBox(width: 12),
-                    Text('恢复默认', style: TextStyle(color: Colors.red)),
+                    Text(AgentChatLocalizations.of(context)!.restoreDefault, style: TextStyle(color: Colors.red)),
                   ],
                 ),
               ),
@@ -474,7 +475,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                 // 工具列表
                 Expanded(
                   child: _allPluginTools.isEmpty
-                      ? const Center(child: Text('暂无工具配置'))
+                      ? Center(child: Text(AgentChatLocalizations.of(context)!.noToolConfig))
                       : ScrollConfiguration(
                           behavior: ScrollConfiguration.of(context).copyWith(
                             dragDevices: {
@@ -617,7 +618,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
           children: [
             const Icon(Icons.block, color: Colors.grey),
             const SizedBox(width: 8),
-            const Text('已禁用的工具'),
+            Text(AgentChatLocalizations.of(context)!.disabledTools),
             const Spacer(),
             Text(
               '${disabledTools.length} 个',
@@ -636,7 +637,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                       children: [
                         Icon(Icons.check_circle, size: 64, color: Colors.green),
                         SizedBox(height: 16),
-                        Text('所有工具都已启用！'),
+                        Text(AgentChatLocalizations.of(context)!.allToolsEnabled),
                       ],
                     ),
                   ),
@@ -720,16 +721,16 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                 final confirmed = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('确认全部启用'),
-                    content: Text('确定要启用所有 ${disabledTools.length} 个已禁用的工具吗？'),
+                    title: Text(AgentChatLocalizations.of(context)!.confirmEnableAll),
+                    content: Text(AgentChatLocalizations.of(context)!.confirmEnableAllTools(disabledTools.length)),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
-                        child: const Text('取消'),
+                        child: Text(AgentChatLocalizations.of(context)!.cancel),
                       ),
                       ElevatedButton(
                         onPressed: () => Navigator.pop(context, true),
-                        child: const Text('全部启用'),
+                        child: Text(AgentChatLocalizations.of(context)!.enableAll),
                       ),
                     ],
                   ),
@@ -753,11 +754,11 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                 }
               },
               icon: const Icon(Icons.done_all),
-              label: const Text('全部启用'),
+              label: Text(AgentChatLocalizations.of(context)!.enableAll),
             ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
+            child: Text(AgentChatLocalizations.of(context)!.close),
           ),
         ],
       ),

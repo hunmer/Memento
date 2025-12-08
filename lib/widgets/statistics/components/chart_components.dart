@@ -352,7 +352,7 @@ class TimeSeriesChart extends StatelessWidget {
     if (series.isEmpty) {
       return SizedBox(
         height: height,
-        child: const Center(child: Text('No data available')),
+        child: Center(child: Text(WidgetsLocalizations.of(context).noDataAvailable)),
       );
     }
 

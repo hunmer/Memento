@@ -5,6 +5,7 @@ import 'package:Memento/plugins/todo/screens/todo_list_selector_screen.dart';
 import 'package:Memento/plugins/todo/widgets/task_form.dart';
 import 'package:Memento/plugins/todo/views/todo_main_view.dart';
 import 'package:Memento/plugins/todo/models/task.dart';
+import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 
 /// 待办插件路由处理器
 class TodoRouteHandler extends PluginRouteHandler {
@@ -153,6 +154,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
   }
 
   void _showTaskDetailDialog(BuildContext context, Task task) {
+    final l10n = TodoLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -164,7 +166,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
             children: [
               if (task.description != null && task.description!.isNotEmpty) ...[
                 Text(
-                  '描述',
+                  l10n.description,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -175,7 +177,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
               ],
               if (task.tags.isNotEmpty) ...[
                 Text(
-                  '标签',
+                  l10n.tags,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -194,7 +196,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
                 const SizedBox(height: 16),
               ],
               Text(
-                '计时器',
+                l10n.timer,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -216,7 +218,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
                 children: [
                   ElevatedButton.icon(
                     icon: const Icon(Icons.play_arrow),
-                    label: const Text('开始'),
+                    label: Text(l10n.start),
                     onPressed: task.status != TaskStatus.inProgress
                         ? () {
                             _plugin.taskController.updateTaskStatus(
@@ -229,7 +231,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
                   ),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.pause),
-                    label: const Text('暂停'),
+                    label: Text(l10n.pause),
                     onPressed: task.status == TaskStatus.inProgress
                         ? () {
                             _plugin.taskController.updateTaskStatus(
@@ -242,7 +244,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
                   ),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.check),
-                    label: const Text('完成'),
+                    label: Text(l10n.complete),
                     onPressed: task.status != TaskStatus.done
                         ? () {
                             _plugin.taskController.updateTaskStatus(
@@ -261,7 +263,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('关闭'),
+            child: Text(l10n.close),
           ),
           TextButton(
             onPressed: () {
@@ -277,23 +279,23 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
                 ),
               );
             },
-            child: const Text('编辑'),
+            child: Text(l10n.edit),
           ),
           TextButton(
             onPressed: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('删除任务'),
-                  content: const Text('确定要删除这个任务吗？'),
+                  title: Text(l10n.deleteTask),
+                  content: Text(l10n.confirmDeleteThisTask),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: const Text('取消'),
+                      child: Text(l10n.cancel),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: const Text('删除'),
+                      child: Text(l10n.delete),
                     ),
                   ],
                 ),
@@ -304,9 +306,9 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
                 Navigator.of(context).pop();
               }
             },
-            child: const Text(
-              '删除',
-              style: TextStyle(color: Colors.red),
+            child: Text(
+              l10n.delete,
+              style: const TextStyle(color: Colors.red),
             ),
           ),
         ],

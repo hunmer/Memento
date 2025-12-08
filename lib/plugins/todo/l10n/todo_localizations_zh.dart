@@ -168,6 +168,37 @@ class TodoLocalizationsZh extends TodoLocalizations {
   @override
   String get cancel => '取消';
 
+  @override
+  String get close => '关闭';
+
+  @override
+  String get edit => '编辑';
+
+  @override
+  String get deleteTask => '删除任务';
+
+  @override
+  String get confirmDeleteThisTask => '确定要删除这个任务吗？';
+
+  @override
+  String get configureTodoListWidget => '配置待办列表小组件';
+
+  @override
+  String get configureQuadrantWidget => '配置四象限小组件';
+
+  // 时间范围选项
+  @override
+  String get today => '今日';
+
+  @override
+  String get thisWeek => '本周';
+
+  @override
+  String get thisMonth => '本月';
+
+  @override
+  String get all => '所有';
+
   // Tab 标签
   @override
   String get todoTab => '待办';
@@ -219,4 +250,25 @@ class TodoLocalizationsZh extends TodoLocalizations {
   // 其他
   @override
   String get todoTasks => '待办事项';
+
+  @override
+  String get widgetTitle => '小组件标题';
+
+  @override
+  String get timeRange => '时间范围';
+
+  @override
+  String get noTodoTasks => '暂无待办任务';
+
+  @override
+  String get confirmConfiguration => '确认配置';
+
+  @override
+  String get leaveEmptyForDefaultTitle => '留空则使用默认标题';
+
+  @override
+  String get loading => '加载中...';
+
+  @override
+  String get done => '完成';
 }

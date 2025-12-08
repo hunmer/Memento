@@ -49,6 +49,7 @@ abstract class TrackerLocalizations {
   String get cancel;
   String get addRecord;
   String get recordValue;
+  String recordValueDisplay(double value);
   String get note;
   String get noteHint;
   String get daily;
@@ -102,6 +103,15 @@ abstract class TrackerLocalizations {
   get recordValueWithUnit;
 
   String get name;
+
+  // Widget configuration
+  String get configureGoalProgressBarWidget; // 配置目标进度条小组件
+  String get configureGoalTrackingWidget; // 配置目标追踪小组件
+  String get backgroundColor; // 背景色
+  String get accentColor; // 强调色
+  String get progressBarColor; // 进度条颜色
+  String get configured; // 已配置
+  String get configurationFailed; // 配置失败
 }
 
 class _TrackerLocalizationsDelegate

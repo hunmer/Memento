@@ -313,7 +313,9 @@ class ScreensLocalizationsEn extends ScreensLocalizations {
   @override
   String get allWidgetsCleared => 'All widgets cleared';
   @override
-  String get layoutSaved => 'Layout saved';
+  String layoutSaved(String name) => 'Layout "$name" saved';
+  @override
+  String get saveFailed => 'Save failed';
   @override
   String get noImage => 'No image';
   @override
@@ -381,6 +383,12 @@ class ScreensLocalizationsEn extends ScreensLocalizations {
   @override
   String widgetSize(int width, int height) => '${width}x${height}';
   @override
+  String get smallSize => 'Small (Icon)';
+  @override
+  String get mediumSize => 'Medium (Horizontal Card)';
+  @override
+  String get largeSize => 'Large (Square Card)';
+  @override
   String confirmDeleteLayout(String layoutName) => 'Are you sure you want to delete layout "$layoutName"? This action cannot be undone.';
   @override
   String get noLayoutName => 'No layout name';
@@ -390,4 +398,160 @@ class ScreensLocalizationsEn extends ScreensLocalizations {
   String get createNewLayout => 'Create New Layout';
   @override
   String get inputLayoutName => 'Please enter layout name';
+  @override
+  String get layoutName => 'Layout Name';
+  @override
+  String get layoutNameHint => 'e.g., Work Layout, Entertainment Layout';
+  @override
+  String get deleted => 'deleted';
+  @override
+  String itemsDeleted(int count) => 'Deleted $count items';
+  @override
+  String get noAvailableFolders => 'No available folders, please create a folder first';
+  @override
+  String itemsMovedToFolder(int count) => 'Moved $count items to folder';
+  @override
+  String get gridSize => 'Grid Size';
+  @override
+  String get gridSizeDescription => 'Select the number of columns for the home grid (1-10)';
+  @override
+  String gridColumns(int count) => '$count columns';
+  @override
+  String get displayPosition => 'Display Position';
+  @override
+  String get displayPositionDescription => 'Choose the alignment of widgets on the screen';
+  @override
+  String get backgroundImageSet => 'Background image set';
+  @override
+  String get backgroundImageNotSet => 'Background image not set';
+  @override
+  String get customBackgroundImage => 'Custom background image set';
+  @override
+  String get useGlobalBackgroundImage => 'Using global background image';
+
+  // create_folder_dialog
+  @override
+  String get folderName => 'Folder Name';
+  @override
+  String get enterFolderName => 'Enter folder name';
+  @override
+  String get pleaseEnterFolderName => 'Please enter folder name';
+  @override
+  String folderCreated(String name) => 'Folder created: $name';
+
+  // background_settings_page
+  @override
+  String get widgetOverallOpacity => 'Widget Overall Opacity';
+  @override
+  String get widgetOverallOpacityDescription => 'Adjust the opacity of the entire widget (including text and content)';
+  @override
+  String get backgroundColorOpacity => 'Background Color Opacity';
+  @override
+  String get backgroundColorOpacityDescription => 'Adjust only the background color opacity, does not affect text';
+  @override
+  String get layoutBackgroundSettings => 'Layout Background Settings';
+  @override
+  String get layoutBackgroundSettingsDescription => 'Set background images for each layout individually, priority higher than global background image';
+  @override
+  String get noSavedLayouts => 'No saved layouts';
+  @override
+  String get saveLayoutFirst => 'Please save a layout on the home page first';
+  @override
+  String get clearUseGlobalBackground => 'Clear (Use Global Background)';
+  @override
+  String get customBackgroundHasPriority => 'Individually set background images have priority over global background images';
+  @override
+  String get zeroPercentFullyTransparent => '0% (Fully Transparent)';
+  @override
+  String get oneHundredPercentOpaque => '100% (Opaque)';
+
+  // folder_dialog
+  @override
+  String get addToFolder => 'Add to Folder';
+  @override
+  String get editFolder => 'Edit Folder';
+  @override
+  String get folderIsEmpty => 'The folder is empty';
+  @override
+  String get selectItemsToMoveToFolder => 'Select items to move to folder';
+  @override
+  String get movedToHomePage => 'Moved to home page';
+  @override
+  String get folderUpdated => 'Folder updated';
+  @override
+  String get clickToAddContent => 'Click the + button above to add content';
+  @override
+  String get noItemsOnHome => 'No items available on home page to move';
+
+  // home_grid
+  @override
+  String get noWidgetsYet => 'No widgets yet';
+  @override
+  String get quickLayout => 'Quick Layout';
+  @override
+  String get component => 'Widget';
+  @override
+  String get item => 'Item';
+  @override
+  String get clickPlusToAdd => 'Click the + button in the top right to add';
+  @override
+  String get loadLayoutFailed => 'Failed to load layout';
+  @override
+  String get switchedToLayout => 'Switched to';
+  @override
+  String get switchFailed => 'Failed to switch';
+  @override
+  String get saveFirstLayoutHint => 'Click "Save Current Layout" in the top right menu to create your first layout configuration';
+
+  // layout_manager_dialog
+  @override
+  String get pleaseEnterLayoutName => 'Please enter layout name';
+  @override
+  String get renameSuccess => 'Rename successful';
+  @override
+  String get deleteSuccess => 'Delete successful';
+
+  // layout_type_selector
+  @override
+  String get emptyLayout => 'Empty Layout';
+  @override
+  String get emptyLayoutDescription => 'Empty layout without any widgets';
+  @override
+  String get all1x1Widgets => 'All 1x1 Widgets';
+  @override
+  String get all1x1WidgetsDescription => 'Add all widgets that support 1x1 size';
+  @override
+  String get all2x2Widgets => 'All 2x2 Widgets';
+  @override
+  String get all2x2WidgetsDescription => 'Add all widgets that support 2x2 size';
+
+  // widget_settings_dialog
+  @override
+  String get widgetSettings => 'Widget Settings';
+  @override
+  String get oneColumn => 'One Column';
+  @override
+  String get twoColumns => 'Two Columns';
+  @override
+  String get backgroundImage => 'Background Image';
+  @override
+  String get alreadySet => 'Already Set';
+  @override
+  String get notSet => 'Not Set';
+  @override
+  String get iconColor => 'Icon Color';
+  @override
+  String get customized => 'Customized';
+  @override
+  String get useDefault => 'Use Default';
+  @override
+  String get backgroundColor => 'Background Color';
+  @override
+  String get effectWhenNoBackgroundImage => 'Takes effect when no background image';
+  @override
+  String get customColorWithTransparency => 'Custom Color (Supports Transparency)';
+  @override
+  String get presetColors => 'Preset Colors';
+  @override
+  String get quickSelectPresetColors => 'Quick Select Preset Colors';
 }

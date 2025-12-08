@@ -96,8 +96,9 @@ class SettingsScreenController extends ChangeNotifier {
   void toggleTheme(context) => ThemeController.toggleTheme(context);
 
   // 语言相关
-  Future<void> toggleLanguage(context) =>
-      _baseController.toggleLanguage(context);
+  Future<void> toggleLanguage(context) async {
+    await _baseController.showLanguageSelectionDialog(context);
+  }
 
   // 数据导出
   Future<void> exportData([BuildContext? context]) =>

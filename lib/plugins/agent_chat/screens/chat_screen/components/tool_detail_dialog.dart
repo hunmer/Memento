@@ -118,7 +118,7 @@ class _ToolDetailDialogState extends State<ToolDetailDialog>
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('关闭'),
+                  child: Text(AgentChatLocalizations.of(context)!.close),
                 ),
               ],
             ),

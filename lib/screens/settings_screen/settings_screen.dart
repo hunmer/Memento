@@ -12,6 +12,7 @@ import 'package:Memento/core/floating_ball/floating_ball_manager.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_screen.dart';
 import 'package:Memento/screens/about_screen/about_screen.dart';
 import './l10n/settings_screen_localizations.dart';
+import '../l10n/screens_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -327,8 +328,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.code),
-            title: const Text('JS Console'),
-            subtitle: const Text('测试 JavaScript API 功能'),
+            title: Text(ScreensLocalizations.of(context)!.jsConsole),
+            subtitle: Text(ScreensLocalizations.of(context)!.testJavaScriptAPI),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/js_console');
@@ -336,8 +337,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.widgets),
-            title: const Text('JSON Dynamic Widget 测试'),
-            subtitle: const Text('测试和预览动态 UI 组件'),
+            title: Text(ScreensLocalizations.of(context)!.jsonDynamicWidgetTest),
+            subtitle: Text(ScreensLocalizations.of(context)!.testAndPreviewDynamicUI),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/json_dynamic_test');
@@ -345,8 +346,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.navigation),
-            title: const Text('Super Cupertino Navigation 测试'),
-            subtitle: const Text('测试 iOS 风格导航栏组件'),
+            title: Text(ScreensLocalizations.of(context)!.superCupertinoNavigationTest),
+            subtitle: Text(ScreensLocalizations.of(context)!.testIOSStyleNavigation),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/super_cupertino_test');
@@ -354,7 +355,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.notifications),
-            title: const Text('通知测试'),
+            title: Text(ScreensLocalizations.of(context)!.notificationTest),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/notification_test');
@@ -362,8 +363,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.touch_app),
-            title: const Text('悬浮球设置'),
-            subtitle: const Text('管理系统级悬浮球功能'),
+            title: Text(ScreensLocalizations.of(context)!.floatingBallSettings),
+            subtitle: Text(ScreensLocalizations.of(context)!.manageSystemFloatingBall),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/floating_ball');
@@ -371,8 +372,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.link),
-            title: const Text('Intent 测试'),
-            subtitle: const Text('测试动态 Intent 注册和深度链接'),
+            title: Text(ScreensLocalizations.of(context)!.intentTest),
+            subtitle: Text(ScreensLocalizations.of(context)!.testDynamicIntentAndDeepLink),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/intent_test');

@@ -125,7 +125,7 @@ class _SaveToolDialogState extends State<SaveToolDialog>
       actions: [
         TextButton(
           onPressed: _isSaving ? null : () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(AgentChatLocalizations.of(context)!.cancel),
         ),
         FilledButton(
           onPressed: _isSaving ? null : _saveTool,
@@ -139,7 +139,7 @@ class _SaveToolDialogState extends State<SaveToolDialog>
                       color: Colors.white,
                     ),
                   )
-                  : const Text('保存'),
+                  : Text(AgentChatLocalizations.of(context)!.save),
         ),
       ],
     );

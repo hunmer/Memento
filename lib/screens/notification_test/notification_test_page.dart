@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/notification_controller.dart';
 import 'package:memento_notifications/memento_notifications.dart';
+import '../l10n/screens_localizations.dart';
 
 /// 通知测试页面 - 用于测试 awesome_notifications 功能
 class NotificationTestPage extends StatefulWidget {
@@ -123,7 +124,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('通知测试页面'),
+        title: Text(ScreensLocalizations.of(context)!.notificationTestPage),
         elevation: 2,
       ),
       body: Column(
@@ -178,7 +179,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('请求权限'),
+                    child: Text(ScreensLocalizations.of(context)!.requestPermission),
                   ),
               ],
             ),
@@ -319,7 +320,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
             foregroundColor: Colors.white,
             disabledBackgroundColor: Colors.grey.shade300,
           ),
-          child: const Text('测试'),
+          child: Text(ScreensLocalizations.of(context)!.test),
         ),
       ),
     );

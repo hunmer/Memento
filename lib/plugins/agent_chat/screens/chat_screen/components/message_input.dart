@@ -542,7 +542,7 @@ class _MessageInputState extends State<MessageInput> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.image),
-                  title: const Text('图片'),
+                  title: Text(AgentChatLocalizations.of(context)!.image),
                   onTap: () {
                     Navigator.pop(context);
                     widget.controller.pickImages();
@@ -550,7 +550,7 @@ class _MessageInputState extends State<MessageInput> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.description),
-                  title: const Text('文档'),
+                  title: Text(AgentChatLocalizations.of(context)!.document),
                   onTap: () {
                     Navigator.pop(context);
                     widget.controller.pickDocuments();
@@ -624,7 +624,7 @@ class _MessageInputState extends State<MessageInput> {
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
             const SizedBox(width: 12),
-            Text('正在加载工具模板...', style: TextStyle(color: Colors.grey[700])),
+            Text(AgentChatLocalizations.of(context)!.loadingToolTemplates, style: TextStyle(color: Colors.grey[700])),
           ],
         ),
       );

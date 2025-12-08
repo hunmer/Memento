@@ -187,7 +187,8 @@ class ScreensLocalizations {
   String get notificationPermissionDenied => '通知权限被拒绝';
   String get saveSuccess => '保存成功';
   String get allWidgetsCleared => '已清空所有小组件';
-  String get layoutSaved => '布局已保存';
+  String layoutSaved(String name) => '布局"$name"已保存';
+  String get saveFailed => '保存失败';
   String get noImage => '没有图片';
   String get imageLoadFailed => '图片加载失败';
   String get pleaseSelectImage => '请选择图片';
@@ -223,11 +224,99 @@ class ScreensLocalizations {
   // Additional home screen messages
   String confirmDeleteSelectedItems(int count) => '确定要删除选中的 $count 个项目吗？';
   String widgetSize(int width, int height) => '${width}x${height}';
+  String get smallSize => '小 (图标)';
+  String get mediumSize => '中 (横向卡片)';
+  String get largeSize => '大 (方形卡片)';
   String confirmDeleteLayout(String layoutName) => '确定要删除布局"$layoutName"吗？此操作不可恢复。';
   String get noLayoutName => '没有布局名称';
   String get quickCreateLayoutDescription => '选择一个布局模板快速开始：';
   String get createNewLayout => '新建布局';
   String get inputLayoutName => '请输入布局名称';
+  String get layoutName => '布局名称';
+  String get layoutNameHint => '例如：工作布局、娱乐布局';
+  String get deleted => '已删除';
+  String itemsDeleted(int count) => '已删除 $count 个项目';
+  String get noAvailableFolders => '没有可用的文件夹，请先创建文件夹';
+  String itemsMovedToFolder(int count) => '已将 $count 个项目移动到文件夹';
+  String get gridSize => '网格大小';
+  String get gridSizeDescription => '选择主页网格的列数 (1-10)';
+  String gridColumns(int count) => '$count 列';
+  String get displayPosition => '显示位置';
+  String get displayPositionDescription => '选择小组件在屏幕上的对齐方式';
+  String get backgroundImageSet => '已设置背景图';
+  String get backgroundImageNotSet => '未设置背景图';
+  String get customBackgroundImage => '已设置独立背景图';
+  String get useGlobalBackgroundImage => '使用全局背景图';
+
+  // create_folder_dialog
+  String get folderName => '文件夹名称';
+  String get enterFolderName => '输入文件夹名称';
+  String get pleaseEnterFolderName => '请输入文件夹名称';
+  String folderCreated(String name) => '已创建文件夹：$name';
+
+  // background_settings_page
+  String get widgetOverallOpacity => '小组件整体透明度';
+  String get widgetOverallOpacityDescription => '调整整个小组件的透明度（包括文字和内容）';
+  String get backgroundColorOpacity => '背景颜色透明度';
+  String get backgroundColorOpacityDescription => '仅调整小组件背景颜色的透明度，不影响文字';
+  String get layoutBackgroundSettings => '布局背景设置';
+  String get layoutBackgroundSettingsDescription => '为每个布局单独设置背景图，优先级高于全局背景图';
+  String get noSavedLayouts => '暂无保存的布局';
+  String get saveLayoutFirst => '请先在主页保存布局';
+  String get clearUseGlobalBackground => '清除（使用全局背景）';
+  String get customBackgroundHasPriority => '单独设置的背景图优先级高于全局背景图';
+  String get zeroPercentFullyTransparent => '0%（完全透明）';
+  String get oneHundredPercentOpaque => '100%（不透明）';
+
+  // folder_dialog
+  String get addToFolder => '添加到文件夹';
+  String get editFolder => '编辑文件夹';
+  String get folderIsEmpty => '文件夹是空的';
+  String get selectItemsToMoveToFolder => '选择要移入文件夹的项目';
+  String get movedToHomePage => '已移出到主页';
+  String get folderUpdated => '文件夹已更新';
+  String get clickToAddContent => '点击上方 + 按钮添加内容';
+  String get noItemsOnHome => '主页上没有可移入的项目';
+
+  // home_grid
+  String get noWidgetsYet => '还没有小组件';
+  String get quickLayout => '快速布局';
+  String get component => '组件';
+  String get item => '项目';
+  String get clickPlusToAdd => '点击右上角的 + 按钮添加';
+  String get loadLayoutFailed => '加载布局失败';
+  String get switchedToLayout => '已切换到';
+  String get switchFailed => '切换失败';
+  String get saveFirstLayoutHint => '点击右上角菜单中的"保存当前布局"来创建第一个布局配置';
+
+  // layout_manager_dialog
+  String get pleaseEnterLayoutName => '请输入布局名称';
+  String get renameSuccess => '重命名成功';
+  String get deleteSuccess => '删除成功';
+
+  // layout_type_selector
+  String get emptyLayout => '空白布局';
+  String get emptyLayoutDescription => '不包含任何小组件的空白布局';
+  String get all1x1Widgets => '所有 1x1 小组件';
+  String get all1x1WidgetsDescription => '添加所有支持 1x1 尺寸的小组件';
+  String get all2x2Widgets => '所有 2x2 小组件';
+  String get all2x2WidgetsDescription => '添加所有支持 2x2 尺寸的小组件';
+
+  // widget_settings_dialog
+  String get widgetSettings => '小组件设置';
+  String get oneColumn => '一列';
+  String get twoColumns => '两列';
+  String get backgroundImage => '背景图片';
+  String get alreadySet => '已设置';
+  String get notSet => '未设置';
+  String get iconColor => '图标颜色';
+  String get customized => '已自定义';
+  String get useDefault => '使用默认';
+  String get backgroundColor => '背景颜色';
+  String get effectWhenNoBackgroundImage => '无背景图片时生效';
+  String get customColorWithTransparency => '自定义颜色（支持透明度）';
+  String get presetColors => '预设颜色';
+  String get quickSelectPresetColors => '快速选择预设颜色';
 }
 
 class _ScreensLocalizationsDelegate

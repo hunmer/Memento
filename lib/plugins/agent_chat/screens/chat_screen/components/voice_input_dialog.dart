@@ -403,14 +403,14 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
       children: [
         TextButton(
           onPressed: _cancel,
-          child: const Text('取消'),
+          child: Text(AgentChatLocalizations.of(context)!.cancel),
         ),
         const SizedBox(width: 12),
         FilledButton(
           onPressed: _currentState == SpeechRecognitionState.recording
               ? null
               : _confirmSend,
-          child: const Text('发送'),
+          child: Text(AgentChatLocalizations.of(context)!.send),
         ),
       ],
     );

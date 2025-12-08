@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:memento_intent/memento_intent.dart';
+import '../l10n/screens_localizations.dart';
 
 class IntentTestScreen extends StatefulWidget {
   const IntentTestScreen({super.key});
@@ -178,8 +179,8 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('快速注册 Intent'),
-          content: const Text('选择一个预设的 Intent 类型进行快速注册'),
+          title: Text(ScreensLocalizations.of(context)!.quickRegisterIntent),
+          content: Text(ScreensLocalizations.of(context)!.selectPresetIntentType),
           actions: <Widget>[
             SizedBox(
               width: double.infinity,
@@ -189,7 +190,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                   _quickRegister('memento', null, '/test');
                 },
                 icon: const Icon(Icons.link),
-                label: const Text('Memento 测试 (memento:///test)'),
+                label: Text(ScreensLocalizations.of(context)!.mementoTest),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -204,7 +205,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                   _quickRegister('memento', 'app.example.com', '/open');
                 },
                 icon: const Icon(Icons.link),
-                label: const Text('Memento 完整 (memento://app.example.com/open)'),
+                label: Text(ScreensLocalizations.of(context)!.mementoComplete),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -219,7 +220,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                   _quickRegister('myapp', 'custom.host', null);
                 },
                 icon: const Icon(Icons.link),
-                label: const Text('自定义应用 (myapp://custom.host)'),
+                label: Text(ScreensLocalizations.of(context)!.customApp),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -228,7 +229,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('取消'),
+              child: Text(ScreensLocalizations.of(context)!.cancel),
             ),
           ],
         );
@@ -268,7 +269,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Intent 测试'),
+        title: Text(ScreensLocalizations.of(context)!.intentTest),
         actions: [
           IconButton(
             icon: const Icon(Icons.clear_all),
@@ -365,7 +366,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                         child: ElevatedButton.icon(
                           onPressed: () => _showQuickRegisterDialog(),
                           icon: const Icon(Icons.flash_on),
-                          label: const Text('快速注册'),
+                          label: Text(ScreensLocalizations.of(context)!.quickRegister),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.orange,
                             foregroundColor: Colors.white,
@@ -417,7 +418,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                               child: Row(
                                 children: [
                                   Expanded(
-                                    child: Text('• $scheme'),
+                                    child: Text(ScreensLocalizations.of(context)!.bulletScheme(scheme)),
                                   ),
                                   ElevatedButton.icon(
                                     onPressed: () => _testScheme(scheme),

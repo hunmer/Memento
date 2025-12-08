@@ -89,4 +89,118 @@ class TTSLocalizationsZh extends TTSLocalizations {
 
   @override
   String get clearQueue => '清空队列';
+
+  @override
+  String get loading => '加载中...';
+
+  @override
+  String get setAsDefaultTTSService => '设为默认朗读服务';
+
+  @override
+  String get audioBase64Encoded => '音频Base64编码';
+
+  @override
+  String get audioIsBase64Encoded => '音频数据是否为Base64编码';
+
+  @override
+  String get enableThisService => '启用此服务';
+
+  @override
+  String get disableThisService => '禁用此服务';
+
+  @override
+  String get basicConfig => '基础配置';
+
+  @override
+  String get readingParameters => '朗读参数';
+
+  @override
+  String get httpConfig => 'HTTP 配置';
+
+  @override
+  String get directAudioReturn => '直接返回音频';
+
+  @override
+  String get jsonWrapped => 'JSON 包裹';
+
+  @override
+  String get loadVoiceListFailed => '加载语音列表失败';
+
+  @override
+  String get pleaseEnterApiUrl => '请输入API URL';
+
+  @override
+  String get urlMustStartWithHttp => 'URL 必须以 http:// 或 https:// 开头';
+
+  @override
+  String get configValidationFailed => '配置验证失败，请检查必填项';
+
+  @override
+  String get saveFailed => '保存失败';
+
+  @override
+  String get pleaseEnterAudioFieldPath => '请输入音频字段路径';
+
+  @override
+  String get noServicesAvailable => '暂无服务';
+
+  @override
+  String get setAsDefault => '设为默认';
+
+  @override
+  String get loadServicesFailed => '加载服务失败';
+
+  @override
+  String get serviceDeleted => '服务已删除';
+
+  @override
+  String get deleteFailed => '删除失败';
+
+  @override
+  String get updateFailed => '更新失败';
+
+  @override
+  String get setAsDefaultService => '已设置为默认服务';
+
+  @override
+  String get setDefaultFailed => '设置失败';
+
+  @override
+  String get serviceAdded => '服务已添加';
+
+  @override
+  String get addFailed => '添加失败';
+
+  @override
+  String get serviceUpdated => '服务已更新';
+
+  @override
+  String get voiceTestText => '你好，这是语音测试';
+
+  @override
+  String get testFailedPrefix => '测试失败';
+
+  @override
+  String get refresh => '刷新';
+
+  @override
+  String get loadingVoiceList => '正在加载语音列表...';
+
+  @override
+  String availableVoiceCount(int count) => '共 $count 个可用语音';
+
+  @override
+  String get reloadVoiceList => '重新加载语音列表';
+
+  @override
+  String get fillAccordingToApi => '根据API要求填写';
+
+  @override
+  String get responseType => '响应类型';
+
+  @override
+  String get audioFieldPath => '音频字段路径';
+
+  @override
+  String get audioFormat => '音频格式';
 }

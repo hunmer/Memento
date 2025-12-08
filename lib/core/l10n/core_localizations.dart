@@ -79,6 +79,7 @@ abstract class CoreLocalizations {
   // Action Selector Dialog
   String get clearSettings;
   String get confirm;
+  String get noActionsFound;
 
   // Floating Button Manager
   String get confirmDelete;
@@ -98,6 +99,40 @@ abstract class CoreLocalizations {
 
   // Create Action Group
   String get createActionGroup;
+
+  // Action Group Editor
+  String get pleaseAddAtLeastOneAction;
+
+  // Action Selector Dialog
+  String get singleAction;
+  String get actionGroup;
+  String get customAction;
+  String get noActionGroups;
+  String get noCustomActions;
+  String get selectAction;
+  String get searchActions;
+  String get actionConfig;
+  String get noDescription;
+  String get actionsCount(int count);
+
+  // Action Group Editor
+  String get editActionGroup;
+  String get createActionGroupTitle;
+  String get basicInfo;
+  String get groupTitle;
+  String get enterActionGroupTitle;
+  String get pleaseEnterGroupTitle;
+  String get groupDescription;
+  String get enterActionGroupDescription;
+  String get executionConfig;
+  String get operator;
+  String get selectExecutionMethod;
+  String get executionMode;
+  String get selectExecutionMode;
+  String get priority;
+  String get priorityDescription;
+  String get actionList;
+  String get noActionsAdded;
 
   static CoreLocalizations? of(BuildContext context) {
     return Localizations.of<CoreLocalizations>(context, CoreLocalizations);

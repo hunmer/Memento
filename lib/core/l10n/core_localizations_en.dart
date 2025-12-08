@@ -96,6 +96,9 @@ class CoreLocalizationsEn extends CoreLocalizations {
   String get confirm => 'Confirm';
 
   @override
+  String get noActionsFound => 'No actions found';
+
+  @override
   String get confirmDelete => 'Confirm Delete';
 
   @override
@@ -127,4 +130,88 @@ class CoreLocalizationsEn extends CoreLocalizations {
 
   @override
   String get createActionGroup => 'Create Action Group';
+
+  @override
+  String get pleaseAddAtLeastOneAction => 'Please add at least one action';
+
+  @override
+  String get singleAction => 'Single Action';
+
+  @override
+  String get actionGroup => 'Action Group';
+
+  @override
+  String get customAction => 'Custom';
+
+  @override
+  String get noActionGroups => 'No Action Groups';
+
+  @override
+  String get noCustomActions => 'No Custom Actions';
+
+  @override
+  String get selectAction => 'Select Action';
+
+  @override
+  String get searchActions => 'Search actions...';
+
+  @override
+  String get actionConfig => 'Action Configuration';
+
+  @override
+  String get noDescription => 'No Description';
+
+  @override
+  String actionsCount(int count) => '$count actions';
+
+  @override
+  String get editActionGroup => 'Edit Action Group';
+
+  @override
+  String get createActionGroupTitle => 'Create Action Group';
+
+  @override
+  String get basicInfo => 'Basic Information';
+
+  @override
+  String get groupTitle => 'Group Title';
+
+  @override
+  String get enterActionGroupTitle => 'Enter action group title';
+
+  @override
+  String get pleaseEnterGroupTitle => 'Please enter group title';
+
+  @override
+  String get groupDescription => 'Group Description';
+
+  @override
+  String get enterActionGroupDescription => 'Enter action group description (optional)';
+
+  @override
+  String get executionConfig => 'Execution Configuration';
+
+  @override
+  String get operator => 'Operator';
+
+  @override
+  String get selectExecutionMethod => 'Select execution method';
+
+  @override
+  String get executionMode => 'Execution Mode';
+
+  @override
+  String get selectExecutionMode => 'Select execution mode';
+
+  @override
+  String get priority => 'Priority';
+
+  @override
+  String get priorityDescription => 'Higher numbers have higher priority';
+
+  @override
+  String get actionList => 'Action List';
+
+  @override
+  String get noActionsAdded => 'No actions added, click the button above to add';
 }

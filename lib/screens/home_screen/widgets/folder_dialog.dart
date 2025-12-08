@@ -7,6 +7,7 @@ import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'home_grid.dart';
 import 'add_widget_dialog.dart';
 
@@ -28,6 +29,7 @@ class _FolderDialogState extends State<FolderDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ScreensLocalizations.of(context)!;
     return Dialog(
       child: Container(
         constraints: BoxConstraints(
@@ -56,12 +58,12 @@ class _FolderDialogState extends State<FolderDialog> {
                 IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: _showAddToFolderOptions,
-                  tooltip: '添加到文件夹',
+                  tooltip: l10n.addToFolder,
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: _editFolder,
-                  tooltip: '编辑文件夹',
+                  tooltip: l10n.editFolder,
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -78,8 +80,8 @@ class _FolderDialogState extends State<FolderDialog> {
                   // 重新获取最新的文件夹数据
                   final folder = _layoutManager.findItem(widget.folder.id);
                   if (folder == null || folder is! HomeFolderItem) {
-                    return const Center(
-                      child: Text('文件夹已被删除'),
+                    return Center(
+                      child: Text(l10n.folderHasBeenDeleted),
                     );
                   }
 
@@ -112,6 +114,7 @@ class _FolderDialogState extends State<FolderDialog> {
 
   /// 显示添加到文件夹选项
   void _showAddToFolderOptions() {
+    final l10n = ScreensLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -120,7 +123,7 @@ class _FolderDialogState extends State<FolderDialog> {
           children: [
             ListTile(
               leading: const Icon(Icons.add_box),
-              title: const Text('添加小组件'),
+              title: Text(l10n.addWidget),
               onTap: () {
                 Navigator.pop(context);
                 _showAddWidgetToFolder();
@@ -128,7 +131,7 @@ class _FolderDialogState extends State<FolderDialog> {
             ),
             ListTile(
               leading: const Icon(Icons.move_down),
-              title: const Text('从主页移入'),
+              title: Text(l10n.moveFromHomePage),
               onTap: () {
                 Navigator.pop(context);
                 _showMoveFromHomeOptions();
@@ -156,7 +159,8 @@ class _FolderDialogState extends State<FolderDialog> {
         .toList();
 
     if (homeItems.isEmpty) {
-          Toast.warning('主页上没有可移入的项目');
+      final l10n = ScreensLocalizations.of(context)!;
+          Toast.warning(l10n.noItemsOnHome);
       return;
     }
 
@@ -183,6 +187,7 @@ class _FolderDialogState extends State<FolderDialog> {
 
   /// 显示项目选项
   void _showItemOptions(HomeItem item) {
+    final l10n = ScreensLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -191,16 +196,16 @@ class _FolderDialogState extends State<FolderDialog> {
           children: [
             ListTile(
               leading: const Icon(Icons.drive_file_move),
-              title: const Text('移出文件夹'),
+              title: Text(l10n.moveOutOfFolder),
               onTap: () {
                 Navigator.pop(context);
                 _layoutManager.removeFromFolder(item.id, widget.folder.id);
-                              Toast.success('已移出到主页');
+                              Toast.success(l10n.movedToHomePage);
               },
             ),
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('删除', style: TextStyle(color: Colors.red)),
+              title: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
               onTap: () {
                 Navigator.pop(context);
                 _confirmDeleteItem(item);
@@ -214,15 +219,16 @@ class _FolderDialogState extends State<FolderDialog> {
 
   /// 确认删除项目
   void _confirmDeleteItem(HomeItem item) {
+    final l10n = ScreensLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: const Text('确定要删除这个项目吗？'),
+        title: Text(l10n.confirmDelete),
+        content: Text(l10n.confirmDeleteThisItem),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -233,9 +239,9 @@ class _FolderDialogState extends State<FolderDialog> {
                 children: folder.children.where((c) => c.id != item.id).toList(),
               );
               _layoutManager.updateItem(widget.folder.id, updatedFolder);
-                          Toast.success('已删除');
+                          Toast.success(l10n.deleteSuccess);
             },
-            child: const Text('删除', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -244,6 +250,7 @@ class _FolderDialogState extends State<FolderDialog> {
 
   /// 构建空状态
   Widget _buildEmptyState() {
+    final l10n = ScreensLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -255,14 +262,14 @@ class _FolderDialogState extends State<FolderDialog> {
           ),
           const SizedBox(height: 16),
           Text(
-            '文件夹是空的',
+            l10n.folderIsEmpty,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Theme.of(context).disabledColor,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            '点击上方 + 按钮添加内容',
+            l10n.clickToAddContent,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).disabledColor,
                 ),
@@ -294,15 +301,16 @@ class _MoveFromHomeDialogState extends State<_MoveFromHomeDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ScreensLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('从主页移入'),
+      title: Text(l10n.moveFromHomePage),
       content: SizedBox(
         width: double.maxFinite,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '选择要移入文件夹的项目',
+              l10n.selectItemsToMoveToFolder,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -375,7 +383,7 @@ class _MoveFromHomeDialogState extends State<_MoveFromHomeDialog> {
                   _moveSelectedItems();
                   Navigator.pop(context);
                 },
-          child: Text('移入 (${_selectedIds.length})'),
+          child: Text(l10n.moveIn(_selectedIds.length)),
         ),
       ],
     );
@@ -387,7 +395,7 @@ class _MoveFromHomeDialogState extends State<_MoveFromHomeDialog> {
       widget.layoutManager.moveToFolder(itemId, widget.folderId);
     }
 
-      Toast.success('已移入 ${_selectedIds.length} 个项目');
+      Toast.success(l10n.itemsMovedToFolder(_selectedIds.length));
   }
 }
 
@@ -458,8 +466,9 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ScreensLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('编辑文件夹'),
+      title: Text(l10n.editFolder),
       content: SizedBox(
         width: double.maxFinite,
         child: SingleChildScrollView(
@@ -471,7 +480,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
               TextField(
                 controller: _nameController,
                 decoration: const InputDecoration(
-                  labelText: '文件夹名称',
+                  labelText: l10n.folderName,
                   border: OutlineInputBorder(),
                 ),
                 autofocus: true,
@@ -480,7 +489,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
 
               // 图标选择
               Text(
-                '选择图标',
+                l10n.selectIcon,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
@@ -525,7 +534,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
 
               // 颜色选择
               Text(
-                '选择颜色',
+                l10n.selectColor,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
@@ -571,11 +580,11 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: _saveFolderChanges,
-          child: const Text('保存'),
+          child: Text(l10n.save),
         ),
       ],
     );
@@ -584,8 +593,9 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
   /// 保存文件夹修改
   void _saveFolderChanges() {
     final newName = _nameController.text.trim();
+    final l10n = ScreensLocalizations.of(context)!;
     if (newName.isEmpty) {
-          Toast.error('请输入文件夹名称');
+          Toast.error(l10n.pleaseEnterFolderName);
       return;
     }
 
@@ -600,6 +610,6 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
     widget.layoutManager.updateItem(widget.folder.id, updatedFolder);
 
     Navigator.pop(context);
-    Toast.success('文件夹已更新');
+    Toast.success(l10n.folderUpdated);
   }
 }
