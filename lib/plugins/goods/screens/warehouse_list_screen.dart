@@ -2,10 +2,10 @@ import 'dart:io' show Platform;
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../../../widgets/super_cupertino_navigation_wrapper.dart';
-import '../goods_plugin.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'warehouse_detail_screen.dart';
-import '../widgets/warehouse_card.dart';
+import 'package:Memento/plugins/goods/widgets/warehouse_card.dart';
 
 class WarehouseListScreen extends StatefulWidget {
   const WarehouseListScreen({super.key, this.onWarehouseTap});

@@ -2,13 +2,13 @@ import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
-import '../../../../../widgets/image_picker_dialog.dart';
-import '../../../../../utils/image_utils.dart';
-import '../controllers/form_controller.dart';
-import '../../../models/goods_item.dart';
-import '../../goods_item_selector_dialog.dart';
-import '../custom_fields_list.dart';
-import '../../../../../core/services/toast_service.dart';
+import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/plugins/goods/widgets/goods_item_form/controllers/form_controller.dart';
+import 'package:Memento/plugins/goods/models/goods_item.dart';
+import 'package:Memento/plugins/goods/widgets/goods_item_selector_dialog.dart';
+import 'package:Memento/plugins/goods/widgets/goods_item_form/custom_fields_list.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class BasicInfoTab extends StatelessWidget {
   final GoodsItemFormController controller;

@@ -2,9 +2,9 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../models/interaction_record_model.dart';
-import '../models/contact_model.dart';
-import '../controllers/contact_controller.dart';
+import 'package:Memento/plugins/contact/models/interaction_record_model.dart';
+import 'package:Memento/plugins/contact/models/contact_model.dart';
+import 'package:Memento/plugins/contact/controllers/contact_controller.dart';
 import 'contact_selector.dart';
 
 class InteractionForm extends StatefulWidget {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../../../models/channel.dart';
-import '../../../models/user.dart';
-import '../../../models/message.dart';
-import '../../../chat_plugin.dart';
+import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/plugins/chat/models/user.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
 import '../../../../../../utils/audio_service.dart';
 
 class ChatScreenController extends ChangeNotifier {

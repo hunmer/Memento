@@ -1,9 +1,9 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/message.dart';
-import '../utils/message_options_handler.dart';
-import '../l10n/chat_localizations.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/utils/message_options_handler.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 
 /// 消息选项对话框组件
 class MessageOptionsDialog extends StatelessWidget {

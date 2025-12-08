@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../l10n/goods_localizations.dart';
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 
 class AddUsageRecordDialog extends StatefulWidget {
   const AddUsageRecordDialog({super.key});

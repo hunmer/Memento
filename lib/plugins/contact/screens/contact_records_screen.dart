@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import '../l10n/contact_localizations.dart';
-import '../models/contact_model.dart';
-import '../models/interaction_record_model.dart';
-import '../controllers/contact_controller.dart';
-import '../widgets/interaction_form.dart';
+import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
+import 'package:Memento/plugins/contact/models/contact_model.dart';
+import 'package:Memento/plugins/contact/models/interaction_record_model.dart';
+import 'package:Memento/plugins/contact/controllers/contact_controller.dart';
+import 'package:Memento/plugins/contact/widgets/interaction_form.dart';
 
 class ContactRecordsScreen extends StatefulWidget {
   final Contact contact;

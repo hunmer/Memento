@@ -2,18 +2,18 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
-import '../../agent_chat_plugin.dart';
-import '../../controllers/conversation_controller.dart';
-import '../../models/conversation.dart';
-import '../../models/conversation_group.dart';
-import '../chat_screen/chat_screen.dart';
-import '../agent_chat_settings_screen.dart';
-import '../tool_management_screen/tool_management_screen.dart';
-import '../tool_template_screen/tool_template_screen.dart';
-import '../../services/tool_template_service.dart';
-import '../../../../core/route/route_history_manager.dart';
-import '../../../../core/services/toast_service.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
+import 'package:Memento/plugins/agent_chat/controllers/conversation_controller.dart';
+import 'package:Memento/plugins/agent_chat/models/conversation.dart';
+import 'package:Memento/plugins/agent_chat/models/conversation_group.dart';
+import 'package:Memento/plugins/agent_chat/screens/chat_screen/chat_screen.dart';
+import 'package:Memento/plugins/agent_chat/screens/agent_chat_settings_screen.dart';
+import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
+import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
+import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 会话列表屏幕
 class ConversationListScreen extends StatefulWidget {

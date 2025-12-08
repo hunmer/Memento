@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../models/tool_call_step.dart';
-import '../../../services/message_detail_service.dart';
+import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
+import 'package:Memento/plugins/agent_chat/services/message_detail_service.dart';
 import 'markdown_content.dart';
 import 'tool_call_steps.dart';
-import '../../../../../core/services/toast_service.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 工具调用详情对话框
 ///

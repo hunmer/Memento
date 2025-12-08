@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/core/services/timer/unified_timer_controller.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
-import '../models/goal.dart';
-import '../models/record.dart';
-import '../controllers/tracker_controller.dart';
+import 'package:Memento/plugins/tracker/models/goal.dart';
+import 'package:Memento/plugins/tracker/models/record.dart';
+import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
 
 class TimerDialog extends StatefulWidget {
   final Goal goal;

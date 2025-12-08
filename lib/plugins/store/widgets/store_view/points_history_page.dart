@@ -1,7 +1,7 @@
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../controllers/store_controller.dart';
-import '../../models/points_log.dart';
+import 'package:Memento/plugins/store/controllers/store_controller.dart';
+import 'package:Memento/plugins/store/models/points_log.dart';
 
 /// 积分历史内容组件（不包含 Scaffold，用于 TabBarView）
 class PointsHistoryContent extends StatefulWidget {

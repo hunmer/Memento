@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../../../../models/channel.dart';
-import '../../../../../../widgets/circle_icon_picker.dart';
-import '../../../../l10n/chat_localizations.dart';
+import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/widgets/circle_icon_picker.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import '../../../../../../../core/services/toast_service.dart';
 
 class ChannelDialog extends StatefulWidget {

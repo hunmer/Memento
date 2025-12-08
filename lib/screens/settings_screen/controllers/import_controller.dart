@@ -4,9 +4,9 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
-import '../../../core/utils/file_utils.dart';
-import '../widgets/folder_selection_dialog.dart';
-import '../../../core/l10n/import_localizations.dart';
+import 'package:Memento/core/utils/file_utils.dart';
+import 'package:Memento/screens/settings_screen/widgets/folder_selection_dialog.dart';
+import 'package:Memento/core/l10n/import_localizations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 class ImportController {

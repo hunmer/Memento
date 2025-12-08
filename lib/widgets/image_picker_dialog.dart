@@ -8,8 +8,8 @@ import 'package:crop_your_image/crop_your_image.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:path/path.dart' as path;
-import '../utils/image_utils.dart';
-import '../core/services/image_compression_service.dart';
+import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/core/services/image_compression_service.dart';
 
 class ImagePickerDialog extends StatefulWidget {
   final String? initialUrl;

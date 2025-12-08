@@ -3,17 +3,17 @@ import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:path/path.dart' as path;
-import '../../../models/message.dart';
-import '../../../models/channel.dart';
-import '../../../models/file_message.dart';
-import '../../../utils/date_formatter.dart';
-import '../../../../../widgets/file_preview/file_preview_screen.dart';
-import '../../../widgets/image_message_widget.dart';
-import '../../../widgets/audio_player_widget.dart';
-import '../../../services/settings_service.dart';
-import '../utils/text_highlight.dart';
-import '../controllers/timeline_controller.dart';
-import '../../../utils/message_options_handler.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/plugins/chat/models/file_message.dart';
+import 'package:Memento/plugins/chat/utils/date_formatter.dart';
+import 'package:Memento/widgets/file_preview/file_preview_screen.dart';
+import 'package:Memento/plugins/chat/widgets/image_message_widget.dart';
+import 'package:Memento/plugins/chat/widgets/audio_player_widget.dart';
+import 'package:Memento/plugins/chat/services/settings_service.dart';
+import 'package:Memento/plugins/chat/screens/timeline/utils/text_highlight.dart';
+import 'package:Memento/plugins/chat/screens/timeline/controllers/timeline_controller.dart';
+import 'package:Memento/plugins/chat/utils/message_options_handler.dart';
 
 /// Timeline 中显示的消息卡片组件
 class TimelineMessageCard extends StatelessWidget {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import '../models/calendar_entry.dart';
-import '../l10n/calendar_album_localizations.dart';
-import '../../../utils/image_utils.dart';
+import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
+import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
+import 'package:Memento/utils/image_utils.dart';
 
 class EntryList extends StatelessWidget {
   Widget _buildDefaultCover() {

@@ -1,9 +1,9 @@
 import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../controllers/calendar_controller.dart';
-import '../../models/calendar_entry.dart';
-import '../../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
+import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class EntryEditorController {
   final CalendarEntry? entry;

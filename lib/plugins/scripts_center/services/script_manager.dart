@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import '../models/script_info.dart';
-import '../models/script_folder.dart';
+import 'package:Memento/plugins/scripts_center/models/script_info.dart';
+import 'package:Memento/plugins/scripts_center/models/script_folder.dart';
 import 'script_loader.dart';
 
 /// 脚本管理器服务

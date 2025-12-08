@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../activity_plugin.dart';
-import '../l10n/activity_localizations.dart';
-import '../models/activity_record.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/activity/activity_plugin.dart';
+import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
+import 'package:Memento/plugins/activity/models/activity_record.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 活动插件设置页面
 class ActivitySettingsScreen extends StatefulWidget {

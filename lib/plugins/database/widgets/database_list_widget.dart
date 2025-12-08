@@ -11,8 +11,8 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
-import '../models/database_model.dart';
-import '../services/database_service.dart';
+import 'package:Memento/plugins/database/models/database_model.dart';
+import 'package:Memento/plugins/database/services/database_service.dart';
 
 class DatabaseListWidget extends StatefulWidget {
   final DatabaseService service;

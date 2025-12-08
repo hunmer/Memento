@@ -7,10 +7,10 @@ import 'dart:io';
 import 'package:Memento/core/floating_ball/models/floating_ball_gesture.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../action_manager.dart';
-import '../action_storage.dart';
-import '../models/action_instance.dart';
-import '../models/action_definition.dart';
+import 'package:Memento/core/action/action_manager.dart';
+import 'package:Memento/core/action/action_storage.dart';
+import 'package:Memento/core/action/models/action_instance.dart';
+import 'package:Memento/core/action/models/action_definition.dart';
 
 /// 迁移结果
 class MigrationResult {

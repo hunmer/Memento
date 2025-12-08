@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/checkin_item.dart';
+import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 
 class WeeklyCheckinCircles extends StatelessWidget {
   final CheckinItem item;

@@ -3,7 +3,7 @@ import 'package:Memento/plugins/habits/controllers/completion_record_controller.
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/widgets/common_record_list.dart';
-import '../../../../core/services/toast_service.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class HabitsHistoryList extends StatefulWidget {
   final String habitId;

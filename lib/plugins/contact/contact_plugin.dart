@@ -3,12 +3,12 @@ import 'dart:io' show Platform;
 import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../base_plugin.dart';
+import 'package:Memento/plugins/base_plugin.dart';
 
-import '../../core/plugin_manager.dart';
-import '../../core/config_manager.dart';
-import '../../core/js_bridge/js_bridge_plugin.dart';
-import '../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/config_manager.dart';
+import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'controllers/contact_controller.dart';
 import 'models/contact_model.dart';
 import 'models/interaction_record_model.dart';
@@ -16,7 +16,7 @@ import 'widgets/contact_card.dart';
 import 'widgets/contact_form.dart';
 import 'widgets/filter_dialog.dart';
 import 'package:uuid/uuid.dart';
-import '../../core/services/toast_service.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class ContactPlugin extends BasePlugin with JSBridgePlugin {
   late ContactController _controller;

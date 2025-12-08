@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../models/goods_item.dart';
+import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'controllers/form_controller.dart';
 import 'widgets/basic_info_tab.dart';
 

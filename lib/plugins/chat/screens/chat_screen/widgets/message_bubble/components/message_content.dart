@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/quill_viewer/index.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
-import '../../../../../../../plugins/chat/models/message.dart';
-import '../../../../../../../plugins/chat/widgets/image_message_widget.dart';
-import '../../../../../../../widgets/file_preview/index.dart';
-import '../../audio_message_bubble.dart';
-import '../../../../../../../widgets/file_preview/file_preview_screen.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/widgets/image_message_widget.dart';
+import 'package:Memento/widgets/file_preview/index.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/widgets/audio_message_bubble.dart';
+import 'package:Memento/widgets/file_preview/file_preview_screen.dart';
 import 'thinking_indicator.dart';
 
 class MessageContent extends StatelessWidget {

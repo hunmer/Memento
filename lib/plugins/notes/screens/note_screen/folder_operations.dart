@@ -1,8 +1,8 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../controllers/notes_controller.dart';
-import '../../models/folder.dart';
+import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
 
 // 创建新文件夹
 Future<void> createNewFolder(

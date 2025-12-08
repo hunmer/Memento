@@ -1,6 +1,6 @@
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:flutter/material.dart';
-import '../store_plugin.dart';
+import 'package:Memento/plugins/store/store_plugin.dart';
 
 class PointSettingsView extends StatelessWidget {
   final StorePlugin plugin;

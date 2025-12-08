@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../habits_plugin.dart';
-import '../models/habit.dart';
-import '../models/habits_weekly_widget_config.dart';
-import '../models/habits_weekly_widget_data.dart';
-import '../services/habits_widget_service.dart';
-import '../../../widgets/widget_config_editor/index.dart';
+import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/habits/models/habit.dart';
+import 'package:Memento/plugins/habits/models/habits_weekly_widget_config.dart';
+import 'package:Memento/plugins/habits/models/habits_weekly_widget_data.dart';
+import 'package:Memento/plugins/habits/services/habits_widget_service.dart';
+import 'package:Memento/widgets/widget_config_editor/index.dart';
 
 /// 习惯周视图小组件配置界面
 ///

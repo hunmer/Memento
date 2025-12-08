@@ -1,8 +1,8 @@
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../action/action_manager.dart';
-import '../action/widgets/action_selector_dialog.dart';
+import 'package:Memento/core/action/action_manager.dart';
+import 'package:Memento/core/action/widgets/action_selector_dialog.dart';
 import 'floating_ball_manager.dart';
 import 'floating_ball_service.dart';
 import 'models/floating_ball_gesture.dart';

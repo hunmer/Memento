@@ -4,7 +4,7 @@ import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/quill_viewer/index.dart';
-import '../../models/calendar_entry.dart';
+import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
 import 'entry_detail_image_viewer.dart';
 
 class EntryDetailContent extends StatelessWidget {

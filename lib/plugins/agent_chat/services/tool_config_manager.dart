@@ -8,7 +8,7 @@ import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import '../models/tool_config.dart';
+import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
 
 /// 工具配置管理器（单例）
 class ToolConfigManager {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../managers/home_layout_manager.dart';
-import '../managers/home_widget_registry.dart';
-import '../models/layout_config.dart';
-import '../models/home_widget_item.dart';
-import '../models/home_widget_size.dart';
+import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
+import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
+import 'package:Memento/screens/home_screen/models/layout_config.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import '../../../../core/services/toast_service.dart';
 
 /// 布局管理对话框

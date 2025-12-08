@@ -1,8 +1,8 @@
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../controllers/tool_app_controller.dart';
-import '../models/tool_app.dart';
+import 'package:Memento/plugins/openai/controllers/tool_app_controller.dart';
+import 'package:Memento/plugins/openai/models/tool_app.dart';
 
 class ToolAppGrid extends StatelessWidget {
   const ToolAppGrid({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../l10n/day_localizations.dart';
+import 'package:Memento/plugins/day/l10n/day_localizations.dart';
 import 'color_picker.dart';
-import '../../../../widgets/image_picker_dialog.dart';
+import 'package:Memento/widgets/image_picker_dialog.dart';
 
 class AppearanceTab extends StatelessWidget {
   final Color selectedColor;

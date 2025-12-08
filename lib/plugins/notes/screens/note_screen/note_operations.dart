@@ -3,10 +3,10 @@ import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../../controllers/notes_controller.dart';
-import '../../models/folder.dart';
-import '../../models/note.dart';
-import '../note_edit_screen.dart';
+import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
+import 'package:Memento/plugins/notes/models/note.dart';
+import 'package:Memento/plugins/notes/screens/note_edit_screen.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 // 创建新笔记

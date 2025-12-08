@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/event.dart';
+import 'package:Memento/plugins/calendar/models/event.dart';
 import 'package:intl/intl.dart';
 
 class EventDetailCard extends StatelessWidget {

@@ -5,10 +5,10 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart' as syncfusion;
 import 'package:uuid/uuid.dart';
-import '../../core/plugin_manager.dart';
-import '../../core/config_manager.dart';
-import '../../core/js_bridge/js_bridge_plugin.dart';
-import '../base_plugin.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/config_manager.dart';
+import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/plugins/base_plugin.dart';
 import './controllers/calendar_controller.dart' as app;
 import './models/event.dart';
 import './pages/event_edit_page.dart';
@@ -16,10 +16,10 @@ import './pages/completed_events_page.dart';
 import './pages/event_list_page.dart';
 import './widgets/event_detail_card.dart';
 import './services/todo_event_service.dart';
-import '../todo/todo_plugin.dart';
+import 'package:Memento/plugins/todo/todo_plugin.dart';
 import './l10n/calendar_localizations.dart';
-import '../../core/services/plugin_widget_sync_helper.dart';
-import '../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 
 class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   static CalendarPlugin? _instance;

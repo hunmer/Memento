@@ -1,6 +1,6 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../models/folder.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
 import 'folder_operations.dart';
 import 'notes_screen_state.dart';
 

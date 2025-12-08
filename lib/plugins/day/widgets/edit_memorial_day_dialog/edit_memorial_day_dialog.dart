@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../../models/memorial_day.dart';
-import '../../l10n/day_localizations.dart';
+import 'package:Memento/plugins/day/models/memorial_day.dart';
+import 'package:Memento/plugins/day/l10n/day_localizations.dart';
 import 'information_tab.dart';
 import 'notes_tab.dart';
 import 'appearance_tab.dart';

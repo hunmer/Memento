@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/folder.dart';
-import '../models/note.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
+import 'package:Memento/plugins/notes/models/note.dart';
 
 /// 笔记插件示例数据
 /// 当插件的 JSON 文件不存在时，可以使用这些示例数据进行初始化

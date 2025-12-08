@@ -1,7 +1,7 @@
 import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:flutter/material.dart';
-import '../models/event.dart';
-import '../widgets/event_detail_card.dart';
+import 'package:Memento/plugins/calendar/models/event.dart';
+import 'package:Memento/plugins/calendar/widgets/event_detail_card.dart';
 import 'package:intl/intl.dart';
 
 class EventListPage extends StatefulWidget {

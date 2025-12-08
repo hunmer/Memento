@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:flutter/material.dart';
-import '../models/product.dart';
+import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 
 class ProductCard extends StatelessWidget {

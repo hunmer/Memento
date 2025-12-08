@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
-import '../../l10n/chat_localizations.dart';
-import '../../chat_plugin.dart';
-import '../../utils/message_operations.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/plugins/chat/utils/message_operations.dart';
 import 'controllers/timeline_controller.dart';
 import 'models/timeline_filter.dart';
 import 'widgets/timeline_message_card.dart';

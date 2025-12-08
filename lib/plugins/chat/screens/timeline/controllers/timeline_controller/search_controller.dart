@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../../../models/message.dart';
-import '../../models/timeline_filter.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/screens/timeline/models/timeline_filter.dart';
 import 'base_controller.dart';
 
 /// 搜索和过滤相关功能的混入类

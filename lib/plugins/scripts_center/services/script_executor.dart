@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../../../core/event/event_manager.dart';
-import '../../../core/storage/storage_manager.dart';
-import '../../../core/js_bridge/js_bridge_manager.dart';
-import '../../../core/plugin_base.dart';
-import '../models/script_execution_result.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
+import 'package:Memento/core/plugin_base.dart';
+import 'package:Memento/plugins/scripts_center/models/script_execution_result.dart';
 import 'script_manager.dart';
 
 /// 脚本执行器服务

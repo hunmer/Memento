@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
-import '../floating_widget_controller.dart';
-import '../widgets/floating_button_edit_dialog.dart';
-import '../../services/toast_service.dart';
+import 'package:Memento/core/floating_ball/floating_widget_controller.dart';
+import 'package:Memento/core/floating_ball/widgets/floating_button_edit_dialog.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 悬浮按钮管理界面
 class FloatingButtonManagerScreen extends StatefulWidget {

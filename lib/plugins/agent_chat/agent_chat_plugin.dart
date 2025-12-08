@@ -1,9 +1,9 @@
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../../core/plugin_base.dart';
-import '../../core/plugin_manager.dart';
-import '../../core/config_manager.dart';
+import 'package:Memento/core/plugin_base.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/config_manager.dart';
 import 'controllers/conversation_controller.dart';
 import 'screens/conversation_list_screen/conversation_list_screen.dart';
 import 'screens/chat_screen/chat_screen.dart';

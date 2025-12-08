@@ -1,8 +1,8 @@
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../controllers/store_controller.dart';
-import '../../models/points_log.dart';
-import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/plugins/store/controllers/store_controller.dart';
+import 'package:Memento/plugins/store/models/points_log.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 class PointsHistory extends StatefulWidget {

@@ -1,12 +1,12 @@
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../models/bill.dart';
+import 'package:Memento/plugins/bill/models/bill.dart';
 import 'bill_edit_screen.dart' as bill_edit;
-import '../bill_plugin.dart';
-import '../models/account.dart';
-import '../models/statistic_range.dart';
-import '../widgets/bill_statistics_card.dart';
+import 'package:Memento/plugins/bill/bill_plugin.dart';
+import 'package:Memento/plugins/bill/models/account.dart';
+import 'package:Memento/plugins/bill/models/statistic_range.dart';
+import 'package:Memento/plugins/bill/widgets/bill_statistics_card.dart';
 
 class AccountBillsScreen extends StatefulWidget {
   final BillPlugin billPlugin;

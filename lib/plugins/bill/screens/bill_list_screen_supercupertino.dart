@@ -3,11 +3,11 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
-import '../l10n/bill_localizations.dart';
-import '../models/bill_model.dart';
-import '../models/bill.dart';
-import '../bill_plugin.dart';
-import '../widgets/month_selector.dart';
+import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
+import 'package:Memento/plugins/bill/models/bill_model.dart';
+import 'package:Memento/plugins/bill/models/bill.dart';
+import 'package:Memento/plugins/bill/bill_plugin.dart';
+import 'package:Memento/plugins/bill/widgets/month_selector.dart';
 import 'bill_edit_screen.dart';
 import 'account_list_screen.dart';
 

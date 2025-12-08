@@ -6,9 +6,9 @@ import 'package:Memento/plugins/openai/widgets/agent_list_drawer.dart';
 import 'widgets/metadata_display.dart';
 import 'widgets/input_field.dart';
 import 'widgets/send_button.dart';
-import '../message_input_actions/message_input_actions_drawer.dart';
-import '../message_input_actions/message_input_actions_builder.dart';
-import '../../../../models/message.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/message_input_actions_drawer.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/message_input_actions_builder.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
 
 class MessageInput extends StatefulWidget {
   final TextEditingController controller;

@@ -4,9 +4,9 @@ import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_a
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
-import '../../../../../models/file_message.dart';
-import '../../../../../services/file_service.dart';
-import '../types.dart';
+import 'package:Memento/plugins/chat/models/file_message.dart';
+import 'package:Memento/plugins/chat/services/file_service.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/types.dart';
 
 Future<void> handleLocalVideoSelection({
   required BuildContext context,

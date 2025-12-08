@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../utils/color_extension.dart';
+import 'package:Memento/utils/color_extension.dart';
 import 'message.dart';
 
 class Channel {

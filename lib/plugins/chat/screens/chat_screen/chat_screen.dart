@@ -11,12 +11,12 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/services.dart';
 import 'dart:io'; // 添加File类支持
-import '../../models/channel.dart';
-import '../../models/message.dart';
-import '../../models/user.dart';
-import '../../chat_plugin.dart';
-import '../profile_edit_dialog.dart';
-import '../../utils/message_operations.dart'; // 添加消息操作工具类
+import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/models/user.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/plugins/chat/screens/profile_edit_dialog.dart';
+import 'package:Memento/plugins/chat/utils/message_operations.dart';
 // 移除未使用的导入
 import 'controllers/chat_screen_controller.dart';
 import 'widgets/chat_app_bar.dart';

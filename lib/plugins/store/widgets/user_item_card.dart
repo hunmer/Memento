@@ -1,10 +1,10 @@
 import 'package:Memento/l10n/app_localizations.dart';
 
-import '../l10n/store_localizations.dart';
+import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
-import '../models/user_item.dart';
+import 'package:Memento/plugins/store/models/user_item.dart';
 
 class UserItemCard extends StatelessWidget {
   final UserItem item;

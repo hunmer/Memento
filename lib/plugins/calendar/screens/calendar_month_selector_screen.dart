@@ -3,15 +3,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
-import '../../../core/plugin_manager.dart';
-import '../calendar_plugin.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/calendar/calendar_plugin.dart';
 import '../controllers/calendar_controller.dart' as app;
-import '../../../widgets/widget_config_editor/widget_config_editor.dart';
-import '../../../widgets/widget_config_editor/models/widget_config.dart';
-import '../../../widgets/widget_config_editor/models/color_config.dart';
-import '../../../widgets/widget_config_editor/models/widget_size.dart';
+import 'package:Memento/widgets/widget_config_editor/widget_config_editor.dart';
+import 'package:Memento/widgets/widget_config_editor/models/widget_config.dart';
+import 'package:Memento/widgets/widget_config_editor/models/color_config.dart';
+import 'package:Memento/widgets/widget_config_editor/models/widget_size.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 日历月视图小组件配置界面
 ///

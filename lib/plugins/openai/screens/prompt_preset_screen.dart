@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import '../l10n/openai_localizations.dart';
-import '../models/prompt_preset.dart';
-import '../services/prompt_preset_service.dart';
+import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
+import 'package:Memento/plugins/openai/models/prompt_preset.dart';
+import 'package:Memento/plugins/openai/services/prompt_preset_service.dart';
 
 class PromptPresetScreen extends StatelessWidget {
   const PromptPresetScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/note.dart';
-import '../utils/text_highlight.dart';
+import 'package:Memento/plugins/notes/models/note.dart';
+import 'package:Memento/plugins/notes/utils/text_highlight.dart';
 
 class SearchNoteItem extends StatelessWidget {
   final Note note;

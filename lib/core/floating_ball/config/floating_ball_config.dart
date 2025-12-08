@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../models/floating_ball_gesture.dart';
+import 'package:Memento/core/floating_ball/models/floating_ball_gesture.dart';
 
 /// 悬浮球配置数据模型
 class FloatingBallConfig {

@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../../../core/plugin_base.dart';
-import '../services/speech/speech_recognition_config.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/core/plugin_base.dart';
+import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_config.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// Agent Chat 插件设置界面
 class AgentChatSettingsScreen extends StatefulWidget {

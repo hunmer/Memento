@@ -2,10 +2,10 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../../core/plugin_manager.dart';
-import '../../core/config_manager.dart';
-import '../../core/js_bridge/js_bridge_plugin.dart';
-import '../base_plugin.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/config_manager.dart';
+import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/plugins/base_plugin.dart';
 import 'widgets/calendar_album_bottom_bar.dart';
 import 'controllers/calendar_controller.dart';
 

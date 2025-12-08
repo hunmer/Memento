@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/service_provider.dart';
-import '../openai_plugin.dart';
+import 'package:Memento/plugins/openai/models/service_provider.dart';
+import 'package:Memento/plugins/openai/openai_plugin.dart';
 
 class ProviderController {
   // 使用OpenAI插件的storage

@@ -1,5 +1,5 @@
-import '../../../core/event/event_manager.dart';
-import '../models/user.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/plugins/chat/models/user.dart';
 
 /// 用户相关事件的常量定义
 class UserEventNames {

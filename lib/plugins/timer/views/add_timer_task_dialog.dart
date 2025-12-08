@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:uuid/uuid.dart';
 import '../models/timer_task.dart' show TimerTask;
-import '../models/timer_item.dart';
-import '../../../widgets/icon_picker_dialog.dart';
+import 'package:Memento/plugins/timer/models/timer_item.dart';
+import 'package:Memento/widgets/icon_picker_dialog.dart';
 
 class AddTimerTaskDialog extends StatefulWidget {
   final List<String> groups;

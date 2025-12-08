@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../models/account.dart';
-import '../models/bill.dart';
+import 'package:Memento/plugins/bill/models/account.dart';
+import 'package:Memento/plugins/bill/models/bill.dart';
 
 /// 账单插件示例数据
 /// 当插件首次使用且没有数据时，自动加载这些示例数据

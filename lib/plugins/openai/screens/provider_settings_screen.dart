@@ -2,8 +2,8 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../models/service_provider.dart';
-import '../controllers/provider_controller.dart';
+import 'package:Memento/plugins/openai/models/service_provider.dart';
+import 'package:Memento/plugins/openai/controllers/provider_controller.dart';
 import 'provider_edit_screen.dart';
 import 'package:Memento/core/services/toast_service.dart';
 

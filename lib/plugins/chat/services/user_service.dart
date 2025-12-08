@@ -1,7 +1,7 @@
-import '../../../core/event/event_manager.dart';
-import '../events/user_events.dart';
-import '../models/user.dart';
-import '../chat_plugin.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/plugins/chat/events/user_events.dart';
+import 'package:Memento/plugins/chat/models/user.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
 
 /// 负责管理用户相关的功能
 class UserService {

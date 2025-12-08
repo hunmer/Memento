@@ -1,6 +1,6 @@
 import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../models/folder.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
 
 class NotesAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Folder? currentFolder;

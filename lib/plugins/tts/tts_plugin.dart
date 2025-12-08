@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../base_plugin.dart';
-import '../../core/plugin_manager.dart';
-import '../../core/config_manager.dart';
+import 'package:Memento/plugins/base_plugin.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/config_manager.dart';
 import 'models/tts_service_config.dart';
 import 'models/tts_service_type.dart';
 import 'services/tts_manager_service.dart';

@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../agent_chat_plugin.dart';
-import '../../screens/chat_screen/components/voice_input_dialog.dart';
+import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
+import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/voice_input_dialog.dart';
 import 'speech_recognition_config.dart';
 import 'tencent_asr_service.dart';
-import '../../../../core/services/toast_service.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 语音识别辅助类
 ///

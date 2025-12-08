@@ -3,9 +3,9 @@
 library;
 
 import 'package:flutter/material.dart';
-import '../models/action_definition.dart';
-import '../models/action_form.dart';
-import '../../app_initializer.dart';
+import 'package:Memento/core/action/models/action_definition.dart';
+import 'package:Memento/core/action/models/action_form.dart';
+import 'package:Memento/core/app_initializer.dart';
 
 /// 表单值改变回调
 typedef OnFormChanged = void Function(Map<String, dynamic> values);

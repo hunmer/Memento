@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../../../utils/image_utils.dart';
-import '../models/ai_agent.dart';
-import '../screens/agent_edit_screen.dart';
+import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/plugins/openai/models/ai_agent.dart';
+import 'package:Memento/plugins/openai/screens/agent_edit_screen.dart';
 
 class AgentListItem extends StatelessWidget {
   final AIAgent agent;

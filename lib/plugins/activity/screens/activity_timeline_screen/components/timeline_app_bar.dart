@@ -2,9 +2,9 @@ import 'dart:io' show Platform;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/diary/l10n/diary_localizations.dart';
 import 'package:flutter/material.dart';
-import '../controllers/activity_controller.dart';
-import '../controllers/tag_controller.dart';
-import '../controllers/view_mode_controller.dart';
+import 'package:Memento/plugins/activity/screens/activity_timeline_screen/controllers/activity_controller.dart';
+import 'package:Memento/plugins/activity/screens/activity_timeline_screen/controllers/tag_controller.dart';
+import 'package:Memento/plugins/activity/screens/activity_timeline_screen/controllers/view_mode_controller.dart';
 
 class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
   final TagController tagController;

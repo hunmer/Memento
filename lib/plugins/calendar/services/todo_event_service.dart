@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../todo/controllers/task_controller.dart';
-import '../../todo/models/task.dart';
-import '../models/event.dart';
+import 'package:Memento/plugins/todo/controllers/task_controller.dart';
+import 'package:Memento/plugins/todo/models/task.dart';
+import 'package:Memento/plugins/calendar/models/event.dart';
 
 /// TodoEventService 负责从 TodoPlugin 获取任务数据并转换为日历事件
 class TodoEventService {

@@ -1,12 +1,12 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../../../../core/storage/storage_manager.dart';
-import '../../../../core/event/event.dart';
-import '../../../../widgets/calendar_strip_date_picker.dart';
-import '../../services/activity_service.dart';
-import '../../widgets/activity_timeline.dart';
-import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/event/event.dart';
+import 'package:Memento/widgets/calendar_strip_date_picker.dart';
+import 'package:Memento/plugins/activity/services/activity_service.dart';
+import 'package:Memento/plugins/activity/widgets/activity_timeline.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'components/activity_grid_view.dart';
 import 'controllers/activity_controller.dart';
 import 'controllers/tag_controller.dart';

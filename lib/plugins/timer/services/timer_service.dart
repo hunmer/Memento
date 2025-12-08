@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import '../models/timer_task.dart';
+import 'package:Memento/plugins/timer/models/timer_task.dart';
 
 class TimerService {
   static const MethodChannel _channel = MethodChannel(

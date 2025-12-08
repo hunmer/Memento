@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../models/statistics_models.dart';
+import 'package:Memento/widgets/statistics/models/statistics_models.dart';
 import 'date_range_selector.dart';
 import 'chart_components.dart';
 

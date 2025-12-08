@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
-import '../../../core/storage/storage_manager.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:mime/mime.dart';
 import 'dart:async';
-import '../widgets/backup_progress_dialog.dart';
+import 'package:Memento/screens/settings_screen/widgets/backup_progress_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 class WebDAVController {

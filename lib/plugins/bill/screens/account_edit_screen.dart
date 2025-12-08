@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import '../bill_plugin.dart';
-import '../models/account.dart';
-import '../../../widgets/icon_picker_dialog.dart';
+import 'package:Memento/plugins/bill/bill_plugin.dart';
+import 'package:Memento/plugins/bill/models/account.dart';
+import 'package:Memento/widgets/icon_picker_dialog.dart';
 
 class AccountEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;

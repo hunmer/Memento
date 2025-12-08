@@ -3,13 +3,13 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import '../models/warehouse.dart';
-import '../widgets/warehouse_form.dart';
-import '../models/goods_item.dart';
-import '../goods_plugin.dart';
-import '../widgets/goods_item_card.dart';
-import '../widgets/goods_item_list_tile.dart';
-import '../widgets/goods_item_form/goods_item_form.dart';
+import 'package:Memento/plugins/goods/models/warehouse.dart';
+import 'package:Memento/plugins/goods/widgets/warehouse_form.dart';
+import 'package:Memento/plugins/goods/models/goods_item.dart';
+import 'package:Memento/plugins/goods/goods_plugin.dart';
+import 'package:Memento/plugins/goods/widgets/goods_item_card.dart';
+import 'package:Memento/plugins/goods/widgets/goods_item_list_tile.dart';
+import 'package:Memento/plugins/goods/widgets/goods_item_form/goods_item_form.dart';
 
 class WarehouseDetailScreen extends StatefulWidget {
   final Warehouse warehouse;

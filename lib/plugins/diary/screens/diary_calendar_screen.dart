@@ -7,11 +7,11 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
-import '../../../widgets/quill_viewer/index.dart';
-import '../../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/quill_viewer/index.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'diary_editor_screen.dart';
-import '../models/diary_entry.dart';
-import '../utils/diary_utils.dart';
+import 'package:Memento/plugins/diary/models/diary_entry.dart';
+import 'package:Memento/plugins/diary/utils/diary_utils.dart';
 
 class DiaryCalendarScreen extends StatefulWidget {
   final StorageManager storage;

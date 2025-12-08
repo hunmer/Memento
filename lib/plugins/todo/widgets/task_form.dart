@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../models/models.dart';
-import '../controllers/controllers.dart';
+import 'package:Memento/plugins/todo/models/models.dart';
+import 'package:Memento/plugins/todo/controllers/controllers.dart';
 
 class TaskForm extends StatefulWidget {
   final Task? task; // If null, create new task

@@ -1,9 +1,9 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../controllers/store_controller.dart';
-import '../../models/product.dart';
-import '../product_card.dart';
+import 'package:Memento/plugins/store/controllers/store_controller.dart';
+import 'package:Memento/plugins/store/models/product.dart';
+import 'package:Memento/plugins/store/widgets/product_card.dart';
 
 class ArchivedProductsPage extends StatefulWidget {
   final StoreController controller;

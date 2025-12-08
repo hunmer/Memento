@@ -6,8 +6,8 @@ import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
-import '../models/product.dart';
-import '../controllers/store_controller.dart';
+import 'package:Memento/plugins/store/models/product.dart';
+import 'package:Memento/plugins/store/controllers/store_controller.dart';
 
 class AddProductPage extends StatefulWidget {
   final StoreController controller;

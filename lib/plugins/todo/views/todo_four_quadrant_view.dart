@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/models.dart';
-import '../models/task.dart';
+import 'package:Memento/plugins/todo/models/models.dart';
+import 'package:Memento/plugins/todo/models/task.dart';
 
 class TodoFourQuadrantView extends StatelessWidget {
   final List<Task> tasks;

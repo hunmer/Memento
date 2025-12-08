@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../models/custom_field.dart';
-import '../../l10n/goods_localizations.dart';
-import '../../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/goods/models/custom_field.dart';
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class CustomFieldsList extends StatefulWidget {
   final List<CustomField> fields;

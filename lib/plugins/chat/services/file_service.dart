@@ -4,7 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
-import '../models/file_message.dart';
+import 'package:Memento/plugins/chat/models/file_message.dart';
 
 // 用于返回保存文件的结果
 class SaveFileResult {

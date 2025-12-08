@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../l10n/checkin_localizations.dart';
+import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 
 class EmptyState extends StatelessWidget {
   const EmptyState({super.key});

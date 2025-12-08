@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../services/suggested_questions_service.dart';
-import '../../../../../core/storage/storage_manager.dart';
-import '../../../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/agent_chat/services/suggested_questions_service.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 预设问题选择对话框
 class SuggestedQuestionsDialog extends StatefulWidget {

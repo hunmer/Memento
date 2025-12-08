@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import '../models/execution_history.dart';
-import '../openai_plugin.dart';
+import 'package:Memento/plugins/openai/models/execution_history.dart';
+import 'package:Memento/plugins/openai/openai_plugin.dart';
 
 /// 执行历史控制器
 ///

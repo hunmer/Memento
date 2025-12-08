@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import '../controllers/day_controller.dart';
-import '../l10n/day_localizations.dart';
-import '../widgets/memorial_day_card.dart';
-import '../widgets/memorial_day_list_item.dart';
-import '../widgets/edit_memorial_day_dialog/edit_memorial_day_dialog.dart';
-import '../models/memorial_day.dart';
+import 'package:Memento/plugins/day/controllers/day_controller.dart';
+import 'package:Memento/plugins/day/l10n/day_localizations.dart';
+import 'package:Memento/plugins/day/widgets/memorial_day_card.dart';
+import 'package:Memento/plugins/day/widgets/memorial_day_list_item.dart';
+import 'package:Memento/plugins/day/widgets/edit_memorial_day_dialog/edit_memorial_day_dialog.dart';
+import 'package:Memento/plugins/day/models/memorial_day.dart';
 
 class DayHomeScreen extends StatefulWidget {
   const DayHomeScreen({super.key});

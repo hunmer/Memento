@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/tool_config.dart';
+import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
 import 'tool_list_item.dart';
 
 /// 插件分组展示组件

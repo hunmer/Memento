@@ -1,6 +1,6 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../../core/plugin_base.dart';
+import 'package:Memento/core/plugin_base.dart';
 
 class PluginSelectionDialog extends StatefulWidget {
   final List<PluginBase> plugins;

@@ -1,6 +1,6 @@
-import '../models/database_model.dart';
-import '../models/record.dart';
-import '../services/database_service.dart';
+import 'package:Memento/plugins/database/models/database_model.dart';
+import 'package:Memento/plugins/database/models/record.dart';
+import 'package:Memento/plugins/database/services/database_service.dart';
 
 class DatabaseController {
   final DatabaseService service;

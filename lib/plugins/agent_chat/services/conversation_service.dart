@@ -1,9 +1,9 @@
 import 'package:Memento/plugins/agent_chat/data/sample_data.dart';
 import 'package:flutter/foundation.dart';
-import '../../../core/storage/storage_manager.dart';
-import '../../../core/services/plugin_widget_sync_helper.dart';
-import '../models/conversation.dart';
-import '../models/conversation_group.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/plugins/agent_chat/models/conversation.dart';
+import 'package:Memento/plugins/agent_chat/models/conversation_group.dart';
 
 /// 会话服务
 ///

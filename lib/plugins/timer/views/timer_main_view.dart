@@ -8,9 +8,9 @@ import 'package:Memento/plugins/timer/views/timer_task_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import '../timer_plugin.dart';
+import 'package:Memento/plugins/timer/timer_plugin.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
-import '../models/timer_task.dart';
+import 'package:Memento/plugins/timer/models/timer_task.dart';
 import 'package:collection/collection.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 

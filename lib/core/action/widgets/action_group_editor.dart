@@ -4,8 +4,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../models/action_instance.dart';
-import '../models/action_group.dart';
+import 'package:Memento/core/action/models/action_instance.dart';
+import 'package:Memento/core/action/models/action_group.dart';
 import 'action_selector_dialog.dart';
 
 /// 动作组编辑器

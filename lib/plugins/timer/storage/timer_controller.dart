@@ -2,7 +2,7 @@ import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../models/timer_task.dart';
+import 'package:Memento/plugins/timer/models/timer_task.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 
 class TimerController {

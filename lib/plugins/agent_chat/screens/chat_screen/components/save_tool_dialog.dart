@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../models/chat_message.dart';
-import '../../../models/saved_tool_template.dart';
-import '../../../models/tool_call_step.dart';
-import '../../../services/tool_template_service.dart';
-import '../../../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
+import 'package:Memento/plugins/agent_chat/models/saved_tool_template.dart';
+import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
+import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 保存/编辑工具对话框
 ///

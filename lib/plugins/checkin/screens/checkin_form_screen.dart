@@ -1,9 +1,9 @@
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:flutter/material.dart';
-import '../models/checkin_item.dart';
-import '../../../utils/date_time_utils.dart';
-import '../../../widgets/circle_icon_picker.dart';
+import 'package:Memento/plugins/checkin/models/checkin_item.dart';
+import 'package:Memento/utils/date_time_utils.dart';
+import 'package:Memento/widgets/circle_icon_picker.dart';
 
 class CheckinFormScreen extends StatefulWidget {
   final CheckinItem? initialItem;

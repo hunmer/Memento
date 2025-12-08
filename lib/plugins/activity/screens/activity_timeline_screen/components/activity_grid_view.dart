@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import '../../../models/activity_record.dart';
+import 'package:Memento/plugins/activity/models/activity_record.dart';
 
 class ActivityGridView extends StatefulWidget {
   final List<ActivityRecord> activities;

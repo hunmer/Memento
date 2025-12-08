@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../storage/storage_manager.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
 import 'page_visit_record.dart';
 
 /// 路由历史管理器

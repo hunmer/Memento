@@ -1,6 +1,6 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class CommonRecordList<T> extends StatelessWidget {
   final List<T> records;

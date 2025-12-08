@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../models/script_info.dart';
-import '../models/script_input.dart';
-import '../models/script_trigger.dart';
-import '../services/script_manager.dart';
-import '../widgets/script_input_edit_dialog.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/scripts_center/models/script_info.dart';
+import 'package:Memento/plugins/scripts_center/models/script_input.dart';
+import 'package:Memento/plugins/scripts_center/models/script_trigger.dart';
+import 'package:Memento/plugins/scripts_center/services/script_manager.dart';
+import 'package:Memento/plugins/scripts_center/widgets/script_input_edit_dialog.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 脚本编辑屏幕
 ///

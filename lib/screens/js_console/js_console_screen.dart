@@ -4,7 +4,7 @@ import 'controllers/js_console_controller.dart';
 import 'widgets/code_editor.dart';
 import 'widgets/output_viewer.dart';
 import 'widgets/example_buttons.dart';
-import '../../core/js_bridge/js_bridge_manager.dart';
+import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 
 class JSConsoleScreen extends StatefulWidget {
   const JSConsoleScreen({super.key});

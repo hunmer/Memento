@@ -1,11 +1,11 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import '../tts_plugin.dart';
-import '../models/tts_service_config.dart';
-import '../models/tts_service_type.dart';
-import '../l10n/tts_localizations.dart';
-import '../widgets/service_editor_dialog.dart';
+import 'package:Memento/plugins/tts/tts_plugin.dart';
+import 'package:Memento/plugins/tts/models/tts_service_config.dart';
+import 'package:Memento/plugins/tts/models/tts_service_type.dart';
+import 'package:Memento/plugins/tts/l10n/tts_localizations.dart';
+import 'package:Memento/plugins/tts/widgets/service_editor_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 /// TTS服务列表界面

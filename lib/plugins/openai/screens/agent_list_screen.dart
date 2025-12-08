@@ -3,12 +3,12 @@ import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import '../l10n/openai_localizations.dart';
-import '../openai_plugin.dart';
-import '../widgets/agent_list_view.dart';
-import '../widgets/agent_grid_view.dart';
-import '../widgets/filter_dialog.dart';
-import '../models/ai_agent.dart';
+import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
+import 'package:Memento/plugins/openai/openai_plugin.dart';
+import 'package:Memento/plugins/openai/widgets/agent_list_view.dart';
+import 'package:Memento/plugins/openai/widgets/agent_grid_view.dart';
+import 'package:Memento/plugins/openai/widgets/filter_dialog.dart';
+import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'agent_edit_screen.dart';
 
 class AgentListScreen extends StatefulWidget {

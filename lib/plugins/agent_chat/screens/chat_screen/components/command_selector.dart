@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/chat_command.dart';
+import 'package:Memento/plugins/agent_chat/models/chat_command.dart';
 
 /// 命令选择器组件
 ///

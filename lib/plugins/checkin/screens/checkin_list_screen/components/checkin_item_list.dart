@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../controllers/checkin_list_controller.dart';
-import '../../../models/checkin_item.dart';
+import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
+import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'checkin_item_card.dart';
 
 class CheckinItemList extends StatelessWidget {

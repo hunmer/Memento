@@ -4,7 +4,7 @@ import 'floating_ball_service.dart';
 import 'floating_ball_manager.dart';
 import 'widgets/shared_floating_ball_widget.dart';
 import 'models/floating_ball_gesture.dart';
-import '../action/action_manager.dart';
+import 'package:Memento/core/action/action_manager.dart';
 
 /// 浮浮球Widget
 ///

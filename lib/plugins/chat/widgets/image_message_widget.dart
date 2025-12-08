@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../models/message.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
 import '../../../../utils/image_utils.dart';
 
 class ImageMessageWidget extends StatelessWidget {

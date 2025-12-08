@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import '../models/home_item.dart';
-import '../models/home_widget_item.dart';
-import '../models/home_folder_item.dart';
-import '../managers/home_widget_registry.dart';
+import 'package:Memento/screens/home_screen/models/home_item.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
+import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
+import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'home_card.dart';
 
 /// 主页网格布局组件

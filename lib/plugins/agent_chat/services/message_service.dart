@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import '../../../core/storage/storage_manager.dart';
-import '../models/chat_message.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
 import 'token_counter_service.dart';
 import 'widget_service.dart';
 

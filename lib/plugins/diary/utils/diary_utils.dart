@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
-import '../../../core/storage/storage_manager.dart';
-import '../../../core/services/plugin_widget_sync_helper.dart';
-import '../../../core/event/event_manager.dart';
-import '../models/diary_entry.dart';
-import '../diary_plugin.dart';
-import '../sample_data.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/plugins/diary/models/diary_entry.dart';
+import 'package:Memento/plugins/diary/diary_plugin.dart';
+import 'package:Memento/plugins/diary/sample_data.dart';
 
 class DiaryUtils {
   static const String _pluginDir = 'diary';

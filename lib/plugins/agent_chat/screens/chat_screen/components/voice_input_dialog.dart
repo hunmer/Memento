@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../../services/speech/speech_recognition_service.dart';
-import '../../../services/speech/speech_recognition_state.dart';
+import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_service.dart';
+import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_state.dart';
 import '../../../../../../core/services/toast_service.dart';
 
 /// 语音输入对话框

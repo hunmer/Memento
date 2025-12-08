@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import '../base_plugin.dart';
-import '../../core/plugin_manager.dart';
-import '../../core/config_manager.dart';
-import '../../core/event/event_manager.dart';
-import '../../core/event/event_args.dart';
-import '../../core/event/item_event_args.dart';
-import '../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/plugins/base_plugin.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/config_manager.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/event_args.dart';
+import 'package:Memento/core/event/item_event_args.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'services/script_loader.dart';
 import 'services/script_manager.dart';
 import 'services/script_executor.dart';

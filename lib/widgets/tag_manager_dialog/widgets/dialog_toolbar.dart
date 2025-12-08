@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/tag_manager_config.dart';
+import 'package:Memento/widgets/tag_manager_dialog/models/tag_manager_config.dart';
 
 class DialogToolbar extends StatelessWidget {
   final String selectedGroup;

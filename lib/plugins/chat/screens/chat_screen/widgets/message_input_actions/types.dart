@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../models/message.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
 
 /// 消息输入动作的基础类
 class MessageInputAction {

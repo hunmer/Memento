@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
-import '../../../plugins/activity/activity_plugin.dart';
-import '../../../plugins/activity/models/activity_weekly_widget_config.dart';
-import '../../../plugins/activity/models/activity_daily_widget_config.dart';
-import '../../../plugins/activity/services/activity_widget_service.dart';
-import '../../plugin_manager.dart';
+import 'package:Memento/plugins/activity/activity_plugin.dart';
+import 'package:Memento/plugins/activity/models/activity_weekly_widget_config.dart';
+import 'package:Memento/plugins/activity/models/activity_daily_widget_config.dart';
+import 'package:Memento/plugins/activity/services/activity_widget_service.dart';
+import 'package:Memento/core/plugin_manager.dart';
 import 'plugin_widget_syncer.dart';
 import 'package:memento_widgets/memento_widgets.dart';
 

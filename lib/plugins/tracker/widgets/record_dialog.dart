@@ -1,9 +1,9 @@
 import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import '../models/goal.dart';
-import '../models/record.dart';
-import '../controllers/tracker_controller.dart';
+import 'package:Memento/plugins/tracker/models/goal.dart';
+import 'package:Memento/plugins/tracker/models/record.dart';
+import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
 
 class RecordDialog extends StatefulWidget {
   final Goal goal;

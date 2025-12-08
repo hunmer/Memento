@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../l10n/activity_localizations.dart';
-import '../services/activity_service.dart';
-import '../widgets/activity_form.dart';
-import '../models/activity_record.dart';
-import '../../../core/services/toast_service.dart';
+import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
+import 'package:Memento/plugins/activity/services/activity_service.dart';
+import 'package:Memento/plugins/activity/widgets/activity_form.dart';
+import 'package:Memento/plugins/activity/models/activity_record.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 活动编辑界面
 /// 用于创建和编辑活动记录

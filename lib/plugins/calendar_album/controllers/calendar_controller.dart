@@ -1,9 +1,9 @@
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
-import '../models/calendar_entry.dart';
+import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
 import 'dart:convert';
-import '../../../core/storage/storage_manager.dart';
-import '../../../core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 
 class CalendarController extends ChangeNotifier {
   final Map<DateTime, List<CalendarEntry>> _entries = {};

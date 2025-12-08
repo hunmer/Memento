@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../plugin_base.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'js_bridge_manager.dart';
 
 /// 插件 JS 桥接能力 Mixin

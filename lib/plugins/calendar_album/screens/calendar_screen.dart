@@ -6,13 +6,13 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/widgets/enhanced_calendar/index.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import '../controllers/calendar_controller.dart';
-import '../controllers/tag_controller.dart';
-import '../l10n/calendar_album_localizations.dart';
-import '../widgets/entry_list.dart';
+import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
+import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
+import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
+import 'package:Memento/plugins/calendar_album/widgets/entry_list.dart';
 import 'entry_editor_screen.dart';
 import 'entry_detail_screen.dart';
-import '../utils/date_utils.dart';
+import 'package:Memento/plugins/calendar_album/utils/date_utils.dart';
 import 'package:intl/intl.dart';
 
 final DateTime _calendarMinMonth = DateTime(2010, 1, 1);

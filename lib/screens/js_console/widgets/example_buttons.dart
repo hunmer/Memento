@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
 import 'package:provider/provider.dart';
-import '../controllers/js_console_controller.dart';
+import 'package:Memento/screens/js_console/controllers/js_console_controller.dart';
 
 class ExampleButtons extends StatelessWidget {
   const ExampleButtons({super.key});

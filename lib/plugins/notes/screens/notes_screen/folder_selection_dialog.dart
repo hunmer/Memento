@@ -2,8 +2,8 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../models/folder.dart';
-import '../../models/note.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
+import 'package:Memento/plugins/notes/models/note.dart';
 import 'notes_screen_state.dart';
 import '../../../../../../core/services/toast_service.dart';
 

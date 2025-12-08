@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../l10n/nodes_localizations.dart';
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 
 class DateSection extends StatelessWidget {
   final DateTime? startDate;

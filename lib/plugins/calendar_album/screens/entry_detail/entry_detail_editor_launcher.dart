@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../controllers/calendar_controller.dart';
-import '../../controllers/tag_controller.dart';
-import '../../models/calendar_entry.dart';
-import '../entry_editor_screen.dart';
+import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
+import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
+import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
+import 'package:Memento/plugins/calendar_album/screens/entry_editor_screen.dart';
 
 class EntryDetailEditorLauncher extends StatelessWidget {
   final CalendarController calendarController;

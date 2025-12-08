@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../habits_plugin.dart';
-import '../models/habits_weekly_widget_data.dart';
-import '../models/habit.dart';
+import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/habits/models/habits_weekly_widget_data.dart';
+import 'package:Memento/plugins/habits/models/habit.dart';
 
 /// 习惯周视图小组件业务逻辑服务
 class HabitsWidgetService {

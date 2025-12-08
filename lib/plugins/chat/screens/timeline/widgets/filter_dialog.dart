@@ -1,10 +1,10 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../../l10n/chat_localizations.dart';
-import '../../../models/channel.dart';
-import '../../../models/user.dart';
-import '../../../chat_plugin.dart';
-import '../models/timeline_filter.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
+import 'package:Memento/plugins/chat/models/channel.dart';
+import 'package:Memento/plugins/chat/models/user.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/plugins/chat/screens/timeline/models/timeline_filter.dart';
 
 /// 高级过滤器对话框
 class FilterDialog extends StatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../l10n/chat_localizations.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 
 class EmptyChannelView extends StatelessWidget {
   final VoidCallback onAddChannel;

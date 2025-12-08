@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:openai_dart/openai_dart.dart';
-import '../models/ai_agent.dart';
+import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'prompt_preset_service.dart';
 import 'dart:developer' as developer;
 

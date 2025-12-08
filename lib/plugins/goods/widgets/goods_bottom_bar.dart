@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
-import '../goods_plugin.dart';
+import 'package:Memento/plugins/goods/goods_plugin.dart';
 
 /// Goods 插件的底部栏组件
 /// 提供仓库视图和物品视图的切换功能

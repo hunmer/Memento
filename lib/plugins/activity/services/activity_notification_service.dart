@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/notification_controller.dart';
+import 'package:Memento/core/notification_controller.dart';
 import 'activity_service.dart';
 
 /// 活动通知服务 - 管理Android常驻通知栏

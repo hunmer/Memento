@@ -1,7 +1,7 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import '../../controllers/notes_controller.dart';
-import '../../models/folder.dart';
+import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
 import 'folder_operations.dart';
 
 class FolderListTile extends StatelessWidget {

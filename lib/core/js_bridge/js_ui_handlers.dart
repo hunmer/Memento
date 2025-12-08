@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
 import 'platform/mobile_js_engine.dart';
-import '../../widgets/location_picker.dart';
+import 'package:Memento/widgets/location_picker.dart';
 
 /// JavaScript Bridge UI 处理器
 /// 提供默认的 Toast/Alert/Dialog 实现

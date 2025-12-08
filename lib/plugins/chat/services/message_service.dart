@@ -1,5 +1,5 @@
-import '../models/message.dart';
-import '../chat_plugin.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
 
 /// 负责管理消息相关的功能
 class MessageService {

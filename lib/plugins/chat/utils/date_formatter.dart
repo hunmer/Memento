@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../l10n/chat_localizations.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 
 class DateFormatter {
   static bool isSameDay(DateTime date1, DateTime date2) {

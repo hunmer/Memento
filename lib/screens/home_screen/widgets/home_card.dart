@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:flutter/material.dart';
-import '../models/home_item.dart';
-import '../models/home_widget_item.dart';
-import '../models/home_folder_item.dart';
-import '../managers/home_widget_registry.dart';
-import '../managers/home_layout_manager.dart';
+import 'package:Memento/screens/home_screen/models/home_item.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
+import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
+import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
+import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'folder_dialog.dart';
 
 /// 主页卡片组件

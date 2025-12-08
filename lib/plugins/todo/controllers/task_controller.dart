@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/models.dart';
-import '../../../core/storage/storage_manager.dart';
-import '../../../core/event/event_manager.dart';
-import '../../../core/event/item_event_args.dart';
+import 'package:Memento/plugins/todo/models/models.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 

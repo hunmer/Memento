@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import '../../../widgets/image_picker_dialog.dart';
-import '../../../utils/image_utils.dart';
-import '../models/contact_model.dart';
-import '../models/custom_activity_event_model.dart';
-import '../controllers/contact_controller.dart';
+import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/plugins/contact/models/contact_model.dart';
+import 'package:Memento/plugins/contact/models/custom_activity_event_model.dart';
+import 'package:Memento/plugins/contact/controllers/contact_controller.dart';
 import 'package:uuid/uuid.dart';
 
 class ContactForm extends StatefulWidget {

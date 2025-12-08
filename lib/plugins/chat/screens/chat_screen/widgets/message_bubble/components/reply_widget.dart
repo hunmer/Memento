@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../../../../plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
 
 class ReplyWidget extends StatelessWidget {
   final Message replyMessage;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../widgets/image_picker_dialog.dart';
-import '../../../../utils/image_utils.dart';
+import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/utils/image_utils.dart';
 import 'dart:io';
 
 class EntryEditorImageHandler extends StatefulWidget {

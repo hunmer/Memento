@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../models/message.dart';
-import '../../../models/channel.dart';
+import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/chat/models/channel.dart';
 
 /// Timeline 工具类，提供各种辅助函数
 class TimelineUtils {

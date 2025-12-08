@@ -3,10 +3,10 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/quill_viewer/quill_viewer.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
-import '../controllers/nodes_controller.dart';
-import '../models/node.dart';
-import '../screens/node_edit_screen.dart';
-import '../l10n/nodes_localizations.dart';
+import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
+import 'package:Memento/plugins/nodes/models/node.dart';
+import 'package:Memento/plugins/nodes/screens/node_edit_screen.dart';
+import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 
 class _StatusInfo {
   final Color color;

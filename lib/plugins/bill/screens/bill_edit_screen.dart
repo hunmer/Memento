@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:uuid/uuid.dart';
-import '../bill_plugin.dart';
-import '../models/bill.dart';
+import 'package:Memento/plugins/bill/bill_plugin.dart';
+import 'package:Memento/plugins/bill/models/bill.dart';
 
 class BillEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;

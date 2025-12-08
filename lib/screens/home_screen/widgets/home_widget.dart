@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/home_widget_size.dart';
-import '../models/plugin_widget_config.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 
 /// 小组件构建器函数类型
 typedef HomeWidgetBuilder = Widget Function(BuildContext context, Map<String, dynamic> config);

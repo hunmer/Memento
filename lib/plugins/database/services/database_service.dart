@@ -1,5 +1,5 @@
-import '../models/database_model.dart';
-import '../../base_plugin.dart';
+import 'package:Memento/plugins/database/models/database_model.dart';
+import 'package:Memento/plugins/base_plugin.dart';
 
 class DatabaseService {
   final BasePlugin plugin;

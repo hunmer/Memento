@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/tag_group.dart' as dialog;
-import '../models/tag_manager_config.dart';
-import '../services/dialog_service.dart';
-import '../widgets/tag_manager_dialog.dart';
+import 'package:Memento/widgets/tag_manager_dialog/models/tag_manager_config.dart';
+import 'package:Memento/widgets/tag_manager_dialog/services/dialog_service.dart';
+import 'package:Memento/widgets/tag_manager_dialog/widgets/tag_manager_dialog.dart';
 
 /// 标签管理器对话框状态
 abstract class TagManagerDialogState extends State<TagManagerDialog> {

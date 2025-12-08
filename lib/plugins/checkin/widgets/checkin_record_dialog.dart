@@ -2,7 +2,7 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
 import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:flutter/material.dart';
-import '../models/checkin_item.dart';
+import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 
 class CheckinRecordDialog extends StatefulWidget {
   final CheckinItem item;

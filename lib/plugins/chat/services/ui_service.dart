@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:Memento/plugins/chat/models/user.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:flutter/material.dart';
-import '../l10n/chat_localizations.dart';
-import '../screens/channel_list/channel_list_screen.dart';
-import '../screens/timeline/timeline_screen.dart';
-import '../screens/profile_edit_dialog.dart';
-import '../chat_plugin.dart';
+import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
+import 'package:Memento/plugins/chat/screens/channel_list/channel_list_screen.dart';
+import 'package:Memento/plugins/chat/screens/timeline/timeline_screen.dart';
+import 'package:Memento/plugins/chat/screens/profile_edit_dialog.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'settings_service.dart';
 import 'user_service.dart';
 

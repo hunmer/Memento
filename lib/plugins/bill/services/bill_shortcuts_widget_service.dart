@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
-import '../models/bill_shortcut.dart';
+import 'package:Memento/plugins/bill/models/bill_shortcut.dart';
 
 /// 快捷记账小组件数据同步服务
 ///
