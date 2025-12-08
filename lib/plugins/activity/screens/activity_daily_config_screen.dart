@@ -7,6 +7,7 @@ import 'package:Memento/plugins/activity/models/activity_daily_widget_data.dart'
 import 'package:Memento/plugins/activity/services/activity_widget_service.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 
 /// 日视图活动列表小组件配置界面
 ///
@@ -273,8 +274,8 @@ class _ActivityDailyConfigScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('上午', style: TextStyle(fontSize: 10, color: accentColor)),
-                    Text('下午', style: TextStyle(fontSize: 10, color: accentColor)),
+                    Text(ActivityLocalizations.of(context).morning, style: TextStyle(fontSize: 10, color: accentColor)),
+                    Text(ActivityLocalizations.of(context).afternoon, style: TextStyle(fontSize: 10, color: accentColor)),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -471,14 +472,14 @@ class _ActivityDailyConfigScreenState
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('配置日视图小组件')),
+        appBar: AppBar(title: Text(ActivityLocalizations.of(context).configDailyWidget)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('配置日视图小组件'),
+        title: Text(ActivityLocalizations.of(context).configDailyWidget),
         actions: [
           if (_isSaving)
             const Center(
@@ -504,7 +505,7 @@ class _ActivityDailyConfigScreenState
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isSaving ? null : _saveConfig,
         icon: const Icon(Icons.check),
-        label: const Text('保存'),
+        label: Text(ActivityLocalizations.of(context).save),
       ),
     );
   }

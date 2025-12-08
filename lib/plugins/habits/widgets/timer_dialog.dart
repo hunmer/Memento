@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
+import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 
 class TimerDialog extends StatefulWidget {
   final Habit habit;
@@ -435,7 +436,7 @@ class _TimerDialogState extends State<TimerDialog> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('取消计时'),
+        title: Text(HabitsLocalizations.of(context).cancelTimer),
         content: Text(
           '确定要取消计时吗？\n'
           '已计时: ${_formatDuration(_elapsed)}\n\n'
@@ -444,14 +445,14 @@ class _TimerDialogState extends State<TimerDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('继续计时'),
+            child: Text(HabitsLocalizations.of(context).continueTimer),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: const Text('确定取消'),
+            child: Text(HabitsLocalizations.of(context).confirmCancel),
           ),
         ],
       ),
@@ -475,7 +476,7 @@ class _TimerDialogState extends State<TimerDialog> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('完成计时'),
+        title: Text(HabitsLocalizations.of(context).completeTimer),
         content: Text(
           '确定要完成计时并保存记录吗？\n'
           '已计时: ${_formatDuration(_elapsed)}\n'
@@ -485,14 +486,14 @@ class _TimerDialogState extends State<TimerDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('继续调整'),
+            child: Text(HabitsLocalizations.of(context).continueAdjust),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: _themeColor,
             ),
-            child: const Text('确定完成'),
+            child: Text(HabitsLocalizations.of(context).confirmComplete),
           ),
         ],
       ),

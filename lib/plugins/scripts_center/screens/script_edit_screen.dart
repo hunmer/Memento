@@ -5,6 +5,7 @@ import 'package:Memento/plugins/scripts_center/models/script_trigger.dart';
 import 'package:Memento/plugins/scripts_center/services/script_manager.dart';
 import 'package:Memento/plugins/scripts_center/widgets/script_input_edit_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/scripts_center/l10n/scripts_center_localizations.dart';
 
 /// 脚本编辑屏幕
 ///
@@ -465,7 +466,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                   toastService.showToast('代码格式化功能即将推出');
                 },
                 icon: const Icon(Icons.format_align_left, size: 18),
-                label: const Text('格式化'),
+                label: Text(ScriptsCenterLocalizations.of(context).format),
               ),
             ],
           ),
@@ -540,7 +541,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
               ElevatedButton.icon(
                 onPressed: _showAddTriggerDialog,
                 icon: const Icon(Icons.add),
-                label: const Text('添加触发器'),
+                label: Text(ScriptsCenterLocalizations.of(context).addTrigger),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
                   foregroundColor: Colors.white,
@@ -610,10 +611,10 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('类别: ${eventOption.category}'),
-                            Text('描述: ${eventOption.description}'),
+                            Text(ScriptsCenterLocalizations.of(context).categoryLabel(eventOption.category)),
+                            Text(ScriptsCenterLocalizations.of(context).descriptionLabel(eventOption.description)),
                             if (trigger.delay != null && trigger.delay! > 0)
-                              Text('延迟: ${trigger.delay}ms'),
+                              Text(ScriptsCenterLocalizations.of(context).delayLabel(trigger.delay!)),
                           ],
                         ),
                         trailing: IconButton(
@@ -649,14 +650,14 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
               prefixIcon: Icon(Icons.category),
               border: OutlineInputBorder(),
             ),
-            items: const [
+            items: [
               DropdownMenuItem(
                 value: 'module',
-                child: Text('Module（可接受参数）'),
+                child: Text(ScriptsCenterLocalizations.of(context).moduleType),
               ),
               DropdownMenuItem(
                 value: 'standalone',
-                child: Text('Standalone（独立运行）'),
+                child: Text(ScriptsCenterLocalizations.of(context).standaloneType),
               ),
             ],
             onChanged: (value) {
@@ -811,7 +812,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
             OutlinedButton.icon(
               onPressed: _addInput,
               icon: const Icon(Icons.add),
-              label: const Text('添加输入参数'),
+              label: Text(ScriptsCenterLocalizations.of(context).addInputParameter),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.deepPurple,
                 side: const BorderSide(color: Colors.deepPurple),
@@ -855,7 +856,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                   _enabled = value;
                 });
               },
-              title: const Text('启用脚本'),
+              title: Text(ScriptsCenterLocalizations.of(context).enableScript),
               subtitle: Text(
                 _enabled ? '脚本将在触发条件满足时执行' : '脚本已禁用，不会执行',
               ),
@@ -880,7 +881,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('添加触发条件'),
+          title: Text(ScriptsCenterLocalizations.of(context).addTriggerCondition),
           content: SizedBox(
             width: 500,
             child: Column(
@@ -950,7 +951,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
+              child: Text(ScriptsCenterLocalizations.of(context).cancel),
             ),
             ElevatedButton(
               onPressed: selectedEvent == null
@@ -960,7 +961,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                 backgroundColor: Colors.deepPurple,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('添加'),
+              child: Text(ScriptsCenterLocalizations.of(context).add),
             ),
           ],
         ),

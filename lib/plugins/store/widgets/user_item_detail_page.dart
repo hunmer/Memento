@@ -259,7 +259,7 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
         children: [
           Icon(icon, size: 20, color: Theme.of(context).primaryColor),
           const SizedBox(width: 12),
-          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(StoreLocalizations.of(context).labelColon(label), style: const TextStyle(fontWeight: FontWeight.bold)),
           Text(value),
         ],
       ),

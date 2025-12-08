@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 import 'package:Memento/plugins/scripts_center/models/script_input.dart';
 import 'script_input_edit_dialog.dart';
+import 'package:Memento/plugins/scripts_center/l10n/scripts_center_localizations.dart';
 
 /// 脚本编辑对话框
 ///
@@ -315,14 +316,14 @@ class _ScriptEditDialogState extends State<ScriptEditDialog> {
                           prefixIcon: Icon(Icons.category),
                           border: OutlineInputBorder(),
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
                             value: 'module',
-                            child: Text('Module（可接受参数）'),
+                            child: Text(ScriptsCenterLocalizations.of(context).moduleType),
                           ),
                           DropdownMenuItem(
                             value: 'standalone',
-                            child: Text('Standalone（独立运行）'),
+                            child: Text(ScriptsCenterLocalizations.of(context).standaloneType),
                           ),
                         ],
                         onChanged: (value) {
@@ -464,7 +465,7 @@ class _ScriptEditDialogState extends State<ScriptEditDialog> {
                         OutlinedButton.icon(
                           onPressed: _addInput,
                           icon: const Icon(Icons.add),
-                          label: const Text('添加输入参数'),
+                          label: Text(ScriptsCenterLocalizations.of(context).addInputParameter),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.deepPurple,
                             side: const BorderSide(color: Colors.deepPurple),
@@ -507,7 +508,7 @@ class _ScriptEditDialogState extends State<ScriptEditDialog> {
                             _enabled = value;
                           });
                         },
-                        title: const Text('启用脚本'),
+                        title: Text(ScriptsCenterLocalizations.of(context).enableScript),
                         subtitle: Text(
                           _enabled ? '脚本将在触发条件满足时执行' : '脚本已禁用，不会执行',
                         ),
@@ -536,7 +537,7 @@ class _ScriptEditDialogState extends State<ScriptEditDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('取消'),
+                    child: Text(ScriptsCenterLocalizations.of(context).cancel),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton.icon(

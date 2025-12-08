@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/floating_ball/plugin_overlay_manager.dart';
+import 'package:Memento/core/l10n/core_localizations.dart';
 
 /// 显示插件覆盖层对话框
 /// 用于选择要在小窗口中打开的插件

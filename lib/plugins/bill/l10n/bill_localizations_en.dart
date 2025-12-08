@@ -198,4 +198,72 @@ class BillLocalizationsEn extends BillLocalizations {
 
   @override
   String get accountName => 'Account Name';
+
+  // 新增遗漏的国际化字符串
+  @override
+  String get statisticsAnalysis => 'Statistics Analysis';
+
+  @override
+  String get confirmDeleteThisBill => 'Are you sure you want to delete this bill?';
+
+  @override
+  String get shortcutsAccountingConfig => 'Shortcuts Accounting Config';
+
+  @override
+  String get configDailyWidget => 'Configure Daily Widget';
+
+  @override
+  String get configWeeklyWidget => 'Configure Weekly Widget';
+
+  @override
+  String get saveConfig => 'Save Config';
+
+  // 新增的硬编码文本
+  @override
+  String get quickBookkeepingConfig => 'Quick Bookkeeping Config';
+
+  @override
+  String get income => 'Income';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get addQuickPreset => 'Add Quick Preset';
+
+  @override
+  String get quickAccountingPreview => 'Quick Accounting Preview';
+
+  @override
+  String get noQuickPresets => 'No Quick Presets';
+
+  @override
+  String get clickToAddQuickPreset => 'Click the + button in the bottom right to add quick presets';
+
+  @override
+  String get editQuickPreset => 'Edit Quick Preset';
+
+  @override
+  String get presetName => 'Preset Name';
+
+  @override
+  String get presetNameHint => 'e.g: breakfast, taxi';
+
+  @override
+  String get pleaseEnterPresetName => 'Please enter preset name';
+
+  @override
+  String get presetAmount => 'Preset Amount (Optional)';
+
+  @override
+  String get presetAmountHint => 'Leave blank to enter manually each time';
+
+  @override
+  String get expense => 'Expense';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get edit => 'Edit';
 }

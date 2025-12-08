@@ -6,6 +6,7 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:Memento/core/floating_ball/floating_widget_controller.dart';
 import 'package:Memento/core/floating_ball/screens/floating_button_manager_screen.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 
 class FloatingBallScreen extends StatefulWidget {
   const FloatingBallScreen({super.key});
@@ -40,7 +41,8 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
     _runningSubscription = _controller.runningChanges.listen((isRunning) {
       if (mounted) {
         setState(() {});
-        _showMessage(isRunning ? '悬浮球已启动' : '悬浮球已停止');
+        final l10n = ScreensLocalizations.of(context);
+        _showMessage(isRunning ? l10n.floatingBallStarted : l10n.floatingBallStopped);
       }
     });
 
@@ -49,7 +51,8 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
     ) {
       if (mounted) {
         setState(() {});
-        _showMessage(hasPermission ? '权限已授予' : '权限被拒绝');
+        final l10n = ScreensLocalizations.of(context);
+        _showMessage(hasPermission ? l10n.permissionGranted : l10n.permissionDenied);
       }
     });
 
@@ -62,7 +65,8 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
     _buttonSubscription = _controller.buttonEvents.listen((event) {
       print('收到按钮事件: ${event.title}, data: ${event.data}');
       if (mounted) {
-        _showMessage('点击了: ${event.title}');
+        final l10n = ScreensLocalizations.of(context);
+        _showMessage(l10n.clickedButton(event.title));
         _handleButtonEvent(event);
       }
     });
@@ -98,8 +102,9 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ScreensLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('悬浮球设置')),
+      appBar: AppBar(title: Text(l10n.floatingBallSettings)),
       body: ListView(
         children: [
           // 第一行：悬浮球状态、悬浮窗权限、开启/禁用悬浮球
@@ -123,8 +128,8 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                             size: 32,
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            '悬浮球状态',
+                          Text(
+                            l10n.floatingBallStatus,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
@@ -132,7 +137,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            _controller.isRunning ? '运行中' : '已停止',
+                            _controller.isRunning ? l10n.running : l10n.stopped,
                             style: TextStyle(
                               fontSize: 12,
                               color: _controller.isRunning
@@ -164,8 +169,8 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                             size: 32,
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            '悬浮窗权限',
+                          Text(
+                            l10n.floatingWindowPermission,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
@@ -173,7 +178,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            _controller.hasPermission ? '已授予' : '未授予',
+                            _controller.hasPermission ? l10n.granted : l10n.notGranted,
                             style: TextStyle(
                               fontSize: 12,
                               color: _controller.hasPermission
@@ -188,7 +193,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                                 await _controller.requestPermission();
                               },
                               icon: const Icon(Icons.security, size: 16),
-                              label: const Text('申请权限', style: TextStyle(fontSize: 12)),
+                              label: Text(l10n.requestPermission, style: TextStyle(fontSize: 12)),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 4),
@@ -225,8 +230,8 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                               size: 32,
                             ),
                             const SizedBox(height: 4),
-                            const Text(
-                              '悬浮球开关',
+                            Text(
+                              l10n.floatingBallSwitch,
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
@@ -234,7 +239,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              _controller.isRunning ? '点击停止' : '点击开启',
+                              _controller.isRunning ? l10n.clickToStop : l10n.clickToStart,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: _controller.isRunning
@@ -265,7 +270,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '应用内自动隐藏',
+                            l10n.autoHideInApp,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -273,7 +278,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            '在应用内自动隐藏overlay悬浮球',
+                            l10n.autoHideInAppDescription,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey,
@@ -299,17 +304,17 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
           Card(
             child: Column(
               children: [
-                const ListTile(
+                ListTile(
                   leading: Icon(Icons.tune),
-                  title: Text('悬浮球配置'),
-                  subtitle: Text('自定义悬浮球的外观和行为'),
+                  title: Text(l10n.floatingBallConfig),
+                  subtitle: Text(l10n.customizeFloatingBallAppearanceBehavior),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: ElevatedButton.icon(
                     onPressed: _pickAndSetImage,
                     icon: const Icon(Icons.image),
-                    label: const Text('选择图片作为悬浮球'),
+                    label: Text(l10n.selectImageAsFloatingBall),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                     ),
@@ -319,14 +324,14 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     children: [
-                      const Text('大小: '),
+                      Text(l10n.sizeColon),
                       Expanded(
                         child: Slider(
                           value: _controller.ballSize,
                           min: 50,
                           max: 150,
                           divisions: 10,
-                          label: '${_controller.ballSize.round()}dp',
+                          label: l10n.ballSizeDp(_controller.ballSize.round()),
                           onChanged: (value) {
                             _controller.setBallSize(value);
                             setState(() {});
@@ -336,7 +341,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           },
                         ),
                       ),
-                      Text('${_controller.ballSize.round()}dp'),
+                      Text(l10n.ballSizeDp(_controller.ballSize.round())),
                     ],
                   ),
                 ),
@@ -344,14 +349,14 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     children: [
-                      const Text('吸附阈值: '),
+                      Text(l10n.snapThresholdColon),
                       Expanded(
                         child: Slider(
                           value: _controller.snapThreshold.toDouble(),
                           min: 20,
                           max: 100,
                           divisions: 8,
-                          label: '${_controller.snapThreshold}px',
+                          label: l10n.snapThresholdPx(_controller.snapThreshold),
                           onChanged: (value) {
                             _controller.setSnapThreshold(value.toInt());
                             setState(() {});
@@ -361,7 +366,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           },
                         ),
                       ),
-                      Text('${_controller.snapThreshold}px'),
+                      Text(l10n.snapThresholdPx(_controller.snapThreshold)),
                     ],
                   ),
                 ),
@@ -369,7 +374,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     children: [
-                      const Expanded(child: Text('自动恢复悬浮球状态')),
+                      Expanded(child: Text(l10n.autoRestoreFloatingBallState)),
                       Switch(
                         value: _controller.autoRestore,
                         onChanged: (value) {
@@ -388,8 +393,8 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                     children: [
                       Row(
                         children: [
-                          const Text('按钮数量: '),
-                          Text('${_controller.buttonData.length} 个'),
+                          Text(l10n.buttonCountColon),
+                          Text(l10n.buttonCount(_controller.buttonData.length)),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -399,7 +404,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           ).then((_) => setState(() {}));
                         },
                         icon: const Icon(Icons.touch_app),
-                        label: const Text('管理悬浮按钮'),
+                        label: Text(l10n.manageFloatingButtons),
                       ),
                     ],
                   ),
@@ -412,9 +417,9 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.location_on),
-                title: const Text('当前位置'),
+                title: Text(l10n.currentPosition),
                 subtitle: Text(
-                  'X: ${_controller.lastPosition!.x}, Y: ${_controller.lastPosition!.y}',
+                  l10n.xPositionYPosition(_controller.lastPosition!.x, _controller.lastPosition!.y),
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.refresh),

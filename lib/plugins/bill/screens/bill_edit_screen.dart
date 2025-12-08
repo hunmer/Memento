@@ -301,9 +301,9 @@ class _BillEditScreenState extends State<BillEditScreen> {
                   ),
                   elevation: 2,
                 ),
-                child: const Text(
-                  '保存',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                child: Text(
+                  BillLocalizations.of(context).save,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

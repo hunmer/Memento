@@ -167,4 +167,56 @@ class TodoLocalizationsZh extends TodoLocalizations {
 
   @override
   String get cancel => '取消';
+
+  // Tab 标签
+  @override
+  String get todoTab => '待办';
+
+  @override
+  String get historyTab => '历史';
+
+  // 搜索相关
+  @override
+  String get searchTasksHint => '搜索任务标题、备注、标签...';
+
+  @override
+  String get searchTitle => '标题';
+
+  @override
+  String get searchDescription => '备注';
+
+  @override
+  String get searchTag => '标签';
+
+  @override
+  String get searchSubtask => '子任务';
+
+  @override
+  String get searchInputHint => '输入关键词开始搜索';
+
+  @override
+  String get searchSupportHint => '支持搜索：标题、备注、标签、子任务';
+
+  @override
+  String get noMatchingTasks => '未找到匹配的任务';
+
+  @override
+  String get tryOtherKeywords => '尝试使用其他关键词';
+
+  // 历史记录相关
+  @override
+  String get historyTitle => '历史记录';
+
+  @override
+  String get clearHistoryTitle => '清空历史记录';
+
+  @override
+  String get clearHistoryMessage => '确定要清空所有历史记录吗？此操作不可撤销。';
+
+  @override
+  String get clearHistoryAction => '清空';
+
+  // 其他
+  @override
+  String get todoTasks => '待办事项';
 }

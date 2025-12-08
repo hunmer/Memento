@@ -108,4 +108,7 @@ class CalendarLocalizationsZh extends CalendarLocalizations {
 
   @override
   String get dateRange => '日期范围';
+
+  @override
+  String get complete => '完成';
 }

@@ -246,4 +246,23 @@ class ContactLocalizationsZh extends ContactLocalizations {
 
   @override
   String get done => '完成';
+
+  // 添加的字符串
+  @override
+  String get separator => ' - ';
+
+  @override
+  String get customFields => '自定义字段';
+
+  @override
+  String get addCustomField => '添加自定义字段';
+
+  @override
+  String get customActivityEvents => '自定义活动事件';
+
+  @override
+  String get addCustomEvent => '添加自定义事件';
+
+  @override
+  String get pickColor => '选择颜色';
 }

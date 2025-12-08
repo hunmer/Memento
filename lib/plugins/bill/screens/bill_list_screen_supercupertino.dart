@@ -488,17 +488,18 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                         return await showDialog(
                           context: context,
                           builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text('确认删除'),
-                              content: const Text('确定要删除这条账单吗？'),
+                            final l10n = BillLocalizations.of(context);
+                              return AlertDialog(
+                              title: Text(l10n.confirmDelete),
+                              content: Text(l10n.confirmDeleteThisBill),
                               actions: <Widget>[
                                 TextButton(
                                   onPressed: () => Navigator.of(context).pop(false),
-                                  child: const Text('取消'),
+                                  child: Text(l10n.cancel),
                                 ),
                                 TextButton(
                                   onPressed: () => Navigator.of(context).pop(true),
-                                  child: const Text('删除'),
+                                  child: Text(l10n.delete),
                                 ),
                               ],
                             );

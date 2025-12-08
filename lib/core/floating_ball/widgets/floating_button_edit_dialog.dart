@@ -10,6 +10,7 @@ import 'package:Memento/core/action/action_manager.dart';
 import 'package:Memento/core/action/widgets/action_selector_dialog.dart';
 import 'package:Memento/core/action/models/action_instance.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/core/l10n/core_localizations.dart';
 
 /// 悬浮按钮编辑对话框
 class FloatingButtonEditDialog extends StatefulWidget {
@@ -362,12 +363,12 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('清空图标/图片'),
-                            content: const Text('确定要清空当前设置的图标和图片吗？'),
+                            title: Text(FloatingBallLocalizations.of(context)!.clearIconImage),
+                            content: Text(FloatingBallLocalizations.of(context)!.confirmClearIconImage),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
-                                child: const Text('取消'),
+                                child: Text(FloatingBallLocalizations.of(context)!.cancel),
                               ),
                               ElevatedButton(
                                 onPressed: () {
@@ -378,7 +379,7 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.red,
                                 ),
-                                child: const Text('清空'),
+                                child: Text(FloatingBallLocalizations.of(context)!.clear),
                               ),
                             ],
                           ),
@@ -397,7 +398,7 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
                     child: ElevatedButton.icon(
                       onPressed: _pickIcon,
                       icon: const Icon(Icons.tag),
-                      label: const Text('选择图标'),
+                      label: Text(FloatingBallLocalizations.of(context)!.selectIcon),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -472,12 +473,12 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('取消'),
+                    child: Text(FloatingBallLocalizations.of(context)!.cancel),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: _save,
-                    child: const Text('保存'),
+                    child: Text(FloatingBallLocalizations.of(context)!.save),
                   ),
                 ],
               ),

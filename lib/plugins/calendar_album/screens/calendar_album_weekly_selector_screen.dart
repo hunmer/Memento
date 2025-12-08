@@ -6,6 +6,7 @@ import 'package:Memento/widgets/widget_config_editor/models/color_config.dart';
 import 'package:Memento/widgets/widget_config_editor/models/widget_config.dart';
 import 'package:Memento/widgets/widget_config_editor/models/widget_size.dart';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
+import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 
 /// 每周相册小组件配置界面
 class CalendarAlbumWeeklySelectorScreen extends StatefulWidget {
@@ -250,7 +251,7 @@ class _CalendarAlbumWeeklySelectorScreenState
   }
 
   /// 构建实时预览组件
-  Widget _buildPreview(BuildContext context, WidgetConfig config) {
+  Widget _buildPreview(BuildContext context, WidgetConfig config, CalendarAlbumLocalizations l10n) {
     final primaryColor = config.getColor('primary') ?? const Color(0xFF5A9E9A);
     final accentColor = config.getColor('accent') ?? Colors.white;
     final opacity = config.opacity;
@@ -275,7 +276,7 @@ class _CalendarAlbumWeeklySelectorScreenState
         children: [
           // 顶部标题
           Text(
-            '一日一拍',
+            l10n.oneDayOnePhoto,
             style: TextStyle(
               color: accentColor,
               fontSize: 18,
@@ -285,7 +286,7 @@ class _CalendarAlbumWeeklySelectorScreenState
           const SizedBox(height: 12),
           // 周信息
           Text(
-            '第 45 周・11月 3 - 11月 9',
+            l10n.weekInfo,
             style: TextStyle(
               color: accentColor.withOpacity(0.8),
               fontSize: 12,
@@ -333,14 +334,15 @@ class _CalendarAlbumWeeklySelectorScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = CalendarAlbumLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('配置每周相册小组件'),
+        title: Text(l10n.configWeeklyAlbumWidget),
         actions: [
           TextButton(
             onPressed: _saveAndFinish,
-            child: const Text('完成', style: TextStyle(color: Colors.white)),
+            child: Text(l10n.complete, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -360,14 +362,14 @@ class _CalendarAlbumWeeklySelectorScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '配置说明',
+                            l10n.configDescription,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '每周相册小组件会显示一周的照片日记。\n配置后可在小组件上点击具体日期快速查看或添加日记。',
+                            l10n.configDescriptionText,
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
@@ -378,7 +380,7 @@ class _CalendarAlbumWeeklySelectorScreenState
 
                   // 主题配置编辑器
                   Text(
-                    '小组件样式',
+                    l10n.widgetStyle,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -392,7 +394,7 @@ class _CalendarAlbumWeeklySelectorScreenState
                         _widgetConfig = newConfig;
                       });
                     },
-                    previewBuilder: _buildPreview,
+                    previewBuilder: (context, config) => _buildPreview(context, config, l10n),
                   ),
                 ],
               ),

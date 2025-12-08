@@ -136,6 +136,20 @@ abstract class ActivityLocalizations {
   String get updateInterval;
   String get updateIntervalDesc;
   String minutesUnit(int minutes);
+
+  // 新增遗漏的国际化字符串
+  String get notificationTestResult;
+  String get configDailyWidget;
+  String get configWeeklyWidget;
+
+  // 新增的硬编码文本
+  String get morning;
+  String get afternoon;
+  String get save;
+  String get sortByStartTimeAsc;
+  String get sortByDuration;
+  String get sortByStartTimeDesc;
+  String activityNotificationTestResult(String error);
 }
 
 class _ActivityLocalizationsDelegate

@@ -144,7 +144,7 @@ class _NotesMainViewState extends NotesMainViewState
             const SizedBox(width: 8),
             _buildFilterChip(
               icon: Icons.label_outline,
-              label: _selectedTag ?? 'All Tags',
+              label: _selectedTag ?? NotesLocalizations.of(context).allTags,
               onTap: () {
                 _showTagPicker();
               },
@@ -200,7 +200,7 @@ class _NotesMainViewState extends NotesMainViewState
             ),
             const SizedBox(width: 4),
             Text(
-              '清除',
+              NotesLocalizations.of(context).clearAll,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -448,7 +448,7 @@ class _NotesMainViewState extends NotesMainViewState
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('选择文件夹'),
+          title: Text(NotesLocalizations.of(context).selectFolder),
           content: SizedBox(
             width: double.maxFinite,
             height: 300,
@@ -475,7 +475,7 @@ class _NotesMainViewState extends NotesMainViewState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('取消'),
+              child: Text(NotesLocalizations.of(context).cancel),
             ),
           ],
         );
@@ -503,13 +503,13 @@ class _NotesMainViewState extends NotesMainViewState
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('选择标签'),
+          title: Text(NotesLocalizations.of(context).selectTag),
           content: SizedBox(
             width: double.maxFinite,
             height: 300,
             child:
                 tagsList.isEmpty
-                    ? const Center(child: Text('暂无标签'))
+                    ? Center(child: Text(NotesLocalizations.of(context).noTagsAvailable('')))
                     : ListView.builder(
                       itemCount:
                           tagsList.length + 1, // +1 for "All Tags" option
@@ -518,7 +518,7 @@ class _NotesMainViewState extends NotesMainViewState
                           // "All Tags" option
                           return ListTile(
                             leading: const Icon(Icons.label),
-                            title: const Text('All Tags'),
+                            title: Text(NotesLocalizations.of(context).allTags),
                             onTap: () {
                               setState(() {
                                 _selectedTag = null;
@@ -547,7 +547,7 @@ class _NotesMainViewState extends NotesMainViewState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
+              child: Text(NotesLocalizations.of(context).cancel),
             ),
           ],
         );

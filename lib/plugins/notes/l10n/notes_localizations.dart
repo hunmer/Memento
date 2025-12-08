@@ -92,6 +92,12 @@ abstract class NotesLocalizations {
 
   String get movedToFolder;
   String get selectSubfolder;
+
+  // 文件夹选择
+  String get selectFolder;
+  String get selectTag;
+  String noTagsAvailable(String tagType);
+  String get allTags;
 }
 
 class _NotesLocalizationsDelegate

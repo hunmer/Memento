@@ -241,4 +241,29 @@ class CheckinLocalizationsEn extends CheckinLocalizations {
 
   @override
   String get upcoming => 'Upcoming';
+
+  // Card display styles
+  @override
+  String get modifyCardDisplayStyle => 'Modify Card Display Style';
+
+  @override
+  String get selectCardStyle => 'Select Card Style';
+
+  @override
+  String get sevenDayDisplay => '7-Day Display (Default)';
+
+  @override
+  String get smallCardStyle => 'Small Card Style (1/2 Width)';
+
+  @override
+  String get calendarStyle => 'Calendar Style';
+
+  // Widget configuration
+  @override
+  String get configureCheckinWidget => 'Configure Check-in Widget';
+
+  // Empty data placeholder
+  @override
+  String get emptyData => 'No data available';
+
 }

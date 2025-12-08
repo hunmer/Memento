@@ -155,17 +155,17 @@ class _ProductListState extends State<ProductList> {
       actions: [
         PopupMenuButton<int>(
           icon: const Icon(Icons.sort),
-          tooltip: '排序方式',
+          tooltip: StoreLocalizations.of(context).sortMethod,
           onSelected: (index) {
             setState(() {
               _sortIndex = index;
             });
           },
           itemBuilder: (context) => [
-            const PopupMenuItem(value: 0, child: Text('默认排序')),
-            const PopupMenuItem(value: 1, child: Text('按库存排序')),
-            const PopupMenuItem(value: 2, child: Text('按价格排序')),
-            const PopupMenuItem(value: 3, child: Text('按兑换期限')),
+            PopupMenuItem(value: 0, child: Text(StoreLocalizations.of(context).defaultSort)),
+            PopupMenuItem(value: 1, child: Text(StoreLocalizations.of(context).sortByStock)),
+            PopupMenuItem(value: 2, child: Text(StoreLocalizations.of(context).sortByPrice)),
+            PopupMenuItem(value: 3, child: Text(StoreLocalizations.of(context).sortByExpiryDate)),
           ],
         ),
       ],

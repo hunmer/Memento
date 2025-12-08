@@ -54,6 +54,14 @@ abstract class FloatingBallLocalizations {
   String get swipeDownGesture;
   String get swipeLeftGesture;
   String get swipeRightGesture;
+
+  // 按钮编辑对话框
+  String get clearIconImage;
+  String get confirmClearIconImage;
+  String get cancel;
+  String get clear;
+  String get selectIcon;
+  String get save;
 }
 
 class _FloatingBallLocalizationsDelegate

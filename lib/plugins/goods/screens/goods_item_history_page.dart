@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'package:Memento/plugins/goods/models/usage_record.dart';
+import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 
 class GoodsItemHistoryPage extends StatefulWidget {
   final GoodsItem item;
@@ -49,7 +50,7 @@ class _GoodsItemHistoryPageState extends State<GoodsItemHistoryPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('使用历史'), // TODO: Localize
+        title: Text(GoodsLocalizations.of(context).usageHistory),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),

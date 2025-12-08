@@ -314,4 +314,37 @@ class StoreLocalizationsZh extends StoreLocalizations {
 
   @override
   String get noProducts => '暂无商品';
+
+  @override
+  String labelColon(String label) => '$label: ';
+
+  @override
+  String get clearPointsHistory => '清空积分记录';
+
+  @override
+  String get confirmClearPointsHistory => '确定要清空所有积分历史记录吗？此操作不可撤销。';
+
+  @override
+  String get earnPointsTip => '完成应用内活动即可获得积分';
+
+  @override
+  String get defaultSort => '默认排序';
+
+  @override
+  String get sortByStock => '按库存排序';
+
+  @override
+  String get sortByPrice => '按价格排序';
+
+  @override
+  String get sortByExpiryDate => '按兑换期限';
+
+  @override
+  String get allItems => '全部物品';
+
+  @override
+  String get usable => '可使用';
+
+  @override
+  String get expired => '已过期';
 }

@@ -392,7 +392,7 @@ class MessageBubble extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '图片加载失败',
+                            'Image load failed',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],
@@ -492,7 +492,7 @@ class MessageBubble extends StatelessWidget {
                 children: [
                   Icon(Icons.copy, size: 18),
                   SizedBox(width: 8),
-                  Text('复制'),
+                  Text(AgentChatLocalizations.of(context)!.copy),
                 ],
               ),
             ),
@@ -504,7 +504,7 @@ class MessageBubble extends StatelessWidget {
                   children: [
                     Icon(Icons.edit, size: 18),
                     SizedBox(width: 8),
-                    Text('编辑'),
+                    Text(AgentChatLocalizations.of(context)!.edit),
                   ],
                 ),
               ),
@@ -515,7 +515,7 @@ class MessageBubble extends StatelessWidget {
                   children: [
                     Icon(Icons.refresh, size: 18),
                     SizedBox(width: 8),
-                    Text('重新生成'),
+                    Text(AgentChatLocalizations.of(context)!.regenerate),
                   ],
                 ),
               ),
@@ -526,7 +526,7 @@ class MessageBubble extends StatelessWidget {
                   children: [
                     Icon(Icons.save, size: 18, color: Colors.blue),
                     SizedBox(width: 8),
-                    Text('保存工具', style: TextStyle(color: Colors.blue)),
+                    Text(AgentChatLocalizations.of(context)!.saveTool, style: TextStyle(color: Colors.blue)),
                   ],
                 ),
               ),
@@ -537,7 +537,7 @@ class MessageBubble extends StatelessWidget {
                   children: [
                     Icon(Icons.replay, size: 18, color: Colors.orange),
                     SizedBox(width: 8),
-                    Text('重新执行工具', style: TextStyle(color: Colors.orange)),
+                    Text(AgentChatLocalizations.of(context)!.reExecuteTool, style: TextStyle(color: Colors.orange)),
                   ],
                 ),
               ),
@@ -548,7 +548,7 @@ class MessageBubble extends StatelessWidget {
                   children: [
                     Icon(Icons.info_outline, size: 18, color: Colors.blue),
                     SizedBox(width: 8),
-                    Text('查看详情', style: TextStyle(color: Colors.blue)),
+                    Text(AgentChatLocalizations.of(context)!.viewDetails, style: TextStyle(color: Colors.blue)),
                   ],
                 ),
               ),
@@ -559,7 +559,7 @@ class MessageBubble extends StatelessWidget {
                   children: [
                     Icon(Icons.delete, size: 18, color: Colors.red),
                     SizedBox(width: 8),
-                    Text('删除', style: TextStyle(color: Colors.red)),
+                    Text(AgentChatLocalizations.of(context)!.delete, style: TextStyle(color: Colors.red)),
                   ],
                 ),
               ),
@@ -577,7 +577,7 @@ class MessageBubble extends StatelessWidget {
           (context) => AlertDialog(
             title: Row(
               children: [
-                const Text('编辑消息'),
+                Text(AgentChatLocalizations.of(context)!.editMessage),
                 const SizedBox(width: 8),
                 if (!message.isUser)
                   Container(
@@ -640,7 +640,7 @@ class MessageBubble extends StatelessWidget {
                   }
                   Navigator.pop(context);
                 },
-                child: const Text('保存'),
+                child: Text(AgentChatLocalizations.of(context)!.save),
               ),
             ],
           ),
@@ -960,7 +960,7 @@ class MessageBubble extends StatelessWidget {
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                const Text('工具执行结果'),
+                Text(AgentChatLocalizations.of(context)!.toolExecutionResult),
               ],
             ),
             content: SizedBox(
@@ -1105,7 +1105,7 @@ class MessageBubble extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('关闭'),
+                child: Text(AgentChatLocalizations.of(context)!.close),
               ),
             ],
           ),

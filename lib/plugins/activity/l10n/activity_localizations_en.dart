@@ -201,4 +201,36 @@ class ActivityLocalizationsEn extends ActivityLocalizations {
 
   @override
   String minutesUnit(int minutes) => '$minutes min';
+
+  // 新增遗漏的国际化字符串
+  @override
+  String get notificationTestResult => 'Activity Notification Test Results';
+
+  @override
+  String get configDailyWidget => 'Configure Daily Widget';
+
+  @override
+  String get configWeeklyWidget => 'Configure Weekly Widget';
+
+  // 新增的硬编码文本
+  @override
+  String get morning => 'Morning';
+
+  @override
+  String get afternoon => 'Afternoon';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get sortByStartTimeAsc => 'Sort by start time (asc)';
+
+  @override
+  String get sortByDuration => 'Sort by duration';
+
+  @override
+  String get sortByStartTimeDesc => 'Sort by start time (desc)';
+
+  @override
+  String activityNotificationTestResult(String error) => 'Activity Notification Test Results\nError: $error';
 }

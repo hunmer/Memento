@@ -110,4 +110,7 @@ class CalendarLocalizationsEn extends CalendarLocalizations {
 
   @override
   String get dateRange => 'Date range';
+
+  @override
+  String get complete => 'Complete';
 }

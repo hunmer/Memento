@@ -233,6 +233,18 @@ abstract class OpenAILocalizations {
   String get noPreset;
   String get promptPresetActiveHint;
   String get promptContent;
+
+  // Agent Edit Screen - 新增的键
+  String get enablePluginFunctionCalls;
+  String get allowAICallPluginFunctions;
+  String get enableGuessWhatYouWantToAsk;
+  String get showPresetOpeningQuestions;
+
+  // Test Service - 新增的键
+  String get testing;
+
+  // Plugin Method Selection - 新增的键
+  String get all;
 }
 
 /// 中文实现
@@ -724,6 +736,27 @@ class OpenAILocalizationsZh implements OpenAILocalizations {
   String get promptPresetActiveHint => '已选择预设，此字段内容将被忽略';
   @override
   String get promptContent => 'Prompt 内容';
+
+  // Agent Edit Screen - 新增的键
+  @override
+  String get enablePluginFunctionCalls => '启用插件功能调用';
+
+  @override
+  String get allowAICallPluginFunctions => '允许 AI 调用插件功能获取数据';
+
+  @override
+  String get enableGuessWhatYouWantToAsk => '启用猜你想问功能';
+
+  @override
+  String get showPresetOpeningQuestions => '在聊天界面显示预设的开场白问题';
+
+  // Test Service - 新增的键
+  @override
+  String get testing => '测试中...';
+
+  // Plugin Method Selection - 新增的键
+  @override
+  String get all => '全部';
 }
 
 /// 英文实现
@@ -1219,6 +1252,27 @@ class OpenAILocalizationsEn implements OpenAILocalizations {
   String get promptPresetActiveHint => 'Preset selected, this field will be ignored';
   @override
   String get promptContent => 'Prompt Content';
+
+  // Agent Edit Screen - 新增的键
+  @override
+  String get enablePluginFunctionCalls => 'Enable Plugin Function Calls';
+
+  @override
+  String get allowAICallPluginFunctions => 'Allow AI to call plugin functions to get data';
+
+  @override
+  String get enableGuessWhatYouWantToAsk => 'Enable Guess What You Want to Ask';
+
+  @override
+  String get showPresetOpeningQuestions => 'Show preset opening questions in chat interface';
+
+  // Test Service - 新增的键
+  @override
+  String get testing => 'Testing...';
+
+  // Plugin Method Selection - 新增的键
+  @override
+  String get all => 'All';
 }
 
 /// 本地化代理

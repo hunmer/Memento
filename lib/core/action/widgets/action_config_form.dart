@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/action/models/action_definition.dart';
 import 'package:Memento/core/action/models/action_form.dart';
 import 'package:Memento/core/app_initializer.dart';
+import 'package:Memento/core/l10n/core_localizations.dart';
 
 /// 表单值改变回调
 typedef OnFormChanged = void Function(Map<String, dynamic> values);
@@ -355,7 +356,7 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
         if (!config.required)
           const DropdownMenuItem<String>(
             value: null,
-            child: Text('未选择'),
+            child: Text(CoreLocalizations.of(context)!.notSelected),
           ),
         ...?config.options?.map(
           (option) => DropdownMenuItem<String>(
@@ -645,7 +646,7 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
       items: [
         const DropdownMenuItem<String>(
           value: null,
-          child: Text('未选择'),
+          child: Text(CoreLocalizations.of(context)!.notSelected),
         ),
         ...plugins.map(
           (plugin) => DropdownMenuItem<String>(
@@ -722,7 +723,7 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
               final color = await showDialog<Color>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('选择颜色'),
+                  title: Text(CoreLocalizations.of(context)!.selectColor),
                   content: SizedBox(
                     width: double.maxFinite,
                     child: Wrap(
@@ -752,7 +753,7 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('取消'),
+                      child: Text(CoreLocalizations.of(context)!.cancel),
                     ),
                   ],
                 ),
@@ -766,7 +767,7 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
 
   Widget _buildIconSelectorField(String fieldName, FormFieldConfig config) {
     // TODO: 实现图标选择器
-    return Text('图标选择器（暂未实现）');
+    return Text(CoreLocalizations.of(context)!.iconSelectorNotImplemented);
   }
 
   @override

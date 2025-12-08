@@ -4,6 +4,7 @@ import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'custom_dialog.dart';
 import 'package:Memento/constants/app_icons.dart';
+import 'package:Memento/widgets/l10n/widgets_localizations.dart';
 
 class IconPickerDialog extends StatefulWidget {
   final IconData currentIcon;
@@ -142,7 +143,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
   @override
   Widget build(BuildContext context) {
     return CustomDialog(
-      title: '选择图标',
+      title: WidgetsLocalizations.of(context).selectIcon,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -150,7 +151,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: '搜索图标...',
+              hintText: WidgetsLocalizations.of(context).searchIcons,
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -187,7 +188,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                   },
                 ),
                 const Expanded(
-                  child: Text('将图标转换为图片'),
+                  child: Text(WidgetsLocalizations.of(context).convertIconToImage),
                 ),
                 IconButton(
                   icon: const Icon(Icons.help_outline),
@@ -195,22 +196,20 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('图标转图片'),
-                        content: const Text(
-                          '启用此选项后，选择的图标将被转换为 PNG 图片。'
-                          '这对于不支持图标显示的环境（如某些桌面应用）很有用。'
-                          '转换后的图片可以提供更好的视觉效果和兼容性。',
+                        title: Text(WidgetsLocalizations.of(context).iconToImage),
+                        content: Text(
+                          WidgetsLocalizations.of(context).iconToImageDescription,
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text('确定'),
+                            child: Text(WidgetsLocalizations.of(context).confirm),
                           ),
                         ],
                       ),
                     );
                   },
-                  tooltip: '什么是图标转图片？',
+                  tooltip: WidgetsLocalizations.of(context).whatIsIconToImage,
                 ),
               ],
             ),
@@ -278,7 +277,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text(WidgetsLocalizations.of(context).cancel),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -289,7 +288,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
               Navigator.pop(context, selectedIcon);
             }
           },
-          child: Text(AppLocalizations.of(context)!.ok),
+          child: Text(WidgetsLocalizations.of(context).confirm),
         ),
       ],
     );

@@ -13,6 +13,7 @@ import 'package:Memento/screens/super_cupertino_test_screen/super_cupertino_test
 import 'package:Memento/screens/floating_widget_screen/floating_widget_screen.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/app_initializer.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
@@ -161,6 +162,53 @@ class AppRoutes extends NavigatorObserver {
   static Route _createRoute(Widget page) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return child;
+      },
+      transitionDuration: Duration(milliseconds: 0),
+      reverseTransitionDuration: Duration(milliseconds: 0),
+    );
+  }
+
+  // 创建错误页面的辅助函数
+  static Route _createErrorRoute(String titleKey, String messageKey, {String? messageParam}) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) {
+        final l10n = ScreensLocalizations.of(context);
+        String title;
+        String message;
+
+        // 根据键获取本地化文本
+        switch (titleKey) {
+          case 'error':
+            title = l10n.error;
+            break;
+          default:
+            title = titleKey;
+        }
+
+        switch (messageKey) {
+          case 'errorWidgetIdMissing':
+            message = l10n.errorWidgetIdMissing;
+            break;
+          case 'errorHabitIdRequired':
+            message = l10n.errorHabitIdRequired;
+            break;
+          case 'errorHabitsPluginNotFound':
+            message = l10n.errorHabitsPluginNotFound;
+            break;
+          case 'errorHabitNotFound':
+            message = l10n.errorHabitNotFound(messageParam ?? '');
+            break;
+          default:
+            message = messageKey;
+        }
+
+        return Scaffold(
+          appBar: AppBar(title: Text(title)),
+          body: Center(child: Text(message)),
+        );
+      },
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return child;
       },
@@ -460,11 +508,9 @@ class AppRoutes extends NavigatorObserver {
         }
 
         if (activityWeeklyWidgetId == null) {
-          return _createRoute(
-            Scaffold(
-              appBar: AppBar(title: const Text('错误')),
-              body: const Center(child: Text('错误: widgetId 参数缺失')),
-            ),
+          return _createErrorRoute(
+            'error',
+            'errorWidgetIdMissing',
           );
         }
 
@@ -491,11 +537,9 @@ class AppRoutes extends NavigatorObserver {
         }
 
         if (activityDailyWidgetId == null) {
-          return _createRoute(
-            Scaffold(
-              appBar: AppBar(title: const Text('错误')),
-              body: const Center(child: Text('错误: widgetId 参数缺失')),
-            ),
+          return _createErrorRoute(
+            'error',
+            'errorWidgetIdMissing',
           );
         }
 
@@ -522,11 +566,9 @@ class AppRoutes extends NavigatorObserver {
         }
 
         if (habitsWeeklyWidgetId == null) {
-          return _createRoute(
-            Scaffold(
-              appBar: AppBar(title: const Text('错误')),
-              body: const Center(child: Text('错误: widgetId 参数缺失')),
-            ),
+          return _createErrorRoute(
+            'error',
+            'errorWidgetIdMissing',
           );
         }
 
@@ -590,8 +632,9 @@ class AppRoutes extends NavigatorObserver {
         }
 
         if (habitId == null) {
-          return _createRoute(
-            Scaffold(body: Center(child: Text('Error: habitId is required'))),
+          return _createErrorRoute(
+            'error',
+            'errorHabitIdRequired',
           );
         }
 
@@ -599,10 +642,9 @@ class AppRoutes extends NavigatorObserver {
         final habitsPlugin =
             PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
         if (habitsPlugin == null) {
-          return _createRoute(
-            Scaffold(
-              body: Center(child: Text('Error: HabitsPlugin not found')),
-            ),
+          return _createErrorRoute(
+            'error',
+            'errorHabitsPluginNotFound',
           );
         }
 
@@ -615,12 +657,10 @@ class AppRoutes extends NavigatorObserver {
         );
 
         if (habit == null) {
-          return _createRoute(
-            Scaffold(
-              body: Center(
-                child: Text('Error: Habit not found with id: $habitId'),
-              ),
-            ),
+          return _createErrorRoute(
+            'error',
+            'errorHabitNotFound',
+            messageParam: habitId,
           );
         }
 

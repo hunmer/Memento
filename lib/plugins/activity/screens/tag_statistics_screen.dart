@@ -358,9 +358,9 @@ class _TagStatisticsScreenState extends State<TagStatisticsScreen> {
     if (spots.isEmpty) {
       return _buildCard(
         title: 'Trend', // Localize?
-        child: const SizedBox(
+        child: SizedBox(
           height: 200,
-          child: Center(child: Text('No Data')),
+          child: Center(child: Text(ActivityLocalizations.of(context).noData)),
         ),
       );
     }

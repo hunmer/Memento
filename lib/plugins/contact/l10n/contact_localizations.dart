@@ -167,6 +167,14 @@ abstract class ContactLocalizations {
   String get emailLabel;
   String get websiteLabel;
   String get done;
+
+  // 添加的字符串
+  String get separator;
+  String get customFields;
+  String get addCustomField;
+  String get customActivityEvents;
+  String get addCustomEvent;
+  String get pickColor;
 }
 
 class _ContactLocalizationsDelegate

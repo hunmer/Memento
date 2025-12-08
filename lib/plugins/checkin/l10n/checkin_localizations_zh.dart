@@ -238,4 +238,29 @@ class CheckinLocalizationsZh extends CheckinLocalizations {
 
   @override
   String get upcoming => '按即将发生排序';
+
+  // 卡片显示样式
+  @override
+  String get modifyCardDisplayStyle => '修改卡片显示风格';
+
+  @override
+  String get selectCardStyle => '选择卡片风格';
+
+  @override
+  String get sevenDayDisplay => '七天显示 (默认)';
+
+  @override
+  String get smallCardStyle => '小卡片风格 (1/2宽度)';
+
+  @override
+  String get calendarStyle => '日历风格';
+
+  // 小组件配置
+  @override
+  String get configureCheckinWidget => '配置打卡小组件';
+
+  // 空数据占位
+  @override
+  String get emptyData => '暂无数据';
+
 }

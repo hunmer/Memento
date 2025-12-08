@@ -189,4 +189,90 @@ class CalendarAlbumLocalizationsZh extends CalendarAlbumLocalizations {
 
   @override
   String get wordCount => '字数统计';
+
+  // 新增遗漏的国际化字符串
+  @override
+  String get configWeeklyWidget => '配置每周相册小组件';
+
+  @override
+  String get complete => '完成';
+
+  // 相册统计相关
+  @override
+  String get albumStatistics => '相册统计';
+
+  @override
+  String get totalPhotoCount => '总图片数量';
+
+  @override
+  String get recentPhotos => '最近的照片：';
+
+  @override
+  String get close => '关闭';
+
+  // 新建日记
+  @override
+  String get createNewDiary => '新建日记';
+
+  // 小组件配置相关
+  @override
+  String get configWeeklyAlbumWidget => '配置每周相册小组件';
+
+  @override
+  String get configDescription => '配置说明';
+
+  @override
+  String get configDescriptionText => '每周相册小组件会显示一周的照片日记。\n配置后可在小组件上点击具体日期快速查看或添加日记。';
+
+  @override
+  String get widgetStyle => '小组件样式';
+
+  @override
+  String get backgroundLabel => '背景色';
+
+  @override
+  String get titleLabel => '标题色';
+
+  @override
+  String get oneDayOnePhoto => '一日一拍';
+
+  @override
+  String get weekInfo => '第 45 周・11月 3 - 11月 9';
+
+  // 搜索相关
+  @override
+  String get searchDiaryPlaceholder => '搜索日记标题、内容或标签';
+
+  @override
+  String get enterKeywordToSearch => '输入关键词搜索日记';
+
+  @override
+  String get noMatchingDiaries => '没有找到匹配的日记';
+
+  @override
+  String get tryOtherKeywords => '试试其他关键词';
+
+  @override
+  String get title => '标题';
+
+  @override
+  String get content => '内容';
+
+  @override
+  String get tag => '标签';
+
+  @override
+  String get backToCurrentMonth => '回到当前月份';
+
+  @override
+  String get selectMonth => '选择年月';
+
+  @override
+  String get confirm => '确定';
+
+  @override
+  String get diaryForDate => '的日记';
+
+  @override
+  String get newDiary => '新建日记';
 }

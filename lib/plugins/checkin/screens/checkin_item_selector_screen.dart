@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
+import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
@@ -148,7 +149,7 @@ class _CheckinItemSelectorScreenState extends State<CheckinItemSelectorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('配置打卡小组件'),
+        title: Text(CheckinLocalizations.of(context).configureCheckinWidget),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),

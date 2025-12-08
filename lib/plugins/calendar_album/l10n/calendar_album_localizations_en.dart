@@ -182,4 +182,90 @@ class CalendarAlbumLocalizationsEn extends CalendarAlbumLocalizations {
 
   @override
   String get todayDiary => "Today";
+
+  // 新增遗漏的国际化字符串
+  @override
+  String get configWeeklyWidget => 'Configure Weekly Album Widget';
+
+  @override
+  String get complete => 'Complete';
+
+  // 相册统计相关
+  @override
+  String get albumStatistics => 'Album Statistics';
+
+  @override
+  String get totalPhotoCount => 'Total Photos';
+
+  @override
+  String get recentPhotos => 'Recent Photos:';
+
+  @override
+  String get close => 'Close';
+
+  // 新建日记
+  @override
+  String get createNewDiary => 'Create New Diary';
+
+  // 小组件配置相关
+  @override
+  String get configWeeklyAlbumWidget => 'Configure Weekly Album Widget';
+
+  @override
+  String get configDescription => 'Configuration Description';
+
+  @override
+  String get configDescriptionText => 'The weekly album widget displays photo diaries for a week.\nAfter configuration, you can click on specific dates in the widget to quickly view or add diaries.';
+
+  @override
+  String get widgetStyle => 'Widget Style';
+
+  @override
+  String get backgroundLabel => 'Background Color';
+
+  @override
+  String get titleLabel => 'Title Color';
+
+  @override
+  String get oneDayOnePhoto => 'One Day One Photo';
+
+  @override
+  String get weekInfo => 'Week 45 ・ Nov 3 - Nov 9';
+
+  // 搜索相关
+  @override
+  String get searchDiaryPlaceholder => 'Search diary titles, content or tags';
+
+  @override
+  String get enterKeywordToSearch => 'Enter keywords to search diaries';
+
+  @override
+  String get noMatchingDiaries => 'No matching diaries found';
+
+  @override
+  String get tryOtherKeywords => 'Try other keywords';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get content => 'Content';
+
+  @override
+  String get tag => 'Tag';
+
+  @override
+  String get backToCurrentMonth => 'Back to current month';
+
+  @override
+  String get selectMonth => 'Select month and year';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get diaryForDate => ' diary';
+
+  @override
+  String get newDiary => 'New Diary';
 }

@@ -151,7 +151,7 @@ class _PluginMethodSelectionDialogState
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: FilterChip(
-                      label: const Text('全部'),
+                      label: Text(OpenAILocalizations.of(context).all),
                       selected: _selectedPluginId == null,
                       onSelected: (selected) {
                         setState(() {

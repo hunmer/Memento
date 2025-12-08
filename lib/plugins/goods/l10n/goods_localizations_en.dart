@@ -333,4 +333,11 @@ class GoodsLocalizationsEn extends GoodsLocalizations {
 
   @override
   String get times => "Times";
+
+  // Added strings
+  @override
+  String get dateTime => "Date Time";
+
+  @override
+  String get usageHistory => "Usage History";
 }

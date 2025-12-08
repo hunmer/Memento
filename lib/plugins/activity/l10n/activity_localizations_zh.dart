@@ -211,4 +211,34 @@ class ActivityLocalizationsZh extends ActivityLocalizations {
 
   @override
   String minutesUnit(int minutes) => '$minutes 分钟';
+
+  // 新增遗漏的国际化字符串
+  @override
+  String get notificationTestResult => '活动通知功能测试结果';
+
+  @override
+  String get configDailyWidget => '配置日视图小组件';
+
+  @override
+  String get configWeeklyWidget => '配置周视图小组件';
+
+  // 新增的硬编码文本
+  @override
+  String get morning => '上午';
+
+  @override
+  String get afternoon => '下午';
+
+  @override
+  String get sortByStartTimeAsc => '按开始时间升序';
+
+  @override
+  String get sortByDuration => '按持续时间';
+
+  @override
+  String get sortByStartTimeDesc => '按开始时间降序';
+
+  @override
+  String activityNotificationTestResult(String error) =>
+      '活动通知功能测试结果\n错误信息: $error';
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'activity_notification_service.dart';
 import 'activity_service.dart';
 import '../../../../core/storage/storage_manager.dart';
+import '../l10n/activity_localizations.dart';
 
 /// 活动通知功能测试工具
 class ActivityNotificationTest {
@@ -169,47 +170,60 @@ class ActivityNotificationTest {
   }
 
   /// 显示测试结果对话框
-  static void showTestResults(BuildContext context, Map<String, bool> results) {
+  static void showTestResults(BuildContext context, Map<String, bool> results, {String? error}) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('活动通知功能测试结果'),
+        title: Text(ActivityLocalizations.of(context).notificationTestResult),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView(
-            children: results.entries.map((entry) {
-              final status = entry.value ? '✓' : '✗';
-              final color = entry.value ? Colors.green : Colors.red;
-
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Row(
-                  children: [
-                    Text(
-                      status,
-                      style: TextStyle(
-                        color: color,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+            children: [
+              if (error != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Text(
+                    error,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 14,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _getTestDisplayName(entry.key),
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              );
-            }).toList(),
+              ...results.entries.map((entry) {
+                final status = entry.value ? '✓' : '✗';
+                final color = entry.value ? Colors.green : Colors.red;
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        status,
+                        style: TextStyle(
+                          color: color,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _getTestDisplayName(entry.key),
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ],
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('确定'),
+            child: Text(ActivityLocalizations.of(context).confirm),
           ),
         ],
       ),

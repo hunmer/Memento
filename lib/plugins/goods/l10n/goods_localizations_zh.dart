@@ -325,4 +325,11 @@ class GoodsLocalizationsZh extends GoodsLocalizations {
 
   @override
   String get times => "次";
+
+  // 添加的字符串
+  @override
+  String get dateTime => "日期时间";
+
+  @override
+  String get usageHistory => "使用历史";
 }

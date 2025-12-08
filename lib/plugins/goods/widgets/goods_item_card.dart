@@ -94,7 +94,7 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
           ),
           ListTile(
             leading: const Icon(Icons.history),
-            title: const Text('使用历史'), // TODO: Localize
+            title: Text(GoodsLocalizations.of(context).usageHistory),
             onTap: () {
               Navigator.pop(context); // Close menu
               NavigationHelper.push(context, GoodsItemHistoryPage(

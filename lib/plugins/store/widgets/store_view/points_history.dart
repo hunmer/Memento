@@ -126,7 +126,7 @@ class _PointsHistoryState extends State<PointsHistory> {
             ),
             const SizedBox(height: 8),
             Text(
-              '完成应用内活动即可获得积分',
+              StoreLocalizations.of(context).earnPointsTip,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.grey[500],
               ),
@@ -320,12 +320,12 @@ class _PointsHistoryState extends State<PointsHistory> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('清空积分记录'),
-        content: const Text('确定要清空所有积分历史记录吗？此操作不可撤销。'),
+        title: Text(StoreLocalizations.of(context).clearPointsHistory),
+        content: Text(StoreLocalizations.of(context).confirmClearPointsHistory),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(StoreLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () async {

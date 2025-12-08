@@ -168,6 +168,19 @@ abstract class CheckinLocalizations {
   String get frequency;
 
   String get dateAdded;
+
+  // 卡片显示样式
+  String get modifyCardDisplayStyle;
+  String get selectCardStyle;
+  String get sevenDayDisplay;
+  String get smallCardStyle;
+  String get calendarStyle;
+
+  // 小组件配置
+  String get configureCheckinWidget;
+
+  // 空数据占位
+  String get emptyData;
 }
 
 class _CheckinLocalizationsDelegate

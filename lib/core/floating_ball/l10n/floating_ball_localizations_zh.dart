@@ -54,4 +54,22 @@ class FloatingBallLocalizationsZh extends FloatingBallLocalizations {
   @override
   String get longPressGesture => '长按手势';
 
-  }
+  // 按钮编辑对话框
+  @override
+  String get clearIconImage => '清空图标/图片';
+
+  @override
+  String get confirmClearIconImage => '确定要清空当前设置的图标和图片吗？';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get clear => '清空';
+
+  @override
+  String get selectIcon => '选择图标';
+
+  @override
+  String get save => '保存';
+}

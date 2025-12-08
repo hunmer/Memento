@@ -17,6 +17,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'action_manager.dart';
 import 'models/action_definition.dart';
 import 'models/action_group.dart';
+import 'package:Memento/core/l10n/core_localizations.dart';
 
 /// 执行结果
 class ExecutionResult {
@@ -767,7 +768,7 @@ class CustomActionExecutor implements ActionExecutor {
     final result = await showDialog<Map<String, String>>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('输入JavaScript代码'),
+        title: Text(CoreLocalizations.of(context)!.inputJavaScriptCode),
         content: SizedBox(
           width: double.maxFinite,
           child: Column(
@@ -804,7 +805,7 @@ class CustomActionExecutor implements ActionExecutor {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(CoreLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -813,7 +814,7 @@ class CustomActionExecutor implements ActionExecutor {
                 'data': inputDataController.text,
               });
             },
-            child: const Text('执行'),
+            child: Text(CoreLocalizations.of(context)!.execute),
           ),
         ],
       ),

@@ -167,6 +167,17 @@ abstract class HabitsLocalizations {
   String weeksStreak(int weeks);
   String monthsStreak(int months);
   String habitCompletionPercentage(int percentage);
+
+  // 添加的字符串
+  String get configureHabitGroupListWidget;
+  String get configureHabitTimerWidget;
+  String get configureHabitWeeklyWidget;
+  String get cancelTimer;
+  String get continueTimer;
+  String get confirmCancel;
+  String get completeTimer;
+  String get continueAdjust;
+  String get confirmComplete;
 }
 
 class _HabitsLocalizationsDelegate

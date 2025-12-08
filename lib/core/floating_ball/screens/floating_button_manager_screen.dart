@@ -4,6 +4,7 @@ import 'package:floating_ball_plugin/floating_ball_plugin.dart';
 import 'package:Memento/core/floating_ball/floating_widget_controller.dart';
 import 'package:Memento/core/floating_ball/widgets/floating_button_edit_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/core/l10n/core_localizations.dart';
 
 /// 悬浮按钮管理界面
 class FloatingButtonManagerScreen extends StatefulWidget {
@@ -71,7 +72,11 @@ class _FloatingButtonManagerScreenState
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('确认删除'),
-        content: Text('确定要删除按钮"${_buttons[index].title}"吗？'),
+            content: Text(
+              CoreLocalizations.of(
+                context,
+              )!.confirmDeleteButton(_buttons[index].title),
+            ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -111,7 +116,7 @@ class _FloatingButtonManagerScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('悬浮按钮管理'),
+        title: Text(CoreLocalizations.of(context)!.floatingButtonManager),
       ),
       body: _buttons.isEmpty
           ? Center(
@@ -135,7 +140,9 @@ class _FloatingButtonManagerScreenState
                   ElevatedButton.icon(
                     onPressed: _addButton,
                     icon: const Icon(Icons.add),
-                    label: const Text('添加第一个按钮'),
+                      label: Text(
+                        CoreLocalizations.of(context)!.addFirstButton,
+                      ),
                   ),
                 ],
               ),

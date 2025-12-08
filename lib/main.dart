@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:Memento/core/app_widgets/page_transitions.dart';
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
+import 'package:Memento/core/l10n/core_localizations.dart';
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
@@ -15,6 +17,7 @@ import 'package:Memento/plugins/tts/l10n/tts_localizations.dart';
 import 'package:Memento/screens/settings_screen/l10n/settings_screen_localizations.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_localizations.dart';
 import 'package:Memento/screens/settings_screen/widgets/l10n/webdav_localizations.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
 import 'package:Memento/widgets/l10n/group_selector_localizations.dart';
 import 'package:Memento/widgets/l10n/image_picker_localizations.dart';
@@ -75,7 +78,7 @@ class WidgetUriHandler extends StatelessWidget {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('正在启动...'),
+                  Text(CoreLocalizations.of(context)!.starting),
                 ],
               ),
             ),
@@ -210,6 +213,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               CheckinLocalizations.delegate,
               DatabaseLocalizations.delegate,
               ActivityLocalizations.delegate,
+              AgentChatLocalizations.delegate,
               TimerLocalizations.delegate,
               ChatLocalizations.delegate,
               ContactLocalizations.delegate,
@@ -230,12 +234,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               TodoLocalizations.delegate,
               CalendarAlbumLocalizations.delegate,
               FloatingBallLocalizations.delegate,
+              CoreLocalizationsDelegate(),
               GoodsLocalizations.delegate,
               NodesLocalizations.delegate,
               SfGlobalLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               WebDAVLocalizations.delegate,
+              ScreensLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
               FlutterQuillLocalizations.delegate,
             ],

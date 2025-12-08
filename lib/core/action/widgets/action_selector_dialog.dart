@@ -11,6 +11,7 @@ import 'package:Memento/core/action/models/action_group.dart';
 import 'package:Memento/core/floating_ball/models/floating_ball_gesture.dart';
 import 'action_config_form.dart';
 import 'action_group_editor.dart';
+import 'package:Memento/core/l10n/core_localizations.dart';
 
 /// 对话框结果
 class ActionSelectorResult {
@@ -414,7 +415,7 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
                         );
                       },
                       icon: const Icon(Icons.clear_all, size: 18),
-                      label: const Text('清除已设置'),
+                      label: const Text(CoreLocalizations.of(context)!.clearSettings),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[300],
                         foregroundColor: Colors.black87,
@@ -429,12 +430,12 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
                     children: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('取消'),
+                        child: Text(CoreLocalizations.of(context)!.cancel),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: _onConfirm,
-                        child: const Text('确认'),
+                        child: Text(CoreLocalizations.of(context)!.confirm),
                       ),
                     ],
                   ),
@@ -587,7 +588,7 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
               child: OutlinedButton.icon(
                 onPressed: _onCreateGroup,
                 icon: const Icon(Icons.add),
-                label: const Text('创建动作组'),
+                label: const Text(CoreLocalizations.of(context)!.createActionGroup),
               ),
             ),
           ),

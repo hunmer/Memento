@@ -1,0 +1,468 @@
+
+lib\core\action\migration\migration_tool.dart:
+  473      return AlertDialog(
+  474:       title: const Text('配置迁移'),
+  475        content: SizedBox(
+
+  534              onPressed: () => Navigator.pop(context),
+  535:             child: const Text('取消'),
+  536            ),
+
+  543              onPressed: () => Navigator.pop(context),
+  544:             child: const Text('关闭'),
+  545            ),
+
+lib\core\action\widgets\action_config_form.dart:
+  725                  builder: (context) => AlertDialog(
+  726:                   title: const Text('选择颜色'),
+  727                    content: SizedBox(
+
+  755                        onPressed: () => Navigator.pop(context),
+  756:                       child: const Text('取消'),
+  757                      ),
+
+  769      // TODO: 实现图标选择器
+  770:     return Text('图标选择器（暂未实现）');
+  771    }
+
+lib\core\action\widgets\action_group_editor.dart:
+  449                      onPressed: () => Navigator.pop(context),
+  450:                     child: const Text('取消'),
+  451                    ),
+
+  455                      icon: const Icon(Icons.save),
+  456:                     label: const Text('保存'),
+  457                    ),
+
+lib\core\action\widgets\action_selector_dialog.dart:
+  432                          onPressed: () => Navigator.pop(context),
+  433:                         child: const Text('取消'),
+  434                        ),
+
+  437                          onPressed: _onConfirm,
+  438:                         child: const Text('确认'),
+  439                        ),
+
+lib\core\floating_ball\screens\floating_button_manager_screen.dart:
+  73        builder: (context) => AlertDialog(
+  74:         title: const Text('确认删除'),
+  75          content: Text(CoreLocalizations.of(context)!.confirmDeleteButton(_buttons[index].title)),
+
+  78              onPressed: () => Navigator.of(context).pop(false),
+  79:             child: const Text('取消'),
+  80            ),
+
+  82              onPressed: () => Navigator.of(context).pop(true),
+  83:             child: const Text('删除', style: TextStyle(color: Colors.red)),
+  84            ),
+
+lib\core\floating_ball\widgets\plugin_overlay_selector.dart:
+  55                      onPressed: () => Navigator.of(context).pop(),
+  56:                     child: const Text('取消'),
+  57                    ),
+
+lib\plugins\activity\screens\tag_statistics_screen.dart:
+  414                      }
+  415:                     return const Text('');
+  416                    },
+
+  655                      }
+  656:                     return const Text('');
+  657                    },
+
+lib\plugins\agent_chat\screens\chat_screen\chat_screen.dart:
+   507                                  icon: const Icon(Icons.clear_all, size: 14),
+   508:                                 label: const Text('清空', style: TextStyle(fontSize: 12)),
+   509                                  style: TextButton.styleFrom(
+
+  1093                  onPressed: () => Navigator.pop(context, true),
+  1094:                 child: const Text('清空'),
+  1095                ),
+
+lib\plugins\agent_chat\screens\chat_screen\components\message_bubble.dart:
+  632                  onPressed: () => Navigator.pop(context),
+  633:                 child: const Text('取消'),
+  634                ),
+
+lib\plugins\agent_chat\screens\chat_screen\components\message_input.dart:
+  544                    leading: const Icon(Icons.image),
+  545:                   title: const Text('图片'),
+  546                    onTap: () {
+
+  552                    leading: const Icon(Icons.description),
+  553:                   title: const Text('文档'),
+  554                    onTap: () {
+
+  626              const SizedBox(width: 12),
+  627:             Text('正在加载工具模板...', style: TextStyle(color: Colors.grey[700])),
+  628            ],
+
+  870      _textController.clear();
+  871:     widget.controller.setInputText('');
+  872  
+
+  880      _textController.clear();
+  881:     widget.controller.setInputText('');
+  882  
+
+lib\plugins\agent_chat\screens\chat_screen\components\save_tool_dialog.dart:
+  127            onPressed: _isSaving ? null : () => Navigator.pop(context),
+  128:           child: const Text('取消'),
+  129          ),
+
+  141                    )
+  142:                   : const Text('保存'),
+  143          ),
+
+lib\plugins\agent_chat\screens\chat_screen\components\tool_call_steps.dart:
+  277                          icon: const Icon(Icons.replay, size: 16),
+  278:                         label: const Text('重新执行此步骤'),
+  279                          style: ElevatedButton.styleFrom(
+
+lib\plugins\agent_chat\screens\chat_screen\components\tool_detail_dialog.dart:
+  120                    onPressed: () => Navigator.of(context).pop(),
+  121:                   child: const Text('关闭'),
+  122                  ),
+
+lib\plugins\agent_chat\screens\chat_screen\components\voice_input_dialog.dart:
+  405            onPressed: _cancel,
+  406:           child: const Text('取消'),
+  407          ),
+
+  412                : _confirmSend,
+  413:           child: const Text('发送'),
+  414          ),
+
+lib\plugins\agent_chat\screens\conversation_list_screen\conversation_list_screen.dart:
+  132            (context) => AlertDialog(
+  133:             title: const Text('分组管理'),
+  134              content: SizedBox(
+
+  153                                    SizedBox(width: 8),
+  154:                                   Text('编辑'),
+  155                                  ],
+
+  179                  onPressed: () => Navigator.pop(context),
+  180:                 child: const Text('关闭'),
+  181                ),
+
+  211              (context) => AlertDialog(
+  212:               title: const Text('编辑分组'),
+  213                content: TextField(
+
+  220                    onPressed: () => Navigator.pop(context, false),
+  221:                   child: const Text('取消'),
+  222                  ),
+
+  224                    onPressed: () => Navigator.pop(context, true),
+  225:                   child: const Text('保存'),
+  226                  ),
+
+  249            (context) => AlertDialog(
+  250:             title: const Text('确认删除'),
+  251:             content: Text('确定要删除分组 "${group.name}" 吗？\n\n此操作将同时清除该分组的筛选状态。'),
+  252              actions: [
+
+  254                  onPressed: () => Navigator.pop(context, false),
+  255:                 child: const Text('取消'),
+  256                ),
+
+  259                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+  260:                 child: const Text('删除'),
+  261                ),
+
+  285            (context) => AlertDialog(
+  286:             title: const Text('选择要创建的类型'),
+  287              content: Column(
+
+  291                    leading: const Icon(Icons.chat),
+  292:                   title: const Text('频道'),
+  293:                   subtitle: const Text('创建新的对话频道'),
+  294                    onTap: () => Navigator.pop(context, 'channel'),
+
+  297                    leading: const Icon(Icons.folder),
+  298:                   title: const Text('分组'),
+  299:                   subtitle: const Text('创建新的分组分类'),
+  300                    onTap: () => Navigator.pop(context, 'group'),
+
+  322              (context) => AlertDialog(
+  323:               title: const Text('添加频道'),
+  324                content: TextField(
+
+  334                    onPressed: () => Navigator.pop(context, false),
+  335:                   child: const Text('取消'),
+  336                  ),
+
+  338                    onPressed: () => Navigator.pop(context, true),
+  339:                   child: const Text('创建'),
+  340                  ),
+
+  372              (context) => AlertDialog(
+  373:               title: const Text('添加分组'),
+  374                content: TextField(
+
+  384                    onPressed: () => Navigator.pop(context, false),
+  385:                   child: const Text('取消'),
+  386                  ),
+
+  388                    onPressed: () => Navigator.pop(context, true),
+  389:                   child: const Text('创建'),
+  390                  ),
+
+  419      return SuperCupertinoNavigationWrapper(
+  420:       title: const Text('AI 对话'),
+  421        largeTitle: 'AI 对话',
+
+  601                    ),
+  602:                   child: const Text('清除', style: TextStyle(fontSize: 12)),
+  603                  ),
+
+  760                            SizedBox(width: 8),
+  761:                           Text('编辑'),
+  762                          ],
+
+  770                            SizedBox(width: 8),
+  771:                           Text('删除', style: TextStyle(color: Colors.red)),
+  772                          ],
+
+  832              (context) => AlertDialog(
+  833:               title: const Text('编辑会话'),
+  834                content: TextField(
+
+  841                    onPressed: () => Navigator.pop(context, false),
+  842:                   child: const Text('取消'),
+  843                  ),
+
+  845                    onPressed: () => Navigator.pop(context, true),
+  846:                   child: const Text('保存'),
+  847                  ),
+
+  871            (context) => AlertDialog(
+  872:             title: const Text('确认删除'),
+  873              content: Text(
+
+  878                  onPressed: () => Navigator.pop(context, false),
+  879:                 child: const Text('取消'),
+  880                ),
+
+  883                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+  884:                 child: const Text('删除'),
+  885                ),
+
+lib\plugins\agent_chat\screens\tool_management_screen\tool_management_screen.dart:
+   95        builder: (context) => AlertDialog(
+   96:         title: const Text('选择插件'),
+   97          content: SizedBox(
+
+  169          builder: (context) => AlertDialog(
+  170:           title: const Text('确认导入'),
+  171:           content: const Text('导入配置将覆盖现有配置，是否继续？'),
+  172            actions: [
+
+  174                onPressed: () => Navigator.pop(context, false),
+  175:               child: const Text('取消'),
+  176              ),
+
+  178                onPressed: () => Navigator.pop(context, true),
+  179:               child: const Text('确认'),
+  180              ),
+
+  235        builder: (context) => AlertDialog(
+  236:         title: const Text('确认恢复默认'),
+  237:         content: const Text('此操作将删除所有自定义配置，恢复到默认配置。是否继续？'),
+  238          actions: [
+
+  240              onPressed: () => Navigator.pop(context, false),
+  241:             child: const Text('取消'),
+  242            ),
+
+  248              ),
+  249:             child: const Text('恢复默认'),
+  250            ),
+
+  341                child: FilterChip(
+  342:                 label: const Text('全部'),
+  343                  selected: _selectedPluginFilter == null,
+
+  360                  child: FilterChip(
+  361:                   label: Text('$pluginId ($enabledCount/$totalCount)'),
+  362                    selected: _selectedPluginFilter == pluginId,
+
+  381        appBar: AppBar(
+  382:         title: const Text('工具管理'),
+  383          actions: [
+
+  410                      SizedBox(width: 12),
+  411:                     Text('添加工具'),
+  412                    ],
+
+  420                      SizedBox(width: 12),
+  421:                     Text('导入配置'),
+  422                    ],
+
+  430                      SizedBox(width: 12),
+  431:                     Text('导出配置'),
+  432                    ],
+
+  441                      SizedBox(width: 12),
+  442:                     Text('恢复默认', style: TextStyle(color: Colors.red)),
+  443                    ],
+
+  476                    child: _allPluginTools.isEmpty
+  477:                       ? const Center(child: Text('暂无工具配置'))
+  478                        : ScrollConfiguration(
+
+  619              const SizedBox(width: 8),
+  620:             const Text('已禁用的工具'),
+  621              const Spacer(),
+
+  638                          SizedBox(height: 16),
+  639:                         Text('所有工具都已启用！'),
+  640                        ],
+
+  722                    builder: (context) => AlertDialog(
+  723:                     title: const Text('确认全部启用'),
+  724:                     content: Text('确定要启用所有 ${disabledTools.length} 个已禁用的工具吗？'),
+  725                      actions: [
+
+  727                          onPressed: () => Navigator.pop(context, false),
+  728:                         child: const Text('取消'),
+  729                        ),
+
+  731                          onPressed: () => Navigator.pop(context, true),
+  732:                         child: const Text('全部启用'),
+  733                        ),
+
+  755                icon: const Icon(Icons.done_all),
+  756:               label: const Text('全部启用'),
+  757              ),
+
+  759              onPressed: () => Navigator.pop(context),
+  760:             child: const Text('关闭'),
+  761            ),
+
+lib\plugins\agent_chat\screens\tool_management_screen\components\tool_editor_dialog.dart:
+  288                    onPressed: () => Navigator.pop(context),
+  289:                   child: const Text('取消'),
+  290                  ),
+
+  293                    onPressed: _save,
+  294:                   child: const Text('保存'),
+  295                  ),
+
+  390            child: SwitchListTile(
+  391:             title: const Text('启用工具'),
+  392:             subtitle: const Text('禁用后该工具将不会提供给AI使用'),
+  393              value: _enabled,
+
+  416                  icon: const Icon(Icons.add),
+  417:                 label: const Text('添加参数'),
+  418                  onPressed: _addParameter,
+
+  427                ? const Center(
+  428:                   child: Text('暂无参数，点击上方按钮添加'),
+  429                  )
+
+  502                              CheckboxListTile(
+  503:                               title: const Text('可选参数'),
+  504                                value: param.optional,
+
+  571                  icon: const Icon(Icons.add),
+  572:                 label: const Text('添加示例'),
+  573                  onPressed: _addExample,
+
+  582                ? const Center(
+  583:                   child: Text('暂无示例，点击上方按钮添加'),
+  584                  )
+
+  607                                    icon: const Icon(Icons.play_arrow, size: 18),
+  608:                                   label: const Text('测试'),
+  609                                    onPressed: () =>
+
+  673                  const SizedBox(height: 16),
+  674:                 const Text('正在执行 JS 代码...'),
+  675                  const SizedBox(height: 16),
+
+  677                    icon: const Icon(Icons.cancel),
+  678:                   label: const Text('取消'),
+  679                    onPressed: () {
+
+  789              onPressed: () => Navigator.pop(context),
+  790:             child: const Text('关闭'),
+  791            ),
+
+lib\plugins\agent_chat\screens\tool_management_screen\components\tool_list_item.dart:
+  78                (context) => AlertDialog(
+  79:                 title: const Text('确认删除'),
+  80:                 content: Text('确定要删除工具 "$toolId" 吗？'),
+  81                  actions: [
+
+  83                      onPressed: () => Navigator.pop(context, false),
+  84:                     child: const Text('取消'),
+  85                    ),
+
+  91                      ),
+  92:                     child: const Text('删除'),
+  93                    ),
+
+lib\plugins\agent_chat\screens\tool_template_screen\tool_template_screen.dart:
+   68        appBar: AppBar(
+   69:         title: const Text('工具模板'),
+   70          actions: [
+
+  261                        icon: const Icon(Icons.send, size: 18),
+  262:                       label: const Text('使用'),
+  263                        style: FilledButton.styleFrom(
+
+  290                              SizedBox(width: 8),
+  291:                             Text('编辑', style: TextStyle(color: Colors.blue)),
+  292                            ],
+
+  300                              SizedBox(width: 8),
+  301:                             Text('删除', style: TextStyle(color: Colors.red)),
+  302                            ],
+
+  452        builder: (context) => AlertDialog(
+  453:         title: const Text('删除确认'),
+  454:         content: Text('确定要删除工具模板"${template.name}"吗？'),
+  455          actions: [
+
+  457              onPressed: () => Navigator.pop(context, false),
+  458:             child: const Text('取消'),
+  459            ),
+
+  464              ),
+  465:             child: const Text('删除'),
+  466            ),
+
+  527              SizedBox(width: 8),
+  528:             Text('重置确认'),
+  529            ],
+
+  538              onPressed: () => Navigator.pop(context, false),
+  539:             child: const Text('取消'),
+  540            ),
+
+  546              icon: const Icon(Icons.restore),
+  547:             label: const Text('重置'),
+  548            ),
+
+  569                      SizedBox(height: 16),
+  570:                     Text('正在重置默认模板...'),
+  571                    ],
+
+  635            const SizedBox(width: 8),
+  636:           const Text('选择标签过滤'),
+  637            const Spacer(),
+
+  644                },
+  645:               child: const Text('清空'),
+  646              ),
+
+  720            onPressed: () => Navigator.pop(context),
+  721:           child: const Text('取消'),
+  722          ),
+
+  731                    ),
+  732:           label: const Text('确定'),
+  733          ),
