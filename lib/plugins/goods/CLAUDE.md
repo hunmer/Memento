@@ -49,7 +49,8 @@ class GoodsPlugin extends BasePlugin {
         PluginManager pluginManager,
         ConfigManager configManager,
     ) async {
-        await initialize();
+        // 插件已在 initialize() 中完成初始化
+    // 这里可以添加额外的应用级注册逻辑
     }
 }
 ```

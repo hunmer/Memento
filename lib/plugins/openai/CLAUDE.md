@@ -359,7 +359,8 @@ void registerPluginAnalysis(String pluginId, PluginAnalysisMethod method) {
 // diary_plugin.dart
 @override
 Future<void> registerToApp(PluginManager pm, ConfigManager cm) async {
-  await initialize();
+  // 插件已在 initialize() 中完成初始化
+    // 这里可以添加额外的应用级注册逻辑
 
   // 注册数据分析方法
   final openAIPlugin = pm.getPlugin('openai') as OpenAIPlugin;

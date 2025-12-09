@@ -46,10 +46,12 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Future<void> registerToApp(
+    
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
-    await initialize();
+    // 插件已在 initialize() 中完成初始化
+    // 这里可以添加额外的应用级注册逻辑
   }
 
   @override

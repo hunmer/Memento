@@ -49,8 +49,6 @@ class PluginManager {
         plugin.setStorageManager(_storageManager!);
       }
       _plugins.add(plugin);
-      // 初始化插件（加载数据）
-      await plugin.initialize();
       // 注册到应用程序（设置监听器等）
       await plugin.registerToApp(this, ConfigManager(_storageManager!));
     }

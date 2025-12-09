@@ -75,11 +75,13 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Future<void> registerToApp(
+    
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
     // 初始化插件
-    await initialize();
+    // 插件已在 initialize() 中完成初始化
+    // 这里可以添加额外的应用级注册逻辑
 
     // 监听通知点击事件
     eventManager.subscribe(
