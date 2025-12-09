@@ -135,8 +135,13 @@ class FloatingBallManager {
 
     switch (lastPage.pageId) {
       case 'tool_template':
+        final templateService = AgentChatPlugin.instance.templateService;
+        if (templateService == null) {
+          Toast.error('工具模板服务未初始化');
+          break;
+        }
         await NavigationHelper.push(context, ToolTemplateScreen(
-                  templateService: AgentChatPlugin.instance.templateService,),
+                  templateService: templateService,),
         );
         break;
       case 'tool_management':

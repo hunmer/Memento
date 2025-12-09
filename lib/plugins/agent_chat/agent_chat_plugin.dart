@@ -32,10 +32,10 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
   static AgentChatPlugin get instance => _instance!;
 
   ConversationController? _conversationController;
-  ConversationController get conversationController => _conversationController!;
+  ConversationController? get conversationController => _conversationController;
 
   ToolTemplateService? _templateService;
-  ToolTemplateService get templateService => _templateService!;
+  ToolTemplateService? get templateService => _templateService;
 
   /// 检查是否已初始化
   bool get isInitialized =>
@@ -106,7 +106,7 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
   /// 获取总对话数
   int getTotalConversationsCount() {
     try {
-      return conversationController.conversations.length;
+      return conversationController?.conversations.length ?? 0;
     } catch (e) {
       debugPrint('获取总对话数失败: $e');
       return 0;
@@ -117,6 +117,12 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
   /// 统计所有会话中今天发送的消息总数
   Future<int> getTodayMessagesCount() async {
     try {
+      final controller = conversationController;
+      if (controller == null) {
+        debugPrint('conversationController 未初始化');
+        return 0;
+      }
+
       final today = DateTime.now();
       final todayStart = DateTime(today.year, today.month, today.day);
       final todayEnd = todayStart.add(const Duration(days: 1));
@@ -124,7 +130,7 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
       int count = 0;
 
       // 遍历所有会话
-      for (final conversation in conversationController.conversations) {
+      for (final conversation in controller.conversations) {
         try {
           // 加载该会话的消息
           final data = await storage.read('agent_chat/messages/${conversation.id}');
@@ -156,12 +162,18 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
   /// 定义: 最近7天内有消息的会话
   Future<int> getActiveConversationsCount() async {
     try {
+      final controller = conversationController;
+      if (controller == null) {
+        debugPrint('conversationController 未初始化');
+        return 0;
+      }
+
       final now = DateTime.now();
       final sevenDaysAgo = now.subtract(const Duration(days: 7));
 
       int count = 0;
 
-      for (final conversation in conversationController.conversations) {
+      for (final conversation in controller.conversations) {
         // 检查lastMessageAt是否在7天内
         if (conversation.lastMessageAt != null &&
             conversation.lastMessageAt.isAfter(sevenDaysAgo)) {
@@ -232,6 +244,11 @@ class _AgentChatMainViewState extends State<AgentChatMainView> {
     try {
       final plugin = AgentChatPlugin.instance;
       final controller = plugin.conversationController;
+
+      if (controller == null) {
+        debugPrint('conversationController 未初始化');
+        return;
+      }
 
       // 查找指定的对话
       final conversation = controller.conversations.firstWhere(

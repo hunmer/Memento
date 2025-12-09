@@ -478,23 +478,37 @@ Future<void> initializeFlutterFloatingBall() async {
       return;
     }
 
-    // 初始化悬浮球服务
-    final floatingBallService = FloatingBallService();
-    await floatingBallService.initialize(context);
+    // 使用 addPostFrameCallback 确保 UI 完全构建后再显示浮动球
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        // 再次检查上下文是否有效
+        if (!context.mounted) {
+          debugPrint('上下文已失效，跳过悬浮球初始化');
+          return;
+        }
 
-    // 设置悬浮球动作上下文，使手势动作生效
-    floatingBallService.manager.setActionContext(context);
+        // 初始化悬浮球服务
+        final floatingBallService = FloatingBallService();
+        await floatingBallService.initialize(context);
 
-    // 检查悬浮球是否启用，如果启用则显示
-    final isEnabled = await floatingBallService.manager.isEnabled();
-    if (isEnabled) {
-      debugPrint('悬浮球已启用，显示悬浮球');
-      await floatingBallService.show(context);
-    } else {
-      debugPrint('悬浮球未启用，跳过显示');
-    }
+        // 设置悬浮球动作上下文，使手势动作生效
+        floatingBallService.manager.setActionContext(context);
 
-    debugPrint('Flutter悬浮球初始化完成');
+        // 检查悬浮球是否启用，如果启用则显示
+        final isEnabled = await floatingBallService.manager.isEnabled();
+        if (isEnabled) {
+          debugPrint('悬浮球已启用，显示悬浮球');
+          await floatingBallService.show(context);
+        } else {
+          debugPrint('悬浮球未启用，跳过显示');
+        }
+
+        debugPrint('Flutter悬浮球初始化完成');
+      } catch (e, stack) {
+        debugPrint('Flutter悬浮球初始化失败: $e');
+        debugPrint('堆栈: $stack');
+      }
+    });
   } catch (e, stack) {
     debugPrint('Flutter悬浮球初始化失败: $e');
     debugPrint('堆栈: $stack');

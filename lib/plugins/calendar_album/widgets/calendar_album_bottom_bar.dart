@@ -57,8 +57,8 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
     });
 
     // 获取控制器
-    _calendarController = widget.plugin.calendarController;
-    _tagController = widget.plugin.tagController;
+    _calendarController = widget.plugin.calendarController!;
+    _tagController = widget.plugin.tagController!;
   }
 
   /// 测量底部栏高度

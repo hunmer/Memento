@@ -57,17 +57,18 @@ class CalendarAlbumHomeWidgets {
           as CalendarAlbumPlugin?;
       if (plugin == null) return [];
 
-      final todayCount = plugin.calendarController.getTodayEntriesCount();
-      final sevenDayCount = plugin.calendarController.getLast7DaysEntriesCount();
-      final allEntriesCount = plugin.calendarController.getAllEntriesCount();
-      final tagCount = plugin.tagController.tags.length;
+      final todayCount = plugin.calendarController?.getTodayEntriesCount();
+      final sevenDayCount =
+          plugin.calendarController?.getLast7DaysEntriesCount();
+      final allEntriesCount = plugin.calendarController!.getAllEntriesCount();
+      final tagCount = plugin.tagController?.tags.length;
 
       return [
         StatItemData(
           id: 'today_diary',
           label: '今日日记',
           value: '$todayCount',
-          highlight: todayCount > 0,
+          highlight: todayCount! > 0,
           color: _pluginColor,
         ),
         StatItemData(

@@ -19,7 +19,7 @@ class AgentChatWidgetService {
 
     try {
       final plugin = AgentChatPlugin.instance;
-      final conversations = plugin.conversationController.conversations;
+      final conversations = plugin.conversationController!.conversations;
 
       // 获取最近使用的对话
       final recentConversations = _getRecentConversations(conversations);

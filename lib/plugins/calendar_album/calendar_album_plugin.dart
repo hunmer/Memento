@@ -38,8 +38,11 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     return _instance!;
   }
 
-  late final CalendarController calendarController;
-  late final TagController tagController;
+  CalendarController? _calendarController;
+  CalendarController? get calendarController => _calendarController;
+
+  TagController? _tagController;
+  TagController? get tagController => _tagController;
 
   @override
   String get id => 'calendar_album';
@@ -52,9 +55,8 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Future<void> initialize() async {
-    calendarController = CalendarController();
-    tagController = TagController(onTagsChanged: () {});
-
+    _calendarController = CalendarController();
+    _tagController = TagController(onTagsChanged: () {});
 
     await initializeDefaultData();
 
@@ -86,7 +88,12 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取总照片数
   int getTotalPhotosCount() {
     try {
-      return calendarController.getAllImages().length;
+      final controller = calendarController;
+      if (controller == null) {
+        debugPrint('calendarController 未初始化');
+        return 0;
+      }
+      return controller.getAllImages().length;
     } catch (e) {
       debugPrint('获取总照片数失败: $e');
       return 0;
@@ -96,7 +103,12 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取今日新增照片数
   int getTodayPhotosCount() {
     try {
-      final todayEntries = calendarController.getEntriesForDate(DateTime.now());
+      final controller = calendarController;
+      if (controller == null) {
+        debugPrint('calendarController 未初始化');
+        return 0;
+      }
+      final todayEntries = controller.getEntriesForDate(DateTime.now());
       int photoCount = 0;
 
       for (final entry in todayEntries) {
@@ -116,7 +128,12 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取标签总数
   int getTagsCount() {
     try {
-      return tagController.tags.length;
+      final controller = tagController;
+      if (controller == null) {
+        debugPrint('tagController 未初始化');
+        return 0;
+      }
+      return controller.tags.length;
     } catch (e) {
       debugPrint('获取标签总数失败: $e');
       return 0;
@@ -130,6 +147,12 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// @param startDate 起始日期（可选，默认从周一开始）
   List<CalendarEntry> getWeeklyEntries({int weekOffset = 0, DateTime? startDate}) {
     try {
+      final controller = calendarController;
+      if (controller == null) {
+        debugPrint('calendarController 未初始化');
+        return [];
+      }
+
       // 计算目标周的起始日期（周一）
       final now = DateTime.now();
       final currentWeekStart = _getWeekStart(now);
@@ -140,7 +163,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       // 获取这一周每一天的日记
       for (int i = 0; i < 7; i++) {
         final date = targetWeekStart.add(Duration(days: i));
-        entries.addAll(calendarController.getEntriesForDate(date));
+        entries.addAll(controller.getEntriesForDate(date));
       }
 
       // 按日期排序
@@ -156,7 +179,12 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取指定日期的日记条目（周一到周日点击用）
   /// @param date 日期
   List<CalendarEntry> getEntriesForDate(DateTime date) {
-    return calendarController.getEntriesForDate(date);
+    final controller = calendarController;
+    if (controller == null) {
+      debugPrint('calendarController 未初始化');
+      return [];
+    }
+    return controller.getEntriesForDate(date);
   }
 
   /// 计算指定周的周开始日期（周一）
@@ -235,7 +263,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${calendarController.getTodayEntriesCount()}',
+                        '${calendarController?.getTodayEntriesCount() ?? 0}',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -251,7 +279,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${calendarController.getLast7DaysEntriesCount()} ',
+                        '${calendarController?.getLast7DaysEntriesCount() ?? 0} ',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -274,7 +302,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${calendarController.getAllEntriesCount()} ',
+                        '${calendarController?.getAllEntriesCount() ?? 0} ',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -290,7 +318,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
-                        '${tagController.tags.length} ',
+                        '${tagController?.tags.length ?? 0} ',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -370,8 +398,13 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取所有日记条目
   /// 支持分页参数: offset, count
   Future<String> _jsGetEntries(Map<String, dynamic> params) async {
+    final controller = calendarController;
+    if (controller == null) {
+      return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+    }
+
     final allEntries = <CalendarEntry>[];
-    calendarController.entries.forEach((date, entries) {
+    controller.entries.forEach((date, entries) {
       allEntries.addAll(entries);
     });
     // 按创建时间倒序排序
@@ -406,8 +439,13 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     try {
+      final controller = calendarController;
+      if (controller == null) {
+        return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+      }
+
       final date = DateTime.parse(dateStr);
-      final entries = calendarController.getEntriesForDate(date);
+      final entries = controller.getEntriesForDate(date);
       return jsonEncode(entries.map((e) => e.toJson()).toList());
     } catch (e) {
       return jsonEncode({
@@ -457,7 +495,11 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
         imageUrls: imageUrls,
       );
 
-      await calendarController.addEntry(entry);
+      final controller = calendarController;
+      if (controller == null) {
+        return jsonEncode({'error': 'calendarController 未初始化'});
+      }
+      await controller.addEntry(entry);
       return jsonEncode(entry.toJson());
     } catch (e) {
       return jsonEncode({
@@ -483,7 +525,12 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     try {
-      final entry = calendarController.getEntryById(entryId);
+      final controller = calendarController;
+      if (controller == null) {
+        return jsonEncode({'error': 'calendarController 未初始化'});
+      }
+
+      final entry = controller.getEntryById(entryId);
       if (entry == null) {
         return jsonEncode({
           'error': '日记不存在',
@@ -510,7 +557,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
         updatedAt: DateTime.now(),
       );
 
-      await calendarController.updateEntry(updatedEntry);
+      await controller.updateEntry(updatedEntry);
       return jsonEncode(updatedEntry.toJson());
     } catch (e) {
       return jsonEncode({
@@ -532,7 +579,15 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     try {
-      final entry = calendarController.getEntryById(entryId);
+      final controller = calendarController;
+      if (controller == null) {
+        return jsonEncode({
+          'success': false,
+          'error': 'calendarController 未初始化',
+        });
+      }
+
+      final entry = controller.getEntryById(entryId);
       if (entry == null) {
         return jsonEncode({
           'success': false,
@@ -541,7 +596,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
         });
       }
 
-      await calendarController.deleteEntry(entry);
+      await controller.deleteEntry(entry);
       return jsonEncode({
         'success': true,
         'entryId': entryId,
@@ -563,7 +618,12 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: entryId'});
     }
 
-    final entry = calendarController.getEntryById(entryId);
+    final controller = calendarController;
+    if (controller == null) {
+      return jsonEncode({'error': 'calendarController 未初始化'});
+    }
+
+    final entry = controller.getEntryById(entryId);
     if (entry == null) {
       return jsonEncode({
         'error': '日记不存在',
@@ -577,7 +637,12 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// @param params - 参数对象（无参数）
   /// 返回: List<String> (JSON数组)
   Future<String> _jsGetTags(Map<String, dynamic> params) async {
-    final tags = tagController.tags;
+    final controller = tagController;
+    if (controller == null) {
+      return jsonEncode({'error': 'tagController 未初始化', 'tags': []});
+    }
+
+    final tags = controller.tags;
     return jsonEncode(tags);
   }
 
@@ -592,7 +657,11 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     final int? offset = params['offset'];
     final int? count = params['count'];
 
-    final entries = calendarController.getEntriesByTag(tag);
+    final controller = calendarController;
+    if (controller == null) {
+      return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+    }
+    final entries = controller.getEntriesByTag(tag);
     final entriesJson = entries.map((e) => e.toJson()).toList();
 
     // 检查是否需要分页
@@ -619,7 +688,11 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     final int? offset = params['offset'];
     final int? count = params['count'];
 
-    final entries = calendarController.getEntriesByTags(tags);
+    final controller = calendarController;
+    if (controller == null) {
+      return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+    }
+    final entries = controller.getEntriesByTags(tags);
     final entriesJson = entries.map((e) => e.toJson()).toList();
 
     // 检查是否需要分页
@@ -641,7 +714,11 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     final int? offset = params['offset'];
     final int? count = params['count'];
 
-    final photos = calendarController.getAllImages();
+    final controller = calendarController;
+    if (controller == null) {
+      return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+    }
+    final photos = controller.getAllImages();
 
     // 检查是否需要分页
     if (offset != null || count != null) {
@@ -677,7 +754,11 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
 
       final List<Map<String, dynamic>> photos = [];
 
-      calendarController.entries.forEach((date, entries) {
+      final controller = calendarController;
+      if (controller == null) {
+        return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+      }
+      controller.entries.forEach((date, entries) {
         if ((date.isAfter(startDate) || date.isAtSameMomentAs(startDate)) &&
             (date.isBefore(endDate) || date.isAtSameMomentAs(endDate))) {
           for (var entry in entries) {
@@ -717,12 +798,25 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// @param params - 参数对象（无参数）
   /// 返回: {todayCount, last7DaysCount, totalCount, tagCount, photoCount}
   Future<String> _jsGetStatistics(Map<String, dynamic> params) async {
+    final calendarCtrl = calendarController;
+    final tagCtrl = tagController;
+    if (calendarCtrl == null || tagCtrl == null) {
+      return jsonEncode({
+        'error': '控制器未初始化',
+        'todayCount': 0,
+        'last7DaysCount': 0,
+        'totalCount': 0,
+        'tagCount': 0,
+        'photoCount': 0,
+      });
+    }
+
     final stats = {
-      'todayCount': calendarController.getTodayEntriesCount(),
-      'last7DaysCount': calendarController.getLast7DaysEntriesCount(),
-      'totalCount': calendarController.getAllEntriesCount(),
-      'tagCount': tagController.tags.length,
-      'photoCount': calendarController.getAllImages().length,
+      'todayCount': calendarCtrl.getTodayEntriesCount(),
+      'last7DaysCount': calendarCtrl.getLast7DaysEntriesCount(),
+      'totalCount': calendarCtrl.getAllEntriesCount(),
+      'tagCount': tagCtrl.tags.length,
+      'photoCount': calendarCtrl.getAllImages().length,
     };
     return jsonEncode(stats);
   }
@@ -751,8 +845,13 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     final int? count = params['count'];
 
     // 获取所有日记
+    final controller = calendarController;
+    if (controller == null) {
+      return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+    }
+
     final allEntries = <CalendarEntry>[];
-    calendarController.entries.forEach((date, entries) {
+    controller.entries.forEach((date, entries) {
       allEntries.addAll(entries);
     });
 
@@ -798,7 +897,11 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: id'});
     }
 
-    final entry = calendarController.getEntryById(id);
+    final controller = calendarController;
+    if (controller == null) {
+      return jsonEncode({'error': 'calendarController 未初始化'});
+    }
+    final entry = controller.getEntryById(id);
     if (entry == null) {
       return jsonEncode(null);
     }
@@ -823,8 +926,13 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     final int? count = params['count'];
 
     // 获取所有日记
+    final controller = calendarController;
+    if (controller == null) {
+      return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+    }
+
     final allEntries = <CalendarEntry>[];
-    calendarController.entries.forEach((date, entries) {
+    controller.entries.forEach((date, entries) {
       allEntries.addAll(entries);
     });
 

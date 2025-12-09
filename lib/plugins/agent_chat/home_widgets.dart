@@ -56,7 +56,7 @@ class AgentChatHomeWidgets {
       }
 
       final controller = plugin.conversationController;
-      final conversations = controller.conversations;
+      final conversations = controller!.conversations;
 
       // 计算未读消息总数
       int totalUnread = 0;
@@ -82,7 +82,7 @@ class AgentChatHomeWidgets {
         StatItemData(
           id: 'total_groups',
           label: '分组总数',
-          value: '${controller.groups.length}',
+          value: '${controller!.groups.length}',
           highlight: controller.groups.isNotEmpty,
           color: Colors.purple,
         ),
