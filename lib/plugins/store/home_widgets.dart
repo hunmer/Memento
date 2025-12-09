@@ -49,7 +49,7 @@ class StoreHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
       final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
       if (plugin == null) return [];
@@ -113,7 +113,7 @@ class StoreHomeWidgets {
       }
 
       // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
       return GenericPluginWidget(

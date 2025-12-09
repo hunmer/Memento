@@ -253,4 +253,7 @@ class BillLocalizationsZh extends BillLocalizations {
 
   @override
   String get edit => '编辑';
+
+  @override
+  String get monthlyRecord => '月度记账';
 }

@@ -80,7 +80,10 @@ abstract class CalendarLocalizations {
   String get endTimeCannotBeEarlier;
 
   String get dateRange;
-  String get complete => '完成';
+  String get complete;
+  String get activityCount;
+  String get sevenDaysActivity;
+  String get expiredActivity;
 }
 
 class _CalendarLocalizationsDelegate

@@ -103,6 +103,8 @@ abstract class DatabaseLocalizations {
   String get deleteAction;
 
   String get editRecordTitle;
+
+  String get totalDatabases;
 }
 
 class _DatabaseLocalizationsDelegate

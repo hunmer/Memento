@@ -107,4 +107,7 @@ class DatabaseLocalizationsZh extends DatabaseLocalizations {
 
   @override
   String get editRecordTitle => '编辑记录';
+
+  @override
+  String get totalDatabases => '总数据库数';
 }

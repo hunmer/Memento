@@ -111,4 +111,13 @@ class CalendarLocalizationsZh extends CalendarLocalizations {
 
   @override
   String get complete => '完成';
+
+  @override
+  String get activityCount => '活动数量';
+
+  @override
+  String get sevenDaysActivity => '7天活动';
+
+  @override
+  String get expiredActivity => '过期活动';
 }

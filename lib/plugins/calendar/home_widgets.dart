@@ -49,7 +49,7 @@ class CalendarHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
       final plugin = PluginManager.instance.getPlugin('calendar') as CalendarPlugin?;
       if (plugin == null) return [];
@@ -58,6 +58,7 @@ class CalendarHomeWidgets {
       final eventCount = allEvents.length;
 
       // 获取7天内的活动数量
+      final l10n = CalendarLocalizations.of(context);
       final now = DateTime.now();
       final sevenDaysLater = now.add(const Duration(days: 7));
       final upcomingEventCount = allEvents.where((event) {
@@ -73,20 +74,20 @@ class CalendarHomeWidgets {
       return [
         StatItemData(
           id: 'event_count',
-          label: '活动数量',
+          label: l10n.activityCount,
           value: '$eventCount',
           highlight: false,
         ),
         StatItemData(
           id: 'week_events',
-          label: '7天活动',
+          label: l10n.sevenDaysActivity,
           value: '$upcomingEventCount',
           highlight: upcomingEventCount > 0,
           color: Colors.orange,
         ),
         StatItemData(
           id: 'expired_events',
-          label: '过期活动',
+          label: l10n.expiredActivity,
           value: '$expiredEventCount',
           highlight: expiredEventCount > 0,
           color: Colors.red,
@@ -117,7 +118,7 @@ class CalendarHomeWidgets {
       }
 
       // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
       return GenericPluginWidget(

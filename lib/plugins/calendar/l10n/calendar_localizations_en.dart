@@ -113,4 +113,13 @@ class CalendarLocalizationsEn extends CalendarLocalizations {
 
   @override
   String get complete => 'Complete';
+
+  @override
+  String get activityCount => 'Activity Count';
+
+  @override
+  String get sevenDaysActivity => '7-Day Activities';
+
+  @override
+  String get expiredActivity => 'Expired Activities';
 }

@@ -340,4 +340,7 @@ class GoodsLocalizationsEn extends GoodsLocalizations {
 
   @override
   String get usageHistory => "Usage History";
+
+  @override
+  String get totalGoods => "Total Items";
 }

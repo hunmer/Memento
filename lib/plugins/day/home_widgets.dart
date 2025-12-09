@@ -45,24 +45,24 @@ class DayHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
       final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
       if (plugin == null) return [];
 
       final totalCount = plugin.getMemorialDayCount();
       final upcomingDays = plugin.getUpcomingMemorialDays();
-
+      final l10n = DayLocalizations.of(context);
       return [
         StatItemData(
           id: 'total_count',
-          label: '纪念日数',
+          label: l10n.memorialDays,
           value: '$totalCount',
           highlight: false,
         ),
         StatItemData(
           id: 'upcoming',
-          label: '即将到来',
+          label: l10n.upcoming,
           value: upcomingDays.isNotEmpty ? upcomingDays.join('、') : '暂无',
           highlight: upcomingDays.isNotEmpty,
           color: Colors.black87,
@@ -102,7 +102,7 @@ class DayHomeWidgets {
       }
 
       // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
       return GenericPluginWidget(

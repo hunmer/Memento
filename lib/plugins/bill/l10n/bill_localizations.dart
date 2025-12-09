@@ -131,6 +131,7 @@ abstract class BillLocalizations {
   String get presetAmountHint => '留空则每次手动输入';
   String get add => '添加';
   String get edit => '编辑';
+  String get monthlyRecord => '月度记账';
 }
 
 class _BillLocalizationsDelegate

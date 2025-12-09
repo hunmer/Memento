@@ -163,6 +163,8 @@ abstract class GoodsLocalizations {
   // 添加的字符串
   String get dateTime;
   String get usageHistory;
+
+  String get totalGoods;
 }
 
 class _GoodsLocalizationsDelegate

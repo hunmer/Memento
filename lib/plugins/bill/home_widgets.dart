@@ -49,11 +49,11 @@ class BillHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
       final plugin = PluginManager.instance.getPlugin('bill') as BillPlugin?;
       if (plugin == null) return [];
-
+      final l10n = BillLocalizations.of(context);
       final todayFinance = plugin.controller.getTodayFinance();
       final monthFinance = plugin.controller.getMonthFinance();
       final monthBillCount = plugin.controller.getMonthBillCount();
@@ -61,21 +61,21 @@ class BillHomeWidgets {
       return [
         StatItemData(
           id: 'today_finance',
-          label: '今日财务',
+          label: l10n.todayFinance,
           value: '¥${todayFinance.toStringAsFixed(2)}',
           highlight: todayFinance != 0,
           color: todayFinance >= 0 ? Colors.green : Colors.red,
         ),
         StatItemData(
           id: 'month_finance',
-          label: '本月财务',
+          label: l10n.monthFinance,
           value: '¥${monthFinance.toStringAsFixed(2)}',
           highlight: monthFinance != 0,
           color: monthFinance >= 0 ? Colors.green : Colors.red,
         ),
         StatItemData(
           id: 'month_bills',
-          label: '本月记账',
+          label: l10n.monthlyRecord,
           value: '$monthBillCount',
           highlight: false,
         ),
@@ -105,7 +105,7 @@ class BillHomeWidgets {
       }
 
       // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
       return GenericPluginWidget(

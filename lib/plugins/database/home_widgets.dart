@@ -49,7 +49,7 @@ class DatabaseHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
       final plugin = PluginManager.instance.getPlugin('database') as DatabasePlugin?;
       if (plugin == null) return [];
@@ -59,11 +59,11 @@ class DatabaseHomeWidgets {
       plugin.service.getDatabaseCount().then((count) {
         databaseCount = count;
       });
-
+      final l10n = DatabaseLocalizations.of(context);
       return [
         StatItemData(
           id: 'total_databases',
-          label: '数据库总数',
+          label: l10n.totalDatabases,
           value: '$databaseCount',
           highlight: databaseCount > 0,
           color: Colors.deepPurple,
@@ -94,7 +94,7 @@ class DatabaseHomeWidgets {
       }
 
       // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
       return GenericPluginWidget(

@@ -752,7 +752,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
 
     // 获取可用的统计项
-    final availableItems = widget.availableStatsProvider!();
+    final availableItems = widget.availableStatsProvider!(context);
 
     if (availableItems.isEmpty) {
       Toast.warning('该小组件没有可配置的项目');

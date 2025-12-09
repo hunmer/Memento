@@ -49,8 +49,9 @@ class OpenAIHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
+      final l10n = OpenAILocalizations.of(context);
       final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
       if (plugin == null) return [];
 
@@ -66,7 +67,7 @@ class OpenAIHomeWidgets {
       return [
         StatItemData(
           id: 'total_agents',
-          label: 'AI助手数',
+          label: l10n.totalAgents,
           value: '$agentsCount',
           highlight: agentsCount > 0,
           color: Colors.deepOrange,
@@ -97,7 +98,7 @@ class OpenAIHomeWidgets {
       }
 
       // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
       return GenericPluginWidget(

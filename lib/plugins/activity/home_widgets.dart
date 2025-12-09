@@ -49,8 +49,9 @@ class ActivityHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
+      final l10n = ActivityLocalizations.of(context);
       final plugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
       if (plugin == null) return [];
 
@@ -61,20 +62,20 @@ class ActivityHomeWidgets {
       return [
         StatItemData(
           id: 'today_activities',
-          label: '今日活动',
+          label: l10n.todayActivities,
           value: '$activityCount',
           highlight: activityCount > 0,
           color: Colors.pink,
         ),
         StatItemData(
           id: 'today_duration',
-          label: '今日时长',
+          label: l10n.todayDuration,
           value: '${(activityDuration / 60).toStringAsFixed(1)}H',
           highlight: false,
         ),
         StatItemData(
           id: 'remaining_time',
-          label: '剩余时间',
+          label: l10n.remainingTime,
           value: '${(remainingTime / 60).toStringAsFixed(1)}H',
           highlight: remainingTime < 120,
           color: Colors.red,
@@ -105,7 +106,7 @@ class ActivityHomeWidgets {
       }
 
       // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
       return GenericPluginWidget(

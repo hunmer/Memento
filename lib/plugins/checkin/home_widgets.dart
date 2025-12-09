@@ -49,8 +49,9 @@ class CheckinHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
+      final l10n = CheckinLocalizations.of(context);
       final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
       if (plugin == null) return [];
 
@@ -61,14 +62,14 @@ class CheckinHomeWidgets {
       return [
         StatItemData(
           id: 'today_checkin',
-          label: '今日打卡',
+          label: l10n.todayCheckin,
           value: '$todayCheckins/$totalItems',
           highlight: todayCheckins > 0,
           color: Colors.teal,
         ),
         StatItemData(
           id: 'total_count',
-          label: '总打卡数',
+          label: l10n.totalCheckinCount,
           value: '$totalCheckins',
           highlight: false,
         ),
@@ -98,7 +99,7 @@ class CheckinHomeWidgets {
       }
 
       // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
       return GenericPluginWidget(

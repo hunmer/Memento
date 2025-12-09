@@ -49,7 +49,7 @@ class AgentChatHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
       final plugin = PluginManager.instance.getPlugin('agent_chat') as AgentChatPlugin?;
       if (plugin == null || !plugin.isInitialized) {
@@ -115,7 +115,7 @@ class AgentChatHomeWidgets {
       }
 
       // 获取基础统计项数据
-      final baseItems = _getAvailableStats();
+      final baseItems = _getAvailableStats(context);
 
       // 使用l10n更新统计项标签
       final availableItems = baseItems.map((item) {

@@ -116,7 +116,7 @@ class CalendarAlbumLocalizationsZh extends CalendarAlbumLocalizations {
   @override
   String get allDiaries => '所有日记';
   @override
-  String get sevenDayDiary => '七日日记';
+  String get sevenDaysDiary => '七日日记';
 
   @override
   String get tagCount => '标签数量';

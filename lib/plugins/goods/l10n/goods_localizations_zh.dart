@@ -332,4 +332,7 @@ class GoodsLocalizationsZh extends GoodsLocalizations {
 
   @override
   String get usageHistory => "使用历史";
+
+  @override
+  String get totalGoods => "物品总数";
 }
