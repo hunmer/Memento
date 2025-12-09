@@ -1,7 +1,6 @@
 import 'script_trigger.dart';
 import 'script_input.dart';
 
-import 'package:get/get.dart';
 /// 脚本元数据模型
 ///
 /// 存储脚本的所有配置信息，对应metadata.json文件

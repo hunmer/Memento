@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:record/record.dart';

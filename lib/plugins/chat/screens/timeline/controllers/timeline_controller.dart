@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/screens/timeline/models/timeline_filter.dart';
 import 'timeline_controller/base_controller.dart';

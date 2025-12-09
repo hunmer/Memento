@@ -1,5 +1,4 @@
 import 'models/calendar_entry.dart';
-import 'package:get/get.dart';
 
 /// 日历相册插件的示例数据
 /// 当插件的 JSON 文件不存在时，自动加载这些示例数据

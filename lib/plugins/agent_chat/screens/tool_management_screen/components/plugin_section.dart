@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
 import 'tool_list_item.dart';
 

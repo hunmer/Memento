@@ -81,7 +81,6 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
   }
 
   Future<void> _navigateToEdit(BuildContext context) async {
-    ;
     await NavigationHelper.push(
       context,
       SkillForm(

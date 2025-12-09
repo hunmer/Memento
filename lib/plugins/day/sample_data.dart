@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'models/memorial_day.dart';
 
 /// 纪念日插件的示例数据

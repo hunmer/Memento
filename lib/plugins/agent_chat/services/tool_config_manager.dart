@@ -4,7 +4,6 @@
 library;
 
 import 'dart:convert';
-import 'package:get/get.dart';
 import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';

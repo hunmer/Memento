@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 /// 标签管理器对话框配置选项
 class TagManagerConfig {

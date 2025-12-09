@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 /// 聊天命令类型
 enum ChatCommandType {

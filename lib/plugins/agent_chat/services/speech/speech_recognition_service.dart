@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:get/get.dart';
 import 'speech_recognition_state.dart';
 
 /// 语音识别服务抽象基类

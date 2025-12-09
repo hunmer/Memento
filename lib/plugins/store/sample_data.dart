@@ -1,6 +1,6 @@
 /// 商店插件示例数据
 /// 当 JSON 文件不存在时，使用此文件中的数据作为默认值
-library store_sample_data;
+library;
 
 import 'models/product.dart';
 import 'models/user_item.dart';

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:Memento/screens/home_screen/home_screen.dart';

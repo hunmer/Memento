@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import './database_field.dart';
 
 /// 数据库模型
