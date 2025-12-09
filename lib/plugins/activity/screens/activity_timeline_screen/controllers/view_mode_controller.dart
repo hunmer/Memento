@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
 
 enum ViewMode {

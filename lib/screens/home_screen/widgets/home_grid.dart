@@ -48,7 +48,7 @@ class HomeGrid extends StatefulWidget {
 class _HomeGridState extends State<HomeGrid> {
   int? _draggingIndex;
   int? _hoveringIndex;
-  String _quickLayoutType = 'empty';
+  final String _quickLayoutType = 'empty';
 
   /// 处理添加到文件夹的操作
   void _handleAddToFolder(String itemId, String folderId) {

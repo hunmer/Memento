@@ -1,5 +1,4 @@
 import 'package:uuid/uuid.dart';
-import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:path/path.dart' as path;
 

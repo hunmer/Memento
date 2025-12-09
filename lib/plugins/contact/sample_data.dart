@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'models/contact_model.dart';
 import 'models/interaction_record_model.dart';

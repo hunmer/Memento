@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'base_controller.dart';
 
 /// 滚动控制相关功能的混入类

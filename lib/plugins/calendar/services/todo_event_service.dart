@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:Memento/plugins/todo/controllers/task_controller.dart';
 import 'package:Memento/plugins/todo/models/task.dart';
 import 'package:Memento/plugins/calendar/models/event.dart';

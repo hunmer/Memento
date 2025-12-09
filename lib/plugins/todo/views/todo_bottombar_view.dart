@@ -237,8 +237,8 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                   backgroundColor: _colors[_currentPage],
                   elevation: 4,
                   shape: const CircleBorder(),
-                  child: Icon(Icons.add, color: Colors.white, size: 32),
                   onPressed: openContainer,
+                  child: Icon(Icons.add, color: Colors.white, size: 32),
                 );
               },
             ),

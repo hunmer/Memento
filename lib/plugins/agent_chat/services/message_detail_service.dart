@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 
 /// 消息详细信息服务

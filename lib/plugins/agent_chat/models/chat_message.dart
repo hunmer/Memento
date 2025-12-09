@@ -1,5 +1,4 @@
 import 'package:uuid/uuid.dart';
-import 'package:get/get.dart';
 import 'file_attachment.dart';
 import 'tool_call_step.dart';
 

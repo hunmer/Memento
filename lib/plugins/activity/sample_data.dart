@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:get/get.dart';
 
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart';

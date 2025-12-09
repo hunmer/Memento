@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 
 /// 负责管理聊天插件的设置

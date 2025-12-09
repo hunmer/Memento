@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:get/get.dart';
 import 'package:crypto/crypto.dart';
 
 /// 腾讯云 ASR 配置

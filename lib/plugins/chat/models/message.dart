@@ -1,5 +1,4 @@
 import 'package:Memento/models/file_path_converter.dart';
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'user.dart';
 import 'package:Memento/utils/color_extension.dart';

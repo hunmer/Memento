@@ -11,7 +11,6 @@ import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:Memento/plugins/store/models/points_log.dart';
 import 'package:Memento/plugins/store/sample_data.dart';
 
-import 'package:get/get.dart';
 class StoreController with ChangeNotifier {
   List<Product> _products = [];
   final List<Product> _archivedProducts = [];

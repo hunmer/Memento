@@ -46,8 +46,7 @@ class StatisticsTab extends StatelessWidget {
                           leading: const Icon(Icons.check_circle),
                           title: Text('habits_totalCompletions'.tr),
                           trailing: Text(
-                            'habits_completions'.tr +
-                                ': $count',
+                            '${'habits_completions'.tr}: $count',
                           ),
                         ),
                         ListTile(

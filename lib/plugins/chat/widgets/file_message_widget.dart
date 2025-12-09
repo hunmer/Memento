@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/chat/models/file_message.dart';
 import 'package:url_launcher/url_launcher.dart';

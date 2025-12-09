@@ -1,5 +1,4 @@
 import 'package:Memento/widgets/statistics/statistics.dart';
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'tag_statistics_screen.dart';

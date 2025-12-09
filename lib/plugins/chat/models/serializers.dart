@@ -1,5 +1,4 @@
 import 'message.dart';
-import 'package:get/get.dart';
 import 'user.dart';
 
 class UserSerializer {

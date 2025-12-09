@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'tool_config_manager.dart';

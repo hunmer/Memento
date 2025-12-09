@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 import 'package:path/path.dart' as path;
 import 'package:Memento/screens/settings_screen/widgets/backup_progress_dialog.dart';

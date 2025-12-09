@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:Memento/plugins/calendar/models/event.dart';
 import 'package:intl/intl.dart';
 

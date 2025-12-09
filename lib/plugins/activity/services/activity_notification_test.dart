@@ -217,7 +217,7 @@ class ActivityNotificationTest {
                     ],
                   ),
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),

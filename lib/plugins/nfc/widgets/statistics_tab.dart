@@ -46,8 +46,7 @@ class StatisticsTab extends StatelessWidget {
                           leading: const Icon(Icons.check_circle),
                           title: Text('nfc_totalCompletions'.tr),
                           trailing: Text(
-                            'nfc_completions'.tr +
-                                ': $count',
+                            '${'nfc_completions'.tr}: $count',
                           ),
                         ),
                         ListTile(

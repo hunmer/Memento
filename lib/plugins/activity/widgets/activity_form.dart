@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'activity_form/activity_form_widget.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 

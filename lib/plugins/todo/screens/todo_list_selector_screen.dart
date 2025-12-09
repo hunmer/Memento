@@ -477,7 +477,6 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
 
   /// 保存配置并关闭界面
   Future<void> _saveAndFinish() async {
-    ;
     final timeRangeOptions = _getTimeRangeOptions(context);
 
     if (widget.widgetId == null) {

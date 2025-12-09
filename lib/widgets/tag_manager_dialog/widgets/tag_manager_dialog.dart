@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart';
 import 'package:Memento/widgets/tag_manager_dialog/models/tag_manager_config.dart';
 import 'package:Memento/widgets/tag_manager_dialog/states/tag_manager_dialog_state.dart';
