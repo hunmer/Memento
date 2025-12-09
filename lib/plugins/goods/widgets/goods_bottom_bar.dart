@@ -80,11 +80,11 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
                 try {
                   await widget.plugin.saveWarehouse(warehouse);
                   if (mounted) {
-                    Toast.success('goods_warehouseCreated'.tr ?? '仓库已创建');
+              Toast.success('goods_warehouseCreated'.tr);
                   }
                 } catch (e) {
                   if (mounted) {
-                    Toast.error('${'goods_createWarehouseFailed'.tr ?? '创建仓库失败'}: $e');
+              Toast.error('${'goods_createWarehouseFailed'.tr}: $e');
                   }
                 }
               },
@@ -106,7 +106,7 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
 
     // 如果没有仓库，提示先创建仓库
     if (widget.plugin.warehouses.isEmpty) {
-      Toast.info('goods_createWarehouseFirst'.tr ?? '请先创建仓库');
+      Toast.info('goods_createWarehouseFirst'.tr);
       return;
     }
 
@@ -118,11 +118,11 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
                   final warehouseId = widget.plugin.warehouses.first.id;
                   await widget.plugin.saveGoodsItem(warehouseId, item);
                   if (mounted) {
-                    Toast.success('goods_itemCreated'.tr ?? '物品已创建');
+              Toast.success('goods_itemCreated'.tr);
                   }
                 } catch (e) {
                   if (mounted) {
-                    Toast.error('${'goods_createItemFailed'.tr ?? '创建物品失败'}: $e');
+              Toast.error('${'goods_createItemFailed'.tr}: $e');
                   }
                 }
               },
@@ -261,11 +261,11 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
             tabs: [
               Tab(
                 icon: const Icon(Icons.warehouse),
-                text: 'goods_warehouseTab'.tr ?? '仓库',
+                text: 'goods_warehouseTab'.tr,
               ),
               Tab(
                 icon: const Icon(Icons.inventory_2),
-                text: 'goods_itemsTab'.tr ?? '物品',
+                text: 'goods_itemsTab'.tr,
               ),
             ],
           ),

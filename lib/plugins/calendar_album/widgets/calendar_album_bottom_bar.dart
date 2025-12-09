@@ -233,15 +233,15 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
             tabs: [
               Tab(
                 icon: const Icon(Icons.calendar_today),
-                text: 'calendarAlbum_calendar'.tr ?? '日历',
+                text: 'calendarAlbum_calendar'.tr,
               ),
               Tab(
                 icon: const Icon(Icons.tag),
-                text: 'calendarAlbum_tags'.tr ?? '标签',
+                text: 'calendarAlbum_tags'.tr,
               ),
               Tab(
                 icon: const Icon(Icons.photo_library),
-                text: 'calendarAlbum_album'.tr ?? '相册',
+                text: 'calendarAlbum_album'.tr,
               ),
             ],
           ),

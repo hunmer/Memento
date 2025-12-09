@@ -236,7 +236,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
                     child: Text(
                       isEdit
                           ? ('goods_editWarehouseTitle'.tr)
-                          : ('goods_createWarehouse'.tr ?? '新建仓库'),
+                          : ('goods_createWarehouse'.tr),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
