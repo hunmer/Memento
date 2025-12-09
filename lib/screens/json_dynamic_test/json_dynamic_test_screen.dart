@@ -277,7 +277,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                 padding: const EdgeInsets.all(16),
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(ScreensLocalizations.of(context)!.cancel),
+                      child: Text(ScreensLocalizations.of(context).cancel),
                 ),
               ),
             ],
@@ -353,12 +353,12 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(ScreensLocalizations.of(context)!.jsonDynamicUITest),
+        title: Text(ScreensLocalizations.of(context).jsonDynamicUITest),
         actions: [
           IconButton(
             onPressed: _showTemplateDialog,
             icon: const Icon(Icons.folder_open),
-            tooltip: ScreensLocalizations.of(context)!.loadFile,
+            tooltip: ScreensLocalizations.of(context).loadFile,
           ),
           IconButton(
             onPressed: _formatJson,
@@ -489,7 +489,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                 ElevatedButton.icon(
                   onPressed: _showTemplateDialog,
                   icon: const Icon(Icons.folder_open),
-                  label: Text(ScreensLocalizations.of(context)!.loadFile),
+                  label: Text(ScreensLocalizations.of(context).loadFile),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -501,7 +501,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                 FilledButton.icon(
                   onPressed: _showPreviewDialog,
                   icon: const Icon(Icons.visibility),
-                  label: Text(ScreensLocalizations.of(context)!.previewEffect),
+                  label: Text(ScreensLocalizations.of(context).previewEffect),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -585,7 +585,7 @@ class _JsonDynamicPreviewScreenState extends State<JsonDynamicPreviewScreen> {
           icon: const Icon(Icons.arrow_back),
           tooltip: '返回',
         ),
-        title: Text(ScreensLocalizations.of(context)!.uiPreview),
+        title: Text(ScreensLocalizations.of(context).uiPreview),
         actions: [
           IconButton(
             onPressed: () => Navigator.of(context).pop(),

@@ -173,7 +173,7 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
           TextButton.icon(
             onPressed: _copyAllResults,
             icon: const Icon(Icons.copy, size: 18),
-            label: Text(AgentChatLocalizations.of(context)!.copyResult),
+            label: Text(AgentChatLocalizations.of(context).copyResult),
           ),
         // 关闭按钮
         FilledButton(

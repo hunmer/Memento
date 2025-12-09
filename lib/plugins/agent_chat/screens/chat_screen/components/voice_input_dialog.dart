@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_service.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_state.dart';
@@ -403,14 +404,14 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
       children: [
         TextButton(
           onPressed: _cancel,
-          child: Text(AgentChatLocalizations.of(context)!.cancel),
+          child: Text(AgentChatLocalizations.of(context).cancel),
         ),
         const SizedBox(width: 12),
         FilledButton(
           onPressed: _currentState == SpeechRecognitionState.recording
               ? null
               : _confirmSend,
-          child: Text(AgentChatLocalizations.of(context)!.send),
+          child: Text(AgentChatLocalizations.of(context).send),
         ),
       ],
     );

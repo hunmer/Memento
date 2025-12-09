@@ -8,7 +8,6 @@ import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
-import 'package:Memento/plugins/habits/widgets/skill_form.dart';
 import 'package:Memento/plugins/habits/widgets/skill_detail_page.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 
@@ -456,32 +455,4 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
     );
   }
 
-  Future<void> _showSkillForm(BuildContext context, [Skill? skill]) async {
-    final l10n = HabitsLocalizations.of(context);
-    await NavigationHelper.push(context, Scaffold(
-              appBar: AppBar(
-                title: Text(skill == null ? l10n.createSkill : l10n.editSkill),
-                actions: [
-                  if (skill != null)
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () async {
-                        await widget.skillController.deleteSkill(skill.id);
-                        Navigator.pop(context);
-                        _loadSkills();
-                      },
-                    ),
-                ],
-              ),
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              body: SkillForm(
-                initialSkill: skill,
-                onSave: (skill) async {
-                  await widget.skillController.saveSkill(skill);
-                  Navigator.pop(context);
-                  _loadSkills();
-                },),
-      ),
-    );
-  }
 }

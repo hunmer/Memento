@@ -124,7 +124,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(ScreensLocalizations.of(context)!.notificationTestPage),
+        title: Text(ScreensLocalizations.of(context).notificationTestPage),
         elevation: 2,
       ),
       body: Column(
@@ -179,7 +179,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
                     ),
-                    child: Text(ScreensLocalizations.of(context)!.requestPermission),
+                    child: Text(ScreensLocalizations.of(context).requestPermission),
                   ),
               ],
             ),
@@ -320,7 +320,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
             foregroundColor: Colors.white,
             disabledBackgroundColor: Colors.grey.shade300,
           ),
-          child: Text(ScreensLocalizations.of(context)!.test),
+          child: Text(ScreensLocalizations.of(context).test),
         ),
       ),
     );

@@ -259,9 +259,6 @@ class ContactLocalizationsEn extends ContactLocalizations {
   String get customFields => 'Custom Fields';
 
   @override
-  String get addCustomField => 'Add custom field';
-
-  @override
   String get customActivityEvents => 'Custom Activity Events';
 
   @override

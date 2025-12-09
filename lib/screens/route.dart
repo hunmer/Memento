@@ -44,7 +44,6 @@ import 'package:Memento/plugins/habits/screens/habits_weekly_config_screen.dart'
 import 'package:Memento/plugins/habits/screens/habit_group_list_selector_screen.dart';
 import 'package:Memento/plugins/habits/widgets/timer_dialog.dart';
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/plugins/nodes/nodes_plugin.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/scripts_center/scripts_center_plugin.dart';

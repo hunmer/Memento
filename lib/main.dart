@@ -71,13 +71,13 @@ class WidgetUriHandler extends StatelessWidget {
         // 如果有待处理的初始URI，显示加载页面
         if (initialUri != null && startupState.isHandlingInitialUri) {
           debugPrint('WidgetUriHandler: 显示加载页面，等待处理初始URI: $initialUri');
-          return const Scaffold(
+          return Scaffold(
             body: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
                   Text(CoreLocalizations.of(context)!.starting),
                 ],
               ),

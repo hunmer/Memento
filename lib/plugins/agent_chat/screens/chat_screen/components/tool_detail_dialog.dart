@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
@@ -118,7 +119,7 @@ class _ToolDetailDialogState extends State<ToolDetailDialog>
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(AgentChatLocalizations.of(context)!.close),
+                  child: Text(AgentChatLocalizations.of(context).close),
                 ),
               ],
             ),

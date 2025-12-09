@@ -69,4 +69,32 @@ class TimerLocalizationsEn extends TimerLocalizations {
 
   @override
   String get name => 'Timer';
+
+  // New missing strings
+  @override
+  String get cancelTimer => 'Cancel Timer';
+
+  @override
+  String get pauseTimerConfirm => 'Are you sure you want to pause the timer? Recorded time: {time}';
+
+  @override
+  String get continueTimer => 'Continue Timer';
+
+  @override
+  String get confirmCancel => 'Confirm Cancel';
+
+  @override
+  String get completeTimer => 'Complete Timer';
+
+  @override
+  String get completeTimerConfirm => 'Are you sure you want to complete the timer?\nRecorded time: {time}{note}';
+
+  @override
+  String get timerNotePrefix => 'Note: ';
+
+  @override
+  String get continueAdjust => 'Continue Adjust';
+
+  @override
+  String get confirmComplete => 'Confirm Complete';
 }

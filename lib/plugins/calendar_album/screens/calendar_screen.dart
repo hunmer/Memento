@@ -199,6 +199,7 @@ class _CalendarScreenState extends State<CalendarScreen>
     CalendarController calendarController,
     TagController tagController,
   ) {
+    final l10n = CalendarAlbumLocalizations.of(context);
     final theme = Theme.of(context);
 
     if (_searchQuery.isEmpty) {
@@ -389,26 +390,6 @@ class _CalendarScreenState extends State<CalendarScreen>
     );
   }
 
-  void _navigateToNewEntry(BuildContext context) {
-    final calendarController = Provider.of<CalendarController>(
-      context,
-      listen: false,
-    );
-    final tagController = Provider.of<TagController>(context, listen: false);
-
-    NavigationHelper.push(context, MultiProvider(
-              providers: [
-                ChangeNotifierProvider.value(value: calendarController),
-                ChangeNotifierProvider.value(value: tagController),
-              ],
-              child: EntryEditorScreen(
-                initialDate: calendarController.selectedDate,
-                isEditing: false,),
-      ),
-    ).then((_) {
-      if (mounted) setState(() {});
-    });
-  }
 
   Widget _buildCalendarListView(
     CalendarController calendarController,
@@ -641,6 +622,7 @@ class _CalendarScreenState extends State<CalendarScreen>
     BuildContext context,
     CalendarController calendarController,
   ) async {
+    final l10n = CalendarAlbumLocalizations.of(context);
     final selectedDate = await showDatePicker(
       context: context,
       initialDate: _focusedDay,

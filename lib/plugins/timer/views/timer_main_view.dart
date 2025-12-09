@@ -148,22 +148,6 @@ class _TimerMainViewState extends State<TimerMainView> {
     );
   }
 
-  void _showAddTaskDialog() async {
-    final groups = _plugin.timerController.getGroups();
-    final newTask = await showDialog<TimerTask>(
-      context: context,
-      builder: (context) => AddTimerTaskDialog(groups: groups),
-    );
-
-    if (newTask != null) {
-      await _plugin.addTask(newTask);
-      setState(() {
-        _tasks = _plugin.getTasks();
-        _groupedTasks = groupBy(_tasks, (TimerTask task) => task.group);
-      });
-    }
-  }
-
   void _showTaskDetails(TimerTask task) async {
     await NavigationHelper.push(context, TimerTaskDetailsPage(
               task: task,

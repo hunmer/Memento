@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/widgets/statistics/models/statistics_models.dart';
-import 'package:Memento/widgets/l10n/widgets_localizations.dart';
+import 'package:Memento/widgets/l10n/widget_localizations.dart';
 
 /// 通用卡片构建器
 Widget buildStatisticsCard({
@@ -76,7 +76,9 @@ class DistributionPieChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (data.isEmpty) {
-      return Center(child: Text(WidgetsLocalizations.of(context).noDataAvailable));
+      return Center(
+        child: Text(WidgetLocalizations.of(context).noDataAvailable),
+      );
     }
 
     // 如果数据项过多，合并小的分段
@@ -240,7 +242,8 @@ class RankingList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (data.isEmpty) {
-      return emptyWidget ?? Center(child: Text(WidgetsLocalizations.of(context).noDataAvailable));
+      return emptyWidget ??
+          Center(child: Text(WidgetLocalizations.of(context).noDataAvailable));
     }
 
     final maxValue = data.first.value;
@@ -352,7 +355,9 @@ class TimeSeriesChart extends StatelessWidget {
     if (series.isEmpty) {
       return SizedBox(
         height: height,
-        child: Center(child: Text(WidgetsLocalizations.of(context).noDataAvailable)),
+        child: Center(
+          child: Text(WidgetLocalizations.of(context).noDataAvailable),
+        ),
       );
     }
 
@@ -369,7 +374,9 @@ class TimeSeriesChart extends StatelessWidget {
     if (allSpots.isEmpty) {
       return SizedBox(
         height: height,
-        child: Center(child: Text(WidgetsLocalizations.of(context).noDataPoints)),
+        child: Center(
+          child: Text(WidgetLocalizations.of(context).noDataPoints),
+        ),
       );
     }
 
@@ -457,7 +464,9 @@ class HourlyDistributionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (hourlyData.isEmpty) {
-      return Center(child: Text(WidgetsLocalizations.of(context).noDataAvailable));
+      return Center(
+        child: Text(WidgetLocalizations.of(context).noDataAvailable),
+      );
     }
 
     // 转换为 24 小时的分布
@@ -510,11 +519,26 @@ class HourlyDistributionBar extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(WidgetsLocalizations.of(context).time0000, style: TextStyle(fontSize: 10, color: Colors.grey)),
-            Text(WidgetsLocalizations.of(context).time0600, style: TextStyle(fontSize: 10, color: Colors.grey)),
-            Text(WidgetsLocalizations.of(context).time1200, style: TextStyle(fontSize: 10, color: Colors.grey)),
-            Text(WidgetsLocalizations.of(context).time1800, style: TextStyle(fontSize: 10, color: Colors.grey)),
-            Text(WidgetsLocalizations.of(context).time2400, style: TextStyle(fontSize: 10, color: Colors.grey)),
+            Text(
+              WidgetLocalizations.of(context).time0000,
+              style: TextStyle(fontSize: 10, color: Colors.grey),
+            ),
+            Text(
+              WidgetLocalizations.of(context).time0600,
+              style: TextStyle(fontSize: 10, color: Colors.grey),
+            ),
+            Text(
+              WidgetLocalizations.of(context).time1200,
+              style: TextStyle(fontSize: 10, color: Colors.grey),
+            ),
+            Text(
+              WidgetLocalizations.of(context).time1800,
+              style: TextStyle(fontSize: 10, color: Colors.grey),
+            ),
+            Text(
+              WidgetLocalizations.of(context).time2400,
+              style: TextStyle(fontSize: 10, color: Colors.grey),
+            ),
           ],
         ),
       ],

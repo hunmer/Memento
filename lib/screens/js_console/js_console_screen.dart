@@ -40,7 +40,7 @@ class _JSConsoleScreenState extends State<JSConsoleScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(ScreensLocalizations.of(context)!.jsConsole),
+          title: Text(ScreensLocalizations.of(context).jsConsole),
           actions: [
             Consumer<JSConsoleController>(
               builder: (context, controller, _) {

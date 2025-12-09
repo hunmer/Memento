@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:ui' as ui;
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'custom_dialog.dart';
 import 'package:Memento/constants/app_icons.dart';
-import 'package:Memento/widgets/l10n/widgets_localizations.dart';
+import 'package:Memento/widgets/l10n/widget_localizations.dart';
 
 class IconPickerDialog extends StatefulWidget {
   final IconData currentIcon;
@@ -143,7 +142,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
   @override
   Widget build(BuildContext context) {
     return CustomDialog(
-      title: WidgetsLocalizations.of(context).selectIcon,
+      title: WidgetLocalizations.of(context).selectIcon,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -151,7 +150,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: WidgetsLocalizations.of(context).searchIcons,
+              hintText: WidgetLocalizations.of(context).searchIcons,
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -187,8 +186,10 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                     });
                   },
                 ),
-                const Expanded(
-                  child: Text(WidgetsLocalizations.of(context).convertIconToImage),
+                Expanded(
+                  child: Text(
+                    WidgetLocalizations.of(context).convertIconToImage,
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.help_outline),
@@ -196,20 +197,26 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: Text(WidgetsLocalizations.of(context).iconToImage),
+                            title: Text(
+                              WidgetLocalizations.of(context).iconToImage,
+                            ),
                         content: Text(
-                          WidgetsLocalizations.of(context).iconToImageDescription,
+                              WidgetLocalizations.of(
+                                context,
+                              ).iconToImageDescription,
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: Text(WidgetsLocalizations.of(context).confirm),
+                                child: Text(
+                                  WidgetLocalizations.of(context).confirm,
+                                ),
                           ),
                         ],
                       ),
                     );
                   },
-                  tooltip: WidgetsLocalizations.of(context).whatIsIconToImage,
+                  tooltip: WidgetLocalizations.of(context).whatIsIconToImage,
                 ),
               ],
             ),
@@ -277,7 +284,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(WidgetsLocalizations.of(context).cancel),
+          child: Text(WidgetLocalizations.of(context).cancel),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -288,7 +295,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
               Navigator.pop(context, selectedIcon);
             }
           },
-          child: Text(WidgetsLocalizations.of(context).confirm),
+          child: Text(WidgetLocalizations.of(context).confirm),
         ),
       ],
     );

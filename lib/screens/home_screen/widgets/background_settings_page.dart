@@ -49,12 +49,15 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
       if (mounted) {
         setState(() {
           _layouts = layouts;
-          _globalBackgroundPath = globalConfig['backgroundImagePath'] as String?;
+          _globalBackgroundPath =
+              globalConfig['backgroundImagePath'] as String?;
           _globalBackgroundFit = LayoutConfig.boxFitFromString(
             globalConfig['backgroundFit'] as String?,
           );
-          _globalBackgroundBlur = (globalConfig['backgroundBlur'] as num?)?.toDouble() ?? 0.0;
-          _globalWidgetOpacity = (globalConfig['widgetOpacity'] as num?)?.toDouble() ?? 1.0;
+          _globalBackgroundBlur =
+              (globalConfig['backgroundBlur'] as num?)?.toDouble() ?? 0.0;
+          _globalWidgetOpacity =
+              (globalConfig['widgetOpacity'] as num?)?.toDouble() ?? 1.0;
           _globalWidgetBackgroundOpacity =
               (globalConfig['widgetBackgroundOpacity'] as num?)?.toDouble() ??
               1.0;
@@ -155,162 +158,186 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          final l10n = ScreensLocalizations.of(context)!;
-          return AlertDialog(
-          title: Text(l10n.globalBackgroundSettings),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 背景图预览
-                if (tempPath != null)
-                  Container(
-                    height: 200,
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.file(
-                            File(tempPath!),
-                            fit: tempFit,
+      builder:
+          (context) => StatefulBuilder(
+            builder: (context, setDialogState) {
+              final l10n = ScreensLocalizations.of(context);
+              return AlertDialog(
+                title: Text(l10n.globalBackgroundSettings),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 背景图预览
+                      if (tempPath != null)
+                        Container(
+                          height: 200,
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey),
                           ),
-                          if (tempBlur > 0)
-                            BackdropFilter(
-                              filter: ImageFilter.blur(
-                                sigmaX: tempBlur,
-                                sigmaY: tempBlur,
-                              ),
-                              child: Container(
-                                color: Colors.transparent,
-                              ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.file(File(tempPath!), fit: tempFit),
+                                if (tempBlur > 0)
+                                  BackdropFilter(
+                                    filter: ImageFilter.blur(
+                                      sigmaX: tempBlur,
+                                      sigmaY: tempBlur,
+                                    ),
+                                    child: Container(color: Colors.transparent),
+                                  ),
+                              ],
                             ),
+                          ),
+                        ),
+
+                      // 选择图片按钮
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () async {
+                                final path = await _pickImage();
+                                if (path != null) {
+                                  setDialogState(() {
+                                    tempPath = path;
+                                  });
+                                }
+                              },
+                              icon: const Icon(Icons.image),
+                              label: Text(l10n.selectImage),
+                            ),
+                          ),
+                          if (tempPath != null) ...[
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: () {
+                                setDialogState(() {
+                                  tempPath = null;
+                                });
+                              },
+                              icon: const Icon(Icons.clear),
+                              tooltip: l10n.clear,
+                            ),
+                          ],
                         ],
                       ),
-                    ),
-                  ),
 
-                // 选择图片按钮
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          final path = await _pickImage();
-                          if (path != null) {
+                      const SizedBox(height: 24),
+
+                      // 填充方式
+                      Text(
+                        l10n.fillMode,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButton<BoxFit>(
+                        value: tempFit,
+                        isExpanded: true,
+                        items: [
+                          DropdownMenuItem(
+                            value: BoxFit.cover,
+                            child: Text(l10n.cover),
+                          ),
+                          DropdownMenuItem(
+                            value: BoxFit.contain,
+                            child: Text(l10n.contain),
+                          ),
+                          DropdownMenuItem(
+                            value: BoxFit.fill,
+                            child: Text(l10n.fill),
+                          ),
+                          DropdownMenuItem(
+                            value: BoxFit.fitWidth,
+                            child: Text(l10n.fitWidth),
+                          ),
+                          DropdownMenuItem(
+                            value: BoxFit.fitHeight,
+                            child: Text(l10n.fitHeight),
+                          ),
+                          DropdownMenuItem(
+                            value: BoxFit.none,
+                            child: Text(l10n.none),
+                          ),
+                          DropdownMenuItem(
+                            value: BoxFit.scaleDown,
+                            child: Text(l10n.scaleDown),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
                             setDialogState(() {
-                              tempPath = path;
+                              tempFit = value;
                             });
                           }
                         },
-                        icon: const Icon(Icons.image),
-                        label: Text(l10n.selectImage),
                       ),
-                    ),
-                    if (tempPath != null) ...[
-                      const SizedBox(width: 8),
-                      IconButton(
-                        onPressed: () {
-                          setDialogState(() {
-                            tempPath = null;
-                          });
-                        },
-                        icon: const Icon(Icons.clear),
-                        tooltip: l10n.clear,
+
+                      const SizedBox(height: 24),
+
+                      // 模糊程度
+                      Text(
+                        l10n.blurLevel,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Slider(
+                              value: tempBlur,
+                              min: 0,
+                              max: 10,
+                              divisions: 20,
+                              label: tempBlur.toStringAsFixed(1),
+                              onChanged: (value) {
+                                setDialogState(() {
+                                  tempBlur = value;
+                                });
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                            width: 50,
+                            child: Text(
+                              tempBlur.toStringAsFixed(1),
+                              style: const TextStyle(fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ],
+                  ),
                 ),
-
-                const SizedBox(height: 24),
-
-                // 填充方式
-                Text(l10n.fillMode, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                DropdownButton<BoxFit>(
-                  value: tempFit,
-                  isExpanded: true,
-                  items: [
-                    DropdownMenuItem(value: BoxFit.cover, child: Text(l10n.cover)),
-                    DropdownMenuItem(value: BoxFit.contain, child: Text(l10n.contain)),
-                    DropdownMenuItem(value: BoxFit.fill, child: Text(l10n.fill)),
-                    DropdownMenuItem(value: BoxFit.fitWidth, child: Text(l10n.fitWidth)),
-                    DropdownMenuItem(value: BoxFit.fitHeight, child: Text(l10n.fitHeight)),
-                    DropdownMenuItem(value: BoxFit.none, child: Text(l10n.none)),
-                    DropdownMenuItem(value: BoxFit.scaleDown, child: Text(l10n.scaleDown)),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setDialogState(() {
-                        tempFit = value;
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l10n.cancel),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _globalBackgroundPath = tempPath;
+                        _globalBackgroundFit = tempFit;
+                        _globalBackgroundBlur = tempBlur;
                       });
-                    }
-                  },
-                ),
-
-                const SizedBox(height: 24),
-
-                // 模糊程度
-                Text(l10n.blurLevel, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Slider(
-                        value: tempBlur,
-                        min: 0,
-                        max: 10,
-                        divisions: 20,
-                        label: tempBlur.toStringAsFixed(1),
-                        onChanged: (value) {
-                          setDialogState(() {
-                            tempBlur = value;
-                          });
-                        },
-                      ),
-                    ),
-                    SizedBox(
-                      width: 50,
-                      child: Text(
-                        tempBlur.toStringAsFixed(1),
-                        style: const TextStyle(fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                      _saveGlobalBackground();
+                      Navigator.pop(context);
+                    },
+                    child: Text(l10n.save),
+                  ),
+                ],
+              );
+            },
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(l10n.cancel),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _globalBackgroundPath = tempPath;
-                  _globalBackgroundFit = tempFit;
-                  _globalBackgroundBlur = tempBlur;
-                });
-                _saveGlobalBackground();
-                Navigator.pop(context);
-              },
-              child: Text(l10n.save),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -322,180 +349,213 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          final l10n = ScreensLocalizations.of(context)!;
-          return AlertDialog(
-          title: Text(l10n.layoutBackgroundSettings(layout.name)),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 提示信息
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Row(
+      builder:
+          (context) => StatefulBuilder(
+            builder: (context, setDialogState) {
+              final l10n = ScreensLocalizations.of(context);
+              return AlertDialog(
+                title: Text(l10n.layoutBackgroundSettings(layout.name)),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.info_outline, size: 20, color: Colors.blue),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          l10n.customBackgroundHasPriority,
-                          style: const TextStyle(fontSize: 12),
+                      // 提示信息
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // 背景图预览
-                if (tempPath != null)
-                  Container(
-                    height: 200,
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.file(
-                            File(tempPath!),
-                            fit: tempFit,
-                          ),
-                          if (tempBlur > 0)
-                            BackdropFilter(
-                              filter: ImageFilter.blur(
-                                sigmaX: tempBlur,
-                                sigmaY: tempBlur,
-                              ),
-                              child: Container(
-                                color: Colors.transparent,
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.info_outline,
+                              size: 20,
+                              color: Colors.blue,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                l10n.customBackgroundHasPriority,
+                                style: const TextStyle(fontSize: 12),
                               ),
                             ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // 背景图预览
+                      if (tempPath != null)
+                        Container(
+                          height: 200,
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.file(File(tempPath!), fit: tempFit),
+                                if (tempBlur > 0)
+                                  BackdropFilter(
+                                    filter: ImageFilter.blur(
+                                      sigmaX: tempBlur,
+                                      sigmaY: tempBlur,
+                                    ),
+                                    child: Container(color: Colors.transparent),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                      // 选择图片按钮
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () async {
+                                final path = await _pickImage();
+                                if (path != null) {
+                                  setDialogState(() {
+                                    tempPath = path;
+                                  });
+                                }
+                              },
+                              icon: const Icon(Icons.image),
+                              label: Text(l10n.selectImage),
+                            ),
+                          ),
+                          if (tempPath != null) ...[
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: () {
+                                setDialogState(() {
+                                  tempPath = null;
+                                });
+                              },
+                              icon: const Icon(Icons.clear),
+                              tooltip: l10n.clearUseGlobalBackground,
+                            ),
+                          ],
                         ],
                       ),
-                    ),
-                  ),
 
-                // 选择图片按钮
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          final path = await _pickImage();
-                          if (path != null) {
+                      const SizedBox(height: 24),
+
+                      // 填充方式
+                      Text(
+                        l10n.fillMode,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButton<BoxFit>(
+                        value: tempFit,
+                        isExpanded: true,
+                        items: [
+                          DropdownMenuItem(
+                            value: BoxFit.cover,
+                            child: Text(l10n.cover),
+                          ),
+                          DropdownMenuItem(
+                            value: BoxFit.contain,
+                            child: Text(l10n.contain),
+                          ),
+                          DropdownMenuItem(
+                            value: BoxFit.fill,
+                            child: Text(l10n.fill),
+                          ),
+                          DropdownMenuItem(
+                            value: BoxFit.fitWidth,
+                            child: Text(l10n.fitWidth),
+                          ),
+                          DropdownMenuItem(
+                            value: BoxFit.fitHeight,
+                            child: Text(l10n.fitHeight),
+                          ),
+                          DropdownMenuItem(
+                            value: BoxFit.none,
+                            child: Text(l10n.none),
+                          ),
+                          DropdownMenuItem(
+                            value: BoxFit.scaleDown,
+                            child: Text(l10n.scaleDown),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
                             setDialogState(() {
-                              tempPath = path;
+                              tempFit = value;
                             });
                           }
                         },
-                        icon: const Icon(Icons.image),
-                        label: Text(l10n.selectImage),
                       ),
-                    ),
-                    if (tempPath != null) ...[
-                      const SizedBox(width: 8),
-                      IconButton(
-                        onPressed: () {
-                          setDialogState(() {
-                            tempPath = null;
-                          });
-                        },
-                        icon: const Icon(Icons.clear),
-                        tooltip: l10n.clearUseGlobalBackground,
+
+                      const SizedBox(height: 24),
+
+                      // 模糊程度
+                      Text(
+                        l10n.blurLevel,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Slider(
+                              value: tempBlur,
+                              min: 0,
+                              max: 10,
+                              divisions: 20,
+                              label: tempBlur.toStringAsFixed(1),
+                              onChanged: (value) {
+                                setDialogState(() {
+                                  tempBlur = value;
+                                });
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                            width: 50,
+                            child: Text(
+                              tempBlur.toStringAsFixed(1),
+                              style: const TextStyle(fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ],
+                  ),
                 ),
-
-                const SizedBox(height: 24),
-
-                // 填充方式
-                Text(l10n.fillMode, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                DropdownButton<BoxFit>(
-                  value: tempFit,
-                  isExpanded: true,
-                  items: [
-                    DropdownMenuItem(value: BoxFit.cover, child: Text(l10n.cover)),
-                    DropdownMenuItem(value: BoxFit.contain, child: Text(l10n.contain)),
-                    DropdownMenuItem(value: BoxFit.fill, child: Text(l10n.fill)),
-                    DropdownMenuItem(value: BoxFit.fitWidth, child: Text(l10n.fitWidth)),
-                    DropdownMenuItem(value: BoxFit.fitHeight, child: Text(l10n.fitHeight)),
-                    DropdownMenuItem(value: BoxFit.none, child: Text(l10n.none)),
-                    DropdownMenuItem(value: BoxFit.scaleDown, child: Text(l10n.scaleDown)),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setDialogState(() {
-                        tempFit = value;
-                      });
-                    }
-                  },
-                ),
-
-                const SizedBox(height: 24),
-
-                // 模糊程度
-                Text(l10n.blurLevel, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Slider(
-                        value: tempBlur,
-                        min: 0,
-                        max: 10,
-                        divisions: 20,
-                        label: tempBlur.toStringAsFixed(1),
-                        onChanged: (value) {
-                          setDialogState(() {
-                            tempBlur = value;
-                          });
-                        },
-                      ),
-                    ),
-                    SizedBox(
-                      width: 50,
-                      child: Text(
-                        tempBlur.toStringAsFixed(1),
-                        style: const TextStyle(fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l10n.cancel),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      _updateLayoutBackground(
+                        layout,
+                        tempPath,
+                        tempFit,
+                        tempBlur,
+                      );
+                      Navigator.pop(context);
+                    },
+                    child: Text(l10n.save),
+                  ),
+                ],
+              );
+            },
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(l10n.cancel),
-            ),
-            TextButton(
-              onPressed: () {
-                _updateLayoutBackground(layout, tempPath, tempFit, tempBlur);
-                Navigator.pop(context);
-              },
-              child: Text(l10n.save),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -503,105 +563,120 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(ScreensLocalizations.of(context)!.themeSettings),
+        title: Text(ScreensLocalizations.of(context).themeSettings),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // 全局背景设置卡片
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.wallpaper),
-                    title: Text(ScreensLocalizations.of(context)!.globalBackgroundImage),
-                    subtitle: Text(
-                      _globalBackgroundPath != null
-                          ? ScreensLocalizations.of(context)!.backgroundImageSet
-                          : ScreensLocalizations.of(context)!.backgroundImageNotSet,
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // 全局背景设置卡片
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.wallpaper),
+                      title: Text(
+                        ScreensLocalizations.of(context).globalBackgroundImage,
+                      ),
+                      subtitle: Text(
+                        _globalBackgroundPath != null
+                            ? ScreensLocalizations.of(
+                              context,
+                            ).backgroundImageSet
+                            : ScreensLocalizations.of(
+                              context,
+                            ).backgroundImageNotSet,
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: _showGlobalBackgroundDialog,
                     ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: _showGlobalBackgroundDialog,
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // 全局小组件透明度设置卡片
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.opacity),
-                            const SizedBox(width: 12),
-                            Text(
-                                ScreensLocalizations.of(context)!.widgetOverallOpacity,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                  // 全局小组件透明度设置卡片
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.opacity),
+                              const SizedBox(width: 12),
+                              Text(
+                                ScreensLocalizations.of(
+                                  context,
+                                ).widgetOverallOpacity,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            const Spacer(),
-                            Text(
-                              '${(_globalWidgetOpacity * 100).toInt()}%',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                              const Spacer(),
+                              Text(
+                                '${(_globalWidgetOpacity * 100).toInt()}%',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                            ScreensLocalizations.of(context)!.widgetOverallOpacityDescription,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).hintColor,
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        Slider(
-                          value: _globalWidgetOpacity,
-                          min: 0.0,
-                          max: 1.0,
-                          divisions: 20,
-                          label: '${(_globalWidgetOpacity * 100).toInt()}%',
-                          onChanged: (value) {
-                            setState(() {
-                              _globalWidgetOpacity = value;
-                            });
-                          },
-                          onChangeEnd: (value) {
-                            _saveGlobalBackground();
-                          },
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              ScreensLocalizations.of(context)!.zeroPercentFullyTransparent,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Theme.of(context).hintColor,
-                              ),
+                          const SizedBox(height: 8),
+                          Text(
+                            ScreensLocalizations.of(
+                              context,
+                            ).widgetOverallOpacityDescription,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).hintColor,
                             ),
-                            Text(
-                              ScreensLocalizations.of(context)!.oneHundredPercentOpaque,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Theme.of(context).hintColor,
+                          ),
+                          const SizedBox(height: 16),
+                          Slider(
+                            value: _globalWidgetOpacity,
+                            min: 0.0,
+                            max: 1.0,
+                            divisions: 20,
+                            label: '${(_globalWidgetOpacity * 100).toInt()}%',
+                            onChanged: (value) {
+                              setState(() {
+                                _globalWidgetOpacity = value;
+                              });
+                            },
+                            onChangeEnd: (value) {
+                              _saveGlobalBackground();
+                            },
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                ScreensLocalizations.of(
+                                  context,
+                                ).zeroPercentFullyTransparent,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context).hintColor,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                              Text(
+                                ScreensLocalizations.of(
+                                  context,
+                                ).oneHundredPercentOpaque,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context).hintColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
                   const SizedBox(height: 16),
 
@@ -617,7 +692,9 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                               const Icon(Icons.format_color_fill),
                               const SizedBox(width: 12),
                               Text(
-                                ScreensLocalizations.of(context)!.backgroundColorOpacity,
+                                ScreensLocalizations.of(
+                                  context,
+                                ).backgroundColorOpacity,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -635,7 +712,9 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            ScreensLocalizations.of(context)!.backgroundColorOpacityDescription,
+                            ScreensLocalizations.of(
+                              context,
+                            ).backgroundColorOpacityDescription,
                             style: TextStyle(
                               fontSize: 12,
                               color: Theme.of(context).hintColor,
@@ -662,14 +741,18 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                ScreensLocalizations.of(context)!.zeroPercentFullyTransparent,
+                                ScreensLocalizations.of(
+                                  context,
+                                ).zeroPercentFullyTransparent,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Theme.of(context).hintColor,
                                 ),
                               ),
                               Text(
-                                ScreensLocalizations.of(context)!.oneHundredPercentOpaque,
+                                ScreensLocalizations.of(
+                                  context,
+                                ).oneHundredPercentOpaque,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Theme.of(context).hintColor,
@@ -682,83 +765,93 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                     ),
                   ),
 
-                const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                // 布局背景设置标题
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(
-                    ScreensLocalizations.of(context)!.layoutBackgroundSettings,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // 提示信息
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(
-                    ScreensLocalizations.of(context)!.layoutBackgroundSettingsDescription,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).hintColor,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // 布局列表
-                if (_layouts.isEmpty)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Column(
-                        children: [
-                          Icon(Icons.layers_outlined, size: 64, color: Colors.grey),
-                          SizedBox(height: 16),
-                          Text(
-                            ScreensLocalizations.of(context)!.noSavedLayouts,
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            ScreensLocalizations.of(context)!.saveLayoutFirst,
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                        ],
+                  // 布局背景设置标题
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      ScreensLocalizations.of(
+                        context,
+                      ).layoutBackgroundSettingsTitle,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  )
-                else
-                  ...List.generate(
-                    _layouts.length,
-                    (index) {
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // 提示信息
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      ScreensLocalizations.of(
+                        context,
+                      ).layoutBackgroundSettingsDescription,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).hintColor,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // 布局列表
+                  if (_layouts.isEmpty)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.layers_outlined,
+                              size: 64,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              ScreensLocalizations.of(context).noSavedLayouts,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              ScreensLocalizations.of(context).saveLayoutFirst,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    ...List.generate(_layouts.length, (index) {
                       final layout = _layouts[index];
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
-                          leading: CircleAvatar(
-                            child: Text('${index + 1}'),
-                          ),
+                          leading: CircleAvatar(child: Text('${index + 1}')),
                           title: Text(layout.name),
                           subtitle: Text(
                             layout.backgroundImagePath != null
-                                ? ScreensLocalizations.of(context)!.customBackgroundImage
-                                : ScreensLocalizations.of(context)!.useGlobalBackgroundImage,
+                                ? ScreensLocalizations.of(
+                                  context,
+                                ).customBackgroundImage
+                                : ScreensLocalizations.of(
+                                  context,
+                                ).useGlobalBackgroundImage,
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => _showLayoutBackgroundDialog(layout),
                         ),
                       );
-                    },
-                  ),
-              ],
-            ),
+                    }),
+                ],
+              ),
     );
   }
 }

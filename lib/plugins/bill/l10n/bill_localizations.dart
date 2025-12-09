@@ -119,8 +119,6 @@ abstract class BillLocalizations {
   String get configWeeklyWidget => '配置周视图小组件';
   String get saveConfig => '保存配置';
   String get quickBookkeepingConfig => '快捷记账配置';
-  String get income => '收入';
-  String get save => '保存';
   String get addQuickPreset => '添加快捷预设';
   String get quickAccountingPreview => '快捷记账预览';
   String get noQuickPresets => '暂无快捷预设';
@@ -131,7 +129,6 @@ abstract class BillLocalizations {
   String get pleaseEnterPresetName => '请输入预设名称';
   String get presetAmount => '预设金额(可选)';
   String get presetAmountHint => '留空则每次手动输入';
-  String get expense => '支出';
   String get add => '添加';
   String get edit => '编辑';
 }

@@ -2,7 +2,6 @@
 /// 用于初始化和演示用途
 
 import 'dart:convert';
-import 'package:flutter/material.dart';
 
 /// 获取示例频道数据
 Map<String, dynamic> getSampleChannelsData() {

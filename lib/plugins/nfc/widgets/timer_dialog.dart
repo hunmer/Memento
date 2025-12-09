@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
@@ -328,14 +329,14 @@ class _TimerDialogState extends State<TimerDialog> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.check_circle, size: 22),
-                            SizedBox(width: 8),
+                            const Icon(Icons.check_circle, size: 22),
+                            const SizedBox(width: 8),
                             Text(
                               l10n.complete,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -434,6 +435,7 @@ class _TimerDialogState extends State<TimerDialog> {
 
   /// 取消计时器（不保存记录）
   Future<void> _cancelTimer(BuildContext context) async {
+    final l10n = TimerLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -472,6 +474,7 @@ class _TimerDialogState extends State<TimerDialog> {
 
   /// 完成计时并保存记录
   Future<void> _completeTimer(BuildContext context) async {
+    final l10n = TimerLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(

@@ -277,8 +277,6 @@ class ScreensLocalizationsZh extends ScreensLocalizations {
   @override
   String get manageSystemFloatingBall => '管理系统级悬浮球功能';
   @override
-  String get intentTest => 'Intent 测试';
-  @override
   String get testDynamicIntentAndDeepLink => '测试动态 Intent 注册和深度链接';
 
   // base_settings_controller
@@ -339,6 +337,8 @@ class ScreensLocalizationsZh extends ScreensLocalizations {
   @override
   String layoutBackgroundSettings(String layoutName) => '${layoutName} - 背景设置';
   @override
+  String get layoutBackgroundSettingsTitle => '布局背景设置';
+  @override
   String get addWidgets => '添加小组件';
   @override
   String get clear => '清除';
@@ -388,8 +388,6 @@ class ScreensLocalizationsZh extends ScreensLocalizations {
   String get mediumSize => '中 (横向卡片)';
   @override
   String get largeSize => '大 (方形卡片)';
-  @override
-  String confirmDeleteLayout(String layoutName) => '确定要删除布局"$layoutName"吗？此操作不可恢复。';
   @override
   String get noLayoutName => '没有布局名称';
   @override
@@ -449,8 +447,6 @@ class ScreensLocalizationsZh extends ScreensLocalizations {
   @override
   String get backgroundColorOpacityDescription => '仅调整小组件背景颜色的透明度，不影响文字';
   @override
-  String get layoutBackgroundSettings => '布局背景设置';
-  @override
   String get layoutBackgroundSettingsDescription => '为每个布局单独设置背景图，优先级高于全局背景图';
   @override
   String get noSavedLayouts => '暂无保存的布局';
@@ -466,10 +462,6 @@ class ScreensLocalizationsZh extends ScreensLocalizations {
   String get oneHundredPercentOpaque => '100%（不透明）';
 
   // folder_dialog
-  @override
-  String get addToFolder => '添加到文件夹';
-  @override
-  String get editFolder => '编辑文件夹';
   @override
   String get folderIsEmpty => '文件夹是空的';
   @override
@@ -505,51 +497,11 @@ class ScreensLocalizationsZh extends ScreensLocalizations {
 
   // layout_manager_dialog
   @override
-  String get pleaseEnterLayoutName => '请输入布局名称';
-  @override
   String get renameSuccess => '重命名成功';
   @override
   String get deleteSuccess => '删除成功';
 
-  // layout_type_selector
-  @override
-  String get emptyLayout => '空白布局';
-  @override
-  String get emptyLayoutDescription => '不包含任何小组件的空白布局';
-  @override
-  String get all1x1Widgets => '所有 1x1 小组件';
-  @override
-  String get all1x1WidgetsDescription => '添加所有支持 1x1 尺寸的小组件';
-  @override
-  String get all2x2Widgets => '所有 2x2 小组件';
-  @override
-  String get all2x2WidgetsDescription => '添加所有支持 2x2 尺寸的小组件';
 
-  // widget_settings_dialog
-  @override
-  String get widgetSettings => '小组件设置';
-  @override
-  String get oneColumn => '一列';
-  @override
-  String get twoColumns => '两列';
-  @override
-  String get backgroundImage => '背景图片';
-  @override
-  String get alreadySet => '已设置';
-  @override
-  String get notSet => '未设置';
-  @override
-  String get iconColor => '图标颜色';
-  @override
-  String get customized => '已自定义';
-  @override
-  String get useDefault => '使用默认';
-  @override
-  String get backgroundColor => '背景颜色';
-  @override
-  String get effectWhenNoBackgroundImage => '无背景图片时生效';
-  @override
-  String get customColorWithTransparency => '自定义颜色（支持透明度）';
   @override
   String get presetColors => '预设颜色';
   @override

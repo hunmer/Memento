@@ -56,6 +56,17 @@ abstract class TimerLocalizations {
   String get cycleCount;
   String get taskName;
   String get selectGroup;
+
+  // 新增缺失的字符串
+  String get cancelTimer;
+  String get pauseTimerConfirm;
+  String get continueTimer;
+  String get confirmCancel;
+  String get completeTimer;
+  String get completeTimerConfirm;
+  String get timerNotePrefix;
+  String get continueAdjust;
+  String get confirmComplete;
 }
 
 class _TimerLocalizationsDelegate

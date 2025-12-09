@@ -29,7 +29,7 @@ class _FolderDialogState extends State<FolderDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     return Dialog(
       child: Container(
         constraints: BoxConstraints(
@@ -114,7 +114,7 @@ class _FolderDialogState extends State<FolderDialog> {
 
   /// 显示添加到文件夹选项
   void _showAddToFolderOptions() {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -159,7 +159,7 @@ class _FolderDialogState extends State<FolderDialog> {
         .toList();
 
     if (homeItems.isEmpty) {
-      final l10n = ScreensLocalizations.of(context)!;
+      final l10n = ScreensLocalizations.of(context);
           Toast.warning(l10n.noItemsOnHome);
       return;
     }
@@ -187,7 +187,7 @@ class _FolderDialogState extends State<FolderDialog> {
 
   /// 显示项目选项
   void _showItemOptions(HomeItem item) {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -219,7 +219,7 @@ class _FolderDialogState extends State<FolderDialog> {
 
   /// 确认删除项目
   void _confirmDeleteItem(HomeItem item) {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -250,7 +250,7 @@ class _FolderDialogState extends State<FolderDialog> {
 
   /// 构建空状态
   Widget _buildEmptyState() {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -301,7 +301,7 @@ class _MoveFromHomeDialogState extends State<_MoveFromHomeDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     return AlertDialog(
       title: Text(l10n.moveFromHomePage),
       content: SizedBox(
@@ -391,6 +391,7 @@ class _MoveFromHomeDialogState extends State<_MoveFromHomeDialog> {
 
   /// 移动选中的项目
   void _moveSelectedItems() {
+    final l10n = ScreensLocalizations.of(context);
     for (final itemId in _selectedIds) {
       widget.layoutManager.moveToFolder(itemId, widget.folderId);
     }
@@ -466,7 +467,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     return AlertDialog(
       title: Text(l10n.editFolder),
       content: SizedBox(
@@ -479,9 +480,9 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
               // 文件夹名称
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: l10n.folderName,
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 autofocus: true,
               ),
@@ -593,7 +594,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
   /// 保存文件夹修改
   void _saveFolderChanges() {
     final newName = _nameController.text.trim();
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     if (newName.isEmpty) {
           Toast.error(l10n.pleaseEnterFolderName);
       return;

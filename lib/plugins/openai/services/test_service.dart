@@ -560,11 +560,11 @@ class _TextInputDialogState extends State<_TextInputDialog> {
               // 显示加载指示器
               if (_isTesting) ...[
                 const SizedBox(height: 16),
-                const Center(
+                Center(
                   child: Column(
                     children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 8),
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 8),
                       Text(OpenAILocalizations.of(context).testing),
                     ],
                   ),

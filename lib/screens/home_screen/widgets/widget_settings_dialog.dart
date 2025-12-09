@@ -43,7 +43,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final screensL10n = ScreensLocalizations.of(context)!;
+    final screensL10n = ScreensLocalizations.of(context);
 
     return AlertDialog(
       title: Text(screensL10n.widgetSettings),
@@ -277,7 +277,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
     Color? currentColor,
     ValueChanged<Color> onColorSelected,
   ) {
-    final screensL10n = ScreensLocalizations.of(context)!;
+    final screensL10n = ScreensLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -367,7 +367,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
     Color initialColor,
     ValueChanged<Color> onColorSelected,
   ) {
-    final screensL10n = ScreensLocalizations.of(context)!;
+    final screensL10n = ScreensLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) {

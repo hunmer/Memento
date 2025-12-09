@@ -115,7 +115,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
         height: dialogHeight,
         child: Scaffold(
           appBar: AppBar(
-            title: Text(ScreensLocalizations.of(context)!.addWidget),
+            title: Text(ScreensLocalizations.of(context).addWidget),
             automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
             actions: [
               IconButton(
@@ -236,7 +236,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
                 TextButton.icon(
                   onPressed: _clearFilters,
                   icon: const Icon(Icons.clear_all, size: 18),
-                  label: Text(ScreensLocalizations.of(context)!.clear),
+                  label: Text(ScreensLocalizations.of(context).clear),
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
@@ -285,7 +285,9 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
             TextButton.icon(
               onPressed: _clearFilters,
               icon: const Icon(Icons.clear_all),
-              label: Text(ScreensLocalizations.of(context)!.clearFilterConditions),
+              label: Text(
+                ScreensLocalizations.of(context).clearFilterConditions,
+              ),
             ),
           ],
         ),

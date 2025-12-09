@@ -179,8 +179,10 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(ScreensLocalizations.of(context)!.quickRegisterIntent),
-          content: Text(ScreensLocalizations.of(context)!.selectPresetIntentType),
+          title: Text(ScreensLocalizations.of(context).quickRegisterIntent),
+          content: Text(
+            ScreensLocalizations.of(context).selectPresetIntentType,
+          ),
           actions: <Widget>[
             SizedBox(
               width: double.infinity,
@@ -190,7 +192,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                   _quickRegister('memento', null, '/test');
                 },
                 icon: const Icon(Icons.link),
-                label: Text(ScreensLocalizations.of(context)!.mementoTest),
+                label: Text(ScreensLocalizations.of(context).mementoTest),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -205,7 +207,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                   _quickRegister('memento', 'app.example.com', '/open');
                 },
                 icon: const Icon(Icons.link),
-                label: Text(ScreensLocalizations.of(context)!.mementoComplete),
+                label: Text(ScreensLocalizations.of(context).mementoComplete),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -220,7 +222,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                   _quickRegister('myapp', 'custom.host', null);
                 },
                 icon: const Icon(Icons.link),
-                label: Text(ScreensLocalizations.of(context)!.customApp),
+                label: Text(ScreensLocalizations.of(context).customApp),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -229,7 +231,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(ScreensLocalizations.of(context)!.cancel),
+              child: Text(ScreensLocalizations.of(context).cancel),
             ),
           ],
         );
@@ -269,7 +271,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(ScreensLocalizations.of(context)!.intentTest),
+        title: Text(ScreensLocalizations.of(context).intentTest),
         actions: [
           IconButton(
             icon: const Icon(Icons.clear_all),
@@ -366,7 +368,9 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                         child: ElevatedButton.icon(
                           onPressed: () => _showQuickRegisterDialog(),
                           icon: const Icon(Icons.flash_on),
-                          label: Text(ScreensLocalizations.of(context)!.quickRegister),
+                          label: Text(
+                            ScreensLocalizations.of(context).quickRegister,
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.orange,
                             foregroundColor: Colors.white,
@@ -418,7 +422,11 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                               child: Row(
                                 children: [
                                   Expanded(
-                                    child: Text(ScreensLocalizations.of(context)!.bulletScheme(scheme)),
+                                    child: Text(
+                                      ScreensLocalizations.of(
+                                        context,
+                                      ).bulletScheme(scheme),
+                                    ),
                                   ),
                                   ElevatedButton.icon(
                                     onPressed: () => _testScheme(scheme),

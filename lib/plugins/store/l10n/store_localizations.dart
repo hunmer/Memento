@@ -163,14 +163,8 @@ abstract class StoreLocalizations {
 
   // 商品排序相关
   String get defaultSort;
-  String get sortByStock;
-  String get sortByPrice;
   String get sortByExpiryDate;
 
-  // 物品状态相关
-  String get allItems;
-  String get usable;
-  String get expired;
 }
 
 class _StoreLocalizationsDelegate

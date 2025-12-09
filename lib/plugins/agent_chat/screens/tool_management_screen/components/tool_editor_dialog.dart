@@ -287,12 +287,12 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(AgentChatLocalizations.of(context)!.cancel),
+                  child: Text(AgentChatLocalizations.of(context).cancel),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _save,
-                  child: Text(AgentChatLocalizations.of(context)!.save),
+                  child: Text(AgentChatLocalizations.of(context).save),
                 ),
               ],
             ),
@@ -389,8 +389,8 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
         // 启用工具
         Card(
           child: SwitchListTile(
-            title: Text(AgentChatLocalizations.of(context)!.enableTool),
-            subtitle: Text(AgentChatLocalizations.of(context)!.disableToolWarning),
+            title: Text(AgentChatLocalizations.of(context).enableTool),
+            subtitle: Text(AgentChatLocalizations.of(context).disableToolWarning),
             value: _enabled,
             onChanged: (value) {
               setState(() {
@@ -415,7 +415,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
             children: [
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: Text(AgentChatLocalizations.of(context)!.addParameter),
+                label: Text(AgentChatLocalizations.of(context).addParameter),
                 onPressed: _addParameter,
               ),
             ],
@@ -425,8 +425,8 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
         // 参数列表
         Expanded(
           child: _parameters.isEmpty
-              ? const Center(
-                  child: Text(AgentChatLocalizations.of(context)!.noParametersClickToAdd),
+                  ? Center(
+                  child: Text(AgentChatLocalizations.of(context).noParametersClickToAdd),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(8),
@@ -501,7 +501,11 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
                             ),
                             const SizedBox(height: 8),
                             CheckboxListTile(
-                              title: Text(AgentChatLocalizations.of(context)!.optionalParameter),
+                                title: Text(
+                                  AgentChatLocalizations.of(
+                                    context,
+                                  ).optionalParameter,
+                                ),
                               value: param.optional,
                               dense: true,
                               contentPadding: EdgeInsets.zero,
@@ -570,7 +574,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
             children: [
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: Text(AgentChatLocalizations.of(context)!.addExample),
+                label: Text(AgentChatLocalizations.of(context).addExample),
                 onPressed: _addExample,
               ),
             ],
@@ -580,8 +584,10 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
         // 示例列表
         Expanded(
           child: _examples.isEmpty
-              ? const Center(
-                  child: Text(AgentChatLocalizations.of(context)!.noExamplesClickToAdd),
+                  ? Center(
+                    child: Text(
+                      AgentChatLocalizations.of(context).noExamplesClickToAdd,
+                    ),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(8),
@@ -606,7 +612,9 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
                                 // 测试按钮
                                 ElevatedButton.icon(
                                   icon: const Icon(Icons.play_arrow, size: 18),
-                                  label: Text(AgentChatLocalizations.of(context)!.test),
+                                    label: Text(
+                                      AgentChatLocalizations.of(context).test,
+                                    ),
                                   onPressed: () =>
                                       _testExample(example.codeController.text),
                                 ),
@@ -672,11 +680,11 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                Text(AgentChatLocalizations.of(context)!.executingJSCode),
+                    Text(AgentChatLocalizations.of(context).executingJSCode),
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.cancel),
-                  label: Text(AgentChatLocalizations.of(context)!.cancel),
+                      label: Text(AgentChatLocalizations.of(context).cancel),
                   onPressed: () {
                     isCancelled = true;
                     Navigator.pop(context);
@@ -788,7 +796,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(AgentChatLocalizations.of(context)!.close),
+                child: Text(AgentChatLocalizations.of(context).close),
           ),
         ],
       ),

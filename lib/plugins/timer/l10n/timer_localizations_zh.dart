@@ -69,4 +69,32 @@ class TimerLocalizationsZh extends TimerLocalizations {
 
   @override
   String get name => '计时器';
+
+  // 新增缺失的字符串
+  @override
+  String get cancelTimer => '取消计时器';
+
+  @override
+  String get pauseTimerConfirm => '确定要暂停计时器吗？已记录时间：{time}';
+
+  @override
+  String get continueTimer => '继续计时';
+
+  @override
+  String get confirmCancel => '确认取消';
+
+  @override
+  String get completeTimer => '完成计时';
+
+  @override
+  String get completeTimerConfirm => '确定要完成计时吗？\n记录时间：{time}{note}';
+
+  @override
+  String get timerNotePrefix => '备注：';
+
+  @override
+  String get continueAdjust => '继续调整';
+
+  @override
+  String get confirmComplete => '确认完成';
 }

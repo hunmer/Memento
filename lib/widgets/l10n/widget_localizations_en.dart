@@ -1,9 +1,9 @@
 import 'dart:ui';
 
-import 'widgets_localizations.dart';
+import 'widget_localizations.dart';
 
-class WidgetsLocalizationsEn extends WidgetsLocalizations {
-  const WidgetsLocalizationsEn() : super(const Locale('en'));
+class WidgetLocalizationsEn extends WidgetLocalizations {
+  const WidgetLocalizationsEn() : super(const Locale('en'));
 
   @override
   String get selectColor => 'Select Color';

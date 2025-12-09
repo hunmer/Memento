@@ -1,5 +1,4 @@
 import 'dart:io' show Platform;
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
@@ -23,7 +22,6 @@ class ActivityTimelineScreen extends StatefulWidget {
 
 class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   late DateTime _selectedDate;
-  late DateTime _previousSelectedDate;
   late ActivityService _activityService;
   late ActivityController _activityController;
   late TagController _tagController;
@@ -41,7 +39,6 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
-    _previousSelectedDate = _selectedDate;
 
     // 监听通知点击事件
     eventManager.subscribe('activity_notification_tapped', _onNotificationTapped);
@@ -83,7 +80,6 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     if (date == _selectedDate) return;
 
     setState(() {
-      _previousSelectedDate = _selectedDate;
       _selectedDate = date;
     });
     _activityController.loadActivities(_selectedDate);
@@ -501,32 +497,32 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
             _activityController.setSortMode(index);
           },
           itemBuilder: (context) => [
-            const PopupMenuItem(
+                PopupMenuItem(
               value: 0,
               child: Row(
                 children: [
-                  Icon(Icons.arrow_upward, size: 16),
-                  SizedBox(width: 8),
+                      const Icon(Icons.arrow_upward, size: 16),
+                      const SizedBox(width: 8),
                   Text(ActivityLocalizations.of(context).sortByStartTimeAsc),
                 ],
               ),
             ),
-            const PopupMenuItem(
+                PopupMenuItem(
               value: 1,
               child: Row(
                 children: [
-                  Icon(Icons.timer, size: 16),
-                  SizedBox(width: 8),
+                      const Icon(Icons.timer, size: 16),
+                      const SizedBox(width: 8),
                   Text(ActivityLocalizations.of(context).sortByDuration),
                 ],
               ),
             ),
-            const PopupMenuItem(
+                PopupMenuItem(
               value: 2,
               child: Row(
                 children: [
-                  Icon(Icons.arrow_downward, size: 16),
-                  SizedBox(width: 8),
+                      const Icon(Icons.arrow_downward, size: 16),
+                      const SizedBox(width: 8),
                   Text(ActivityLocalizations.of(context).sortByStartTimeDesc),
                 ],
               ),

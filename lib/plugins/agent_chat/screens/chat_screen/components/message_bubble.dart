@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -486,80 +487,96 @@ class MessageBubble extends StatelessWidget {
       },
       itemBuilder:
           (context) => [
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'copy',
               child: Row(
                 children: [
-                  Icon(Icons.copy, size: 18),
-                  SizedBox(width: 8),
-                  Text(AgentChatLocalizations.of(context)!.copy),
+                  const Icon(Icons.copy, size: 18),
+                  const SizedBox(width: 8),
+                  Text(AgentChatLocalizations.of(context).copy),
                 ],
               ),
             ),
             // 允许编辑所有消息（除了工具调用消息）
             if (onEdit != null && !isToolCallMessage)
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'edit',
                 child: Row(
                   children: [
-                    Icon(Icons.edit, size: 18),
-                    SizedBox(width: 8),
-                    Text(AgentChatLocalizations.of(context)!.edit),
+                    const Icon(Icons.edit, size: 18),
+                    const SizedBox(width: 8),
+                    Text(AgentChatLocalizations.of(context).edit),
                   ],
                 ),
               ),
             if (!message.isUser && onRegenerate != null && hasAgent)
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'regenerate',
                 child: Row(
                   children: [
-                    Icon(Icons.refresh, size: 18),
-                    SizedBox(width: 8),
-                    Text(AgentChatLocalizations.of(context)!.regenerate),
+                    const Icon(Icons.refresh, size: 18),
+                    const SizedBox(width: 8),
+                    Text(AgentChatLocalizations.of(context).regenerate),
                   ],
                 ),
               ),
             if (!message.isUser && isToolCallMessage && onSaveTool != null)
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'save_tool',
                 child: Row(
                   children: [
-                    Icon(Icons.save, size: 18, color: Colors.blue),
-                    SizedBox(width: 8),
-                    Text(AgentChatLocalizations.of(context)!.saveTool, style: TextStyle(color: Colors.blue)),
+                    const Icon(Icons.save, size: 18, color: Colors.blue),
+                    const SizedBox(width: 8),
+                    Text(
+                      AgentChatLocalizations.of(context).saveTool,
+                      style: const TextStyle(color: Colors.blue),
+                    ),
                   ],
                 ),
               ),
             if (!message.isUser && isToolCallMessage && onRerunTool != null)
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'rerun_tool',
                 child: Row(
                   children: [
-                    Icon(Icons.replay, size: 18, color: Colors.orange),
-                    SizedBox(width: 8),
-                    Text(AgentChatLocalizations.of(context)!.reExecuteTool, style: TextStyle(color: Colors.orange)),
+                    const Icon(Icons.replay, size: 18, color: Colors.orange),
+                    const SizedBox(width: 8),
+                    Text(
+                      AgentChatLocalizations.of(context).reExecuteTool,
+                      style: const TextStyle(color: Colors.orange),
+                    ),
                   ],
                 ),
               ),
             if (!message.isUser && isToolCallMessage && storage != null)
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'view_details',
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, size: 18, color: Colors.blue),
-                    SizedBox(width: 8),
-                    Text(AgentChatLocalizations.of(context)!.viewDetails, style: TextStyle(color: Colors.blue)),
+                    const Icon(
+                      Icons.info_outline,
+                      size: 18,
+                      color: Colors.blue,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      AgentChatLocalizations.of(context).viewDetails,
+                      style: const TextStyle(color: Colors.blue),
+                    ),
                   ],
                 ),
               ),
             if (onDelete != null)
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'delete',
                 child: Row(
                   children: [
-                    Icon(Icons.delete, size: 18, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text(AgentChatLocalizations.of(context)!.delete, style: TextStyle(color: Colors.red)),
+                    const Icon(Icons.delete, size: 18, color: Colors.red),
+                    const SizedBox(width: 8),
+                    Text(
+                      AgentChatLocalizations.of(context).delete,
+                      style: const TextStyle(color: Colors.red),
+                    ),
                   ],
                 ),
               ),
@@ -577,7 +594,7 @@ class MessageBubble extends StatelessWidget {
           (context) => AlertDialog(
             title: Row(
               children: [
-                Text(AgentChatLocalizations.of(context)!.editMessage),
+                Text(AgentChatLocalizations.of(context).editMessage),
                 const SizedBox(width: 8),
                 if (!message.isUser)
                   Container(
@@ -630,7 +647,7 @@ class MessageBubble extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AgentChatLocalizations.of(context)!.cancel),
+                child: Text(AgentChatLocalizations.of(context).cancel),
               ),
               TextButton(
                 onPressed: () {
@@ -640,7 +657,7 @@ class MessageBubble extends StatelessWidget {
                   }
                   Navigator.pop(context);
                 },
-                child: Text(AgentChatLocalizations.of(context)!.save),
+                child: Text(AgentChatLocalizations.of(context).save),
               ),
             ],
           ),
@@ -960,7 +977,7 @@ class MessageBubble extends StatelessWidget {
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text(AgentChatLocalizations.of(context)!.toolExecutionResult),
+                Text(AgentChatLocalizations.of(context).toolExecutionResult),
               ],
             ),
             content: SizedBox(
@@ -1105,7 +1122,7 @@ class MessageBubble extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: Text(AgentChatLocalizations.of(context)!.close),
+                child: Text(AgentChatLocalizations.of(context).close),
               ),
             ],
           ),

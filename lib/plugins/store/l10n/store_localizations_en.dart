@@ -337,20 +337,6 @@ class StoreLocalizationsEn extends StoreLocalizations {
   String get defaultSort => 'Default Sort';
 
   @override
-  String get sortByStock => 'Sort by Stock';
-
-  @override
-  String get sortByPrice => 'Sort by Price';
-
-  @override
   String get sortByExpiryDate => 'Sort by Expiry Date';
 
-  @override
-  String get allItems => 'All Items';
-
-  @override
-  String get usable => 'Usable';
-
-  @override
-  String get expired => 'Expired';
 }
