@@ -33,7 +33,7 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('calendarAlbum_tagManagement'.tr),
+      title: Text('calendar_album_tag_management'.tr),
       content: SingleChildScrollView(
         child: Column(
           children: [

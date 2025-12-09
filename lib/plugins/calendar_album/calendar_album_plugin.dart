@@ -65,7 +65,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return 'calendarAlbum_name'.tr;
+    return 'calendar_album_name'.tr;
   }
 
   @override
@@ -237,7 +237,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                'calendarAlbum_name'.tr,
+                'calendar_album_name'.tr,
 
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
@@ -258,7 +258,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        'calendarAlbum_todayDiary'.tr,
+                        'calendar_album_today_diary'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -274,7 +274,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        'calendarAlbum_sevenDaysDiary'.tr,
+                        'calendar_album_seven_days_diary'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -297,7 +297,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        'calendarAlbum_allDiaries'.tr,
+                        'calendar_album_all_diaries'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -313,7 +313,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        'calendarAlbum_tagCount'.tr,
+                        'calendar_album_tag_count'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(

@@ -142,17 +142,17 @@ class _CalendarScreenState extends State<CalendarScreen>
       ],
       child: SuperCupertinoNavigationWrapper(
         title: Text(
-          'calendarAlbum_calendarDiary'.tr,
+          'calendar_album_calendar_diary'.tr,
           style: TextStyle(
             fontSize: 18,
             color: theme.textTheme.titleLarge?.color,
           ),
         ),
-        largeTitle: 'calendar_album_calendarDiary'.tr,
+        largeTitle: 'calendar_album_calendar_diary'.tr,
         automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
         // 启用搜索栏
         enableSearchBar: true,
-        searchPlaceholder: 'calendar_album_searchDiaryPlaceholder'.tr,
+        searchPlaceholder: 'calendar_album_search_diary_placeholder'.tr,
         onSearchChanged: (query) {
           _performSearch(query);
         },
