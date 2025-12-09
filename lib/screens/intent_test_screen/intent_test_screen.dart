@@ -422,9 +422,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      ScreensLocalizations.of(
-                                        context,
-                                      ).bulletScheme(scheme),
+                                      'screens_bulletScheme'.trParams({'scheme': scheme}),
                                     ),
                                   ),
                                   ElevatedButton.icon(

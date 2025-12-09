@@ -120,14 +120,10 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                     builder:
                         (context) => AlertDialog(
                           title: Text(
-                            GoodsLocalizations.of(
-                              context,
-                            ).confirmClearWarehouse,
+                            'goods_confirmClearWarehouse'.tr,
                           ),
                           content: Text(
-                            GoodsLocalizations.of(
-                              context,
-                            ).confirmClearWarehouseMessage,
+                            'goods_confirmClearWarehouseMessage'.tr,
                           ),
                           actions: [
                             TextButton(

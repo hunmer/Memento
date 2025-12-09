@@ -17,7 +17,6 @@ class NotesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = ;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,7 +25,7 @@ class NotesTab extends StatelessWidget {
         TextButton.icon(
           onPressed: onAddNote,
           icon: const Icon(Icons.add),
-          label: Text(localizations.addNote),
+          label: Text('day_addNote'.tr),
         ),
       ],
     );

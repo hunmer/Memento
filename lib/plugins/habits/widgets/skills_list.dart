@@ -124,7 +124,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
           onPressed: _showSortMenu,
         ),
       ],
-      body: _buildCardView(_skills, l10n),
+      body: _buildCardView(_skills),
     );
   }
 
@@ -184,7 +184,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
       );
     }
 
-    return _buildCardView(_filteredSkills, );
+    return _buildCardView(_filteredSkills);
   }
 
   /// 显示排序菜单
@@ -255,7 +255,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildCardView(List<Skill> skills, ) {
+  Widget _buildCardView(List<Skill> skills) {
     // 按group分组
     final groupedSkills = <String, List<Skill>>{};
     for (final skill in skills) {

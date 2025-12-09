@@ -838,9 +838,10 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                     return RadioListTile<HomeWidgetSize>(
                       title: Text(sizeLabel),
                       subtitle: Text(
-                        ScreensLocalizations.of(
-                          context,
-                        ).widgetSize(size.width, size.height),
+                        'screens_widgetSize'.trParams({
+                          'width': size.width.toString(),
+                          'height': size.height.toString(),
+                        }),
                       ),
                       value: size,
                       groupValue: item.size,
@@ -967,9 +968,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       builder: (context) => AlertDialog(
             title: Text('screens_confirmDelete'.tr),
             content: Text(
-              ScreensLocalizations.of(
-                context,
-              ).confirmDeleteSelectedItems(_selectedItemIds.length),
+              'screens_confirmDeleteSelectedItems'.trParams({
+                'count': _selectedItemIds.length.toString(),
+              }),
             ),
         actions: [
           TextButton(
@@ -984,9 +985,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 _layoutManager.removeItem(itemId);
               }
                   Toast.success(
-                    ScreensLocalizations.of(
-                      context,
-                    ).itemsDeleted(_selectedItemIds.length),
+                    'screens_itemsDeleted'.trParams({
+                      'count': _selectedItemIds.length.toString(),
+                    }),
                   );
               _exitBatchMode();
             },
@@ -1028,9 +1029,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 leading: Icon(folder.icon, color: folder.color),
                 title: Text(folder.name),
                     subtitle: Text(
-                      ScreensLocalizations.of(
-                        context,
-                      ).itemCount(folder.children.length),
+                      'screens_itemCount'.trParams({
+                        'count': folder.children.length.toString(),
+                      }),
                     ),
                 onTap: () {
                   Navigator.pop(context);
@@ -1056,9 +1057,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       _layoutManager.moveToFolder(itemId, folderId);
     }
     Toast.success(
-      ScreensLocalizations.of(
-        context,
-      ).itemsMovedToFolder(_selectedItemIds.length),
+      'screens_itemsMovedToFolder'.trParams({
+        'count': _selectedItemIds.length.toString(),
+      }),
     );
     _exitBatchMode();
   }

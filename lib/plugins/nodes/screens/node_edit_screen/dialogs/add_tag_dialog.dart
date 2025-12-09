@@ -1,4 +1,4 @@
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Node;
 import 'package:flutter/material.dart';
 
 class AddTagDialog extends StatefulWidget {

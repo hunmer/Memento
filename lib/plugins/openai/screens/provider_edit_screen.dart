@@ -319,18 +319,12 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                                   IconButton(
                                     icon: const Icon(Icons.edit),
                                     onPressed: () => _editHeader(key),
-                                    tooltip:
-                                        OpenAILocalizations.of(
-                                          context,
-                                        ).editHeader,
+                                    tooltip: 'openai_editHeader'.tr,
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.delete),
                                     onPressed: () => _removeHeader(key),
-                                    tooltip:
-                                        OpenAILocalizations.of(
-                                          context,
-                                        ).deleteHeader,
+                                    tooltip: 'openai_deleteHeader'.tr,
                                   ),
                                 ],
                               ),

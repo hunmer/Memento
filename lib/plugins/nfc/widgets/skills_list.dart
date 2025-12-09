@@ -79,21 +79,20 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       children: [
-        _buildAppBar(context, l10n),
+        _buildAppBar(context),
         Expanded(
           child:
               _isCardView
-                  ? _buildCardView(_skills, l10n)
-                  : _buildListView(_skills, l10n),
+                  ? _buildCardView(_skills)
+                  : _buildListView(_skills),
         ),
       ],
     );
   }
 
-  AppBar _buildAppBar(BuildContext context, ) {
+  AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       title: Text('nfc_skills'.tr),
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
@@ -118,7 +117,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildListView(List<Skill> skills, ) {
+  Widget _buildListView(List<Skill> skills) {
     // 按group分组
     final groupedSkills = <String, List<Skill>>{};
     for (final skill in skills) {
@@ -192,7 +191,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildCardView(List<Skill> skills, ) {
+  Widget _buildCardView(List<Skill> skills) {
     // 按group分组
     final groupedSkills = <String, List<Skill>>{};
     for (final skill in skills) {

@@ -1,4 +1,4 @@
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Node;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -50,7 +50,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
           _searchQuery = query;
         });
       },
-      searchBody: _buildSearchResults(context, filteredNotebooks, controller, l10n),
+      searchBody: _buildSearchResults(context, filteredNotebooks, controller),
       actions: [
         IconButton(
           icon: Icon(Icons.add, color: theme.iconTheme.color),
@@ -89,8 +89,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                     (context) => AlertDialog(
                       title: Text('nodes_deleteNotebook'.tr),
                       content: Text(
-                        
-                            .deleteNotebookConfirmation
+                        'nodes_deleteNotebookConfirmation'.tr
                             .replaceAll('{notebook.title}', notebook.title),
                       ),
                       actions: [
@@ -174,7 +173,6 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
     BuildContext context,
     List<Notebook> notebooks,
     NodesController controller,
-    ,
   ) {
     if (_searchQuery.isEmpty) {
       return const SizedBox.shrink();
@@ -309,7 +307,6 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
   }
 
   void _showNotebookActions(BuildContext parentContext, Notebook notebook) {
-    final l10n = NodesLocalizations.of(parentContext);
 
     showModalBottomSheet(
       context: parentContext,

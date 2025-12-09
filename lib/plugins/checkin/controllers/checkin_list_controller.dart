@@ -409,9 +409,7 @@ class CheckinListController {
                   await item.resetRecords();
                   onStateChanged();
                   ToastService.instance.showToast(
-                    CheckinLocalizations.of(
-                      context,
-                    ).resetSuccessMessage.replaceFirst('%s', item.name),
+                    'checkin_resetSuccessMessage'.trParams({'name': item.name}),
                   );
                 },
                 child: Text(
@@ -450,9 +448,7 @@ class CheckinListController {
                   await CheckinPlugin.shared.triggerSave();
                   onStateChanged();
                   ToastService.instance.showToast(
-                    CheckinLocalizations.of(
-                      context,
-                    ).deleteSuccessMessage.replaceFirst('%s', item.name),
+                    'checkin_deleteSuccessMessage'.trParams({'name': item.name}),
                   );
                 },
                 child: Text(

@@ -1,4 +1,4 @@
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Node;
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/nodes/models/node.dart';
 import 'package:Memento/plugins/nodes/screens/node_edit_screen/dialogs/add_custom_field_dialog.dart';

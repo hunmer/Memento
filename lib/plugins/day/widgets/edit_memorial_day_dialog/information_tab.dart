@@ -17,7 +17,6 @@ class InformationTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = ;
 
     return SingleChildScrollView(
       child: Column(
@@ -28,8 +27,8 @@ class InformationTab extends StatelessWidget {
           TextField(
             controller: titleController,
             decoration: InputDecoration(
-              labelText: localizations.title,
-              hintText: localizations.enterTitle,
+              labelText: 'day_title'.tr,
+              hintText: 'day_enterTitle'.tr,
             ),
             maxLength: 50,
           ),
@@ -38,7 +37,7 @@ class InformationTab extends StatelessWidget {
           // 日期选择
           Row(
             children: [
-              Text(localizations.targetDate),
+              Text('day_targetDate'.tr),
               const SizedBox(width: 16),
               TextButton(
                 onPressed: onSelectDate,

@@ -73,11 +73,9 @@ class _HabitsListState extends State<HabitsList> {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       children: [
         HabitsAppBar(
-          l10n: l10n,
           onAddPressed: () => _showHabitForm(context),
           onBackPressed: () => PluginManager.toHomeScreen(context),
         ),

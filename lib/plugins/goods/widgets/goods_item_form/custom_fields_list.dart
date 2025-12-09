@@ -124,9 +124,7 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
                   Navigator.of(context).pop(true);
                 } else {
                   toastService.showToast(
-                    GoodsLocalizations.of(
-                      context,
-                    ).fieldNameAndValueCannotBeEmpty,
+                    'goods_fieldNameAndValueCannotBeEmpty'.tr,
                   );
                 }
               },
@@ -194,9 +192,7 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
                   Navigator.of(context).pop(true);
                 } else {
                   toastService.showToast(
-                    GoodsLocalizations.of(
-                      context,
-                    ).fieldNameAndValueCannotBeEmpty,
+                    'goods_fieldNameAndValueCannotBeEmpty'.tr,
                   );
                 }
               },

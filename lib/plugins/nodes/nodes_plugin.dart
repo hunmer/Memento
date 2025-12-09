@@ -1,4 +1,4 @@
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Node;
 import 'dart:convert';
 import 'package:Memento/core/config_manager.dart';
 import 'package:flutter/material.dart';

@@ -106,9 +106,7 @@ mixin FolderSelectionDialog on NotesMainViewState {
       await plugin.controller.moveNote(note.id, targetFolder.id);
       loadCurrentFolder(); // 刷新当前文件夹视图
       toastService.showToast(
-        NotesLocalizations.of(
-          context,
-        ).movedToFolder.replaceFirst('{folderName}', targetFolder.name),
+        'notes_movedToFolder'.trParams({'folderName': targetFolder.name}),
       );
     }
   }

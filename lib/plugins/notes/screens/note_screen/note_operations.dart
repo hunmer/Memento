@@ -62,9 +62,7 @@ Future<void> moveNoteDialog(
     onReload();
     if (context.mounted) {
       toastService.showToast(
-        NotesLocalizations.of(
-          context,
-        ).movedToFolder.replaceFirst('{folderName}', targetFolder.name),
+        'notes_movedToFolder'.trParams({'folderName': targetFolder.name}),
       );
     }
   }
