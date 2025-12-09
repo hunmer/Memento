@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/screens/settings_screen/controllers/settings_screen_controller.dart';
 import 'package:Memento/screens/settings_screen/models/webdav_config.dart';
-import 'l10n/webdav_localizations.dart';
 import '../../../../core/services/toast_service.dart';
 
 class WebDAVSettingsSection extends StatefulWidget {
@@ -74,12 +74,12 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
 
       if (!mounted) return;
 
-      toastService.showToast(WebDAVLocalizations.of(context).settingsSaved);
+      toastService.showToast('webdav_settingsSaved'.tr);
     } catch (e) {
       if (!mounted) return;
 
       toastService.showToast(
-        '${WebDAVLocalizations.of(context).saveFailed}: ${e.toString()}',
+        '${'webdav_saveFailed'.tr}: ${e.toString()}',
       );
     } finally {
       if (mounted) {
@@ -136,7 +136,7 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                 const Icon(Icons.cloud_sync),
                 const SizedBox(width: 8),
                 Text(
-                  WebDAVLocalizations.of(context).title,
+                  'webdav_title'.tr,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
@@ -149,22 +149,17 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                   TextFormField(
                     controller: _serverController,
                     decoration: InputDecoration(
-                      labelText: WebDAVLocalizations.of(context).serverAddress,
-                      hintText:
-                          WebDAVLocalizations.of(context).serverAddressHint,
+                      labelText: 'webdav_serverAddress'.tr,
+                      hintText: 'webdav_serverAddressHint'.tr,
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return WebDAVLocalizations.of(
-                          context,
-                        ).serverAddressEmptyError;
+                        return 'webdav_serverAddressEmptyError'.tr;
                       }
                       if (!value.startsWith('http://') &&
                           !value.startsWith('https://')) {
-                        return WebDAVLocalizations.of(
-                          context,
-                        ).serverAddressInvalidError;
+                        return 'webdav_serverAddressInvalidError'.tr;
                       }
                       return null;
                     },
@@ -173,14 +168,12 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                   TextFormField(
                     controller: _usernameController,
                     decoration: InputDecoration(
-                      labelText: WebDAVLocalizations.of(context).username,
+                      labelText: 'webdav_username'.tr,
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return WebDAVLocalizations.of(
-                          context,
-                        ).usernameEmptyError;
+                        return 'webdav_usernameEmptyError'.tr;
                       }
                       return null;
                     },
@@ -190,7 +183,7 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
-                      labelText: WebDAVLocalizations.of(context).password,
+                      labelText: 'webdav_password'.tr,
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -207,9 +200,7 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return WebDAVLocalizations.of(
-                          context,
-                        ).passwordEmptyError;
+                        return 'webdav_passwordEmptyError'.tr;
                       }
                       return null;
                     },
@@ -221,7 +212,7 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _saveSettings,
                           child: Text(
-                            WebDAVLocalizations.of(context).saveSettings,
+                            'webdav_saveSettings'.tr,
                           ),
                         ),
                       ),
@@ -232,7 +223,7 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
             ),
             const Divider(height: 32),
             Text(
-              WebDAVLocalizations.of(context).dataSync,
+              'webdav_dataSync'.tr,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -242,7 +233,7 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                   child: ElevatedButton.icon(
                     onPressed: _isLoading ? null : _uploadAllToWebDAV,
                     icon: const Icon(Icons.cloud_upload),
-                    label: Text(WebDAVLocalizations.of(context).uploadAllData),
+                    label: Text('webdav_uploadAllData'.tr),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -251,7 +242,7 @@ class _WebDAVSettingsSectionState extends State<WebDAVSettingsSection> {
                     onPressed: _isLoading ? null : _downloadAllFromWebDAV,
                     icon: const Icon(Icons.cloud_download),
                     label: Text(
-                      WebDAVLocalizations.of(context).downloadAllData,
+                      'webdav_downloadAllData'.tr,
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.secondary,

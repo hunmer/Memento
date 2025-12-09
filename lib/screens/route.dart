@@ -13,7 +13,7 @@ import 'package:Memento/screens/super_cupertino_test_screen/super_cupertino_test
 import 'package:Memento/screens/floating_widget_screen/floating_widget_screen.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/app_initializer.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
+import 'package:get/get.dart';
 
 // 插件路由导入
 import 'package:Memento/plugins/activity/activity_plugin.dart';
@@ -173,14 +173,13 @@ class AppRoutes extends NavigatorObserver {
   static Route _createErrorRoute(String titleKey, String messageKey, {String? messageParam}) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) {
-        final l10n = ScreensLocalizations.of(context);
         String title;
         String message;
 
         // 根据键获取本地化文本
         switch (titleKey) {
           case 'error':
-            title = l10n.error;
+            title = 'screens_error'.tr;
             break;
           default:
             title = titleKey;
@@ -188,16 +187,16 @@ class AppRoutes extends NavigatorObserver {
 
         switch (messageKey) {
           case 'errorWidgetIdMissing':
-            message = l10n.errorWidgetIdMissing;
+            message = 'screens_errorWidgetIdMissing'.tr;
             break;
           case 'errorHabitIdRequired':
-            message = l10n.errorHabitIdRequired;
+            message = 'screens_errorHabitIdRequired'.tr;
             break;
           case 'errorHabitsPluginNotFound':
-            message = l10n.errorHabitsPluginNotFound;
+            message = 'screens_errorHabitsPluginNotFound'.tr;
             break;
           case 'errorHabitNotFound':
-            message = l10n.errorHabitNotFound(messageParam ?? '');
+            message = 'screens_errorHabitNotFound'.trParams({'id': messageParam ?? ''});
             break;
           default:
             message = messageKey;

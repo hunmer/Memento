@@ -1,7 +1,8 @@
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 
@@ -255,7 +256,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
+          child: Text('screens_cancel'.tr),
         ),
         ElevatedButton(
           onPressed: () {
@@ -264,7 +265,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
             );
             Navigator.of(context).pop(finalConfig);
           },
-          child: Text(l10n.confirm),
+          child: Text('screens_confirm'.tr),
         ),
       ],
     );

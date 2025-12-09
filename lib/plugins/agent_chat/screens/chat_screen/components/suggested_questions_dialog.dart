@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/services/suggested_questions_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';

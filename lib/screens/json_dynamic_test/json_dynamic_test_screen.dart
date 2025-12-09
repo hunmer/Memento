@@ -1,4 +1,5 @@
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -277,7 +278,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                 padding: const EdgeInsets.all(16),
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                      child: Text(ScreensLocalizations.of(context).cancel),
+                      child: Text('screens_cancel'.tr),
                 ),
               ),
             ],
@@ -353,12 +354,12 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(ScreensLocalizations.of(context).jsonDynamicUITest),
+        title: Text('screens_jsonDynamicUITest'.tr),
         actions: [
           IconButton(
             onPressed: _showTemplateDialog,
             icon: const Icon(Icons.folder_open),
-            tooltip: ScreensLocalizations.of(context).loadFile,
+            tooltip: 'screens_loadFile'.tr,
           ),
           IconButton(
             onPressed: _formatJson,
@@ -489,7 +490,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                 ElevatedButton.icon(
                   onPressed: _showTemplateDialog,
                   icon: const Icon(Icons.folder_open),
-                  label: Text(ScreensLocalizations.of(context).loadFile),
+                  label: Text('screens_loadFile'.tr),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -501,7 +502,7 @@ class _JsonDynamicTestScreenState extends State<JsonDynamicTestScreen> {
                 FilledButton.icon(
                   onPressed: _showPreviewDialog,
                   icon: const Icon(Icons.visibility),
-                  label: Text(ScreensLocalizations.of(context).previewEffect),
+                  label: Text('screens_previewEffect'.tr),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -585,7 +586,7 @@ class _JsonDynamicPreviewScreenState extends State<JsonDynamicPreviewScreen> {
           icon: const Icon(Icons.arrow_back),
           tooltip: '返回',
         ),
-        title: Text(ScreensLocalizations.of(context).uiPreview),
+        title: Text('screens_uiPreview'.tr),
         actions: [
           IconButton(
             onPressed: () => Navigator.of(context).pop(),

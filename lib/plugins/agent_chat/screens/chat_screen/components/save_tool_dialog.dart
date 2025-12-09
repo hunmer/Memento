@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
 import 'package:Memento/plugins/agent_chat/models/saved_tool_template.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
@@ -126,7 +126,7 @@ class _SaveToolDialogState extends State<SaveToolDialog>
       actions: [
         TextButton(
           onPressed: _isSaving ? null : () => Navigator.pop(context),
-          child: Text(AgentChatLocalizations.of(context).cancel),
+          child: Text('agent_chat_cancel'.tr),
         ),
         FilledButton(
           onPressed: _isSaving ? null : _saveTool,
@@ -140,7 +140,7 @@ class _SaveToolDialogState extends State<SaveToolDialog>
                       color: Colors.white,
                     ),
                   )
-                  : Text(AgentChatLocalizations.of(context).save),
+                  : Text('agent_chat_save'.tr),
         ),
       ],
     );

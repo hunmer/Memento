@@ -1,12 +1,12 @@
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
 import 'package:Memento/plugins/agent_chat/models/saved_tool_template.dart';
 import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/save_tool_dialog.dart';
 import 'components/template_execution_dialog.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
-
 /// 工具模板管理界面
 class ToolTemplateScreen extends StatefulWidget {
   final ToolTemplateService templateService;
@@ -67,7 +67,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AgentChatLocalizations.of(context).toolTemplate),
+        title: Text('agent_chat_toolTemplate'.tr),
         actions: [
           // 标签过滤按钮
           if (allTags.isNotEmpty)
@@ -163,7 +163,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                           },
                           icon: const Icon(Icons.clear_all, size: 16),
                           label: Text(
-                            AgentChatLocalizations.of(context).clear,
+                            'agent_chat_clear'.tr,
                             style: TextStyle(fontSize: 12),
                           ),
                         ),
@@ -260,7 +260,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                         Navigator.pop(context);
                       },
                       icon: const Icon(Icons.send, size: 18),
-                      label: Text(AgentChatLocalizations.of(context).use),
+                      label: Text('agent_chat_use'.tr),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -294,7 +294,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  AgentChatLocalizations.of(context).edit,
+                                  'agent_chat_edit'.tr,
                                   style: const TextStyle(color: Colors.blue),
                                 ),
                           ],
@@ -311,7 +311,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  AgentChatLocalizations.of(context).delete,
+                                  'agent_chat_delete'.tr,
                                   style: const TextStyle(color: Colors.red),
                                 ),
                           ],
@@ -465,23 +465,23 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context).deleteConfirmation),
+            title: Text('agent_chat_deleteConfirmation'.tr),
             content: Text(
-              AgentChatLocalizations.of(
-                context,
-              ).confirmDeleteTemplate(template.name),
+              'agent_chat_confirmDeleteTemplate'.trParams({
+                'templateName': template.name,
+              }),
             ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(AgentChatLocalizations.of(context).cancel),
+                child: Text('agent_chat_cancel'.tr),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-                child: Text(AgentChatLocalizations.of(context).delete),
+                child: Text('agent_chat_delete'.tr),
           ),
         ],
       ),
@@ -544,7 +544,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
           children: [
                 const Icon(Icons.warning_amber_rounded, color: Colors.orange),
                 const SizedBox(width: 8),
-                Text(AgentChatLocalizations.of(context).resetConfirmation),
+                Text('agent_chat_resetConfirmation'.tr),
           ],
         ),
         content: const Text(
@@ -555,7 +555,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-                child: Text(AgentChatLocalizations.of(context).cancel),
+                child: Text('agent_chat_cancel'.tr),
           ),
           FilledButton.icon(
             onPressed: () => Navigator.pop(context, true),
@@ -563,7 +563,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
               backgroundColor: Colors.orange,
             ),
             icon: const Icon(Icons.restore),
-                label: Text(AgentChatLocalizations.of(context).reset),
+                label: Text('agent_chat_reset'.tr),
           ),
         ],
       ),
@@ -657,7 +657,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
         children: [
           const Icon(Icons.filter_list, size: 24),
           const SizedBox(width: 8),
-          Text(AgentChatLocalizations.of(context).selectTagFilter),
+          Text('agent_chat_selectTagFilter'.tr),
           const Spacer(),
           if (_selectedTags.isNotEmpty)
             TextButton(
@@ -666,7 +666,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
                   _selectedTags.clear();
                 });
               },
-              child: Text(AgentChatLocalizations.of(context).clear),
+              child: Text('agent_chat_clear'.tr),
             ),
         ],
       ),
@@ -742,7 +742,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(AgentChatLocalizations.of(context).cancel),
+          child: Text('agent_chat_cancel'.tr),
         ),
         FilledButton.icon(
           onPressed: () => Navigator.pop(context, _selectedTags),
@@ -753,7 +753,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
                     label: Text(_selectedTags.length.toString()),
                     child: const Icon(Icons.check),
                   ),
-          label: Text(AgentChatLocalizations.of(context).confirm),
+          label: Text('agent_chat_confirm'.tr),
         ),
       ],
     );

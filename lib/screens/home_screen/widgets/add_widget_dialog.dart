@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
 
 /// 添加小组件对话框
 class AddWidgetDialog extends StatefulWidget {
@@ -115,7 +115,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
         height: dialogHeight,
         child: Scaffold(
           appBar: AppBar(
-            title: Text(ScreensLocalizations.of(context).addWidget),
+            title: Text('screens_addWidget'.tr),
             automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
             actions: [
               IconButton(
@@ -236,7 +236,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
                 TextButton.icon(
                   onPressed: _clearFilters,
                   icon: const Icon(Icons.clear_all, size: 18),
-                  label: Text(ScreensLocalizations.of(context).clear),
+                  label: Text('screens_clear'.tr),
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                   ),
@@ -286,7 +286,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
               onPressed: _clearFilters,
               icon: const Icon(Icons.clear_all),
               label: Text(
-                ScreensLocalizations.of(context).clearFilterConditions,
+                'screens_clearFilterConditions'.tr,
               ),
             ),
           ],

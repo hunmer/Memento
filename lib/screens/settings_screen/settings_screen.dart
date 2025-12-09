@@ -11,8 +11,8 @@ import 'package:Memento/core/floating_ball/settings_screen.dart';
 import 'package:Memento/core/floating_ball/floating_ball_manager.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_screen.dart';
 import 'package:Memento/screens/about_screen/about_screen.dart';
-import './l10n/settings_screen_localizations.dart';
 import '../l10n/screens_localizations.dart';
+import 'package:get/get.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -95,10 +95,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return SuperCupertinoNavigationWrapper(
       title: Text(
-        SettingsScreenLocalizations.of(context).settingsTitle,
+        'settings_screen_settingsTitle'.tr,
         style: TextStyle(color: Theme.of(context).textTheme.titleLarge?.color),
       ),
-      largeTitle: '设置',
+      largeTitle: 'settings_screen_settingsTitle'.tr,
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -114,18 +114,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.language),
-            title: Text(SettingsScreenLocalizations.of(context).languageTitle),
-            subtitle: Text(
-              SettingsScreenLocalizations.of(context).languageSubtitle,
-            ),
+            title: Text('settings_screen_languageTitle'.tr),
+            subtitle: Text('settings_screen_languageSubtitle'.tr),
             onTap: () => _controller.toggleLanguage(context),
           ),
           ListTile(
             leading: const Icon(Icons.brightness_4),
-            title: Text(SettingsScreenLocalizations.of(context).darkModeTitle),
-            subtitle: Text(
-              SettingsScreenLocalizations.of(context).darkModeSubtitle,
-            ),
+            title: Text('settings_screen_darkModeTitle'.tr),
+            subtitle: Text('settings_screen_darkModeSubtitle'.tr),
             trailing: Switch(
               value: ThemeController.isDarkTheme(context),
               onChanged: (value) => _controller.toggleTheme(context),
@@ -145,12 +141,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.upload),
-            title: Text(
-              SettingsScreenLocalizations.of(context).exportDataTitle,
-            ),
-            subtitle: Text(
-              SettingsScreenLocalizations.of(context).exportDataSubtitle,
-            ),
+            title: Text('settings_screen_exportDataTitle'.tr),
+            subtitle: Text('settings_screen_exportDataSubtitle'.tr),
             onTap: () {
               if (mounted) {
                 _controller.exportData(context);
@@ -159,56 +151,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.storage),
-            title: Text(
-              SettingsScreenLocalizations.of(context).dataManagementTitle,
-            ),
-            subtitle: Text(
-              SettingsScreenLocalizations.of(context).dataManagementSubtitle,
-            ),
+            title: Text('settings_screen_dataManagementTitle'.tr),
+            subtitle: Text('settings_screen_dataManagementSubtitle'.tr),
             onTap: () {
               NavigationHelper.push(context, DataManagementScreen());
             },
           ),
           ListTile(
             leading: const Icon(Icons.download),
-            title: Text(
-              SettingsScreenLocalizations.of(context).importDataTitle,
-            ),
-            subtitle: Text(
-              SettingsScreenLocalizations.of(context).importDataSubtitle,
-            ),
+            title: Text('settings_screen_importDataTitle'.tr),
+            subtitle: Text('settings_screen_importDataSubtitle'.tr),
             onTap: _controller.importData,
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.backup),
-            title: Text(
-              SettingsScreenLocalizations.of(context).fullBackupTitle,
-            ),
-            subtitle: Text(
-              SettingsScreenLocalizations.of(context).fullBackupSubtitle,
-            ),
+            title: Text('settings_screen_fullBackupTitle'.tr),
+            subtitle: Text('settings_screen_fullBackupSubtitle'.tr),
             onTap: _controller.exportAllData,
           ),
           ListTile(
             leading: const Icon(Icons.restore),
-            title: Text(
-              SettingsScreenLocalizations.of(context).fullRestoreTitle,
-            ),
-            subtitle: Text(
-              SettingsScreenLocalizations.of(context).fullRestoreSubtitle,
-            ),
+            title: Text('settings_screen_fullRestoreTitle'.tr),
+            subtitle: Text('settings_screen_fullRestoreSubtitle'.tr),
             onTap: _controller.importAllData,
             trailing: const Icon(Icons.warning, color: Colors.orange),
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.cloud),
-            title: Text(SettingsScreenLocalizations.of(context).webDAVTitle),
+            title: Text('settings_screen_webDAVTitle'.tr),
             subtitle: Text(
               _isWebDAVConnected
-                  ? SettingsScreenLocalizations.of(context).webDAVConnected
-                  : SettingsScreenLocalizations.of(context).webDAVDisconnected,
+                  ? 'settings_screen_webDAVConnected'.tr
+                  : 'settings_screen_webDAVDisconnected'.tr,
             ),
             trailing:
                 _isWebDAVConnected
@@ -238,17 +214,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final bool isEnabled = snapshot.data ?? true;
               return ListTile(
                 leading: const Icon(Icons.touch_app),
-                title: Text(
-                  SettingsScreenLocalizations.of(context).floatingBallTitle,
-                ),
+                title: Text('settings_screen_floatingBallTitle'.tr),
                 subtitle: Text(
                   isEnabled
-                      ? SettingsScreenLocalizations.of(
-                        context,
-                      ).floatingBallEnabled
-                      : SettingsScreenLocalizations.of(
-                        context,
-                      ).floatingBallDisabled,
+                      ? 'settings_screen_floatingBallEnabled'.tr
+                      : 'settings_screen_floatingBallDisabled'.tr,
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
@@ -262,24 +232,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.schedule),
-            title: Text(
-              SettingsScreenLocalizations.of(context).autoBackupTitle,
-            ),
-            subtitle: Text(
-              SettingsScreenLocalizations.of(context).autoBackupSubtitle,
-            ),
+            title: Text('settings_screen_autoBackupTitle'.tr),
+            subtitle: Text('settings_screen_autoBackupSubtitle'.tr),
             onTap: _backupService.showBackupScheduleDialog,
           ),
           ListTile(
             leading: const Icon(Icons.play_circle),
-            title: Text(
-              SettingsScreenLocalizations.of(context).autoOpenLastPluginTitle,
-            ),
-            subtitle: Text(
-              SettingsScreenLocalizations.of(
-                context,
-              ).autoOpenLastPluginSubtitle,
-            ),
+            title: Text('settings_screen_autoOpenLastPluginTitle'.tr),
+            subtitle: Text('settings_screen_autoOpenLastPluginSubtitle'.tr),
             trailing: Switch(
               value: _controller.autoOpenLastPlugin,
               onChanged:
@@ -290,12 +250,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.system_update),
-            title: Text(
-              SettingsScreenLocalizations.of(context).autoCheckUpdateTitle,
-            ),
-            subtitle: Text(
-              SettingsScreenLocalizations.of(context).autoCheckUpdateSubtitle,
-            ),
+            title: Text('settings_screen_autoCheckUpdateTitle'.tr),
+            subtitle: Text('settings_screen_autoCheckUpdateSubtitle'.tr),
             trailing: Switch(
               value: _controller.autoCheckUpdate,
               onChanged:
@@ -306,12 +262,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.update),
-            title: Text(
-              SettingsScreenLocalizations.of(context).checkUpdateTitle,
-            ),
-            subtitle: Text(
-              SettingsScreenLocalizations.of(context).checkUpdateSubtitle,
-            ),
+            title: Text('settings_screen_checkUpdateTitle'.tr),
+            subtitle: Text('settings_screen_checkUpdateSubtitle'.tr),
             onTap: _controller.checkForUpdates,
           ),
           const Divider(),
@@ -328,8 +280,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.code),
-            title: Text(ScreensLocalizations.of(context).jsConsole),
-            subtitle: Text(ScreensLocalizations.of(context).testJavaScriptAPI),
+            title: Text('screens_jsConsole'.tr),
+            subtitle: Text('screens_testJavaScriptAPI'.tr),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/js_console');
@@ -337,9 +289,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.widgets),
-            title: Text(ScreensLocalizations.of(context).jsonDynamicWidgetTest),
+            title: Text('screens_jsonDynamicWidgetTest'.tr),
             subtitle: Text(
-              ScreensLocalizations.of(context).testAndPreviewDynamicUI,
+              'screens_testAndPreviewDynamicUI'.tr,
             ),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
@@ -349,10 +301,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.navigation),
             title: Text(
-              ScreensLocalizations.of(context).superCupertinoNavigationTest,
+              'screens_superCupertinoNavigationTest'.tr,
             ),
             subtitle: Text(
-              ScreensLocalizations.of(context).testIOSStyleNavigation,
+              'screens_testIOSStyleNavigation'.tr,
             ),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
@@ -361,7 +313,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.notifications),
-            title: Text(ScreensLocalizations.of(context).notificationTest),
+            title: Text('screens_notificationTest'.tr),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/notification_test');
@@ -369,8 +321,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.touch_app),
-            title: Text(ScreensLocalizations.of(context).floatingBallSettings),
-            subtitle: Text(ScreensLocalizations.of(context).manageSystemFloatingBall),
+            title: Text('screens_floatingBallSettings'.tr),
+            subtitle: Text('screens_manageSystemFloatingBall'.tr),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/floating_ball');
@@ -378,8 +330,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.link),
-            title: Text(ScreensLocalizations.of(context).intentTest),
-            subtitle: Text(ScreensLocalizations.of(context).testDynamicIntentAndDeepLink),
+            title: Text('screens_intentTest'.tr),
+            subtitle: Text('screens_testDynamicIntentAndDeepLink'.tr),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/intent_test');

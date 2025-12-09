@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'home_grid.dart';
 import 'add_widget_dialog.dart';
 
@@ -28,9 +28,7 @@ class _FolderDialogState extends State<FolderDialog> {
   final HomeLayoutManager _layoutManager = HomeLayoutManager();
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context);
-    return Dialog(
+  Widget build(BuildContext context) {    return Dialog(
       child: Container(
         constraints: BoxConstraints(
           maxWidth: 600,
@@ -58,12 +56,12 @@ class _FolderDialogState extends State<FolderDialog> {
                 IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: _showAddToFolderOptions,
-                  tooltip: l10n.addToFolder,
+                  tooltip: 'screens_addToFolder'.tr,
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: _editFolder,
-                  tooltip: l10n.editFolder,
+                  tooltip: 'screens_editFolder'.tr,
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -81,7 +79,7 @@ class _FolderDialogState extends State<FolderDialog> {
                   final folder = _layoutManager.findItem(widget.folder.id);
                   if (folder == null || folder is! HomeFolderItem) {
                     return Center(
-                      child: Text(l10n.folderHasBeenDeleted),
+                      child: Text('screens_folderHasBeenDeleted'.tr),
                     );
                   }
 
@@ -113,9 +111,7 @@ class _FolderDialogState extends State<FolderDialog> {
   }
 
   /// 显示添加到文件夹选项
-  void _showAddToFolderOptions() {
-    final l10n = ScreensLocalizations.of(context);
-    showModalBottomSheet(
+  void _showAddToFolderOptions() {    showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
@@ -123,7 +119,7 @@ class _FolderDialogState extends State<FolderDialog> {
           children: [
             ListTile(
               leading: const Icon(Icons.add_box),
-              title: Text(l10n.addWidget),
+              title: Text('screens_addWidget'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _showAddWidgetToFolder();
@@ -131,7 +127,7 @@ class _FolderDialogState extends State<FolderDialog> {
             ),
             ListTile(
               leading: const Icon(Icons.move_down),
-              title: Text(l10n.moveFromHomePage),
+              title: Text('screens_moveFromHomePage'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _showMoveFromHomeOptions();
@@ -158,9 +154,7 @@ class _FolderDialogState extends State<FolderDialog> {
         .where((item) => item.id != widget.folder.id)
         .toList();
 
-    if (homeItems.isEmpty) {
-      final l10n = ScreensLocalizations.of(context);
-          Toast.warning(l10n.noItemsOnHome);
+    if (homeItems.isEmpty) {          Toast.warning('screens_noItemsOnHome'.tr);
       return;
     }
 
@@ -186,9 +180,7 @@ class _FolderDialogState extends State<FolderDialog> {
   }
 
   /// 显示项目选项
-  void _showItemOptions(HomeItem item) {
-    final l10n = ScreensLocalizations.of(context);
-    showModalBottomSheet(
+  void _showItemOptions(HomeItem item) {    showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
@@ -196,16 +188,16 @@ class _FolderDialogState extends State<FolderDialog> {
           children: [
             ListTile(
               leading: const Icon(Icons.drive_file_move),
-              title: Text(l10n.moveOutOfFolder),
+              title: Text('screens_moveOutOfFolder'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _layoutManager.removeFromFolder(item.id, widget.folder.id);
-                              Toast.success(l10n.movedToHomePage);
+                              Toast.success('screens_movedToHomePage'.tr);
               },
             ),
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
-              title: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+              title: Text('screens_delete'.tr, style: const TextStyle(color: Colors.red)),
               onTap: () {
                 Navigator.pop(context);
                 _confirmDeleteItem(item);
@@ -218,17 +210,15 @@ class _FolderDialogState extends State<FolderDialog> {
   }
 
   /// 确认删除项目
-  void _confirmDeleteItem(HomeItem item) {
-    final l10n = ScreensLocalizations.of(context);
-    showDialog(
+  void _confirmDeleteItem(HomeItem item) {    showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.confirmDelete),
-        content: Text(l10n.confirmDeleteThisItem),
+        title: Text('screens_confirmDelete'.tr),
+        content: Text('screens_confirmDeleteThisItem'.tr),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
+            child: Text('screens_cancel'.tr),
           ),
           TextButton(
             onPressed: () {
@@ -239,9 +229,9 @@ class _FolderDialogState extends State<FolderDialog> {
                 children: folder.children.where((c) => c.id != item.id).toList(),
               );
               _layoutManager.updateItem(widget.folder.id, updatedFolder);
-                          Toast.success(l10n.deleteSuccess);
+                          Toast.success('screens_deleteSuccess'.tr);
             },
-            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+            child: Text('screens_delete'.tr, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -249,9 +239,7 @@ class _FolderDialogState extends State<FolderDialog> {
   }
 
   /// 构建空状态
-  Widget _buildEmptyState() {
-    final l10n = ScreensLocalizations.of(context);
-    return Center(
+  Widget _buildEmptyState() {    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -262,14 +250,14 @@ class _FolderDialogState extends State<FolderDialog> {
           ),
           const SizedBox(height: 16),
           Text(
-            l10n.folderIsEmpty,
+            'screens_folderIsEmpty'.tr,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Theme.of(context).disabledColor,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            l10n.clickToAddContent,
+            'screens_clickToAddContent'.tr,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).disabledColor,
                 ),
@@ -300,17 +288,15 @@ class _MoveFromHomeDialogState extends State<_MoveFromHomeDialog> {
   final Set<String> _selectedIds = {};
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context);
-    return AlertDialog(
-      title: Text(l10n.moveFromHomePage),
+  Widget build(BuildContext context) {    return AlertDialog(
+      title: Text('screens_moveFromHomePage'.tr),
       content: SizedBox(
         width: double.maxFinite,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              l10n.selectItemsToMoveToFolder,
+              'screens_selectItemsToMoveToFolder'.tr,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -383,20 +369,18 @@ class _MoveFromHomeDialogState extends State<_MoveFromHomeDialog> {
                   _moveSelectedItems();
                   Navigator.pop(context);
                 },
-          child: Text(l10n.moveIn(_selectedIds.length)),
+          child: Text('screens_moveIn'.trParams({'count': _selectedIds.length.toString()})),
         ),
       ],
     );
   }
 
   /// 移动选中的项目
-  void _moveSelectedItems() {
-    final l10n = ScreensLocalizations.of(context);
-    for (final itemId in _selectedIds) {
+  void _moveSelectedItems() {    for (final itemId in _selectedIds) {
       widget.layoutManager.moveToFolder(itemId, widget.folderId);
     }
 
-      Toast.success(l10n.itemsMovedToFolder(_selectedIds.length));
+      Toast.success('screens_itemsMovedToFolder'.trParams({'count': _selectedIds.length.toString()}));
   }
 }
 
@@ -466,10 +450,8 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context);
-    return AlertDialog(
-      title: Text(l10n.editFolder),
+  Widget build(BuildContext context) {    return AlertDialog(
+      title: Text('screens_editFolder'.tr),
       content: SizedBox(
         width: double.maxFinite,
         child: SingleChildScrollView(
@@ -481,7 +463,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: l10n.folderName,
+                  labelText: 'screens_folderName'.tr,
                   border: const OutlineInputBorder(),
                 ),
                 autofocus: true,
@@ -490,7 +472,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
 
               // 图标选择
               Text(
-                l10n.selectIcon,
+                'screens_selectIcon'.tr,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
@@ -535,7 +517,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
 
               // 颜色选择
               Text(
-                l10n.selectColor,
+                'screens_selectColor'.tr,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
@@ -581,11 +563,11 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.cancel),
+          child: Text('screens_cancel'.tr),
         ),
         FilledButton(
           onPressed: _saveFolderChanges,
-          child: Text(l10n.save),
+          child: Text('screens_save'.tr),
         ),
       ],
     );
@@ -593,10 +575,8 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
 
   /// 保存文件夹修改
   void _saveFolderChanges() {
-    final newName = _nameController.text.trim();
-    final l10n = ScreensLocalizations.of(context);
-    if (newName.isEmpty) {
-          Toast.error(l10n.pleaseEnterFolderName);
+    final newName = _nameController.text.trim();    if (newName.isEmpty) {
+          Toast.error('screens_pleaseEnterFolderName'.tr);
       return;
     }
 
@@ -611,6 +591,6 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
     widget.layoutManager.updateItem(widget.folder.id, updatedFolder);
 
     Navigator.pop(context);
-    Toast.success(l10n.folderUpdated);
+    Toast.success('screens_folderUpdated'.tr);
   }
 }

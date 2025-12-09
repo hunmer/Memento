@@ -2,13 +2,12 @@ import 'dart:async';
 
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
-import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
-import 'package:Memento/plugins/nfc/l10n/nfc_localizations.dart';
+import 'package:get/get.dart';
 
 class TimerDialog extends StatefulWidget {
   final Habit habit;
@@ -75,7 +74,6 @@ class _TimerDialogState extends State<TimerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = NfcLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF0F1323) : const Color(0xFFF5F6F8);
     final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
@@ -182,7 +180,7 @@ class _TimerDialogState extends State<TimerDialog> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            _isRunning ? l10n.pause : l10n.start,
+                            _isRunning ? 'nfc_pause'.tr : 'nfc_start'.tr,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -220,7 +218,7 @@ class _TimerDialogState extends State<TimerDialog> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  l10n.quickNotes,
+                  'nfc_quickNotes'.tr,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -262,7 +260,7 @@ class _TimerDialogState extends State<TimerDialog> {
                       child: TextField(
                         controller: _notesController,
                         decoration: InputDecoration(
-                          hintText: l10n.addQuickNote,
+                          hintText: 'nfc_addQuickNote'.tr,
                           hintStyle: TextStyle(color: subTextColor),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -302,7 +300,7 @@ class _TimerDialogState extends State<TimerDialog> {
                             Icon(Icons.cancel_outlined, size: 22, color: isDark ? Colors.white70 : Colors.grey[700]),
                             const SizedBox(width: 8),
                             Text(
-                              l10n.cancelBtn,
+                              'nfc_cancelBtn'.tr,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -335,7 +333,7 @@ class _TimerDialogState extends State<TimerDialog> {
                             const Icon(Icons.check_circle, size: 22),
                             const SizedBox(width: 8),
                             Text(
-                              l10n.complete,
+                              'nfc_complete'.tr,
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -435,25 +433,24 @@ class _TimerDialogState extends State<TimerDialog> {
 
   /// 取消计时器（不保存记录）
   Future<void> _cancelTimer(BuildContext context) async {
-    final l10n = TimerLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.cancelTimer),
+        title: Text('nfc_cancelTimer'.tr),
         content: Text(
-          l10n.pauseTimerConfirm.replaceAll('{time}', _formatDuration(_elapsed)),
+          'nfc_pauseTimerConfirm'.trParams({'time': _formatDuration(_elapsed)}),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.continueTimer),
+            child: Text('nfc_continueTimer'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: Text(l10n.confirmCancel),
+            child: Text('nfc_confirmCancel'.tr),
           ),
         ],
       ),
@@ -474,29 +471,29 @@ class _TimerDialogState extends State<TimerDialog> {
 
   /// 完成计时并保存记录
   Future<void> _completeTimer(BuildContext context) async {
-    final l10n = TimerLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.completeTimer),
+        title: Text('nfc_completeTimer'.tr),
         content: Text(
-          l10n.completeTimerConfirm
-              .replaceAll('{time}', _formatDuration(_elapsed))
-              .replaceAll('{note}', _notesController.text.isNotEmpty
-                  ? '${l10n.timerNotePrefix}${_notesController.text}\n'
-                  : ''),
+          'nfc_completeTimerConfirm'.trParams({
+            'time': _formatDuration(_elapsed),
+            'note': _notesController.text.isNotEmpty
+                ? '${'nfc_timerNotePrefix'.tr}${_notesController.text}\n'
+                : ''
+          }),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.continueAdjust),
+            child: Text('nfc_continueAdjust'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: _themeColor,
             ),
-            child: Text(l10n.confirmComplete),
+            child: Text('nfc_confirmComplete'.tr),
           ),
         ],
       ),

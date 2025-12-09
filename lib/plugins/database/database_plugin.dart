@@ -5,7 +5,7 @@ import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/base_plugin.dart';
-import './l10n/database_localizations.dart';
+import 'package:get/get.dart';
 import './models/database_model.dart';
 import './models/database_field.dart';
 import './models/record.dart';
@@ -78,7 +78,7 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return DatabaseLocalizations.of(context).name;
+    return 'database_name'.tr;
   }
 
   @override
@@ -113,7 +113,7 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    DatabaseLocalizations.of(context).name,
+                    'database_name'.tr,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -131,9 +131,7 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            DatabaseLocalizations.of(
-                              context,
-                            ).totalDatabasesCount,
+                            'database_totalDatabasesCount'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(

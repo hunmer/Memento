@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
-
 /// 工具编辑对话框
 class ToolEditorDialog extends StatefulWidget {
   final String pluginId;
@@ -287,12 +287,12 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(AgentChatLocalizations.of(context).cancel),
+                  child: Text('agent_chat_cancel'.tr),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _save,
-                  child: Text(AgentChatLocalizations.of(context).save),
+                  child: Text('agent_chat_save'.tr),
                 ),
               ],
             ),
@@ -389,8 +389,8 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
         // 启用工具
         Card(
           child: SwitchListTile(
-            title: Text(AgentChatLocalizations.of(context).enableTool),
-            subtitle: Text(AgentChatLocalizations.of(context).disableToolWarning),
+            title: Text('agent_chat_enableTool'.tr),
+            subtitle: Text('agent_chat_disableToolWarning'.tr),
             value: _enabled,
             onChanged: (value) {
               setState(() {
@@ -415,7 +415,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
             children: [
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: Text(AgentChatLocalizations.of(context).addParameter),
+                label: Text('agent_chat_addParameter'.tr),
                 onPressed: _addParameter,
               ),
             ],
@@ -426,7 +426,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
         Expanded(
           child: _parameters.isEmpty
                   ? Center(
-                  child: Text(AgentChatLocalizations.of(context).noParametersClickToAdd),
+                  child: Text('agent_chat_noParametersClickToAdd'.tr),
                 )
               : ListView.builder(
                   padding: const EdgeInsets.all(8),
@@ -574,7 +574,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
             children: [
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: Text(AgentChatLocalizations.of(context).addExample),
+                label: Text('agent_chat_addExample'.tr),
                 onPressed: _addExample,
               ),
             ],
@@ -586,7 +586,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
           child: _examples.isEmpty
                   ? Center(
                     child: Text(
-                      AgentChatLocalizations.of(context).noExamplesClickToAdd,
+                      'agent_chat_noExamplesClickToAdd'.tr,
                     ),
                 )
               : ListView.builder(
@@ -613,7 +613,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
                                 ElevatedButton.icon(
                                   icon: const Icon(Icons.play_arrow, size: 18),
                                     label: Text(
-                                      AgentChatLocalizations.of(context).test,
+                                      'agent_chat_test'.tr,
                                     ),
                                   onPressed: () =>
                                       _testExample(example.codeController.text),
@@ -680,11 +680,11 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
               children: [
                 const CircularProgressIndicator(),
                 const SizedBox(height: 16),
-                    Text(AgentChatLocalizations.of(context).executingJSCode),
+                    Text('agent_chat_executingJSCode'.tr),
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.cancel),
-                      label: Text(AgentChatLocalizations.of(context).cancel),
+                      label: Text('agent_chat_cancel'.tr),
                   onPressed: () {
                     isCancelled = true;
                     Navigator.pop(context);
@@ -796,7 +796,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-                child: Text(AgentChatLocalizations.of(context).close),
+                child: Text('agent_chat_close'.tr),
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:async';
 import 'package:memento_intent/memento_intent.dart';
 import '../l10n/screens_localizations.dart';
@@ -179,9 +180,9 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(ScreensLocalizations.of(context).quickRegisterIntent),
+          title: Text('screens_quickRegisterIntent'.tr),
           content: Text(
-            ScreensLocalizations.of(context).selectPresetIntentType,
+            'screens_selectPresetIntentType'.tr,
           ),
           actions: <Widget>[
             SizedBox(
@@ -192,7 +193,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                   _quickRegister('memento', null, '/test');
                 },
                 icon: const Icon(Icons.link),
-                label: Text(ScreensLocalizations.of(context).mementoTest),
+                label: Text('screens_mementoTest'.tr),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -207,7 +208,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                   _quickRegister('memento', 'app.example.com', '/open');
                 },
                 icon: const Icon(Icons.link),
-                label: Text(ScreensLocalizations.of(context).mementoComplete),
+                label: Text('screens_mementoComplete'.tr),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -222,7 +223,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                   _quickRegister('myapp', 'custom.host', null);
                 },
                 icon: const Icon(Icons.link),
-                label: Text(ScreensLocalizations.of(context).customApp),
+                label: Text('screens_customApp'.tr),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -231,7 +232,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(ScreensLocalizations.of(context).cancel),
+              child: Text('screens_cancel'.tr),
             ),
           ],
         );
@@ -271,7 +272,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(ScreensLocalizations.of(context).intentTest),
+        title: Text('screens_intentTest'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.clear_all),
@@ -369,7 +370,7 @@ class _IntentTestScreenState extends State<IntentTestScreen> {
                           onPressed: () => _showQuickRegisterDialog(),
                           icon: const Icon(Icons.flash_on),
                           label: Text(
-                            ScreensLocalizations.of(context).quickRegister,
+                            'screens_quickRegister'.tr,
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.orange,

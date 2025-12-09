@@ -1,31 +1,34 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:Memento/core/app_widgets/page_transitions.dart';
-import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
+// GetX翻译导入
+import 'package:Memento/core/floating_ball/l10n/floating_ball_translations.dart';
+import 'package:Memento/plugins/nfc/l10n/nfc_translations.dart';
+import 'package:Memento/plugins/tts/l10n/tts_translations.dart';
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_translations.dart';
+import 'package:Memento/screens/settings_screen/screens/data_management_translations.dart';
+import 'package:Memento/screens/settings_screen/l10n/settings_screen_translations.dart';
+import 'package:Memento/screens/settings_screen/widgets/l10n/webdav_translations.dart';
+import 'package:Memento/screens/l10n/screens_translations.dart';
+import 'package:Memento/widgets/l10n/group_selector_translations.dart';
+import 'package:Memento/widgets/l10n/image_picker_translations.dart';
+import 'package:Memento/widgets/l10n/location_picker_translations.dart';
+
+// 旧的Localizations导入(待迁移的模块)
 import 'package:Memento/core/l10n/core_localizations.dart';
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
-import 'package:Memento/plugins/nfc/l10n/nfc_localizations.dart';
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:Memento/plugins/scripts_center/l10n/scripts_center_localizations.dart';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
-import 'package:Memento/plugins/tts/l10n/tts_translations.dart';
-import 'package:Memento/screens/settings_screen/l10n/settings_screen_localizations.dart';
-import 'package:Memento/screens/settings_screen/screens/data_management_localizations.dart';
-import 'package:Memento/screens/settings_screen/widgets/l10n/webdav_localizations.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
-import 'package:Memento/widgets/l10n/group_selector_localizations.dart';
 import 'package:Memento/widgets/l10n/widget_localizations.dart';
-import 'package:Memento/widgets/l10n/image_picker_localizations.dart';
-import 'package:Memento/widgets/l10n/location_picker_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 
@@ -94,6 +97,60 @@ class WidgetUriHandler extends StatelessWidget {
       },
       child: child,
     );
+  }
+}
+
+/// 合并多个GetX翻译类
+class _CombinedTranslations extends Translations {
+  @override
+  Map<String, Map<String, String>> get keys {
+    // 实例化所有已迁移模块的翻译类
+    final ttsTranslations = TTSTranslations();
+    final nfcTranslations = NfcTranslations();
+    final floatingBallTranslations = FloatingBallTranslations();
+    final webdavTranslations = WebDAVTranslations();
+    final dataManagementTranslations = DataManagementTranslations();
+    final settingsScreenTranslations = SettingsScreenTranslations();
+    final screensTranslations = ScreensTranslations();
+    final groupSelectorTranslations = GroupSelectorTranslations();
+    final imagPickerTranslations = ImagePickerTranslations();
+    final locationPickerTranslations = LocationPickerTranslations();
+    final agentChatTranslations = AgentChatTranslations();
+
+    // 合并所有翻译
+    final Map<String, Map<String, String>> combined = {};
+
+    // 合并中文翻译
+    combined['zh_CN'] = {
+      ...?ttsTranslations.keys['zh_CN'],
+      ...?nfcTranslations.keys['zh_CN'],
+      ...?floatingBallTranslations.keys['zh_CN'],
+      ...?webdavTranslations.keys['zh_CN'],
+      ...?dataManagementTranslations.keys['zh_CN'],
+      ...?settingsScreenTranslations.keys['zh_CN'],
+      ...?screensTranslations.keys['zh_CN'],
+      ...?groupSelectorTranslations.keys['zh_CN'],
+      ...?imagPickerTranslations.keys['zh_CN'],
+      ...?locationPickerTranslations.keys['zh_CN'],
+      ...?agentChatTranslations.keys['zh_CN'],
+    };
+
+    // 合并英文翻译
+    combined['en_US'] = {
+      ...?ttsTranslations.keys['en_US'],
+      ...?nfcTranslations.keys['en_US'],
+      ...?floatingBallTranslations.keys['en_US'],
+      ...?webdavTranslations.keys['en_US'],
+      ...?dataManagementTranslations.keys['en_US'],
+      ...?settingsScreenTranslations.keys['en_US'],
+      ...?screensTranslations.keys['en_US'],
+      ...?groupSelectorTranslations.keys['en_US'],
+      ...?imagPickerTranslations.keys['en_US'],
+      ...?locationPickerTranslations.keys['en_US'],
+      ...?agentChatTranslations.keys['en_US'],
+    };
+
+    return combined;
   }
 }
 
@@ -206,7 +263,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       builder:
           (theme, darkTheme) => WidgetUriHandler(
             child: GetMaterialApp(
-              translations: TTSTranslations(),
+              translations: _CombinedTranslations(),
               locale: globalConfigManager.getLocale().languageCode == 'zh'
                   ? const Locale('zh', 'CN')
                   : const Locale('en', 'US'),
@@ -222,35 +279,26 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               CheckinLocalizations.delegate,
               DatabaseLocalizations.delegate,
               ActivityLocalizations.delegate,
-              AgentChatLocalizations.delegate,
               TimerLocalizations.delegate,
               ChatLocalizations.delegate,
               ContactLocalizations.delegate,
               TrackerLocalizations.delegate,
               HabitsLocalizations.delegate,
-              ImagePickerLocalizations.delegate,
-              SettingsScreenLocalizations.delegate,
-              DataManagementLocalizations.delegate,
               CalendarLocalizations.delegate,
               FilePreviewLocalizations.delegate,
-              GroupSelectorLocalizations.delegate,
                 WidgetLocalizations.delegate,
               BillLocalizations.delegate,
-              LocationPickerLocalizations.delegate,
               DayLocalizationsDelegate.delegate,
               OpenAILocalizationsDelegate.delegate,
               NotesLocalizations.delegate,
               TodoLocalizations.delegate,
               CalendarAlbumLocalizations.delegate,
-              FloatingBallLocalizations.delegate,
               CoreLocalizationsDelegate(),
               GoodsLocalizations.delegate,
               NodesLocalizations.delegate,
               SfGlobalLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
-              WebDAVLocalizations.delegate,
-              ScreensLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
               FlutterQuillLocalizations.delegate,
                 ScriptsCenterLocalizations.delegate,

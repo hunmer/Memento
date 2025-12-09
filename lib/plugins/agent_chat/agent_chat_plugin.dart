@@ -1,5 +1,6 @@
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -12,7 +13,6 @@ import 'services/tool_service.dart';
 import 'services/tool_template_service.dart';
 import 'services/widget_service.dart';
 import 'models/chat_message.dart';
-import 'l10n/agent_chat_localizations.dart';
 
 /// Agent Chat 插件
 ///
@@ -289,11 +289,11 @@ class _AgentChatMainViewState extends State<AgentChatMainView> {
                 children: [
                   const Icon(Icons.error_outline, size: 48, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text(AgentChatLocalizations.of(context).initializationFailed('${snapshot.error}')),
+                  Text('agent_chat_initializationFailed'.trParams({'error': '${snapshot.error}'})),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(AgentChatLocalizations.of(context).goBack),
+                    child: Text('agent_chat_goBack'.tr),
                   ),
                 ],
               ),

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:Memento/core/floating_ball/floating_widget_controller.dart';
 import 'package:Memento/core/floating_ball/screens/floating_button_manager_screen.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
 
 class FloatingBallScreen extends StatefulWidget {
   const FloatingBallScreen({super.key});
@@ -40,9 +40,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
   void _setupListeners() {
     _runningSubscription = _controller.runningChanges.listen((isRunning) {
       if (mounted) {
-        setState(() {});
-        final l10n = ScreensLocalizations.of(context);
-        _showMessage(isRunning ? l10n.floatingBallStarted : l10n.floatingBallStopped);
+        setState(() {});        _showMessage(isRunning ? 'screens_floatingBallStarted'.tr : 'screens_floatingBallStopped'.tr);
       }
     });
 
@@ -50,9 +48,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
       hasPermission,
     ) {
       if (mounted) {
-        setState(() {});
-        final l10n = ScreensLocalizations.of(context);
-        _showMessage(hasPermission ? l10n.permissionGranted : l10n.permissionDenied);
+        setState(() {});        _showMessage(hasPermission ? 'screens_permissionGranted'.tr : 'screens_permissionDenied'.tr);
       }
     });
 
@@ -64,9 +60,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
 
     _buttonSubscription = _controller.buttonEvents.listen((event) {
       print('收到按钮事件: ${event.title}, data: ${event.data}');
-      if (mounted) {
-        final l10n = ScreensLocalizations.of(context);
-        _showMessage(l10n.clickedButton(event.title));
+      if (mounted) {        _showMessage('screens_clickedButton'.trParams({'buttonName': event.title}));
         _handleButtonEvent(event);
       }
     });
@@ -101,10 +95,8 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.floatingBallSettings)),
+  Widget build(BuildContext context) {    return Scaffold(
+      appBar: AppBar(title: Text('screens_floatingBallSettings'.tr)),
       body: ListView(
         children: [
           // 第一行：悬浮球状态、悬浮窗权限、开启/禁用悬浮球
@@ -129,7 +121,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            l10n.floatingBallStatus,
+                            'screens_floatingBallStatus'.tr,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
@@ -137,7 +129,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            _controller.isRunning ? l10n.running : l10n.stopped,
+                            _controller.isRunning ? 'screens_running'.tr : 'screens_stopped'.tr,
                             style: TextStyle(
                               fontSize: 12,
                               color: _controller.isRunning
@@ -170,7 +162,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            l10n.floatingWindowPermission,
+                            'screens_floatingWindowPermission'.tr,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
@@ -178,7 +170,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            _controller.hasPermission ? l10n.granted : l10n.notGranted,
+                            _controller.hasPermission ? 'screens_granted'.tr : 'screens_notGranted'.tr,
                             style: TextStyle(
                               fontSize: 12,
                               color: _controller.hasPermission
@@ -193,7 +185,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                                 await _controller.requestPermission();
                               },
                               icon: const Icon(Icons.security, size: 16),
-                              label: Text(l10n.requestPermission, style: TextStyle(fontSize: 12)),
+                              label: Text('screens_requestPermission'.tr, style: TextStyle(fontSize: 12)),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 4),
@@ -231,7 +223,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              l10n.floatingBallSwitch,
+                              'screens_floatingBallSwitch'.tr,
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
@@ -239,7 +231,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              _controller.isRunning ? l10n.clickToStop : l10n.clickToStart,
+                              _controller.isRunning ? 'screens_clickToStop'.tr : 'screens_clickToStart'.tr,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: _controller.isRunning
@@ -270,7 +262,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            l10n.autoHideInApp,
+                            'screens_autoHideInApp'.tr,
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -278,7 +270,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            l10n.autoHideInAppDescription,
+                            'screens_autoHideInAppDescription'.tr,
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.grey,
@@ -306,15 +298,15 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
               children: [
                 ListTile(
                   leading: Icon(Icons.tune),
-                  title: Text(l10n.floatingBallConfig),
-                  subtitle: Text(l10n.customizeFloatingBallAppearanceBehavior),
+                  title: Text('screens_floatingBallConfig'.tr),
+                  subtitle: Text('screens_customizeFloatingBallAppearanceBehavior'.tr),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: ElevatedButton.icon(
                     onPressed: _pickAndSetImage,
                     icon: const Icon(Icons.image),
-                    label: Text(l10n.selectImageAsFloatingBall),
+                    label: Text('screens_selectImageAsFloatingBall'.tr),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                     ),
@@ -324,24 +316,24 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     children: [
-                      Text(l10n.sizeColon),
+                      Text('screens_sizeColon'.tr),
                       Expanded(
                         child: Slider(
                           value: _controller.ballSize,
                           min: 50,
                           max: 150,
                           divisions: 10,
-                          label: l10n.ballSizeDp(_controller.ballSize.round()),
+                          label: 'screens_ballSizeDp'.trParams({'size': _controller.ballSize.round(.toString()}),
                           onChanged: (value) {
                             _controller.setBallSize(value);
                             setState(() {});
                           },
                           onChangeEnd: (value) async {
                             await _controller.updateConfig();
-                          },
+                          }
                         ),
                       ),
-                      Text(l10n.ballSizeDp(_controller.ballSize.round())),
+                      Text('screens_ballSizeDp'.trParams({'size': _controller.ballSize.round(.toString()}))
                     ],
                   ),
                 ),
@@ -349,14 +341,14 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     children: [
-                      Text(l10n.snapThresholdColon),
+                      Text('screens_snapThresholdColon'.tr),
                       Expanded(
                         child: Slider(
                           value: _controller.snapThreshold.toDouble(),
                           min: 20,
                           max: 100,
                           divisions: 8,
-                          label: l10n.snapThresholdPx(_controller.snapThreshold),
+                          label: 'screens_snapThresholdPx'.trParams({'threshold': _controller.snapThreshold.toString()}),
                           onChanged: (value) {
                             _controller.setSnapThreshold(value.toInt());
                             setState(() {});
@@ -366,7 +358,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           },
                         ),
                       ),
-                      Text(l10n.snapThresholdPx(_controller.snapThreshold)),
+                      Text('screens_snapThresholdPx'.trParams({'threshold': _controller.snapThreshold.toString()})),
                     ],
                   ),
                 ),
@@ -374,7 +366,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     children: [
-                      Expanded(child: Text(l10n.autoRestoreFloatingBallState)),
+                      Expanded(child: Text('screens_autoRestoreFloatingBallState'.tr)),
                       Switch(
                         value: _controller.autoRestore,
                         onChanged: (value) {
@@ -393,8 +385,8 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                     children: [
                       Row(
                         children: [
-                          Text(l10n.buttonCountColon),
-                          Text(l10n.buttonCount(_controller.buttonData.length)),
+                          Text('screens_buttonCountColon'.tr),
+                          Text('screens_buttonCount'.trParams({'count': _controller.buttonData.length.toString()})),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -404,22 +396,22 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           ).then((_) => setState(() {}));
                         },
                         icon: const Icon(Icons.touch_app),
-                        label: Text(l10n.manageFloatingButtons),
+                        label: Text('screens_manageFloatingButtons'.tr),
                       ),
                     ],
                   ),
                 ),
               ],
-            ),
+            )
           ),
           // 位置信息
           if (_controller.lastPosition != null)
             Card(
               child: ListTile(
                 leading: const Icon(Icons.location_on),
-                title: Text(l10n.currentPosition),
+                title: Text('screens_currentPosition'.tr),
                 subtitle: Text(
-                  l10n.xPositionYPosition(_controller.lastPosition!.x.toDouble(), _controller.lastPosition!.y.toDouble()),
+                  'screens_xPositionYPosition'.trParams({'x': _controller.lastPosition!.x.toDouble().toStringAsFixed(0), 'y': _controller.lastPosition!.y.toDouble(.toStringAsFixed(0))})
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.refresh),

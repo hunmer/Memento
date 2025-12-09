@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/layout_config.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
 import '../../../../core/services/toast_service.dart';
 import 'layout_type_selector.dart';
 
@@ -48,58 +48,52 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-        });
-        final l10n = ScreensLocalizations.of(context);
-        toastService.showToast('${l10n.loadLayoutFailed}：$e');
+        });        toastService.showToast('${'screens_loadLayoutFailed'.tr}：$e');
       }
     }
   }
 
   /// 切换到指定布局
-  Future<void> _switchLayout(LayoutConfig layout) async {
-    final l10n = ScreensLocalizations.of(context);
-    try {
+  Future<void> _switchLayout(LayoutConfig layout) async {    try {
       await _layoutManager.loadLayoutConfig(layout.id);
       if (mounted) {
         setState(() {
           _currentLayoutId = layout.id;
         });
         Navigator.pop(context);
-        toastService.showToast('${l10n.switchedToLayout}"${layout.name}"');
+        toastService.showToast('${'screens_switchedToLayout'.tr}"${layout.name}"');
       }
     } catch (e) {
       if (mounted) {
-        toastService.showToast('${l10n.switchFailed}：$e');
+        toastService.showToast('${'screens_switchFailed'.tr}：$e');
       }
     }
   }
 
   /// 显示重命名对话框
-  void _showRenameDialog(LayoutConfig layout) {
-    final l10n = ScreensLocalizations.of(context);
-    final TextEditingController controller = TextEditingController(text: layout.name);
+  void _showRenameDialog(LayoutConfig layout) {    final TextEditingController controller = TextEditingController(text: layout.name);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.renameLayout),
+        title: Text('screens_renameLayout'.tr),
         content: TextField(
           controller: controller,
           decoration: InputDecoration(
-            labelText: l10n.layoutName,
+            labelText: 'screens_layoutName'.tr,
           ),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
+            child: Text('screens_cancel'.tr),
           ),
           TextButton(
             onPressed: () async {
               final newName = controller.text.trim();
               if (newName.isEmpty) {
-                toastService.showToast(l10n.pleaseEnterLayoutName);
+                toastService.showToast('screens_pleaseEnterLayoutName'.tr);
                 return;
               }
 
@@ -109,15 +103,15 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
                 await _layoutManager.renameLayoutConfig(layout.id, newName);
                 await _loadLayouts();
                 if (mounted) {
-                  toastService.showToast(l10n.renameSuccess);
+                  toastService.showToast('screens_renameSuccess'.tr);
                 }
               } catch (e) {
                 if (mounted) {
-                  toastService.showToast(l10n.saveFailed);
+                  toastService.showToast('screens_saveFailed'.tr);
                 }
               }
             },
-            child: Text(l10n.confirm),
+            child: Text('screens_confirm'.tr),
           ),
         ],
       ),
@@ -125,17 +119,15 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
   }
 
   /// 确认删除布局
-  void _confirmDelete(LayoutConfig layout) {
-    final l10n = ScreensLocalizations.of(context);
-    showDialog(
+  void _confirmDelete(LayoutConfig layout) {    showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.confirmDelete),
-        content: Text(l10n.confirmDeleteLayout(layout.name)),
+        title: Text('screens_confirmDelete'.tr),
+        content: Text('screens_confirmDeleteLayout'.trParams({'layoutName': layout.name})),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
+            child: Text('screens_cancel'.tr),
           ),
           TextButton(
             onPressed: () async {
@@ -145,15 +137,15 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
                 await _layoutManager.deleteLayoutConfig(layout.id);
                 await _loadLayouts();
                 if (mounted) {
-                  toastService.showToast(l10n.deleteSuccess);
+                  toastService.showToast('screens_deleteSuccess'.tr);
                 }
               } catch (e) {
                 if (mounted) {
-                  toastService.showToast(l10n.saveFailed);
+                  toastService.showToast('screens_saveFailed'.tr);
                 }
               }
             },
-            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+            child: Text('screens_delete'.tr, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -174,10 +166,8 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context);
-    return AlertDialog(
-      title: Text(l10n.layoutManagement),
+  Widget build(BuildContext context) {    return AlertDialog(
+      title: Text('screens_layoutManagement'.tr),
       content: SizedBox(
         width: double.maxFinite,
         child: _isLoading
@@ -192,12 +182,12 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
                           const Icon(Icons.layers_outlined, size: 64, color: Colors.grey),
                           const SizedBox(height: 16),
                           Text(
-                            l10n.noSavedLayouts,
+                            'screens_noSavedLayouts'.tr,
                             style: const TextStyle(fontSize: 16, color: Colors.grey),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            l10n.saveFirstLayoutHint,
+                            'screens_saveFirstLayoutHint'.tr,
                             style: const TextStyle(fontSize: 12, color: Colors.grey),
                             textAlign: TextAlign.center,
                           ),
@@ -260,7 +250,7 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
                                     children: [
                                       const Icon(Icons.swap_horiz),
                                       const SizedBox(width: 8),
-                                      Text(l10n.switchToThisLayout),
+                                      Text('screens_switchToThisLayout'.tr),
                                     ],
                                   ),
                                 ),
@@ -270,7 +260,7 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
                                   children: [
                                     const Icon(Icons.edit),
                                     const SizedBox(width: 8),
-                                    Text(l10n.rename),
+                                    Text('screens_rename'.tr),
                                   ],
                                 ),
                               ),
@@ -280,7 +270,7 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
                                   children: [
                                     const Icon(Icons.delete, color: Colors.red),
                                     const SizedBox(width: 8),
-                                    Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                                    Text('screens_delete'.tr, style: const TextStyle(color: Colors.red)),
                                   ],
                                 ),
                               ),
@@ -296,11 +286,11 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
         TextButton.icon(
           onPressed: _showCreateLayoutDialog,
           icon: const Icon(Icons.add),
-          label: Text(l10n.newLayout),
+          label: Text('screens_newLayout'.tr),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.close),
+          child: Text('screens_close'.tr),
         ),
       ],
     );
@@ -329,11 +319,9 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
   }
 
   /// 创建布局
-  Future<void> _createLayout() async {
-    final l10n = ScreensLocalizations.of(context);
-    final name = _nameController.text.trim();
+  Future<void> _createLayout() async {    final name = _nameController.text.trim();
     if (name.isEmpty) {
-      toastService.showToast(l10n.pleaseEnterLayoutName);
+      toastService.showToast('screens_pleaseEnterLayoutName'.tr);
       return;
     }
 
@@ -353,13 +341,13 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
       await _layoutManager.saveCurrentLayoutAs(name);
 
       if (mounted) {
-        toastService.showToast(l10n.layoutSaved(name));
+        toastService.showToast('screens_layoutSaved'.trParams({'name': name}));
         Navigator.pop(context);
         widget.onLayoutCreated();
       }
     } catch (e) {
       if (mounted) {
-        toastService.showToast(l10n.saveFailed);
+        toastService.showToast('screens_saveFailed'.tr);
       }
     }
   }
@@ -387,10 +375,8 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context);
-    return AlertDialog(
-      title: Text(l10n.newLayout),
+  Widget build(BuildContext context) {    return AlertDialog(
+      title: Text('screens_newLayout'.tr),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -399,8 +385,8 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: l10n.layoutName,
-                hintText: l10n.layoutNameHint,
+                labelText: 'screens_layoutName'.tr,
+                hintText: 'screens_layoutNameHint'.tr,
               ),
               autofocus: true,
             ),
@@ -419,11 +405,11 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.cancel),
+          child: Text('screens_cancel'.tr),
         ),
         TextButton(
           onPressed: _createLayout,
-          child: Text(l10n.create),
+          child: Text('screens_create'.tr),
         ),
       ],
     );

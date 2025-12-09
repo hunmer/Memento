@@ -1,9 +1,10 @@
 import 'dart:math';
+import 'package:Memento/widgets/l10n/widget_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:get/get.dart';
 import 'package:Memento/widgets/statistics/models/statistics_models.dart';
-import 'package:Memento/widgets/l10n/widget_localizations.dart';
 
 /// 通用卡片构建器
 Widget buildStatisticsCard({
@@ -77,7 +78,7 @@ class DistributionPieChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (data.isEmpty) {
       return Center(
-        child: Text(WidgetLocalizations.of(context)!.noDataAvailable),
+        child: Text('widget_noDataAvailable'.tr),
       );
     }
 

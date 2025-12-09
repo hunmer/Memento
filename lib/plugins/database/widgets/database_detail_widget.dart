@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/database/l10n/database_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/database/widgets/record_edit_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -122,7 +122,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
               child: ListTile(
                 title: Text(
                   record.fields['title']?.toString() ??
-                      DatabaseLocalizations.of(context).untitledRecord,
+                      'database_untitledRecord'.tr,
                 ),
                 subtitle: Text(record.updatedAt.toString()),
                 onTap: () {
@@ -180,7 +180,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
                         Image.network(record.fields['image'], height: 80),
                       Text(
                         record.fields['title']?.toString() ??
-                            DatabaseLocalizations.of(context).untitledRecord,
+                            'database_untitledRecord'.tr,
                       ),
                     ],
                   ),
@@ -201,24 +201,20 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(DatabaseLocalizations.of(context).deleteRecordTitle),
+            title: Text('database_deleteRecordTitle'.tr),
             content: Text(
-              DatabaseLocalizations.of(
-                context,
-              ).deleteRecordMessage.replaceFirst(
-                '%s',
-                record.fields['title'] ??
-                    DatabaseLocalizations.of(context).untitledRecord,
-              ),
+              'database_deleteRecordMessage'.trParams({
+                'name': record.fields['title'] ?? 'database_untitledRecord'.tr,
+              }),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(DatabaseLocalizations.of(context).cancel),
+                child: Text('database_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(DatabaseLocalizations.of(context).delete),
+                child: Text('database_delete'.tr),
               ),
             ],
           ),
@@ -239,7 +235,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
           children: [
             ListTile(
               leading: const Icon(Icons.edit),
-              title: Text(DatabaseLocalizations.of(context).edit),
+              title: Text('database_edit'.tr),
               onTap: () {
                 Navigator.of(context).pop();
                 _editRecord(context, record);
@@ -247,7 +243,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
             ),
             ListTile(
               leading: const Icon(Icons.delete),
-              title: Text(DatabaseLocalizations.of(context).delete),
+              title: Text('database_delete'.tr),
               onTap: () async {
                 Navigator.of(context).pop();
                 final shouldDelete = await _confirmDelete(context, record);

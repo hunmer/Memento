@@ -1,4 +1,6 @@
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter/gestures.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
@@ -6,8 +8,6 @@ import 'package:Memento/plugins/agent_chat/services/tool_config_manager.dart';
 import 'components/plugin_section.dart';
 import 'components/tool_editor_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
-
 /// 工具管理界面
 class ToolManagementScreen extends StatefulWidget {
   final String? conversationId;
@@ -94,7 +94,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
     final selectedPlugin = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context).selectPlugin),
+            title: Text('agent_chat_selectPlugin'.tr),
         content: SizedBox(
           width: double.maxFinite,
           child: ScrollConfiguration(
@@ -168,16 +168,16 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(AgentChatLocalizations.of(context).confirmImport),
-          content: Text(AgentChatLocalizations.of(context).importConfigOverride),
+              title: Text('agent_chat_confirmImport'.tr),
+              content: Text('agent_chat_importConfigOverride'.tr),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(AgentChatLocalizations.of(context).cancel),
+                  child: Text('agent_chat_cancel'.tr),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text(AgentChatLocalizations.of(context).confirm),
+                  child: Text('agent_chat_confirm'.tr),
             ),
           ],
         ),
@@ -235,15 +235,15 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
       context: context,
       builder: (context) => AlertDialog(
             title: Text(
-              AgentChatLocalizations.of(context).confirmRestoreDefault,
+              'agent_chat_confirmRestoreDefault'.tr,
             ),
             content: Text(
-              AgentChatLocalizations.of(context).restoreDefaultDescription,
+              'agent_chat_restoreDefaultDescription'.tr,
             ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(AgentChatLocalizations.of(context).cancel),
+                child: Text('agent_chat_cancel'.tr),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -251,7 +251,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-                child: Text(AgentChatLocalizations.of(context).restoreDefault),
+                child: Text('agent_chat_restoreDefault'.tr),
           ),
         ],
       ),
@@ -344,7 +344,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: FilterChip(
-                label: Text(AgentChatLocalizations.of(context).all),
+                label: Text('agent_chat_all'.tr),
                 selected: _selectedPluginFilter == null,
                 onSelected: (selected) {
                   setState(() {
@@ -363,7 +363,13 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: FilterChip(
-                  label: Text(AgentChatLocalizations.of(context).pluginInfo(pluginId, enabledCount, totalCount)),
+                  label: Text(
+                    'agent_chat_pluginInfo'.trParams({
+                      'pluginId': pluginId,
+                      'enabledCount': enabledCount.toString(),
+                      'totalCount': totalCount.toString(),
+                    }),
+                  ),
                   selected: _selectedPluginFilter == pluginId,
                   onSelected: (selected) {
                     setState(() {
@@ -384,7 +390,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AgentChatLocalizations.of(context).toolManagement),
+        title: Text('agent_chat_toolManagement'.tr),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
@@ -413,7 +419,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                   children: [
                         const Icon(Icons.add),
                         const SizedBox(width: 12),
-                        Text(AgentChatLocalizations.of(context).addTool),
+                        Text('agent_chat_addTool'.tr),
                   ],
                 ),
               ),
@@ -423,7 +429,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                   children: [
                         const Icon(Icons.file_download),
                         const SizedBox(width: 12),
-                        Text(AgentChatLocalizations.of(context).importConfig),
+                        Text('agent_chat_importConfig'.tr),
                   ],
                 ),
               ),
@@ -433,7 +439,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                   children: [
                         const Icon(Icons.file_upload),
                         const SizedBox(width: 12),
-                        Text(AgentChatLocalizations.of(context).exportConfig),
+                        Text('agent_chat_exportConfig'.tr),
                   ],
                 ),
               ),
@@ -445,7 +451,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                         const Icon(Icons.restore, color: Colors.red),
                         const SizedBox(width: 12),
                         Text(
-                          AgentChatLocalizations.of(context).restoreDefault,
+                          'agent_chat_restoreDefault'.tr,
                           style: const TextStyle(color: Colors.red),
                         ),
                   ],
@@ -484,7 +490,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                   child: _allPluginTools.isEmpty
                             ? Center(
                               child: Text(
-                                AgentChatLocalizations.of(context).noToolConfig,
+                                'agent_chat_noToolConfig'.tr,
                               ),
                             )
                       : ScrollConfiguration(
@@ -629,7 +635,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
           children: [
             const Icon(Icons.block, color: Colors.grey),
             const SizedBox(width: 8),
-                Text(AgentChatLocalizations.of(context).disabledTools),
+                Text('agent_chat_disabledTools'.tr),
             const Spacer(),
             Text(
               '${disabledTools.length} 个',
@@ -741,26 +747,24 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                   context: context,
                   builder: (context) => AlertDialog(
                             title: Text(
-                              AgentChatLocalizations.of(
-                                context,
-                              ).confirmEnableAll,
+                              'agent_chat_confirmEnableAll'.tr,
                             ),
                             content: Text(
-                              AgentChatLocalizations.of(
-                                context,
-                              ).confirmEnableAllTools(disabledTools.length),
+                              'agent_chat_confirmEnableAllTools'.trParams({
+                                'count': disabledTools.length.toString(),
+                              }),
                             ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
                                 child: Text(
-                                  AgentChatLocalizations.of(context).cancel,
+                                  'agent_chat_cancel'.tr,
                                 ),
                       ),
                       ElevatedButton(
                         onPressed: () => Navigator.pop(context, true),
                                 child: Text(
-                                  AgentChatLocalizations.of(context).enableAll,
+                                  'agent_chat_enableAll'.tr,
                                 ),
                       ),
                     ],
@@ -785,11 +789,11 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                 }
               },
               icon: const Icon(Icons.done_all),
-                  label: Text(AgentChatLocalizations.of(context).enableAll),
+                  label: Text('agent_chat_enableAll'.tr),
             ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-                child: Text(AgentChatLocalizations.of(context).close),
+                child: Text('agent_chat_close'.tr),
           ),
         ],
       ),

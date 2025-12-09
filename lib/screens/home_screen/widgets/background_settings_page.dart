@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/models/layout_config.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
 
 /// 主页主题设置页面
 class BackgroundSettingsPage extends StatefulWidget {
@@ -161,9 +162,8 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
       builder:
           (context) => StatefulBuilder(
             builder: (context, setDialogState) {
-              final l10n = ScreensLocalizations.of(context);
               return AlertDialog(
-                title: Text(l10n.globalBackgroundSettings),
+                title: Text('screens_globalBackgroundSettings'.tr),
                 content: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -212,7 +212,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                                 }
                               },
                               icon: const Icon(Icons.image),
-                              label: Text(l10n.selectImage),
+                              label: Text('screens_selectImage'.tr),
                             ),
                           ),
                           if (tempPath != null) ...[
@@ -224,7 +224,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                                 });
                               },
                               icon: const Icon(Icons.clear),
-                              tooltip: l10n.clear,
+                              tooltip: 'screens_clear'.tr,
                             ),
                           ],
                         ],
@@ -234,7 +234,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
 
                       // 填充方式
                       Text(
-                        l10n.fillMode,
+                        'screens_fillMode'.tr,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
@@ -244,31 +244,31 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                         items: [
                           DropdownMenuItem(
                             value: BoxFit.cover,
-                            child: Text(l10n.cover),
+                            child: Text('screens_cover'.tr),
                           ),
                           DropdownMenuItem(
                             value: BoxFit.contain,
-                            child: Text(l10n.contain),
+                            child: Text('screens_contain'.tr),
                           ),
                           DropdownMenuItem(
                             value: BoxFit.fill,
-                            child: Text(l10n.fill),
+                            child: Text('screens_fill'.tr),
                           ),
                           DropdownMenuItem(
                             value: BoxFit.fitWidth,
-                            child: Text(l10n.fitWidth),
+                            child: Text('screens_fitWidth'.tr),
                           ),
                           DropdownMenuItem(
                             value: BoxFit.fitHeight,
-                            child: Text(l10n.fitHeight),
+                            child: Text('screens_fitHeight'.tr),
                           ),
                           DropdownMenuItem(
                             value: BoxFit.none,
-                            child: Text(l10n.none),
+                            child: Text('screens_none'.tr),
                           ),
                           DropdownMenuItem(
                             value: BoxFit.scaleDown,
-                            child: Text(l10n.scaleDown),
+                            child: Text('screens_scaleDown'.tr),
                           ),
                         ],
                         onChanged: (value) {
@@ -284,7 +284,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
 
                       // 模糊程度
                       Text(
-                        l10n.blurLevel,
+                        'screens_blurLevel'.tr,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
@@ -320,7 +320,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(l10n.cancel),
+                    child: Text('screens_cancel'.tr),
                   ),
                   TextButton(
                     onPressed: () {
@@ -332,7 +332,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                       _saveGlobalBackground();
                       Navigator.pop(context);
                     },
-                    child: Text(l10n.save),
+                    child: Text('screens_save'.tr),
                   ),
                 ],
               );
@@ -352,9 +352,12 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
       builder:
           (context) => StatefulBuilder(
             builder: (context, setDialogState) {
-              final l10n = ScreensLocalizations.of(context);
               return AlertDialog(
-                title: Text(l10n.layoutBackgroundSettings(layout.name)),
+                title: Text(
+                  'screens_layoutBackgroundSettings'.trParams({
+                    'layoutName': layout.name,
+                  }),
+                ),
                 content: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -377,7 +380,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                l10n.customBackgroundHasPriority,
+                                'screens_customBackgroundHasPriority'.tr,
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ),
@@ -430,7 +433,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                                 }
                               },
                               icon: const Icon(Icons.image),
-                              label: Text(l10n.selectImage),
+                              label: Text('screens_selectImage'.tr),
                             ),
                           ),
                           if (tempPath != null) ...[
@@ -442,7 +445,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                                 });
                               },
                               icon: const Icon(Icons.clear),
-                              tooltip: l10n.clearUseGlobalBackground,
+                              tooltip: 'screens_clearUseGlobalBackground'.tr,
                             ),
                           ],
                         ],
@@ -452,7 +455,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
 
                       // 填充方式
                       Text(
-                        l10n.fillMode,
+                        'screens_fillMode'.tr,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
@@ -462,31 +465,31 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                         items: [
                           DropdownMenuItem(
                             value: BoxFit.cover,
-                            child: Text(l10n.cover),
+                            child: Text('screens_cover'.tr),
                           ),
                           DropdownMenuItem(
                             value: BoxFit.contain,
-                            child: Text(l10n.contain),
+                            child: Text('screens_contain'.tr),
                           ),
                           DropdownMenuItem(
                             value: BoxFit.fill,
-                            child: Text(l10n.fill),
+                            child: Text('screens_fill'.tr),
                           ),
                           DropdownMenuItem(
                             value: BoxFit.fitWidth,
-                            child: Text(l10n.fitWidth),
+                            child: Text('screens_fitWidth'.tr),
                           ),
                           DropdownMenuItem(
                             value: BoxFit.fitHeight,
-                            child: Text(l10n.fitHeight),
+                            child: Text('screens_fitHeight'.tr),
                           ),
                           DropdownMenuItem(
                             value: BoxFit.none,
-                            child: Text(l10n.none),
+                            child: Text('screens_none'.tr),
                           ),
                           DropdownMenuItem(
                             value: BoxFit.scaleDown,
-                            child: Text(l10n.scaleDown),
+                            child: Text('screens_scaleDown'.tr),
                           ),
                         ],
                         onChanged: (value) {
@@ -502,7 +505,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
 
                       // 模糊程度
                       Text(
-                        l10n.blurLevel,
+                        'screens_blurLevel'.tr,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
@@ -538,7 +541,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(l10n.cancel),
+                    child: Text('screens_cancel'.tr),
                   ),
                   TextButton(
                     onPressed: () {
@@ -550,7 +553,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                       );
                       Navigator.pop(context);
                     },
-                    child: Text(l10n.save),
+                    child: Text('screens_save'.tr),
                   ),
                 ],
               );
@@ -563,7 +566,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(ScreensLocalizations.of(context).themeSettings),
+        title: Text('screens_themeSettings'.tr),
       ),
       body:
           _isLoading
@@ -576,7 +579,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                     child: ListTile(
                       leading: const Icon(Icons.wallpaper),
                       title: Text(
-                        ScreensLocalizations.of(context).globalBackgroundImage,
+                        'screens_globalBackgroundImage'.tr,
                       ),
                       subtitle: Text(
                         _globalBackgroundPath != null
@@ -813,12 +816,12 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              ScreensLocalizations.of(context).noSavedLayouts,
+                              'screens_noSavedLayouts'.tr,
                               style: const TextStyle(color: Colors.grey),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              ScreensLocalizations.of(context).saveLayoutFirst,
+                              'screens_saveLayoutFirst'.tr,
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,

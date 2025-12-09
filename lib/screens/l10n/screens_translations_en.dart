@@ -1,0 +1,279 @@
+/// Screens通用英文翻译
+final Map<String, String> screensTranslationsEn = {
+  // route.dart
+  'screens_error': 'Error',
+  'screens_errorWidgetIdMissing': 'Error: widgetId parameter is missing',
+  'screens_errorHabitIdRequired': 'Error: habitId is required',
+  'screens_errorHabitsPluginNotFound': 'Error: HabitsPlugin not found',
+  'screens_errorHabitNotFound': 'Error: Habit not found with id: @id',
+
+  // floating_widget_screen
+  'screens_floatingBallSettings': 'Floating Ball Settings',
+  'screens_requestPermission': 'Request Permission',
+  'screens_floatingBallConfig': 'Floating Ball Configuration',
+  'screens_customizeFloatingBallAppearanceBehavior': 'Customize the appearance and behavior of the floating ball',
+  'screens_selectImageAsFloatingBall': 'Select image as floating ball',
+  'screens_sizeColon': 'Size: ',
+  'screens_ballSizeDp': '@sizedp',
+  'screens_snapThresholdColon': 'Snap Threshold: ',
+  'screens_snapThresholdPx': '@thresholdpx',
+  'screens_autoRestoreFloatingBallState': 'Auto restore floating ball state',
+  'screens_buttonCountColon': 'Button Count: ',
+  'screens_buttonCount': '@count buttons',
+  'screens_manageFloatingButtons': 'Manage Floating Buttons',
+  'screens_currentPosition': 'Current Position',
+
+  // home_screen
+  'screens_createNewFolder': 'Create New Folder',
+  'screens_addWidget': 'Add Widget',
+  'screens_saveCurrentLayout': 'Save Current Layout',
+  'screens_manageLayouts': 'Manage Layouts',
+  'screens_themeSettings': 'Theme Settings',
+  'screens_gridSettings': 'Grid Settings',
+  'screens_clearLayout': 'Clear Layout',
+  'screens_confirmClear': 'Confirm Clear',
+  'screens_confirmClearAllWidgets': 'Are you sure you want to clear all widgets? This action cannot be undone.',
+  'screens_cancel': 'Cancel',
+  'screens_confirm': 'Confirm',
+  'screens_adjustSize': 'Adjust Size',
+  'screens_delete': 'Delete',
+  'screens_selectWidgetSize': 'Select Widget Size',
+  'screens_confirmDelete': 'Confirm Delete',
+  'screens_confirmDeleteItem': 'Are you sure you want to delete "@itemName"?',
+  'screens_moveToFolder': 'Move to Folder',
+  'screens_topDisplay': 'Top Display',
+  'screens_centerDisplay': 'Center Display',
+  'screens_complete': 'Complete',
+  'screens_clearFilterConditions': 'Clear filter conditions',
+
+  // background_settings_page
+  'screens_globalBackgroundSettings': 'Global Background Settings',
+  'screens_selectImage': 'Select Image',
+  'screens_fillMode': 'Fill Mode',
+  'screens_cover': 'Cover',
+  'screens_contain': 'Contain',
+  'screens_fill': 'Fill',
+  'screens_fitWidth': 'Fit Width',
+  'screens_fitHeight': 'Fit Height',
+  'screens_none': 'None',
+  'screens_scaleDown': 'Scale Down',
+  'screens_blurLevel': 'Blur Level',
+  'screens_save': 'Save',
+  'screens_globalBackgroundImage': 'Global Background Image',
+
+  // create_folder_dialog
+  'screens_selectIcon': 'Select Icon',
+  'screens_selectColor': 'Select Color',
+  'screens_create': 'Create',
+
+  // folder_dialog
+  'screens_folderHasBeenDeleted': 'Folder has been deleted',
+  'screens_moveOutOfFolder': 'Move out of folder',
+  'screens_confirmDeleteThisItem': 'Are you sure you want to delete this item?',
+  'screens_moveFromHomePage': 'Move from home page',
+  'screens_moveIn': 'Move in (@count)',
+  'screens_editFolder': 'Edit Folder',
+
+  // home_card
+  'screens_cannotOpenPlugin': 'Cannot open plugin',
+
+  // home_grid
+  'screens_quickCreateLayout': 'Quick Create Layout',
+  'screens_selectLayoutTemplate': 'Select a layout template to get started quickly:',
+  'screens_dragToFolder': 'Drag to folder',
+  'screens_dragItemToFolder': 'Drag "@item" to folder "@folder"',
+  'screens_pleaseSelectAction': 'Please select an action:',
+  'screens_replacePosition': 'Replace Position',
+  'screens_addToFolder': 'Add to Folder',
+
+  // layout_manager_dialog
+  'screens_renameLayout': 'Rename Layout',
+  'screens_confirmDeleteLayout': 'Are you sure you want to delete layout "@layoutName"? This action cannot be undone.',
+  'screens_layoutManagement': 'Layout Management',
+  'screens_layoutInfo': '@items widgets · @columns columns grid',
+  'screens_switchToThisLayout': 'Switch to this layout',
+  'screens_rename': 'Rename',
+  'screens_close': 'Close',
+
+  // layout_type_selector
+  'screens_emptyLayout': 'Empty Layout',
+  'screens_emptyLayoutDescription': 'Blank layout without any widgets',
+  'screens_all1x1Widgets': 'All 1x1 Widgets',
+  'screens_all1x1WidgetsDescription': 'Add all widgets supporting 1x1 size',
+  'screens_all2x2Widgets': 'All 2x2 Widgets',
+  'screens_all2x2WidgetsDescription': 'Add all widgets supporting 2x2 size',
+
+  // widget_settings_dialog
+  'screens_oneColumn': 'One Column',
+  'screens_twoColumns': 'Two Columns',
+  'screens_backgroundImage': 'Background Image',
+  'screens_alreadySet': 'Already Set',
+  'screens_notSet': 'Not Set',
+  'screens_iconColor': 'Icon Color',
+  'screens_customized': 'Customized',
+  'screens_useDefault': 'Use Default',
+  'screens_backgroundColor': 'Background Color',
+  'screens_effectWhenNoBackgroundImage': 'Effective when no background image',
+  'screens_customColorWithTransparency': 'Custom color (with transparency support)',
+
+  // intent_test_screen
+  'screens_quickRegisterIntent': 'Quick Register Intent',
+  'screens_selectPresetIntentType': 'Select a preset Intent type for quick registration',
+  'screens_mementoTest': 'Memento Test (memento:///test)',
+  'screens_mementoComplete': 'Memento Complete (memento://app.example.com/open)',
+  'screens_customApp': 'Custom App (myapp://custom.host)',
+  'screens_intentTest': 'Intent Test',
+  'screens_quickRegister': 'Quick Register',
+  'screens_bulletScheme': '• @scheme',
+
+  // js_console
+  'screens_jsConsole': 'JS Console',
+  'screens_loadingExamples': 'Loading examples...',
+  'screens_noAvailableExamples': 'No available examples',
+  'screens_selectExampleFile': 'Select example file: ',
+  'screens_allExamples': 'All Examples',
+
+  // json_dynamic_test
+  'screens_jsonDynamicUITest': 'JSON Dynamic UI Test',
+  'screens_loadFile': 'Load File',
+  'screens_previewEffect': 'Preview Effect',
+  'screens_uiPreview': 'UI Preview',
+
+  // notification_test
+  'screens_notificationTestPage': 'Notification Test Page',
+  'screens_test': 'Test',
+
+  // settings_screen
+  'screens_testJavaScriptAPI': 'Test JavaScript API functionality',
+  'screens_jsonDynamicWidgetTest': 'JSON Dynamic Widget Test',
+  'screens_testAndPreviewDynamicUI': 'Test and preview dynamic UI components',
+  'screens_superCupertinoNavigationTest': 'Super Cupertino Navigation Test',
+  'screens_testIOSStyleNavigation': 'Test iOS style navigation bar component',
+  'screens_notificationTest': 'Notification Test',
+  'screens_manageSystemFloatingBall': 'Manage system-level floating ball functionality',
+  'screens_testDynamicIntentAndDeepLink': 'Test dynamic Intent registration and deep linking',
+
+  // base_settings_controller
+  'screens_selectLanguage': 'Select Language',
+  'screens_chinese': 'Chinese',
+  'screens_english': 'English',
+
+  // super_cupertino_test_screen
+  'screens_superCupertinoTest': 'Super Cupertino Test',
+  'screens_fruitList': 'Fruit List',
+  'screens_fruitIndex': 'This is the @indexth fruit',
+
+  // Additional messages
+  'screens_floatingBallStarted': 'Floating ball started',
+  'screens_floatingBallStopped': 'Floating ball stopped',
+  'screens_pleaseEnterLayoutName': 'Please enter layout name',
+  'screens_notificationPermissionGranted': 'Notification permission granted',
+  'screens_notificationPermissionDenied': 'Notification permission denied',
+  'screens_saveSuccess': 'Saved successfully',
+  'screens_allWidgetsCleared': 'All widgets cleared',
+  'screens_layoutSaved': 'Layout "@name" saved',
+  'screens_saveFailed': 'Save failed',
+  'screens_noImage': 'No image',
+  'screens_imageLoadFailed': 'Failed to load image',
+  'screens_pleaseSelectImage': 'Please select an image',
+  'screens_copySuccess': 'Copy successful',
+  'screens_copiedToClipboard': 'Copied to clipboard',
+  'screens_sendNotification': 'Send notification',
+  'screens_notificationSent': 'Notification sent',
+  'screens_noTestSchemeAvailable': 'No test scheme available',
+  'screens_widgetSettings': 'Widget Settings',
+  'screens_itemCount': '@count items',
+  'screens_layoutBackgroundSettings': '@layoutName - Background Settings',
+  'screens_layoutBackgroundSettingsTitle': 'Layout Background Settings',
+  'screens_addWidgets': 'Add Widgets',
+  'screens_clear': 'Clear',
+  'screens_newLayout': 'New Layout',
+
+  // Additional floating ball messages
+  'screens_permissionGranted': 'Permission granted',
+  'screens_permissionDenied': 'Permission denied',
+  'screens_floatingBallStatus': 'Floating Ball Status',
+  'screens_running': 'Running',
+  'screens_stopped': 'Stopped',
+  'screens_floatingWindowPermission': 'Floating Window Permission',
+  'screens_granted': 'Granted',
+  'screens_notGranted': 'Not Granted',
+  'screens_floatingBallSwitch': 'Floating Ball Switch',
+  'screens_clickToStop': 'Click to Stop',
+  'screens_clickToStart': 'Click to Start',
+  'screens_autoHideInApp': 'Auto Hide In App',
+  'screens_autoHideInAppDescription': 'Auto hide overlay floating ball in app',
+  'screens_clickedButton': 'Clicked: @buttonName',
+  'screens_xPositionYPosition': 'X: @x, Y: @y',
+
+  // Additional home screen messages
+  'screens_confirmDeleteSelectedItems': 'Are you sure you want to delete the selected @count items?',
+  'screens_widgetSize': '@width×@height',
+  'screens_smallSize': 'Small (Icon)',
+  'screens_mediumSize': 'Medium (Horizontal Card)',
+  'screens_largeSize': 'Large (Square Card)',
+  'screens_noLayoutName': 'No layout name',
+  'screens_quickCreateLayoutDescription': 'Select a layout template to get started quickly:',
+  'screens_createNewLayout': 'Create New Layout',
+  'screens_inputLayoutName': 'Please enter layout name',
+  'screens_layoutName': 'Layout Name',
+  'screens_layoutNameHint': 'e.g., Work Layout, Entertainment Layout',
+  'screens_deleted': 'deleted',
+  'screens_itemsDeleted': 'Deleted @count items',
+  'screens_noAvailableFolders': 'No available folders, please create a folder first',
+  'screens_itemsMovedToFolder': 'Moved @count items to folder',
+  'screens_gridSize': 'Grid Size',
+  'screens_gridSizeDescription': 'Select the number of columns for the home grid (1-10)',
+  'screens_gridColumns': '@count columns',
+  'screens_displayPosition': 'Display Position',
+  'screens_displayPositionDescription': 'Choose the alignment of widgets on the screen',
+  'screens_backgroundImageSet': 'Background image set',
+  'screens_backgroundImageNotSet': 'Background image not set',
+  'screens_customBackgroundImage': 'Custom background image set',
+  'screens_useGlobalBackgroundImage': 'Using global background image',
+
+  // create_folder_dialog
+  'screens_folderName': 'Folder Name',
+  'screens_enterFolderName': 'Enter folder name',
+  'screens_pleaseEnterFolderName': 'Please enter folder name',
+  'screens_folderCreated': 'Folder created: @name',
+
+  // background_settings_page
+  'screens_widgetOverallOpacity': 'Widget Overall Opacity',
+  'screens_widgetOverallOpacityDescription': 'Adjust the opacity of the entire widget (including text and content)',
+  'screens_backgroundColorOpacity': 'Background Color Opacity',
+  'screens_backgroundColorOpacityDescription': 'Adjust only the background color opacity, does not affect text',
+  'screens_layoutBackgroundSettingsDescription': 'Set background images for each layout individually, priority higher than global background image',
+  'screens_noSavedLayouts': 'No saved layouts',
+  'screens_saveLayoutFirst': 'Please save a layout on the home page first',
+  'screens_clearUseGlobalBackground': 'Clear (Use Global Background)',
+  'screens_customBackgroundHasPriority': 'Individually set background images have priority over global background images',
+  'screens_zeroPercentFullyTransparent': '0% (Fully Transparent)',
+  'screens_oneHundredPercentOpaque': '100% (Opaque)',
+
+  // folder_dialog
+  'screens_folderIsEmpty': 'The folder is empty',
+  'screens_selectItemsToMoveToFolder': 'Select items to move to folder',
+  'screens_movedToHomePage': 'Moved to home page',
+  'screens_folderUpdated': 'Folder updated',
+  'screens_clickToAddContent': 'Click the + button above to add content',
+  'screens_noItemsOnHome': 'No items available on home page to move',
+
+  // home_grid
+  'screens_noWidgetsYet': 'No widgets yet',
+  'screens_quickLayout': 'Quick Layout',
+  'screens_component': 'Widget',
+  'screens_item': 'Item',
+  'screens_clickPlusToAdd': 'Click the + button in the top right to add',
+  'screens_loadLayoutFailed': 'Failed to load layout',
+  'screens_switchedToLayout': 'Switched to',
+  'screens_switchFailed': 'Failed to switch',
+  'screens_saveFirstLayoutHint': 'Click "Save Current Layout" in the top right menu to create your first layout configuration',
+
+  // layout_manager_dialog
+  'screens_renameSuccess': 'Rename successful',
+  'screens_deleteSuccess': 'Delete successful',
+
+  'screens_presetColors': 'Preset Colors',
+  'screens_quickSelectPresetColors': 'Quick Select Preset Colors',
+};

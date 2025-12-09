@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/event/plugin_action_event_args.dart';
-import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/dialogs/plugin_list_dialog.dart';
@@ -316,7 +316,7 @@ class BuiltInActionExecutor implements ActionExecutor {
 
     if (lastPlugin == null) {
       if (context.mounted) {
-        Toast.show(FloatingBallLocalizations.of(context)!.noRecentPlugin);
+        Toast.show('floating_ball_noRecentPlugin'.tr);
       }
       return ExecutionResult.success(
         data: {'action': 'openLastPlugin', 'message': 'No recent plugin'},

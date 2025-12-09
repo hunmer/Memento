@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'controllers/js_console_controller.dart';
 import 'widgets/code_editor.dart';
@@ -40,7 +41,7 @@ class _JSConsoleScreenState extends State<JSConsoleScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(ScreensLocalizations.of(context).jsConsole),
+          title: Text('screens_jsConsole'.tr),
           actions: [
             Consumer<JSConsoleController>(
               builder: (context, controller, _) {

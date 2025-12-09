@@ -1,8 +1,8 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/screens/settings_screen/controllers/webdav_controller.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
-import 'l10n/webdav_localizations.dart';
 import '../../../../core/services/toast_service.dart';
 
 class WebDAVSettingsDialog extends StatefulWidget {
@@ -75,7 +75,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
 
     setState(() {
       _isConnecting = true;
-      _statusMessage = WebDAVLocalizations.of(context).connectingStatus;
+      _statusMessage = 'webdav_connectingStatus'.tr;
     });
 
     try {
@@ -91,15 +91,15 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
         _isConnected = success;
         _statusMessage =
             success
-                ? WebDAVLocalizations.of(context).connectionSuccessStatus
-                : WebDAVLocalizations.of(context).connectionFailedStatus;
+                ? 'webdav_connectionSuccessStatus'.tr
+                : 'webdav_connectionFailedStatus'.tr;
       });
     } catch (e) {
       setState(() {
         _isConnecting = false;
         _isConnected = false;
         _statusMessage =
-            WebDAVLocalizations.of(context).connectionErrorStatus +
+            'webdav_connectionErrorStatus'.tr +
             e.toString();
       });
     }
@@ -109,7 +109,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
   Future<void> _disconnect() async {
     setState(() {
       _isConnecting = true;
-      _statusMessage = WebDAVLocalizations.of(context).disconnectingStatus;
+      _statusMessage = 'webdav_disconnectingStatus'.tr;
     });
 
     // 停止文件监控
@@ -132,14 +132,14 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
       _isConnecting = false;
       _isConnected = false;
       _autoSync = false;
-      _statusMessage = WebDAVLocalizations.of(context).disconnectedStatus;
+      _statusMessage = 'webdav_disconnectedStatus'.tr;
     });
   }
 
   // 将本地数据同步到WebDAV
   Future<void> _syncLocalToWebDAV() async {
     setState(() {
-      _statusMessage = WebDAVLocalizations.of(context).uploadingStatus;
+      _statusMessage = 'webdav_uploadingStatus'.tr;
       _isConnecting = true;
     });
 
@@ -149,15 +149,15 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
       _isConnecting = false;
       _statusMessage =
           success
-              ? WebDAVLocalizations.of(context).uploadSuccessStatus
-              : WebDAVLocalizations.of(context).uploadFailedStatus;
+              ? 'webdav_uploadSuccessStatus'.tr
+              : 'webdav_uploadFailedStatus'.tr;
     });
   }
 
   // 将WebDAV数据同步到本地
   Future<void> _syncWebDAVToLocal() async {
     setState(() {
-      _statusMessage = WebDAVLocalizations.of(context).downloadingStatus;
+      _statusMessage = 'webdav_downloadingStatus'.tr;
       _isConnecting = true;
     });
 
@@ -167,15 +167,15 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
       _isConnecting = false;
       _statusMessage =
           success
-              ? WebDAVLocalizations.of(context).downloadSuccessStatus
-              : WebDAVLocalizations.of(context).downloadFailedStatus;
+              ? 'webdav_downloadSuccessStatus'.tr
+              : 'webdav_downloadFailedStatus'.tr;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(WebDAVLocalizations.of(context).title),
+      title: Text('webdav_title'.tr),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -186,20 +186,16 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               TextFormField(
                 controller: _urlController,
                 decoration: InputDecoration(
-                  labelText: WebDAVLocalizations.of(context).serverAddress,
-                  hintText: WebDAVLocalizations.of(context).serverAddressHint,
+                  labelText: 'webdav_serverAddress'.tr,
+                  hintText: 'webdav_serverAddressHint'.tr,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return WebDAVLocalizations.of(
-                      context,
-                    ).serverAddressEmptyError;
+                    return 'webdav_serverAddressEmptyError'.tr;
                   }
                   if (!value.startsWith('http://') &&
                       !value.startsWith('https://')) {
-                    return WebDAVLocalizations.of(
-                      context,
-                    ).serverAddressInvalidError;
+                    return 'webdav_serverAddressInvalidError'.tr;
                   }
                   return null;
                 },
@@ -209,11 +205,11 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               TextFormField(
                 controller: _usernameController,
                 decoration: InputDecoration(
-                  labelText: WebDAVLocalizations.of(context).username,
+                  labelText: 'webdav_username'.tr,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return WebDAVLocalizations.of(context).usernameEmptyError;
+                    return 'webdav_usernameEmptyError'.tr;
                   }
                   return null;
                 },
@@ -223,12 +219,12 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(
-                  labelText: WebDAVLocalizations.of(context).password,
+                  labelText: 'webdav_password'.tr,
                 ),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return WebDAVLocalizations.of(context).passwordEmptyError;
+                    return 'webdav_passwordEmptyError'.tr;
                   }
                   return null;
                 },
@@ -238,15 +234,15 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               TextFormField(
                 controller: _dataPathController,
                 decoration: InputDecoration(
-                  labelText: WebDAVLocalizations.of(context).rootPath,
-                  hintText: WebDAVLocalizations.of(context).rootPathHint,
+                  labelText: 'webdav_rootPath'.tr,
+                  hintText: 'webdav_rootPathHint'.tr,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return WebDAVLocalizations.of(context).rootPathEmptyError;
+                    return 'webdav_rootPathEmptyError'.tr;
                   }
                   if (!value.startsWith('/')) {
-                    return WebDAVLocalizations.of(context).rootPathInvalidError;
+                    return 'webdav_rootPathInvalidError'.tr;
                   }
                   return null;
                 },
@@ -255,9 +251,9 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               const SizedBox(height: 16),
               if (_isConnected)
                 SwitchListTile(
-                  title: Text(WebDAVLocalizations.of(context).enableAutoSync),
+                  title: Text('webdav_enableAutoSync'.tr),
                   subtitle: Text(
-                    WebDAVLocalizations.of(context).syncIntervalHint,
+                    'webdav_syncIntervalHint'.tr,
                   ),
                   value: _autoSync,
                   onChanged: (bool value) {
@@ -265,12 +261,8 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
                       _autoSync = value;
                       _statusMessage =
                           value
-                              ? WebDAVLocalizations.of(
-                                context,
-                              ).autoSyncEnabledStatus
-                              : WebDAVLocalizations.of(
-                                context,
-                              ).autoSyncDisabledStatus;
+                              ? 'webdav_autoSyncEnabledStatus'.tr
+                              : 'webdav_autoSyncDisabledStatus'.tr;
                     });
                   },
                 ),
@@ -296,20 +288,20 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
         if (!_isConnected)
           TextButton(
             onPressed: _isConnecting ? null : _testConnection,
-            child: Text(WebDAVLocalizations.of(context).testConnection),
+            child: Text('webdav_testConnection'.tr),
           )
         else ...[
           TextButton(
             onPressed: _isConnecting ? null : _disconnect,
-            child: Text(WebDAVLocalizations.of(context).disconnect),
+            child: Text('webdav_disconnect'.tr),
           ),
           TextButton(
             onPressed: _isConnecting ? null : _syncWebDAVToLocal,
-            child: Text(WebDAVLocalizations.of(context).downloadAllData),
+            child: Text('webdav_downloadAllData'.tr),
           ),
           TextButton(
             onPressed: _isConnecting ? null : _syncLocalToWebDAV,
-            child: Text(WebDAVLocalizations.of(context).uploadAllData),
+            child: Text('webdav_uploadAllData'.tr),
           ),
           TextButton(
             onPressed: () async {
@@ -340,7 +332,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               Navigator.of(currentContext).pop(true);
 
               // 显示提示
-              toastService.showToast(WebDAVLocalizations.of(currentContext).settingsSavedMessage);
+              toastService.showToast('webdav_settingsSavedMessage'.tr);
             },
             child: Text(AppLocalizations.of(context)!.done),
           ),

@@ -1,11 +1,10 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_config.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
-
 /// Agent Chat 插件设置界面
 class AgentChatSettingsScreen extends StatefulWidget {
   final PluginBase plugin;
@@ -141,7 +140,7 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
       }
     } catch (e) {
       debugPrint('❌ [设置页面] 保存失败: $e');
-      _showError('${AgentChatLocalizations.of(context).saveSettings} failed: $e');
+      _showError('${'agent_chat_saveSettings'.tr} failed: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -187,7 +186,7 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AgentChatLocalizations.of(context).agentChatSettings),
+        title: Text('agent_chat_agentChatSettings'.tr),
         actions: [
           if (_hasChanges)
             IconButton(
@@ -216,8 +215,8 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Card(
               child: SwitchListTile(
-                title: Text(AgentChatLocalizations.of(context).prioritizeToolTemplate),
-                subtitle: Text(AgentChatLocalizations.of(context).prioritizeToolTemplateDescription),
+                title: Text('agent_chat_prioritizeToolTemplate'.tr),
+                subtitle: Text('agent_chat_prioritizeToolTemplateDescription'.tr),
                 value: _preferToolTemplates,
                 onChanged: (value) {
                   setState(() {
@@ -252,8 +251,8 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
                 child: Column(
                   children: [
                     SwitchListTile(
-                      title: Text(AgentChatLocalizations.of(context).enableBackgroundService),
-                      subtitle: Text(AgentChatLocalizations.of(context).enableBackgroundServiceDescription),
+                      title: Text('agent_chat_enableBackgroundService'.tr),
+                      subtitle: Text('agent_chat_enableBackgroundServiceDescription'.tr),
                       value: _enableBackgroundService,
                       onChanged: (value) {
                         setState(() {
@@ -268,8 +267,8 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
 
                       // Token消耗显示开关
                       SwitchListTile(
-                        title: Text(AgentChatLocalizations.of(context).showTokenConsumption),
-                        subtitle: Text(AgentChatLocalizations.of(context).showTokenConsumptionDescription),
+                        title: Text('agent_chat_showTokenConsumption'.tr),
+                        subtitle: Text('agent_chat_showTokenConsumptionDescription'.tr),
                         value: _showTokenInNotification,
                         onChanged: (value) {
                           setState(() {
@@ -421,14 +420,14 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: _testConnection,
-                            child: Text(AgentChatLocalizations.of(context).testConfiguration),
+                            child: Text('agent_chat_testConfiguration'.tr),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: FilledButton(
                             onPressed: _hasChanges ? _saveSettings : null,
-                            child: Text(AgentChatLocalizations.of(context).saveSettings),
+                            child: Text('agent_chat_saveSettings'.tr),
                           ),
                         ),
                       ],
