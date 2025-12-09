@@ -38,7 +38,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'calendar_album_edit'.tr : 'calendar_album_newEntry'.tr),
+        title: Text(isEditing ? 'calendar_album_edit'.tr : 'calendar_album_new_entry'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -124,7 +124,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
 
   Widget _buildWordCount() {
     return Text(
-      '${'calendar_album_wordCount'.tr}: ${controller.contentController.text.trim().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).length}',
+      '${'calendar_album_word_count'.tr}: ${controller.contentController.text.trim().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).length}',
       style: const TextStyle(color: Colors.grey),
     );
   }

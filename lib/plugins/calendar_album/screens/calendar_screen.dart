@@ -185,7 +185,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                 ).selectDate(DateTime.now());
               });
             },
-            tooltip: 'calendar_album_backToCurrentMonth'.tr,
+            tooltip: 'calendar_album_back_to_current_month'.tr,
           ),
         ],
         body: _buildCalendarListView(calendarController, selectedDate),
@@ -213,7 +213,7 @@ class _CalendarScreenState extends State<CalendarScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'calendar_album_enterKeywordToSearch'.tr,
+              'calendar_album_enter_keyword_to_search'.tr,
               style: TextStyle(
                 fontSize: 16,
                 color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
@@ -236,7 +236,7 @@ class _CalendarScreenState extends State<CalendarScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'calendar_album_noMatchingDiaries'.tr,
+              'calendar_album_no_matching_diaries'.tr,
               style: TextStyle(
                 fontSize: 16,
                 color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
@@ -244,7 +244,7 @@ class _CalendarScreenState extends State<CalendarScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              'calendar_album_tryOtherKeywords'.tr,
+              'calendar_album_try_other_keywords'.tr,
               style: TextStyle(
                 fontSize: 14,
                 color: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
@@ -480,7 +480,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                             children: [
                               Expanded(
                                 child: Text(
-                                  ' ${DateFormat('yyyy年MM月dd日').format(selectedDate)}${'calendar_album_diaryForDate'.tr}',
+                                  ' ${DateFormat('yyyy年MM月dd日').format(selectedDate)}${'calendar_album_diary_for_date'.tr}',
                                   style: Theme.of(context).textTheme.titleMedium
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
@@ -506,7 +506,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                   });
                                 },
                                 icon: const Icon(Icons.add),
-                                tooltip: 'calendar_album_newDiary'.tr,
+                                tooltip: 'calendar_album_new_diary'.tr,
                               ),
                               IconButton(
                                 onPressed: () => Navigator.pop(context),
@@ -625,7 +625,7 @@ class _CalendarScreenState extends State<CalendarScreen>
       lastDate: _calendarMaxMonth,
       initialEntryMode: DatePickerEntryMode.calendarOnly,
       initialDatePickerMode: DatePickerMode.year,
-      helpText: 'calendar_album_selectMonth'.tr,
+      helpText: 'calendar_album_select_month'.tr,
       cancelText: 'calendar_album_cancel'.tr,
       confirmText: 'calendar_album_confirm'.tr,
     );

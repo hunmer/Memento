@@ -20,8 +20,8 @@ class CalendarAlbumHomeWidgets {
     registry.register(HomeWidget(
       id: 'calendar_album_icon',
       pluginId: 'calendar_album',
-      name: 'calendar_album_widgetName'.tr,
-      description: 'calendar_album_widgetDescription'.tr,
+      name: 'calendar_album_widget_name'.tr,
+      description: 'calendar_album_widget_description'.tr,
       icon: Icons.notes_rounded,
       color: _pluginColor,
       defaultSize: HomeWidgetSize.small,
@@ -30,7 +30,7 @@ class CalendarAlbumHomeWidgets {
       builder: (context, config) => GenericIconWidget(
         icon: Icons.notes_rounded,
         color: _pluginColor,
-        name: 'calendar_album_widgetName'.tr,
+        name: 'calendar_album_widget_name'.tr,
       ),
     ));
 
@@ -38,8 +38,8 @@ class CalendarAlbumHomeWidgets {
     registry.register(HomeWidget(
       id: 'calendar_album_overview',
       pluginId: 'calendar_album',
-      name: 'calendar_album_overviewName'.tr,
-      description: 'calendar_album_overviewDescription'.tr,
+      name: 'calendar_album_overview_name'.tr,
+      description: 'calendar_album_overview_description'.tr,
       icon: Icons.calendar_today,
       color: _pluginColor,
       defaultSize: HomeWidgetSize.large,
@@ -66,26 +66,26 @@ class CalendarAlbumHomeWidgets {
       return [
         StatItemData(
           id: 'today_diary',
-          label: 'calendar_album_todayDiary'.tr,
+          label: 'calendar_album_today_diary'.tr,
           value: '$todayCount',
           highlight: todayCount! > 0,
           color: _pluginColor,
         ),
         StatItemData(
           id: 'seven_day_diary',
-          label: 'calendar_album_sevenDaysDiary'.tr,
+          label: 'calendar_album_seven_days_diary'.tr,
           value: '$sevenDayCount',
           highlight: false,
         ),
         StatItemData(
           id: 'all_diaries',
-          label: 'calendar_album_allDiaries'.tr,
+          label: 'calendar_album_all_diaries'.tr,
           value: '$allEntriesCount',
           highlight: false,
         ),
         StatItemData(
           id: 'tag_count',
-          label: 'calendar_album_tagCount'.tr,
+          label: 'calendar_album_tag_count'.tr,
           value: '$tagCount',
           highlight: false,
         ),

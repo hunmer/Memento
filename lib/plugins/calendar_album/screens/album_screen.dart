@@ -66,12 +66,12 @@ class _AlbumScreenState extends State<AlbumScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('calendar_album_allPhotos'.tr)),
+      appBar: AppBar(title: Text('calendar_album_all_photos'.tr)),
       body: Consumer<CalendarController>(
         builder: (context, calendarController, child) {
           final images = calendarController.getAllImages();
           return images.isEmpty
-              ? Center(child: Text('calendar_album_noPhotos'.tr))
+              ? Center(child: Text('calendar_album_no_photos'.tr))
               : GridView.builder(
                 padding: const EdgeInsets.all(8),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

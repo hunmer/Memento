@@ -27,7 +27,7 @@ class EntryEditorTagHandler extends StatelessWidget {
         TextField(
           decoration: InputDecoration(
             labelText: 'calendar_album_tags'.tr,
-            hintText: 'calendar_album_tagsHint'.tr,
+            hintText: 'calendar_album_tags_hint'.tr,
             border: const OutlineInputBorder(),
             suffixIcon: IconButton(
               icon: const Icon(Icons.label),
@@ -40,7 +40,7 @@ class EntryEditorTagHandler extends StatelessWidget {
                   (context as Element).markNeedsBuild();
                 }
               },
-              tooltip: 'calendar_album_tagManagement'.tr,
+              tooltip: 'calendar_album_tag_management'.tr,
             ),
           ),
           readOnly: true,
