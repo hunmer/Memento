@@ -108,7 +108,8 @@ dependencies:
   memento_nfc:
     path: ./memento_nfc
 
-  flutter_localizations: any
+  flutter_localizations:
+    sdk: flutter
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -161,7 +161,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         });
         Toast.success('app_moveSuccess'.tr);
       } catch (e) {
-        Toast.error('app_moveFailed'.tr(e.toString()));
+        Toast.error('app_moveFailed'.trParams({'error': e.toString()}));
       }
     }
   }
@@ -202,7 +202,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         }
         _refreshFiles();
       } catch (e) {
-        Toast.error('app_renameFailed'.tr(e.toString()));
+        Toast.error('app_renameFailed'.trParams({'error': e.toString()}));
       }
     }
   }
@@ -322,7 +322,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       );
 
       if (savePath != null) {
-        Toast.success('app_exportSuccessTo'.tr(savePath));
+        Toast.success('app_exportSuccessTo'.trParams({'path': savePath}));
       } else {
         Toast.show('app_exportCancelled'.tr);
       }

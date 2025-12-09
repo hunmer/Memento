@@ -44,7 +44,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AlertDialog(
-      title: Text(screensL10n.widgetSettings),
+      title: Text('homeScreen_widgetSettings'.tr),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -62,12 +62,12 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
               segments: [
                 ButtonSegment(
                   value: PluginWidgetDisplayStyle.oneColumn,
-                  label: Text(screensL10n.oneColumn),
+                  label: Text('homeScreen_oneColumn'.tr),
                   icon: const Icon(Icons.view_agenda),
                 ),
                 ButtonSegment(
                   value: PluginWidgetDisplayStyle.twoColumns,
-                  label: Text(screensL10n.twoColumns),
+                  label: Text('homeScreen_twoColumns'.tr),
                   icon: const Icon(Icons.view_column),
                 ),
               ],
@@ -121,10 +121,10 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
             // 背景图片
             ListTile(
               leading: const Icon(Icons.image),
-              title: Text(screensL10n.backgroundImage),
+              title: Text('homeScreen_backgroundImage'.tr),
               subtitle: _config.backgroundImagePath != null
-                ? Text(screensL10n.alreadySet)
-                : Text(screensL10n.notSet),
+                ? Text('homeScreen_alreadySet'.tr)
+                : Text('homeScreen_notSet'.tr),
               trailing: _config.backgroundImagePath != null
                 ? IconButton(
                   icon: const Icon(Icons.clear),
@@ -161,10 +161,10 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
             // 图标颜色
             ListTile(
               leading: const Icon(Icons.color_lens),
-              title: Text(screensL10n.iconColor),
+              title: Text('homeScreen_iconColor'.tr),
               subtitle: _config.iconColor != null
-                ? Text(screensL10n.customized)
-                : Text(screensL10n.useDefault),
+                ? Text('homeScreen_customized'.tr)
+                : Text('homeScreen_useDefault'.tr),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -207,8 +207,8 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
             // 背景颜色
             ListTile(
               leading: const Icon(Icons.format_color_fill),
-              title: Text(screensL10n.backgroundColor),
-              subtitle: Text(screensL10n.effectWhenNoBackgroundImage),
+              title: Text('homeScreen_backgroundColor'.tr),
+              subtitle: Text('homeScreen_effectWhenNoBackgroundImage'.tr),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -287,7 +287,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
             children: [
               // 预设颜色网格
               Text(
-                screensL10n.presetColors,
+                'homeScreen_presetColors'.tr,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -341,7 +341,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
                     );
                   },
                   icon: const Icon(Icons.palette),
-                  label: Text(screensL10n.customColorWithTransparency),
+                  label: Text('homeScreen_customColorWithTransparency'.tr),
                 ),
               ),
             ],
@@ -408,7 +408,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        screensL10n.quickSelectPresetColors,
+                        'homeScreen_quickSelectPresetColors'.tr,
                         style: const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     ),
