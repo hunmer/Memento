@@ -114,20 +114,19 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
       context: context,
       builder: (context) => AlertDialog(
             title: Text(
-              'widget_confirmClear'.tr ?? '确认清空',
+              'widget_confirmClear'.tr,
             ),
             content: Text(
-              'widget_confirmEmptyHistory'.tr ??
-                  '确定要清空所有路由历史记录吗？',
+              'widget_confirmEmptyHistory'.tr,
             ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-                child: Text('widget_cancel'.tr ?? '取消'),
+                child: Text('widget_cancel'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-                child: Text('widget_confirm'.tr ?? '确定'),
+                child: Text('widget_confirm'.tr),
           ),
         ],
       ),
@@ -173,7 +172,7 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    'widget_routeHistory'.tr ?? '路由历史记录',
+                    'widget_routeHistory'.tr,
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.bold,
