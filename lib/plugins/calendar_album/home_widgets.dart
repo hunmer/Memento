@@ -57,7 +57,6 @@ class CalendarAlbumHomeWidgets {
           as CalendarAlbumPlugin?;
       if (plugin == null) return [];
 
-      final l10n = CalendarAlbumLocalizations.of(context);
       final todayCount = plugin.calendarController?.getTodayEntriesCount();
       final sevenDayCount =
           plugin.calendarController?.getLast7DaysEntriesCount();
@@ -67,26 +66,26 @@ class CalendarAlbumHomeWidgets {
       return [
         StatItemData(
           id: 'today_diary',
-          label: l10n.todayDiary,
+          label: 'calendar_album_todayDiary'.tr,
           value: '$todayCount',
           highlight: todayCount! > 0,
           color: _pluginColor,
         ),
         StatItemData(
           id: 'seven_day_diary',
-          label: l10n.sevenDaysDiary,
+          label: 'calendar_album_sevenDaysDiary'.tr,
           value: '$sevenDayCount',
           highlight: false,
         ),
         StatItemData(
           id: 'all_diaries',
-          label: l10n.allDiaries,
+          label: 'calendar_album_allDiaries'.tr,
           value: '$allEntriesCount',
           highlight: false,
         ),
         StatItemData(
           id: 'tag_count',
-          label: l10n.tagCount,
+          label: 'calendar_album_tagCount'.tr,
           value: '$tagCount',
           highlight: false,
         ),
@@ -99,7 +98,6 @@ class CalendarAlbumHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = CalendarAlbumLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -120,7 +118,7 @@ class CalendarAlbumHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'calendar_album_name'.tr,
         pluginIcon: Icons.notes_rounded,
         pluginDefaultColor: _pluginColor,
         availableItems: availableItems,

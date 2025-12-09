@@ -1,6 +1,6 @@
 import 'timer_localizations.dart';
 
-class TimerLocalizationsEn extends TimerLocalizations {
+class TimerLocalizationsEn extends {
   TimerLocalizationsEn() : super('en');
 
   @override

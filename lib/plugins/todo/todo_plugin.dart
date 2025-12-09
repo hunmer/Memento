@@ -50,7 +50,6 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       'reminderAdvanceTime': 60, // minutes
     });
 
-
     // 注册 JS API（最后一步）
     await registerJSAPI();
   }

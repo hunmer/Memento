@@ -1,7 +1,7 @@
 import 'notes_localizations.dart';
 
 /// 英文本地化实现
-class NotesLocalizationsEn extends NotesLocalizations {
+class NotesLocalizationsEn extends {
   NotesLocalizationsEn() : super('en');
 
   @override

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.dart';
 
-
 /// Super Cupertino Navigation Bar 的封装组件
 ///
 /// 提供了一个统一的界面配置，包括：
@@ -197,7 +196,6 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
       }
     });
   }
-
 
   /// 更新搜索过滤器状态
   void _updateSearchFilter(String key, bool value) {

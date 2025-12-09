@@ -51,7 +51,6 @@ class ActivityHomeWidgets {
   /// 获取可用的统计项
   static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
-      final l10n = ActivityLocalizations.of(context);
       final plugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
       if (plugin == null) return [];
 
@@ -62,20 +61,20 @@ class ActivityHomeWidgets {
       return [
         StatItemData(
           id: 'today_activities',
-          label: l10n.todayActivities,
+          label: 'activity_todayActivities'.tr,
           value: '$activityCount',
           highlight: activityCount > 0,
           color: Colors.pink,
         ),
         StatItemData(
           id: 'today_duration',
-          label: l10n.todayDuration,
+          label: 'activity_todayDuration'.tr,
           value: '${(activityDuration / 60).toStringAsFixed(1)}H',
           highlight: false,
         ),
         StatItemData(
           id: 'remaining_time',
-          label: l10n.remainingTime,
+          label: 'activity_remainingTime'.tr,
           value: '${(remainingTime / 60).toStringAsFixed(1)}H',
           highlight: remainingTime < 120,
           color: Colors.red,
@@ -89,7 +88,6 @@ class ActivityHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = ActivityLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -110,7 +108,7 @@ class ActivityHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'activity_name'.tr,
         pluginIcon: Icons.access_time,
         pluginDefaultColor: Colors.pink,
         availableItems: availableItems,

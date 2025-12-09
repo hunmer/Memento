@@ -62,7 +62,6 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
   Widget _buildTaskCard(BuildContext context, Task task) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final l10n = TodoLocalizations.of(context);
 
     // 格式化日期
     final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
@@ -160,7 +159,7 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
                       size: 20,
                     ),
                     onPressed: () => _showDeleteConfirmation(context, task),
-                    tooltip: l10n.delete,
+                    tooltip: 'todo_delete'.tr,
                     visualDensity: VisualDensity.compact,
                   ),
                 ],
@@ -180,7 +179,7 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
                     child: _buildTimeInfo(
                       context,
                       icon: Icons.add_circle_outline,
-                      label: l10n.createdAt,
+                      label: 'todo_createdAt'.tr,
                       value: createdAtStr,
                       color: colorScheme.primary,
                     ),
@@ -190,7 +189,7 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
                     child: _buildTimeInfo(
                       context,
                       icon: Icons.check_circle_outline,
-                      label: l10n.completedOn,
+                      label: 'todo_completedOn'.tr,
                       value: completedAtStr,
                       color: Colors.green,
                     ),
@@ -335,24 +334,24 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
   }
 
   Future<void> _showDeleteConfirmation(BuildContext context, Task task) async {
-    final l10n = TodoLocalizations.of(context);
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.delete_forever, color: Colors.red),
-        title: Text(l10n.deleteTaskTitle),
-        content: Text(l10n.deleteTaskMessage),
+        title: Text('todo_deleteTaskTitle'.tr),
+        content: Text('todo_deleteTaskMessage'.tr),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.cancel),
+            child: Text('todo_cancel'.tr),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: Text(l10n.delete),
+            child: Text('todo_delete'.tr),
           ),
         ],
       ),

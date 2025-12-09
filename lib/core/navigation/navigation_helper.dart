@@ -247,7 +247,6 @@ class NavigationHelper {
     );
   }
 
-
   /// 显示底部弹窗
   static Future<T?> showModalBottomSheet<T extends Object?>(
     BuildContext context,

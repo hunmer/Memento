@@ -81,7 +81,6 @@ class TrackerHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = TrackerLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -102,7 +101,7 @@ class TrackerHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'tracker_name'.tr,
         pluginIcon: Icons.track_changes,
         pluginDefaultColor: Colors.red,
         availableItems: baseItems,
@@ -115,7 +114,7 @@ class TrackerHomeWidgets {
 
   /// 构建错误提示组件
   static Widget _buildErrorWidget(BuildContext context, String error) {
-    final l10n = TrackerLocalizations.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -123,7 +122,7 @@ class TrackerHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            l10n.loadFailed,
+            'tracker_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

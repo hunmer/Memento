@@ -51,7 +51,7 @@ class ChatHomeWidgets {
   /// 获取可用的统计项
   static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
-      final l10n = ChatLocalizations.of(context);
+
       final plugin = PluginManager.instance.getPlugin('chat') as ChatPlugin?;
       if (plugin == null) return [];
 
@@ -62,19 +62,19 @@ class ChatHomeWidgets {
       return [
         StatItemData(
           id: 'channel_count',
-          label: l10n.channelCount,
+          label: 'chat_channelCount'.tr,
           value: '${channels.length}',
           highlight: false,
         ),
         StatItemData(
           id: 'total_messages',
-          label: l10n.totalMessages,
+          label: 'chat_totalMessages'.tr,
           value: '$totalMessages',
           highlight: false,
         ),
         StatItemData(
           id: 'today_messages',
-          label: l10n.todayMessages,
+          label: 'chat_todayMessages'.tr,
           value: '$todayMessages',
           highlight: todayMessages > 0,
           color: Colors.indigoAccent,
@@ -88,7 +88,6 @@ class ChatHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = ChatLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -109,7 +108,7 @@ class ChatHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.chatWidgetName,
+        pluginName: 'chat_chatWidgetName'.tr,
         pluginIcon: Icons.chat_bubble,
         pluginDefaultColor: Colors.indigoAccent,
         availableItems: availableItems,
@@ -122,7 +121,7 @@ class ChatHomeWidgets {
 
   /// 构建错误提示组件
   static Widget _buildErrorWidget(BuildContext context, String error) {
-    final l10n = ChatLocalizations.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -130,7 +129,7 @@ class ChatHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            l10n.loadFailed,
+            'chat_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

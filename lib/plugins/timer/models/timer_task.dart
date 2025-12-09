@@ -169,7 +169,6 @@ class TimerTask {
     );
   }
 
-
   /// 获取计时器类型
   TimerType _getTimerType() {
     if (timerItems.isEmpty) return TimerType.countUp;

@@ -46,7 +46,6 @@ class _SkillFormState extends State<SkillForm> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -216,7 +215,7 @@ class _SkillFormState extends State<SkillForm> {
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 16),
-          ElevatedButton(onPressed: _saveSkill, child: Text(l10n.save)),
+          ElevatedButton(onPressed: _saveSkill, child: Text('habits_save'.tr)),
         ],
       ),
     );

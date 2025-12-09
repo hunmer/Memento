@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
@@ -93,7 +92,7 @@ mixin FolderSelectionDialog on NotesMainViewState {
                 TextButton(
                   onPressed: () => Navigator.pop(context, parentFolder),
                   child: Text(
-                    NodesLocalizations.of(context).selectCurrentFolder,
+                    .selectCurrentFolder,
                   ),
                 ),
             ],

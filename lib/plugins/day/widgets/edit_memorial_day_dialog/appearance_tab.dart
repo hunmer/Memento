@@ -21,7 +21,7 @@ class AppearanceTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = DayLocalizations.of(context);
+    final localizations = ;
     final scrollController = ScrollController();
 
     return SingleChildScrollView(

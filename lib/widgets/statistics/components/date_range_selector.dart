@@ -74,8 +74,6 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
     }
   }
 
-
-
   void _handleRangeChanged(DateRangeOption range) {
     if (range == DateRangeOption.custom) {
       _showDateRangePicker();

@@ -1,4 +1,3 @@
-import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
@@ -117,13 +116,13 @@ class _FolderListScreenState extends State<FolderListScreen> {
             context: context,
             builder:
                 (context) => AlertDialog(
-                  title: Text(NodesLocalizations.of(context).createNew),
+                  title: Text(.createNew),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ListTile(
                         leading: const Icon(Icons.folder),
-                        title: Text(NodesLocalizations.of(context).newFolder),
+                        title: Text(.newFolder),
                         onTap: () {
                           Navigator.pop(context);
                           // Show folder creation dialog
@@ -131,7 +130,7 @@ class _FolderListScreenState extends State<FolderListScreen> {
                       ),
                       ListTile(
                         leading: const Icon(Icons.note),
-                        title: Text(NodesLocalizations.of(context).newNote),
+                        title: Text(.newNote),
                         onTap: () {
                           Navigator.pop(context);
                           NavigationHelper.push(context, NoteEditScreen(

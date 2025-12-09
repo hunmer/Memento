@@ -52,17 +52,17 @@ class DayHomeWidgets {
 
       final totalCount = plugin.getMemorialDayCount();
       final upcomingDays = plugin.getUpcomingMemorialDays();
-      final l10n = DayLocalizations.of(context);
+
       return [
         StatItemData(
           id: 'total_count',
-          label: l10n.memorialDays,
+          label: 'day_memorialDays'.tr,
           value: '$totalCount',
           highlight: false,
         ),
         StatItemData(
           id: 'upcoming',
-          label: l10n.upcoming,
+          label: 'day_upcoming'.tr,
           value: upcomingDays.isNotEmpty ? upcomingDays.join('、') : '暂无',
           highlight: upcomingDays.isNotEmpty,
           color: Colors.black87,
@@ -85,7 +85,6 @@ class DayHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = DayLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -106,7 +105,7 @@ class DayHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'day_name'.tr,
         pluginIcon: Icons.event_outlined,
         pluginDefaultColor: Colors.black87,
         availableItems: availableItems,

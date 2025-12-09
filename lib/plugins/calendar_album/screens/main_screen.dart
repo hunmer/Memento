@@ -38,7 +38,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = CalendarAlbumLocalizations.of(context);
+
     final pages = [
       CalendarScreen(key: const PageStorageKey('calendar')),
       TagScreen(key: const PageStorageKey('tags')),
@@ -71,15 +71,15 @@ class _MainScreenState extends State<MainScreen> {
           items: [
             BottomNavigationBarItem(
               icon: const Icon(Icons.calendar_today),
-              label: l10n.calendar,
+              label: 'calendar_album_calendar'.tr,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.tag),
-              label: l10n.tags,
+              label: 'calendar_album_tags'.tr,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.photo_library),
-              label: l10n.album,
+              label: 'calendar_album_album'.tr,
             ),
           ],
         ),

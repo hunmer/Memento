@@ -1,5 +1,3 @@
-import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
-import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -83,8 +81,8 @@ Future<void> deleteNoteDialog(
     context: context,
     builder:
         (context) => AlertDialog(
-          title: Text(NodesLocalizations.of(context).deleteNote),
-          content: Text(NodesLocalizations.of(context).deleteNoteConfirmation),
+          title: Text(.deleteNote),
+          content: Text(.deleteNoteConfirmation),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -93,7 +91,7 @@ Future<void> deleteNoteDialog(
             TextButton(
               onPressed: () => Navigator.pop(context, true),
               child: Text(
-                NodesLocalizations.of(context).delete,
+                .delete,
                 style: TextStyle(color: Colors.red),
               ),
             ),

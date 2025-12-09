@@ -501,9 +501,7 @@ class _ToolEditorDialogState extends State<ToolEditorDialog>
                             const SizedBox(height: 8),
                             CheckboxListTile(
                                 title: Text(
-                                  AgentChatLocalizations.of(
-                                    context,
-                                  ).optionalParameter,
+                                  'agent_chat_optionalParameter'.tr,
                                 ),
                               value: param.optional,
                               dense: true,

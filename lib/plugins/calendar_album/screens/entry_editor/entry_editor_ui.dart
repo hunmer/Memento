@@ -35,10 +35,10 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = CalendarAlbumLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? l10n.edit : l10n.newEntry),
+        title: Text(isEditing ? 'calendar_album_edit'.tr : 'calendar_album_newEntry'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -51,11 +51,11 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
           ),
         ],
       ),
-      body: _buildBody(context, l10n),
+      body: _buildBody(context),
     );
   }
 
-  Widget _buildBody(BuildContext context, CalendarAlbumLocalizations l10n) {
+  Widget _buildBody(BuildContext context) {
     if (controller.isPreview) {
       return SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -83,57 +83,57 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
             },
           ),
           const SizedBox(height: 16),
-          _buildTitleField(l10n),
+          _buildTitleField(),
           const SizedBox(height: 16),
-          _buildContentField(l10n),
+          _buildContentField(),
           const SizedBox(height: 16),
-          _buildWordCount(l10n),
+          _buildWordCount(),
           const SizedBox(height: 16),
-          EntryEditorTagHandler(controller: controller, l10n: l10n),
+          EntryEditorTagHandler(controller: controller),
           const SizedBox(height: 16),
-          _buildLocationField(l10n),
+          _buildLocationField(),
           const SizedBox(height: 16),
-          _buildMoodAndWeatherRow(l10n),
+          _buildMoodAndWeatherRow(),
         ],
       ),
     );
   }
 
   // 其他UI组件方法...
-  Widget _buildTitleField(CalendarAlbumLocalizations l10n) {
+  Widget _buildTitleField() {
     return TextField(
       controller: controller.titleController,
       decoration: InputDecoration(
-        labelText: l10n.title,
+        labelText: 'calendar_album_title'.tr,
         border: const OutlineInputBorder(),
       ),
       maxLines: 1,
     );
   }
 
-  Widget _buildContentField(CalendarAlbumLocalizations l10n) {
+  Widget _buildContentField() {
     return TextField(
       controller: controller.contentController,
       decoration: InputDecoration(
-        labelText: l10n.content,
+        labelText: 'calendar_album_content'.tr,
         border: const OutlineInputBorder(),
       ),
       maxLines: 10,
     );
   }
 
-  Widget _buildWordCount(CalendarAlbumLocalizations l10n) {
+  Widget _buildWordCount() {
     return Text(
-      '${l10n.wordCount}: ${controller.contentController.text.trim().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).length}',
+      '${'calendar_album_wordCount'.tr}: ${controller.contentController.text.trim().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).length}',
       style: const TextStyle(color: Colors.grey),
     );
   }
 
-  Widget _buildLocationField(CalendarAlbumLocalizations l10n) {
+  Widget _buildLocationField() {
     return TextField(
       controller: controller.locationController,
       decoration: InputDecoration(
-        labelText: l10n.location,
+        labelText: 'calendar_album_location'.tr,
         border: const OutlineInputBorder(),
         prefixIcon: IconButton(
           icon: const Icon(Icons.location_on),
@@ -170,21 +170,21 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     );
   }
 
-  Widget _buildMoodAndWeatherRow(CalendarAlbumLocalizations l10n) {
+  Widget _buildMoodAndWeatherRow() {
     return Row(
       children: [
-        _buildMoodDropdown(l10n),
+        _buildMoodDropdown(),
         const SizedBox(width: 16),
-        _buildWeatherDropdown(l10n),
+        _buildWeatherDropdown(),
       ],
     );
   }
 
-  Widget _buildMoodDropdown(CalendarAlbumLocalizations l10n) {
+  Widget _buildMoodDropdown() {
     return Expanded(
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration(
-          labelText: l10n.mood,
+          labelText: 'calendar_album_mood'.tr,
           border: const OutlineInputBorder(),
         ),
         initialValue: controller.mood,
@@ -211,11 +211,11 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     );
   }
 
-  Widget _buildWeatherDropdown(CalendarAlbumLocalizations l10n) {
+  Widget _buildWeatherDropdown() {
     return Expanded(
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration(
-          labelText: l10n.weather,
+          labelText: 'calendar_album_weather'.tr,
           border: const OutlineInputBorder(),
         ),
         initialValue: controller.weather,

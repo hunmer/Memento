@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/widgets/common_record_list.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
@@ -40,11 +39,10 @@ class _HabitsHistoryListState extends State<HabitsHistoryList> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.history),
+        title: Text('nfc_history'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete),
@@ -58,7 +56,7 @@ class _HabitsHistoryListState extends State<HabitsHistoryList> {
         onDelete: widget.controller.deleteCompletionRecord,
         getDate: (record) => record.date.toString(),
         getNotes: (record) => record.notes,
-        getDeleteMessage: () => l10n.recordDeleted,
+        getDeleteMessage: () => 'nfc_recordDeleted'.tr,
         itemKey: (record) => Key(record.id),
       ),
     );
@@ -68,24 +66,24 @@ class _HabitsHistoryListState extends State<HabitsHistoryList> {
     BuildContext context,
     CompletionRecord record,
   ) async {
-    final l10n = HabitsLocalizations.of(context);
+
     return await showDialog<bool>(
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(l10n.deleteRecord),
-                content: Text(l10n.deleteRecordMessage),
+                title: Text('nfc_deleteRecord'.tr),
+                content: Text('nfc_deleteRecordMessage'.tr),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: Text(l10n.cancel),
+                    child: Text('nfc_cancel'.tr),
                   ),
                   TextButton(
                     onPressed: () async {
                       await widget.controller.deleteCompletionRecord(record.id);
                       Navigator.pop(context, true);
                     },
-                    child: Text(l10n.delete),
+                    child: Text('nfc_delete'.tr),
                   ),
                 ],
               ),
@@ -94,22 +92,22 @@ class _HabitsHistoryListState extends State<HabitsHistoryList> {
   }
 
   Future<void> _showClearAllDialog(BuildContext context) async {
-    final l10n = HabitsLocalizations.of(context);
+
     final shouldClear =
         await showDialog<bool>(
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(l10n.clearAllRecords),
-                content: Text(l10n.deleteRecordMessage),
+                title: Text('nfc_clearAllRecords'.tr),
+                content: Text('nfc_deleteRecordMessage'.tr),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: Text(l10n.cancel),
+                    child: Text('nfc_cancel'.tr),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, true),
-                    child: Text(l10n.clearAllRecords),
+                    child: Text('nfc_clearAllRecords'.tr),
                   ),
                 ],
               ),
@@ -118,7 +116,7 @@ class _HabitsHistoryListState extends State<HabitsHistoryList> {
 
     if (shouldClear && mounted) {
       await widget.controller.clearAllCompletionRecords(widget.habitId);
-      ToastService.instance.showToast(l10n.clearAllRecords);
+      ToastService.instance.showToast('nfc_clearAllRecords'.tr);
       await _loadRecords();
     }
   }

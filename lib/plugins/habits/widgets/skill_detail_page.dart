@@ -29,7 +29,6 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -53,11 +52,11 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
         items: [
           BottomNavigationBarItem(
             icon: const Icon(Icons.list),
-            label: l10n.records,
+            label: 'habits_records'.tr,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.bar_chart),
-            label: l10n.statistics,
+            label: 'habits_statistics'.tr,
           ),
         ],
       ),
@@ -82,7 +81,7 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
   }
 
   Future<void> _navigateToEdit(BuildContext context) async {
-    HabitsLocalizations.of(context);
+    ;
     await NavigationHelper.push(
       context,
       SkillForm(
@@ -97,24 +96,24 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
   }
 
   Future<void> _confirmDelete(BuildContext context) async {
-    final l10n = HabitsLocalizations.of(context);
+
     return showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(l10n.deleteSkill),
-            content: Text(l10n.deleteSkillConfirmation),
+            title: Text('habits_deleteSkill'.tr),
+            content: Text('habits_deleteSkillConfirmation'.tr),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel),
+                child: Text('habits_cancel'.tr),
               ),
               TextButton(
                 onPressed: () async {
                   await widget.skillController.deleteSkill(widget.skill.id);
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
-                child: Text(l10n.delete),
+                child: Text('habits_delete'.tr),
               ),
             ],
           ),

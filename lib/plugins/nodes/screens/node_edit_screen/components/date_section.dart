@@ -17,7 +17,6 @@ class DateSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = NodesLocalizations.of(context);
 
     return Row(
       children: [
@@ -27,7 +26,7 @@ class DateSection extends StatelessWidget {
             label: Text(
               startDate != null
                   ? startDate!.toString().split(' ')[0]
-                  : l10n.startDate,
+                  : 'nodes_startDate'.tr,
             ),
             onPressed: () => _selectDate(context, true),
           ),
@@ -39,7 +38,7 @@ class DateSection extends StatelessWidget {
             label: Text(
               endDate != null
                   ? endDate!.toString().split(' ')[0]
-                  : l10n.endDate,
+                  : 'nodes_endDate'.tr,
             ),
             onPressed: () => _selectDate(context, false),
           ),

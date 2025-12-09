@@ -134,7 +134,6 @@ class _CalendarScreenState extends State<CalendarScreen>
     final tagController = Provider.of<TagController>(context);
     final selectedDate = calendarController.selectedDate;
     final theme = Theme.of(context);
-    final l10n = CalendarAlbumLocalizations.of(context);
 
     return MultiProvider(
       providers: [
@@ -149,11 +148,11 @@ class _CalendarScreenState extends State<CalendarScreen>
             color: theme.textTheme.titleLarge?.color,
           ),
         ),
-        largeTitle: l10n.calendarDiary,
+        largeTitle: 'calendar_album_calendarDiary'.tr,
         automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
         // 启用搜索栏
         enableSearchBar: true,
-        searchPlaceholder: l10n.searchDiaryPlaceholder,
+        searchPlaceholder: 'calendar_album_searchDiaryPlaceholder'.tr,
         onSearchChanged: (query) {
           _performSearch(query);
         },
@@ -162,7 +161,7 @@ class _CalendarScreenState extends State<CalendarScreen>
         },
         // 启用搜索过滤器
         enableSearchFilter: true,
-        filterLabels: {'title': l10n.title, 'content': l10n.content, 'tag': l10n.tag},
+        filterLabels: {'title': 'calendar_album_title'.tr, 'content': 'calendar_album_content'.tr, 'tag': 'calendar_album_tag'.tr},
         onSearchFilterChanged: (filters) {
           setState(() {
             _searchFilters = Map.from(filters);
@@ -186,7 +185,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                 ).selectDate(DateTime.now());
               });
             },
-            tooltip: l10n.backToCurrentMonth,
+            tooltip: 'calendar_album_backToCurrentMonth'.tr,
           ),
         ],
         body: _buildCalendarListView(calendarController, selectedDate),
@@ -199,7 +198,7 @@ class _CalendarScreenState extends State<CalendarScreen>
     CalendarController calendarController,
     TagController tagController,
   ) {
-    final l10n = CalendarAlbumLocalizations.of(context);
+
     final theme = Theme.of(context);
 
     if (_searchQuery.isEmpty) {
@@ -214,7 +213,7 @@ class _CalendarScreenState extends State<CalendarScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              l10n.enterKeywordToSearch,
+              'calendar_album_enterKeywordToSearch'.tr,
               style: TextStyle(
                 fontSize: 16,
                 color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
@@ -237,7 +236,7 @@ class _CalendarScreenState extends State<CalendarScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              l10n.noMatchingDiaries,
+              'calendar_album_noMatchingDiaries'.tr,
               style: TextStyle(
                 fontSize: 16,
                 color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
@@ -245,7 +244,7 @@ class _CalendarScreenState extends State<CalendarScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.tryOtherKeywords,
+              'calendar_album_tryOtherKeywords'.tr,
               style: TextStyle(
                 fontSize: 14,
                 color: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
@@ -390,12 +389,11 @@ class _CalendarScreenState extends State<CalendarScreen>
     );
   }
 
-
   Widget _buildCalendarListView(
     CalendarController calendarController,
     DateTime selectedDate,
   ) {
-    final l10n = CalendarAlbumLocalizations.of(context);
+
     return _VerticalCalendarView(
       calendarController: calendarController,
       selectedDate: selectedDate,
@@ -404,7 +402,7 @@ class _CalendarScreenState extends State<CalendarScreen>
         calendarController.selectDate(selectedDay);
         setState(() => _focusedDay = selectedDay);
         // 选中日期后自动弹出抽屉
-        _showEntryDrawer(context, calendarController, selectedDay, l10n);
+        _showEntryDrawer(context, calendarController, selectedDay);
       },
       onDateLongPressed: (pressedDay) {
         // 长按可以选择日期并打开编辑器
@@ -434,7 +432,6 @@ class _CalendarScreenState extends State<CalendarScreen>
     BuildContext context,
     CalendarController calendarController,
     DateTime selectedDate,
-    dynamic l10n,
   ) {
     // 在 showModalBottomSheet 之前获取 TagController 实例
     final tagController = Provider.of<TagController>(context, listen: false);
@@ -483,7 +480,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                             children: [
                               Expanded(
                                 child: Text(
-                                  ' ${DateFormat('yyyy年MM月dd日').format(selectedDate)}${l10n.diaryForDate}',
+                                  ' ${DateFormat('yyyy年MM月dd日').format(selectedDate)}${'calendar_album_diaryForDate'.tr}',
                                   style: Theme.of(context).textTheme.titleMedium
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
@@ -509,7 +506,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                   });
                                 },
                                 icon: const Icon(Icons.add),
-                                tooltip: l10n.newDiary,
+                                tooltip: 'calendar_album_newDiary'.tr,
                               ),
                               IconButton(
                                 onPressed: () => Navigator.pop(context),
@@ -527,7 +524,6 @@ class _CalendarScreenState extends State<CalendarScreen>
                                 calendarController,
                                 tagController,
                                 selectedDate,
-                                l10n,
                               );
                             },
                           ),
@@ -545,7 +541,6 @@ class _CalendarScreenState extends State<CalendarScreen>
     CalendarController calendarController,
     TagController tagController,
     DateTime selectedDate,
-    dynamic l10n,
   ) {
     return EntryList(
       entries: calendarController.getEntriesForDate(selectedDate),
@@ -581,12 +576,12 @@ class _CalendarScreenState extends State<CalendarScreen>
             context: context,
             builder:
                 (context) => AlertDialog(
-                  title: Text(l10n.get('delete')),
-                  content: Text('${l10n.get('delete')} "${entry.title}"?'),
+                  title: Text('common_delete'.tr),
+                  content: Text('${'common_confirmDelete'.tr} "${entry.title}"?'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text(l10n.get('cancel')),
+                      child: Text('common_cancel'.tr),
                     ),
                     TextButton(
                       onPressed: () {
@@ -595,7 +590,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                         Navigator.pop(context); // 关闭抽屉并刷新
                         setState(() {});
                       },
-                      child: Text(l10n.get('delete')),
+                      child: Text('common_delete'.tr),
                     ),
                   ],
                 ),
@@ -622,7 +617,7 @@ class _CalendarScreenState extends State<CalendarScreen>
     BuildContext context,
     CalendarController calendarController,
   ) async {
-    final l10n = CalendarAlbumLocalizations.of(context);
+
     final selectedDate = await showDatePicker(
       context: context,
       initialDate: _focusedDay,
@@ -630,9 +625,9 @@ class _CalendarScreenState extends State<CalendarScreen>
       lastDate: _calendarMaxMonth,
       initialEntryMode: DatePickerEntryMode.calendarOnly,
       initialDatePickerMode: DatePickerMode.year,
-      helpText: l10n.selectMonth,
-      cancelText: l10n.cancel,
-      confirmText: l10n.confirm,
+      helpText: 'calendar_album_selectMonth'.tr,
+      cancelText: 'calendar_album_cancel'.tr,
+      confirmText: 'calendar_album_confirm'.tr,
     );
     if (selectedDate != null) {
       setState(() {

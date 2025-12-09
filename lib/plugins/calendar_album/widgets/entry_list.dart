@@ -75,7 +75,6 @@ class EntryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = CalendarAlbumLocalizations.of(context);
 
     if (entries.isEmpty) {
       return Center(
@@ -83,7 +82,7 @@ class EntryList extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              l10n.noEntries,
+              'calendar_album_noEntries'.tr,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -94,7 +93,7 @@ class EntryList extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onCreateNew,
                 icon: const Icon(Icons.add),
-                label: Text(l10n.createNewDiary),
+                label: Text('calendar_album_createNewDiary'.tr),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,

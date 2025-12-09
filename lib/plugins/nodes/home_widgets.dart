@@ -117,7 +117,6 @@ class NodesHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = NodesLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -138,7 +137,7 @@ class NodesHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'nodes_name'.tr,
         pluginIcon: Icons.account_tree,
         pluginDefaultColor: Colors.amber,
         availableItems: availableItems,

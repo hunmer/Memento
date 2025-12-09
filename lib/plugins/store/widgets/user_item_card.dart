@@ -52,7 +52,7 @@ class UserItemCard extends StatelessWidget {
                 builder: (context) => AlertDialog(
                   title: Text('store_confirmUse'.tr),
                   content: Text(
-                    StoreLocalizations.of(context)
+                    
                         .confirmUseMessage
                         .replaceFirst('%s', item.productName),
                   ),

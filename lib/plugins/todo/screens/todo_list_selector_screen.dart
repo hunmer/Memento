@@ -57,12 +57,12 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
 
   /// 获取时间范围选项
   Map<String, String> _getTimeRangeOptions(BuildContext context) {
-    final l10n = TodoLocalizations.of(context);
+
     return {
-      'today': l10n.today,
-      'week': l10n.thisWeek,
-      'month': l10n.thisMonth,
-      'all': l10n.all,
+      'today': 'todo_today'.tr,
+      'week': 'todo_thisWeek'.tr,
+      'month': 'todo_thisMonth'.tr,
+      'all': 'todo_all'.tr,
     };
   }
 
@@ -212,7 +212,6 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = TodoLocalizations.of(context);
 
     if (_isLoading) {
       return const Scaffold(
@@ -224,7 +223,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.configureTodoListWidget),
+        title: Text('todo_configureTodoListWidget'.tr),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
@@ -233,7 +232,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
       body: WidgetConfigEditor(
         widgetSize: WidgetSize.large,
         initialConfig: _widgetConfig,
-        previewTitle: l10n.todoTasks,
+        previewTitle: 'todo_todoTasks'.tr,
         onConfigChanged: (config) {
           setState(() => _widgetConfig = config);
         },
@@ -258,7 +257,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
               ),
             ),
             child: Text(
-              l10n.confirmConfiguration,
+              'todo_confirmConfiguration'.tr,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
@@ -269,7 +268,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
 
   /// 构建预览
   Widget _buildPreview(BuildContext context, WidgetConfig config) {
-    final l10n = TodoLocalizations.of(context);
+
     final primaryColor = config.getColor('primary') ?? const Color(0xFF2dd4bf);
     final accentColor = config.getColor('accent') ?? const Color(0xFF5eeada);
     final filteredTasks = _getFilteredTasks();
@@ -325,7 +324,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
             child: filteredTasks.isEmpty
                 ? Center(
                     child: Text(
-                      l10n.noTodoTasks,
+                      'todo_noTodoTasks'.tr,
                       style: const TextStyle(
                         color: Color(0xFF9CA3AF),
                         fontSize: 14,
@@ -380,7 +379,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
   /// 构建标题配置
   Widget _buildTitleConfig() {
     final theme = Theme.of(context);
-    final l10n = TodoLocalizations.of(context);
+
     final timeRangeOptions = _getTimeRangeOptions(context);
 
     return Card(
@@ -394,7 +393,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
                 Icon(Icons.title, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
-                  l10n.widgetTitle,
+                  'todo_widgetTitle'.tr,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -405,7 +404,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                hintText: '${l10n.leaveEmptyForDefaultTitle}（${timeRangeOptions[_selectedTimeRange]}）',
+                hintText: '${'todo_leaveEmptyForDefaultTitle'.tr}（${timeRangeOptions[_selectedTimeRange]}）',
                 border: const OutlineInputBorder(),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -423,7 +422,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
   /// 构建时间范围配置
   Widget _buildTimeRangeConfig() {
     final theme = Theme.of(context);
-    final l10n = TodoLocalizations.of(context);
+
     final primaryColor = _widgetConfig.getColor('primary') ?? const Color(0xFF2dd4bf);
     final timeRangeOptions = _getTimeRangeOptions(context);
 
@@ -438,7 +437,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
                 Icon(Icons.date_range, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
-                  l10n.timeRange,
+                  'todo_timeRange'.tr,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -478,7 +477,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
 
   /// 保存配置并关闭界面
   Future<void> _saveAndFinish() async {
-    TodoLocalizations.of(context);
+    ;
     final timeRangeOptions = _getTimeRangeOptions(context);
 
     if (widget.widgetId == null) {

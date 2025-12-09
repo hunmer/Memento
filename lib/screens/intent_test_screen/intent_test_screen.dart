@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:async';
 import 'package:memento_intent/memento_intent.dart';
-import '../l10n/screens_localizations.dart';
-
 class IntentTestScreen extends StatefulWidget {
   const IntentTestScreen({super.key});
 

@@ -124,7 +124,7 @@ class _TrackerGoalSelectorScreenState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = TrackerLocalizations.of(context);
+
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -135,7 +135,7 @@ class _TrackerGoalSelectorScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.configureGoalTrackingWidget),
+        title: Text('tracker_configureGoalTrackingWidget'.tr),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
@@ -519,8 +519,8 @@ class _TrackerGoalSelectorScreenState
       );
 
       if (mounted) {
-        final l10n = TrackerLocalizations.of(context);
-        Toast.success('${l10n.configured} "${selectedGoal.name}"');
+
+        Toast.success('${'tracker_configured'.tr} "${selectedGoal.name}"');
 
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
@@ -529,8 +529,8 @@ class _TrackerGoalSelectorScreenState
       }
     } catch (e) {
       if (mounted) {
-        final l10n = TrackerLocalizations.of(context);
-        Toast.error('${l10n.configurationFailed}: $e');
+
+        Toast.error('${'tracker_configurationFailed'.tr}: $e');
       }
     }
   }

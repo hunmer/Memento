@@ -19,12 +19,11 @@ class CustomFieldsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = NodesLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.customFields, style: Theme.of(context).textTheme.titleMedium),
+        Text('nodes_customFields'.tr, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         ...customFields.asMap().entries.map((entry) {
           final index = entry.key;
@@ -59,7 +58,7 @@ class CustomFieldsSection extends StatelessWidget {
         }),
         TextButton.icon(
           icon: const Icon(Icons.add),
-          label: Text(l10n.addCustomField),
+          label: Text('nodes_addCustomField'.tr),
           onPressed: () => _showAddCustomFieldDialog(context),
         ),
       ],

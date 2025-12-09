@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 
@@ -17,7 +16,6 @@ class StatisticsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return FutureBuilder(
       future: Future.wait([
@@ -35,7 +33,7 @@ class StatisticsTab extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.statistics,
+                  'nfc_statistics'.tr,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 16),
@@ -46,7 +44,7 @@ class StatisticsTab extends StatelessWidget {
                       children: [
                         ListTile(
                           leading: const Icon(Icons.check_circle),
-                          title: Text(l10n.totalCompletions),
+                          title: Text('nfc_totalCompletions'.tr),
                           trailing: Text(
                             'nfc_completions'.tr +
                                 ': $count',
@@ -54,7 +52,7 @@ class StatisticsTab extends StatelessWidget {
                         ),
                         ListTile(
                           leading: const Icon(Icons.timer),
-                          title: Text(l10n.totalDuration),
+                          title: Text('nfc_totalDuration'.tr),
                           trailing: Text(HabitsUtils.formatDuration(duration)),
                         ),
                       ],
@@ -65,7 +63,7 @@ class StatisticsTab extends StatelessWidget {
                 // TODO: 添加统计图表
                 Center(
                   child: Text(
-                    l10n.statisticsChartsPlaceholder,
+                    'nfc_statisticsChartsPlaceholder'.tr,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontStyle: FontStyle.italic,
                     ),

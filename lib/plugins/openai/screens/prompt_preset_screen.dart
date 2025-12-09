@@ -42,7 +42,7 @@ class PromptPresetScreen extends StatelessWidget {
         animation: service,
         builder: (context, _) {
           if (service.presets.isEmpty) {
-            final l10n = OpenAILocalizations.of(context);
+
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -54,12 +54,12 @@ class PromptPresetScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    l10n.noPresetsYet,
+                    'openai_noPresetsYet'.tr,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    l10n.createFirstPreset,
+                    'openai_createFirstPreset'.tr,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey,
                         ),
@@ -77,7 +77,7 @@ class PromptPresetScreen extends StatelessWidget {
                       }
                     },
                     icon: const Icon(Icons.add),
-                    label: Text(l10n.addPreset),
+                    label: Text('openai_addPreset'.tr),
                   ),
                 ],
               ),
@@ -279,11 +279,11 @@ class _PresetEditDialogState extends State<_PresetEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = OpenAILocalizations.of(context);
+
     final isEditing = widget.preset != null;
 
     return AlertDialog(
-      title: Text(isEditing ? l10n.editPreset : l10n.addPreset),
+      title: Text(isEditing ? 'openai_editPreset'.tr : 'openai_addPreset'.tr),
       content: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
         child: Form(
@@ -296,12 +296,12 @@ class _PresetEditDialogState extends State<_PresetEditDialog> {
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                    labelText: l10n.presetTitle,
-                    hintText: l10n.pleaseEnterTitle,
+                    labelText: 'openai_presetTitle'.tr,
+                    hintText: 'openai_pleaseEnterTitle'.tr,
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterTitle;
+                      return 'openai_pleaseEnterTitle'.tr;
                     }
                     return null;
                   },
@@ -310,7 +310,7 @@ class _PresetEditDialogState extends State<_PresetEditDialog> {
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: l10n.presetDescription,
+                    labelText: 'openai_presetDescription'.tr,
                   ),
                   maxLines: 2,
                 ),
@@ -318,13 +318,13 @@ class _PresetEditDialogState extends State<_PresetEditDialog> {
                 TextFormField(
                   controller: _contentController,
                   decoration: InputDecoration(
-                    labelText: l10n.promptContent,
-                    hintText: l10n.enterSystemPrompt,
+                    labelText: 'openai_promptContent'.tr,
+                    hintText: 'openai_enterSystemPrompt'.tr,
                   ),
                   maxLines: 8,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterSystemPrompt;
+                      return 'openai_pleaseEnterSystemPrompt'.tr;
                     }
                     return null;
                   },
@@ -336,8 +336,8 @@ class _PresetEditDialogState extends State<_PresetEditDialog> {
                       child: TextFormField(
                         controller: _tagController,
                         decoration: InputDecoration(
-                          labelText: l10n.presetTags,
-                          hintText: l10n.enterTagName,
+                          labelText: 'openai_presetTags'.tr,
+                          hintText: 'openai_enterTagName'.tr,
                         ),
                         onFieldSubmitted: (_) => _addTag(),
                       ),
@@ -371,11 +371,11 @@ class _PresetEditDialogState extends State<_PresetEditDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
+          child: Text('openai_cancel'.tr),
         ),
         ElevatedButton(
           onPressed: _save,
-          child: Text(l10n.save),
+          child: Text('openai_save'.tr),
         ),
       ],
     );

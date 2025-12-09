@@ -402,7 +402,6 @@ class ActivityTimeline extends StatelessWidget {
         }
     }
 
-
     return items;
   }
 

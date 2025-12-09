@@ -5,7 +5,6 @@ import 'package:Memento/widgets/statistics/models/statistics_models.dart';
 import 'date_range_selector.dart';
 import 'chart_components.dart';
 
-
 /// 通用的统计屏幕组件
 class StatisticsScreen extends StatefulWidget {
   final StatisticsConfig config;

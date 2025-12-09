@@ -7,6 +7,7 @@ import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/item_event_args.dart';
 
+import 'package:get/get.dart';
 class GoodsItemFormController {
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();

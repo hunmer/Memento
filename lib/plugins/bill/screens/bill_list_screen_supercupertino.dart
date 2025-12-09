@@ -285,11 +285,9 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
 
   @override
   Widget build(BuildContext context) {
-    final l10n = BillLocalizations.of(context);
-
     return SuperCupertinoNavigationWrapper(
-      title: Text(l10n.billList),
-      largeTitle: l10n.billList,
+      title: Text('bill_billList'.tr),
+      largeTitle: 'bill_billList'.tr,
       enableSearchBar: true,
       searchPlaceholder: '搜索账单名称/分类/笔记',
       onSearchChanged: (value) {
@@ -488,18 +486,17 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                         return await showDialog(
                           context: context,
                           builder: (BuildContext context) {
-                            final l10n = BillLocalizations.of(context);
                               return AlertDialog(
-                              title: Text(l10n.confirmDelete),
-                              content: Text(l10n.confirmDeleteThisBill),
+                              title: Text('bill_confirmDelete'.tr),
+                              content: Text('bill_confirmDeleteThisBill'.tr),
                               actions: <Widget>[
                                 TextButton(
                                   onPressed: () => Navigator.of(context).pop(false),
-                                  child: Text(l10n.cancel),
+                                  child: Text('bill_cancel'.tr),
                                 ),
                                 TextButton(
                                   onPressed: () => Navigator.of(context).pop(true),
-                                  child: Text(l10n.delete),
+                                  child: Text('bill_delete'.tr),
                                 ),
                               ],
                             );

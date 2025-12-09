@@ -1,6 +1,6 @@
 import 'timer_localizations.dart';
 
-class TimerLocalizationsZh extends TimerLocalizations {
+class TimerLocalizationsZh extends {
   TimerLocalizationsZh() : super('zh');
 
   @override

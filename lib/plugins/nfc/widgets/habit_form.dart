@@ -8,7 +8,6 @@ import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:path/path.dart' as path;
@@ -57,7 +56,6 @@ class _HabitFormState extends State<HabitForm> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return Form(
       key: _formKey,
@@ -193,10 +191,10 @@ class _HabitFormState extends State<HabitForm> {
             const SizedBox(height: 24),
             TextFormField(
               controller: _titleController,
-              decoration: InputDecoration(labelText: l10n.title),
+              decoration: InputDecoration(labelText: 'nfc_title'.tr),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return l10n.pleaseEnterTitle;
+                  return 'nfc_pleaseEnterTitle'.tr;
                 }
                 return null;
               },
@@ -204,13 +202,13 @@ class _HabitFormState extends State<HabitForm> {
             const SizedBox(height: 16),
             TextField(
               controller: _notesController,
-              decoration: InputDecoration(labelText: l10n.notes),
+              decoration: InputDecoration(labelText: 'nfc_notes'.tr),
               maxLines: 3,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _groupController,
-              decoration: InputDecoration(labelText: l10n.group),
+              decoration: InputDecoration(labelText: 'nfc_group'.tr),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -227,11 +225,11 @@ class _HabitFormState extends State<HabitForm> {
                   _skills.any((s) => s.id == _selectedSkillId)
                       ? _selectedSkillId
                       : null,
-              decoration: InputDecoration(labelText: l10n.skill),
+              decoration: InputDecoration(labelText: 'nfc_skill'.tr),
               items: [
                 DropdownMenuItem<String>(
                   value: null,
-                  child: Text(l10n.selectSkill),
+                  child: Text('nfc_selectSkill'.tr),
                 ),
                 ..._skills.map((skill) {
                   return DropdownMenuItem<String>(
@@ -247,7 +245,7 @@ class _HabitFormState extends State<HabitForm> {
               },
               validator: (value) {
                 if (value == null) {
-                  return l10n.selectSkill;
+                  return 'nfc_selectSkill'.tr;
                 }
                 return null;
               },
@@ -260,7 +258,7 @@ class _HabitFormState extends State<HabitForm> {
                   _saveHabit();
                 }
               },
-              child: Text(l10n.save),
+              child: Text('nfc_save'.tr),
             ),
           ],
         ),

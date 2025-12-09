@@ -28,11 +28,11 @@ class _TagScreenState extends State<TagScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = CalendarAlbumLocalizations.of(context);
+
     final tagController = Provider.of<TagController>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.tagManagement),
+        title: Text('calendar_album_tagManagement'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.label),
@@ -49,7 +49,7 @@ class _TagScreenState extends State<TagScreen> {
                 });
               }
             },
-            tooltip: l10n.tagManagement,
+            tooltip: 'calendar_album_tagManagement'.tr,
           ),
         ],
       ),
@@ -61,7 +61,7 @@ class _TagScreenState extends State<TagScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child:
                 _selectedTags.isEmpty
-                    ? Center(child: Text(l10n.noTags))
+                    ? Center(child: Text('calendar_album_noTags'.tr))
                     : ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: _selectedTags.length,
@@ -107,7 +107,7 @@ class _TagScreenState extends State<TagScreen> {
             child: Consumer<CalendarController>(
               builder: (context, calendarController, child) {
                 return _selectedTags.isEmpty
-                    ? Center(child: Text(l10n.selectTag))
+                    ? Center(child: Text('calendar_album_selectTag'.tr))
                     : EntryList(
                       entries: calendarController.getEntriesByTags(
                         _selectedTags
@@ -151,12 +151,12 @@ class _TagScreenState extends State<TagScreen> {
                         );
                       },
                       onDelete: (entry) {
-                        final l10n = CalendarAlbumLocalizations.of(context);
+
                         showDialog<void>(
                           context: context,
                                 builder:
                                     (context) => AlertDialog(
-                                      title: Text(l10n.deleteEntry),
+                                      title: Text('calendar_album_deleteEntry'.tr),
                                       content: Text(
                                         '${'app_delete'.tr} "${entry.title}"?',
                                       ),

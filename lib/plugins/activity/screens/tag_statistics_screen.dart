@@ -276,18 +276,17 @@ class _TagStatisticsScreenState extends State<TagStatisticsScreen> {
     // Reusing logic from ActivityStatisticsScreen
     String getRangeText(String range) {
       // Simple mapping, ideally reuse localization logic or pass it in
-      final localizations = ActivityLocalizations.of(context);
       switch (range) {
         case 'Today':
-          return localizations.today;
+          return 'activity_today'.tr;
         case 'This Week':
-          return localizations.weekRange;
+          return 'activity_weekRange'.tr;
         case 'This Month':
-          return localizations.monthRange;
+          return 'activity_monthRange'.tr;
         case 'This Year':
-          return localizations.yearRange;
+          return 'activity_yearRange'.tr;
         case 'Custom Range':
-          return localizations.customRange;
+          return 'activity_customRange'.tr;
         default:
           return range;
       }
@@ -607,10 +606,7 @@ class _TagStatisticsScreenState extends State<TagStatisticsScreen> {
     // HTML shows labels Mon, Tue...
 
     return _buildCard(
-      title:
-          ActivityLocalizations.of(
-            context,
-          ).weekRange, // "Weekly Average" - reuse weekRange key or similar
+      title: 'activity_weekRange'.tr, // "Weekly Average" - reuse weekRange key or similar
       child: SizedBox(
         height: 200,
         child: BarChart(

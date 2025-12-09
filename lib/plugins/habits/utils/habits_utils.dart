@@ -2,6 +2,7 @@ import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:get/get.dart';
 class HabitsUtils {
   static List<String> getGroups(List<Habit> habits, List<Skill> skills) {
     final groups = <String>{};

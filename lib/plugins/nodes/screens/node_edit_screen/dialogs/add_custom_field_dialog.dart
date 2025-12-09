@@ -27,17 +27,16 @@ class AddCustomFieldDialogState extends State<AddCustomFieldDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = NodesLocalizations.of(context);
 
     return AlertDialog(
-      title: Text(l10n.addCustomField),
+      title: Text('nodes_addCustomField'.tr),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _nameController,
             decoration: InputDecoration(
-              labelText: l10n.key,
+              labelText: 'nodes_key'.tr,
               border: const OutlineInputBorder(),
             ),
             autofocus: true,
@@ -46,7 +45,7 @@ class AddCustomFieldDialogState extends State<AddCustomFieldDialog> {
           TextField(
             controller: _valueController,
             decoration: InputDecoration(
-              labelText: l10n.value,
+              labelText: 'nodes_value'.tr,
               border: const OutlineInputBorder(),
             ),
           ),
@@ -55,11 +54,11 @@ class AddCustomFieldDialogState extends State<AddCustomFieldDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.cancel),
+          child: Text('nodes_cancel'.tr),
         ),
         TextButton(
           onPressed: _addCustomField,
-          child: Text(l10n.save),
+          child: Text('nodes_save'.tr),
         ),
       ],
     );

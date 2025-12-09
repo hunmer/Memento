@@ -1,7 +1,7 @@
 import 'tts_localizations.dart';
 
 /// TTS plugin English localization
-class TTSLocalizationsEn extends TTSLocalizations {
+class TTSLocalizationsEn extends {
   TTSLocalizationsEn(super.locale);
   @override
   String get name => 'Text-to-Speech';

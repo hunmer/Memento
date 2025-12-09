@@ -1,6 +1,6 @@
 import 'image_picker_localizations.dart';
 
-class ImagePickerLocalizationsEn extends ImagePickerLocalizations {
+class ImagePickerLocalizationsEn extends {
   ImagePickerLocalizationsEn(super.locale);
 
   @override

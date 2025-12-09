@@ -31,9 +31,9 @@ class _GroupSortDialogState extends State<GroupSortDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = CheckinLocalizations.of(context);
+
     return AlertDialog(
-      title: Text(l10n.groupSortTitle),
+      title: Text('checkin_groupSortTitle'.tr),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -45,7 +45,7 @@ class _GroupSortDialogState extends State<GroupSortDialog> {
           ),
           const Divider(),
           SwitchListTile(
-            title: Text(l10n.reverseSort),
+            title: Text('checkin_reverseSort'.tr),
             value: _isReversed,
             onChanged: (value) {
               setState(() {
@@ -58,14 +58,14 @@ class _GroupSortDialogState extends State<GroupSortDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
+          child: Text('checkin_cancel'.tr),
         ),
         TextButton(
           onPressed: () {
             widget.onSortChanged(_selectedSortType, _isReversed);
             Navigator.of(context).pop();
           },
-          child: Text(l10n.confirm),
+          child: Text('checkin_confirm'.tr),
         ),
       ],
     );

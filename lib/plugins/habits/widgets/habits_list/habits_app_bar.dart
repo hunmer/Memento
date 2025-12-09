@@ -2,10 +2,9 @@ import 'dart:io';
 
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
-
+import 'package:get/get.dart';
 class HabitsAppBar extends StatelessWidget {
-  final HabitsLocalizations l10n;
+  final ;
   final Function() onAddPressed;
   final Function() onBackPressed;
 
@@ -19,7 +18,7 @@ class HabitsAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(l10n.habits),
+      title: Text('habits_habits'.tr),
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       leading:
           (Platform.isAndroid || Platform.isIOS)

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:openai_dart/openai_dart.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'prompt_preset_service.dart';
+import 'package:get/get.dart';
 import 'dart:developer' as developer;
 
 /// 统一的错误消息提取和修复方法

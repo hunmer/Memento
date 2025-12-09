@@ -46,7 +46,6 @@ class _TrackerMainViewState extends State<TrackerMainView> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(

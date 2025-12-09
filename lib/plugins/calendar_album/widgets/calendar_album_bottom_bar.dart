@@ -83,7 +83,6 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     _scheduleBottomBarHeightMeasurement();

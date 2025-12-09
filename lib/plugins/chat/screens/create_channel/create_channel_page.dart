@@ -42,7 +42,7 @@ class _CreateChannelSheetState extends State<CreateChannelSheet> {
     });
 
     try {
-      final l10n = ChatLocalizations.of(context);
+
       final channelName = _nameController.text.trim();
 
       // 创建频道对象
@@ -57,14 +57,14 @@ class _CreateChannelSheetState extends State<CreateChannelSheet> {
       await widget.plugin.channelService.createChannel(channel);
 
       if (mounted) {
-        toastService.showToast(l10n.channelCreated);
+        toastService.showToast('chat_channelCreated'.tr);
         // 返回 true 表示创建成功
         Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
-        final l10n = ChatLocalizations.of(context);
-        toastService.showToast('${l10n.createChannelFailed}: $e');
+
+        toastService.showToast('${'chat_createChannelFailed'.tr}: $e');
         setState(() {
           _isCreating = false;
         });
@@ -74,7 +74,7 @@ class _CreateChannelSheetState extends State<CreateChannelSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ChatLocalizations.of(context);
+
     final theme = Theme.of(context);
 
     // 使用简单的 Column 布局，不使用 SheetContentScaffold
@@ -90,7 +90,7 @@ class _CreateChannelSheetState extends State<CreateChannelSheet> {
               icon: const Icon(Icons.close),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            title: Text(l10n.createChannel),
+            title: Text('chat_createChannel'.tr),
             actions: [
               if (_isCreating)
                 const Padding(
@@ -105,7 +105,7 @@ class _CreateChannelSheetState extends State<CreateChannelSheet> {
                 TextButton(
                   onPressed: _createChannel,
                   child: Text(
-                    l10n.create,
+                    'chat_create'.tr,
                     style: TextStyle(
                       color: widget.plugin.color,
                       fontWeight: FontWeight.bold,
@@ -127,7 +127,7 @@ class _CreateChannelSheetState extends State<CreateChannelSheet> {
                     controller: _nameController,
                     autofocus: true,
                     decoration: InputDecoration(
-                      labelText: l10n.channelName,
+                      labelText: 'chat_channelName'.tr,
                       hintText: '例如：工作、学习、随笔...',
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.label),
@@ -159,7 +159,7 @@ class _CreateChannelSheetState extends State<CreateChannelSheet> {
                               ),
                             )
                           : const Icon(Icons.add),
-                      label: Text(_isCreating ? '创建中...' : l10n.create),
+                      label: Text(_isCreating ? '创建中...' : 'chat_create'.tr),
                       style: FilledButton.styleFrom(
                         backgroundColor: widget.plugin.color,
                         padding: const EdgeInsets.symmetric(vertical: 16),

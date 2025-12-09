@@ -164,9 +164,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                             'goods_confirmDelete'.tr,
                           ),
                           content: Text(
-                            GoodsLocalizations.of(context)
-                                .confirmDeleteWarehouseMessage
-                                .replaceFirst('%s', _warehouse.title),
+                            'goods_confirmDeleteWarehouseMessage'.trParams({'name': _warehouse.title}),
                           ),
                           actions: [
                             TextButton(

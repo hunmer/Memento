@@ -1,6 +1,6 @@
 import 'group_selector_localizations.dart';
 
-class GroupSelectorLocalizationsEn extends GroupSelectorLocalizations {
+class GroupSelectorLocalizationsEn extends {
   GroupSelectorLocalizationsEn() : super('en');
 
   @override

@@ -23,7 +23,6 @@ class CalendarAlbumMainView extends StatelessWidget {
   }
 }
 
-
 class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   static CalendarAlbumPlugin? _instance;
   static CalendarAlbumPlugin get instance {

@@ -80,7 +80,6 @@ class TodoHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = TodoLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -101,7 +100,7 @@ class TodoHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'todo_name'.tr,
         pluginIcon: Icons.check_box,
         pluginDefaultColor: Colors.blue,
         availableItems: availableItems,

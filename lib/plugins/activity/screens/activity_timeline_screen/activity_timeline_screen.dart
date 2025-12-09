@@ -368,7 +368,6 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {

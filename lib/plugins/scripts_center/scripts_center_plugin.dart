@@ -173,7 +173,6 @@ class ScriptsCenterPlugin extends BasePlugin {
       // 加载当前文件夹的脚本
       await _scriptManager.loadScripts();
 
-
       print('✅ ScriptsCenterPlugin初始化成功');
       print('   - 已加载 ${_scriptManager.scriptCount} 个脚本');
       print('   - 已启用 ${_scriptManager.enabledScriptCount} 个脚本');

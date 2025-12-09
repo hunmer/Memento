@@ -6,13 +6,11 @@ import 'entry_editor_controller.dart';
 
 class EntryEditorTagHandler extends StatelessWidget {
   final EntryEditorController controller;
-  final CalendarAlbumLocalizations l10n;
   late final TagController tagController;
 
   EntryEditorTagHandler({
     super.key,
     required this.controller,
-    required this.l10n,
   }) {
     final plugin = PluginManager.instance.getPlugin('calendar_album');
     tagController = (plugin as dynamic).tagController;
@@ -28,8 +26,8 @@ class EntryEditorTagHandler extends StatelessWidget {
       children: [
         TextField(
           decoration: InputDecoration(
-            labelText: l10n.tags,
-            hintText: l10n.tagsHint,
+            labelText: 'calendar_album_tags'.tr,
+            hintText: 'calendar_album_tagsHint'.tr,
             border: const OutlineInputBorder(),
             suffixIcon: IconButton(
               icon: const Icon(Icons.label),
@@ -42,7 +40,7 @@ class EntryEditorTagHandler extends StatelessWidget {
                   (context as Element).markNeedsBuild();
                 }
               },
-              tooltip: l10n.tagManagement,
+              tooltip: 'calendar_album_tagManagement'.tr,
             ),
           ),
           readOnly: true,

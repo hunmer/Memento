@@ -24,14 +24,13 @@ class AddTagDialogState extends State<AddTagDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = NodesLocalizations.of(context);
 
     return AlertDialog(
-      title: Text(l10n.tags),
+      title: Text('nodes_tags'.tr),
       content: TextField(
         controller: _controller,
         decoration: InputDecoration(
-          labelText: l10n.tags,
+          labelText: 'nodes_tags'.tr,
           border: const OutlineInputBorder(),
         ),
         autofocus: true,
@@ -40,11 +39,11 @@ class AddTagDialogState extends State<AddTagDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.cancel),
+          child: Text('nodes_cancel'.tr),
         ),
         TextButton(
           onPressed: _addTag,
-          child: Text(l10n.save),
+          child: Text('nodes_save'.tr),
         ),
       ],
     );

@@ -13,29 +13,14 @@ class DateFormatter {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
-    // 尝试获取本地化实例，如果不可用则使用默认文本
-    final l10n = ChatLocalizations.of(context);
-    if (l10n != null) {
-      if (difference.inMinutes < 1) {
-        return l10n.justNow;
-      } else if (difference.inHours < 1) {
-        return l10n.minutesAgo(difference.inMinutes);
-      } else if (difference.inDays < 1) {
-        return l10n.hoursAgo(difference.inHours);
-      } else if (difference.inDays < 7) {
-        return l10n.daysAgo(difference.inDays);
-      }
-    }
-    
-    // 如果本地化不可用或者超过7天，使用标准格式
     if (difference.inMinutes < 1) {
-      return '刚刚';
+      return 'chat_justNow'.tr;
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}分钟前';
+      return 'chat_minutesAgo'.trParams({'minutes': difference.inMinutes.toString()});
     } else if (difference.inDays < 1) {
-      return '${difference.inHours}小时前';
+      return 'chat_hoursAgo'.trParams({'hours': difference.inHours.toString()});
     } else if (difference.inDays < 7) {
-      return '${difference.inDays}天前';
+      return 'chat_daysAgo'.trParams({'days': difference.inDays.toString()});
     } else {
       final DateFormat formatter = DateFormat('MM-dd HH:mm');
       return formatter.format(dateTime);
@@ -47,22 +32,11 @@ class DateFormatter {
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final dateDay = DateTime(date.year, date.month, date.day);
-    
-    if (context != null) {
-      final l10n = ChatLocalizations.of(context);
-      if (l10n != null) {
-        if (dateDay == today) {
-          return l10n.today;
-        } else if (dateDay == yesterday) {
-          return l10n.yesterday;
-        }
-      }
-    }
-    
+
     if (dateDay == today) {
-      return '今天';
+      return 'chat_today'.tr;
     } else if (dateDay == yesterday) {
-      return '昨天';
+      return 'chat_yesterday'.tr;
     } else if (date.year == now.year) {
       // 如果是今年，只显示月份和日期
       return DateFormat('MM-dd').format(date);

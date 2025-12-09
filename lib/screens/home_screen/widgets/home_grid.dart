@@ -297,7 +297,7 @@ class _HomeGridState extends State<HomeGrid> {
   }
 
   /// 构建空状态
-  Widget _buildEmptyState(BuildContext context, ScreensLocalizations l10n) {
+  Widget _buildEmptyState(BuildContext context, ) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

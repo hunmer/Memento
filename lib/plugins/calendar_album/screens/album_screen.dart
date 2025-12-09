@@ -18,7 +18,6 @@ class AlbumScreen extends StatefulWidget {
 
 class _AlbumScreenState extends State<AlbumScreen> {
   late CalendarController _calendarController;
-  late CalendarAlbumLocalizations l10n;
   List<String> _images = [];
   late List<Widget> _imageWidgets;
 
@@ -35,12 +34,6 @@ class _AlbumScreenState extends State<AlbumScreen> {
       Image.asset('assets/images/image_not_found.jpg', fit: BoxFit.contain),
     );
     _preloadImages();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    l10n = CalendarAlbumLocalizations.of(context);
   }
 
   Future<void> _preloadImages() async {
@@ -73,12 +66,12 @@ class _AlbumScreenState extends State<AlbumScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.allPhotos)),
+      appBar: AppBar(title: Text('calendar_album_allPhotos'.tr)),
       body: Consumer<CalendarController>(
         builder: (context, calendarController, child) {
           final images = calendarController.getAllImages();
           return images.isEmpty
-              ? Center(child: Text(l10n.noPhotos))
+              ? Center(child: Text('calendar_album_noPhotos'.tr))
               : GridView.builder(
                 padding: const EdgeInsets.all(8),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

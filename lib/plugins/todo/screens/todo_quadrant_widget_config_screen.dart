@@ -386,16 +386,15 @@ class _TodoQuadrantWidgetConfigScreenState extends State<TodoQuadrantWidgetConfi
 
   @override
   Widget build(BuildContext context) {
-    final l10n = TodoLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.configureQuadrantWidget),
+        title: Text('todo_configureQuadrantWidget'.tr),
         actions: [
           TextButton(
             onPressed: _isLoading ? null : _saveAndFinish,
             child: Text(
-              _isLoading ? l10n.loading : 'Done',
+              _isLoading ? 'todo_loading'.tr : 'Done',
               style: const TextStyle(color: Colors.white),
             ),
           ),

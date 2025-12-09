@@ -145,7 +145,7 @@ class NodeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<NodesController>(context);
-    final l10n = NodesLocalizations.of(context);
+
     final statusInfo = _getStatusInfo(context, node.status);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -296,7 +296,7 @@ class NodeItem extends StatelessWidget {
   void _showNodeActions(
     BuildContext context,
     NodesController controller,
-    NodesLocalizations l10n,
+    ,
   ) {
     // 定义常用颜色列表 - keeping existing functionality though UI changed
     final List<Color> commonColors = [
@@ -424,7 +424,7 @@ class NodeItem extends StatelessWidget {
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.edit),
-                title: Text(l10n.editNode),
+                title: Text('nodes_editNode'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
@@ -438,7 +438,7 @@ class NodeItem extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.add_circle_outline),
-                title: Text(l10n.addChildNode),
+                title: Text('nodes_addChildNode'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   _addChildNode(context, controller);
@@ -446,7 +446,7 @@ class NodeItem extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.add),
-                title: Text(l10n.addSiblingNode),
+                title: Text('nodes_addSiblingNode'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   _addSiblingNode(context, controller);
@@ -454,7 +454,7 @@ class NodeItem extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.delete),
-                title: Text(l10n.deleteNode),
+                title: Text('nodes_deleteNode'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   _showDeleteConfirmation(context, controller, l10n);
@@ -506,13 +506,13 @@ class NodeItem extends StatelessWidget {
   void _showDeleteConfirmation(
     BuildContext context,
     NodesController controller,
-    NodesLocalizations l10n,
+    ,
   ) {
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(l10n.deleteNode),
+            title: Text('nodes_deleteNode'.tr),
             content: Text(
               NodesLocalizations.of(
                 context,
@@ -521,7 +521,7 @@ class NodeItem extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel),
+                child: Text('nodes_cancel'.tr),
               ),
               TextButton(
                 onPressed: () {
