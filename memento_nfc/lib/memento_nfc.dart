@@ -71,9 +71,26 @@ class MementoNfc {
 
   /// 写入数据到NFC标签
   /// [data] 要写入的数据
-  /// [formatType] NFC格式类型，默认为'NDEF'
-  Future<NfcWriteResult> writeNfc(String data, {String formatType = 'NDEF'}) {
+  /// [formatType] 记录类型: URI, TEXT, MIME, AAR, EXTERNAL
+  Future<NfcWriteResult> writeNfc(String data, {String formatType = 'TEXT'}) {
     return MementoNfcPlatform.instance.writeNfc(data, formatType: formatType);
+  }
+
+  /// 写入多条NFC记录
+  /// [records] 记录列表，每条记录包含:
+  ///   - type: 记录类型 (URI, TEXT, MIME, AAR, EXTERNAL)
+  ///   - data: 记录数据
+  ///
+  /// 示例:
+  /// ```dart
+  /// await nfc.writeNfcRecords([
+  ///   {'type': 'URI', 'data': 'https://example.com'},
+  ///   {'type': 'TEXT', 'data': 'Hello World'},
+  ///   {'type': 'AAR', 'data': 'com.example.app'},
+  /// ]);
+  /// ```
+  Future<NfcWriteResult> writeNfcRecords(List<Map<String, String>> records) {
+    return MementoNfcPlatform.instance.writeNfcRecords(records);
   }
 
   /// 写入NDEF格式的URL

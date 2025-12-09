@@ -40,8 +40,15 @@ abstract class MementoNfcPlatform extends PlatformInterface {
     throw UnimplementedError('readNfc() has not been implemented.');
   }
 
-  Future<NfcWriteResult> writeNfc(String data, {String formatType = 'NDEF'}) {
+  Future<NfcWriteResult> writeNfc(String data, {String formatType = 'TEXT'}) {
     throw UnimplementedError('writeNfc() has not been implemented.');
+  }
+
+  /// 写入多条 NFC 记录
+  /// [records] 记录列表，每条记录包含 type 和 data
+  /// type 支持: URI, TEXT, MIME, AAR, EXTERNAL
+  Future<NfcWriteResult> writeNfcRecords(List<Map<String, String>> records) {
+    throw UnimplementedError('writeNfcRecords() has not been implemented.');
   }
 
   Future<NfcWriteResult> writeNdefUrl(String url) {

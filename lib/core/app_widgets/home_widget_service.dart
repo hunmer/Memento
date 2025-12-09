@@ -397,15 +397,21 @@ void handleWidgetClick(String url) {
     debugPrint('URI query: ${uri.query}');
 
     // 解析 URI 路径和参数
-    // 支持两种格式:
-    // 1. memento://widget/quick_send?channelId=xxx (path-based)
-    // 2. memento://habits_weekly_config?widgetId=35 (host-based)
+    // 支持多种格式:
+    // 1. memento://widget/quick_send?channelId=xxx (path-based, host=widget)
+    // 2. memento://habits_weekly_config?widgetId=35 (host-based, path=/)
+    // 3. memento://checkin/item?itemId=xxx (host+path combined)
     String routePath = uri.path;
 
     // 如果 path 为空或只有斜杠，使用 host 作为路由路径
     if (routePath.isEmpty || routePath == '/') {
       routePath = '/${uri.host}';
       debugPrint('使用 host 作为路由路径: $routePath');
+    } else if (uri.host != 'widget' && uri.host.isNotEmpty) {
+      // 如果 host 不是 'widget' 且 path 不为空，组合 host 和 path
+      // 例如: memento://checkin/item -> /checkin/item
+      routePath = '/${uri.host}${uri.path}';
+      debugPrint('组合 host 和 path 作为路由路径: $routePath');
     }
 
     // 移除 /widget 前缀（如果存在）
