@@ -38,10 +38,22 @@ class MethodChannelMementoNfc extends MementoNfcPlatform {
   }
 
   @override
-  Future<NfcWriteResult> writeNfc(String data, {String formatType = 'NDEF'}) async {
+  Future<NfcWriteResult> writeNfc(String data, {String formatType = 'TEXT'}) async {
     final result = await methodChannel.invokeMapMethod<String, dynamic>(
       'writeNfc',
       {'data': data, 'formatType': formatType},
+    );
+    if (result == null) {
+      return NfcWriteResult(success: false, error: 'Unknown error');
+    }
+    return NfcWriteResult.fromMap(result);
+  }
+
+  @override
+  Future<NfcWriteResult> writeNfcRecords(List<Map<String, String>> records) async {
+    final result = await methodChannel.invokeMapMethod<String, dynamic>(
+      'writeNfcRecords',
+      {'records': records},
     );
     if (result == null) {
       return NfcWriteResult(success: false, error: 'Unknown error');

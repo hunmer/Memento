@@ -21,6 +21,12 @@ import io.flutter.plugin.common.MethodChannel.Result
 import org.json.JSONObject
 import java.nio.charset.Charset
 
+/** NFC记录数据类 */
+data class NfcRecordData(
+    val type: String,  // URI, TEXT, MIME, AAR
+    val data: String
+)
+
 /** MementoNfcPlugin */
 class MementoNfcPlugin :
     FlutterPlugin,
@@ -33,8 +39,7 @@ class MementoNfcPlugin :
     private var nfcAdapter: NfcAdapter? = null
     private var pendingResult: Result? = null
     private var isWriteMode = false
-    private var pendingWriteData: String = ""
-    private var pendingWriteFormat: String = ""
+    private var pendingWriteRecords: List<NfcRecordData> = emptyList()
     private var timeoutHandler: Handler? = null
     private val timeoutRunnable = Runnable {
         Log.w(TAG, "NFC operation timeout")
@@ -77,19 +82,35 @@ class MementoNfcPlugin :
             }
             "writeNfc" -> {
                 val data = call.argument<String>("data") ?: ""
-                val formatType = call.argument<String>("formatType") ?: "NDEF"
+                val formatType = call.argument<String>("formatType") ?: "TEXT"
+                Log.d(TAG, "writeNfc: data=$data, formatType=$formatType")
                 isWriteMode = true
-                startNfcWriting(result, data, formatType)
+                pendingWriteRecords = listOf(NfcRecordData(formatType, data))
+                startNfcWriting(result)
+            }
+            "writeNfcRecords" -> {
+                @Suppress("UNCHECKED_CAST")
+                val records = call.argument<List<Map<String, String>>>("records") ?: emptyList()
+                isWriteMode = true
+                pendingWriteRecords = records.map {
+                    NfcRecordData(
+                        it["type"] ?: "TEXT",
+                        it["data"] ?: ""
+                    )
+                }
+                startNfcWriting(result)
             }
             "writeNdefUrl" -> {
                 val url = call.argument<String>("url") ?: ""
-                val mapResult = writeNdefUrl(url)
-                result.success(mapResult)
+                isWriteMode = true
+                pendingWriteRecords = listOf(NfcRecordData("URI", url))
+                startNfcWriting(result)
             }
             "writeNdefText" -> {
                 val text = call.argument<String>("text") ?: ""
-                val mapResult = writeNdefText(text)
-                result.success(mapResult)
+                isWriteMode = true
+                pendingWriteRecords = listOf(NfcRecordData("TEXT", text))
+                startNfcWriting(result)
             }
             else -> {
                 result.notImplemented()
@@ -97,7 +118,7 @@ class MementoNfcPlugin :
         }
     }
 
-    private fun startNfcWriting(result: Result, data: String, formatType: String) {
+    private fun startNfcWriting(result: Result) {
         if (nfcAdapter == null || !nfcAdapter!!.isEnabled) {
             result.success(hashMapOf(
                 "success" to false,
@@ -107,8 +128,6 @@ class MementoNfcPlugin :
         }
 
         pendingResult = result
-        pendingWriteData = data
-        pendingWriteFormat = formatType
 
         // 启动超时计时器
         timeoutHandler = Handler(Looper.getMainLooper())
@@ -207,7 +226,7 @@ class MementoNfcPlugin :
         if (isWriteMode) {
             Log.i(TAG, "onTagDiscovered: Processing write operation")
             // 写入模式
-            val writeResult = performWrite(tag, pendingWriteData, pendingWriteFormat)
+            val writeResult = performWrite(tag, pendingWriteRecords)
             Handler(Looper.getMainLooper()).post {
                 pendingResult?.success(writeResult)
                 stopNfcReading()
@@ -236,8 +255,7 @@ class MementoNfcPlugin :
             // 忽略关闭错误
         }
         pendingResult = null
-        pendingWriteData = ""
-        pendingWriteFormat = ""
+        pendingWriteRecords = emptyList()
     }
 
     private fun performRead(tag: Tag): HashMap<String, Any> {
@@ -284,7 +302,7 @@ class MementoNfcPlugin :
         }
     }
 
-    private fun performWrite(tag: Tag, data: String, formatType: String): HashMap<String, Any> {
+    private fun performWrite(tag: Tag, records: List<NfcRecordData>): HashMap<String, Any> {
         return try {
             val ndef = Ndef.get(tag)
             if (ndef == null) {
@@ -296,14 +314,12 @@ class MementoNfcPlugin :
 
             ndef.connect()
 
-            val textRecord = NdefRecord(
-                NdefRecord.TNF_MIME_MEDIA,
-                "text/plain".toByteArray(),
-                byteArrayOf(),
-                data.toByteArray()
-            )
+            // 将所有记录转换为 NdefRecord
+            val ndefRecords = records.map { record ->
+                createNdefRecord(record.type, record.data)
+            }.toTypedArray()
 
-            val message = NdefMessage(arrayOf(textRecord))
+            val message = NdefMessage(ndefRecords)
             ndef.writeNdefMessage(message)
             ndef.close()
 
@@ -315,6 +331,54 @@ class MementoNfcPlugin :
             result["success"] = false
             result["error"] = e.message ?: "Unknown error"
             return result
+        }
+    }
+
+    /** 根据类型创建 NdefRecord */
+    private fun createNdefRecord(type: String, data: String): NdefRecord {
+        Log.d(TAG, "createNdefRecord: type=$type, data=$data")
+        return when (type.uppercase()) {
+            "URI" -> {
+                // URI 记录 - 使用 createUri 简化创建
+                Log.d(TAG, "createNdefRecord: Creating URI record")
+                NdefRecord.createUri(data)
+            }
+            "TEXT" -> {
+                // 文本记录
+                val lang = "en"
+                val textBytes = data.toByteArray(Charsets.UTF_8)
+                val langBytes = lang.toByteArray(Charsets.US_ASCII)
+                val payload = ByteArray(1 + langBytes.size + textBytes.size)
+                payload[0] = langBytes.size.toByte()
+                System.arraycopy(langBytes, 0, payload, 1, langBytes.size)
+                System.arraycopy(textBytes, 0, payload, 1 + langBytes.size, textBytes.size)
+                NdefRecord(NdefRecord.TNF_WELL_KNOWN, NdefRecord.RTD_TEXT, byteArrayOf(), payload)
+            }
+            "MIME" -> {
+                // MIME 类型记录 - data 格式: "mime_type|content"
+                val parts = data.split("|", limit = 2)
+                val mimeType = if (parts.size > 1) parts[0] else "text/plain"
+                val content = if (parts.size > 1) parts[1] else data
+                NdefRecord.createMime(mimeType, content.toByteArray(Charsets.UTF_8))
+            }
+            "AAR" -> {
+                // Android Application Record
+                NdefRecord.createApplicationRecord(data)
+            }
+            "EXTERNAL" -> {
+                // 外部类型记录 - data 格式: "domain:type|content"
+                val parts = data.split("|", limit = 2)
+                val typeSpec = if (parts.size > 1) parts[0] else "memento:data"
+                val content = if (parts.size > 1) parts[1] else data
+                val typeParts = typeSpec.split(":", limit = 2)
+                val domain = typeParts[0]
+                val externalType = if (typeParts.size > 1) typeParts[1] else "data"
+                NdefRecord.createExternal(domain, externalType, content.toByteArray(Charsets.UTF_8))
+            }
+            else -> {
+                // 默认使用纯文本
+                NdefRecord.createTextRecord("en", data)
+            }
         }
     }
 

@@ -4,6 +4,8 @@ import android.util.Log
 import android.content.Intent
 import android.os.Build
 import android.net.Uri
+import android.nfc.NdefMessage
+import android.nfc.NfcAdapter
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import github.hunmer.memento.TimerForegroundService
@@ -19,18 +21,30 @@ class MainActivity: FlutterActivity() {
 
     private var widgetMethodChannel: MethodChannel? = null
     private var pendingWidgetUrl: String? = null
+    private var isInForeground = false
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
-        // 处理启动时的 DeepLink
-        handleIntent(intent)
+        // 处理启动时的 DeepLink（冷启动时应用不在前台）
+        handleIntent(intent, isFromBackground = true)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         // 处理新的 DeepLink
         setIntent(intent)
-        handleIntent(intent)
+        // 如果应用在前台，isInForeground 为 true
+        handleIntent(intent, isFromBackground = !isInForeground)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        isInForeground = true
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isInForeground = false
     }
 
     private fun handleIntent(intent: Intent?) {
@@ -55,8 +69,14 @@ class MainActivity: FlutterActivity() {
             }
         }
 
-        // 处理DeepLink
-        val uri: Uri? = intent?.data
+        // 优先尝试从 NFC intent 中提取 URI
+        var uri: Uri? = extractNfcUri(intent)
+
+        // 如果 NFC 中没有，再检查普通的 DeepLink
+        if (uri == null) {
+            uri = intent?.data
+        }
+
         uri?.let {
             Log.d("MainActivity", "Received DeepLink: $it")
 
@@ -67,6 +87,41 @@ class MainActivity: FlutterActivity() {
                 pendingWidgetUrl = it.toString()
             }
         }
+    }
+
+    /**
+     * 从 NFC intent 中提取 URI
+     * NFC 扫描时，NDEF 记录存储在 EXTRA_NDEF_MESSAGES 中
+     */
+    private fun extractNfcUri(intent: Intent?): Uri? {
+        if (intent == null) return null
+
+        // 检查是否是 NFC intent
+        if (intent.action != NfcAdapter.ACTION_NDEF_DISCOVERED &&
+            intent.action != NfcAdapter.ACTION_TAG_DISCOVERED &&
+            intent.action != NfcAdapter.ACTION_TECH_DISCOVERED) {
+            return null
+        }
+
+        Log.d("MainActivity", "Processing NFC intent: action=${intent.action}")
+
+        // 从 NDEF messages 中提取 URI
+        val rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
+        if (rawMessages != null) {
+            for (rawMessage in rawMessages) {
+                val message = rawMessage as? NdefMessage ?: continue
+                for (record in message.records) {
+                    // 尝试将记录转换为 URI
+                    val recordUri = record.toUri()
+                    if (recordUri != null) {
+                        Log.d("MainActivity", "Found URI in NFC record: $recordUri")
+                        return recordUri
+                    }
+                }
+            }
+        }
+
+        return null
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
