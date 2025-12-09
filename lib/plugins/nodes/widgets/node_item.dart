@@ -1,4 +1,4 @@
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Node;
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/quill_viewer/quill_viewer.dart';
@@ -153,7 +153,7 @@ class NodeItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
-          onLongPress: () => _showNodeActions(context, controller, l10n),
+          onLongPress: () => _showNodeActions(context, controller),
           child: InkWell(
             onTap: () {
               if (node.children.isNotEmpty) {
@@ -296,7 +296,6 @@ class NodeItem extends StatelessWidget {
   void _showNodeActions(
     BuildContext context,
     NodesController controller,
-    ,
   ) {
     // 定义常用颜色列表 - keeping existing functionality though UI changed
     final List<Color> commonColors = [
@@ -514,9 +513,7 @@ class NodeItem extends StatelessWidget {
           (context) => AlertDialog(
             title: Text('nodes_deleteNode'.tr),
             content: Text(
-              NodesLocalizations.of(
-                context,
-              ).deleteNodeConfirmation.replaceAll('{node.title}', node.title),
+              'nodes_deleteNodeConfirmation'.trParams({'title': node.title}),
             ),
             actions: [
               TextButton(

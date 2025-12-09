@@ -18,14 +18,12 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 class HabitSearchResultsWidget extends StatelessWidget {
   final List<Habit> habits;
   final HabitController controller;
-  final ;
   final Function(Habit)? onHabitTap;
 
   const HabitSearchResultsWidget({
     super.key,
     required this.habits,
     required this.controller,
-    required this.l10n,
     this.onHabitTap,
   });
 
@@ -200,7 +198,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
     );
   }
 
-  Widget _buildCardView(List<Habit> habits, ) {
+  Widget _buildCardView(List<Habit> habits) {
     final habitsPlugin =
         PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
     final skillController = habitsPlugin?.getSkillController();
@@ -250,13 +248,12 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
       searchBody: HabitSearchResultsWidget(
         habits: _filteredHabits,
         controller: widget.controller,
-        l10n: l10n,
         onHabitTap: (habit) => _showHabitForm(context, habit),
       ), // 搜索结果页面
       actions: [
-      
+
       ],
-      body: _buildCardView(_habits, l10n),
+      body: _buildCardView(_habits),
     );
   }
 }

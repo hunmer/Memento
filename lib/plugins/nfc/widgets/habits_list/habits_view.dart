@@ -134,7 +134,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
     );
   }
 
-  Widget _buildCardView(List<Habit> habits, ) {
+  Widget _buildCardView(List<Habit> habits) {
     final habitsPlugin =
         PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
     final skillController = habitsPlugin?.getSkillController();
@@ -169,12 +169,11 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
     return Column(
       children: [
         HabitsAppBar(
-          l10n: l10n,
           onAddPressed: () => _showHabitForm(context),
           onBackPressed: () => PluginManager.toHomeScreen(context),
         ),
         Expanded(
-          child: _buildCardView(_habits, l10n),
+          child: _buildCardView(_habits),
         ),
       ],
     );

@@ -69,7 +69,6 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = ;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -123,12 +122,12 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
                     const SizedBox(height: 4),
                     Text(
                       widget.memorialDay.isExpired
-                          ? localizations.daysPassed(
-                            widget.memorialDay.daysPassed,
-                          )
-                          : localizations.daysRemaining(
-                            widget.memorialDay.daysRemaining,
-                          ),
+                          ? 'day_daysPassed'.trParams({
+                            'count': widget.memorialDay.daysPassed.toString(),
+                          })
+                          : 'day_daysRemaining'.trParams({
+                            'count': widget.memorialDay.daysRemaining.toString(),
+                          }),
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

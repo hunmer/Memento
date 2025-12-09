@@ -583,12 +583,8 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                       ),
                       subtitle: Text(
                         _globalBackgroundPath != null
-                            ? ScreensLocalizations.of(
-                              context,
-                            ).backgroundImageSet
-                            : ScreensLocalizations.of(
-                              context,
-                            ).backgroundImageNotSet,
+                            ? 'screens_backgroundImageSet'.tr
+                            : 'screens_backgroundImageNotSet'.tr,
                       ),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: _showGlobalBackgroundDialog,
@@ -609,9 +605,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                               const Icon(Icons.opacity),
                               const SizedBox(width: 12),
                               Text(
-                                ScreensLocalizations.of(
-                                  context,
-                                ).widgetOverallOpacity,
+                                'screens_widgetOverallOpacity'.tr,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -629,9 +623,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            ScreensLocalizations.of(
-                              context,
-                            ).widgetOverallOpacityDescription,
+                            'screens_widgetOverallOpacityDescription'.tr,
                             style: TextStyle(
                               fontSize: 12,
                               color: Theme.of(context).hintColor,
@@ -657,18 +649,14 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                ScreensLocalizations.of(
-                                  context,
-                                ).zeroPercentFullyTransparent,
+                                'screens_zeroPercentFullyTransparent'.tr,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Theme.of(context).hintColor,
                                 ),
                               ),
                               Text(
-                                ScreensLocalizations.of(
-                                  context,
-                                ).oneHundredPercentOpaque,
+                                'screens_oneHundredPercentOpaque'.tr,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Theme.of(context).hintColor,
@@ -695,9 +683,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                               const Icon(Icons.format_color_fill),
                               const SizedBox(width: 12),
                               Text(
-                                ScreensLocalizations.of(
-                                  context,
-                                ).backgroundColorOpacity,
+                                'screens_backgroundColorOpacity'.tr,
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -715,9 +701,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            ScreensLocalizations.of(
-                              context,
-                            ).backgroundColorOpacityDescription,
+                            'screens_backgroundColorOpacityDescription'.tr,
                             style: TextStyle(
                               fontSize: 12,
                               color: Theme.of(context).hintColor,
@@ -744,18 +728,14 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                ScreensLocalizations.of(
-                                  context,
-                                ).zeroPercentFullyTransparent,
+                                'screens_zeroPercentFullyTransparent'.tr,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Theme.of(context).hintColor,
                                 ),
                               ),
                               Text(
-                                ScreensLocalizations.of(
-                                  context,
-                                ).oneHundredPercentOpaque,
+                                'screens_oneHundredPercentOpaque'.tr,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Theme.of(context).hintColor,
@@ -774,9 +754,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
-                      ScreensLocalizations.of(
-                        context,
-                      ).layoutBackgroundSettingsTitle,
+                      'screens_layoutBackgroundSettingsTitle'.tr,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -790,9 +768,7 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
-                      ScreensLocalizations.of(
-                        context,
-                      ).layoutBackgroundSettingsDescription,
+                      'screens_layoutBackgroundSettingsDescription'.tr,
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(context).hintColor,
@@ -841,12 +817,8 @@ class _BackgroundSettingsPageState extends State<BackgroundSettingsPage> {
                           title: Text(layout.name),
                           subtitle: Text(
                             layout.backgroundImagePath != null
-                                ? ScreensLocalizations.of(
-                                  context,
-                                ).customBackgroundImage
-                                : ScreensLocalizations.of(
-                                  context,
-                                ).useGlobalBackgroundImage,
+                                ? 'screens_customBackgroundImage'.tr
+                                : 'screens_useGlobalBackgroundImage'.tr,
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => _showLayoutBackgroundDialog(layout),

@@ -1,4 +1,4 @@
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Node;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
@@ -118,18 +118,18 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
         controller: _tabController,
         children: [
           // Tab 1: 基本信息
-          _buildBasicInfoTab(context, controller, l10n),
+          _buildBasicInfoTab(context, controller),
           // Tab 2: 时间与字段
-          _buildDateAndFieldsTab(context, l10n),
+          _buildDateAndFieldsTab(context),
           // Tab 3: 笔记内容
-          _buildNotesTab(context, l10n),
+          _buildNotesTab(context),
         ],
       ),
     );
   }
 
   // Tab 1: 基本信息
-  Widget _buildBasicInfoTab(BuildContext context, NodesController controller, ) {
+  Widget _buildBasicInfoTab(BuildContext context, NodesController controller) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -192,7 +192,7 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
   }
 
   // Tab 2: 时间与字段
-  Widget _buildDateAndFieldsTab(BuildContext context, ) {
+  Widget _buildDateAndFieldsTab(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -235,7 +235,7 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
   }
 
   // Tab 3: 笔记内容
-  Widget _buildNotesTab(BuildContext context, ) {
+  Widget _buildNotesTab(BuildContext context) {
     return Column(
       children: [
         // Quill 工具栏

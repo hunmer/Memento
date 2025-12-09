@@ -254,9 +254,7 @@ class _ModelListScreenState extends State<ModelListScreen>
           (context) => AlertDialog(
             title: Text('openai_confirmDelete'.tr),
             content: Text(
-              OpenAILocalizations.of(
-                context,
-              ).confirmDeleteModel.replaceAll('{modelName}', model.name),
+              'openai_confirmDeleteModel'.trParams({'modelName': model.name}),
             ),
             actions: [
               TextButton(
@@ -378,9 +376,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return OpenAILocalizations.of(
-                      context,
-                    ).pleaseSelectModelGroup;
+                    return 'openai_pleaseSelectModelGroup'.tr;
                   }
                   return null;
                 },

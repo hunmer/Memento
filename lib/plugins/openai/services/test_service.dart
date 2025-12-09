@@ -139,7 +139,6 @@ $response
 API端点: ${agent.baseUrl}
 ''';
     } catch (e) {
-      final l10n = OpenAILocalizations.defaultLocalizations;
       return '''
 错误: 请求处理失败
 ${'openai_errorDetails'.tr}: ${e.toString()}

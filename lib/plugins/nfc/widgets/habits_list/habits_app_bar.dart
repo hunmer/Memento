@@ -3,14 +3,13 @@ import 'dart:io';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 class HabitsAppBar extends StatelessWidget {
-  final ;
   final Function() onAddPressed;
   final Function() onBackPressed;
 
   const HabitsAppBar({
     super.key,
-    required this.l10n,
     required this.onAddPressed,
     required this.onBackPressed,
   });

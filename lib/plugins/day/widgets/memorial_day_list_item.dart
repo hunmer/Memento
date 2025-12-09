@@ -17,7 +17,6 @@ class MemorialDayListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = ;
 
     Widget content = Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -32,8 +31,8 @@ class MemorialDayListItem extends StatelessWidget {
             Text(memorialDay.formattedTargetDate),
             Text(
               memorialDay.isExpired
-                  ? localizations.daysPassed(memorialDay.daysPassed)
-                  : localizations.daysRemaining(memorialDay.daysRemaining),
+                  ? 'day_daysPassed'.trParams({'count': memorialDay.daysPassed.toString()})
+                  : 'day_daysRemaining'.trParams({'count': memorialDay.daysRemaining.toString()}),
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: _getStatusColor(),

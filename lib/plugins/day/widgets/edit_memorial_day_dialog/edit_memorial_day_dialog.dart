@@ -49,7 +49,6 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = ;
 
     return AlertDialog(
       title: Column(
@@ -57,8 +56,8 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
         children: [
           Text(
             widget.memorialDay == null
-                ? localizations.addMemorialDay
-                : localizations.editMemorialDay,
+                ? 'day_addMemorialDay'.tr
+                : 'day_editMemorialDay'.tr,
           ),
           const SizedBox(height: 16),
           TabBar(
@@ -66,12 +65,12 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
             tabs: [
               Tab(
                 icon: const Icon(Icons.info_outline),
-                text: localizations.information,
+                text: 'day_information'.tr,
               ),
-              Tab(icon: const Icon(Icons.notes), text: localizations.notes),
+              Tab(icon: const Icon(Icons.notes), text: 'day_notes'.tr),
               Tab(
                 icon: const Icon(Icons.palette_outlined),
-                text: localizations.appearance,
+                text: 'day_appearance'.tr,
               ),
             ],
           ),
@@ -116,17 +115,17 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
               () => Navigator.of(
                 context,
               ).pop(const DialogResult(action: DialogAction.cancel)),
-          child: Text(localizations.cancel),
+          child: Text('day_cancel'.tr),
         ),
         if (widget.memorialDay != null)
           TextButton(
             onPressed: _confirmDelete,
             child: Text(
-              localizations.delete,
+              'day_delete'.tr,
               style: TextStyle(color: Colors.red),
             ),
           ),
-        ElevatedButton(onPressed: _save, child: Text(localizations.save)),
+        ElevatedButton(onPressed: _save, child: Text('day_save'.tr)),
       ],
     );
   }

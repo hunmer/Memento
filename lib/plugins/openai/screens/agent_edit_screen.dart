@@ -568,9 +568,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                                   'openai_updateConfig'.tr,
                                 ),
                                 content: Text(
-                                  OpenAILocalizations.of(
-                                    context,
-                                  ).updateConfigConfirm,
+                                  'openai_updateConfigConfirm'.tr,
                                 ),
                                 actions: [
                                   TextButton(
@@ -581,9 +579,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                                       });
                                     },
                                     child: Text(
-                                      OpenAILocalizations.of(
-                                        context,
-                                      ).keepCurrentConfig,
+                                      'openai_keepCurrentConfig'.tr,
                                     ),
                                   ),
                                   TextButton(
@@ -595,9 +591,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                                       });
                                     },
                                     child: Text(
-                                      OpenAILocalizations.of(
-                                        context,
-                                      ).useDefaultConfig,
+                                      'openai_useDefaultConfig'.tr,
                                     ),
                                   ),
                                 ],
@@ -614,9 +608,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return OpenAILocalizations.of(
-                        context,
-                      ).pleaseSelectProvider;
+                      return 'openai_pleaseSelectProvider'.tr;
                     }
                     return null;
                   },
@@ -686,9 +678,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                   return null;
                 }
                 if (value == null || value.isEmpty) {
-                  return OpenAILocalizations.of(
-                    context,
-                  ).pleaseEnterSystemPrompt;
+                  return 'openai_pleaseEnterSystemPrompt'.tr;
                 }
                 return null;
               },

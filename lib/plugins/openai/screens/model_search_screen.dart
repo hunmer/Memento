@@ -210,9 +210,7 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
                                                           context,
                                                         ).pop(),
                                                 child: Text(
-                                                  OpenAILocalizations.of(
-                                                    context,
-                                                  ).close,
+                                                  'openai_close'.tr,
                                                 ),
                                               ),
                                             ],

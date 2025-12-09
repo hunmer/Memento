@@ -21,7 +21,6 @@ class AppearanceTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = ;
     final scrollController = ScrollController();
 
     return SingleChildScrollView(
@@ -29,7 +28,7 @@ class AppearanceTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            localizations.backgroundColor,
+            'day_backgroundColor'.tr,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 16),
@@ -39,7 +38,7 @@ class AppearanceTab extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            localizations.backgroundImage,
+            'day_backgroundImage'.tr,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 16),
