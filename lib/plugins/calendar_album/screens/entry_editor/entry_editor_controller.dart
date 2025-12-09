@@ -47,7 +47,7 @@ class EntryEditorController {
     );
     // 如果标题为空且没有图片,则提示错误
     if (titleController.text.isEmpty && imageUrls.isEmpty) {
-      toastService.showToast('calendarAlbum_titleCannotBeEmpty'.tr);
+      toastService.showToast('calendar_album_title_cannot_be_empty'.tr);
       return null;
     }
 

@@ -105,6 +105,7 @@ class CalendarAlbumTranslationsZh {
     'calendar_album_confirm': '确定',
     'calendar_album_diary_for_date': '的日记',
     'calendar_album_new_diary': '新建日记',
+    'calendar_album_title_cannot_be_empty': '标题不能为空',
 
     // Home Widget Strings
     'calendar_album_widgetName': '日历相册',

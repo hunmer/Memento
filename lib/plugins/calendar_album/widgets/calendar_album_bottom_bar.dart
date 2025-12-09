@@ -233,15 +233,15 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
             tabs: [
               Tab(
                 icon: const Icon(Icons.calendar_today),
-                text: 'calendarAlbum_calendar'.tr,
+                text: 'calendar_album_calendar'.tr,
               ),
               Tab(
                 icon: const Icon(Icons.tag),
-                text: 'calendarAlbum_tags'.tr,
+                text: 'calendar_album_tags'.tr,
               ),
               Tab(
                 icon: const Icon(Icons.photo_library),
-                text: 'calendarAlbum_album'.tr,
+                text: 'calendar_album_album'.tr,
               ),
             ],
           ),
@@ -286,20 +286,20 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
                   return Scaffold(
                     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                     appBar: AppBar(
-                      title: Text('calendarAlbum_albumStatistics'.tr),
+                      title: Text('calendar_album_album_statistics'.tr),
                       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                     ),
                     body: AlertDialog(
-                      title: Text('calendarAlbum_albumStatistics'.tr),
+                      title: Text('calendar_album_album_statistics'.tr),
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${'calendarAlbum_totalPhotoCount'.tr}: ${allImages.length}'),
+                          Text('${'calendar_album_total_photo_count'.tr}: ${allImages.length}'),
                           const SizedBox(height: 16),
                           if (allImages.isNotEmpty) ...[
                             Text(
-                              'calendarAlbum_recentPhotos'.tr,
+                              'calendar_album_recent_photos'.tr,
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),
@@ -340,7 +340,7 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: Text('calendarAlbum_close'.tr),
+                          child: Text('calendar_album_close'.tr),
                         ),
                       ],
                     ),

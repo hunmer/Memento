@@ -108,6 +108,7 @@ class CalendarAlbumTranslationsEn {
     'calendar_album_confirm': 'Confirm',
     'calendar_album_diary_for_date': ' diary',
     'calendar_album_new_diary': 'New Diary',
+    'calendar_album_title_cannot_be_empty': 'Title cannot be empty',
 
     // Home Widget Strings
     'calendar_album_widgetName': 'Calendar Album',
