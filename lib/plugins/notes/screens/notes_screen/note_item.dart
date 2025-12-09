@@ -35,7 +35,7 @@ mixin NoteItem on NotesMainViewState, NoteOperations, FolderSelectionDialog {
                     ),
                     ListTile(
                       leading: const Icon(Icons.folder),
-                      title: Text(.moveTo),
+                      title: Text('notes_moveTo'.tr),
                       onTap: () {
                         Navigator.pop(context);
                         moveNote(note);

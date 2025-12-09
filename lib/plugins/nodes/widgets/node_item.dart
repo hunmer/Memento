@@ -456,7 +456,7 @@ class NodeItem extends StatelessWidget {
                 title: Text('nodes_deleteNode'.tr),
                 onTap: () {
                   Navigator.pop(context);
-                  _showDeleteConfirmation(context, controller, l10n);
+                  _showDeleteConfirmation(context, controller);
                 },
               ),
             ],
@@ -505,7 +505,6 @@ class NodeItem extends StatelessWidget {
   void _showDeleteConfirmation(
     BuildContext context,
     NodesController controller,
-    ,
   ) {
     showDialog(
       context: context,

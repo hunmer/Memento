@@ -52,8 +52,7 @@ class UserItemCard extends StatelessWidget {
                 builder: (context) => AlertDialog(
                   title: Text('store_confirmUse'.tr),
                   content: Text(
-                    
-                        .confirmUseMessage
+                    'store_confirmUseMessage'.tr
                         .replaceFirst('%s', item.productName),
                   ),
                   actions: [

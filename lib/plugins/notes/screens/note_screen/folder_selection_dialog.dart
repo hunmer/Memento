@@ -42,7 +42,7 @@ Future<Folder?> showFolderSelectionDialog(
             if (parentFolder != null && parentFolder.id != currentFolderId)
               TextButton(
                 onPressed: () => Navigator.pop(context, parentFolder),
-                child: Text(.selectCurrentFolder),
+                child: Text('notes_selectCurrentFolder'.tr),
               ),
           ],
         ),

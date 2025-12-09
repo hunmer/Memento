@@ -116,13 +116,13 @@ class _FolderListScreenState extends State<FolderListScreen> {
             context: context,
             builder:
                 (context) => AlertDialog(
-                  title: Text(.createNew),
+                  title: Text('notes_createNew'.tr),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ListTile(
                         leading: const Icon(Icons.folder),
-                        title: Text(.newFolder),
+                        title: Text('notes_newFolder'.tr),
                         onTap: () {
                           Navigator.pop(context);
                           // Show folder creation dialog
@@ -130,7 +130,7 @@ class _FolderListScreenState extends State<FolderListScreen> {
                       ),
                       ListTile(
                         leading: const Icon(Icons.note),
-                        title: Text(.newNote),
+                        title: Text('notes_newNote'.tr),
                         onTap: () {
                           Navigator.pop(context);
                           NavigationHelper.push(context, NoteEditScreen(

@@ -57,7 +57,7 @@ mixin NoteOperations on NotesMainViewState {
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 child: Text(
-                  .delete,
+                  'notes_delete'.tr,
                   style: TextStyle(color: Colors.red),
                 ),
               ),

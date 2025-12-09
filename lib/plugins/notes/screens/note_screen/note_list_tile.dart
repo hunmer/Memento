@@ -50,7 +50,7 @@ class NoteListTile extends StatelessWidget {
                     ),
                     ListTile(
                       leading: const Icon(Icons.folder),
-                      title: Text(.moveTo),
+                      title: Text('notes_moveTo'.tr),
                       onTap: () async {
                         Navigator.pop(context);
                         await moveNoteDialog(
