@@ -1,10 +1,10 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
 import 'package:Memento/plugins/tts/models/tts_service_config.dart';
 import 'package:Memento/plugins/tts/models/tts_service_type.dart';
-import 'package:Memento/plugins/tts/l10n/tts_localizations.dart';
 import 'package:Memento/plugins/tts/widgets/service_editor_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
@@ -39,7 +39,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        Toast.error('${TTSLocalizations.of(context).loadServicesFailed}: $e');
+        Toast.error('${'tts_loadServicesFailed'.tr}: $e');
       }
     }
   }
@@ -48,17 +48,17 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(TTSLocalizations.of(context).deleteService),
-        content: Text(TTSLocalizations.of(context).confirmDelete),
+        title: Text('tts_deleteService'.tr),
+        content: Text('tts_confirmDelete'.tr),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(TTSLocalizations.of(context).cancel),
+            child: Text('tts_cancel'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(TTSLocalizations.of(context).deleteService),
+            child: Text('tts_deleteService'.tr),
           ),
         ],
       ),
@@ -69,11 +69,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         await _plugin.managerService.deleteService(service.id);
         _loadServices();
         if (mounted) {
-          Toast.success(TTSLocalizations.of(context).serviceDeleted);
+          Toast.success('tts_serviceDeleted'.tr);
         }
       } catch (e) {
         if (mounted) {
-          Toast.error('${TTSLocalizations.of(context).deleteFailed}: $e');
+          Toast.error('${'tts_deleteFailed'.tr}: $e');
         }
       }
     }
@@ -82,21 +82,21 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
   Future<void> _testService(TTSServiceConfig service) async {
     try {
       await _plugin.speak(
-        TTSLocalizations.of(context).voiceTestText,
+        'tts_voiceTestText'.tr,
         serviceId: service.id,
         onError: (error) {
           if (mounted) {
-            Toast.error('${TTSLocalizations.of(context).testFailedPrefix}: $error');
+            Toast.error('${'tts_testFailedPrefix'.tr}: $error');
           }
         },
       );
 
       if (mounted) {
-        Toast.success(TTSLocalizations.of(context).testSuccess);
+        Toast.success('tts_testSuccess'.tr);
       }
     } catch (e) {
       if (mounted) {
-        Toast.error('${TTSLocalizations.of(context).testFailedPrefix}: $e');
+        Toast.error('${'tts_testFailedPrefix'.tr}: $e');
       }
     }
   }
@@ -108,7 +108,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
       _loadServices();
     } catch (e) {
       if (mounted) {
-        Toast.error('${TTSLocalizations.of(context).updateFailed}: $e');
+        Toast.error('${'tts_updateFailed'.tr}: $e');
       }
     }
   }
@@ -127,11 +127,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
       _loadServices();
 
       if (mounted) {
-        Toast.success(TTSLocalizations.of(context).setAsDefaultService);
+        Toast.success('tts_setAsDefaultService'.tr);
       }
     } catch (e) {
       if (mounted) {
-        Toast.error('${TTSLocalizations.of(context).setDefaultFailed}: $e');
+        Toast.error('${'tts_setDefaultFailed'.tr}: $e');
       }
     }
   }
@@ -149,11 +149,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         _loadServices();
 
         if (mounted) {
-          Toast.success(TTSLocalizations.of(context).serviceAdded);
+          Toast.success('tts_serviceAdded'.tr);
         }
       } catch (e) {
         if (mounted) {
-          Toast.error('${TTSLocalizations.of(context).addFailed}: $e');
+          Toast.error('${'tts_addFailed'.tr}: $e');
         }
       }
     }
@@ -172,11 +172,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         _loadServices();
 
         if (mounted) {
-          Toast.success(TTSLocalizations.of(context).serviceUpdated);
+          Toast.success('tts_serviceUpdated'.tr);
         }
       } catch (e) {
         if (mounted) {
-          Toast.error('${TTSLocalizations.of(context).updateFailed}: $e');
+          Toast.error('${'tts_updateFailed'.tr}: $e');
         }
       }
     }
@@ -184,12 +184,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = TTSLocalizations.of(context);
     final theme = Theme.of(context);
 
     return SuperCupertinoNavigationWrapper(
       title: Text(
-        loc.servicesList,
+        'tts_servicesList'.tr,
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
       largeTitle: 'TTS 服务',
@@ -198,7 +197,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
         IconButton(
           icon: Icon(Icons.refresh, color: theme.iconTheme.color),
           onPressed: _loadServices,
-          tooltip: TTSLocalizations.of(context).refresh,
+          tooltip: 'tts_refresh'.tr,
         ),
       ],
       body: Stack(
@@ -212,12 +211,12 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                         children: [
                           const Icon(Icons.record_voice_over_outlined, size: 64, color: Colors.grey),
                           const SizedBox(height: 16),
-                          Text(TTSLocalizations.of(context).noServicesAvailable, style: TextStyle(color: Colors.grey[600])),
+                          Text('tts_noServicesAvailable'.tr, style: TextStyle(color: Colors.grey[600])),
                           const SizedBox(height: 8),
                           ElevatedButton.icon(
                             onPressed: () => _createDefaultService(),
                             icon: const Icon(Icons.add),
-                            label: Text(loc.addService),
+                            label: Text('tts_addService'.tr),
                           ),
                         ],
                       ),
@@ -248,7 +247,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
-                                      loc.defaultService,
+                                      'tts_defaultService'.tr,
                                       style: const TextStyle(color: Colors.white, fontSize: 12),
                                     ),
                                   ),
@@ -259,11 +258,11 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                               children: [
                                 const SizedBox(height: 4),
                                 Text(
-                                  service.type == TTSServiceType.system ? loc.systemTts : loc.httpService,
+                                  service.type == TTSServiceType.system ? 'tts_systemTts'.tr : 'tts_httpService'.tr,
                                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                                 ),
                                 Text(
-                                  service.isEnabled ? loc.enabled : loc.disabled,
+                                  service.isEnabled ? 'tts_enabled'.tr : 'tts_disabled'.tr,
                                   style: TextStyle(
                                     color: service.isEnabled ? Colors.green : Colors.grey,
                                     fontSize: 12,
@@ -299,7 +298,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                                     children: [
                                       const Icon(Icons.edit, size: 20),
                                       const SizedBox(width: 8),
-                                      Text(loc.editService),
+                                      Text('tts_editService'.tr),
                                     ],
                                   ),
                                 ),
@@ -310,7 +309,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                                     children: [
                                       const Icon(Icons.play_arrow, size: 20),
                                       const SizedBox(width: 8),
-                                      Text(loc.test),
+                                      Text('tts_test'.tr),
                                     ],
                                   ),
                                 ),
@@ -323,7 +322,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                                         size: 20,
                                       ),
                                       const SizedBox(width: 8),
-                                      Text(service.isEnabled ? loc.disabled : loc.enabled),
+                                      Text(service.isEnabled ? 'tts_disabled'.tr : 'tts_enabled'.tr),
                                     ],
                                   ),
                                 ),
@@ -334,7 +333,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                                       children: [
                                         const Icon(Icons.star_outline, size: 20),
                                         const SizedBox(width: 8),
-                                        Text(TTSLocalizations.of(context).setAsDefault),
+                                        Text('tts_setAsDefault'.tr),
                                       ],
                                     ),
                                   ),
@@ -345,7 +344,7 @@ class _TTSServicesScreenState extends State<TTSServicesScreen> {
                                     children: [
                                       const Icon(Icons.delete_outline, size: 20, color: Colors.red),
                                       const SizedBox(width: 8),
-                                      Text(loc.deleteService, style: const TextStyle(color: Colors.red)),
+                                      Text('tts_deleteService'.tr, style: const TextStyle(color: Colors.red)),
                                     ],
                                   ),
                                 ),
