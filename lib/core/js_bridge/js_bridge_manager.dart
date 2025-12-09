@@ -804,8 +804,6 @@ class JSBridgeManager {
         };
       })();
     ''');
-
-    print('✓ 事件系统 API 已注册 (events.on/off)');
   }
 
   /// 注册工具调用 API（步骤间结果传递）
@@ -910,8 +908,6 @@ class JSBridgeManager {
         };
       })();
     ''');
-
-    print('✓ 工具调用 API 已注册 (setResult/getResult)');
   }
 
   /// 获取平台名称

@@ -36,7 +36,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   void initState() {
     super.initState();
     // 通过插件实例获取controller
-    _controller = AgentChatPlugin.instance.conversationController;
+    _controller = AgentChatPlugin.instance.conversationController!;
 
     // 初始化工具模板服务
     _templateService = ToolTemplateService(_controller.storage);

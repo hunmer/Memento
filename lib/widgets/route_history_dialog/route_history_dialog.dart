@@ -80,8 +80,16 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
       icon: Icons.inventory_2_outlined,
     );
 
+    final templateService = AgentChatPlugin.instance.templateService;
+    if (templateService == null) {
+      if (context.mounted) {
+        Toast.error('工具模板服务未初始化');
+      }
+      return;
+    }
+
     await NavigationHelper.push(context, ToolTemplateScreen(
-          templateService: AgentChatPlugin.instance.templateService,),
+          templateService: templateService,),
     );
   }
 

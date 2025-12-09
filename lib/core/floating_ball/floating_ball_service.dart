@@ -57,12 +57,17 @@ class FloatingBallService {
             ),
       );
 
-      final overlayState = Overlay.of(context);
+      // 使用 maybeOf 安全获取 Overlay，避免异常
+      final overlayState = Overlay.maybeOf(context);
       if (overlayState != null && overlayState.mounted) {
         overlayState.insert(_overlayEntry!);
+        debugPrint('悬浮球已成功显示');
+      } else {
+        debugPrint('未找到有效的 Overlay 或 Overlay 未挂载，悬浮球显示被跳过');
       }
-    } catch (e) {
+    } catch (e, stack) {
       debugPrint('Error showing floating ball: $e');
+      debugPrint('堆栈信息: $stack');
     }
   }
 
