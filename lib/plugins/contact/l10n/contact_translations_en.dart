@@ -1,0 +1,110 @@
+/// 联系人插件英文翻译
+const Map<String, String> contactTranslationsEn = {
+  // Basic info
+  'contact_name': 'Contacts',
+  'contact_contactList': 'Contact List',
+  'contact_newContact': 'New Contact',
+  'contact_editContact': 'Edit Contact',
+  'contact_deleteContact': 'Delete Contact',
+  'contact_username': 'Name',
+  'contact_phone': 'Phone',
+  'contact_email': 'Email',
+  'contact_address': 'Address',
+  'contact_notes': 'Notes',
+  'contact_save': 'Save',
+  'contact_cancel': 'Cancel',
+  'contact_deleteConfirmation': 'Are you sure you want to delete this contact?',
+  'contact_noContacts': 'No contacts yet',
+  'contact_searchContacts': 'Search contacts',
+
+  // Groups
+  'contact_contactGroups': 'Groups',
+  'contact_addGroup': 'Add Group',
+  'contact_editGroup': 'Edit Group',
+  'contact_deleteGroup': 'Delete Group',
+  'contact_groupName': 'Group Name',
+  'contact_selectGroup': 'Select Group',
+
+  // Import/Export
+  'contact_importContacts': 'Import Contacts',
+  'contact_exportContacts': 'Export Contacts',
+  'contact_shareContact': 'Share Contact',
+
+  // Details and Favorites
+  'contact_contactDetails': 'Contact Details',
+  'contact_favoriteContacts': 'Favorites',
+  'contact_addToFavorites': 'Add to Favorites',
+  'contact_removeFromFavorites': 'Remove from Favorites',
+
+  // Actions
+  'contact_call': 'Call',
+  'contact_message': 'Message',
+  'contact_emailContact': 'Email',
+  'contact_share': 'Share',
+  'contact_contactNotFound': 'Contact not found',
+
+  // Statistics
+  'contact_addContact': 'Add Contact',
+  'contact_confirmDelete': 'Confirm Delete',
+  'contact_contactCount': 'Contact Count',
+  'contact_contacts': 'Contacts',
+  'contact_createdTime': 'Created Time',
+  'contact_deleteConfirmMessage': 'Are you sure you want to delete this contact?',
+  'contact_errorMessage': 'Error: @error',
+  'contact_formValidationMessage': 'Please fill out the form correctly',
+  'contact_lastContactTime': 'Last Contact Time',
+  'contact_recentContacts': 'Recent',
+  'contact_saveFailedMessage': 'Save failed: @error',
+  'contact_sortBy': 'Sort By',
+  'contact_totalContacts': 'Total',
+
+  // Custom fields and tags
+  'contact_addCustomField': 'Add Custom Field',
+  'contact_addCustomFieldTooltip': 'Add a custom field to this contact',
+  'contact_addTag': 'Add Tag',
+  'contact_addTagTooltip': 'Add a tag to this contact',
+  'contact_addressLabel': 'Address',
+  'contact_basicInfoTab': 'Basic Info',
+  'contact_dateRange': 'Date Range',
+  'contact_days': 'Days',
+  'contact_deleteFieldTooltip': 'Delete this field',
+  'contact_endDate': 'End Date',
+  'contact_filter': 'Filter',
+  'contact_nameKeyword': 'Name Keyword',
+  'contact_nameLabel': 'Name',
+  'contact_nameRequiredError': 'Name is required',
+  'contact_noLimit': 'No Limit',
+  'contact_notesLabel': 'Notes',
+  'contact_phoneLabel': 'Phone',
+  'contact_recordsTab': 'Records',
+  'contact_reset': 'Reset',
+  'contact_saveFirstMessage': 'Please save the contact first',
+  'contact_searchContactsHint': 'Search contacts...',
+  'contact_selectContactTitle': 'Select Contact',
+  'contact_startDate': 'Start Date',
+  'contact_tags': 'Tags',
+  'contact_uncontactedDays': 'Uncontacted Days',
+  'contact_upload': 'Upload',
+
+  // Interaction record form
+  'contact_addInteractionRecord': 'Add Interaction Record',
+  'contact_editInteractionRecord': 'Edit Interaction Record',
+  'contact_dateLabel': 'Date',
+  'contact_timeLabel': 'Time',
+  'contact_notesHint': 'Enter interaction details...',
+  'contact_otherParticipants': 'Other Participants',
+  'contact_addParticipantTooltip': 'Add participant',
+
+  // Other fields
+  'contact_organizationLabel': 'Organization',
+  'contact_emailLabel': 'Email',
+  'contact_websiteLabel': 'Website',
+  'contact_done': 'Done',
+
+  // Separator and custom
+  'contact_separator': ' - ',
+  'contact_customFields': 'Custom Fields',
+  'contact_customActivityEvents': 'Custom Activity Events',
+  'contact_addCustomEvent': 'Add custom event',
+  'contact_pickColor': 'Pick a color',
+};

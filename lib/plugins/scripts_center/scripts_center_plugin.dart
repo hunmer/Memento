@@ -5,7 +5,7 @@ import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/event/event_manager.dart';
-import 'package:Memento/core/event/event_args.dart';
+import 'package:Memento/core/event/event_args.dart' as event_args;
 import 'package:Memento/core/event/item_event_args.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'services/script_loader.dart';
@@ -87,12 +87,12 @@ Future<Map<String, dynamic>> _serializeEventArgsAsync(EventArgs args) async {
     result['itemId'] = args.itemId;
     result['title'] = args.title;
     result['action'] = args.action;
-  } else if (args is Value) {
+  } else if (args is event_args.Value) {
     result['value'] = await _deepSerializeAsync(args.value);
-  } else if (args is Values) {
+  } else if (args is event_args.Values) {
     result['value1'] = await _deepSerializeAsync(args.value1);
     result['value2'] = await _deepSerializeAsync(args.value2);
-  } else if (args is UpdateEvent) {
+  } else if (args is event_args.UpdateEvent) {
     result['version'] = args.version;
     result['forceUpdate'] = args.forceUpdate;
     if (args.changelog != null) {

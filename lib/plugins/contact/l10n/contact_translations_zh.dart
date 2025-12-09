@@ -1,0 +1,110 @@
+/// 联系人插件中文翻译
+const Map<String, String> contactTranslationsZh = {
+  // 基础信息
+  'contact_name': '联系人',
+  'contact_contactList': '联系人列表',
+  'contact_newContact': '新建联系人',
+  'contact_editContact': '编辑联系人',
+  'contact_deleteContact': '删除联系人',
+  'contact_username': '姓名',
+  'contact_phone': '电话',
+  'contact_email': '邮箱',
+  'contact_address': '地址',
+  'contact_notes': '备注',
+  'contact_save': '保存',
+  'contact_cancel': '取消',
+  'contact_deleteConfirmation': '确定要删除此联系人吗？',
+  'contact_noContacts': '暂无联系人',
+  'contact_searchContacts': '搜索联系人',
+
+  // 分组
+  'contact_contactGroups': '分组',
+  'contact_addGroup': '添加分组',
+  'contact_editGroup': '编辑分组',
+  'contact_deleteGroup': '删除分组',
+  'contact_groupName': '分组名称',
+  'contact_selectGroup': '选择分组',
+
+  // 导入导出
+  'contact_importContacts': '导入联系人',
+  'contact_exportContacts': '导出联系人',
+  'contact_shareContact': '分享联系人',
+
+  // 详情和收藏
+  'contact_contactDetails': '联系人详情',
+  'contact_favoriteContacts': '收藏',
+  'contact_addToFavorites': '添加到收藏',
+  'contact_removeFromFavorites': '从收藏中移除',
+
+  // 操作
+  'contact_call': '拨打电话',
+  'contact_message': '发送消息',
+  'contact_emailContact': '发送邮件',
+  'contact_share': '分享',
+  'contact_contactNotFound': '未找到联系人',
+
+  // 统计
+  'contact_addContact': '添加联系人',
+  'contact_confirmDelete': '确认删除',
+  'contact_contactCount': '联系人数量',
+  'contact_contacts': '联系人',
+  'contact_createdTime': '创建时间',
+  'contact_deleteConfirmMessage': '确定要删除此联系人吗？',
+  'contact_errorMessage': '错误: @error',
+  'contact_formValidationMessage': '请正确填写表单',
+  'contact_lastContactTime': '最后联系时间',
+  'contact_recentContacts': '最近联系人',
+  'contact_saveFailedMessage': '保存失败: @error',
+  'contact_sortBy': '排序方式',
+  'contact_totalContacts': '联系人总数',
+
+  // 自定义字段和标签
+  'contact_addCustomField': '添加自定义字段',
+  'contact_addCustomFieldTooltip': '为此联系人添加自定义字段',
+  'contact_addTag': '添加标签',
+  'contact_addTagTooltip': '为此联系人添加标签',
+  'contact_addressLabel': '地址',
+  'contact_basicInfoTab': '基本信息',
+  'contact_dateRange': '日期范围',
+  'contact_days': '天',
+  'contact_deleteFieldTooltip': '删除此字段',
+  'contact_endDate': '结束日期',
+  'contact_filter': '筛选',
+  'contact_nameKeyword': '姓名关键字',
+  'contact_nameLabel': '姓名',
+  'contact_nameRequiredError': '姓名是必填项',
+  'contact_noLimit': '无限制',
+  'contact_notesLabel': '备注',
+  'contact_phoneLabel': '电话',
+  'contact_recordsTab': '记录',
+  'contact_reset': '重置',
+  'contact_saveFirstMessage': '请先保存联系人',
+  'contact_searchContactsHint': '搜索联系人...',
+  'contact_selectContactTitle': '选择联系人',
+  'contact_startDate': '开始日期',
+  'contact_tags': '标签',
+  'contact_uncontactedDays': '未联系天数',
+  'contact_upload': '上传',
+
+  // 交互记录表单
+  'contact_addInteractionRecord': '添加联系记录',
+  'contact_editInteractionRecord': '编辑联系记录',
+  'contact_dateLabel': '日期',
+  'contact_timeLabel': '时间',
+  'contact_notesHint': '输入联系内容...',
+  'contact_otherParticipants': '其他参与者',
+  'contact_addParticipantTooltip': '添加参与者',
+
+  // 其他字段
+  'contact_organizationLabel': '组织',
+  'contact_emailLabel': '邮箱',
+  'contact_websiteLabel': '网站',
+  'contact_done': '完成',
+
+  // 分隔符和自定义
+  'contact_separator': ' - ',
+  'contact_customFields': '自定义字段',
+  'contact_customActivityEvents': '自定义活动事件',
+  'contact_addCustomEvent': '添加自定义事件',
+  'contact_pickColor': '选择颜色',
+};
