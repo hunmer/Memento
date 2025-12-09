@@ -155,7 +155,7 @@ class _BackupTimePickerState extends State<BackupTimePicker> {
       children: List.generate(31, (index) {
         final day = index + 1;
         return ChoiceChip(
-          label: Text('app_day'.tr(day.toString())),
+          label: Text('app_day'.trParams({'day': day.toString()})),
           selected: _selectedMonthDays.contains(day),
           onSelected: (selected) {
             setState(() {

@@ -28,7 +28,6 @@ export 'widgets/goal_edit_page.dart';
 export 'widgets/record_dialog.dart';
 export 'utils/date_utils.dart';
 export 'utils/tracker_notification_utils.dart';
-export 'l10n/tracker_localizations.dart';
 
 class TrackerMainView extends StatefulWidget {
   const TrackerMainView({super.key});

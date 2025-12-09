@@ -60,7 +60,7 @@ class _HomeGridState extends State<HomeGrid> {
   @override
   Widget build(BuildContext context) {
     if (widget.items.isEmpty) {
-      return _buildEmptyState(context, l10n);
+      return _buildEmptyState(context);
     }
 
     final gridWidget = Padding(

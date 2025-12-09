@@ -56,9 +56,9 @@ class FullBackupController {
                     LinearProgressIndicator(value: snapshot.data),
                     const SizedBox(height: 16),
                     Text(
-                      'app_completed'.tr(
-                        ((snapshot.data ?? 0) * 100).toStringAsFixed(1),
-                      ),
+                      'app_completed'.trParams({
+                        'value': ((snapshot.data ?? 0) * 100).toStringAsFixed(1)
+                      }),
                     ),
                   ],
                 ),
@@ -157,7 +157,7 @@ class FullBackupController {
       if (errorContext == null) return;
 
       Navigator.of(errorContext, rootNavigator: true).pop();
-      Toast.error('app_exportFailed'.tr(e.toString()));
+      Toast.error('app_exportFailed'.trParams({'error': e.toString()}));
     }
   }
 
@@ -316,7 +316,7 @@ class FullBackupController {
           errorContext,
           rootNavigator: true,
         ).popUntil((route) => route.isFirst);
-        Toast.error('app_fileSelectionFailed'.tr(e));
+        Toast.error('app_fileSelectionFailed'.trParams({'error': e.toString()}));
       }
     } catch (e) {
       // 确保关闭所有可能的对话框

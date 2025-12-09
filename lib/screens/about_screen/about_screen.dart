@@ -86,7 +86,7 @@ class AboutScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.aboutTitle),
+        title: Text('about_title'.tr),
         centerTitle: true,
       ),
       body: FutureBuilder<PackageInfo>(
@@ -145,7 +145,7 @@ class AboutScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '${l10n.version} $version${buildNumber.isNotEmpty ? '+$buildNumber' : ''}',
+                    '${'about_version'.tr} $version${buildNumber.isNotEmpty ? '+$buildNumber' : ''}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.w500,
@@ -160,7 +160,7 @@ class AboutScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Text(
-                    l10n.aboutDescription,
+                    'about_description'.tr,
                     style: Theme.of(context).textTheme.bodyLarge,
                     textAlign: TextAlign.center,
                   ),
@@ -169,7 +169,7 @@ class AboutScreen extends StatelessWidget {
               const SizedBox(height: 24),
               // Links Section
               Text(
-                l10n.projectLinkTitle,
+                'about_projectLinkTitle'.tr,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -178,21 +178,21 @@ class AboutScreen extends StatelessWidget {
               _buildLinkCard(
                 context: context,
                 title: 'GitHub',
-                url: l10n.projectLink,
+                url: 'about_projectLink'.tr,
                 icon: Icons.code,
                 iconColor: Colors.purple,
               ),
               _buildLinkCard(
                 context: context,
-                title: l10n.feedbackTitle,
-                url: l10n.feedbackLink,
+                title: 'about_feedbackTitle'.tr,
+                url: 'about_feedbackLink'.tr,
                 icon: Icons.bug_report,
                 iconColor: Colors.orange,
               ),
               _buildLinkCard(
                 context: context,
-                title: l10n.documentationTitle,
-                url: l10n.documentationLink,
+                title: 'about_documentationTitle'.tr,
+                url: 'about_documentationLink'.tr,
                 icon: Icons.menu_book,
                 iconColor: Colors.blue,
               ),

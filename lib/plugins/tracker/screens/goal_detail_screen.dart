@@ -140,7 +140,7 @@ class GoalDetailScreen extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final record = records[index];
                               return flutter.ListTile(
-                                title: Text('tracker_recordValueDisplay'.tr(record.value)),
+                                title: Text('tracker_recordValueDisplay'.trParams({'value': record.value.toString()})),
                                 subtitle: Text(
                                   record.recordedAt
                                       .toLocal()

@@ -171,7 +171,7 @@ class ImportController {
       }
     } catch (e) {
       if (_mounted) {
-        Toast.error('app_importFailedWithError'.tr(e.toString()));
+        Toast.error('app_importFailedWithError'.trParams({'error': e.toString()}));
       }
     }
   }

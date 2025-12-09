@@ -307,7 +307,7 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
           ),
           const SizedBox(width: 4),
           Text(
-            'widget_visits'.tr(record.visitCount),
+            'widget_visits'.trParams({'count': record.visitCount.toString()}),
             style: TextStyle(
               fontSize: 12,
               color: theme.colorScheme.outline,

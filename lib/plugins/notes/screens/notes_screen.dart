@@ -508,7 +508,7 @@ class _NotesMainViewState extends NotesMainViewState
             height: 300,
             child:
                 tagsList.isEmpty
-                    ? Center(child: Text('notes_noTagsAvailable'.tr('')))
+                    ? Center(child: Text('notes_noTagsAvailable'.tr))
                     : ListView.builder(
                       itemCount:
                           tagsList.length + 1, // +1 for "All Tags" option
