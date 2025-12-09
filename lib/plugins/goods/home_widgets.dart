@@ -51,7 +51,7 @@ class GoodsHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
       final plugin = PluginManager.instance.getPlugin('goods') as GoodsPlugin?;
       if (plugin == null) return [];
@@ -59,11 +59,11 @@ class GoodsHomeWidgets {
       final totalItems = plugin.getTotalItemsCount();
       final totalValue = plugin.getTotalItemsValue();
       final unusedItems = plugin.getUnusedItemsCount();
-
+      final l10n = GoodsLocalizations.of(context);
       return [
         StatItemData(
           id: 'total_quantity',
-          label: '物品总数',
+          label: l10n.totalGoods,
           value: '$totalItems',
           highlight: false,
         ),
@@ -106,7 +106,7 @@ class GoodsHomeWidgets {
       }
 
       // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
       return GenericPluginWidget(

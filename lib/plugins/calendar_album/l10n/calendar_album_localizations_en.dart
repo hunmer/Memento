@@ -169,7 +169,7 @@ class CalendarAlbumLocalizationsEn extends CalendarAlbumLocalizations {
   String get selectTag => 'Select Tag';
 
   @override
-  String get sevenDayDiary => '7-Day';
+  String get sevenDaysDiary => '7-Day';
 
   @override
   String get tagCount => 'Tags';

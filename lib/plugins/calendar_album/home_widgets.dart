@@ -51,12 +51,13 @@ class CalendarAlbumHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
       final plugin = PluginManager.instance.getPlugin('calendar_album')
           as CalendarAlbumPlugin?;
       if (plugin == null) return [];
 
+      final l10n = CalendarAlbumLocalizations.of(context);
       final todayCount = plugin.calendarController?.getTodayEntriesCount();
       final sevenDayCount =
           plugin.calendarController?.getLast7DaysEntriesCount();
@@ -66,26 +67,26 @@ class CalendarAlbumHomeWidgets {
       return [
         StatItemData(
           id: 'today_diary',
-          label: '今日日记',
+          label: l10n.todayDiary,
           value: '$todayCount',
           highlight: todayCount! > 0,
           color: _pluginColor,
         ),
         StatItemData(
           id: 'seven_day_diary',
-          label: '七日日记',
+          label: l10n.sevenDaysDiary,
           value: '$sevenDayCount',
           highlight: false,
         ),
         StatItemData(
           id: 'all_diaries',
-          label: '所有日记',
+          label: l10n.allDiaries,
           value: '$allEntriesCount',
           highlight: false,
         ),
         StatItemData(
           id: 'tag_count',
-          label: '标签数量',
+          label: l10n.tagCount,
           value: '$tagCount',
           highlight: false,
         ),
@@ -115,7 +116,7 @@ class CalendarAlbumHomeWidgets {
       }
 
       // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
       return GenericPluginWidget(

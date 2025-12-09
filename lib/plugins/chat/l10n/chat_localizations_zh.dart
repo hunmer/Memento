@@ -206,6 +206,28 @@ class ChatLocalizationsZh extends ChatLocalizations {
   @override
   String get smartAgent => '智能体';
 
+  // 小组件相关字符串
+  @override
+  String get chatWidgetName => '聊天';
+
+  @override
+  String get chatWidgetDescription => '快速打开聊天';
+
+  @override
+  String get chatWidgetIcon => '聊天';
+
+  @override
+  String get chatOverviewWidgetName => '聊天概览';
+
+  @override
+  String get chatOverviewWidgetDescription => '显示频道和消息统计';
+
+  @override
+  String get communicationCategory => '通讯';
+
+  @override
+  String get loadFailed => '加载失败';
+
   // 消息选项对话框
   @override
   String get messageOptions => '消息选项';

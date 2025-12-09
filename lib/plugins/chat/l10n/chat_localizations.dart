@@ -166,6 +166,15 @@ abstract class ChatLocalizations {
   String get totalMessages;
   String get todayMessages;
 
+  // Home widget related strings
+  String get chatWidgetName;
+  String get chatWidgetDescription;
+  String get chatWidgetIcon;
+  String get chatOverviewWidgetName;
+  String get chatOverviewWidgetDescription;
+  String get communicationCategory;
+  String get loadFailed;
+
   String get editMessageTitle;
 
   String get messageHintText;

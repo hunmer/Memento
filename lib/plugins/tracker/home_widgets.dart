@@ -6,6 +6,7 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'tracker_plugin.dart';
+import 'l10n/tracker_localizations.dart';
 
 /// 目标追踪插件的主页小组件注册
 class TrackerHomeWidgets {
@@ -48,7 +49,7 @@ class TrackerHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
       final plugin = PluginManager.instance.getPlugin('tracker') as TrackerPlugin?;
       if (plugin == null) return [];
@@ -99,7 +100,7 @@ class TrackerHomeWidgets {
       }
 
       // 获取基础统计项数据
-      final baseItems = _getAvailableStats();
+      final baseItems = _getAvailableStats(context);
 
       // 使用l10n更新统计项标签
       final availableItems = baseItems.map((item) {

@@ -51,8 +51,9 @@ class DiaryHomeWidgets {
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
+      final l10n = DiaryLocalizations.of(context);
       final plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
       if (plugin == null) return [];
 
@@ -64,20 +65,20 @@ class DiaryHomeWidgets {
       return [
         StatItemData(
           id: 'today_word_count',
-          label: '今日字数',
+          label: l10n.todayWordCount,
           value: '$todayCount',
           highlight: todayCount > 0,
           color: Colors.indigo,
         ),
         StatItemData(
           id: 'month_word_count',
-          label: '本月字数',
+          label: l10n.monthWordCount,
           value: '$monthCount',
           highlight: false,
         ),
         StatItemData(
           id: 'month_progress',
-          label: '本月进度',
+          label: l10n.monthProgress,
           value: '${monthProgress.$1}/${monthProgress.$2}',
           highlight: monthProgress.$1 > 0,
           color: Colors.indigo,
@@ -111,7 +112,7 @@ class DiaryHomeWidgets {
       }
 
       // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
       return GenericPluginWidget(

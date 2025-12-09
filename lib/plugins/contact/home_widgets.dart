@@ -51,17 +51,18 @@ class ContactHomeWidgets {
   /// 获取可用的统计项
   /// 返回联系人插件支持的所有统计项类型定义
   /// 实际数据值由 _buildOverviewWidget 在 FutureBuilder 中异步获取并更新
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
+    final l10n = ContactLocalizations.of(context);
     return [
       StatItemData(
         id: 'total_contacts',
-        label: '联系人总数',
+        label: l10n.totalContacts,
         value: '0', // 占位符，实际值由 _buildOverviewWidget 异步获取
         highlight: false,
       ),
       StatItemData(
         id: 'recent_contacts',
-        label: '最近联系',
+        label: l10n.recentContacts,
         value: '0', // 占位符，实际值由 _buildOverviewWidget 异步获取
         highlight: false,
         color: Colors.green,
@@ -90,9 +91,9 @@ class ContactHomeWidgets {
 
       // 异步加载实际的统计数据
       return FutureBuilder<List<StatItemData>>(
-        future: _loadContactStats(),
+        future: _loadContactStats(context),
         builder: (context, snapshot) {
-          final availableItems = snapshot.data ?? _getAvailableStats();
+          final availableItems = snapshot.data ?? _getAvailableStats(context);
 
           // 使用通用小组件
           return GenericPluginWidget(
@@ -110,11 +111,12 @@ class ContactHomeWidgets {
   }
 
   /// 异步加载联系人统计数据
-  static Future<List<StatItemData>> _loadContactStats() async {
+  static Future<List<StatItemData>> _loadContactStats(BuildContext context) async {
     try {
       final plugin = PluginManager.instance.getPlugin('contact') as ContactPlugin?;
-      if (plugin == null) return _getAvailableStats();
+      if (plugin == null) return _getAvailableStats(context);
 
+      final l10n = ContactLocalizations.of(context);
       final controller = plugin.controller;
       final contacts = await controller.getAllContacts();
       final recentCount = await controller.getRecentlyContactedCount();
@@ -122,20 +124,20 @@ class ContactHomeWidgets {
       return [
         StatItemData(
           id: 'total_contacts',
-          label: '联系人总数',
+          label: l10n.totalContacts,
           value: '${contacts.length}',
           highlight: false,
         ),
         StatItemData(
           id: 'recent_contacts',
-          label: '最近联系',
+          label: l10n.recentContacts,
           value: '$recentCount',
           highlight: recentCount > 0,
           color: Colors.green,
         ),
       ];
     } catch (e) {
-      return _getAvailableStats();
+      return _getAvailableStats(context);
     }
   }
 

@@ -81,7 +81,7 @@ abstract class CalendarAlbumLocalizations {
 
   get entriesUnit;
 
-  String get sevenDayDiary;
+  String get sevenDaysDiary;
 
   String get allDiaries;
 

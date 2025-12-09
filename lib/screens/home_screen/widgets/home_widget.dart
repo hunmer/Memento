@@ -6,7 +6,7 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 typedef HomeWidgetBuilder = Widget Function(BuildContext context, Map<String, dynamic> config);
 
 /// 可用统计项提供者函数类型
-typedef AvailableStatsProvider = List<StatItemData> Function();
+typedef AvailableStatsProvider = List<StatItemData> Function(BuildContext context);
 
 /// 主页小组件定义
 ///

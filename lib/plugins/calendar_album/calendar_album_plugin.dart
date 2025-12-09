@@ -275,7 +275,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        CalendarAlbumLocalizations.of(context).sevenDayDiary,
+                        CalendarAlbumLocalizations.of(context).sevenDaysDiary,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(

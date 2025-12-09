@@ -199,6 +199,28 @@ class ChatLocalizationsEn extends ChatLocalizations {
   @override
   String get smartAgent => 'Smart Agent';
 
+  // Home widget related strings
+  @override
+  String get chatWidgetName => 'Chat';
+
+  @override
+  String get chatWidgetDescription => 'Quick access to chat';
+
+  @override
+  String get chatWidgetIcon => 'Chat';
+
+  @override
+  String get chatOverviewWidgetName => 'Chat Overview';
+
+  @override
+  String get chatOverviewWidgetDescription => 'Show channel and message statistics';
+
+  @override
+  String get communicationCategory => 'Communication';
+
+  @override
+  String get loadFailed => 'Load Failed';
+
   // Message options dialog
   @override
   String get messageOptions => 'Message Options';

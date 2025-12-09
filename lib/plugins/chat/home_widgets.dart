@@ -18,17 +18,17 @@ class ChatHomeWidgets {
     registry.register(HomeWidget(
       id: 'chat_icon',
       pluginId: 'chat',
-      name: '聊天',
-      description: '快速打开聊天',
+      name: 'chat_widget_name',
+      description: 'chat_widget_description',
       icon: Icons.chat_bubble,
       color: Colors.indigoAccent,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '通讯',
+      category: 'communication_category',
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.chat_bubble,
         color: Colors.indigoAccent,
-        name: '聊天',
+        name: 'chat_widget_icon',
       ),
     ));
 
@@ -36,21 +36,22 @@ class ChatHomeWidgets {
     registry.register(HomeWidget(
       id: 'chat_overview',
       pluginId: 'chat',
-      name: '聊天概览',
-      description: '显示频道和消息统计',
+      name: 'chat_overview_widget_name',
+      description: 'chat_overview_widget_description',
       icon: Icons.chat_bubble_outline,
       color: Colors.indigoAccent,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '通讯',
+      category: 'communication_category',
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
   }
 
   /// 获取可用的统计项
-  static List<StatItemData> _getAvailableStats() {
+  static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
+      final l10n = ChatLocalizations.of(context);
       final plugin = PluginManager.instance.getPlugin('chat') as ChatPlugin?;
       if (plugin == null) return [];
 
@@ -61,19 +62,19 @@ class ChatHomeWidgets {
       return [
         StatItemData(
           id: 'channel_count',
-          label: '频道数',
+          label: l10n.channelCount,
           value: '${channels.length}',
           highlight: false,
         ),
         StatItemData(
           id: 'total_messages',
-          label: '总消息数',
+          label: l10n.totalMessages,
           value: '$totalMessages',
           highlight: false,
         ),
         StatItemData(
           id: 'today_messages',
-          label: '今日消息',
+          label: l10n.todayMessages,
           value: '$todayMessages',
           highlight: todayMessages > 0,
           color: Colors.indigoAccent,
@@ -104,11 +105,11 @@ class ChatHomeWidgets {
       }
 
       // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: l10n.chatWidgetName,
         pluginIcon: Icons.chat_bubble,
         pluginDefaultColor: Colors.indigoAccent,
         availableItems: availableItems,
@@ -121,6 +122,7 @@ class ChatHomeWidgets {
 
   /// 构建错误提示组件
   static Widget _buildErrorWidget(BuildContext context, String error) {
+    final l10n = ChatLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -128,7 +130,7 @@ class ChatHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            l10n.loadFailed,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

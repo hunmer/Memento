@@ -108,4 +108,7 @@ class DatabaseLocalizationsEn extends DatabaseLocalizations {
 
   @override
   String get editRecordTitle => 'Edit Record';
+
+  @override
+  String get totalDatabases => 'Total Databases';
 }

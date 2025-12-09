@@ -256,4 +256,7 @@ class BillLocalizationsEn extends BillLocalizations {
 
   @override
   String get edit => 'Edit';
+
+  @override
+  String get monthlyRecord => 'Monthly Records';
 }
