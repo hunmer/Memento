@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/widgets/add_product_page.dart';
 import 'package:Memento/plugins/store/widgets/product_card.dart';
@@ -49,7 +49,7 @@ class _ProductListContentState extends State<ProductListContent> {
 
     if (uniqueProducts.isEmpty) {
       return Center(
-        child: Text(StoreLocalizations.of(context).noProducts),
+        child: Text('store_noProducts'.tr),
       );
     }
 
@@ -80,11 +80,11 @@ class _ProductListContentState extends State<ProductListContent> {
               if (await widget.controller.exchangeProduct(product)) {
                 if (mounted) setState(() {});
                 Toast.success(
-                  StoreLocalizations.of(context).redeemSuccess,
+                  'store_redeemSuccess'.tr,
                 );
               } else {
                 Toast.error(
-                  StoreLocalizations.of(context).redeemFailed,
+                  'store_redeemFailed'.tr,
                 );
               }
             },

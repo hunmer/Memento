@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
+import 'package:get/get.dart';
 
 class EmptyState extends StatelessWidget {
   const EmptyState({super.key});
@@ -17,12 +17,12 @@ class EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            CheckinLocalizations.of(context).noRecords,
+            'checkin_noRecords'.tr,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
           Text(
-            CheckinLocalizations.of(context).createCheckin,
+            'checkin_createCheckin'.tr,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).hintColor,
             ),

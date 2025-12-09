@@ -118,5 +118,10 @@ class ActivityTranslationsZh {
     'activity_recentlyUsed': '最近使用',
     'activity_tagManagement': '标签管理',
     'activity_tagsHint': '用逗号分隔标签',
+    'activity_sortBy': '排序方式',
+    'activity_activityTimeline': '活动时间线',
+    'activity_minutesSelected': '@minutes分钟已选中',
+    'activity_switchToTimelineView': '切换到时间线视图',
+    'activity_switchToGridView': '切换到网格视图',
   };
 }

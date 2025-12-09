@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'color_config.dart';
 
 /// 小组件配置容器

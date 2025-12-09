@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
+import 'package:get/get.dart';
 
 class EmptyChannelView extends StatelessWidget {
   final VoidCallback onAddChannel;
@@ -22,7 +22,7 @@ class EmptyChannelView extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            ChatLocalizations.of(context).channelList,
+            'chat_channelList'.tr,
             style: const TextStyle(fontSize: 18, color: Colors.grey),
           ),
           const SizedBox(height: 8),
@@ -30,7 +30,7 @@ class EmptyChannelView extends StatelessWidget {
             onPressed: onAddChannel,
             icon: const Icon(Icons.add),
             label: Text(
-              ChatLocalizations.of(context).newChannel,
+              'chat_newChannel'.tr,
             ),
           ),
         ],

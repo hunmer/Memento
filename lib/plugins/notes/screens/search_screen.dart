@@ -1,8 +1,8 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
 import 'package:Memento/plugins/notes/widgets/search_note_item.dart';
-import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 
 class SearchScreen extends StatefulWidget {
   final NotesController controller;
@@ -60,13 +60,13 @@ class _SearchScreenState extends State<SearchScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(NotesLocalizations.of(context).filter),
+            title: Text('notes_filter'.tr),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(NotesLocalizations.of(context).tags),
+                  Text('notes_tags'.tr),
                   Wrap(
                     spacing: 8,
                     children: [
@@ -78,12 +78,12 @@ class _SearchScreenState extends State<SearchScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Text(NotesLocalizations.of(context).dateRange),
+                  Text('notes_dateRange'.tr),
                   ListTile(
                     title: Text(
                       _startDate != null
                           ? 'From: ${_formatDate(_startDate!)}'
-                          : NotesLocalizations.of(context).typeToSearch,
+                          : 'notes_typeToSearch'.tr,
                     ),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () async {
@@ -105,7 +105,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     title: Text(
                       _endDate != null
                           ? 'To: ${_formatDate(_endDate!)}'
-                          : NotesLocalizations.of(context).typeToSearch,
+                          : 'notes_typeToSearch'.tr,
                     ),
                     trailing: const Icon(Icons.calendar_today),
                     onTap: () async {
@@ -137,13 +137,13 @@ class _SearchScreenState extends State<SearchScreen> {
                   _onSearchChanged();
                   Navigator.pop(context);
                 },
-                child: Text(NotesLocalizations.of(context).clearAll),
+                child: Text('notes_clearAll'.tr),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: Text(NotesLocalizations.of(context).apply),
+                child: Text('notes_apply'.tr),
               ),
             ],
           ),
@@ -183,7 +183,7 @@ class _SearchScreenState extends State<SearchScreen> {
         title: TextField(
           controller: _searchController,
           decoration: InputDecoration(
-            hintText: NotesLocalizations.of(context).searchHint,
+            hintText: 'notes_searchHint'.tr,
             border: InputBorder.none,
           ),
           autofocus: true,
@@ -200,8 +200,8 @@ class _SearchScreenState extends State<SearchScreen> {
               ? Center(
                 child:
                     _query.isEmpty
-                        ? Text(NotesLocalizations.of(context).typeToSearch)
-                        : Text(NotesLocalizations.of(context).noResultsFound),
+                        ? Text('notes_typeToSearch'.tr)
+                        : Text('notes_noResultsFound'.tr),
               )
               : ListView.builder(
                 itemCount: _searchResults.length,
@@ -212,7 +212,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     note: note,
                     folderName:
                         folder?.name ??
-                        NotesLocalizations.of(context).noResultsFound,
+                        'notes_noResultsFound'.tr,
                     query: _query,
                   );
                 },

@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
@@ -126,10 +127,10 @@ class _HomeScreenState extends State<HomeScreen> {
               builder:
                   (context) => AlertDialog(
                     title: Text(
-                      TrackerLocalizations.of(context).confirmDeletion,
+                      'tracker_confirmDeletion'.tr,
                     ),
                     content: Text(
-                      '${TrackerLocalizations.of(context).confirmDeletion} "${goal.name}"',
+                      '${'tracker_confirmDeletion'.tr} "${goal.name}"',
                     ),
                     actions: [
                       TextButton(
@@ -150,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onDismissed: (direction) {
             controller.deleteGoal(goal.id);
             Toast.success(
-              '${TrackerLocalizations.of(context).goalDeleted} "${goal.name}"',
+              '${'tracker_goalDeleted'.tr} "${goal.name}"',
             );
           },
           child: OpenContainer(

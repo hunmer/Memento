@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
-import 'package:Memento/plugins/day/l10n/day_localizations.dart';
-import '../../../plugins/nodes/l10n/nodes_localizations.dart' as nodes_l10n;
+
+
+
 import 'package:Memento/screens/home_screen/home_screen.dart';
 
 class RebuildController {

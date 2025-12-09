@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/gestures.dart';
 import 'package:Memento/core/plugin_base.dart';
-import 'package:Memento/core/l10n/core_localizations.dart';
+import 'package:get/get.dart';
 
 /// 插件覆盖层窗口组件
 /// 用于在应用内显示插件的独立小窗口，支持路由隔离、拖动和最小化
@@ -325,9 +325,9 @@ class _PluginOverlayWidgetState extends State<PluginOverlayWidget>
       default:
         // 如果是插件内部的路由，返回错误页面
         return NavigationHelper.createRoute(Scaffold(
-            appBar: AppBar(title: Text(CoreLocalizations.of(context)!.routeError)),
+            appBar: AppBar(title: Text('core_routeError'.tr)),
             body: Center(
-              child: Text(CoreLocalizations.of(context)!.routeNotFound(settings.name ?? '')),
+              child: Text('core_routeNotFound'.trParams({'route': settings.name ?? ''})),
             ),
           ),);
     }

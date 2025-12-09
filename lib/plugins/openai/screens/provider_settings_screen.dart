@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/openai/models/service_provider.dart';
@@ -56,7 +56,7 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
       }
     } catch (e) {
       _showErrorSnackBar(
-        '${OpenAILocalizations.of(context).loadProvidersError}: $e',
+        '${'openai_loadProvidersError'.tr}: $e',
       );
     } finally {
       setState(() {
@@ -98,10 +98,10 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
       builder:
           (context) => AlertDialog(
             title: Text(
-              OpenAILocalizations.of(context).confirmDeleteProviderTitle,
+              'openai_confirmDeleteProviderTitle'.tr,
             ),
             content: Text(
-              OpenAILocalizations.of(context).confirmDeleteProviderMessage
+              'openai_confirmDeleteProviderMessage'.tr
                   .replaceAll('{providerLabel}', provider.label),
             ),
             actions: [
@@ -123,7 +123,7 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
         await _loadProviders();
       } catch (e) {
         _showErrorSnackBar(
-          '${OpenAILocalizations.of(context).deleteFailed}: $e',
+          '${'openai_deleteFailed'.tr}: $e',
         );
       }
     }
@@ -133,12 +133,12 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(OpenAILocalizations.of(context).providerSettingsTitle),
+        title: Text('openai_providerSettingsTitle'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _addProvider,
-            tooltip: OpenAILocalizations.of(context).addProviderTooltip,
+            tooltip: 'openai_addProviderTooltip'.tr,
           ),
         ],
       ),
@@ -159,15 +159,15 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
           const Icon(Icons.cloud_off, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
           Text(
-            OpenAILocalizations.of(context).noProvidersConfigured,
+            'openai_noProvidersConfigured'.tr,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Text(OpenAILocalizations.of(context).addProviderTooltip),
+          Text('openai_addProviderTooltip'.tr),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _addProvider,
-            child: Text(OpenAILocalizations.of(context).addProviderButton),
+            child: Text('openai_addProviderButton'.tr),
           ),
         ],
       ),
@@ -194,12 +194,12 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () => _editProvider(provider),
-                  tooltip: OpenAILocalizations.of(context).editAgent,
+                  tooltip: 'openai_editAgent'.tr,
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () => _deleteProvider(provider),
-                  tooltip: OpenAILocalizations.of(context).deleteAgent,
+                  tooltip: 'openai_deleteAgent'.tr,
                 ),
               ],
             ),

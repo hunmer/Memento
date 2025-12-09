@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:get/get.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -7,7 +8,6 @@ import 'package:path/path.dart' as path;
 import 'package:Memento/plugins/chat/models/file_message.dart';
 import 'package:Memento/plugins/chat/services/file_service.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/types.dart';
-import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/l10n/local_video_handler_localizations.dart';
 
 Future<void> handleVideoSelection({
   required BuildContext context,

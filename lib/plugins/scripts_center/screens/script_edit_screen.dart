@@ -1,4 +1,3 @@
-import 'package:Memento/plugins/scripts_center/l10n/scripts_center_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 import 'package:Memento/plugins/scripts_center/models/script_input.dart';
@@ -825,7 +824,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
             OutlinedButton.icon(
               onPressed: _addInput,
               icon: const Icon(Icons.add),
-              label: Text(ScriptsCenterLocalizations.of(context).addInputParameter),
+              label: Text('scripts_center_addInputParameter'.tr),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.deepPurple,
                 side: const BorderSide(color: Colors.deepPurple),
@@ -869,7 +868,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                   _enabled = value;
                 });
               },
-              title: Text(ScriptsCenterLocalizations.of(context).enableScript),
+              title: Text('scripts_center_enableScript'.tr),
               subtitle: Text(
                 _enabled ? '脚本将在触发条件满足时执行' : '脚本已禁用，不会执行',
               ),
@@ -894,7 +893,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text(ScriptsCenterLocalizations.of(context).addTriggerCondition),
+          title: Text('scripts_center_addTriggerCondition'.tr),
           content: SizedBox(
             width: 500,
             child: Column(
@@ -964,7 +963,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(ScriptsCenterLocalizations.of(context).cancel),
+              child: Text('scripts_center_cancel'.tr),
             ),
             ElevatedButton(
               onPressed: selectedEvent == null
@@ -974,7 +973,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                 backgroundColor: Colors.deepPurple,
                 foregroundColor: Colors.white,
               ),
-              child: Text(ScriptsCenterLocalizations.of(context).add),
+              child: Text('scripts_center_add'.tr),
             ),
           ],
         ),

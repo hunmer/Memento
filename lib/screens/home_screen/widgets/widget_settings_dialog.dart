@@ -1,8 +1,8 @@
-import 'package:Memento/screens/l10n/screens_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 
@@ -43,9 +43,6 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final screensL10n = ScreensLocalizations.of(context);
-
     return AlertDialog(
       title: Text(screensL10n.widgetSettings),
       content: SingleChildScrollView(
@@ -278,7 +275,6 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
     Color? currentColor,
     ValueChanged<Color> onColorSelected,
   ) {
-    final screensL10n = ScreensLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -354,7 +350,7 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(AppLocalizations.of(context)!.cancel),
+            child: Text('app_cancel'.tr),
           ),
         ],
       ),
@@ -368,7 +364,6 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
     Color initialColor,
     ValueChanged<Color> onColorSelected,
   ) {
-    final screensL10n = ScreensLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) {
@@ -475,14 +470,14 @@ class _WidgetSettingsDialogState extends State<WidgetSettingsDialog> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               ElevatedButton(
                 onPressed: () {
                   onColorSelected(pickerColor);
                   Navigator.of(context).pop();
                 },
-                child: Text(AppLocalizations.of(context)!.confirm),
+                child: Text('app_confirm'.tr),
               ),
             ],
           ),

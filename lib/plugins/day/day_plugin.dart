@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:Memento/plugins/day/l10n/day_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
@@ -60,7 +60,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return DayLocalizations.of(context).name;
+    return 'day_name'.tr;
   }
 
   @override
@@ -140,7 +140,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                DayLocalizations.of(context).name,
+                'day_name'.tr,
 
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
@@ -157,7 +157,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
               Column(
                 children: [
                   Text(
-                    DayLocalizations.of(context).memorialDaysCount,
+                    'day_memorialDaysCount'.tr,
                     style: theme.textTheme.bodyMedium,
                   ),
                   Text(
@@ -174,7 +174,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    DayLocalizations.of(context).upcoming,
+                    'day_upcoming'.tr,
                     style: theme.textTheme.bodyMedium,
                   ),
                   Text(

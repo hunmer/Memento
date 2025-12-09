@@ -1,9 +1,9 @@
+import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
@@ -158,7 +158,7 @@ class _HabitTimerSelectorScreenState extends State<HabitTimerSelectorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(HabitsLocalizations.of(context).configureHabitTimerWidget),
+        title: Text('habits_configureHabitTimerWidget'.tr),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),

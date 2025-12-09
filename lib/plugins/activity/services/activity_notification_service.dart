@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:get/get.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

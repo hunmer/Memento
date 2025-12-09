@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/avatar_picker.dart';
@@ -115,7 +114,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog>
             TextField(
               controller: _usernameController,
               decoration: InputDecoration(
-                labelText: ChatLocalizations.of(context).username,
+                labelText: 'chat_username'.tr,
                 border: const OutlineInputBorder(),
               ),
             ),
@@ -135,7 +134,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog>
                     final newUsername = _usernameController.text.trim();
                     if (newUsername.isEmpty) {
                       toastService.showToast(
-                        ChatLocalizations.of(context).usernameCannotBeEmpty,
+                        'chat_usernameCannotBeEmpty'.tr,
                       );
                       return;
                     }
@@ -166,7 +165,7 @@ class _ProfileEditDialogState extends State<ProfileEditDialog>
                     } catch (e) {
                       if (context.mounted) {
                         toastService.showToast(
-                          '${ChatLocalizations.of(context).updateFailed}: $e',
+                          '${'chat_updateFailed'.tr}: $e',
                         );
                       }
                     }

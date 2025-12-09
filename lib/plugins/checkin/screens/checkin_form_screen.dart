@@ -1,5 +1,5 @@
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
-import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:Memento/utils/date_time_utils.dart';
@@ -78,8 +78,8 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       appBar: AppBar(
         title: Text(
           widget.initialItem == null
-              ? CheckinLocalizations.of(context).addCheckinItem
-              : CheckinLocalizations.of(context).editCheckinItemTitle,
+              ? 'checkin_addCheckinItem'.tr
+              : 'checkin_editCheckinItemTitle'.tr,
         ),
         actions: [
           TextButton(
@@ -99,7 +99,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
                 Navigator.of(context).pop(item);
               }
             },
-            child: Text(CheckinLocalizations.of(context).save),
+            child: Text('checkin_save'.tr),
           ),
         ],
       ),
@@ -119,16 +119,16 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
             // 名称输入框
             TextFormField(
               decoration: InputDecoration(
-                labelText: CheckinLocalizations.of(context).nameLabel,
-                hintText: CheckinLocalizations.of(context).nameHint,
+                labelText: 'checkin_nameLabel'.tr,
+                hintText: 'checkin_nameHint'.tr,
               ),
               initialValue: _name,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return CheckinLocalizations.of(context).nameRequiredError;
+                  return 'checkin_nameRequiredError'.tr;
                 }
                 if (_existingNames.contains(value.trim())) {
-                  return CheckinLocalizations.of(context).nameExistsError;
+                  return 'checkin_nameExistsError'.tr;
                 }
                 return null;
               },
@@ -138,8 +138,8 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
             // 分组输入框
             TextFormField(
               decoration: InputDecoration(
-                labelText: CheckinLocalizations.of(context).groupLabel,
-                hintText: CheckinLocalizations.of(context).groupHint,
+                labelText: 'checkin_groupLabel'.tr,
+                hintText: 'checkin_groupHint'.tr,
               ),
               initialValue: _group,
               onSaved:
@@ -171,25 +171,25 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
   Widget _buildReminderTypeSelector() {
     return DropdownButtonFormField<ReminderType>(
       decoration: InputDecoration(
-        labelText: CheckinLocalizations.of(context).reminderTypeLabel,
+        labelText: 'checkin_reminderTypeLabel'.tr,
         border: const OutlineInputBorder(),
       ),
       initialValue: _reminderSettings?.type,
       items: [
         DropdownMenuItem(
           value: null,
-          child: Text(CheckinLocalizations.of(context).noReminder),
+          child: Text('checkin_noReminder'.tr),
         ),
         ...ReminderType.values.map(
           (type) => DropdownMenuItem(
             value: type,
             child: Text(switch (type) {
               ReminderType.weekly =>
-                CheckinLocalizations.of(context).weeklyReminder,
+                'checkin_weeklyReminder'.tr,
               ReminderType.monthly =>
-                CheckinLocalizations.of(context).monthlyReminder,
+                'checkin_monthlyReminder'.tr,
               ReminderType.specific =>
-                CheckinLocalizations.of(context).specificDateReminder,
+                'checkin_specificDateReminder'.tr,
             }),
           ),
         ),
@@ -213,13 +213,13 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
   // 星期选择器
   Widget _buildWeekdaySelector() {
     final weekdays = [
-      CheckinLocalizations.of(context).sunday,
-      CheckinLocalizations.of(context).monday,
-      CheckinLocalizations.of(context).tuesday,
-      CheckinLocalizations.of(context).wednesday,
-      CheckinLocalizations.of(context).thursday,
-      CheckinLocalizations.of(context).friday,
-      CheckinLocalizations.of(context).saturday,
+      'checkin_sunday'.tr,
+      'checkin_monday'.tr,
+      'checkin_tuesday'.tr,
+      'checkin_wednesday'.tr,
+      'checkin_thursday'.tr,
+      'checkin_friday'.tr,
+      'checkin_saturday'.tr,
     ];
     return Wrap(
       spacing: 8,
@@ -255,7 +255,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
   Widget _buildMonthDaySelector() {
     return DropdownButtonFormField<int>(
       decoration: InputDecoration(
-        labelText: CheckinLocalizations.of(context).monthlyReminderDayLabel,
+        labelText: 'checkin_monthlyReminderDayLabel'.tr,
         border: const OutlineInputBorder(),
       ),
       initialValue: _reminderSettings?.dayOfMonth,
@@ -263,7 +263,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
         return DropdownMenuItem(
           value: index + 1,
           child: Text(
-            '${index + 1}${CheckinLocalizations.of(context).daySuffix}',
+            '${index + 1}${'checkin_daySuffix'.tr}',
           ),
         );
       }),
@@ -285,7 +285,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       title: Text(
         _reminderSettings?.specificDate != null
             ? DateTimeUtils.formatDate(_reminderSettings!.specificDate!)
-            : CheckinLocalizations.of(context).selectDate,
+            : 'checkin_selectDate'.tr,
       ),
       trailing: const Icon(Icons.calendar_today),
       onTap: () async {
@@ -313,8 +313,8 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
     return ListTile(
       title: Text(
         _reminderSettings?.timeOfDay != null
-            ? '${CheckinLocalizations.of(context).selectTime}: ${_reminderSettings!.timeOfDay.format(context)}'
-            : CheckinLocalizations.of(context).selectTime,
+            ? '${'checkin_selectTime'.tr}: ${_reminderSettings!.timeOfDay.format(context)}'
+            : 'checkin_selectTime'.tr,
       ),
       trailing: const Icon(Icons.access_time),
       onTap: () async {

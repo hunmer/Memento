@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'dart:convert';
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/models/plugin_analysis_method.dart';
 
@@ -106,7 +106,7 @@ class _PluginMethodSelectionDialogState
                 const Icon(Icons.category),
                 const SizedBox(width: 8),
                 Text(
-                  OpenAILocalizations.of(context).selectAnalysisMethod,
+                  'openai_selectAnalysisMethod'.tr,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const Spacer(),
@@ -151,7 +151,7 @@ class _PluginMethodSelectionDialogState
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: FilterChip(
-                      label: Text(OpenAILocalizations.of(context).all),
+                      label: Text('openai_all'.tr),
                       selected: _selectedPluginId == null,
                       onSelected: (selected) {
                         setState(() {
@@ -239,7 +239,7 @@ class _PluginMethodSelectionDialogState
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(OpenAILocalizations.of(context).cancel),
+                  child: Text('openai_cancel'.tr),
                 ),
               ],
             ),

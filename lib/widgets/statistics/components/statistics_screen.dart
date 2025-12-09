@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/widgets/statistics/models/statistics_models.dart';
 import 'date_range_selector.dart';
 import 'chart_components.dart';
-import 'package:Memento/widgets/l10n/widget_localizations.dart';
+
 
 /// 通用的统计屏幕组件
 class StatisticsScreen extends StatefulWidget {
@@ -167,7 +168,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Center(
-                    child: Text(WidgetLocalizations.of(context)!.noData),
+                    child: Text('widget_noData'.tr),
                   ),
                 )
           else

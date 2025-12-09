@@ -1,7 +1,7 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/event.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/screens/agent_edit_screen.dart';
 import 'package:Memento/utils/image_utils.dart';
@@ -268,7 +268,7 @@ class _ChatScreenState extends State<ChatScreen> {
         .join('\n\n');
 
     Clipboard.setData(ClipboardData(text: textToCopy));
-    Toast.success(ChatLocalizations.of(context).copiedSelectedMessages);
+    Toast.success('chat_copiedSelectedMessages'.tr);
 
     _controller.toggleMultiSelectMode();
   }
@@ -565,7 +565,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                   agent: agent,),
                                         );
                                       } else {
-                                        Toast.error(ChatLocalizations.of(context).aiAssistantNotFound);
+                                        Toast.error('chat_aiAssistantNotFound'.tr);
                                       }
                                     } catch (e) {
                                       // 插件不可用或类型转换失败时显示提示

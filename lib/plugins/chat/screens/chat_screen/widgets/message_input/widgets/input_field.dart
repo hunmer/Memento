@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:io' show Platform;
 
 class InputField extends StatelessWidget {
@@ -44,7 +44,7 @@ class InputField extends StatelessWidget {
                     : Colors.black87,
           ),
           decoration: InputDecoration(
-            hintText: ChatLocalizations.of(context).enterMessage,
+            hintText: 'chat_enterMessage'.tr,
             hintStyle: TextStyle(
               color:
                   Theme.of(context).brightness == Brightness.dark

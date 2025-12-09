@@ -1,4 +1,5 @@
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation_group.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
 

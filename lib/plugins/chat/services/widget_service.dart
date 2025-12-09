@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';

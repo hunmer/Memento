@@ -3,7 +3,7 @@ import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/utils/file_utils.dart';
 import 'package:Memento/core/utils/zip.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -159,9 +159,9 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
           selectedItems.clear();
           _refreshFiles();
         });
-        Toast.success(AppLocalizations.of(context)!.moveSuccess);
+        Toast.success('app_moveSuccess'.tr);
       } catch (e) {
-        Toast.error(AppLocalizations.of(context)!.moveFailed(e.toString()));
+        Toast.error('app_moveFailed'.tr(e.toString()));
       }
     }
   }
@@ -202,7 +202,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         }
         _refreshFiles();
       } catch (e) {
-        Toast.error(AppLocalizations.of(context)!.renameFailed(e.toString()));
+        Toast.error('app_renameFailed'.tr(e.toString()));
       }
     }
   }
@@ -217,7 +217,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
               if (!isDirectory)
                 ListTile(
                   leading: const Icon(Icons.edit),
-                  title: Text(AppLocalizations.of(context)!.edit),
+                  title: Text('app_edit'.tr),
                   onTap: () {
                     Navigator.pop(context);
                     // 这里可以添加编辑文件的逻辑
@@ -226,7 +226,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                 ),
               ListTile(
                 leading: const Icon(Icons.drive_file_rename_outline),
-                title: Text(AppLocalizations.of(context)!.rename),
+                title: Text('app_rename'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   _renameItem(itemPath, isDirectory);
@@ -322,9 +322,9 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       );
 
       if (savePath != null) {
-        Toast.success(AppLocalizations.of(context)!.exportSuccessTo(savePath));
+        Toast.success('app_exportSuccessTo'.tr(savePath));
       } else {
-        Toast.show(AppLocalizations.of(context)!.exportCancelled);
+        Toast.show('app_exportCancelled'.tr);
       }
 
       // 删除临时目录
@@ -681,7 +681,7 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, currentDirectory),

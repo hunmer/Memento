@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
@@ -84,7 +84,7 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
       }
     } catch (e) {
       debugPrint('Error updating item: $e');
-      toastService.showToast(GoodsLocalizations.of(context).saveFailed);
+      toastService.showToast('goods_saveFailed'.tr);
     }
   }
 
@@ -93,16 +93,16 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(GoodsLocalizations.of(context).confirmDelete),
-            content: Text(GoodsLocalizations.of(context).confirmDeleteItem),
+            title: Text('goods_confirmDelete'.tr),
+            content: Text('goods_confirmDeleteItem'.tr),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(GoodsLocalizations.of(context).cancel),
+                child: Text('goods_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(GoodsLocalizations.of(context).delete),
+                child: Text('goods_delete'.tr),
               ),
             ],
           ),
@@ -124,7 +124,7 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
       } catch (e) {
         debugPrint('Error deleting item: $e');
         toastService.showToast(
-          GoodsLocalizations.of(context).saveFailed,
+          'goods_saveFailed'.tr,
           type: ToastType.error,
         );
       }
@@ -140,9 +140,9 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
     if (_item == null) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(GoodsLocalizations.of(context).itemNotFound),
+          title: Text('goods_itemNotFound'.tr),
         ),
-        body: Center(child: Text(GoodsLocalizations.of(context).itemNotExist)),
+        body: Center(child: Text('goods_itemNotExist'.tr)),
       );
     }
 

@@ -1,4 +1,4 @@
-import 'package:Memento/screens/l10n/screens_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
@@ -59,7 +59,6 @@ class _HomeGridState extends State<HomeGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context);
     if (widget.items.isEmpty) {
       return _buildEmptyState(context, l10n);
     }

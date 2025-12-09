@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/routing/plugin_route_handler.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
@@ -5,7 +6,6 @@ import 'package:Memento/plugins/todo/screens/todo_list_selector_screen.dart';
 import 'package:Memento/plugins/todo/widgets/task_form.dart';
 import 'package:Memento/plugins/todo/views/todo_main_view.dart';
 import 'package:Memento/plugins/todo/models/task.dart';
-import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 
 /// 待办插件路由处理器
 class TodoRouteHandler extends PluginRouteHandler {

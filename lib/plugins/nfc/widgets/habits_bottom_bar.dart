@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
@@ -253,11 +254,11 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
             tabs: [
               Tab(
                 icon: Icon(Icons.check_circle),
-                text: HabitsLocalizations.of(context).habits,
+                text: 'nfc_habits'.tr,
               ),
               Tab(
                 icon: Icon(Icons.star),
-                text: HabitsLocalizations.of(context).skills,
+                text: 'nfc_skills'.tr,
               ),
             ],
           ),

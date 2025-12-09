@@ -1,7 +1,7 @@
+import 'package:get/get.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:Memento/plugins/timer/views/add_timer_task_dialog.dart';
 import 'package:Memento/plugins/timer/views/timer_task_details_page.dart';
@@ -275,9 +275,9 @@ class _TimerMainViewState extends State<TimerMainView> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(TimerLocalizations.of(context).deleteTimer),
+            title: Text('timer_deleteTimer'.tr),
             content: Text(
-              '${TimerLocalizations.of(context).deleteTimerConfirmation} "${task.name}"',
+              '${'timer_deleteTimerConfirmation'.tr} "${task.name}"',
             ),
             actions: [
               TextButton(

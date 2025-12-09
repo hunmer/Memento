@@ -11,7 +11,7 @@ import 'package:Memento/core/action/models/action_group.dart';
 import 'package:Memento/core/floating_ball/models/floating_ball_gesture.dart';
 import 'action_config_form.dart';
 import 'action_group_editor.dart';
-import 'package:Memento/core/l10n/core_localizations.dart';
+import 'package:get/get.dart';
 
 /// 对话框结果
 class ActionSelectorResult {
@@ -415,7 +415,7 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
                         );
                       },
                       icon: const Icon(Icons.clear_all, size: 18),
-                      label: Text(CoreLocalizations.of(context)!.clearSettings),
+                      label: Text('core_clearSettings'.tr),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[300],
                         foregroundColor: Colors.black87,
@@ -588,7 +588,7 @@ class _ActionSelectorDialogState extends State<ActionSelectorDialog>
               child: OutlinedButton.icon(
                 onPressed: _onCreateGroup,
                 icon: const Icon(Icons.add),
-                label: Text(CoreLocalizations.of(context)!.createActionGroup),
+                label: Text('core_createActionGroup'.tr),
               ),
             ),
           ),

@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/bill/models/bill.dart';
 import 'bill_edit_screen.dart' as bill_edit;
@@ -50,23 +50,23 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
               return [
                 PopupMenuItem(
                   value: StatisticRange.week,
-                  child: Text(BillLocalizations.of(context).thisWeek),
+                  child: Text('bill_thisWeek'.tr),
                 ),
                 PopupMenuItem(
                   value: StatisticRange.month,
-                  child: Text(BillLocalizations.of(context).thisMonth),
+                  child: Text('bill_thisMonth'.tr),
                 ),
                 PopupMenuItem(
                   value: StatisticRange.year,
-                  child: Text(BillLocalizations.of(context).thisYear),
+                  child: Text('bill_thisYear'.tr),
                 ),
                 PopupMenuItem(
                   value: StatisticRange.all,
-                  child: Text(BillLocalizations.of(context).all),
+                  child: Text('bill_all'.tr),
                 ),
                 PopupMenuItem(
                   value: StatisticRange.custom,
-                  child: Text(BillLocalizations.of(context).custom),
+                  child: Text('bill_custom'.tr),
                 ),
               ];
             },
@@ -140,7 +140,7 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
 
   Widget _buildBillsList(List<Bill> bills) {
     if (bills.isEmpty) {
-      return Center(child: Text(BillLocalizations.of(context).noBillsYet));
+      return Center(child: Text('bill_noBillsYet'.tr));
     }
 
     // 对账单按日期排序
@@ -174,17 +174,17 @@ class _AccountBillsScreenState extends State<AccountBillsScreen> {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(BillLocalizations.of(context).confirmDelete),
+                title: Text('bill_confirmDelete'.tr),
                 content: Text(
-                  BillLocalizations.of(context).deleteBillConfirmation,
+                  'bill_deleteBillConfirmation'.tr,
                 ),
                 actions: [
                   TextButton(
-                    child: Text(BillLocalizations.of(context).cancel),
+                    child: Text('bill_cancel'.tr),
                     onPressed: () => Navigator.pop(context, false),
                   ),
                   TextButton(
-                    child: Text(BillLocalizations.of(context).delete),
+                    child: Text('bill_delete'.tr),
                     onPressed: () => Navigator.pop(context, true),
                   ),
                 ],

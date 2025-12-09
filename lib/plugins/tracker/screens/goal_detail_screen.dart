@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:flutter/material.dart' hide ListTile, Row, Center, SizedBox;
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/material.dart'
@@ -38,7 +38,7 @@ class GoalDetailScreen extends StatelessWidget {
                     builder:
                         (context) => AlertDialog(
                           title: Text(
-                            TrackerLocalizations.of(context).confirmClear,
+                            'tracker_confirmClear'.tr,
                           ),
                           content: Text(
                             TrackerLocalizations.of(
@@ -61,7 +61,7 @@ class GoalDetailScreen extends StatelessWidget {
                     await controller.clearRecordsForGoal(goal.id);
                     if (context.mounted) {
                       Toast.success(
-                        TrackerLocalizations.of(context).recordsCleared,
+                        'tracker_recordsCleared'.tr,
                       );
                     }
                   }
@@ -82,7 +82,7 @@ class GoalDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${TrackerLocalizations.of(context).goalsTitle}: ${goal.name}',
+                  '${'tracker_goalsTitle'.tr}: ${goal.name}',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const flutter.SizedBox(height: 16),
@@ -98,7 +98,7 @@ class GoalDetailScreen extends StatelessWidget {
                 ),
                 const flutter.SizedBox(height: 16),
                 Text(
-                  TrackerLocalizations.of(context).currentProgress
+                  'tracker_currentProgress'.tr
                       .replaceFirst('{currentValue}', currentValue.toString())
                       .replaceFirst(
                         '{targetValue}',
@@ -108,14 +108,14 @@ class GoalDetailScreen extends StatelessWidget {
                 const flutter.SizedBox(height: 16),
                 if (goal.reminderTime != null)
                   Text(
-                    TrackerLocalizations.of(context).reminderTime.replaceFirst(
+                    'tracker_reminderTime'.tr.replaceFirst(
                       '{reminderTime}',
                       goal.reminderTime.toString(),
                     ),
                   ),
                 const flutter.SizedBox(height: 16),
                 Text(
-                  TrackerLocalizations.of(context).recordHistory,
+                  'tracker_recordHistory'.tr,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const flutter.SizedBox(height: 8),
@@ -138,7 +138,7 @@ class GoalDetailScreen extends StatelessWidget {
                           if (records.isEmpty) {
                             return flutter.Center(
                               child: Text(
-                                TrackerLocalizations.of(context).noRecords,
+                                'tracker_noRecords'.tr,
                               ),
                             );
                           }
@@ -147,7 +147,7 @@ class GoalDetailScreen extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final record = records[index];
                               return flutter.ListTile(
-                                title: Text(TrackerLocalizations.of(context).recordValueDisplay(record.value)),
+                                title: Text('tracker_recordValueDisplay'.tr(record.value)),
                                 subtitle: Text(
                                   record.recordedAt
                                       .toLocal()

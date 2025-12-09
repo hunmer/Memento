@@ -1,5 +1,5 @@
 import 'dart:io' show Platform;
-import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
@@ -44,7 +44,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          BillLocalizations.of(context).accountManagement,
+          'bill_accountManagement'.tr,
           style: const TextStyle(
             color: Colors.black,
             fontSize: 18,
@@ -82,7 +82,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
 
   Widget _buildAccountList() {
     if (widget.billPlugin.accounts.isEmpty) {
-      return Center(child: Text(BillLocalizations.of(context).noAccounts));
+      return Center(child: Text('bill_noAccounts'.tr));
     }
 
     return ListView.separated(
@@ -108,14 +108,14 @@ class _AccountListScreenState extends State<AccountListScreen> {
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
-                  title: Text(BillLocalizations.of(context).confirmDelete),
+                  title: Text('bill_confirmDelete'.tr),
                   content: Text(
                     '确定要删除账户"${account.title}"吗？\n删除后该账户下的所有账单记录都将被删除！',
                   ),
                   actions: <Widget>[
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(false),
-                      child: Text(BillLocalizations.of(context).cancel),
+                      child: Text('bill_cancel'.tr),
                     ),
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
@@ -131,7 +131,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
           },
           onDismissed: (direction) {
             widget.billPlugin.controller.deleteAccount(account.id);
-            Toast.success('${BillLocalizations.of(context).accountDeleted} "${account.title}"');
+            Toast.success('${'bill_accountDeleted'.tr} "${account.title}"');
           },
           child: _buildAccountCard(context, account),
         );

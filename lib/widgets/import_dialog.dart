@@ -1,5 +1,6 @@
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ImportDialog extends StatefulWidget {
   final Map<String, int> pluginDataMap;
@@ -36,7 +37,7 @@ class _ImportDialogState extends State<ImportDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        '${AppLocalizations.of(context)!.selectPluginsToImport} (${widget.isMergeMode ? AppLocalizations.of(context)!.mergeMode : AppLocalizations.of(context)!.overwriteMode})',
+        '${'app_selectPluginsToImport'.tr} (${widget.isMergeMode ? 'app_mergeMode'.tr : 'app_overwriteMode'.tr})',
       ),
       content: SizedBox(
         width: double.maxFinite,
@@ -47,7 +48,7 @@ class _ImportDialogState extends State<ImportDialog> {
                 return CheckboxListTile(
                   title: Text(entry.key),
                   subtitle: Text(
-                    '${AppLocalizations.of(context)!.dataSize}: ${_formatFileSize(entry.value)}',
+                    '${'app_dataSize'.tr}: ${_formatFileSize(entry.value)}',
                   ),
                   value: _selectedPlugins[entry.key],
                   onChanged: (bool? value) {
@@ -62,13 +63,13 @@ class _ImportDialogState extends State<ImportDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
         ),
         TextButton(
           onPressed: () {
             Navigator.of(context).pop(_selectedPlugins);
           },
-          child: Text(AppLocalizations.of(context)!.import),
+          child: Text('app_import'.tr),
         ),
       ],
     );

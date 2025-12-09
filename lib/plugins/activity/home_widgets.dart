@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
@@ -6,7 +7,6 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'activity_plugin.dart';
-import 'l10n/activity_localizations.dart';
 
 /// 活动插件的主页小组件注册
 class ActivityHomeWidgets {

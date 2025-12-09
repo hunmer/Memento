@@ -1,9 +1,8 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:Memento/plugins/chat/utils/message_options_handler.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 
 /// 消息选项对话框组件
 class MessageOptionsDialog extends StatelessWidget {
@@ -75,7 +74,7 @@ class MessageOptionsDialog extends StatelessWidget {
     }
 
     return AlertDialog(
-      title: Text(ChatLocalizations.of(context).messageOptions),
+      title: Text('chat_messageOptions'.tr),
       contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -275,15 +274,15 @@ class MessageOptionsDialog extends StatelessWidget {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(ChatLocalizations.of(context).addEmoji),
+            title: Text('chat_addEmoji'.tr),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: symbolController,
                   decoration: InputDecoration(
-                    labelText: ChatLocalizations.of(context).tag,
-                    hintText: ChatLocalizations.of(context).tagHint,
+                    labelText: 'chat_tag'.tr,
+                    hintText: 'chat_tagHint'.tr,
                   ),
                   maxLength: 1, // 限制只能输入一个字符
                 ),
@@ -329,7 +328,7 @@ class MessageOptionsDialog extends StatelessWidget {
                   onSetFixedSymbol(message, symbol);
                   Navigator.pop(context);
                 },
-                child: Text(ChatLocalizations.of(context).settings),
+                child: Text('chat_settings'.tr),
               ),
             ],
           ),

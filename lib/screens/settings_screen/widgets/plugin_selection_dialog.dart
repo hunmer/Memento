@@ -1,5 +1,6 @@
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/plugin_base.dart';
 
 class PluginSelectionDialog extends StatefulWidget {
@@ -17,7 +18,7 @@ class _PluginSelectionDialogState extends State<PluginSelectionDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(AppLocalizations.of(context)!.selectPluginToExport),
+      title: Text('app_selectPluginToExport'.tr),
       content: SingleChildScrollView(
         child: ListBody(
           children:
@@ -40,11 +41,11 @@ class _PluginSelectionDialogState extends State<PluginSelectionDialog> {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
           onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
-          child: Text(AppLocalizations.of(context)!.ok),
+          child: Text('app_ok'.tr),
           onPressed: () => Navigator.of(context).pop(_selectedPlugins.toList()),
         ),
       ],

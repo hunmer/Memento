@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:Memento/plugins/chat/services/file_service.dart';
 import 'handlers/index.dart';
 import 'types.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 
 /// 构建消息输入动作列表
 class MessageInputActionsBuilder {

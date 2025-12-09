@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'custom_activity_event_model.dart';
 
 enum ContactGender {

@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:Memento/core/event/event_manager.dart';
@@ -8,7 +9,6 @@ import 'package:Memento/plugins/habits/widgets/habit_form.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habit_card.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';

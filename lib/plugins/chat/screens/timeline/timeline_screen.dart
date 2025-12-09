@@ -1,10 +1,10 @@
 import 'dart:io';
+import 'package:get/get.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/utils/message_operations.dart';
 import 'controllers/timeline_controller.dart';

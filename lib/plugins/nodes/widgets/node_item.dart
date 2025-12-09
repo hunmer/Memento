@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/quill_viewer/quill_viewer.dart';
@@ -6,7 +7,6 @@ import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
 import 'package:Memento/plugins/nodes/models/node.dart';
 import 'package:Memento/plugins/nodes/screens/node_edit_screen.dart';
-import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 
 class _StatusInfo {
   final Color color;
@@ -528,7 +528,7 @@ class NodeItem extends StatelessWidget {
                   controller.deleteNode(notebookId, node.id);
                   Navigator.pop(context);
                 },
-                child: Text(NodesLocalizations.of(context).delete),
+                child: Text('nodes_delete'.tr),
               ),
             ],
           ),

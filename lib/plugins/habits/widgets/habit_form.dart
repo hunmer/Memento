@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:Memento/core/plugin_manager.dart';
@@ -7,7 +8,6 @@ import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:path/path.dart' as path;
@@ -216,7 +216,7 @@ class _HabitFormState extends State<HabitForm> {
               controller: _durationController,
               decoration: InputDecoration(
                 labelText:
-                    '${HabitsLocalizations.of(context).duration} (${HabitsLocalizations.of(context).minutes})',
+                    '${'habits_duration'.tr} (${'habits_minutes'.tr})',
               ),
               keyboardType: TextInputType.number,
             ),

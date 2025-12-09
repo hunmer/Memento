@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'dart:convert';
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:Memento/core/services/toast_service.dart';
@@ -192,7 +192,7 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return OpenAILocalizations.of(context).name;
+    return 'openai_name'.tr;
   }
 
   // ==================== JS API 定义 ====================
@@ -465,7 +465,7 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    OpenAILocalizations.of(context).name,
+                    'openai_name'.tr,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -485,7 +485,7 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            OpenAILocalizations.of(context).totalAgents,
+                            'openai_totalAgents'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -577,7 +577,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(OpenAILocalizations.of(context).addPreset),
+            title: Text('openai_addPreset'.tr),
             content: SizedBox(
               width: 400,
               child: Column(
@@ -586,7 +586,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
                   TextField(
                     controller: nameController,
                     decoration: InputDecoration(
-                      labelText: OpenAILocalizations.of(context).presetTitle,
+                      labelText: 'openai_presetTitle'.tr,
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -595,7 +595,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
                     controller: descriptionController,
                     decoration: InputDecoration(
                       labelText:
-                          OpenAILocalizations.of(context).presetDescription,
+                          'openai_presetDescription'.tr,
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -603,7 +603,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
                   TextField(
                     controller: contentController,
                     decoration: InputDecoration(
-                      labelText: OpenAILocalizations.of(context).contentLabel,
+                      labelText: 'openai_contentLabel'.tr,
                       border: OutlineInputBorder(),
                     ),
                     maxLines: 5,
@@ -614,11 +614,11 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(OpenAILocalizations.of(context).cancel),
+                child: Text('openai_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(OpenAILocalizations.of(context).addPreset),
+                child: Text('openai_addPreset'.tr),
               ),
             ],
           ),
@@ -641,7 +641,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
       await service.addPreset(preset);
 
       if (mounted) {
-        Toast.success(OpenAILocalizations.of(context).presetSaved);
+        Toast.success('openai_presetSaved'.tr);
       }
     }
 
@@ -769,11 +769,11 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
             tabs: [
               Tab(
                 icon: const Icon(Icons.smart_toy_outlined),
-                text: OpenAILocalizations.of(context).agentsTab,
+                text: 'openai_agentsTab'.tr,
               ),
               Tab(
                 icon: const Icon(Icons.text_snippet_outlined),
-                text: OpenAILocalizations.of(context).promptPreset,
+                text: 'openai_promptPreset'.tr,
               ),
             ],
           ),

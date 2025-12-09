@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -380,7 +380,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
         ),
         TextButton(
           onPressed:
@@ -389,7 +389,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                     context,
                   ).pop({'url': _urlController.text, 'bytes': null})
                   : null,
-          child: Text(AppLocalizations.of(context)!.confirm),
+          child: Text('app_confirm'.tr),
         ),
       ],
     );
@@ -508,11 +508,11 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                                 'bytes': imageBytes,
                               });
                             },
-                            child: Text(AppLocalizations.of(context)!.cancel),
+                            child: Text('app_cancel'.tr),
                           ),
                           ElevatedButton(
                             onPressed: () => cropController.crop(),
-                            child: Text(AppLocalizations.of(context)!.confirm),
+                            child: Text('app_confirm'.tr),
                           ),
                         ],
                       ),

@@ -1,6 +1,7 @@
 import 'dart:async';
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/core/services/toast_service.dart';
@@ -62,11 +63,11 @@ class PermissionController {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text(AppLocalizations.of(context)!.notNow),
+                  child: Text('app_notNow'.tr),
                   onPressed: () => Navigator.of(context).pop(false),
                 ),
                 TextButton(
-                  child: Text(AppLocalizations.of(context)!.grantPermission),
+                  child: Text('app_grantPermission'.tr),
                   onPressed: () => Navigator.of(context).pop(true),
                 ),
               ],
@@ -149,7 +150,7 @@ class PermissionController {
           if (!granted) {
             if (!_mounted) return false;
 
-            Toast.error(AppLocalizations.of(context)!.storagePermissionRequired);
+            Toast.error('app_storagePermissionRequired'.tr);
             return false;
           }
         }

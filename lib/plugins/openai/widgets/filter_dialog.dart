@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/controllers/provider_controller.dart';
@@ -50,7 +50,7 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(OpenAILocalizations.of(context).filterAgents),
+      title: Text('openai_filterAgents'.tr),
       content: SizedBox(
         width: double.maxFinite,
         child: Column(
@@ -58,7 +58,7 @@ class _FilterDialogState extends State<FilterDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              OpenAILocalizations.of(context).serviceProvider,
+              'openai_serviceProvider'.tr,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -84,7 +84,7 @@ class _FilterDialogState extends State<FilterDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              OpenAILocalizations.of(context).tags,
+              'openai_tags'.tr,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -114,14 +114,14 @@ class _FilterDialogState extends State<FilterDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(OpenAILocalizations.of(context).cancel),
+          child: Text('openai_cancel'.tr),
         ),
         TextButton(
           onPressed: () {
             widget.onApply(_selectedProviders, _selectedTags);
             Navigator.pop(context);
           },
-          child: Text(OpenAILocalizations.of(context).apply),
+          child: Text('openai_apply'.tr),
         ),
       ],
     );

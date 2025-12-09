@@ -1,4 +1,5 @@
 import 'package:Memento/core/notification_controller.dart';
+import 'package:get/get.dart';
 import 'package:logging/logging.dart';
 import 'package:memento_notifications/memento_notifications.dart';
 import 'package:flutter/material.dart';

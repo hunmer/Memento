@@ -1,8 +1,8 @@
+import 'package:get/get.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
 import 'package:Memento/plugins/notes/screens/note_edit_screen.dart';
 import 'notes_screen_state.dart';
@@ -46,10 +46,10 @@ mixin NoteOperations on NotesMainViewState {
       builder:
           (context) => AlertDialog(
             title: Text(
-              NotesLocalizations.of(context).deleteNote,
+              'notes_deleteNote'.tr,
             ),
             content: Text(
-              NotesLocalizations.of(context).deleteNoteConfirm,
+              'notes_deleteNoteConfirm'.tr,
             ),
             actions: [
               TextButton(

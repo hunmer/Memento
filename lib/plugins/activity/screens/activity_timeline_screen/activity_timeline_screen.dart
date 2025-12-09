@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
@@ -7,7 +8,6 @@ import 'package:Memento/widgets/calendar_strip_date_picker.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/plugins/activity/widgets/activity_timeline.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'components/activity_grid_view.dart';
 import 'controllers/activity_controller.dart';
 import 'controllers/tag_controller.dart';
@@ -503,7 +503,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                 children: [
                       const Icon(Icons.arrow_upward, size: 16),
                       const SizedBox(width: 8),
-                  Text(ActivityLocalizations.of(context).sortByStartTimeAsc),
+                  Text('activity_sortByStartTimeAsc'.tr),
                 ],
               ),
             ),
@@ -513,7 +513,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                 children: [
                       const Icon(Icons.timer, size: 16),
                       const SizedBox(width: 8),
-                  Text(ActivityLocalizations.of(context).sortByDuration),
+                  Text('activity_sortByDuration'.tr),
                 ],
               ),
             ),
@@ -523,7 +523,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                 children: [
                       const Icon(Icons.arrow_downward, size: 16),
                       const SizedBox(width: 8),
-                  Text(ActivityLocalizations.of(context).sortByStartTimeDesc),
+                  Text('activity_sortByStartTimeDesc'.tr),
                 ],
               ),
             ),

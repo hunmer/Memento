@@ -1,5 +1,6 @@
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class BackupTimePicker extends StatefulWidget {
   final Function(BackupSchedule) onScheduleSelected;
@@ -41,7 +42,7 @@ class _BackupTimePickerState extends State<BackupTimePicker> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(AppLocalizations.of(context)!.setBackupSchedule),
+      title: Text('app_setBackupSchedule'.tr),
       content: SingleChildScrollView(
         child: Column(
           children: [
@@ -54,11 +55,11 @@ class _BackupTimePickerState extends State<BackupTimePicker> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
         ),
         TextButton(
           onPressed: _confirmSelection,
-          child: Text(AppLocalizations.of(context)!.ok),
+          child: Text('app_ok'.tr),
         ),
       ],
     );
@@ -154,7 +155,7 @@ class _BackupTimePickerState extends State<BackupTimePicker> {
       children: List.generate(31, (index) {
         final day = index + 1;
         return ChoiceChip(
-          label: Text(AppLocalizations.of(context)!.day(day.toString())),
+          label: Text('app_day'.tr(day.toString())),
           selected: _selectedMonthDays.contains(day),
           onSelected: (selected) {
             setState(() {

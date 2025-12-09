@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/utils/image_utils.dart';
 

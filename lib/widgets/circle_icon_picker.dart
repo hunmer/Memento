@@ -1,5 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'icon_picker_dialog.dart';
 
@@ -57,7 +57,7 @@ class CircleIconPicker extends StatelessWidget {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: Text(
-                          AppLocalizations.of(context)!.selectBackgroundColor,
+                          'app_selectBackgroundColor'.tr,
                         ),
                         content: SingleChildScrollView(
                           child: ColorPicker(
@@ -69,7 +69,7 @@ class CircleIconPicker extends StatelessWidget {
                         ),
                         actions: <Widget>[
                           TextButton(
-                            child: Text(AppLocalizations.of(context)!.ok),
+                            child: Text('app_ok'.tr),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },

@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
@@ -179,7 +179,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text(AppLocalizations.of(context)!.ok),
+                      child: Text('app_ok'.tr),
                     ),
                   ],
                 ),

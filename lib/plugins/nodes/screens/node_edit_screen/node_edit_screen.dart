@@ -1,10 +1,10 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'dart:convert';
 import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
 import 'package:Memento/plugins/nodes/models/node.dart';
-import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'components/breadcrumbs.dart';
 import 'package:Memento/widgets/color_picker_section.dart';
 import 'components/tags_section.dart';

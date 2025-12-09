@@ -1,10 +1,10 @@
 import 'dart:io' show Platform;
+import 'package:get/get.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
-import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:Memento/plugins/checkin/widgets/checkin_record_dialog.dart';
 import 'components/empty_state.dart';
 import 'components/checkin_item_card.dart';
@@ -58,7 +58,7 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
     final searchResults = controller.getSearchResults();
 
     return SuperCupertinoNavigationWrapper(
-      title: Text(CheckinLocalizations.of(context).name),
+      title: Text('checkin_name'.tr),
       largeTitle: '签到记录',
       body: Column(
         children: [

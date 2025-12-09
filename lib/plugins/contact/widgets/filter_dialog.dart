@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/contact/models/filter_sort_config.dart';
-import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 
 class FilterDialog extends StatefulWidget {
   final FilterConfig initialFilter;
@@ -106,7 +106,7 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(ContactLocalizations.of(context).filter),
+      title: Text('contact_filter'.tr),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -115,12 +115,12 @@ class _FilterDialogState extends State<FilterDialog> {
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: ContactLocalizations.of(context).nameKeyword,
+                labelText: 'contact_nameKeyword'.tr,
                 prefixIcon: const Icon(Icons.search),
               ),
             ),
             const SizedBox(height: 16),
-            Text(ContactLocalizations.of(context).dateRange),
+            Text('contact_dateRange'.tr),
             Row(
               children: [
                 Expanded(
@@ -129,19 +129,19 @@ class _FilterDialogState extends State<FilterDialog> {
                     icon: const Icon(Icons.calendar_today),
                     label: Text(
                       _startDate == null
-                          ? ContactLocalizations.of(context).startDate
+                          ? 'contact_startDate'.tr
                           : '${_startDate!.year}-${_startDate!.month}-${_startDate!.day}',
                     ),
                   ),
                 ),
-                Text(ContactLocalizations.of(context).separator),
+                Text('contact_separator'.tr),
                 Expanded(
                   child: TextButton.icon(
                     onPressed: _selectEndDate,
                     icon: const Icon(Icons.calendar_today),
                     label: Text(
                       _endDate == null
-                          ? ContactLocalizations.of(context).endDate
+                          ? 'contact_endDate'.tr
                           : '${_endDate!.year}-${_endDate!.month}-${_endDate!.day}',
                     ),
                   ),
@@ -149,7 +149,7 @@ class _FilterDialogState extends State<FilterDialog> {
               ],
             ),
             const SizedBox(height: 16),
-            Text('${ContactLocalizations.of(context).uncontactedDays}:'),
+            Text('${'contact_uncontactedDays'.tr}:'),
             Slider(
               value: _uncontactedDays?.toDouble() ?? 0,
               min: 0,
@@ -157,8 +157,8 @@ class _FilterDialogState extends State<FilterDialog> {
               divisions: 73,
               label:
                   _uncontactedDays == null || _uncontactedDays == 0
-                      ? ContactLocalizations.of(context).noLimit
-                      : '$_uncontactedDays ${ContactLocalizations.of(context).days}',
+                      ? 'contact_noLimit'.tr
+                      : '$_uncontactedDays ${'contact_days'.tr}',
               onChanged: (value) {
                 setState(() {
                   _uncontactedDays = value == 0 ? null : value.toInt();
@@ -166,7 +166,7 @@ class _FilterDialogState extends State<FilterDialog> {
               },
             ),
             const SizedBox(height: 16),
-            Text('${ContactLocalizations.of(context).tags}:'),
+            Text('${'contact_tags'.tr}:'),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -185,15 +185,15 @@ class _FilterDialogState extends State<FilterDialog> {
       actions: [
         TextButton(
           onPressed: _resetFilters,
-          child: Text(ContactLocalizations.of(context).reset),
+          child: Text('contact_reset'.tr),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(ContactLocalizations.of(context).cancel),
+          child: Text('contact_cancel'.tr),
         ),
         ElevatedButton(
           onPressed: _applyFilters,
-          child: Text(ContactLocalizations.of(context).save),
+          child: Text('contact_save'.tr),
         ),
       ],
     );

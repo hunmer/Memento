@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/todo/views/todo_item_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -37,7 +37,7 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
             ),
             const SizedBox(height: 16),
             Text(
-              TodoLocalizations.of(context).noCompletedTasks,
+              'todo_noCompletedTasks'.tr,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: colorScheme.outline,
               ),

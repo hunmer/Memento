@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -9,7 +10,6 @@ import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
 import 'package:Memento/plugins/nodes/models/notebook.dart';
 import 'package:Memento/plugins/nodes/models/node.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:Memento/plugins/nodes/widgets/node_item.dart';
 import 'node_edit_screen.dart';
 import 'package:uuid/uuid.dart';
@@ -149,7 +149,7 @@ class _NodesScreenState extends State<NodesScreen> {
     }
 
     Clipboard.setData(ClipboardData(text: buffer.toString()));
-    Toast.success(NodesLocalizations.of(context).copiedToClipboard);
+    Toast.success('nodes_copiedToClipboard'.tr);
   }
 
   void _showClearConfirmDialog(

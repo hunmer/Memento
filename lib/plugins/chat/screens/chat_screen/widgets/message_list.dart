@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
@@ -172,7 +172,7 @@ class _MessageListState extends State<MessageList> {
                                               fileSize: fileInfo.fileSize,),
                                     );
                                   } catch (e) {
-                                    Toast.error(ChatLocalizations.of(context).errorFilePreviewFailed);
+                                    Toast.error('chat_errorFilePreviewFailed'.tr);
                                   }
                                 }
                               },

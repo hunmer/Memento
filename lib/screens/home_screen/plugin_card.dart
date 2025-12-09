@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'card_size.dart';

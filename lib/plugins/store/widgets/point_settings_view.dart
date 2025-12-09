@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/store_plugin.dart';
 
@@ -11,7 +11,7 @@ class PointSettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(StoreLocalizations.of(context).pointSettingsTitle),
+        title: Text('store_pointSettingsTitle'.tr),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -44,7 +44,7 @@ class PointSettingsView extends StatelessWidget {
                                 keyboardType: TextInputType.number,
                                 decoration: InputDecoration(
                                   suffix: Text(
-                                    StoreLocalizations.of(context).points,
+                                    'store_points'.tr,
                                   ),
                                   border: OutlineInputBorder(),
                                 ),

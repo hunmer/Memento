@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/plugins/openai/controllers/tool_app_controller.dart';
@@ -17,7 +17,7 @@ class ToolAppGrid extends StatelessWidget {
 
         if (controller.apps.isEmpty) {
           return Center(
-            child: Text(OpenAILocalizations.of(context).noToolsAvailable),
+            child: Text('openai_noToolsAvailable'.tr),
           );
         }
 

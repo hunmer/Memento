@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'custom_dialog.dart';
 import 'package:Memento/constants/app_icons.dart';
-import 'package:Memento/widgets/l10n/widget_localizations.dart';
+
 
 class IconPickerDialog extends StatefulWidget {
   final IconData currentIcon;
@@ -142,7 +143,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
   @override
   Widget build(BuildContext context) {
     return CustomDialog(
-      title: WidgetLocalizations.of(context)!.selectIcon,
+      title: 'widget_selectIcon'.tr,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -150,7 +151,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: WidgetLocalizations.of(context)!.searchIcons,
+              hintText: 'widget_searchIcons'.tr,
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -188,7 +189,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                 ),
                 Expanded(
                   child: Text(
-                    WidgetLocalizations.of(context)!.convertIconToImage,
+                    'widget_convertIconToImage'.tr,
                   ),
                 ),
                 IconButton(
@@ -198,7 +199,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                       context: context,
                       builder: (context) => AlertDialog(
                             title: Text(
-                              WidgetLocalizations.of(context)!.iconToImage,
+                              'widget_iconToImage'.tr,
                             ),
                         content: Text(
                               WidgetLocalizations.of(
@@ -209,14 +210,14 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                           TextButton(
                             onPressed: () => Navigator.pop(context),
                                 child: Text(
-                                  WidgetLocalizations.of(context)!.confirm,
+                                  'widget_confirm'.tr,
                                 ),
                           ),
                         ],
                       ),
                     );
                   },
-                  tooltip: WidgetLocalizations.of(context)!.whatIsIconToImage,
+                  tooltip: 'widget_whatIsIconToImage'.tr,
                 ),
               ],
             ),
@@ -284,7 +285,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(WidgetLocalizations.of(context)!.cancel),
+          child: Text('widget_cancel'.tr),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -295,7 +296,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
               Navigator.pop(context, selectedIcon);
             }
           },
-          child: Text(WidgetLocalizations.of(context)!.confirm),
+          child: Text('widget_confirm'.tr),
         ),
       ],
     );

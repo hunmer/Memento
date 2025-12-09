@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter/rendering.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 

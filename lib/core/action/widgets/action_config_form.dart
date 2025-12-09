@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/action/models/action_definition.dart';
 import 'package:Memento/core/action/models/action_form.dart';
 import 'package:Memento/core/app_initializer.dart';
-import 'package:Memento/core/l10n/core_localizations.dart';
+import 'package:get/get.dart';
 
 /// 表单值改变回调
 typedef OnFormChanged = void Function(Map<String, dynamic> values);
@@ -356,7 +356,7 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
         if (!config.required)
           DropdownMenuItem<String>(
             value: null,
-            child: Text(CoreLocalizations.of(context)!.notSelected),
+            child: Text('core_notSelected'.tr),
           ),
         ...?config.options?.map(
           (option) => DropdownMenuItem<String>(
@@ -646,7 +646,7 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
       items: [
         DropdownMenuItem<String>(
           value: null,
-          child: Text(CoreLocalizations.of(context)!.notSelected),
+          child: Text('core_notSelected'.tr),
         ),
         ...plugins.map(
           (plugin) => DropdownMenuItem<String>(

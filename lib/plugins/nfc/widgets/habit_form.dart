@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:Memento/core/plugin_manager.dart';
@@ -216,7 +217,7 @@ class _HabitFormState extends State<HabitForm> {
               controller: _durationController,
               decoration: InputDecoration(
                 labelText:
-                    '${HabitsLocalizations.of(context).duration} (${HabitsLocalizations.of(context).minutes})',
+                    '${'nfc_duration'.tr} (${'nfc_minutes'.tr})',
               ),
               keyboardType: TextInputType.number,
             ),

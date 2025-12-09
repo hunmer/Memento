@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:uuid/uuid.dart';
@@ -163,13 +163,13 @@ class _BillEditScreenState extends State<BillEditScreen> {
         await widget.billPlugin.controller.saveBill(bill);
 
         if (!mounted) return;
-        Toast.success(BillLocalizations.of(context).billSaved);
+        Toast.success('bill_billSaved'.tr);
 
         Navigator.of(context).pop();
         widget.onSaved?.call();
       } catch (e) {
         if (!mounted) return;
-        Toast.error('${BillLocalizations.of(context).billSaveFailed}: $e');
+        Toast.error('${'bill_billSaveFailed'.tr}: $e');
       }
     }
   }
@@ -302,7 +302,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
                   elevation: 2,
                 ),
                 child: Text(
-                  BillLocalizations.of(context).save,
+                  'bill_save'.tr,
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -327,7 +327,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
         children: [
           Expanded(
             child: _buildTypeButton(
-              label: BillLocalizations.of(context).expense,
+              label: 'bill_expense'.tr,
               isSelected: _isExpense,
               activeColor: const Color(0xFFE74C3C),
               bgOnSelected: selectedBgColor,
@@ -336,7 +336,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
           ),
           Expanded(
             child: _buildTypeButton(
-              label: BillLocalizations.of(context).income,
+              label: 'bill_income'.tr,
               isSelected: !_isExpense,
               activeColor: const Color(0xFF2ECC71),
               bgOnSelected: selectedBgColor,
@@ -421,10 +421,10 @@ class _BillEditScreenState extends State<BillEditScreen> {
             ],
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return BillLocalizations.of(context).enterAmount;
+                return 'bill_enterAmount'.tr;
               }
               if (double.tryParse(value) == null) {
-                return BillLocalizations.of(context).enterValidAmount;
+                return 'bill_enterValidAmount'.tr;
               }
               return null;
             },

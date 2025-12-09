@@ -1,4 +1,5 @@
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
 import 'package:Memento/plugins/calendar_album/sample_data.dart';

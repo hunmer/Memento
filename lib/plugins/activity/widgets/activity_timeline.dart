@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 
@@ -113,9 +112,9 @@ class ActivityTimeline extends StatelessWidget {
             context: context,
             builder: (BuildContext context) {
                 return AlertDialog(
-                title: Text(ActivityLocalizations.of(context).confirmDelete),
+                title: Text('activity_confirmDelete'.tr),
                 content: Text(
-                    '${ActivityLocalizations.of(context).confirmDelete.replaceFirst('确定要删除', '确定要删除活动 ')}"${activity.title}"吗?',
+                    '${'activity_confirmDelete'.tr.replaceFirst('确定要删除', '确定要删除活动 ')}"${activity.title}"吗?',
                 ),
                 actions: <Widget>[
                     TextButton(
@@ -124,7 +123,7 @@ class ActivityTimeline extends StatelessWidget {
                     ),
                     TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
-                    child: Text(ActivityLocalizations.of(context).deleteActivity),
+                    child: Text('activity_deleteActivity'.tr),
                     ),
                 ],
                 );
@@ -355,7 +354,7 @@ class ActivityTimeline extends StatelessWidget {
                   // Text content
                   Expanded(
                     child: Text(
-                      '${ActivityLocalizations.of(context).unrecordedTimeText} (${_formatDuration(start, end)})',
+                      '${'activity_unrecordedTimeText'.tr} (${_formatDuration(start, end)})',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 14,
@@ -414,7 +413,7 @@ class ActivityTimeline extends StatelessWidget {
     if (slices.isEmpty) {
       return Center(
         child: Text(
-          ActivityLocalizations.of(context).noActivitiesText,
+          'activity_noActivitiesText'.tr,
           style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 16),
         ),
       );

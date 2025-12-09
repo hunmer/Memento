@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'dart:io';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/l10n/app_localizations.dart';
@@ -47,10 +47,10 @@ class ProductCard extends StatelessWidget {
               context: context,
               builder: (context) => AlertDialog(
                 title: Text(
-                  StoreLocalizations.of(context).redeemConfirmation,
+                  'store_redeemConfirmation'.tr,
                 ),
                 content: Text(
-                  '${StoreLocalizations.of(context).confirmUseItem}\n${product.name} 需要消耗 ${product.price} 积分',
+                  '${'store_confirmUseItem'.tr}\n${product.name} 需要消耗 ${product.price} 积分',
                 ),
                 actions: [
                   TextButton(

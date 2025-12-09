@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
 
@@ -36,7 +36,7 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(TodoLocalizations.of(context).filterTasksTitle),
+      title: Text('todo_filterTasksTitle'.tr),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -47,9 +47,9 @@ class _FilterDialogState extends State<FilterDialog> {
               TextFormField(
                 controller: _keywordController,
                 decoration: InputDecoration(
-                  labelText: TodoLocalizations.of(context).searchIn,
+                  labelText: 'todo_searchIn'.tr,
                   hintText:
-                      '${TodoLocalizations.of(context).searchIn} ${TodoLocalizations.of(context).title} & ${TodoLocalizations.of(context).description}',
+                      '${'todo_searchIn'.tr} ${'todo_title'.tr} & ${'todo_description'.tr}',
                 ),
               ),
               const SizedBox(height: 16),
@@ -58,7 +58,7 @@ class _FilterDialogState extends State<FilterDialog> {
               DropdownButtonFormField<TaskPriority>(
                 initialValue: _selectedPriority,
                 decoration: InputDecoration(
-                  labelText: TodoLocalizations.of(context).priority,
+                  labelText: 'todo_priority'.tr,
                 ),
                 items:
                     TaskPriority.values.map((priority) {
@@ -77,7 +77,7 @@ class _FilterDialogState extends State<FilterDialog> {
 
               // 标签选择
               InputChip(
-                label: Text(TodoLocalizations.of(context).tags),
+                label: Text('todo_tags'.tr),
                 onSelected: (_) => _showTagSelector(context),
                 selected: _selectedTags.isNotEmpty,
               ),
@@ -107,8 +107,8 @@ class _FilterDialogState extends State<FilterDialog> {
                     child: ListTile(
                       title: Text(
                         _startDate == null
-                            ? TodoLocalizations.of(context).startDate
-                            : '${TodoLocalizations.of(context).startDate}: ${_startDate!.toLocal()}',
+                            ? 'todo_startDate'.tr
+                            : '${'todo_startDate'.tr}: ${_startDate!.toLocal()}',
                       ),
                       onTap: () async {
                         final date = await showDatePicker(
@@ -129,8 +129,8 @@ class _FilterDialogState extends State<FilterDialog> {
                     child: ListTile(
                       title: Text(
                         _endDate == null
-                            ? TodoLocalizations.of(context).dueDate
-                            : '${TodoLocalizations.of(context).dueDate}: ${_endDate!.toLocal()}',
+                            ? 'todo_dueDate'.tr
+                            : '${'todo_dueDate'.tr}: ${_endDate!.toLocal()}',
                       ),
                       onTap: () async {
                         final date = await showDatePicker(
@@ -162,7 +162,7 @@ class _FilterDialogState extends State<FilterDialog> {
                       });
                     },
                   ),
-                  Text(TodoLocalizations.of(context).showCompleted),
+                  Text('todo_showCompleted'.tr),
                   const SizedBox(width: 16),
                   Checkbox(
                     value: _showIncomplete,
@@ -172,7 +172,7 @@ class _FilterDialogState extends State<FilterDialog> {
                       });
                     },
                   ),
-                  Text(TodoLocalizations.of(context).showIncomplete),
+                  Text('todo_showIncomplete'.tr),
                 ],
               ),
             ],
@@ -197,7 +197,7 @@ class _FilterDialogState extends State<FilterDialog> {
             };
             widget.onFilter(filter);
           },
-          child: Text(TodoLocalizations.of(context).ok),
+          child: Text('todo_ok'.tr),
         ),
       ],
     );
@@ -246,7 +246,7 @@ class _MultiSelectDialogState extends State<MultiSelectDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(TodoLocalizations.of(context).selectTagsTitle),
+      title: Text('todo_selectTagsTitle'.tr),
       content: SingleChildScrollView(
         child: Column(
           children:

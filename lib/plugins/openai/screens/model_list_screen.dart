@@ -1,7 +1,7 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/models/llm_models.dart';
 import 'package:Memento/plugins/openai/controllers/model_controller.dart';
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 class ModelListScreen extends StatefulWidget {
@@ -54,7 +54,7 @@ class _ModelListScreenState extends State<ModelListScreen>
       }
     } catch (e) {
       if (mounted) {
-        toastService.showToast('${OpenAILocalizations.of(context).loadModelsFailed}: $e');
+        toastService.showToast('${'openai_loadModelsFailed'.tr}: $e');
         setState(() {
           _modelGroups = [];
           _tabController?.dispose(); // 在创建新的之前释放旧的
@@ -101,7 +101,7 @@ class _ModelListScreenState extends State<ModelListScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(OpenAILocalizations.of(context).modelManagement),
+        title: Text('openai_modelManagement'.tr),
         actions: [
           IconButton(icon: const Icon(Icons.add), onPressed: _addNewModel),
         ],
@@ -122,7 +122,7 @@ class _ModelListScreenState extends State<ModelListScreen>
                         child: TextField(
                           decoration: InputDecoration(
                             hintText:
-                                OpenAILocalizations.of(context).searchModel,
+                                'openai_searchModel'.tr,
                             prefixIcon: Icon(Icons.search),
                             border: OutlineInputBorder(), // 添加边框使搜索框更明显
                             contentPadding: EdgeInsets.symmetric(vertical: 8.0),
@@ -152,7 +152,7 @@ class _ModelListScreenState extends State<ModelListScreen>
               ? const Center(child: CircularProgressIndicator())
               : _tabController == null
               ? Center(
-                child: Text(OpenAILocalizations.of(context).cannotLoadModels),
+                child: Text('openai_cannotLoadModels'.tr),
               )
               : TabBarView(
                 controller: _tabController,
@@ -162,7 +162,7 @@ class _ModelListScreenState extends State<ModelListScreen>
                       return filteredModels.isEmpty
                           ? Center(
                             child: Text(
-                              OpenAILocalizations.of(context).noModelsFound,
+                              'openai_noModelsFound'.tr,
                             ),
                           )
                           : ListView.builder(
@@ -213,7 +213,7 @@ class _ModelListScreenState extends State<ModelListScreen>
         await _loadModels();
       } catch (e) {
         if (mounted) {
-          toastService.showToast('${OpenAILocalizations.of(context).addModelFailed}: $e');
+          toastService.showToast('${'openai_addModelFailed'.tr}: $e');
         }
       }
     }
@@ -241,7 +241,7 @@ class _ModelListScreenState extends State<ModelListScreen>
         await _loadModels();
       } catch (e) {
         if (mounted) {
-          toastService.showToast('${OpenAILocalizations.of(context).updateModelFailed}: $e');
+          toastService.showToast('${'openai_updateModelFailed'.tr}: $e');
         }
       }
     }
@@ -252,7 +252,7 @@ class _ModelListScreenState extends State<ModelListScreen>
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(OpenAILocalizations.of(context).confirmDelete),
+            title: Text('openai_confirmDelete'.tr),
             content: Text(
               OpenAILocalizations.of(
                 context,
@@ -261,11 +261,11 @@ class _ModelListScreenState extends State<ModelListScreen>
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(OpenAILocalizations.of(context).cancel),
+                child: Text('openai_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(OpenAILocalizations.of(context).delete),
+                child: Text('openai_delete'.tr),
               ),
             ],
           ),
@@ -277,7 +277,7 @@ class _ModelListScreenState extends State<ModelListScreen>
         await _loadModels();
       } catch (e) {
         if (mounted) {
-          toastService.showToast('${OpenAILocalizations.of(context).deleteModelFailed}: $e');
+          toastService.showToast('${'openai_deleteModelFailed'.tr}: $e');
         }
       }
     }
@@ -323,8 +323,8 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
     return AlertDialog(
       title: Text(
         widget.model == null
-            ? OpenAILocalizations.of(context).addModel
-            : OpenAILocalizations.of(context).editModel,
+            ? 'openai_addModel'.tr
+            : 'openai_editModel'.tr,
       ),
       content: Form(
         key: _formKey,
@@ -336,12 +336,12 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
                 TextFormField(
                   controller: _idController,
                   decoration: InputDecoration(
-                    labelText: OpenAILocalizations.of(context).modelId,
-                    hintText: OpenAILocalizations.of(context).modelIdExample,
+                    labelText: 'openai_modelId'.tr,
+                    hintText: 'openai_modelIdExample'.tr,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return OpenAILocalizations.of(context).pleaseEnterModelId;
+                      return 'openai_pleaseEnterModelId'.tr;
                     }
                     return null;
                   },
@@ -349,12 +349,12 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: OpenAILocalizations.of(context).modelName,
-                  hintText: OpenAILocalizations.of(context).modelNameExample,
+                  labelText: 'openai_modelName'.tr,
+                  hintText: 'openai_modelNameExample'.tr,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return OpenAILocalizations.of(context).pleaseEnterModelName;
+                    return 'openai_pleaseEnterModelName'.tr;
                   }
                   return null;
                 },
@@ -363,7 +363,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
               DropdownButtonFormField<String>(
                 initialValue: _selectedGroup,
                 decoration: InputDecoration(
-                  labelText: OpenAILocalizations.of(context).modelGroup,
+                  labelText: 'openai_modelGroup'.tr,
                 ),
                 items:
                     widget.groups.map((group) {
@@ -392,7 +392,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(OpenAILocalizations.of(context).cancel),
+          child: Text('openai_cancel'.tr),
         ),
         TextButton(
           onPressed: () {
@@ -404,7 +404,7 @@ class _ModelEditDialogState extends State<_ModelEditDialog> {
               });
             }
           },
-          child: Text(OpenAILocalizations.of(context).save),
+          child: Text('openai_save'.tr),
         ),
       ],
     );

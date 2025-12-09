@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'constants.dart';
 import 'activity_form_state.dart';
@@ -86,7 +85,7 @@ class MoodSelector extends StatelessWidget {
                 final result = await showDialog<String>(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: Text(ActivityLocalizations.of(context).inputMood),
+                    title: Text('activity_inputMood'.tr),
                     content: TextField(
                       controller: controller,
                       decoration: const InputDecoration(

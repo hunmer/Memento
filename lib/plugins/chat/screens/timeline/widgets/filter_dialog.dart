@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/models/user.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
@@ -108,15 +107,15 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 元数据过滤选项
             Text(
-              ChatLocalizations.of(context).metadataFilters,
+              'chat_metadataFilters'.tr,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
 
             // AI 消息过滤选项
             CheckboxListTile(
-              title: Text(ChatLocalizations.of(context).aiMessages),
-              subtitle: Text(ChatLocalizations.of(context).filterAiMessages),
+              title: Text('chat_aiMessages'.tr),
+              subtitle: Text('chat_filterAiMessages'.tr),
               value: _filter.isAI,
               tristate: true,
               onChanged: (value) {
@@ -129,8 +128,8 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 收藏消息过滤选项
             CheckboxListTile(
-              title: Text(ChatLocalizations.of(context).favoriteMessages),
-              subtitle: Text(ChatLocalizations.of(context).showOnlyFavorites),
+              title: Text('chat_favoriteMessages'.tr),
+              subtitle: Text('chat_showOnlyFavorites'.tr),
               value: _filter.isFavorite,
               tristate: true,
               onChanged: (value) {

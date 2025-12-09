@@ -5,8 +5,8 @@ import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:get/get.dart';
 import 'diary_plugin.dart';
-import 'l10n/diary_localizations.dart';
 
 /// 日记插件的主页小组件注册
 class DiaryHomeWidgets {
@@ -53,7 +53,6 @@ class DiaryHomeWidgets {
   /// 获取可用的统计项
   static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
-      final l10n = DiaryLocalizations.of(context);
       final plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
       if (plugin == null) return [];
 
@@ -65,20 +64,20 @@ class DiaryHomeWidgets {
       return [
         StatItemData(
           id: 'today_word_count',
-          label: l10n.todayWordCount,
+          label: 'diary_todayWordCount'.tr,
           value: '$todayCount',
           highlight: todayCount > 0,
           color: Colors.indigo,
         ),
         StatItemData(
           id: 'month_word_count',
-          label: l10n.monthWordCount,
+          label: 'diary_monthWordCount'.tr,
           value: '$monthCount',
           highlight: false,
         ),
         StatItemData(
           id: 'month_progress',
-          label: l10n.monthProgress,
+          label: 'diary_monthProgress'.tr,
           value: '${monthProgress.$1}/${monthProgress.$2}',
           highlight: monthProgress.$1 > 0,
           color: Colors.indigo,
@@ -95,8 +94,6 @@ class DiaryHomeWidgets {
     Map<String, dynamic> config,
   ) {
     try {
-      final l10n = DiaryLocalizations.of(context);
-
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
       try {
@@ -116,7 +113,7 @@ class DiaryHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'diary_name'.tr,
         pluginIcon: Icons.menu_book,
         pluginDefaultColor: Colors.indigo,
         availableItems: availableItems,

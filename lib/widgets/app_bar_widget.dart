@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/l10n/app_localizations.dart';
+import 'package:get/get.dart';
+
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
@@ -13,7 +14,6 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
     final displayTitle =
         title ?? (titleKey != null ? localizations.getString(titleKey!) : '');
 

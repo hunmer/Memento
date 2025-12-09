@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 import 'package:Memento/plugins/bill/models/bill_shortcut.dart';
 import 'package:Memento/plugins/bill/services/bill_shortcuts_widget_service.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
-import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
@@ -186,19 +186,19 @@ class _BillShortcutsSelectorScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(BillLocalizations.of(context).quickBookkeepingConfig),
+        title: Text('bill_quickBookkeepingConfig'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: _saveConfig,
-            tooltip: BillLocalizations.of(context).saveConfig,
+            tooltip: 'bill_saveConfig'.tr,
           ),
         ],
       ),
       body: WidgetConfigEditor(
         widgetSize: WidgetSize.large,
         initialConfig: _widgetConfig,
-        previewTitle: BillLocalizations.of(context).quickBookkeepingConfig,
+        previewTitle: 'bill_quickBookkeepingConfig'.tr,
         onConfigChanged: (config) {
           setState(() {
             _widgetConfig = config;
@@ -211,7 +211,7 @@ class _BillShortcutsSelectorScreenState
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addShortcut,
-        tooltip: BillLocalizations.of(context).addQuickPreset,
+        tooltip: 'bill_addQuickPreset'.tr,
         child: const Icon(Icons.add),
       ),
     );
@@ -233,7 +233,7 @@ class _BillShortcutsSelectorScreenState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                BillLocalizations.of(context).quickBookkeepingConfig,
+                'bill_quickBookkeepingConfig'.tr,
                 style: TextStyle(
                   color: config.getColor('icon'),
                   fontSize: 22,
@@ -252,7 +252,7 @@ class _BillShortcutsSelectorScreenState
           if (_shortcuts.isEmpty)
             Center(
               child: Text(
-                BillLocalizations.of(context).noQuickPresets,
+                'bill_noQuickPresets'.tr,
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 14,
@@ -328,7 +328,7 @@ class _BillShortcutsSelectorScreenState
     if (_shortcuts.isEmpty) {
       return Center(
         child: Text(
-          BillLocalizations.of(context).clickToAddQuickPreset,
+          'bill_clickToAddQuickPreset'.tr,
           style: const TextStyle(color: Colors.grey),
         ),
       );
@@ -464,8 +464,8 @@ class _BillShortcutEditDialogState extends State<BillShortcutEditDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(widget.initialShortcut == null
-          ? BillLocalizations.of(context).addQuickPreset
-          : BillLocalizations.of(context).editQuickPreset),
+          ? 'bill_addQuickPreset'.tr
+          : 'bill_editQuickPreset'.tr),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -476,12 +476,12 @@ class _BillShortcutEditDialogState extends State<BillShortcutEditDialog> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: BillLocalizations.of(context).presetName,
-                  hintText: BillLocalizations.of(context).presetNameHint,
+                  labelText: 'bill_presetName'.tr,
+                  hintText: 'bill_presetNameHint'.tr,
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return BillLocalizations.of(context).pleaseEnterPresetName;
+                    return 'bill_pleaseEnterPresetName'.tr;
                   }
                   return null;
                 },
@@ -535,8 +535,8 @@ class _BillShortcutEditDialogState extends State<BillShortcutEditDialog> {
               TextFormField(
                 controller: _amountController,
                 decoration: InputDecoration(
-                  labelText: BillLocalizations.of(context).presetAmount,
-                  hintText: BillLocalizations.of(context).presetAmountHint,
+                  labelText: 'bill_presetAmount'.tr,
+                  hintText: 'bill_presetAmountHint'.tr,
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -545,8 +545,8 @@ class _BillShortcutEditDialogState extends State<BillShortcutEditDialog> {
               // 收入/支出
               SegmentedButton<bool>(
                 segments: [
-                  ButtonSegment(value: true, label: Text(BillLocalizations.of(context).expense)),
-                  ButtonSegment(value: false, label: Text(BillLocalizations.of(context).income)),
+                  ButtonSegment(value: true, label: Text('bill_expense'.tr)),
+                  ButtonSegment(value: false, label: Text('bill_income'.tr)),
                 ],
                 selected: {_isExpense},
                 onSelectionChanged: (Set<bool> newSelection) {
@@ -562,11 +562,11 @@ class _BillShortcutEditDialogState extends State<BillShortcutEditDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(BillLocalizations.of(context).cancel),
+          child: Text('bill_cancel'.tr),
         ),
         FilledButton(
           onPressed: _save,
-          child: Text(BillLocalizations.of(context).save),
+          child: Text('bill_save'.tr),
         ),
       ],
     );

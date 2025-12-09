@@ -1,6 +1,7 @@
 import 'dart:io';
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:mime/mime.dart';
@@ -162,7 +163,7 @@ class WebDAVController {
                 onCancel: () {
                   Navigator.of(dialogContext).pop();
                   if (dialogContext.mounted) {
-                    Toast.show(AppLocalizations.of(context)!.downloadCancelled);
+                    Toast.show('app_downloadCancelled'.tr);
                   }
                 },
               ),
@@ -319,7 +320,7 @@ class WebDAVController {
                 onCancel: () {
                   Navigator.of(dialogContext).pop();
                   if (dialogContext.mounted) {
-                    Toast.show(AppLocalizations.of(context)!.downloadCancelled);
+                    Toast.show('app_downloadCancelled'.tr);
                   }
                 },
               ),

@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:Memento/plugins/chat/models/file_message.dart';
@@ -39,7 +39,7 @@ Future<void> handleImageSelection({
 
         if (!await imageFile.exists()) {
           toastService.showToast(
-            ChatLocalizations.of(context).imageNotExist,
+            'chat_imageNotExist'.tr,
           );
           return;
         }
@@ -75,13 +75,13 @@ Future<void> handleImageSelection({
         onFileSelected?.call(metadata);
       } catch (e) {
         toastService.showToast(
-          '${ChatLocalizations.of(context).imageProcessingFailed}: $e',
+          '${'chat_imageProcessingFailed'.tr}: $e',
         );
       }
     }
   } catch (e) {
     toastService.showToast(
-      '${ChatLocalizations.of(context).imageSelectionFailed}: $e',
+      '${'chat_imageSelectionFailed'.tr}: $e',
     );
   }
 }

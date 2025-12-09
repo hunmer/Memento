@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_config.dart';

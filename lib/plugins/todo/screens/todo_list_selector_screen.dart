@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
@@ -5,7 +6,6 @@ import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/todo/models/task.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 
 /// 待办列表小组件配置界面
 ///

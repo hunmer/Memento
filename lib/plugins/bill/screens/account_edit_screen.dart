@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -177,7 +176,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
                           Padding(
                             padding: const EdgeInsets.only(left: 4, bottom: 8),
                             child: Text(
-                              BillLocalizations.of(context).accountName,
+                              'bill_accountName'.tr,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.hintColor,
                                 fontWeight: FontWeight.w500,
@@ -221,7 +220,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
                         ),
                         icon: const Icon(Icons.delete_outline),
                         label: Text(
-                          BillLocalizations.of(context).deleteAccount,
+                          'bill_deleteAccount'.tr,
                         ),
                         onPressed: _deleteAccount,
                       ),
@@ -264,7 +263,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
   void _saveAccount() async {
     final title = _titleController.text.trim();
     if (title.isEmpty) {
-      Toast.error(BillLocalizations.of(context).enterAccountName);
+      Toast.error('bill_enterAccountName'.tr);
       return;
     }
 
@@ -311,7 +310,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
           (context) => AlertDialog(
             title: Text(AppLocalizations.of(context)!.confirmDelete),
             content: Text(
-              BillLocalizations.of(context).confirmDeleteAccountWithBills,
+              'bill_confirmDeleteAccountWithBills'.tr,
             ),
             actions: [
               TextButton(

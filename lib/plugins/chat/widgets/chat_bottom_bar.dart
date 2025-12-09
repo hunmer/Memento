@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/plugins/chat/screens/channel_list/channel_list_screen.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/screens/timeline/timeline_screen.dart';
 import 'package:Memento/plugins/chat/screens/create_channel/create_channel_page.dart';
 import 'package:flutter/foundation.dart';
@@ -257,11 +257,11 @@ class _ChatBottomBarState extends State<ChatBottomBar>
             tabs: [
               Tab(
                 icon: const Icon(Icons.chat_bubble_outline),
-                text: ChatLocalizations.of(context).channelsTab,
+                text: 'chat_channelsTab'.tr,
               ),
               Tab(
                 icon: const Icon(Icons.timeline),
-                text: ChatLocalizations.of(context).timelineTab,
+                text: 'chat_timelineTab'.tr,
               ),
             ],
           ),

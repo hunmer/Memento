@@ -1,6 +1,6 @@
 import 'dart:io';
+import 'package:get/get.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/l10n/local_video_handler_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;

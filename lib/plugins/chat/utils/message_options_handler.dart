@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,7 +44,7 @@ class MessageOptionsHandler {
     if (message.type == MessageType.received ||
         message.type == MessageType.sent) {
       Clipboard.setData(ClipboardData(text: message.content));
-      toastService.showToast(ChatLocalizations.of(context).copiedToClipboard);
+      toastService.showToast('chat_copiedToClipboard'.tr);
     }
   }
 

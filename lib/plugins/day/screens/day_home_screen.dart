@@ -1,10 +1,10 @@
 import 'dart:io' show Platform;
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/day/controllers/day_controller.dart';
-import 'package:Memento/plugins/day/l10n/day_localizations.dart';
 import 'package:Memento/plugins/day/widgets/memorial_day_card.dart';
 import 'package:Memento/plugins/day/widgets/memorial_day_list_item.dart';
 import 'package:Memento/plugins/day/widgets/edit_memorial_day_dialog/edit_memorial_day_dialog.dart';
@@ -58,19 +58,19 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
             context: context,
             builder:
                 (context) => AlertDialog(
-                  title: Text(DayLocalizations.of(context).deleteMemorialDay),
+                  title: Text('day_deleteMemorialDay'.tr),
                   content: Text(
-                    DayLocalizations.of(context).deleteConfirmation,
+                    'day_deleteConfirmation'.tr,
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(false),
-                      child: Text(DayLocalizations.of(context).cancel),
+                      child: Text('day_cancel'.tr),
                     ),
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
                       child: Text(
-                        DayLocalizations.of(context).delete,
+                        'day_delete'.tr,
                         style: const TextStyle(color: Colors.red),
                       ),
                     ),
@@ -114,7 +114,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
           final theme = Theme.of(context);
           return SuperCupertinoNavigationWrapper(
             title: Text(
-              DayLocalizations.of(context).memorialDays,
+              'day_memorialDays'.tr,
               style: TextStyle(color: theme.textTheme.titleLarge?.color),
             ),
             largeTitle: '纪念日',
@@ -137,23 +137,23 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
               // 排序菜单
               PopupMenuButton<SortMode>(
                 icon: Icon(Icons.sort, color: theme.iconTheme.color),
-                tooltip: DayLocalizations.of(context).sortOptions,
+                tooltip: 'day_sortOptions'.tr,
                 onSelected: (mode) => controller.setSortMode(mode),
                 itemBuilder:
                     (context) => [
                       PopupMenuItem(
                         value: SortMode.upcoming,
                         child: Text(
-                          DayLocalizations.of(context).upcomingSort,
+                          'day_upcomingSort'.tr,
                         ),
                       ),
                       PopupMenuItem(
                         value: SortMode.recent,
-                        child: Text(DayLocalizations.of(context).recentSort),
+                        child: Text('day_recentSort'.tr),
                       ),
                       PopupMenuItem(
                         value: SortMode.manual,
-                        child: Text(DayLocalizations.of(context).manualSort),
+                        child: Text('day_manualSort'.tr),
                       ),
                     ],
               ),
@@ -166,8 +166,8 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
                 onPressed: controller.toggleView,
                 tooltip:
                     controller.isCardView
-                        ? DayLocalizations.of(context).listView
-                        : DayLocalizations.of(context).cardView,
+                        ? 'day_listView'.tr
+                        : 'day_cardView'.tr,
               ),
             ],
             body: Stack(
@@ -192,7 +192,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
 
   Widget _buildBody(DayController controller) {
     if (controller.memorialDays.isEmpty) {
-      return Center(child: Text(DayLocalizations.of(context).noMemorialDays));
+      return Center(child: Text('day_noMemorialDays'.tr));
     }
 
     return controller.isCardView

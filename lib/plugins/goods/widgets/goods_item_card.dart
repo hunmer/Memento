@@ -1,8 +1,8 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:io';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:Memento/plugins/goods/dialogs/add_usage_record_dialog.dart';
 import 'package:Memento/plugins/goods/screens/goods_item_history_page.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
@@ -74,7 +74,7 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
         children: [
           ListTile(
             leading: const Icon(Icons.add_circle_outline),
-            title: Text(GoodsLocalizations.of(context).addUsageRecord),
+            title: Text('goods_addUsageRecord'.tr),
             onTap: () async {
               Navigator.pop(context); // Close menu
               final result = await showDialog<Map<String, dynamic>>(
@@ -94,7 +94,7 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
           ),
           ListTile(
             leading: const Icon(Icons.history),
-            title: Text(GoodsLocalizations.of(context).usageHistory),
+            title: Text('goods_usageHistory'.tr),
             onTap: () {
               Navigator.pop(context); // Close menu
               NavigationHelper.push(context, GoodsItemHistoryPage(
@@ -106,7 +106,7 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
           ListTile(
             leading: const Icon(Icons.delete_outline, color: Colors.red),
             title: Text(
-              GoodsLocalizations.of(context).delete,
+              'goods_delete'.tr,
               style: const TextStyle(color: Colors.red),
             ),
             onTap: () async {
@@ -114,16 +114,16 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text(GoodsLocalizations.of(context).confirmDelete),
-                  content: Text(GoodsLocalizations.of(context).confirmDeleteItem),
+                  title: Text('goods_confirmDelete'.tr),
+                  content: Text('goods_confirmDeleteItem'.tr),
                   actions: [
                     TextButton(
-                      child: Text(GoodsLocalizations.of(context).cancel),
+                      child: Text('goods_cancel'.tr),
                       onPressed: () => Navigator.pop(context, false),
                     ),
                     TextButton(
                       child: Text(
-                        GoodsLocalizations.of(context).delete,
+                        'goods_delete'.tr,
                         style: const TextStyle(color: Colors.red),
                       ),
                       onPressed: () => Navigator.pop(context, true),

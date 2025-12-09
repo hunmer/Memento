@@ -1,10 +1,10 @@
+import 'package:get/get.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
-import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 
 class TaskListView extends StatefulWidget {
   final List<Task> tasks;

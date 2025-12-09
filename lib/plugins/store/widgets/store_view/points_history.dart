@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/models/points_log.dart';
@@ -107,7 +107,7 @@ class _PointsHistoryState extends State<PointsHistory> {
         color: Colors.green.shade600,
         size: 24,
       ),
-      largeTitle: StoreLocalizations.of(context).pointsHistory,
+      largeTitle: 'store_pointsHistory'.tr,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -119,14 +119,14 @@ class _PointsHistoryState extends State<PointsHistory> {
             ),
             const SizedBox(height: 16),
             Text(
-              StoreLocalizations.of(context).noRecords,
+              'store_noRecords'.tr,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Colors.grey[600],
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              StoreLocalizations.of(context).earnPointsTip,
+              'store_earnPointsTip'.tr,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.grey[500],
               ),
@@ -153,7 +153,7 @@ class _PointsHistoryState extends State<PointsHistory> {
         color: Colors.green.shade600,
         size: 24,
       ),
-      largeTitle: StoreLocalizations.of(context).pointsHistory,
+      largeTitle: 'store_pointsHistory'.tr,
       body: Column(
         children: [
           // 统计信息
@@ -225,7 +225,7 @@ class _PointsHistoryState extends State<PointsHistory> {
                       ),
                     ),
                     title: Text(
-                      StoreLocalizations.of(context).pointsHistoryEntry
+                      'store_pointsHistoryEntry'.tr
                           .replaceFirst('{value}', log.value.toString())
                           .replaceFirst('{type}', log.type),
                       style: Theme.of(context).textTheme.titleSmall,
@@ -320,12 +320,12 @@ class _PointsHistoryState extends State<PointsHistory> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(StoreLocalizations.of(context).clearPointsHistory),
-        content: Text(StoreLocalizations.of(context).confirmClearPointsHistory),
+        title: Text('store_clearPointsHistory'.tr),
+        content: Text('store_confirmClearPointsHistory'.tr),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(StoreLocalizations.of(context).cancel),
+            child: Text('store_cancel'.tr),
           ),
           TextButton(
             onPressed: () async {

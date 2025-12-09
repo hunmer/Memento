@@ -1,4 +1,5 @@
 
+import 'package:get/get.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';

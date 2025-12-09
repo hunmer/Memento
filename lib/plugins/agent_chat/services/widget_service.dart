@@ -1,4 +1,5 @@
 import 'package:Memento/core/services/system_widget_service.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
 import 'package:logging/logging.dart';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 /// 快捷记账预设数据模型
 class BillShortcut {

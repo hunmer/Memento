@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
@@ -183,7 +184,7 @@ class _SkillFormState extends State<SkillForm> {
           TextField(
             controller: _titleController,
             decoration: InputDecoration(
-              labelText: HabitsLocalizations.of(context).skillName,
+              labelText: 'nfc_skillName'.tr,
               border: const OutlineInputBorder(),
             ),
           ),
@@ -191,7 +192,7 @@ class _SkillFormState extends State<SkillForm> {
           TextField(
             controller: _notesController,
             decoration: InputDecoration(
-              labelText: HabitsLocalizations.of(context).skillDescription,
+              labelText: 'nfc_skillDescription'.tr,
               border: const OutlineInputBorder(),
             ),
             maxLines: 3,
@@ -200,7 +201,7 @@ class _SkillFormState extends State<SkillForm> {
           TextField(
             controller: _groupController,
             decoration: InputDecoration(
-              labelText: HabitsLocalizations.of(context).skillGroup,
+              labelText: 'nfc_skillGroup'.tr,
               border: const OutlineInputBorder(),
             ),
           ),
@@ -209,8 +210,8 @@ class _SkillFormState extends State<SkillForm> {
             controller: _maxDurationController,
             decoration: InputDecoration(
               labelText:
-                  '${HabitsLocalizations.of(context).maxDuration} (${HabitsLocalizations.of(context).minutes})',
-              hintText: HabitsLocalizations.of(context).noLimitHint,
+                  '${'nfc_maxDuration'.tr} (${'nfc_minutes'.tr})',
+              hintText: 'nfc_noLimitHint'.tr,
               border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,

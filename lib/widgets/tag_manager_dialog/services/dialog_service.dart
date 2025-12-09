@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart';
-import 'package:Memento/widgets/tag_manager_dialog/l10n/tag_manager_localizations.dart';
-import 'package:Memento/widgets/tag_manager_dialog/l10n/tag_manager_dialog_localizations.dart';
+
+
 
 /// 对话框服务类，处理标签管理对话框的各种操作
 class DialogService {

@@ -1,4 +1,5 @@
 import 'package:memento_foreground_service/memento_foreground_service.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/notification_controller.dart';
 
 /// AI 聊天任务处理器 - 在独立 isolate 中运行

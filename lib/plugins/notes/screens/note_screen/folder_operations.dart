@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
@@ -18,7 +18,7 @@ Future<void> createNewFolder(
           TextEditingController();
 
       return AlertDialog(
-        title: Text(NotesLocalizations.of(context).newFolder),
+        title: Text('notes_newFolder'.tr),
         content: TextField(
           controller: folderNameController,
           autofocus: true,
@@ -66,7 +66,7 @@ Future<void> renameFolderDialog(
       );
 
       return AlertDialog(
-        title: Text(NotesLocalizations.of(context).renameFolder),
+        title: Text('notes_renameFolder'.tr),
         content: TextField(
           controller: renameController,
           autofocus: true,
@@ -107,8 +107,8 @@ Future<void> deleteFolderDialog(
     context: context,
     builder:
         (context) => AlertDialog(
-          title: Text(NotesLocalizations.of(context).deleteFolder),
-          content: Text(NotesLocalizations.of(context).deleteFolderConfirm),
+          title: Text('notes_deleteFolder'.tr),
+          content: Text('notes_deleteFolderConfirm'.tr),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),

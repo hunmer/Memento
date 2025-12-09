@@ -1,7 +1,7 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 
 class GoodsItemSelectorDialog extends StatefulWidget {
   final String? excludeItemId; // 要排除的物品ID（避免选择自己或已选择的子物品）
@@ -128,7 +128,7 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
               children: [
                 Expanded(
                   child: Text(
-                    GoodsLocalizations.of(context).selectItem,
+                    'goods_selectItem'.tr,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
@@ -142,7 +142,7 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
             // 分类选择器
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
-                labelText: GoodsLocalizations.of(context).filterByCategory,
+                labelText: 'goods_filterByCategory'.tr,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.category),
               ),
@@ -150,7 +150,7 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
               items: [
                 DropdownMenuItem<String>(
                   value: null,
-                  child: Text(GoodsLocalizations.of(context).allCategories),
+                  child: Text('goods_allCategories'.tr),
                 ),
                 ..._availableCategories.map(
                   (category) => DropdownMenuItem<String>(
@@ -169,7 +169,7 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: GoodsLocalizations.of(context).searchItems,
+                hintText: 'goods_searchItems'.tr,
                 prefixIcon: const Icon(Icons.search),
                 border: const OutlineInputBorder(),
               ),
@@ -194,7 +194,7 @@ class _GoodsItemSelectorDialogState extends State<GoodsItemSelectorDialog> {
                     title: Text(item.title),
                     subtitle:
                         item.purchasePrice != null
-                            ? Text(GoodsLocalizations.of(context).price)
+                            ? Text('goods_price'.tr)
                             : null,
                     onTap: () => Navigator.of(context).pop(item),
                   );

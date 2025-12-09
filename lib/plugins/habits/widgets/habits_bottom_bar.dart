@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
@@ -5,7 +6,6 @@ import 'package:Memento/plugins/habits/widgets/habits_list/habits_view.dart';
 import 'package:Memento/plugins/habits/widgets/skills_list.dart';
 import 'package:Memento/plugins/habits/widgets/habit_form.dart';
 import 'package:Memento/plugins/habits/widgets/skill_form.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/core/widgets/keep_alive_wrapper.dart';
 import 'package:flutter/foundation.dart';
@@ -221,11 +221,11 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
             tabs: [
               Tab(
                 icon: Icon(Icons.check_circle),
-                text: HabitsLocalizations.of(context).habits,
+                text: 'habits_habits'.tr,
               ),
               Tab(
                 icon: Icon(Icons.star),
-                text: HabitsLocalizations.of(context).skills,
+                text: 'habits_skills'.tr,
               ),
             ],
           ),

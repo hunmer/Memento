@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:Memento/plugins/activity/widgets/activity_form/activity_form_widget.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
@@ -745,21 +744,21 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
     // 检查时间是否有效
     if (endDateTime.isBefore(startDateTime)) {
-      toastService.showToast('${ActivityLocalizations.of(context).endTime}必须晚于${ActivityLocalizations.of(context).startTime}');
+      toastService.showToast('${'activity_endTime'.tr}必须晚于${'activity_startTime'.tr}');
       return;
     }
 
     // 检查时间间隔是否小于1分钟
     final duration = endDateTime.difference(startDateTime);
     if (duration.inMinutes < 1) {
-      toastService.showToast('活动时间必须至少为${ActivityLocalizations.of(context).minutesFormat(1).replaceAll('1 ', '')}');
+      toastService.showToast('活动时间必须至少为${'activity_minutesFormat'.tr(1).replaceAll('1 ', '')}');
       return;
     }
 
     // 检查是否超过当天结束时间
     final dayEnd = DateTime(now.year, now.month, now.day, 23, 59);
     if (endDateTime.isAfter(dayEnd)) {
-      toastService.showToast('${ActivityLocalizations.of(context).endTime}不能超过当天23:59');
+      toastService.showToast('${'activity_endTime'.tr}不能超过当天23:59');
       return;
     }
 

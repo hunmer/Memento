@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'dart:io' show Platform;
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
@@ -54,8 +54,8 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
     final filteredWarehouses = _filterWarehouses(warehouses);
 
     return SuperCupertinoNavigationWrapper(
-      title: Text(GoodsLocalizations.of(context).allWarehouses),
-      largeTitle: GoodsLocalizations.of(context).allWarehouses,
+      title: Text('goods_allWarehouses'.tr),
+      largeTitle: 'goods_allWarehouses'.tr,
       body: filteredWarehouses.isEmpty && _searchQuery.isNotEmpty
           ? _buildEmptySearchView()
           : ListView.separated(

@@ -1,7 +1,7 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
-import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -81,7 +81,7 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return BillLocalizations.of(context).name;
+    return 'bill_name'.tr;
   }
 
   @override
@@ -112,7 +112,7 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                BillLocalizations.of(context).name,
+                'bill_name'.tr,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -132,7 +132,7 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        BillLocalizations.of(context).todayFinance,
+                        'bill_todayFinance'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -152,7 +152,7 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        BillLocalizations.of(context).monthFinance,
+                        'bill_monthFinance'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -178,7 +178,7 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        BillLocalizations.of(context).monthBills,
+                        'bill_monthBills'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(

@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -11,7 +12,6 @@ import 'widgets/goods_bottom_bar.dart';
 import 'models/warehouse.dart';
 import 'models/goods_item.dart';
 import 'models/find_item_result.dart';
-import 'l10n/goods_localizations.dart';
 import 'sample_data.dart';
 
 /// 物品相关事件的基类
@@ -510,7 +510,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return GoodsLocalizations.of(context).name;
+    return 'goods_name'.tr;
   }
 
   @override
@@ -541,7 +541,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                GoodsLocalizations.of(context).name,
+                'goods_name'.tr,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -561,7 +561,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        GoodsLocalizations.of(context).totalQuantity,
+                        'goods_totalQuantity'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -577,7 +577,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        GoodsLocalizations.of(context).totalValue,
+                        'goods_totalValue'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -600,7 +600,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        GoodsLocalizations.of(context).oneMonthUnused,
+                        'goods_oneMonthUnused'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(

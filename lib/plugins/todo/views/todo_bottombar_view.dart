@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:Memento/plugins/todo/models/task.dart';
@@ -6,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
-import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:Memento/plugins/todo/controllers/task_controller.dart';
 import 'package:Memento/plugins/todo/widgets/task_list_view.dart';
 import 'package:Memento/plugins/todo/widgets/task_form.dart';
@@ -214,8 +214,8 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                 _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
             unselectedLabelColor: unselectedColor,
             tabs: [
-              Tab(icon: const Icon(Icons.check_box_outlined), text: TodoLocalizations.of(context).todoTab),
-              Tab(icon: const Icon(Icons.history), text: TodoLocalizations.of(context).historyTab),
+              Tab(icon: const Icon(Icons.check_box_outlined), text: 'todo_todoTab'.tr),
+              Tab(icon: const Icon(Icons.history), text: 'todo_historyTab'.tr),
             ],
           ),
           Positioned(
@@ -321,15 +321,15 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
               (context) => [
                 PopupMenuItem(
                   value: SortBy.dueDate,
-                  child: Text(TodoLocalizations.of(context).sortByDueDate),
+                  child: Text('todo_sortByDueDate'.tr),
                 ),
                 PopupMenuItem(
                   value: SortBy.priority,
-                  child: Text(TodoLocalizations.of(context).sortByPriority),
+                  child: Text('todo_sortByPriority'.tr),
                 ),
                 PopupMenuItem(
                   value: SortBy.custom,
-                  child: Text(TodoLocalizations.of(context).customSort),
+                  child: Text('todo_customSort'.tr),
                 ),
               ],
         ),

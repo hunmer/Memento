@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 import 'package:path/path.dart' as path;
@@ -78,16 +78,16 @@ Future<void> handleAudioRecording({
                   onFileSelected?.call(metadata);
 
                   // 显示音频发送成功的提示
-                  toastService.showToast('${ChatLocalizations.of(context).audioRecording}: ${formatDuration(duration)}');
+                  toastService.showToast('${'chat_audioRecording'.tr}: ${formatDuration(duration)}');
                 } catch (e) {
                   debugPrint('处理音频时出错: $e');
-                  toastService.showToast('${ChatLocalizations.of(context).recordingFailed}: $e');
+                  toastService.showToast('${'chat_recordingFailed'.tr}: $e');
                 }
               },
             ),
       );
     }
   } else {
-    toastService.showToast(ChatLocalizations.of(context).recordingFailed);
+    toastService.showToast('chat_recordingFailed'.tr);
   }
 }

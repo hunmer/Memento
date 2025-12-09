@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/models/points_log.dart';
@@ -92,7 +92,7 @@ class _PointsHistoryContentState extends State<PointsHistoryContent> {
   @override
   Widget build(BuildContext context) {
     if (widget.controller.pointsLogs.isEmpty) {
-      return Center(child: Text(StoreLocalizations.of(context).noRecords));
+      return Center(child: Text('store_noRecords'.tr));
     }
 
     return ListView.builder(

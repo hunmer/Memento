@@ -1,6 +1,6 @@
 import 'dart:io' show Platform;
+import 'package:get/get.dart';
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/plugins/diary/l10n/diary_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/screens/activity_timeline_screen/controllers/activity_controller.dart';
 import 'package:Memento/plugins/activity/screens/activity_timeline_screen/controllers/tag_controller.dart';
@@ -32,11 +32,10 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
       title: Text(
         viewModeController.isGridMode && viewModeController.selectedMinutes > 0
-            ? DiaryLocalizations.of(context).minutesSelected.replaceAll(
-              '{minutes}',
-              viewModeController.selectedMinutes.toString(),
-            )
-            : DiaryLocalizations.of(context).activityTimeline,
+            ? 'activity_minutesSelected'.trParams({
+              'minutes': viewModeController.selectedMinutes.toString(),
+            })
+            : 'activity_activityTimeline'.tr,
       ),
       actions: [
         // 视图切换按钮
@@ -47,19 +46,19 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: viewModeController.toggleViewMode,
           tooltip:
               viewModeController.isGridMode
-                  ? DiaryLocalizations.of(context).switchToTimelineView
-                  : DiaryLocalizations.of(context).switchToGridView,
+                  ? 'activity_switchToTimelineView'.tr
+                  : 'activity_switchToGridView'.tr,
         ),
         // 标签管理按钮
         IconButton(
           icon: const Icon(Icons.label),
           onPressed: () => tagController.showTagManagerDialog(context),
-          tooltip: DiaryLocalizations.of(context).tagManagement,
+          tooltip: 'activity_tagManagement'.tr,
         ),
         // 排序下拉菜单
         PopupMenuButton<int>(
           icon: const Icon(Icons.sort),
-          tooltip: DiaryLocalizations.of(context).sortBy,
+          tooltip: 'activity_sortBy'.tr,
           initialValue: activityController.sortMode,
           onSelected: (int index) {
             activityController.setSortMode(index);
@@ -72,7 +71,7 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       const Icon(Icons.arrow_upward, size: 16),
                       const SizedBox(width: 8),
-                      Text(DiaryLocalizations.of(context).sortByStartTimeAsc),
+                      Text('activity_sortByStartTimeAsc'.tr),
                     ],
                   ),
                 ),
@@ -82,7 +81,7 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       const Icon(Icons.timer, size: 16),
                       const SizedBox(width: 8),
-                      Text(DiaryLocalizations.of(context).sortByDuration),
+                      Text('activity_sortByDuration'.tr),
                     ],
                   ),
                 ),
@@ -92,7 +91,7 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       const Icon(Icons.arrow_downward, size: 16),
                       const SizedBox(width: 8),
-                      Text(DiaryLocalizations.of(context).sortByStartTimeDesc),
+                      Text('activity_sortByStartTimeDesc'.tr),
                     ],
                   ),
                 ),

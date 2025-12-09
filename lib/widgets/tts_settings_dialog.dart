@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
 import 'package:Memento/plugins/tts/models/tts_service_config.dart';
 import 'package:Memento/plugins/tts/models/tts_service_type.dart';
-import 'package:Memento/widgets/l10n/widget_localizations.dart';
+
 
 /// TTS设置对话框
 ///
@@ -76,7 +77,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
         children: [
           Icon(Icons.record_voice_over, size: 24),
           SizedBox(width: 8),
-          Text(WidgetLocalizations.of(context)!.voiceBroadcastSettings),
+          Text('widget_voiceBroadcastSettings'.tr),
         ],
       ),
       content:
@@ -94,10 +95,10 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                     // 启用开关
                     SwitchListTile(
                       title: Text(
-                        WidgetLocalizations.of(context)!.enableAutoRead,
+                        'widget_enableAutoRead'.tr,
                       ),
                       subtitle: Text(
-                        WidgetLocalizations.of(context)!.autoReadAIMessage,
+                        'widget_autoReadAIMessage'.tr,
                       ),
                       value: _enabled,
                       onChanged: (value) {
@@ -111,7 +112,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                     // 服务选择
                     if (_enabled && _services.isNotEmpty) ...[
                       Text(
-                        WidgetLocalizations.of(context)!.selectTTSService,
+                        'widget_selectTTSService'.tr,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -219,7 +220,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(WidgetLocalizations.of(context)!.cancel),
+          child: Text('widget_cancel'.tr),
         ),
         ElevatedButton(
           onPressed: () {
@@ -229,7 +230,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
             );
             Navigator.of(context).pop(result);
           },
-          child: Text(WidgetLocalizations.of(context)!.confirm),
+          child: Text('widget_confirm'.tr),
         ),
       ],
     );
@@ -239,7 +240,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
   String _getServiceTypeText(BuildContext context, TTSServiceConfig service) {
     String typeText = service.type.displayName;
     if (!service.isEnabled) {
-      typeText += WidgetLocalizations.of(context)!.disabled;
+      typeText += 'widget_disabled'.tr;
     }
     if (service.voice != null && service.voice!.isNotEmpty) {
       typeText += ' · ${service.voice}';

@@ -1,4 +1,5 @@
 import 'dart:io' show Platform, File;
+import 'package:get/get.dart';
 import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,6 @@ import 'package:Memento/widgets/enhanced_calendar/index.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
 import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
-import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'package:Memento/plugins/calendar_album/widgets/entry_list.dart';
 import 'entry_editor_screen.dart';
 import 'entry_detail_screen.dart';
@@ -143,7 +143,7 @@ class _CalendarScreenState extends State<CalendarScreen>
       ],
       child: SuperCupertinoNavigationWrapper(
         title: Text(
-          CalendarAlbumLocalizations.of(context).calendarDiary,
+          'calendarAlbum_calendarDiary'.tr,
           style: TextStyle(
             fontSize: 18,
             color: theme.textTheme.titleLarge?.color,

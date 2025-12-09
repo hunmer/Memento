@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/day/l10n/day_localizations.dart';
+import 'package:get/get.dart';
 import 'color_picker.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 
@@ -129,7 +129,7 @@ class AppearanceTab extends StatelessWidget {
                           Icon(Icons.add_photo_alternate, size: 32),
                           SizedBox(height: 8),
                           Text(
-                            DayLocalizations.of(context).localImage,
+                            'day_localImage'.tr,
                             textAlign: TextAlign.center,
                           ),
                         ],

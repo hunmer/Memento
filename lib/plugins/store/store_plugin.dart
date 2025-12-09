@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'dart:convert';
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/store/widgets/store_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -105,7 +105,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return StoreLocalizations.of(context).name;
+    return 'store_name'.tr;
   }
 
   @override
@@ -136,7 +136,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                StoreLocalizations.of(context).name,
+                'store_name'.tr,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -156,7 +156,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        StoreLocalizations.of(context).productQuantity,
+                        'store_productQuantity'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -172,7 +172,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        StoreLocalizations.of(context).itemQuantity,
+                        'store_itemQuantity'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -195,7 +195,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        StoreLocalizations.of(context).myPoints,
+                        'store_myPoints'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -212,7 +212,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        StoreLocalizations.of(context).expiringIn7Days,
+                        'store_expiringIn7Days'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -241,9 +241,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            title: Text(StoreLocalizations.of(context).pointSettingsTitle),
+            title: Text('store_pointSettingsTitle'.tr),
             subtitle: Text(
-              StoreLocalizations.of(context).pointSettingsSubtitle,
+              'store_pointSettingsSubtitle'.tr,
             ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () {

@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/timer/views/add_timer_item_dialog.dart';
 import 'package:Memento/widgets/group_selector_dialog.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +131,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
                       _buildIconGrid(primaryColor, isDark),
                       const SizedBox(height: 24),
 
-                      _buildLabel(context, TimerLocalizations.of(context).taskName),
+                      _buildLabel(context, 'timer_taskName'.tr),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _nameController,
@@ -145,7 +145,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return '请输入${TimerLocalizations.of(context).taskName}';
+                            return '请输入${'timer_taskName'.tr}';
                           }
                           return null;
                         },
@@ -161,7 +161,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
                               children: [
                                 _buildLabel(
                                   context,
-                                  TimerLocalizations.of(context).repeatCount,
+                                  'timer_repeatCount'.tr,
                                 ),
                                 const SizedBox(height: 8),
                                 TextFormField(
@@ -203,7 +203,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
                               children: [
                                 _buildLabel(
                                   context,
-                                  TimerLocalizations.of(context).selectGroup,
+                                  'timer_selectGroup'.tr,
                                 ),
                                 const SizedBox(height: 8),
                                 InkWell(
@@ -317,7 +317,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                TimerLocalizations.of(context).addTimer,
+                                'timer_addTimer'.tr,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: isDark
@@ -358,7 +358,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          TimerLocalizations.of(context).enableNotification,
+                          'timer_enableNotification'.tr,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: isDark
@@ -504,13 +504,13 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
     String typeText;
     switch (timer.type) {
       case TimerType.countUp:
-        typeText = TimerLocalizations.of(context).countUpTimer;
+        typeText = 'timer_countUpTimer'.tr;
         break;
       case TimerType.countDown:
-        typeText = TimerLocalizations.of(context).countDownTimer;
+        typeText = 'timer_countDownTimer'.tr;
         break;
       case TimerType.pomodoro:
-        typeText = TimerLocalizations.of(context).pomodoroTimer;
+        typeText = 'timer_pomodoroTimer'.tr;
         break;
     }
 

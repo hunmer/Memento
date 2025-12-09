@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'dart:io' show Platform;
-import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -61,7 +61,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return ContactLocalizations.of(context).name;
+    return 'contact_name'.tr;
   }
 
   @override
@@ -95,7 +95,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    ContactLocalizations.of(context).name,
+                    'contact_name'.tr,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -115,7 +115,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            ContactLocalizations.of(context).totalContacts,
+                            'contact_totalContacts'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -132,7 +132,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            ContactLocalizations.of(context).recentContacts,
+                            'contact_recentContacts'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -859,7 +859,7 @@ class ContactMainViewState extends State<ContactMainView> {
       Scaffold(
         appBar: AppBar(
           leading: TextButton(
-            child: Text(ContactLocalizations.of(context).cancel),
+            child: Text('contact_cancel'.tr),
 
             onPressed: () => Navigator.of(context).pop(),
           ),
@@ -868,14 +868,14 @@ class ContactMainViewState extends State<ContactMainView> {
 
           title: Text(
             contact == null
-                ? ContactLocalizations.of(context).addContact
-                : ContactLocalizations.of(context).editContact,
+                ? 'contact_addContact'.tr
+                : 'contact_editContact'.tr,
           ),
 
           actions: [
             TextButton(
               child: Text(
-                ContactLocalizations.of(context).done,
+                'contact_done'.tr,
 
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
@@ -903,13 +903,13 @@ class ContactMainViewState extends State<ContactMainView> {
                   } catch (e) {
                     if (mounted) {
                       ToastService.instance.showToast(
-                        ContactLocalizations.of(context).saveFailedMessage,
+                        'contact_saveFailedMessage'.tr,
                       );
                     }
                   }
                 } else {
                   ToastService.instance.showToast(
-                    ContactLocalizations.of(context).formValidationMessage,
+                    'contact_formValidationMessage'.tr,
                   );
                 }
               },
@@ -937,8 +937,8 @@ class ContactMainViewState extends State<ContactMainView> {
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
-      title: Text(ContactLocalizations.of(context).contacts),
-      largeTitle: ContactLocalizations.of(context).contacts,
+      title: Text('contact_contacts'.tr),
+      largeTitle: 'contact_contacts'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: FutureBuilder<List<Contact>>(
         future: _controller.getFilteredAndSortedContacts(),
@@ -949,7 +949,7 @@ class ContactMainViewState extends State<ContactMainView> {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text(ContactLocalizations.of(context).errorMessage),
+              child: Text('contact_errorMessage'.tr),
             );
           }
 
@@ -967,7 +967,7 @@ class ContactMainViewState extends State<ContactMainView> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    ContactLocalizations.of(context).noContacts,
+                    'contact_noContacts'.tr,
                     style: Theme.of(
                       context,
                     ).textTheme.titleLarge?.copyWith(color: Colors.grey),

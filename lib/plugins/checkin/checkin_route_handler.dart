@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/routing/plugin_route_handler.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/checkin/screens/checkin_item_selector_screen.dart';

@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
-import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 
@@ -113,8 +112,8 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
     return AlertDialog(
       title: Text(
         widget.selectedDate != null
-            ? CheckinLocalizations.of(context).addSpecificDateCheckin
-            : CheckinLocalizations.of(context).addCheckinRecord,
+            ? 'checkin_addSpecificDateCheckin'.tr
+            : 'checkin_addCheckinRecord'.tr,
       ),
       content: Form(
         key: _formKey,
@@ -161,8 +160,8 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               TextFormField(
                 controller: _noteController,
                 decoration: InputDecoration(
-                  labelText: CheckinLocalizations.of(context).noteLabel,
-                  hintText: CheckinLocalizations.of(context).noteHint,
+                  labelText: 'checkin_noteLabel'.tr,
+                  hintText: 'checkin_noteHint'.tr,
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
@@ -171,8 +170,8 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               // 打卡时间显示
               Text(
                 widget.selectedDate != null
-                    ? '${CheckinLocalizations.of(context).checkinDateLabel}: ${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}'
-                    : '${CheckinLocalizations.of(context).checkinTimeLabel}: ${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
+                    ? '${'checkin_checkinDateLabel'.tr}: ${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}'
+                    : '${'checkin_checkinTimeLabel'.tr}: ${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).hintColor,
                 ),
@@ -205,7 +204,7 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: Text(CheckinLocalizations.of(context).checkinButton),
+          child: Text('checkin_checkinButton'.tr),
         ),
       ],
     );

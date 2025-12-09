@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
 import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
-import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'calendar_screen.dart';
 import 'tag_screen.dart';
 import 'album_screen.dart';

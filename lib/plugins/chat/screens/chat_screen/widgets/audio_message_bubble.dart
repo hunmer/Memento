@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:Memento/plugins/chat/widgets/audio_player_widget.dart';
 
@@ -18,7 +18,7 @@ class AudioMessageBubble extends StatelessWidget {
     // 获取音频文件路径
     final audioPath = message.originalFilePath;
     if (audioPath == null) {
-      return Text(ChatLocalizations.of(context).audioMessageBubbleErrorText);
+      return Text('chat_audioMessageBubbleErrorText'.tr);
     }
 
     // 获取音频时长

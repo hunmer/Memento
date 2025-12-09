@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +6,6 @@ import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'controllers/notes_controller.dart';
 import 'screens/notes_screen.dart';
-import 'l10n/notes_localizations.dart';
 
 class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   static NotesPlugin? _instance;
@@ -21,7 +21,7 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return NotesLocalizations.of(context).name;
+    return 'notes_name'.tr;
   }
 
   late NotesController controller;
@@ -115,7 +115,7 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                NotesLocalizations.of(context).name,
+                'notes_name'.tr,
 
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
@@ -136,7 +136,7 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        NotesLocalizations.of(context).totalNotes,
+                        'notes_totalNotes'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -152,7 +152,7 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        NotesLocalizations.of(context).recentNotes,
+                        'notes_recentNotes'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(

@@ -120,5 +120,10 @@ class ActivityTranslationsEn {
     'activity_recentlyUsed': 'Recently Used',
     'activity_tagManagement': 'Tag Management',
     'activity_tagsHint': 'Separate tags with commas',
+    'activity_sortBy': 'Sort by',
+    'activity_activityTimeline': 'Activity Timeline',
+    'activity_minutesSelected': '@minutes minutes selected',
+    'activity_switchToTimelineView': 'Switch to timeline view',
+    'activity_switchToGridView': 'Switch to grid view',
   };
 }
