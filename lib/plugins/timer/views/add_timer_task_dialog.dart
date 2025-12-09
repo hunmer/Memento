@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/timer/views/add_timer_item_dialog.dart';
 import 'package:Memento/widgets/group_selector_dialog.dart';
 import 'package:flutter/material.dart';
@@ -398,7 +397,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
                 shadowColor: primaryColor.withValues(alpha: 0.4),
               ),
               child: Text(
-                AppLocalizations.of(context)!.save,
+                'app_save'.tr,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

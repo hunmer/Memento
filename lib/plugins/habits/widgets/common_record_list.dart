@@ -1,5 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 class CommonRecordList<T> extends StatelessWidget {
@@ -64,7 +64,7 @@ class CommonRecordList<T> extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.close),
+                child: Text('app_close'.tr),
               ),
             ],
           ),

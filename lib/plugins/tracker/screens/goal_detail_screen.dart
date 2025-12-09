@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart' hide ListTile, Row, Center, SizedBox;
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/material.dart'
@@ -37,22 +36,16 @@ class GoalDetailScreen extends StatelessWidget {
                     context: context,
                     builder:
                         (context) => AlertDialog(
-                          title: Text(
-                            'tracker_confirmClear'.tr,
-                          ),
-                          content: Text(
-                            TrackerLocalizations.of(
-                              context,
-                            ).confirmClearMessage,
-                          ),
+                          title: Text('tracker_confirmClear'.tr),
+                          content: Text('tracker_confirmClearMessage'.tr),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
-                              child: Text(AppLocalizations.of(context)!.cancel),
+                              child: Text('app_cancel'.tr),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
-                              child: Text(AppLocalizations.of(context)!.ok),
+                              child: Text('app_ok'.tr),
                             ),
                           ],
                         ),
@@ -168,16 +161,8 @@ class GoalDetailScreen extends StatelessWidget {
                                           context: context,
                                           builder:
                                               (context) => AlertDialog(
-                                                title: Text(
-                                                  TrackerLocalizations.of(
-                                                    context,
-                                                  ).confirmDelete,
-                                                ),
-                                                content: Text(
-                                                  TrackerLocalizations.of(
-                                                    context,
-                                                  ).confirmDeleteRecordMessage,
-                                                ),
+                                                title: Text('tracker_confirmDelete'.tr),
+                                                content: Text('tracker_confirmDeleteRecordMessage'.tr),
                                                 actions: [
                                                   TextButton(
                                                     onPressed:
@@ -185,11 +170,7 @@ class GoalDetailScreen extends StatelessWidget {
                                                           context,
                                                           false,
                                                         ),
-                                                    child: Text(
-                                                      AppLocalizations.of(
-                                                        context,
-                                                      )!.cancel,
-                                                    ),
+                                                    child: Text('app_cancel'.tr),
                                                   ),
                                                   TextButton(
                                                     onPressed:
@@ -197,11 +178,7 @@ class GoalDetailScreen extends StatelessWidget {
                                                           context,
                                                           true,
                                                         ),
-                                                    child: Text(
-                                                      AppLocalizations.of(
-                                                        context,
-                                                      )!.ok,
-                                                    ),
+                                                    child: Text('app_ok'.tr),
                                                   ),
                                                 ],
                                               ),
@@ -211,11 +188,7 @@ class GoalDetailScreen extends StatelessWidget {
                                             record.id,
                                           );
                                           if (context.mounted) {
-                                            Toast.success(
-                                              TrackerLocalizations.of(
-                                                context,
-                                              ).recordDeleted,
-                                            );
+                                            Toast.success('tracker_recordDeleted'.tr);
                                           }
                                         }
                                       },

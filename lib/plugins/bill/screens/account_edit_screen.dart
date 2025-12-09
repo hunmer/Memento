@@ -51,7 +51,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.selectBackgroundColor),
+          title: Text('app_selectBackgroundColor'.tr),
           content: SingleChildScrollView(
             child: ColorPicker(
               pickerColor: _selectedColor,
@@ -62,7 +62,7 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(AppLocalizations.of(context)!.ok),
+              child: Text('app_ok'.tr),
               onPressed: () {
                 Navigator.of(context).pop(newColor);
               },
@@ -308,17 +308,17 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.confirmDelete),
+            title: Text('app_confirmDelete'.tr),
             content: Text(
               'bill_confirmDeleteAccountWithBills'.tr,
             ),
             actions: [
               TextButton(
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
                 onPressed: () => Navigator.pop(context, false),
               ),
               TextButton(
-                child: Text(AppLocalizations.of(context)!.delete),
+                child: Text('app_delete'.tr),
                 onPressed: () => Navigator.pop(context, true),
               ),
             ],

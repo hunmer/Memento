@@ -201,17 +201,11 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                             title: Text(
                               'widget_iconToImage'.tr,
                             ),
-                        content: Text(
-                              WidgetLocalizations.of(
-                                context,
-                              )!.iconToImageDescription,
-                        ),
+                        content: Text('widget_iconToImageDescription'.tr),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                                child: Text(
-                                  'widget_confirm'.tr,
-                                ),
+                                child: Text('widget_confirm'.tr),
                           ),
                         ],
                       ),

@@ -69,7 +69,7 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.selectDate,
+                  'app_selectDate'.tr,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -80,7 +80,7 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
                     widget.onDateSelected(null);
                     Navigator.of(context).pop();
                   },
-                  child: Text(AppLocalizations.of(context)!.showAll),
+                  child: Text('app_showAll'.tr),
                 ),
               ],
             ),
@@ -182,7 +182,7 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(AppLocalizations.of(context)!.cancel),
+                  child: Text('app_cancel'.tr),
                 ),
               ],
             ),

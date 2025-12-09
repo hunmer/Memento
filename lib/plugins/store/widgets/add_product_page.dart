@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -66,7 +65,7 @@ class _AddProductPageState extends State<AddProductPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -92,7 +91,7 @@ class _AddProductPageState extends State<AddProductPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),

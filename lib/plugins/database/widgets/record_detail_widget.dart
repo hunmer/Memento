@@ -84,11 +84,11 @@ class _RecordDetailWidgetState extends State<RecordDetailWidget> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text(AppLocalizations.of(context)!.delete),
+                child: Text('app_delete'.tr),
               ),
             ],
           ),

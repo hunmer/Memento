@@ -1,5 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/plugin_base.dart';
 
@@ -63,7 +63,7 @@ class PluginListDialog extends StatelessWidget {
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(AppLocalizations.of(context)!.close),
+                child: Text('app_close'.tr),
               ),
             ],
           ),

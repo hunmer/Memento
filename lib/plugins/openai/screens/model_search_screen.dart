@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/models/llm_models.dart';
 import 'package:Memento/plugins/openai/controllers/model_controller.dart';
@@ -104,7 +103,7 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
               onPressed: () {
                 Navigator.of(context).pop(_selectedModel);
               },
-              child: Text(AppLocalizations.of(context)!.ok),
+              child: Text('app_ok'.tr),
             ),
         ],
         bottom:

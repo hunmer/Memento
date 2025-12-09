@@ -152,31 +152,30 @@ class _TagScreenState extends State<TagScreen> {
                       },
                       onDelete: (entry) {
                         final l10n = CalendarAlbumLocalizations.of(context);
-                        final appL10n = AppLocalizations.of(context);
                         showDialog<void>(
                           context: context,
-                          builder:
-                              (context) => AlertDialog(
-                                title: Text(l10n.deleteEntry),
-                                content: Text(
-                                  '${appL10n!.delete} "${entry.title}"?',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed:
-                                        () => Navigator.of(context).pop(),
-                                    child: Text(appL10n.cancel),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      calendarController.deleteEntry(entry);
-                                      Navigator.of(context).pop();
-                                      setState(() {}); // 强制刷新界面
-                                    },
-                                    child: Text(appL10n.delete),
-                                  ),
-                                ],
-                              ),
+                                builder:
+                                    (context) => AlertDialog(
+                                      title: Text(l10n.deleteEntry),
+                                      content: Text(
+                                        '${'app_delete'.tr} "${entry.title}"?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed:
+                                              () => Navigator.of(context).pop(),
+                                          child: Text('app_cancel'.tr),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            calendarController.deleteEntry(entry);
+                                            Navigator.of(context).pop();
+                                            setState(() {}); // 强制刷新界面
+                                          },
+                                          child: Text('app_delete'.tr),
+                                        ),
+                                      ],
+                                    ),
                         );
                       },
                     );

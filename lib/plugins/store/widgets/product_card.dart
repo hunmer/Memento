@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/models/product.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -55,14 +54,14 @@ class ProductCard extends StatelessWidget {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(AppLocalizations.of(context)!.cancel),
+                    child: Text('app_cancel'.tr),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                       onExchange();
                     },
-                    child: Text(AppLocalizations.of(context)!.confirm),
+                    child: Text('app_confirm'.tr),
                   ),
                 ],
               ),

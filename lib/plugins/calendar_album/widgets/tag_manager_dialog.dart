@@ -72,14 +72,14 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
         ),
         TextButton(
           onPressed: () {
             widget.onGroupsChanged(_groups);
             Navigator.pop(context, _selectedTags);
           },
-          child: Text(AppLocalizations.of(context)!.confirm),
+          child: Text('app_confirm'.tr),
         ),
       ],
     );

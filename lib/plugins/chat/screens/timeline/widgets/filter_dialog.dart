@@ -53,7 +53,6 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = ChatLocalizations.of(context);
-    final appL10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return AlertDialog(
@@ -273,20 +272,20 @@ class _FilterDialogState extends State<FilterDialog> {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text(appL10n!.cancel),
+          child: Text('app_cancel'.tr),
         ),
         TextButton(
           onPressed: () {
             _filter.reset();
             setState(() {});
           },
-          child: Text(appL10n.reset),
+          child: Text('app_reset'.tr),
         ),
         FilledButton(
           onPressed: () {
             Navigator.of(context).pop(_filter.toJson());
           },
-          child: Text(appL10n.apply),
+          child: Text('app_apply'.tr),
         ),
       ],
     );

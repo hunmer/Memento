@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'dart:io';
 
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
@@ -127,7 +126,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () {
@@ -136,7 +135,7 @@ class _GoalEditPageState extends State<GoalEditPage> {
                     Navigator.pop(context, value);
                   }
                 },
-                child: Text(AppLocalizations.of(context)!.ok),
+                child: Text('app_ok'.tr),
               ),
             ],
           ),

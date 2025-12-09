@@ -210,11 +210,11 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(AppLocalizations.of(context)!.cancel),
+                    child: Text('app_cancel'.tr),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, field),
-                    child: Text(AppLocalizations.of(context)!.save),
+                    child: Text('app_save'.tr),
                   ),
                 ],
               ),
@@ -257,11 +257,11 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(AppLocalizations.of(context)!.cancel),
+                    child: Text('app_cancel'.tr),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context, _selectedFieldType),
-                    child: Text(AppLocalizations.of(context)!.ok),
+                    child: Text('app_ok'.tr),
                   ),
                 ],
               ),

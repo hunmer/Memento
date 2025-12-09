@@ -58,11 +58,11 @@ class MessageOperations {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text(AppLocalizations.of(context)!.save),
+                child: Text('app_save'.tr),
               ),
             ],
           ),
@@ -95,7 +95,7 @@ class MessageOperations {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),

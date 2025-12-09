@@ -244,12 +244,12 @@ class _InteractionFormState extends State<InteractionForm> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: Text(AppLocalizations.of(context)!.cancel),
+                    child: Text('app_cancel'.tr),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: _saveInteraction,
-                    child: Text(AppLocalizations.of(context)!.save),
+                    child: Text('app_save'.tr),
                   ),
                 ],
               ),

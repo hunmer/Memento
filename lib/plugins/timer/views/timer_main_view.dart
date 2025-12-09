@@ -13,7 +13,6 @@ import 'package:Memento/plugins/timer/timer_plugin.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:Memento/plugins/timer/models/timer_task.dart';
 import 'package:collection/collection.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 
 class TimerMainView extends StatefulWidget {
   const TimerMainView({super.key});
@@ -282,11 +281,11 @@ class _TimerMainViewState extends State<TimerMainView> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text(AppLocalizations.of(context)!.delete),
+                child: Text('app_delete'.tr),
               ),
             ],
           ),

@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'dart:async';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/services/timer/events/timer_events.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/tracker/utils/tracker_notification_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -193,11 +192,11 @@ class _TimerDialogState extends State<TimerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
         ),
         ElevatedButton(
           onPressed: _seconds > 0 ? _saveRecord : null,
-          child: Text(AppLocalizations.of(context)!.save),
+          child: Text('app_save'.tr),
         ),
       ],
     );

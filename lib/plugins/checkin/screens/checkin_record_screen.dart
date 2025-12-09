@@ -183,7 +183,7 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () async {
@@ -194,7 +194,7 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
                   }
                 },
                 child: Text(
-                  AppLocalizations.of(context)!.delete,
+                  'app_delete'.tr,
                   style: TextStyle(color: Colors.red),
                 ),
               ),

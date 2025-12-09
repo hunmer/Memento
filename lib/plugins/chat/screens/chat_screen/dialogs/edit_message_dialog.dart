@@ -58,11 +58,11 @@ class EditMessageDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: onCancel,
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
         ),
         TextButton(
           onPressed: onSave,
-          child: Text(AppLocalizations.of(context)!.save),
+          child: Text('app_save'.tr),
         ),
       ],
     );

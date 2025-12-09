@@ -58,18 +58,16 @@ class TrackerHomeWidgets {
       final todayComplete = controller.getTodayCompletedGoals();
       final monthComplete = controller.getMonthCompletedGoals();
 
-      // Note: We can't use l10n here as this is a static method without context
-      // The labels will be translated in the build method if needed
       return [
         StatItemData(
           id: 'today_complete',
-          label: 'Today Complete', // Default English, will be overridden if context available
+          label: 'tracker_todayComplete'.tr,
           value: '$todayComplete',
           highlight: todayComplete > 0,
         ),
         StatItemData(
           id: 'month_complete',
-          label: 'Month Complete', // Default English
+          label: 'tracker_thisMonthComplete'.tr,
           value: '$monthComplete',
           highlight: monthComplete > 0,
           color: Colors.red,
@@ -102,34 +100,12 @@ class TrackerHomeWidgets {
       // 获取基础统计项数据
       final baseItems = _getAvailableStats(context);
 
-      // 使用l10n更新统计项标签
-      final availableItems = baseItems.map((item) {
-        if (item.id == 'today_complete') {
-          return StatItemData(
-            id: item.id,
-            label: l10n.todayComplete,
-            value: item.value,
-            highlight: item.highlight,
-            color: item.color,
-          );
-        } else if (item.id == 'month_complete') {
-          return StatItemData(
-            id: item.id,
-            label: l10n.thisMonthComplete,
-            value: item.value,
-            highlight: item.highlight,
-            color: item.color,
-          );
-        }
-        return item;
-      }).toList();
-
       // 使用通用小组件
       return GenericPluginWidget(
         pluginName: l10n.name,
         pluginIcon: Icons.track_changes,
         pluginDefaultColor: Colors.red,
-        availableItems: availableItems,
+        availableItems: baseItems,
         config: widgetConfig,
       );
     } catch (e) {

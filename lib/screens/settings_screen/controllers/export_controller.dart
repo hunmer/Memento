@@ -91,11 +91,12 @@ class ExportController {
       await tempDir.delete(recursive: true);
       if (savePath != null) {
         if (!_mounted) return;
-        Toast.success(AppLocalizations.of(context!)!.dataExportedTo(savePath));
+        Toast.success('app_dataExportedTo'.tr.replaceFirst('{path}', savePath));
       }
     } catch (e) {
       if (!_mounted) return;
-      Toast.error(AppLocalizations.of(context!)!.exportFailedWithError(e.toString()));
+      Toast.error(
+          'app_exportFailedWithError'.tr.replaceFirst('{error}', e.toString()));
     }
   }
 }

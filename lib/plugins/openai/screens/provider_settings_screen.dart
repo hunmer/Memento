@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/openai/models/service_provider.dart';
@@ -107,11 +106,11 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text(AppLocalizations.of(context)!.delete),
+                child: Text('app_delete'.tr),
               ),
             ],
           ),

@@ -150,9 +150,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                                           ),
                                         ),
                                         child: Text(
-                                          WidgetLocalizations.of(
-                                            context,
-                                          )!.defaultLabel,
+                                          'widget_defaultLabel'.tr,
                                           style: const TextStyle(
                                             fontSize: 10,
                                             color: Colors.blue,
@@ -205,9 +203,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                WidgetLocalizations.of(
-                                  context,
-                                )!.noTTSServiceAvailable,
+                                'widget_noTTSServiceAvailable'.tr,
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ),

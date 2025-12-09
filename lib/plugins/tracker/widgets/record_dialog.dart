@@ -32,11 +32,7 @@ class _RecordDialogState extends State<RecordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(
-        TrackerLocalizations.of(
-          context,
-        ).recordTitle.replaceFirst('{goalName}', widget.goal.name),
-      ),
+      title: Text('tracker_recordTitle'.tr.replaceFirst('{goalName}', widget.goal.name)),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -61,8 +57,8 @@ class _RecordDialogState extends State<RecordDialog> {
                       ),
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: TrackerLocalizations.of(context)
-                            .incrementValueWithUnit
+                        labelText: 'tracker_incrementValueWithUnit'
+                            .tr
                             .replaceFirst('\${unit}', widget.goal.unitType),
                         border: const OutlineInputBorder(),
                       ),

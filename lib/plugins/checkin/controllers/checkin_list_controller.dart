@@ -258,7 +258,7 @@ class CheckinListController {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () {
@@ -270,7 +270,7 @@ class CheckinListController {
                   onStateChanged();
                 },
                 child: Text(
-                  AppLocalizations.of(context)!.delete,
+                  'app_delete'.tr,
                   style: TextStyle(color: Colors.red),
                 ),
               ),
@@ -320,7 +320,7 @@ class CheckinListController {
                 ListTile(
                   leading: const Icon(Icons.delete, color: Colors.red),
                   title: Text(
-                    AppLocalizations.of(context)!.delete,
+                    'app_delete'.tr,
                     style: TextStyle(color: Colors.red),
                   ),
                   onTap: () {
@@ -401,7 +401,7 @@ class CheckinListController {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () async {
@@ -439,7 +439,7 @@ class CheckinListController {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () async {
@@ -514,7 +514,7 @@ class CheckinListController {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(AppLocalizations.of(context)!.ok),
+                child: Text('app_ok'.tr),
               ),
             ],
           ),
