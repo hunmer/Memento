@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/tts/models/tts_service_config.dart';
 import 'package:Memento/plugins/tts/models/tts_service_type.dart';
 import 'package:Memento/plugins/tts/models/tts_voice.dart';
 import 'package:Memento/plugins/tts/services/system_tts_service.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
-import 'package:Memento/plugins/tts/l10n/tts_localizations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 /// TTS服务编辑对话框（支持新建和编辑）
@@ -104,7 +104,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
     if (_loadingVoices) return;
 
     setState(() => _loadingVoices = true);
-    final loc = TTSLocalizations.of(context);
+    // Removed: Using GetX translations directly
 
     try {
       // 创建临时服务实例来获取语音列表
@@ -131,14 +131,14 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
     } catch (e) {
       setState(() => _loadingVoices = false);
       if (mounted) {
-        Toast.error('${loc.loadVoiceListFailed}: $e');
+        Toast.error('${'tts_loadVoiceListFailed'.tr}: $e');
       }
     }
   }
 
   /// 构建表单
   Widget _buildForm() {
-    final loc = TTSLocalizations.of(context);
+    // Removed: Using GetX translations directly
 
     return Form(
       key: _formKey,
@@ -148,20 +148,20 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 基础配置
-            _buildSectionTitle(loc.basicConfig),
+            _buildSectionTitle('tts_basicConfig'.tr),
             const SizedBox(height: 8),
 
             // 服务名称
             TextFormField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: loc.serviceName,
+                labelText: 'tts_serviceName'.tr,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.label),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return loc.serviceName;
+                  return 'tts_serviceName'.tr;
                 }
                 return null;
               },
@@ -172,7 +172,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
             DropdownButtonFormField<TTSServiceType>(
               value: _selectedType,
               decoration: InputDecoration(
-                labelText: loc.serviceType,
+                labelText: 'tts_serviceType'.tr,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.category),
               ),
@@ -183,7 +183,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                     children: [
                       const Icon(Icons.record_voice_over, size: 20),
                       const SizedBox(width: 8),
-                      Text(loc.systemTts),
+                      Text('tts_systemTts'.tr),
                     ],
                   ),
                 ),
@@ -193,7 +193,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                     children: [
                       const Icon(Icons.cloud, size: 20),
                       const SizedBox(width: 8),
-                      Text(loc.httpService),
+                      Text('tts_httpService'.tr),
                     ],
                   ),
                 ),
@@ -213,16 +213,16 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
 
             // 启用状态
             SwitchListTile(
-              title: Text(loc.enabled),
-              subtitle: Text(_isEnabled ? loc.enableThisService : loc.disableThisService),
+              title: Text('tts_enabled'.tr),
+              subtitle: Text(_isEnabled ? 'tts_enableThisService'.tr : 'tts_disableThisService'.tr),
               value: _isEnabled,
               onChanged: (value) => setState(() => _isEnabled = value),
             ),
 
             // 默认服务
             SwitchListTile(
-              title: Text(loc.defaultService),
-              subtitle: Text(loc.setAsDefaultTTSService),
+              title: Text('tts_defaultService'.tr),
+              subtitle: Text('tts_setAsDefaultTTSService'.tr),
               value: _isDefault,
               onChanged: (value) => setState(() => _isDefault = value),
             ),
@@ -230,12 +230,12 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
             const SizedBox(height: 24),
 
             // 通用参数
-            _buildSectionTitle(loc.readingParameters),
+            _buildSectionTitle('tts_readingParameters'.tr),
             const SizedBox(height: 8),
 
             // 音调
             _buildSlider(
-              label: loc.pitch,
+              label: 'tts_pitch'.tr,
               value: _pitch,
               min: 0.5,
               max: 2.0,
@@ -245,7 +245,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
 
             // 语速
             _buildSlider(
-              label: loc.speed,
+              label: 'tts_speed'.tr,
               value: _speed,
               min: 0.5,
               max: 2.0,
@@ -255,7 +255,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
 
             // 音量
             _buildSlider(
-              label: loc.volume,
+              label: 'tts_volume'.tr,
               value: _volume,
               min: 0.0,
               max: 1.0,
@@ -275,10 +275,10 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                       ? _voiceController.text
                       : _availableVoices.first.id,
                     decoration: InputDecoration(
-                      labelText: loc.voice,
+                      labelText: 'tts_voice'.tr,
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.language),
-                      helperText: TTSLocalizations.of(context).availableVoiceCount(_availableVoices.length),
+                      helperText: 'tts_availableVoiceCount'.trParams({'count': '${_availableVoices.length}'}),
                     ),
                     isExpanded: true,
                     items: _availableVoices.map((voice) {
@@ -306,7 +306,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
                           const SizedBox(width: 8),
-                          Text(TTSLocalizations.of(context).loadingVoiceList, style: const TextStyle(fontSize: 12)),
+                          Text('tts_loadingVoiceList'.tr, style: const TextStyle(fontSize: 12)),
                         ],
                       ),
                     ),
@@ -319,7 +319,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                   TextFormField(
                     controller: _voiceController,
                     decoration: InputDecoration(
-                      labelText: loc.voice,
+                      labelText: 'tts_voice'.tr,
                       border: const OutlineInputBorder(),
                       prefixIcon: const Icon(Icons.language),
                       hintText: 'zh-CN, en-US, etc.',
@@ -337,7 +337,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          TTSLocalizations.of(context).loadingVoiceList,
+                          'tts_loadingVoiceList'.tr,
                           style: const TextStyle(fontSize: 12),
                         ),
                       ],
@@ -349,17 +349,17 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
               TextFormField(
                 controller: _voiceController,
                 decoration: InputDecoration(
-                  labelText: loc.voice,
+                  labelText: 'tts_voice'.tr,
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.language),
                   hintText: _selectedType == TTSServiceType.system
                     ? 'zh-CN, en-US, etc.'
-                    : TTSLocalizations.of(context).fillAccordingToApi,
+                    : 'tts_fillAccordingToApi'.tr,
                   suffixIcon: _selectedType == TTSServiceType.system && !_loadingVoices
                     ? IconButton(
                         icon: const Icon(Icons.refresh),
                         onPressed: _loadAvailableVoices,
-                        tooltip: TTSLocalizations.of(context).reloadVoiceList,
+                        tooltip: 'tts_reloadVoiceList'.tr,
                       )
                     : null,
                 ),
@@ -368,14 +368,14 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
             // HTTP 特有配置
             if (_selectedType == TTSServiceType.http) ...[
               const SizedBox(height: 24),
-              _buildSectionTitle(loc.httpConfig),
+              _buildSectionTitle('tts_httpConfig'.tr),
               const SizedBox(height: 8),
 
               // API URL
               TextFormField(
                 controller: _urlController,
                 decoration: InputDecoration(
-                  labelText: loc.apiUrl,
+                  labelText: 'tts_apiUrl'.tr,
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.link),
                   hintText: 'https://api.example.com/tts',
@@ -384,10 +384,10 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                 validator: (value) {
                   if (_selectedType == TTSServiceType.http) {
                     if (value == null || value.trim().isEmpty) {
-                      return loc.pleaseEnterApiUrl;
+                      return 'tts_pleaseEnterApiUrl'.tr;
                     }
                     if (!value.startsWith('http://') && !value.startsWith('https://')) {
-                      return loc.urlMustStartWithHttp;
+                      return 'tts_urlMustStartWithHttp'.tr;
                     }
                   }
                   return null;
@@ -399,7 +399,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
               TextFormField(
                 controller: _headersController,
                 decoration: InputDecoration(
-                  labelText: loc.headers,
+                  labelText: 'tts_headers'.tr,
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.http),
                   hintText: 'Content-Type: application/json\nAuthorization: Bearer token',
@@ -413,7 +413,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
               TextFormField(
                 controller: _requestBodyController,
                 decoration: InputDecoration(
-                  labelText: loc.requestBody,
+                  labelText: 'tts_requestBody'.tr,
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.code),
                   hintText: '{"text": "{text}", "voice": "{voice}"}',
@@ -427,18 +427,18 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
               DropdownButtonFormField<String>(
                 value: _responseType,
                 decoration: InputDecoration(
-                  labelText: TTSLocalizations.of(context).responseType,
+                  labelText: 'tts_responseType'.tr,
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.settings_input_composite),
                 ),
                 items: [
                   DropdownMenuItem(
                     value: 'audio',
-                    child: Text(loc.directAudioReturn),
+                    child: Text('tts_directAudioReturn'.tr),
                   ),
                   DropdownMenuItem(
                     value: 'json',
-                    child: Text(loc.jsonWrapped),
+                    child: Text('tts_jsonWrapped'.tr),
                   ),
                 ],
                 onChanged: (value) {
@@ -454,7 +454,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                 TextFormField(
                   controller: _audioFieldPathController,
                   decoration: InputDecoration(
-                    labelText: TTSLocalizations.of(context).audioFieldPath,
+                    labelText: 'tts_audioFieldPath'.tr,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.account_tree),
                     hintText: 'data.audio 或 result.audioUrl',
@@ -462,7 +462,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                   ),
                   validator: (value) {
                     if (_responseType == 'json' && (value == null || value.trim().isEmpty)) {
-                      return loc.pleaseEnterAudioFieldPath;
+                      return 'tts_pleaseEnterAudioFieldPath'.tr;
                     }
                     return null;
                   },
@@ -471,8 +471,8 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
 
                 // Base64 编码
                 SwitchListTile(
-                  title: Text(loc.audioBase64Encoded),
-                  subtitle: Text(loc.audioIsBase64Encoded),
+                  title: Text('tts_audioBase64Encoded'.tr),
+                  subtitle: Text('tts_audioIsBase64Encoded'.tr),
                   value: _audioIsBase64,
                   onChanged: (value) => setState(() => _audioIsBase64 = value),
                 ),
@@ -482,7 +482,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
               TextFormField(
                 controller: _audioFormatController,
                 decoration: InputDecoration(
-                  labelText: TTSLocalizations.of(context).audioFormat,
+                  labelText: 'tts_audioFormat'.tr,
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.audiotrack),
                   hintText: 'mp3, wav, ogg, pcm',
@@ -645,7 +645,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
       return;
     }
 
-    final loc = TTSLocalizations.of(context);
+    // Removed: Using GetX translations directly
 
     try {
       final service = TTSServiceConfig(
@@ -675,7 +675,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
       // 验证配置
       if (!service.validate()) {
         if (mounted) {
-          Toast.error(loc.configValidationFailed);
+          Toast.error('tts_configValidationFailed'.tr);
         }
         return;
       }
@@ -686,14 +686,14 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
       }
     } catch (e) {
       if (mounted) {
-        Toast.error('${loc.saveFailed}: $e');
+        Toast.error('${'tts_saveFailed'.tr}: $e');
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final loc = TTSLocalizations.of(context);
+    // Removed: Using GetX translations directly
     final isEditing = widget.service != null;
 
     return Dialog(
@@ -704,7 +704,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
           children: [
             // 标题栏
             AppBar(
-              title: Text(isEditing ? loc.editService : loc.addService),
+              title: Text(isEditing ? 'tts_editService'.tr : 'tts_addService'.tr),
               automaticallyImplyLeading:
                   !(Platform.isAndroid || Platform.isIOS),
               actions: [
@@ -731,13 +731,13 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: Text(loc.cancel),
+                    child: Text('tts_cancel'.tr),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: _saveService,
                     icon: const Icon(Icons.save),
-                    label: Text(loc.save),
+                    label: Text('tts_save'.tr),
                   ),
                 ],
               ),

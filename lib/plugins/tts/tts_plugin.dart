@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
@@ -7,7 +8,6 @@ import 'models/tts_service_config.dart';
 import 'models/tts_service_type.dart';
 import 'services/tts_manager_service.dart';
 import 'services/tts_base_service.dart';
-import 'l10n/tts_localizations.dart';
 import 'screens/tts_services_screen.dart';
 
 /// TTS语音朗读插件
@@ -39,7 +39,7 @@ class TTSPlugin extends BasePlugin {
 
   @override
   String? getPluginName(context) {
-    return TTSLocalizations.of(context).name;
+    return 'tts_name'.tr;
   }
 
   @override
@@ -128,7 +128,7 @@ class TTSPlugin extends BasePlugin {
               future: managerService.getAllServices(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return Text(TTSLocalizations.of(context).loading);
+                  return Text('tts_loading'.tr);
                 }
 
                 final services = snapshot.data!;

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:get/get.dart';
 import 'package:Memento/core/app_widgets/page_transitions.dart';
 import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
 import 'package:Memento/core/l10n/core_localizations.dart';
@@ -15,7 +16,7 @@ import 'package:Memento/plugins/scripts_center/l10n/scripts_center_localizations
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
-import 'package:Memento/plugins/tts/l10n/tts_localizations.dart';
+import 'package:Memento/plugins/tts/l10n/tts_translations.dart';
 import 'package:Memento/screens/settings_screen/l10n/settings_screen_localizations.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_localizations.dart';
 import 'package:Memento/screens/settings_screen/widgets/l10n/webdav_localizations.dart';
@@ -204,7 +205,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       initial: savedThemeMode ?? AdaptiveThemeMode.light,
       builder:
           (theme, darkTheme) => WidgetUriHandler(
-            child: MaterialApp(
+            child: GetMaterialApp(
+              translations: TTSTranslations(),
+              locale: globalConfigManager.getLocale().languageCode == 'zh'
+                  ? const Locale('zh', 'CN')
+                  : const Locale('en', 'US'),
+              fallbackLocale: const Locale('zh', 'CN'),
               scaffoldMessengerKey: scaffoldMessengerKey,
               navigatorKey: navigatorKey,
               title: 'Memento',
@@ -222,7 +228,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               ContactLocalizations.delegate,
               TrackerLocalizations.delegate,
               HabitsLocalizations.delegate,
-              TTSLocalizations.delegate,
               ImagePickerLocalizations.delegate,
               SettingsScreenLocalizations.delegate,
               DataManagementLocalizations.delegate,
@@ -251,10 +256,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 ScriptsCenterLocalizations.delegate,
             ],
             supportedLocales: const [
-              Locale('zh', ''), // 中文
-              Locale('en', ''), // 英文
+              Locale('zh', 'CN'), // 中文
+              Locale('en', 'US'), // 英文
             ],
-            locale: globalConfigManager.getLocale(),
             theme: theme,
             darkTheme: darkTheme,
             builder: (context, child) {
