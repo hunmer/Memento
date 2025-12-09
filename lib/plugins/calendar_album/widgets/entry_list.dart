@@ -82,7 +82,7 @@ class EntryList extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'calendar_album_noEntries'.tr,
+              'calendar_album_no_entries'.tr,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -93,7 +93,7 @@ class EntryList extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onCreateNew,
                 icon: const Icon(Icons.add),
-                label: Text('calendar_album_createNewDiary'.tr),
+                label: Text('calendar_album_create_new_diary'.tr),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,

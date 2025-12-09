@@ -32,7 +32,7 @@ class _TagScreenState extends State<TagScreen> {
     final tagController = Provider.of<TagController>(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('calendar_album_tagManagement'.tr),
+        title: Text('calendar_album_tag_management'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.label),
@@ -49,7 +49,7 @@ class _TagScreenState extends State<TagScreen> {
                 });
               }
             },
-            tooltip: 'calendar_album_tagManagement'.tr,
+            tooltip: 'calendar_album_tag_management'.tr,
           ),
         ],
       ),
@@ -61,7 +61,7 @@ class _TagScreenState extends State<TagScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child:
                 _selectedTags.isEmpty
-                    ? Center(child: Text('calendar_album_noTags'.tr))
+                    ? Center(child: Text('calendar_album_no_tags'.tr))
                     : ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: _selectedTags.length,
@@ -107,7 +107,7 @@ class _TagScreenState extends State<TagScreen> {
             child: Consumer<CalendarController>(
               builder: (context, calendarController, child) {
                 return _selectedTags.isEmpty
-                    ? Center(child: Text('calendar_album_selectTag'.tr))
+                    ? Center(child: Text('calendar_album_select_tag'.tr))
                     : EntryList(
                       entries: calendarController.getEntriesByTags(
                         _selectedTags
@@ -156,7 +156,7 @@ class _TagScreenState extends State<TagScreen> {
                           context: context,
                                 builder:
                                     (context) => AlertDialog(
-                                      title: Text('calendar_album_deleteEntry'.tr),
+                                      title: Text('calendar_album_delete_entry'.tr),
                                       content: Text(
                                         '${'app_delete'.tr} "${entry.title}"?',
                                       ),

@@ -108,9 +108,9 @@ class CalendarAlbumTranslationsZh {
     'calendar_album_title_cannot_be_empty': '标题不能为空',
 
     // Home Widget Strings
-    'calendar_album_widgetName': '日历相册',
-    'calendar_album_widgetDescription': '快速打开日历相册',
-    'calendar_album_overviewName': '日历相册概览',
-    'calendar_album_overviewDescription': '显示相册统计信息',
+    'calendar_album_widget_name': '日历相册',
+    'calendar_album_widget_description': '快速打开日历相册',
+    'calendar_album_overview_name': '日历相册概览',
+    'calendar_album_overview_description': '显示相册统计信息',
   };
 }

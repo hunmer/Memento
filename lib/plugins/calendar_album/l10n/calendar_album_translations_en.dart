@@ -111,9 +111,9 @@ class CalendarAlbumTranslationsEn {
     'calendar_album_title_cannot_be_empty': 'Title cannot be empty',
 
     // Home Widget Strings
-    'calendar_album_widgetName': 'Calendar Album',
-    'calendar_album_widgetDescription': 'Quick access to calendar album',
-    'calendar_album_overviewName': 'Calendar Album Overview',
-    'calendar_album_overviewDescription': 'Display album statistics',
+    'calendar_album_widget_name': 'Calendar Album',
+    'calendar_album_widget_description': 'Quick access to calendar album',
+    'calendar_album_overview_name': 'Calendar Album Overview',
+    'calendar_album_overview_description': 'Display album statistics',
   };
 }

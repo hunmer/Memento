@@ -276,7 +276,7 @@ class _CalendarAlbumWeeklySelectorScreenState
         children: [
           // 顶部标题
           Text(
-            'calendar_album_oneDayOnePhoto'.tr,
+            'calendar_album_one_day_one_photo'.tr,
             style: TextStyle(
               color: accentColor,
               fontSize: 18,
@@ -286,7 +286,7 @@ class _CalendarAlbumWeeklySelectorScreenState
           const SizedBox(height: 12),
           // 周信息
           Text(
-            'calendar_album_weekInfo'.tr,
+            'calendar_album_week_info'.tr,
             style: TextStyle(
               color: accentColor.withOpacity(0.8),
               fontSize: 12,
@@ -337,7 +337,7 @@ class _CalendarAlbumWeeklySelectorScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('calendar_album_configWeeklyAlbumWidget'.tr),
+        title: Text('calendar_album_config_weekly_album_widget'.tr),
         actions: [
           TextButton(
             onPressed: _saveAndFinish,
@@ -361,14 +361,14 @@ class _CalendarAlbumWeeklySelectorScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'calendar_album_configDescription'.tr,
+                            'calendar_album_config_description'.tr,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'calendar_album_configDescriptionText'.tr,
+                            'calendar_album_config_description_text'.tr,
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
@@ -379,7 +379,7 @@ class _CalendarAlbumWeeklySelectorScreenState
 
                   // 主题配置编辑器
                   Text(
-                    'calendar_album_widgetStyle'.tr,
+                    'calendar_album_widget_style'.tr,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
