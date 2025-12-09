@@ -11,6 +11,7 @@ import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart'
 import 'package:Memento/screens/notification_test/notification_test_page.dart';
 import 'package:Memento/screens/super_cupertino_test_screen/super_cupertino_test_screen.dart';
 import 'package:Memento/screens/floating_widget_screen/floating_widget_screen.dart';
+import 'package:Memento/screens/data_selector_test/data_selector_test_screen.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:get/get.dart';
@@ -368,6 +369,9 @@ class AppRoutes extends NavigatorObserver {
       case '/super_cupertino_test':
       case 'super_cupertino_test':
         return _createRoute(const SuperCupertinoTestScreen());
+      case '/data_selector_test':
+      case 'data_selector_test':
+        return _createRoute(const DataSelectorTestScreen());
       case '/chat':
       case 'chat':
         // 支持通过 channelId 参数直接打开指定频道
