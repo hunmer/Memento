@@ -208,4 +208,5 @@ final Map<String, String> openaiTranslationsEn = {
   'openai_noPreset': 'No Preset',
   'openai_promptPresetActiveHint': 'Preset selected, this field will be ignored',
   'openai_promptContent': 'Prompt Content',
+  'openai_searchAgent': 'Search agents',
 };

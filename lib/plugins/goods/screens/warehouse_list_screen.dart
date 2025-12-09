@@ -81,7 +81,7 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
             ),
       enableLargeTitle: true,
       enableSearchBar: true,
-      searchPlaceholder: '搜索仓库名称',
+      searchPlaceholder: 'goods_searchWarehouse'.tr,
       onSearchChanged: (query) {
         setState(() {
           _searchQuery = query;

@@ -73,7 +73,7 @@ class _TimerMainViewState extends State<TimerMainView> {
       largeTitle: '计时器',
       enableLargeTitle: true,
       enableSearchBar: true,
-      searchPlaceholder: '搜索计时器任务...',
+      searchPlaceholder: 'timer_searchPlaceholder'.tr,
       onSearchChanged: _searchTasks,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       backgroundColor: const Color(0xFFF5F6F8),

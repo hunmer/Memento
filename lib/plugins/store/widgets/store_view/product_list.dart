@@ -150,7 +150,7 @@ class _ProductListState extends State<ProductList> {
       searchBody: buildProductGrid(filteredProducts), // 搜索结果页面
       enableLargeTitle: true,
       enableSearchBar: true,
-      searchPlaceholder: '搜索商品名称或描述',
+      searchPlaceholder: 'store_searchProductPlaceholder'.tr,
       onSearchChanged: _handleSearchChanged,
       actions: [
         PopupMenuButton<int>(

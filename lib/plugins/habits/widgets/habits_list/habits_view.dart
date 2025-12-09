@@ -236,7 +236,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
       enableLargeTitle: true,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       enableSearchBar: true, // 启用搜索栏
-      searchPlaceholder: '搜索习惯标题', // 搜索栏占位符
+      searchPlaceholder: 'habits_searchHabitPlaceholder'.tr, // 搜索栏占位符
       onSearchChanged: (query) {
         // 实时搜索，无需等待用户提交
         _filterHabits(query);

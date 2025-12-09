@@ -208,4 +208,5 @@ final Map<String, String> openaiTranslationsZh = {
   'openai_noPreset': '无预设',
   'openai_promptPresetActiveHint': '已选择预设,此字段内容将被忽略',
   'openai_promptContent': 'Prompt 内容',
+  'openai_searchAgent': '搜索智能体',
 };

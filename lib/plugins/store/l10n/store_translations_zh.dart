@@ -140,6 +140,10 @@ const Map<String, String> storeTranslationsZh = {
   // 工具方法
   'store_labelColon': '@label: ',
 
+  // 搜索占位符
+  'store_searchItemPlaceholder': '搜索物品名称或描述',
+  'store_searchProductPlaceholder': '搜索商品名称或描述',
+
   // Home Widget Strings
   'store_widgetName': '积分商店',
   'store_widgetDescription': '快速打开积分商店',

@@ -66,6 +66,7 @@ const Map<String, String> goodsTranslationsZh = {
   'goods_enterUsageNote': '输入使用备注',
   'goods_allWarehouses': '所有仓库',
   'goods_searchGoods': '搜索物品...',
+  'goods_searchWarehouse': '搜索仓库名称',
   'goods_close': '关闭',
   'goods_filter': '筛选',
   'goods_viewAsList': '列表视图',

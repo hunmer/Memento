@@ -114,7 +114,7 @@ class _UserItemsState extends State<UserItems> {
       enableLargeTitle: true,
       // 即使没有物品也启用搜索栏，让用户可以搜索（虽然不会有结果）
       enableSearchBar: true,
-      searchPlaceholder: '搜索物品名称或描述',
+      searchPlaceholder: 'store_searchItemPlaceholder'.tr,
       onSearchChanged: _onSearchChanged,
       // 提供空的搜索结果页面
       searchBody: _buildSearchResultsView(),
@@ -199,7 +199,7 @@ class _UserItemsState extends State<UserItems> {
             ),
       // 启用搜索栏
       enableSearchBar: true,
-      searchPlaceholder: '搜索物品名称或描述',
+      searchPlaceholder: 'store_searchItemPlaceholder'.tr,
       onSearchChanged: _onSearchChanged,
       // 搜索结果页面
       searchBody: _buildSearchResultsView(),

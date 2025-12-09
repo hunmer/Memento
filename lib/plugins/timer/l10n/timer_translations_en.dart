@@ -31,5 +31,6 @@ class TimerTranslationsEn {
     'timer_timerNotePrefix': 'Note: ',
     'timer_continueAdjust': 'Continue Adjust',
     'timer_confirmComplete': 'Confirm Complete',
+    'timer_searchPlaceholder': 'Search timer tasks...',
   };
 }

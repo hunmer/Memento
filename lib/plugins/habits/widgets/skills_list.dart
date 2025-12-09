@@ -113,7 +113,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
       largeTitle: 'habits_skills'.tr,
       enableLargeTitle: true,
       enableSearchBar: true,
-      searchPlaceholder: '搜索技能标题、描述或分组',
+      searchPlaceholder: 'habits_searchSkillPlaceholder'.tr,
       onSearchChanged: _filterSkills,
       onSearchSubmitted: _filterSkills,
       searchBody: _buildSearchResults(),
