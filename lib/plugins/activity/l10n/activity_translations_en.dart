@@ -5,6 +5,12 @@ class ActivityTranslationsEn {
     'activity_name': 'Activity',
     'activity_activityPluginDescription': 'Activity tracking plugin',
 
+    // Widget related
+    'activity_widgetName': 'Activity',
+    'activity_widgetDescription': 'Quick access to activity records',
+    'activity_overviewName': 'Activity Overview',
+    'activity_overviewDescription': 'Display today\'s activity count and duration',
+
     // Navigation and titles
     'activity_timeline': 'Timeline',
     'activity_statistics': 'Statistics',

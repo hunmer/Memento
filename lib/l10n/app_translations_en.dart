@@ -156,4 +156,12 @@ const Map<String, String> appTranslationsEn = {
   'app_feedbackLink': 'https://github.com/hunmer/Memento/issues',
   'app_documentationTitle': 'Documentation',
   'app_documentationLink': 'https://github.com/hunmer/Memento#readme',
+
+  // Home Widget Categories
+  'home_categoryRecord': 'Record',
+  'home_categoryTools': 'Tools',
+  'home_categoryCommunication': 'Communication',
+  'home_categoryFinance': 'Finance',
+  'home_categoryLife': 'Life',
+  'home_loadFailed': 'Load Failed',
 };

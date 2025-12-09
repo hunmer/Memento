@@ -18,17 +18,17 @@ class AgentChatHomeWidgets {
     registry.register(HomeWidget(
       id: 'agent_chat_icon',
       pluginId: 'agent_chat',
-      name: 'Agent Chat',
-      description: 'Quick access to Agent Chat',
+      name: 'agent_chat_widgetName'.tr,
+      description: 'agent_chat_widgetDescription'.tr,
       icon: Icons.chat_bubble_outline,
       color: const Color(0xFF2196F3),
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '工具',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryTools'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.chat_bubble_outline,
-        color: Color(0xFF2196F3),
-        name: 'Agent Chat',
+        color: const Color(0xFF2196F3),
+        name: 'agent_chat_name'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class AgentChatHomeWidgets {
     registry.register(HomeWidget(
       id: 'agent_chat_overview',
       pluginId: 'agent_chat',
-      name: 'Agent Chat Overview',
-      description: 'Display conversation statistics',
+      name: 'agent_chat_overviewName'.tr,
+      description: 'agent_chat_overviewDescription'.tr,
       icon: Icons.analytics_outlined,
       color: const Color(0xFF2196F3),
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '工具',
+      category: 'home_categoryTools'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -70,21 +70,21 @@ class AgentChatHomeWidgets {
       return [
         StatItemData(
           id: 'total_conversations',
-          label: 'Total Conversations', // Default English
+          label: 'agent_chat_totalConversations'.tr,
           value: '${conversations.length}',
           highlight: conversations.isNotEmpty,
           color: const Color(0xFF2196F3),
         ),
         StatItemData(
           id: 'unread_messages',
-          label: 'Unread Messages', // Default English
+          label: 'agent_chat_unreadMessages'.tr,
           value: '$totalUnread',
           highlight: totalUnread > 0,
           color: Colors.orange,
         ),
         StatItemData(
           id: 'total_groups',
-          label: 'Total Groups', // Default English
+          label: 'agent_chat_totalGroups'.tr,
           value: '${controller.groups.length}',
           highlight: controller.groups.isNotEmpty,
           color: Colors.purple,
@@ -117,34 +117,7 @@ class AgentChatHomeWidgets {
       final baseItems = _getAvailableStats(context);
 
       // 使用GetX翻译更新统计项标签
-      final availableItems = baseItems.map((item) {
-        if (item.id == 'total_conversations') {
-          return StatItemData(
-            id: item.id,
-            label: 'agent_chat_totalConversations'.tr,
-            value: item.value,
-            highlight: item.highlight,
-            color: item.color,
-          );
-        } else if (item.id == 'unread_messages') {
-          return StatItemData(
-            id: item.id,
-            label: 'agent_chat_unreadMessages'.tr,
-            value: item.value,
-            highlight: item.highlight,
-            color: item.color,
-          );
-        } else if (item.id == 'total_groups') {
-          return StatItemData(
-            id: item.id,
-            label: 'agent_chat_totalGroups'.tr,
-            value: item.value,
-            highlight: item.highlight,
-            color: item.color,
-          );
-        }
-        return item;
-      }).toList();
+      final availableItems = baseItems;
 
       // 使用通用小组件
       return GenericPluginWidget(
@@ -168,7 +141,7 @@ class AgentChatHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            'agent_chat_loadFailed'.tr,
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

@@ -5,6 +5,12 @@ class ActivityTranslationsZh {
     'activity_name': '活动',
     'activity_activityPluginDescription': '活动记录插件',
 
+    // 小组件相关
+    'activity_widgetName': '活动',
+    'activity_widgetDescription': '快速打开活动记录',
+    'activity_overviewName': '活动概览',
+    'activity_overviewDescription': '显示今日活动数和时长',
+
     // 导航和标题
     'activity_timeline': '时间线',
     'activity_statistics': '统计',

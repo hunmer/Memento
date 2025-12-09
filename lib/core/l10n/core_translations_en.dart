@@ -3,6 +3,13 @@ const Map<String, String> coreTranslationsEn = {
   // Application Startup
   'core_starting': 'Starting...',
 
+  // Navigation
+  'core_back': 'Back',
+  'core_search': 'Search',
+  'core_activity': 'Activity',
+  'core_tag': 'Tag',
+  'core_comment': 'Comment',
+
   // Action Executor
   'core_inputJavaScriptCode': 'Input JavaScript Code',
   'core_cancel': 'Cancel',

@@ -20,17 +20,17 @@ class NotesHomeWidgets {
     registry.register(HomeWidget(
       id: 'notes_icon',
       pluginId: 'notes',
-      name: '笔记',
-      description: '快速打开笔记',
+      name: 'notes_widgetName'.tr,
+      description: 'notes_widgetDescription'.tr,
       icon: Icons.note_alt_outlined,
       color: _notesColor,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '记录',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryRecord'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.note_alt_outlined,
         color: _notesColor,
-        name: '笔记',
+        name: 'notes_widgetName'.tr,
       ),
     ));
 
@@ -38,13 +38,13 @@ class NotesHomeWidgets {
     registry.register(HomeWidget(
       id: 'notes_overview',
       pluginId: 'notes',
-      name: '笔记概览',
-      description: '显示总笔记数和近期笔记数',
+      name: 'notes_overviewName'.tr,
+      description: 'notes_overviewDescription'.tr,
       icon: Icons.notes,
       color: _notesColor,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '记录',
+      category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -122,7 +122,7 @@ class NotesHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

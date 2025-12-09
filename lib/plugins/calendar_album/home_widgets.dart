@@ -20,17 +20,17 @@ class CalendarAlbumHomeWidgets {
     registry.register(HomeWidget(
       id: 'calendar_album_icon',
       pluginId: 'calendar_album',
-      name: '日历相册',
-      description: '快速打开日历相册',
+      name: 'calendar_album_widgetName'.tr,
+      description: 'calendar_album_widgetDescription'.tr,
       icon: Icons.notes_rounded,
       color: _pluginColor,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '记录',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryRecord'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.notes_rounded,
         color: _pluginColor,
-        name: '日记相册',
+        name: 'calendar_album_widgetName'.tr,
       ),
     ));
 
@@ -38,13 +38,13 @@ class CalendarAlbumHomeWidgets {
     registry.register(HomeWidget(
       id: 'calendar_album_overview',
       pluginId: 'calendar_album',
-      name: '日历相册概览',
-      description: '显示日记和标签统计',
+      name: 'calendar_album_overviewName'.tr,
+      description: 'calendar_album_overviewDescription'.tr,
       icon: Icons.calendar_today,
       color: _pluginColor,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '记录',
+      category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -138,7 +138,7 @@ class CalendarAlbumHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

@@ -1,6 +1,7 @@
 /// NFC插件中文翻译
 const Map<String, String> nfcTranslationsZh = {
   // 基础信息
+  'nfc_pluginName': 'NFC控制器',
   'nfc_pleaseBringPhoneNearNFC': '请将手机靠近NFC标签',
   'nfc_writeNFCData': '写入NFC数据',
   'nfc_cancel': '取消',

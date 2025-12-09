@@ -18,17 +18,17 @@ class ContactHomeWidgets {
     registry.register(HomeWidget(
       id: 'contact_icon',
       pluginId: 'contact',
-      name: '联系人',
-      description: '快速打开联系人管理',
+      name: 'contact_widgetName'.tr,
+      description: 'contact_widgetDescription'.tr,
       icon: Icons.contacts,
       color: Colors.deepPurple,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '工具',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryTool'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.contacts,
         color: Colors.deepPurple,
-        name: '联系人',
+        name: 'contact_widgetName'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class ContactHomeWidgets {
     registry.register(HomeWidget(
       id: 'contact_overview',
       pluginId: 'contact',
-      name: '联系人概览',
-      description: '显示联系人总数和最近联系统计',
+      name: 'contact_overviewName'.tr,
+      description: 'contact_overviewDescription'.tr,
       icon: Icons.people,
       color: Colors.deepPurple,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '工具',
+      category: 'home_categoryTool'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -148,7 +148,7 @@ class ContactHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

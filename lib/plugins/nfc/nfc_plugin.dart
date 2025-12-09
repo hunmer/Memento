@@ -614,6 +614,6 @@ class NfcPlugin extends PluginBase {
 
   @override
   String? getPluginName(context) {
-    return 'NFC控制器';
+    return 'nfc_pluginName'.tr;
   }
 }

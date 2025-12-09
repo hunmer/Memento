@@ -134,7 +134,8 @@ const Map<String, String> agentChatTranslationsZh = {
   'agent_chat_emptyConversationHistory': '空白的对话历史',
 
   // Widget Home Strings
-  'agent_chat_name': 'Agent Chat',
+  'agent_chat_pluginName': 'AI 对话',
+  'agent_chat_name': 'AI 对话',
   'agent_chat_description': '快速打开 Agent Chat',
   'agent_chat_overview': 'Agent Chat 概览',
   'agent_chat_overviewDescription': '显示会话统计信息',

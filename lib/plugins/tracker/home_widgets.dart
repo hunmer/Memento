@@ -18,17 +18,17 @@ class TrackerHomeWidgets {
     registry.register(HomeWidget(
       id: 'tracker_icon',
       pluginId: 'tracker',
-      name: 'Goal Tracker',
-      description: 'Quick access to Goal Tracker',
+      name: 'tracker_widgetName'.tr,
+      description: 'tracker_widgetDescription'.tr,
       icon: Icons.track_changes,
       color: Colors.red,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '记录',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryRecord'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.track_changes,
         color: Colors.red,
-        name: 'Goal Tracker',
+        name: 'tracker_name'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class TrackerHomeWidgets {
     registry.register(HomeWidget(
       id: 'tracker_overview',
       pluginId: 'tracker',
-      name: 'Goal Tracker Overview',
-      description: 'Display today and monthly completion statistics',
+      name: 'tracker_overviewName'.tr,
+      description: 'tracker_overviewDescription'.tr,
       icon: Icons.analytics_outlined,
       color: Colors.red,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '记录',
+      category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -122,7 +122,7 @@ class TrackerHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            'tracker_loadFailed'.tr,
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

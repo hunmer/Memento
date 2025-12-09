@@ -18,17 +18,17 @@ class HabitsHomeWidgets {
     registry.register(HomeWidget(
       id: 'habits_icon',
       pluginId: 'habits',
-      name: '习惯追踪',
-      description: '快速打开习惯追踪',
+      name: 'habits_widgetName'.tr,
+      description: 'habits_widgetDescription'.tr,
       icon: Icons.auto_awesome,
       color: Colors.amber,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '记录',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryRecord'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.auto_awesome,
         color: Colors.amber,
-        name: '习惯',
+        name: 'habits_widgetName'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class HabitsHomeWidgets {
     registry.register(HomeWidget(
       id: 'habits_overview',
       pluginId: 'habits',
-      name: '习惯概览',
-      description: '显示习惯和技能统计',
+      name: 'habits_overviewName'.tr,
+      description: 'habits_overviewDescription'.tr,
       icon: Icons.trending_up,
       color: Colors.amber,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '记录',
+      category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -133,7 +133,7 @@ class HabitsHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

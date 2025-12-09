@@ -18,13 +18,13 @@ class DayHomeWidgets {
     registry.register(HomeWidget(
       id: 'day_icon',
       pluginId: 'day',
-      name: '纪念日',
-      description: '快速打开纪念日',
+      name: 'day_widgetName'.tr,
+      description: 'day_widgetDescription'.tr,
       icon: Icons.event_outlined,
       color: Colors.black87,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '记录',
+      category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildIconWidget(context),
     ));
 
@@ -32,13 +32,13 @@ class DayHomeWidgets {
     registry.register(HomeWidget(
       id: 'day_overview',
       pluginId: 'day',
-      name: '纪念日概览',
-      description: '显示纪念日总数和即将到来的事件',
+      name: 'day_overviewName'.tr,
+      description: 'day_overviewDescription'.tr,
       icon: Icons.event,
       color: Colors.black87,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '记录',
+      category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -75,10 +75,10 @@ class DayHomeWidgets {
 
   /// 构建 1x1 图标组件
   static Widget _buildIconWidget(BuildContext context) {
-    return const GenericIconWidget(
+    return GenericIconWidget(
       icon: Icons.event_outlined,
       color: Colors.black87,
-      name: '纪念日',
+      name: 'day_widgetName'.tr,
     );
   }
 
@@ -125,7 +125,7 @@ class DayHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
