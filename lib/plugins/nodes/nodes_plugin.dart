@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'controllers/nodes_controller.dart';
 import 'screens/notebooks_screen.dart';
 import 'models/node.dart';
@@ -110,6 +111,9 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
+
+    // 注册数据选择器
+    _registerDataSelectors();
   }
 
   @override
@@ -1076,5 +1080,73 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
         );
       },
     );
+  }
+
+  // ========== 数据选择器 ==========
+
+  void _registerDataSelectors() {
+    pluginDataSelectorService.registerSelector(SelectorDefinition(
+      id: 'nodes.node',
+      pluginId: id,
+      name: '选择节点',
+      icon: icon,
+      color: color,
+      searchable: true,
+      selectionMode: SelectionMode.single,
+      steps: [
+        SelectorStep(
+          id: 'node',
+          title: '选择节点',
+          viewType: SelectorViewType.list,
+          isFinalStep: true,
+          dataLoader: (_) async {
+            // 获取所有笔记本的所有节点（扁平列表）
+            final List<SelectableItem> items = [];
+
+            for (var notebook in _controller.notebooks) {
+              // 递归获取所有节点
+              void addNodesRecursively(List<Node> nodes, String notebookTitle, String parentPath) {
+                for (var node in nodes) {
+                  // 构建节点路径
+                  final nodePath = parentPath.isEmpty
+                      ? node.title
+                      : '$parentPath / ${node.title}';
+
+                  items.add(SelectableItem(
+                    id: '${notebook.id}:${node.id}',
+                    title: node.title,
+                    subtitle: '$notebookTitle · $nodePath',
+                    icon: Icons.subdirectory_arrow_right,
+                    rawData: {
+                      'notebookId': notebook.id,
+                      'notebookTitle': notebook.title,
+                      'nodeId': node.id,
+                      'node': node,
+                    },
+                  ));
+
+                  // 递归添加子节点
+                  if (node.children.isNotEmpty) {
+                    addNodesRecursively(node.children, notebookTitle, nodePath);
+                  }
+                }
+              }
+
+              addNodesRecursively(notebook.nodes, notebook.title, '');
+            }
+
+            return items;
+          },
+          searchFilter: (items, query) {
+            if (query.isEmpty) return items;
+            final lowerQuery = query.toLowerCase();
+            return items.where((item) =>
+              item.title.toLowerCase().contains(lowerQuery) ||
+              (item.subtitle?.toLowerCase().contains(lowerQuery) ?? false)
+            ).toList();
+          },
+        ),
+      ],
+    ));
   }
 }

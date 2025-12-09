@@ -8,6 +8,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'models/checkin_item.dart';
 import 'screens/checkin_list_screen/checkin_list_screen.dart';
@@ -369,11 +370,53 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
+
+    // 注册数据选择器
+    _registerDataSelectors();
   }
 
   @override
   Widget buildMainView(BuildContext context) {
     return const CheckinMainView();
+  }
+
+  // 注册数据选择器
+  void _registerDataSelectors() {
+    pluginDataSelectorService.registerSelector(SelectorDefinition(
+      id: 'checkin.item',
+      pluginId: id,
+      name: '选择签到项',
+      icon: icon,
+      color: color,
+      searchable: true,
+      selectionMode: SelectionMode.single,
+      steps: [
+        SelectorStep(
+          id: 'item',
+          title: '选择签到项',
+          viewType: SelectorViewType.grid,
+          isFinalStep: true,
+          dataLoader: (_) async {
+            return _checkinItems.map((item) => SelectableItem(
+              id: item.id,
+              title: item.name,
+              subtitle: item.group,
+              icon: item.icon,
+              color: item.color,
+              rawData: item,
+            )).toList();
+          },
+          searchFilter: (items, query) {
+            if (query.isEmpty) return items;
+            final lowerQuery = query.toLowerCase();
+            return items.where((item) =>
+              item.title.toLowerCase().contains(lowerQuery) ||
+              (item.subtitle?.toLowerCase().contains(lowerQuery) ?? false)
+            ).toList();
+          },
+        ),
+      ],
+    ));
   }
 
   // 添加打卡项目

@@ -12,6 +12,7 @@ import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/widgets/point_settings_view.dart';
 import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/events/point_award_event.dart';
+import 'package:Memento/core/services/plugin_data_selector/index.dart';
 
 /// 物品兑换插件
 class StorePlugin extends BasePlugin with JSBridgePlugin {
@@ -90,6 +91,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       _pointAwardEvent = PointAwardEvent(this);
 
       _isInitialized = true;
+
+      // 注册数据选择器
+      _registerDataSelectors();
 
       // 注册 JS API（最后一步）
       await registerJSAPI();
@@ -943,5 +947,55 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     } catch (e) {
       return jsonEncode(null);
     }
+  }
+
+  // ==================== 数据选择器注册 ====================
+
+  /// 注册数据选择器
+  void _registerDataSelectors() {
+    final selectorService = pluginDataSelectorService;
+
+    // 注册商品选择器
+    selectorService.registerSelector(SelectorDefinition(
+      id: 'store.product',
+      pluginId: id,
+      name: '选择商品',
+      icon: icon,
+      color: color,
+      searchable: true,
+      selectionMode: SelectionMode.single,
+      steps: [
+        SelectorStep(
+          id: 'product',
+          title: '选择商品',
+          viewType: SelectorViewType.grid,
+          isFinalStep: true,
+          dataLoader: (_) async {
+            return controller.products.map((product) {
+              // 构建副标题：价格 + 库存
+              final subtitle = '${product.price} 积分 · 库存: ${product.stock}';
+
+              return SelectableItem(
+                id: product.id,
+                title: product.name,
+                subtitle: subtitle,
+                icon: Icons.shopping_bag,
+                rawData: product,
+              );
+            }).toList();
+          },
+          searchFilter: (items, query) {
+            if (query.isEmpty) return items;
+            final lowerQuery = query.toLowerCase();
+            return items.where((item) {
+              final matchesTitle = item.title.toLowerCase().contains(lowerQuery);
+              final product = item.rawData as Product;
+              final matchesDescription = product.description.toLowerCase().contains(lowerQuery);
+              return matchesTitle || matchesDescription;
+            }).toList();
+          },
+        ),
+      ],
+    ));
   }
 }

@@ -4,6 +4,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'controllers/notes_controller.dart';
 import 'screens/notes_screen.dart';
 
@@ -45,6 +46,9 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
+
+    // 注册数据选择器
+    _registerDataSelectors();
   }
 
   // 获取总笔记数
@@ -830,5 +834,83 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       }
       return jsonEncode(matchedFolders.first.toJson());
     }
+  }
+
+  // ==================== 数据选择器注册 ====================
+
+  void _registerDataSelectors() {
+    pluginDataSelectorService.registerSelector(SelectorDefinition(
+      id: 'notes.note',
+      pluginId: id,
+      name: '选择笔记',
+      icon: icon,
+      color: color,
+      searchable: true,
+      selectionMode: SelectionMode.single,
+      steps: [
+        SelectorStep(
+          id: 'note',
+          title: '选择笔记',
+          viewType: SelectorViewType.list,
+          isFinalStep: true,
+          dataLoader: (_) async {
+            if (!_isInitialized) return [];
+
+            // 获取所有笔记
+            final allNotes = controller.searchNotes(query: '');
+
+            // 构建文件夹路径映射
+            final folderPaths = <String, String>{};
+            for (final folder in controller.getAllFolders()) {
+              folderPaths[folder.id] = _buildFolderPath(folder.id);
+            }
+
+            return allNotes.map((note) {
+              final folderPath = folderPaths[note.folderId] ?? '';
+              return SelectableItem(
+                id: note.id,
+                title: note.title,
+                subtitle: folderPath.isNotEmpty ? '📁 $folderPath' : null,
+                icon: Icons.note_outlined,
+                rawData: note,
+              );
+            }).toList();
+          },
+          searchFilter: (items, query) {
+            if (query.isEmpty) return items;
+            final lowerQuery = query.toLowerCase();
+            return items.where((item) {
+              return item.title.toLowerCase().contains(lowerQuery) ||
+                     (item.subtitle?.toLowerCase().contains(lowerQuery) ?? false);
+            }).toList();
+          },
+        ),
+      ],
+    ));
+  }
+
+  /// 构建文件夹完整路径（用于显示在副标题）
+  String _buildFolderPath(String folderId) {
+    final folder = controller.getFolder(folderId);
+    if (folder == null || folder.id == 'root') return '';
+
+    final pathParts = <String>[];
+    var currentFolder = folder;
+
+    while (currentFolder.id != 'root') {
+      pathParts.insert(0, currentFolder.name);
+      if (currentFolder.parentId != null) {
+        final parent = controller.getFolder(currentFolder.parentId!);
+        if (parent != null) {
+          currentFolder = parent;
+        } else {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    return pathParts.join(' / ');
   }
 }

@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'controls/bill_controller.dart';
 import 'screens/bill_list_screen_supercupertino.dart';
 import 'screens/bill_stats_screen_supercupertino.dart';
@@ -68,6 +69,9 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
+
+    // 注册数据选择器
+    _registerDataSelectors();
   }
 
   @override
@@ -1141,6 +1145,117 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     }
 
     return jsonEncode(billsJson);
+  }
+
+  // ==================== 数据选择器注册 ====================
+
+  /// 注册数据选择器
+  void _registerDataSelectors() {
+    // 1. 选择账户（单级）
+    pluginDataSelectorService.registerSelector(SelectorDefinition(
+      id: 'bill.account',
+      pluginId: id,
+      name: '选择账户',
+      icon: icon,
+      color: color,
+      searchable: true,
+      selectionMode: SelectionMode.single,
+      steps: [
+        SelectorStep(
+          id: 'account',
+          title: '选择账户',
+          viewType: SelectorViewType.list,
+          isFinalStep: true,
+          dataLoader: (_) async {
+            return _billController.accounts.map((account) => SelectableItem(
+              id: account.id,
+              title: account.title,
+              subtitle: '余额: ¥${account.totalAmount.toStringAsFixed(2)}',
+              icon: account.icon,
+              color: account.backgroundColor,
+              rawData: account,
+            )).toList();
+          },
+          searchFilter: (items, query) {
+            if (query.isEmpty) return items;
+            final lowerQuery = query.toLowerCase();
+            return items.where((item) {
+              return item.title.toLowerCase().contains(lowerQuery);
+            }).toList();
+          },
+        ),
+      ],
+    ));
+
+    // 2. 选择账单记录（两级：账户 → 账单）
+    pluginDataSelectorService.registerSelector(SelectorDefinition(
+      id: 'bill.record',
+      pluginId: id,
+      name: '选择账单记录',
+      icon: Icons.receipt_long,
+      color: color,
+      searchable: true,
+      selectionMode: SelectionMode.single,
+      steps: [
+        // 第一步：选择账户
+        SelectorStep(
+          id: 'account',
+          title: '选择账户',
+          viewType: SelectorViewType.list,
+          isFinalStep: false,
+          dataLoader: (_) async {
+            return _billController.accounts.map((account) => SelectableItem(
+              id: account.id,
+              title: account.title,
+              subtitle: '余额: ¥${account.totalAmount.toStringAsFixed(2)} | ${account.bills.length} 条账单',
+              icon: account.icon,
+              color: account.backgroundColor,
+              rawData: account,
+            )).toList();
+          },
+          searchFilter: (items, query) {
+            if (query.isEmpty) return items;
+            final lowerQuery = query.toLowerCase();
+            return items.where((item) {
+              return item.title.toLowerCase().contains(lowerQuery);
+            }).toList();
+          },
+        ),
+        // 第二步：选择账单
+        SelectorStep(
+          id: 'bill',
+          title: '选择账单',
+          viewType: SelectorViewType.list,
+          isFinalStep: true,
+          dataLoader: (previousSelections) async {
+            final account = previousSelections['account'] as Account;
+            // 按日期倒序排列
+            final sortedBills = List<Bill>.from(account.bills)
+              ..sort((a, b) => b.date.compareTo(a.date));
+
+            return sortedBills.map((bill) => SelectableItem(
+              id: bill.id,
+              title: bill.title,
+              subtitle: '${bill.category} | ${bill.date.toString().substring(0, 10)} | ¥${bill.amount.toStringAsFixed(2)}',
+              icon: bill.icon,
+              color: bill.iconColor,
+              rawData: bill,
+            )).toList();
+          },
+          searchFilter: (items, query) {
+            if (query.isEmpty) return items;
+            final lowerQuery = query.toLowerCase();
+            return items.where((item) {
+              final bill = item.rawData as Bill;
+              return item.title.toLowerCase().contains(lowerQuery) ||
+                  bill.category.toLowerCase().contains(lowerQuery) ||
+                  bill.note.toLowerCase().contains(lowerQuery);
+            }).toList();
+          },
+          emptyText: '该账户暂无账单记录',
+        ),
+      ],
+    ));
   }
 }
 
