@@ -66,6 +66,7 @@ const Map<String, String> goodsTranslationsEn = {
   'goods_enterUsageNote': 'Enter usage note',
   'goods_allWarehouses': 'All Warehouses',
   'goods_searchGoods': 'Search goods...',
+  'goods_searchWarehouse': 'Search warehouse name',
   'goods_close': 'Close',
   'goods_filter': 'Filter',
   'goods_viewAsList': 'View as list',

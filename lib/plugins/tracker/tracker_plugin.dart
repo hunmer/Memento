@@ -52,7 +52,7 @@ class _TrackerMainViewState extends State<TrackerMainView> {
       largeTitle: 'tracker_goalTracking'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       enableSearchBar: true,
-      searchPlaceholder: '搜索目标...',
+      searchPlaceholder: 'tracker_searchPlaceholder'.tr,
       onSearchChanged: _onSearchChanged,
       actions: [
         OpenContainer(

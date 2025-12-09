@@ -148,7 +148,7 @@ class _AgentListScreenState extends State<AgentListScreen> {
 
       // 启用搜索栏
       enableSearchBar: true,
-      searchPlaceholder: '搜索智能体',
+      searchPlaceholder: 'openai_searchAgent'.tr,
       onSearchChanged: _onSearchChanged,
 
       // 启用搜索过滤器

@@ -82,5 +82,6 @@ class TrackerTranslationsZh {
     'tracker_progressBarColor': '进度条颜色',
     'tracker_configured': '已配置',
     'tracker_configurationFailed': '配置失败',
+    'tracker_searchPlaceholder': '搜索目标...',
   };
 }

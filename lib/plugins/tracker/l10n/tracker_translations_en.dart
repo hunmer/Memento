@@ -84,5 +84,6 @@ class TrackerTranslationsEn {
     'tracker_progressBarColor': 'Progress Bar Color',
     'tracker_configured': 'Configured',
     'tracker_configurationFailed': 'Configuration failed',
+    'tracker_searchPlaceholder': 'Search goals...',
   };
 }

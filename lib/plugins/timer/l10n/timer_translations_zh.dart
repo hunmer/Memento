@@ -31,5 +31,6 @@ class TimerTranslationsZh {
     'timer_timerNotePrefix': '备注:',
     'timer_continueAdjust': '继续调整',
     'timer_confirmComplete': '确认完成',
+    'timer_searchPlaceholder': '搜索计时器任务...',
   };
 }
