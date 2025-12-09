@@ -18,17 +18,17 @@ class CheckinHomeWidgets {
     registry.register(HomeWidget(
       id: 'checkin_icon',
       pluginId: 'checkin',
-      name: '打卡',
-      description: '快速打开打卡管理',
+      name: 'checkin_widgetName'.tr,
+      description: 'checkin_widgetDescription'.tr,
       icon: Icons.checklist,
       color: Colors.teal,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '记录',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryRecord'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.checklist,
         color: Colors.teal,
-        name: '签到',
+        name: 'checkin_widgetName'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class CheckinHomeWidgets {
     registry.register(HomeWidget(
       id: 'checkin_overview',
       pluginId: 'checkin',
-      name: '打卡概览',
-      description: '显示今日打卡和总打卡统计',
+      name: 'checkin_overviewName'.tr,
+      description: 'checkin_overviewDescription'.tr,
       icon: Icons.checklist_rtl,
       color: Colors.teal,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '记录',
+      category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -122,7 +122,7 @@ class CheckinHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

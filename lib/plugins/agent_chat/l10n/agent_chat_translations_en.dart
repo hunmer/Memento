@@ -134,6 +134,7 @@ const Map<String, String> agentChatTranslationsEn = {
   'agent_chat_emptyConversationHistory': 'Empty conversation history',
 
   // Widget Home Strings
+  'agent_chat_pluginName': 'Agent Chat',
   'agent_chat_name': 'Agent Chat',
   'agent_chat_description': 'Quick access to Agent Chat',
   'agent_chat_overview': 'Agent Chat Overview',

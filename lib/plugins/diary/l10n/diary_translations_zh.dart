@@ -5,6 +5,12 @@ class DiaryTranslationsZh {
     'diary_name': '日记',
     'diary_diaryPluginDescription': '日记管理插件',
 
+    // 小组件相关
+    'diary_widgetName': '日记',
+    'diary_widgetDescription': '快速打开日记',
+    'diary_overviewName': '日记概览',
+    'diary_overviewDescription': '显示今日字数和本月进度',
+
     // 统计信息
     'diary_todayWordCount': '今日文字数',
     'diary_monthWordCount': '本月文字数',

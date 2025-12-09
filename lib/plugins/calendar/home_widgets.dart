@@ -18,17 +18,17 @@ class CalendarHomeWidgets {
     registry.register(HomeWidget(
       id: 'calendar_icon',
       pluginId: 'calendar',
-      name: '日历',
-      description: '快速打开日历',
+      name: 'calendar_widgetName'.tr,
+      description: 'calendar_widgetDescription'.tr,
       icon: Icons.calendar_month,
       color: const Color.fromARGB(255, 211, 91, 91),
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '工具',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryTool'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.calendar_month,
-        color: Color.fromARGB(255, 211, 91, 91),
-        name: '日历',
+        color: const Color.fromARGB(255, 211, 91, 91),
+        name: 'calendar_widgetName'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class CalendarHomeWidgets {
     registry.register(HomeWidget(
       id: 'calendar_overview',
       pluginId: 'calendar',
-      name: '日历概览',
-      description: '显示活动数量、7天活动和过期活动统计',
+      name: 'calendar_overviewName'.tr,
+      description: 'calendar_overviewDescription'.tr,
       icon: Icons.calendar_today,
       color: const Color.fromARGB(255, 211, 91, 91),
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '工具',
+      category: 'home_categoryTool'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -141,7 +141,7 @@ class CalendarHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

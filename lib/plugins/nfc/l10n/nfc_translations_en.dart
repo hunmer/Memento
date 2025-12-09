@@ -1,6 +1,7 @@
 /// NFC plugin English translations
 const Map<String, String> nfcTranslationsEn = {
   // Basic info
+  'nfc_pluginName': 'NFC Controller',
   'nfc_pleaseBringPhoneNearNFC': 'Please bring phone near NFC tag',
   'nfc_writeNFCData': 'Write NFC Data',
   'nfc_cancel': 'Cancel',

@@ -3,6 +3,13 @@ const Map<String, String> coreTranslationsZh = {
   // Application Startup
   'core_starting': '正在启动...',
 
+  // Navigation
+  'core_back': '返回',
+  'core_search': '搜索',
+  'core_activity': '活动',
+  'core_tag': '标签',
+  'core_comment': '评论',
+
   // Action Executor
   'core_inputJavaScriptCode': '输入JavaScript代码',
   'core_cancel': '取消',

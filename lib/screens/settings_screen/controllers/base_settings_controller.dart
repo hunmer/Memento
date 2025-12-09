@@ -45,6 +45,8 @@ class BaseSettingsController extends ChangeNotifier {
     if (result != null) {
       await globalConfigManager.setLocale(result);
       _currentLocale = result;
+      // 使用 GetX 更新当前显示语言
+      Get.updateLocale(result);
       notifyListeners();
       // 重启应用以应用语言设置
       restartApplication();

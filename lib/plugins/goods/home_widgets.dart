@@ -20,17 +20,17 @@ class GoodsHomeWidgets {
     registry.register(HomeWidget(
       id: 'goods_icon',
       pluginId: 'goods',
-      name: '物品',
-      description: '快速打开物品管理',
+      name: 'goods_widgetName'.tr,
+      description: 'goods_widgetDescription'.tr,
       icon: Icons.inventory_2,
       color: _goodsColor,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '记录',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryRecord'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.inventory_2,
         color: _goodsColor,
-        name: '物品',
+        name: 'goods_widgetName'.tr,
       ),
     ));
 
@@ -38,13 +38,13 @@ class GoodsHomeWidgets {
     registry.register(HomeWidget(
       id: 'goods_overview',
       pluginId: 'goods',
-      name: '物品概览',
-      description: '显示物品数量、价值和使用情况',
+      name: 'goods_overviewName'.tr,
+      description: 'goods_overviewDescription'.tr,
       icon: Icons.dashboard,
       color: _goodsColor,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '记录',
+      category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -129,7 +129,7 @@ class GoodsHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

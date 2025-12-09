@@ -18,17 +18,17 @@ class TimerHomeWidgets {
     registry.register(HomeWidget(
       id: 'timer_icon',
       pluginId: 'timer',
-      name: '计时器',
-      description: '快速打开计时器',
+      name: 'timer_widgetName'.tr,
+      description: 'timer_widgetDescription'.tr,
       icon: Icons.timer,
       color: Colors.blueGrey,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '工具',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryTools'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.timer,
         color: Colors.blueGrey,
-        name: '计时器',
+        name: 'timer_name'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class TimerHomeWidgets {
     registry.register(HomeWidget(
       id: 'timer_overview',
       pluginId: 'timer',
-      name: '计时器概览',
-      description: '显示计时器任务统计',
+      name: 'timer_overviewName'.tr,
+      description: 'timer_overviewDescription'.tr,
       icon: Icons.timer_outlined,
       color: Colors.blueGrey,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '工具',
+      category: 'home_categoryTools'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -61,13 +61,13 @@ class TimerHomeWidgets {
       return [
         StatItemData(
           id: 'total_count',
-          label: '总计时器',
+          label: 'timer_totalTimer'.tr,
           value: '$totalCount',
           highlight: false,
         ),
         StatItemData(
           id: 'running_count',
-          label: '运行中',
+          label: 'timer_running'.tr,
           value: '$runningCount',
           highlight: runningCount > 0,
           color: Colors.blueGrey,
@@ -121,7 +121,7 @@ class TimerHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

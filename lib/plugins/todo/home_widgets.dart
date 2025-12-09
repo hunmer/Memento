@@ -18,17 +18,17 @@ class TodoHomeWidgets {
     registry.register(HomeWidget(
       id: 'todo_icon',
       pluginId: 'todo',
-      name: '待办事项',
-      description: '快速打开待办事项',
+      name: 'todo_widgetName'.tr,
+      description: 'todo_widgetDescription'.tr,
       icon: Icons.check_box,
       color: Colors.blue,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '工具',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryTools'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.check_box,
         color: Colors.blue,
-        name: '任务',
+        name: 'todo_name'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class TodoHomeWidgets {
     registry.register(HomeWidget(
       id: 'todo_overview',
       pluginId: 'todo',
-      name: '待办概览',
-      description: '显示任务数量统计',
+      name: 'todo_overviewName'.tr,
+      description: 'todo_overviewDescription'.tr,
       icon: Icons.check_box_outlined,
       color: Colors.blue,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '工具',
+      category: 'home_categoryTools'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -60,13 +60,13 @@ class TodoHomeWidgets {
       return [
         StatItemData(
           id: 'total_tasks',
-          label: '总任务数',
+          label: 'todo_totalTasks'.tr,
           value: '$totalTasks',
           highlight: false,
         ),
         StatItemData(
           id: 'weekly_tasks',
-          label: '七日任务数',
+          label: 'todo_weeklyTasks'.tr,
           value: '$weeklyTasks',
           highlight: weeklyTasks > 0,
           color: Colors.orange,
@@ -120,7 +120,7 @@ class TodoHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

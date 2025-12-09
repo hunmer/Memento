@@ -18,19 +18,19 @@ class DiaryHomeWidgets {
     registry.register(HomeWidget(
       id: 'diary_icon',
       pluginId: 'diary',
-      name: '日记',
-      description: '快速打开日记',
+      name: 'diary_widgetName'.tr,
+      description: 'diary_widgetDescription'.tr,
       icon: Icons.book,
       color: Colors.indigo,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '记录',
+      category: 'home_categoryRecord'.tr,
         builder:
             (context, config) =>
-                const GenericIconWidget(
+                GenericIconWidget(
                   icon: Icons.book,
                   color: Colors.indigo,
-                  name: '日记',
+                  name: 'diary_widgetName'.tr,
                 ),
     ));
 
@@ -38,13 +38,13 @@ class DiaryHomeWidgets {
     registry.register(HomeWidget(
       id: 'diary_overview',
       pluginId: 'diary',
-      name: '日记概览',
-      description: '显示今日字数和本月进度',
+      name: 'diary_overviewName'.tr,
+      description: 'diary_overviewDescription'.tr,
       icon: Icons.menu_book,
       color: Colors.indigo,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '记录',
+      category: 'home_categoryRecord'.tr,
         builder: (context, config) => _buildOverviewWidget(context, config),
         availableStatsProvider: _getAvailableStats,
     ));
@@ -133,7 +133,7 @@ class DiaryHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

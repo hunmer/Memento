@@ -18,17 +18,17 @@ class NodesHomeWidgets {
     registry.register(HomeWidget(
       id: 'nodes_icon',
       pluginId: 'nodes',
-      name: '节点',
-      description: '快速打开节点笔记本',
+      name: 'nodes_widgetName'.tr,
+      description: 'nodes_widgetDescription'.tr,
       icon: Icons.account_tree,
       color: Colors.amber,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '工具',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryTools'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.account_tree,
         color: Colors.amber,
-        name: '节点',
+        name: 'nodes_name'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class NodesHomeWidgets {
     registry.register(HomeWidget(
       id: 'nodes_overview',
       pluginId: 'nodes',
-      name: '节点概览',
-      description: '显示笔记本、节点和待办统计',
+      name: 'nodes_overviewName'.tr,
+      description: 'nodes_overviewDescription'.tr,
       icon: Icons.dashboard,
       color: Colors.amber,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '工具',
+      category: 'home_categoryTools'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -68,20 +68,20 @@ class NodesHomeWidgets {
       return [
         StatItemData(
           id: 'notebooks_count',
-          label: '笔记本数',
+          label: 'nodes_notebooksCount'.tr,
           value: '$notebookCount',
           highlight: notebookCount > 0,
           color: Colors.amber,
         ),
         StatItemData(
           id: 'nodes_count',
-          label: '节点数',
+          label: 'nodes_nodesCount'.tr,
           value: '$totalNodes',
           highlight: false,
         ),
         StatItemData(
           id: 'todo_nodes_count',
-          label: '待办节点',
+          label: 'nodes_todoNodes'.tr,
           value: '$todoNodes',
           highlight: todoNodes > 0,
           color: Colors.orange,
@@ -157,7 +157,7 @@ class NodesHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

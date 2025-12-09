@@ -18,17 +18,17 @@ class ActivityHomeWidgets {
     registry.register(HomeWidget(
       id: 'activity_icon',
       pluginId: 'activity',
-      name: '活动',
-      description: '快速打开活动记录',
+      name: 'activity_widgetName'.tr,
+      description: 'activity_widgetDescription'.tr,
       icon: Icons.timeline,
       color: Colors.pink,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '记录',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryRecord'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.timeline,
         color: Colors.pink,
-        name: '活动',
+        name: 'activity_widgetName'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class ActivityHomeWidgets {
     registry.register(HomeWidget(
       id: 'activity_overview',
       pluginId: 'activity',
-      name: '活动概览',
-      description: '显示今日活动数和时长',
+      name: 'activity_overviewName'.tr,
+      description: 'activity_overviewDescription'.tr,
       icon: Icons.access_time,
       color: Colors.pink,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '记录',
+      category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -128,7 +128,7 @@ class ActivityHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

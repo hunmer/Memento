@@ -18,17 +18,17 @@ class BillHomeWidgets {
     registry.register(HomeWidget(
       id: 'bill_icon',
       pluginId: 'bill',
-      name: '账单',
-      description: '快速打开账单管理',
+      name: 'bill_widgetName'.tr,
+      description: 'bill_widgetDescription'.tr,
       icon: Icons.account_balance_wallet,
       color: Colors.green,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '记录',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryRecord'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.account_balance_wallet,
         color: Colors.green,
-        name: '账单',
+        name: 'bill_widgetName'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class BillHomeWidgets {
     registry.register(HomeWidget(
       id: 'bill_overview',
       pluginId: 'bill',
-      name: '账单概览',
-      description: '显示今日和本月财务统计',
+      name: 'bill_overviewName'.tr,
+      description: 'bill_overviewDescription'.tr,
       icon: Icons.account_balance_wallet_outlined,
       color: Colors.green,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '记录',
+      category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -127,7 +127,7 @@ class BillHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

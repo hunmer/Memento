@@ -5,6 +5,12 @@ class DiaryTranslationsEn {
     'diary_name': 'Diary',
     'diary_diaryPluginDescription': 'Diary management plugin',
 
+    // Widget related
+    'diary_widgetName': 'Diary',
+    'diary_widgetDescription': 'Quick access to diary',
+    'diary_overviewName': 'Diary Overview',
+    'diary_overviewDescription': 'Display today\'s word count and monthly progress',
+
     // 统计信息
     'diary_todayWordCount': '1d word',
     'diary_monthWordCount': '30d word',

@@ -18,17 +18,17 @@ class StoreHomeWidgets {
     registry.register(HomeWidget(
       id: 'store_icon',
       pluginId: 'store',
-      name: '积分商店',
-      description: '快速打开积分商店',
+      name: 'store_widgetName'.tr,
+      description: 'store_widgetDescription'.tr,
       icon: Icons.store,
       color: Colors.pinkAccent,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '工具',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryTool'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.store,
         color: Colors.pinkAccent,
-        name: '商店',
+        name: 'store_widgetName'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class StoreHomeWidgets {
     registry.register(HomeWidget(
       id: 'store_overview',
       pluginId: 'store',
-      name: '积分商店概览',
-      description: '显示商品、物品、积分和即将到期统计',
+      name: 'store_overviewName'.tr,
+      description: 'store_overviewDescription'.tr,
       icon: Icons.shopping_bag_outlined,
       color: Colors.pinkAccent,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '工具',
+      category: 'home_categoryTool'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -136,7 +136,7 @@ class StoreHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

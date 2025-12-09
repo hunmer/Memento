@@ -18,17 +18,17 @@ class OpenAIHomeWidgets {
     registry.register(HomeWidget(
       id: 'openai_icon',
       pluginId: 'openai',
-      name: 'AI助手',
-      description: '快速打开AI助手',
+      name: 'openai_widgetName'.tr,
+      description: 'openai_widgetDescription'.tr,
       icon: Icons.smart_toy,
       color: Colors.deepOrange,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '工具',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryTool'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.smart_toy,
         color: Colors.deepOrange,
-        name: 'AI助手',
+        name: 'openai_widgetName'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class OpenAIHomeWidgets {
     registry.register(HomeWidget(
       id: 'openai_overview',
       pluginId: 'openai',
-      name: 'AI助手概览',
-      description: '显示智能体统计信息',
+      name: 'openai_overviewName'.tr,
+      description: 'openai_overviewDescription'.tr,
       icon: Icons.psychology,
       color: Colors.deepOrange,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '工具',
+      category: 'home_categoryTool'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -121,7 +121,7 @@ class OpenAIHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

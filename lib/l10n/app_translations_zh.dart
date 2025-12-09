@@ -150,4 +150,12 @@ const Map<String, String> appTranslationsZh = {
   'app_feedbackLink': 'https://github.com/hunmer/Memento/issues',
   'app_documentationTitle': '项目文档',
   'app_documentationLink': 'https://github.com/hunmer/Memento#readme',
+
+  // Home Widget Categories
+  'home_categoryRecord': '记录',
+  'home_categoryTools': '工具',
+  'home_categoryCommunication': '通讯',
+  'home_categoryFinance': '财务',
+  'home_categoryLife': '生活',
+  'home_loadFailed': '加载失败',
 };

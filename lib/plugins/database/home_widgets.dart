@@ -18,17 +18,17 @@ class DatabaseHomeWidgets {
     registry.register(HomeWidget(
       id: 'database_icon',
       pluginId: 'database',
-      name: '数据库',
-      description: '快速打开数据库',
+      name: 'database_widgetName'.tr,
+      description: 'database_widgetDescription'.tr,
       icon: Icons.storage,
       color: Colors.deepPurple,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: '工具',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryTools'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.storage,
         color: Colors.deepPurple,
-        name: '数据库',
+        name: 'database_name'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class DatabaseHomeWidgets {
     registry.register(HomeWidget(
       id: 'database_overview',
       pluginId: 'database',
-      name: '数据库概览',
-      description: '显示数据库统计',
+      name: 'database_overviewName'.tr,
+      description: 'database_overviewDescription'.tr,
       icon: Icons.storage_outlined,
       color: Colors.deepPurple,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: '工具',
+      category: 'home_categoryTools'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -115,7 +115,7 @@ class DatabaseHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
