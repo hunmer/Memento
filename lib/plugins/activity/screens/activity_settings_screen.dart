@@ -182,7 +182,6 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = ActivityLocalizations.of(context);
 
     return Scaffold(
       body:
@@ -207,7 +206,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                l10n.notificationSettings,
+                                'activity_notificationSettings'.tr,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -226,7 +225,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                l10n.enableNotificationBar,
+                                'activity_enableNotificationBar'.tr,
                                 style: theme.textTheme.titleSmall,
                               ),
                               Switch(
@@ -257,7 +256,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      l10n.onlySupportsAndroid,
+                                      'activity_onlySupportsAndroid'.tr,
                                       style: theme.textTheme.bodySmall
                                           ?.copyWith(color: Colors.orange),
                                     ),
@@ -275,12 +274,12 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
 
                             // 最小提醒间隔
                             Text(
-                              l10n.minimumReminderInterval,
+                              'activity_minimumReminderInterval'.tr,
                               style: theme.textTheme.titleSmall,
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              l10n.minimumReminderIntervalDesc,
+                              'activity_minimumReminderIntervalDesc'.tr,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.textTheme.bodySmall?.color,
                               ),
@@ -294,8 +293,8 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                                     min: 5,
                                     max: 120,
                                     divisions: 23,
-                                    label: l10n.minutesUnit(
-                                      _minimumReminderInterval,
+                                    label: 'activity_minutesUnit'.trParams(
+                                      {'minutes': '$_minimumReminderInterval'},
                                     ),
                                     activeColor: ActivityPlugin.instance.color,
                                     onChanged: (value) {
@@ -308,7 +307,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                                 SizedBox(
                                   width: 80,
                                   child: Text(
-                                    l10n.minutesUnit(_minimumReminderInterval),
+                                    'activity_minutesUnit'.trParams(
+                                      {'minutes': '$_minimumReminderInterval'},
+                                    ),
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: ActivityPlugin.instance.color,
@@ -323,12 +324,12 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
 
                             // 通知更新频率
                             Text(
-                              l10n.updateInterval,
+                              'activity_updateInterval'.tr,
                               style: theme.textTheme.titleSmall,
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              l10n.updateIntervalDesc,
+                              'activity_updateIntervalDesc'.tr,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.textTheme.bodySmall?.color,
                               ),
@@ -342,7 +343,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                                     min: 1,
                                     max: 10,
                                     divisions: 9,
-                                    label: l10n.minutesUnit(_updateInterval),
+                                    label: 'activity_minutesUnit'.trParams(
+                                      {'minutes': '$_updateInterval'},
+                                    ),
                                     activeColor: ActivityPlugin.instance.color,
                                     onChanged: (value) {
                                       _updateUpdateInterval(value.round());
@@ -352,7 +355,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                                 SizedBox(
                                   width: 80,
                                   child: Text(
-                                    l10n.minutesUnit(_updateInterval),
+                                    'activity_minutesUnit'.trParams(
+                                      {'minutes': '$_updateInterval'},
+                                    ),
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: ActivityPlugin.instance.color,

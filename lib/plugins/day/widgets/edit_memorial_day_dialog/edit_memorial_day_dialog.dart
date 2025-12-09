@@ -49,7 +49,7 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = DayLocalizations.of(context);
+    final localizations = ;
 
     return AlertDialog(
       title: Column(

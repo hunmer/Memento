@@ -431,7 +431,6 @@ class MobileJSEngine implements JSEngine {
               $code
             })();
 
-
             // 如果用户没有调用 setResult，自动设置结果
             if (!globalThis.__EVAL_RESULTS__['$executionId']) {
               globalThis.setResult(result);
@@ -456,7 +455,6 @@ class MobileJSEngine implements JSEngine {
           (function() {
             var pendingKeys = Object.keys(globalThis.__PENDING_CALLS__ || {});
             var resultKeys = Object.keys(globalThis.__DART_RESULTS__ || {});
-
 
             for (var i = 0; i < pendingKeys.length; i++) {
               var key = pendingKeys[i];

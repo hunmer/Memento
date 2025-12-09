@@ -16,7 +16,6 @@ class StatisticsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return FutureBuilder(
       future: Future.wait([
@@ -34,7 +33,7 @@ class StatisticsTab extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.statistics,
+                  'habits_statistics'.tr,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 16),
@@ -45,7 +44,7 @@ class StatisticsTab extends StatelessWidget {
                       children: [
                         ListTile(
                           leading: const Icon(Icons.check_circle),
-                          title: Text(l10n.totalCompletions),
+                          title: Text('habits_totalCompletions'.tr),
                           trailing: Text(
                             'habits_completions'.tr +
                                 ': $count',
@@ -53,7 +52,7 @@ class StatisticsTab extends StatelessWidget {
                         ),
                         ListTile(
                           leading: const Icon(Icons.timer),
-                          title: Text(l10n.totalDuration),
+                          title: Text('habits_totalDuration'.tr),
                           trailing: Text(HabitsUtils.formatDuration(duration)),
                         ),
                       ],
@@ -64,7 +63,7 @@ class StatisticsTab extends StatelessWidget {
                 // TODO: 添加统计图表
                 Center(
                   child: Text(
-                    l10n.statisticsChartsPlaceholder,
+                    'habits_statisticsChartsPlaceholder'.tr,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontStyle: FontStyle.italic,
                     ),

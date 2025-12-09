@@ -126,7 +126,7 @@ class UIService {
   }
 
   Widget buildMainView(BuildContext context) {
-    final l10n = ChatLocalizations.of(context);
+
     final theme = Theme.of(context);
     final channels = _plugin.channelService.channels;
 
@@ -147,11 +147,11 @@ class UIService {
           tabs: [
             Tab(
               icon: const Icon(Icons.chat_bubble_outline),
-              text: l10n.channelsTab,
+              text: 'chat_channelsTab'.tr,
             ),
             Tab(
               icon: const Icon(Icons.timeline),
-              text: l10n.timelineTab,
+              text: 'chat_timelineTab'.tr,
             ),
           ],
         ),

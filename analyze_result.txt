@@ -1,0 +1,891 @@
+Analyzing Memento...                                            
+
+   info - Angle brackets will be interpreted as HTML - floating_ball_plugin\lib\floating_ball_plugin.dart:115:21 - unintended_html_in_doc_comment
+   info - 'unsubscribeById' is deprecated and shouldn't be used. 请使用 unsubscribe(eventName, [handler]) 方法代替 - lib\core\js_bridge\js_bridge_manager.dart:696:47 - deprecated_member_use_from_same_package
+   info - The imported package 'flutter_localizations' isn't a dependency of the importing package - lib\main.dart:9:8 - depend_on_referenced_packages
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\models\activity_daily_widget_config.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\models\activity_record.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\models\activity_weekly_widget_config.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\sample_data.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\screens\activity_statistics_screen.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\screens\activity_timeline_screen\components\activity_grid_view.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\screens\activity_timeline_screen\components\date_selector.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\screens\activity_timeline_screen\controllers\activity_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\screens\activity_timeline_screen\controllers\tag_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\screens\activity_timeline_screen\controllers\view_mode_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\services\activity_notification_service.dart:2:8 - unused_import
+   info - Unnecessary use of 'toList' in a spread - lib\plugins\activity\services\activity_notification_test.dart:220:18 - unnecessary_to_list_in_spreads
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\services\activity_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\services\activity_widget_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\widgets\activity_form.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\activity\widgets\activity_form\activity_form_utils.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\controllers\chat_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\controllers\conversation_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\data\sample_data.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\models\chat_command.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\models\chat_message.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\models\conversation.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\models\conversation_group.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\models\file_attachment.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\models\saved_tool_template.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\screens\chat_screen\components\command_selector.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\screens\chat_screen\components\markdown_content.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\screens\chat_screen\components\suggested_questions_dialog.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\screens\chat_screen\components\tool_template_selector.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\screens\tool_management_screen\components\plugin_section.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\chat_task_handler.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\conversation_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\message_detail_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\message_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\speech\speech_recognition_config.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\speech\speech_recognition_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\speech\tencent_asr_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\speech\voice_recognition_helper.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\suggested_questions_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\tool_config_manager.dart:7:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\tool_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\tool_template_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\services\widget_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\agent_chat\widgets\press_to_record_button.dart:4:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\bill\controls\bill_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\bill\data\sample_data.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\bill\models\account.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\bill\models\bill.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\bill\models\bill_model.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\bill\models\bill_shortcut.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\bill\screens\bill_stats_screen.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\bill\services\bill_shortcuts_widget_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\bill\widgets\bill_statistics_card.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\bill\widgets\month_selector.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar\controllers\calendar_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar\models\event.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar\services\todo_event_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar\utils\calendar_notification_utils.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar\utils\date_utils.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar\widgets\event_detail_card.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar_album\controllers\calendar_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar_album\controllers\tag_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar_album\models\calendar_entry.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar_album\sample_data.dart:2:8 - unused_import
+   info - An uninitialized field should have an explicit type annotation - lib\plugins\calendar_album\screens\album_screen.dart:21:3 - prefer_typing_uninitialized_variables
+  error - Variables must be declared using the keywords 'const', 'final', 'var' or a type name - lib\plugins\calendar_album\screens\album_screen.dart:21:3 - missing_const_final_var_or_type
+  error - Undefined name 'l10n' - lib\plugins\calendar_album\screens\album_screen.dart:43:5 - undefined_identifier
+  error - Expected an identifier - lib\plugins\calendar_album\screens\album_screen.dart:43:12 - missing_identifier
+  error - Too many positional arguments: 2 expected, but 3 found - lib\plugins\calendar_album\screens\calendar_album_weekly_selector_screen.dart:396:89 - extra_positional_arguments
+  error - Undefined name 'l10n' - lib\plugins\calendar_album\screens\calendar_album_weekly_selector_screen.dart:396:89 - undefined_identifier
+  error - Undefined name 'l10n' - lib\plugins\calendar_album\screens\calendar_screen.dart:405:68 - undefined_identifier
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\plugins\calendar_album\screens\calendar_screen.dart:582:31 - invocation_of_non_function_expression
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\plugins\calendar_album\screens\calendar_screen.dart:583:36 - invocation_of_non_function_expression
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\plugins\calendar_album\screens\calendar_screen.dart:587:35 - invocation_of_non_function_expression
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\plugins\calendar_album\screens\calendar_screen.dart:596:35 - invocation_of_non_function_expression
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar_album\screens\entry_detail\entry_detail_content.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar_album\screens\entry_detail\entry_detail_editor_launcher.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar_album\screens\entry_detail\entry_detail_image_viewer.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar_album\screens\entry_editor\entry_editor_controller.dart:2:8 - unused_import
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\calendar_album\screens\entry_editor\entry_editor_controller.dart:50:30 - experiment_not_enabled
+  error - The static getter 'titleCannotBeEmpty' isn't defined for the context type 'String' - lib\plugins\calendar_album\screens\entry_editor\entry_editor_controller.dart:50:31 - dot_shorthand_undefined_member
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar_album\screens\entry_editor\entry_editor_image_handler.dart:2:8 - unused_import
+warning - The value of the field '<unnamed>' isn't used - lib\plugins\calendar_album\screens\entry_editor\entry_editor_tag_handler.dart:7:7 - unused_field
+   info - An uninitialized field should have an explicit type annotation - lib\plugins\calendar_album\screens\entry_editor\entry_editor_tag_handler.dart:9:9 - prefer_typing_uninitialized_variables
+  error - Expected an identifier - lib\plugins\calendar_album\screens\entry_editor\entry_editor_tag_handler.dart:9:9 - missing_identifier
+  error - 'l10n' isn't a field in the enclosing class - lib\plugins\calendar_album\screens\entry_editor\entry_editor_tag_handler.dart:15:5 - initializing_formal_for_non_existent_field
+  error - Too many positional arguments: 1 expected, but 2 found - lib\plugins\calendar_album\screens\entry_editor\entry_editor_ui.dart:54:33 - extra_positional_arguments
+  error - Undefined name 'l10n' - lib\plugins\calendar_album\screens\entry_editor\entry_editor_ui.dart:54:33 - undefined_identifier
+  error - Undefined name 'l10n' - lib\plugins\calendar_album\screens\entry_editor\entry_editor_ui.dart:92:63 - undefined_identifier
+warning - Unused import: 'package:get/get.dart' - lib\plugins\calendar_album\screens\entry_editor_screen.dart:2:8 - unused_import
+warning - The left operand can't be null, so the right operand is never executed - lib\plugins\calendar_album\widgets\calendar_album_bottom_bar.dart:236:54 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\plugins\calendar_album\widgets\calendar_album_bottom_bar.dart:240:50 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\plugins\calendar_album\widgets\calendar_album_bottom_bar.dart:244:51 - dead_null_aware_expression
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\events\user_events.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\models\channel.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\models\file_message.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\models\message.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\models\serializers.dart:2:8 - unused_import
+   info - Dangling library doc comment - lib\plugins\chat\sample_data.dart:1:1 - dangling_library_doc_comments
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\sample_data.dart:5:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\channel_list\controllers\channel_list_controller.dart:2:8 - unused_import
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\chat\screens\channel_list\widgets\channel_dialogs\channel_dialog.dart:130:23 - experiment_not_enabled
+  error - The static getter 'cancelButtonLabel' isn't defined for the context type 'String' - lib\plugins\chat\screens\channel_list\widgets\channel_dialogs\channel_dialog.dart:130:24 - dot_shorthand_undefined_member
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\chat\screens\channel_list\widgets\channel_dialogs\channel_dialog.dart:206:19 - experiment_not_enabled
+  error - The static getter 'okButtonLabel' isn't defined for the context type 'String' - lib\plugins\chat\screens\channel_list\widgets\channel_dialogs\channel_dialog.dart:206:20 - dot_shorthand_undefined_member
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\controllers\chat_screen_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\utils\message_list_builder.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\channels_view.dart:2:8 - unused_import
+  error - Undefined class 'ChatLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\chat_app_bar.dart:35:21 - undefined_class
+  error - Expected an identifier - lib\plugins\chat\screens\chat_screen\widgets\chat_app_bar.dart:37:27 - missing_identifier
+  error - The property 'selectedMessages' can't be unconditionally accessed because the receiver can be 'null' - lib\plugins\chat\screens\chat_screen\widgets\chat_app_bar.dart:53:22 - unchecked_use_of_nullable_value
+  error - The property 'multiSelectMode' can't be unconditionally accessed because the receiver can be 'null' - lib\plugins\chat\screens\chat_screen\widgets\chat_app_bar.dart:89:36 - unchecked_use_of_nullable_value
+  error - The property 'clearMessages' can't be unconditionally accessed because the receiver can be 'null' - lib\plugins\chat\screens\chat_screen\widgets\chat_app_bar.dart:105:36 - unchecked_use_of_nullable_value
+  error - The property 'setBackground' can't be unconditionally accessed because the receiver can be 'null' - lib\plugins\chat\screens\chat_screen\widgets\chat_app_bar.dart:121:36 - unchecked_use_of_nullable_value
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\date_separator.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_bubble\components\avatar.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_bubble\components\favorite_icon.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_bubble\components\fixed_symbol.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_bubble\components\message_actions.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_bubble\components\message_content.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_bubble\components\message_timestamp.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_bubble\components\reply_widget.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_bubble\components\thinking_indicator.dart:2:8 - unused_import
+  error - The name 'Value' is defined in the libraries 'package:Memento/core/event/event_args.dart (via package:Memento/core/event/event.dart)' and 'package:get/get_state_manager/src/rx_flutter/rx_notifier.dart (via package:get/get.dart)' - lib\plugins\chat\screens\chat_screen\widgets\message_bubble\index.dart:100:18 - ambiguous_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_input\message_input.dart:2:8 - unused_import
+  error - 'Value' isn't a function - lib\plugins\chat\screens\chat_screen\widgets\message_input\message_input_state.dart:123:11 - invocation_of_non_function
+  error - The name 'Value' is defined in the libraries 'package:Memento/core/event/event_args.dart (via package:Memento/core/event/event.dart)' and 'package:get/get_state_manager/src/rx_flutter/rx_notifier.dart (via package:get/get.dart)' - lib\plugins\chat\screens\chat_screen\widgets\message_input\message_input_state.dart:123:11 - ambiguous_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_input\message_input_types.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_input\widgets\send_button.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\advanced_editor_handler.dart:2:8 - unused_import
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:20:7 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:22:9 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:41:15 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:43:17 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:83:13 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:85:15 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:93:9 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:95:11 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:117:13 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:119:15 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:164:11 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:166:13 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:174:7 - undefined_identifier
+  error - Undefined name 'LocalVideoHandlerLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\handlers\video_handler.dart:176:9 - undefined_identifier
+warning - The value of the local variable '<unnamed>' isn't used - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\message_input_actions_builder.dart:45:28 - unused_local_variable
+  error - Expected an identifier - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\message_input_actions_builder.dart:47:11 - missing_identifier
+  error - Expected an identifier - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\message_input_actions_builder.dart:47:13 - missing_identifier
+  error - Undefined name 'chatLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\message_input_actions_builder.dart:52:16 - undefined_identifier
+  error - Undefined name 'chatLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\message_input_actions_builder.dart:65:16 - undefined_identifier
+  error - Undefined name 'chatLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\message_input_actions_builder.dart:80:16 - undefined_identifier
+  error - Undefined name 'chatLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\message_input_actions_builder.dart:96:16 - undefined_identifier
+  error - Undefined name 'chatLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\message_input_actions_builder.dart:110:16 - undefined_identifier
+  error - Undefined name 'chatLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\message_input_actions_builder.dart:124:16 - undefined_identifier
+  error - Undefined name 'chatLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\message_input_actions_builder.dart:140:18 - undefined_identifier
+  error - Undefined name 'chatLocalizations' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\message_input_actions_builder.dart:155:16 - undefined_identifier
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\message_input_actions_drawer.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\chat_screen\widgets\message_input_actions\types.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\timeline\controllers\timeline_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\timeline\controllers\timeline_controller\base_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\timeline\controllers\timeline_controller\channel_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\timeline\controllers\timeline_controller\message_handler.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\timeline\controllers\timeline_controller\pagination_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\timeline\controllers\timeline_controller\scroll_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\timeline\controllers\timeline_controller\search_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\timeline\models\timeline_filter.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\timeline\utils\text_highlight.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\timeline\utils\timeline_utils.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\screens\timeline\widgets\timeline_message_card.dart:2:8 - unused_import
+  error - 'Value' isn't a function - lib\plugins\chat\services\channel_service.dart:522:9 - invocation_of_non_function
+  error - The name 'Value' is defined in the libraries 'package:Memento/core/event/event_args.dart (via package:Memento/core/event/event.dart)' and 'package:get/get_state_manager/src/rx_flutter/rx_notifier.dart (via package:get/get.dart)' - lib\plugins\chat\services\channel_service.dart:522:9 - ambiguous_import
+  error - 'Value' isn't a function - lib\plugins\chat\services\channel_service.dart:672:9 - invocation_of_non_function
+  error - The name 'Value' is defined in the libraries 'package:Memento/core/event/event_args.dart (via package:Memento/core/event/event.dart)' and 'package:get/get_state_manager/src/rx_flutter/rx_notifier.dart (via package:get/get.dart)' - lib\plugins\chat\services\channel_service.dart:672:9 - ambiguous_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\services\file_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\services\message_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\services\settings_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\services\user_service.dart:2:8 - unused_import
+warning - The member 'notifyListeners' can only be used within 'package:flutter/src/foundation/change_notifier.dart' or a test - lib\plugins\chat\services\user_service.dart:81:13 - invalid_use_of_visible_for_testing_member
+warning - The member 'notifyListeners' can only be used within 'package:flutter/src/foundation/change_notifier.dart' or a test - lib\plugins\chat\services\user_service.dart:110:13 - invalid_use_of_visible_for_testing_member
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\services\widget_service.dart:2:8 - unused_import
+  error - Undefined name 'l10n' - lib\plugins\chat\utils\date_formatter.dart:18:9 - undefined_identifier
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\plugins\chat\utils\date_formatter.dart:22:16 - invocation_of_non_function_expression
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\plugins\chat\utils\date_formatter.dart:24:16 - invocation_of_non_function_expression
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\plugins\chat\utils\date_formatter.dart:26:16 - invocation_of_non_function_expression
+  error - Undefined name 'l10n' - lib\plugins\chat\utils\date_formatter.dart:53:11 - undefined_identifier
+warning - The member 'notifyListeners' can only be used within 'package:flutter/src/foundation/change_notifier.dart' or a test - lib\plugins\chat\utils\message_operations.dart:132:19 - invalid_use_of_visible_for_testing_member
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\widgets\audio_player_widget.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\widgets\file_message_widget.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\chat\widgets\image_message_widget.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\checkin\checkin_route_handler.dart:2:8 - unused_import
+  error - Undefined name 'CheckinLocalizations' - lib\plugins\checkin\controllers\checkin_list_controller.dart:412:21 - undefined_identifier
+  error - Undefined name 'CheckinLocalizations' - lib\plugins\checkin\controllers\checkin_list_controller.dart:453:21 - undefined_identifier
+warning - Unused import: 'package:get/get.dart' - lib\plugins\checkin\models\checkin_item.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\checkin\screens\checkin_detail_screen.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\checkin\screens\checkin_list_screen\components\checkin_item_card.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\checkin\screens\checkin_list_screen\components\checkin_item_list.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\checkin\screens\checkin_list_screen\components\group_card.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\checkin\screens\checkin_list_screen\components\group_list_view.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\checkin\screens\checkin_list_screen\components\stat_card.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\checkin\screens\checkin_list_screen\components\weekly_checkin_circles.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\checkin\screens\checkin_stats_screen\widgets\daily_checkin_chart.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\checkin\widgets\checkin_card.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\contact\controllers\contact_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\contact\models\contact_model.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\contact\models\custom_activity_event_model.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\contact\sample_data.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\contact\utils\contact_utils.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\contact\widgets\contact_card.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\database\controllers\database_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\database\models\database_field.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\database\models\database_model.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\database\services\database_service.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\day\controllers\day_controller.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\day\models\memorial_day.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\day\sample_data.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\day\utils\date_utils.dart:2:8 - unused_import
+  error - Expected an identifier - lib\plugins\day\widgets\edit_memorial_day_dialog\appearance_tab.dart:24:27 - missing_identifier
+warning - Unused import: 'package:get/get.dart' - lib\plugins\day\widgets\edit_memorial_day_dialog\color_picker.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\plugins\day\widgets\edit_memorial_day_dialog\edit_memorial_day_dialog.dart:2:8 - unused_import
+  error - Expected an identifier - lib\plugins\day\widgets\edit_memorial_day_dialog\edit_memorial_day_dialog.dart:52:27 - missing_identifier
+warning - Unused import: 'package:get/get.dart' - lib\plugins\day\widgets\edit_memorial_day_dialog\information_tab.dart:2:8 - unused_import
+  error - Expected an identifier - lib\plugins\day\widgets\edit_memorial_day_dialog\information_tab.dart:20:27 - missing_identifier
+  error - Expected an identifier - lib\plugins\day\widgets\edit_memorial_day_dialog\notes_tab.dart:20:27 - missing_identifier
+warning - Unused import: 'package:get/get.dart' - lib\plugins\day\widgets\memorial_day_card.dart:2:8 - unused_import
+  error - Expected an identifier - lib\plugins\day\widgets\memorial_day_card.dart:72:27 - missing_identifier
+warning - Unused import: 'package:get/get.dart' - lib\plugins\day\widgets\memorial_day_list_item.dart:2:8 - unused_import
+  error - Expected an identifier - lib\plugins\day\widgets\memorial_day_list_item.dart:20:27 - missing_identifier
+warning - Unused import: 'package:get/get.dart' - lib\plugins\diary\utils\diary_utils.dart:10:8 - unused_import
+  error - Undefined name 'GoodsLocalizations' - lib\plugins\goods\screens\warehouse_detail_screen.dart:123:29 - undefined_identifier
+  error - Undefined name 'GoodsLocalizations' - lib\plugins\goods\screens\warehouse_detail_screen.dart:128:29 - undefined_identifier
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\goods\screens\warehouse_detail_screen.dart:168:33 - experiment_not_enabled
+  error - The static getter 'confirmDeleteWarehouseMessage' isn't defined for the context type 'String' - lib\plugins\goods\screens\warehouse_detail_screen.dart:168:34 - dot_shorthand_undefined_member
+warning - The left operand can't be null, so the right operand is never executed - lib\plugins\goods\widgets\goods_bottom_bar.dart:83:66 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\plugins\goods\widgets\goods_bottom_bar.dart:87:72 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\plugins\goods\widgets\goods_bottom_bar.dart:109:53 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\plugins\goods\widgets\goods_bottom_bar.dart:121:61 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\plugins\goods\widgets\goods_bottom_bar.dart:125:67 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\plugins\goods\widgets\goods_bottom_bar.dart:264:50 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\plugins\goods\widgets\goods_bottom_bar.dart:268:46 - dead_null_aware_expression
+warning - Unused import: 'package:get/get.dart' - lib\plugins\goods\widgets\goods_item_form\controllers\form_controller.dart:10:8 - unused_import
+  error - Undefined name 'GoodsLocalizations' - lib\plugins\goods\widgets\goods_item_form\custom_fields_list.dart:127:21 - undefined_identifier
+  error - Undefined name 'GoodsLocalizations' - lib\plugins\goods\widgets\goods_item_form\custom_fields_list.dart:197:21 - undefined_identifier
+warning - The left operand can't be null, so the right operand is never executed - lib\plugins\goods\widgets\warehouse_form.dart:239:60 - dead_null_aware_expression
+warning - Unused import: 'package:get/get.dart' - lib\plugins\habits\utils\habits_utils.dart:5:8 - unused_import
+warning - The value of the field '<unnamed>' isn't used - lib\plugins\habits\widgets\habits_list\habits_app_bar.dart:6:7 - unused_field
+   info - An uninitialized field should have an explicit type annotation - lib\plugins\habits\widgets\habits_list\habits_app_bar.dart:7:9 - prefer_typing_uninitialized_variables
+  error - Expected an identifier - lib\plugins\habits\widgets\habits_list\habits_app_bar.dart:7:9 - missing_identifier
+  error - 'l10n' isn't a field in the enclosing class - lib\plugins\habits\widgets\habits_list\habits_app_bar.dart:13:5 - initializing_formal_for_non_existent_field
+  error - Undefined name 'l10n' - lib\plugins\habits\widgets\habits_list\habits_list.dart:80:17 - undefined_identifier
+warning - The value of the field '<unnamed>' isn't used - lib\plugins\habits\widgets\habits_list\habits_view.dart:18:7 - unused_field
+   info - An uninitialized field should have an explicit type annotation - lib\plugins\habits\widgets\habits_list\habits_view.dart:21:9 - prefer_typing_uninitialized_variables
+  error - Expected an identifier - lib\plugins\habits\widgets\habits_list\habits_view.dart:21:9 - missing_identifier
+  error - 'l10n' isn't a field in the enclosing class - lib\plugins\habits\widgets\habits_list\habits_view.dart:28:5 - initializing_formal_for_non_existent_field
+  error - Undefined name 'l10n' - lib\plugins\habits\widgets\habits_list\habits_view.dart:253:15 - undefined_identifier
+  error - Too many positional arguments: 1 expected, but 2 found - lib\plugins\habits\widgets\habits_list\habits_view.dart:259:37 - extra_positional_arguments
+  error - Undefined name 'l10n' - lib\plugins\habits\widgets\habits_list\habits_view.dart:259:37 - undefined_identifier
+   info - Unnecessary empty statement - lib\plugins\habits\widgets\skill_detail_page.dart:84:5 - empty_statements
+  error - Too many positional arguments: 1 expected, but 2 found - lib\plugins\habits\widgets\skills_list.dart:127:37 - extra_positional_arguments
+  error - Undefined name 'l10n' - lib\plugins\habits\widgets\skills_list.dart:127:37 - undefined_identifier
+   info - Use interpolation to compose strings and values - lib\plugins\habits\widgets\statistics_tab.dart:49:29 - prefer_interpolation_to_compose_strings
+warning - The value of the field '<unnamed>' isn't used - lib\plugins\nfc\widgets\habits_list\habits_app_bar.dart:6:7 - unused_field
+   info - An uninitialized field should have an explicit type annotation - lib\plugins\nfc\widgets\habits_list\habits_app_bar.dart:7:9 - prefer_typing_uninitialized_variables
+  error - Expected an identifier - lib\plugins\nfc\widgets\habits_list\habits_app_bar.dart:7:9 - missing_identifier
+  error - 'l10n' isn't a field in the enclosing class - lib\plugins\nfc\widgets\habits_list\habits_app_bar.dart:13:5 - initializing_formal_for_non_existent_field
+  error - Undefined name 'l10n' - lib\plugins\nfc\widgets\habits_list\habits_list.dart:80:17 - undefined_identifier
+  error - Undefined name 'l10n' - lib\plugins\nfc\widgets\habits_list\habits_view.dart:172:17 - undefined_identifier
+  error - Too many positional arguments: 1 expected, but 2 found - lib\plugins\nfc\widgets\habits_list\habits_view.dart:177:42 - extra_positional_arguments
+  error - Undefined name 'l10n' - lib\plugins\nfc\widgets\habits_list\habits_view.dart:177:42 - undefined_identifier
+   info - Unnecessary empty statement - lib\plugins\nfc\widgets\skill_detail_page.dart:84:5 - empty_statements
+  error - Too many positional arguments: 1 expected, but 2 found - lib\plugins\nfc\widgets\skills_list.dart:85:31 - extra_positional_arguments
+  error - Undefined name 'l10n' - lib\plugins\nfc\widgets\skills_list.dart:85:31 - undefined_identifier
+  error - Too many positional arguments: 1 expected, but 2 found - lib\plugins\nfc\widgets\skills_list.dart:89:45 - extra_positional_arguments
+  error - Undefined name 'l10n' - lib\plugins\nfc\widgets\skills_list.dart:89:45 - undefined_identifier
+  error - Too many positional arguments: 1 expected, but 2 found - lib\plugins\nfc\widgets\skills_list.dart:90:45 - extra_positional_arguments
+  error - Undefined name 'l10n' - lib\plugins\nfc\widgets\skills_list.dart:90:45 - undefined_identifier
+   info - Use interpolation to compose strings and values - lib\plugins\nfc\widgets\statistics_tab.dart:49:29 - prefer_interpolation_to_compose_strings
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\nodes_plugin.dart:88:36 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\nodes_plugin.dart:333:10 - ambiguous_import
+  error - 'Node' isn't a function - lib\plugins\nodes\nodes_plugin.dart:391:21 - invocation_of_non_function
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\nodes_plugin.dart:391:21 - ambiguous_import
+  error - 'Node' isn't a function - lib\plugins\nodes\nodes_plugin.dart:449:25 - invocation_of_non_function
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\nodes_plugin.dart:449:25 - ambiguous_import
+  error - 'Node' isn't a function - lib\plugins\nodes\nodes_plugin.dart:523:23 - invocation_of_non_function
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\nodes_plugin.dart:523:23 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\nodes_plugin.dart:747:22 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\nodes_plugin.dart:749:27 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\nodes_plugin.dart:831:22 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\nodes_plugin.dart:833:27 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\nodes_plugin.dart:866:36 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\nodes_plugin.dart:940:27 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\nodes_plugin.dart:949:28 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\screens\node_edit_screen\components\breadcrumbs.dart:11:9 - ambiguous_import
+  error - 'Node' isn't a function - lib\plugins\nodes\screens\node_edit_screen\components\breadcrumbs.dart:75:47 - invocation_of_non_function
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\screens\node_edit_screen\components\breadcrumbs.dart:75:47 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\screens\node_edit_screen\components\breadcrumbs.dart:160:47 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\screens\node_edit_screen\components\breadcrumbs.dart:170:49 - ambiguous_import
+  error - 'Node' isn't a function - lib\plugins\nodes\screens\node_edit_screen\components\breadcrumbs.dart:180:35 - invocation_of_non_function
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\screens\node_edit_screen\components\breadcrumbs.dart:180:35 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\screens\node_edit_screen\node_edit_screen.dart:17:9 - ambiguous_import
+  error - Too many positional arguments: 2 expected, but 3 found - lib\plugins\nodes\screens\node_edit_screen\node_edit_screen.dart:121:51 - extra_positional_arguments
+  error - Undefined name 'l10n' - lib\plugins\nodes\screens\node_edit_screen\node_edit_screen.dart:121:51 - undefined_identifier
+  error - Too many positional arguments: 1 expected, but 2 found - lib\plugins\nodes\screens\node_edit_screen\node_edit_screen.dart:123:43 - extra_positional_arguments
+  error - Undefined name 'l10n' - lib\plugins\nodes\screens\node_edit_screen\node_edit_screen.dart:123:43 - undefined_identifier
+  error - Too many positional arguments: 1 expected, but 2 found - lib\plugins\nodes\screens\node_edit_screen\node_edit_screen.dart:125:35 - extra_positional_arguments
+  error - Undefined name 'l10n' - lib\plugins\nodes\screens\node_edit_screen\node_edit_screen.dart:125:35 - undefined_identifier
+  error - 'Node' isn't a function - lib\plugins\nodes\screens\node_edit_screen\node_edit_screen.dart:388:25 - invocation_of_non_function
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\screens\node_edit_screen\node_edit_screen.dart:388:25 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\screens\nodes_screen.dart:137:22 - ambiguous_import
+  error - 'Node' isn't a function - lib\plugins\nodes\screens\nodes_screen.dart:187:21 - invocation_of_non_function
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\screens\nodes_screen.dart:187:21 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\screens\nodes_screen.dart:339:8 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\screens\nodes_screen.dart:339:32 - ambiguous_import
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\screens\nodes_screen.dart:340:21 - ambiguous_import
+  error - Undefined name 'l10n' - lib\plugins\nodes\screens\notebooks_screen.dart:53:79 - undefined_identifier
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\nodes\screens\notebooks_screen.dart:93:29 - experiment_not_enabled
+  error - The static getter 'deleteNotebookConfirmation' isn't defined for the context type 'String' - lib\plugins\nodes\screens\notebooks_screen.dart:93:30 - dot_shorthand_undefined_member
+  error - Expected an identifier - lib\plugins\nodes\screens\notebooks_screen.dart:177:5 - missing_identifier
+warning - The value of the local variable 'l10n' isn't used - lib\plugins\nodes\screens\notebooks_screen.dart:312:11 - unused_local_variable
+  error - Undefined name 'NodesLocalizations' - lib\plugins\nodes\screens\notebooks_screen.dart:312:18 - undefined_identifier
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\widgets\node_item.dart:26:9 - ambiguous_import
+  error - 'Node' isn't a function - lib\plugins\nodes\widgets\node_item.dart:88:29 - invocation_of_non_function
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\widgets\node_item.dart:88:29 - ambiguous_import
+  error - Undefined name 'l10n' - lib\plugins\nodes\widgets\node_item.dart:156:68 - undefined_identifier
+  error - Expected an identifier - lib\plugins\nodes\widgets\node_item.dart:299:5 - missing_identifier
+  error - 'Node' isn't a function - lib\plugins\nodes\widgets\node_item.dart:343:45 - invocation_of_non_function
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\widgets\node_item.dart:343:45 - ambiguous_import
+  error - Undefined name 'l10n' - lib\plugins\nodes\widgets\node_item.dart:460:64 - undefined_identifier
+  error - 'Node' isn't a function - lib\plugins\nodes\widgets\node_item.dart:469:21 - invocation_of_non_function
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\widgets\node_item.dart:469:21 - ambiguous_import
+  error - 'Node' isn't a function - lib\plugins\nodes\widgets\node_item.dart:488:21 - invocation_of_non_function
+  error - The name 'Node' is defined in the libraries 'package:Memento/plugins/nodes/models/node.dart' and 'package:get/get_rx/src/rx_stream/rx_stream.dart (via package:get/get.dart)' - lib\plugins\nodes\widgets\node_item.dart:488:21 - ambiguous_import
+  error - Expected an identifier - lib\plugins\nodes\widgets\node_item.dart:509:5 - missing_identifier
+  error - Undefined name 'NodesLocalizations' - lib\plugins\nodes\widgets\node_item.dart:517:15 - undefined_identifier
+  error - Target of URI doesn't exist: 'notes_localizations.dart' - lib\plugins\notes\l10n\notes_localizations_en.dart:1:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\plugins\notes\l10n\notes_localizations_en.dart:4:36 - extends_non_class
+  error - Expected a type name - lib\plugins\notes\l10n\notes_localizations_en.dart:4:36 - expected_type_name
+  error - Too many positional arguments: 0 expected, but 1 found - lib\plugins\notes\l10n\notes_localizations_en.dart:5:34 - extra_positional_arguments
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:8:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:11:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:15:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:18:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:21:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:24:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:27:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:30:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:33:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:36:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:40:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:43:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:46:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:50:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:53:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:56:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:59:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:62:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:65:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:68:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:71:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:74:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:77:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:80:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:83:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:86:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:88:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:91:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:94:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:97:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:100:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:103:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:106:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:109:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:112:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:115:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:118:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:121:14 - override_on_non_overriding_member
+warning - The method doesn't override an inherited method - lib\plugins\notes\l10n\notes_localizations_en.dart:124:10 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_en.dart:127:14 - override_on_non_overriding_member
+  error - Target of URI doesn't exist: 'notes_localizations.dart' - lib\plugins\notes\l10n\notes_localizations_zh.dart:1:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\plugins\notes\l10n\notes_localizations_zh.dart:4:36 - extends_non_class
+  error - Expected a type name - lib\plugins\notes\l10n\notes_localizations_zh.dart:4:36 - expected_type_name
+  error - Too many positional arguments: 0 expected, but 1 found - lib\plugins\notes\l10n\notes_localizations_zh.dart:5:34 - extra_positional_arguments
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:8:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:11:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:14:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:17:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:20:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:23:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:26:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:29:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:32:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:35:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:38:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:41:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:44:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:47:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:50:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:53:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:56:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:59:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:62:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:65:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:68:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:71:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:74:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:77:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:80:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:83:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:86:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:89:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:92:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:95:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:98:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:101:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:104:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:107:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:110:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:113:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:116:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:119:14 - override_on_non_overriding_member
+warning - The method doesn't override an inherited method - lib\plugins\notes\l10n\notes_localizations_zh.dart:122:10 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\notes\l10n\notes_localizations_zh.dart:125:14 - override_on_non_overriding_member
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\notes\screens\folder_list_screen.dart:119:31 - experiment_not_enabled
+  error - The static getter 'createNew' isn't defined for the context type 'String' - lib\plugins\notes\screens\folder_list_screen.dart:119:32 - dot_shorthand_undefined_member
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\notes\screens\folder_list_screen.dart:125:37 - experiment_not_enabled
+  error - The static getter 'newFolder' isn't defined for the context type 'String' - lib\plugins\notes\screens\folder_list_screen.dart:125:38 - dot_shorthand_undefined_member
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\notes\screens\folder_list_screen.dart:133:37 - experiment_not_enabled
+  error - The static getter 'newNote' isn't defined for the context type 'String' - lib\plugins\notes\screens\folder_list_screen.dart:133:38 - dot_shorthand_undefined_member
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\notes\screens\note_screen\folder_selection_dialog.dart:45:29 - experiment_not_enabled
+  error - The static getter 'selectCurrentFolder' isn't defined for the context type 'String' - lib\plugins\notes\screens\note_screen\folder_selection_dialog.dart:45:30 - dot_shorthand_undefined_member
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\notes\screens\note_screen\note_list_tile.dart:53:35 - experiment_not_enabled
+  error - The static getter 'moveTo' isn't defined for the context type 'String' - lib\plugins\notes\screens\note_screen\note_list_tile.dart:53:36 - dot_shorthand_undefined_member
+  error - Undefined name 'NotesLocalizations' - lib\plugins\notes\screens\note_screen\note_operations.dart:65:9 - undefined_identifier
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\notes\screens\note_screen\note_operations.dart:84:23 - experiment_not_enabled
+  error - The static getter 'deleteNote' isn't defined for the context type 'String' - lib\plugins\notes\screens\note_screen\note_operations.dart:84:24 - dot_shorthand_undefined_member
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\notes\screens\note_screen\note_operations.dart:85:25 - experiment_not_enabled
+  error - The static getter 'deleteNoteConfirmation' isn't defined for the context type 'String' - lib\plugins\notes\screens\note_screen\note_operations.dart:85:26 - dot_shorthand_undefined_member
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\notes\screens\note_screen\note_operations.dart:94:17 - experiment_not_enabled
+  error - The static getter 'delete' isn't defined for the context type 'String' - lib\plugins\notes\screens\note_screen\note_operations.dart:94:18 - dot_shorthand_undefined_member
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\plugins\notes\screens\notes_screen.dart:511:42 - invocation_of_non_function_expression
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\notes\screens\notes_screen\folder_operations.dart:104:19 - experiment_not_enabled
+  error - The static getter 'delete' isn't defined for the context type 'String' - lib\plugins\notes\screens\notes_screen\folder_operations.dart:104:20 - dot_shorthand_undefined_member
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\notes\screens\notes_screen\folder_selection_dialog.dart:95:21 - experiment_not_enabled
+  error - The static getter 'selectCurrentFolder' isn't defined for the context type 'String' - lib\plugins\notes\screens\notes_screen\folder_selection_dialog.dart:95:22 - dot_shorthand_undefined_member
+  error - Undefined name 'NotesLocalizations' - lib\plugins\notes\screens\notes_screen\folder_selection_dialog.dart:109:9 - undefined_identifier
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\notes\screens\notes_screen\note_item.dart:38:35 - experiment_not_enabled
+  error - The static getter 'moveTo' isn't defined for the context type 'String' - lib\plugins\notes\screens\notes_screen\note_item.dart:38:36 - dot_shorthand_undefined_member
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\notes\screens\notes_screen\note_operations.dart:60:19 - experiment_not_enabled
+  error - The static getter 'delete' isn't defined for the context type 'String' - lib\plugins\notes\screens\notes_screen\note_operations.dart:60:20 - dot_shorthand_undefined_member
+warning - Unused import: 'package:get/get.dart' - lib\plugins\notes\widgets\tag_input.dart:3:8 - unused_import
+warning - The member 'notifyListeners' can only be used within 'package:flutter/src/foundation/change_notifier.dart' or a test - lib\plugins\openai\handlers\chat_event_handler.dart:159:15 - invalid_use_of_visible_for_testing_member
+warning - The member 'notifyListeners' can only be used within 'package:flutter/src/foundation/change_notifier.dart' or a test - lib\plugins\openai\handlers\chat_event_handler.dart:268:25 - invalid_use_of_visible_for_testing_member
+warning - The member 'notifyListeners' can only be used within 'package:flutter/src/foundation/change_notifier.dart' or a test - lib\plugins\openai\handlers\chat_event_handler.dart:295:21 - invalid_use_of_visible_for_testing_member
+warning - The member 'notifyListeners' can only be used within 'package:flutter/src/foundation/change_notifier.dart' or a test - lib\plugins\openai\handlers\chat_event_handler.dart:336:21 - invalid_use_of_visible_for_testing_member
+warning - The member 'notifyListeners' can only be used within 'package:flutter/src/foundation/change_notifier.dart' or a test - lib\plugins\openai\handlers\chat_event_handler.dart:349:21 - invalid_use_of_visible_for_testing_member
+  error - Undefined name 'OpenAILocalizations' - lib\plugins\openai\screens\agent_edit_screen.dart:571:35 - undefined_identifier
+  error - Undefined name 'OpenAILocalizations' - lib\plugins\openai\screens\agent_edit_screen.dart:584:39 - undefined_identifier
+  error - Undefined name 'OpenAILocalizations' - lib\plugins\openai\screens\agent_edit_screen.dart:598:39 - undefined_identifier
+  error - Undefined name 'OpenAILocalizations' - lib\plugins\openai\screens\agent_edit_screen.dart:617:30 - undefined_identifier
+  error - Undefined name 'OpenAILocalizations' - lib\plugins\openai\screens\agent_edit_screen.dart:689:26 - undefined_identifier
+  error - Undefined name 'OpenAILocalizations' - lib\plugins\openai\screens\model_list_screen.dart:257:15 - undefined_identifier
+  error - Undefined name 'OpenAILocalizations' - lib\plugins\openai\screens\model_list_screen.dart:381:28 - undefined_identifier
+  error - Undefined name 'OpenAILocalizations' - lib\plugins\openai\screens\model_search_screen.dart:213:51 - undefined_identifier
+  error - Undefined name 'OpenAILocalizations' - lib\plugins\openai\screens\provider_edit_screen.dart:323:41 - undefined_identifier
+  error - Undefined name 'OpenAILocalizations' - lib\plugins\openai\screens\provider_edit_screen.dart:331:41 - undefined_identifier
+warning - Unused import: 'package:get/get.dart' - lib\plugins\openai\services\request_service.dart:7:8 - unused_import
+warning - The value of the local variable 'l10n' isn't used - lib\plugins\openai\services\test_service.dart:142:13 - unused_local_variable
+  error - Undefined name 'OpenAILocalizations' - lib\plugins\openai\services\test_service.dart:142:20 - undefined_identifier
+warning - Unused import: 'package:get/get.dart' - lib\plugins\scripts_center\models\script_info.dart:4:8 - unused_import
+   info - 'unsubscribeById' is deprecated and shouldn't be used. 请使用 unsubscribe(eventName, [handler]) 方法代替 - lib\plugins\scripts_center\scripts_center_plugin.dart:317:29 - deprecated_member_use_from_same_package
+warning - Unused import: 'package:get/get.dart' - lib\plugins\store\controllers\store_controller.dart:14:8 - unused_import
+   info - Library names are not necessary - lib\plugins\store\sample_data.dart:3:9 - unnecessary_library_name
+warning - The member 'notifyListeners' can only be used within 'package:flutter/src/foundation/change_notifier.dart' or a test - lib\plugins\store\widgets\add_product_page.dart:111:25 - invalid_use_of_visible_for_testing_member
+   info - Invalid use of a private type in a public API - lib\plugins\store\widgets\store_view\archived_products.dart:13:3 - library_private_types_in_public_api
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\store\widgets\store_view\points_history_page.dart:125:19 - experiment_not_enabled
+  error - The static getter 'pointsHistoryEntry' isn't defined for the context type 'String' - lib\plugins\store\widgets\store_view\points_history_page.dart:125:20 - dot_shorthand_undefined_member
+  error - This requires the 'dot-shorthands' language feature to be enabled - lib\plugins\store\widgets\user_item_card.dart:56:25 - experiment_not_enabled
+  error - The static getter 'confirmUseMessage' isn't defined for the context type 'String' - lib\plugins\store\widgets\user_item_card.dart:56:26 - dot_shorthand_undefined_member
+   info - Invalid use of a private type in a public API - lib\plugins\store\widgets\user_item_detail_page.dart:23:3 - library_private_types_in_public_api
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\plugins\store\widgets\user_item_detail_page.dart:261:16 - invocation_of_non_function_expression
+  error - Target of URI doesn't exist: 'timer_localizations.dart' - lib\plugins\timer\l10n\timer_localizations_en.dart:1:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\plugins\timer\l10n\timer_localizations_en.dart:3:36 - extends_non_class
+  error - Expected a type name - lib\plugins\timer\l10n\timer_localizations_en.dart:3:36 - expected_type_name
+  error - Too many positional arguments: 0 expected, but 1 found - lib\plugins\timer\l10n\timer_localizations_en.dart:4:34 - extra_positional_arguments
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:7:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:10:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:13:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:17:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:20:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:23:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:26:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:29:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:32:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:35:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:38:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:41:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:44:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:47:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:50:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:53:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:56:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:59:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:62:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:65:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:68:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:71:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:75:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:78:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:81:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:84:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:87:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:90:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:93:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:96:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_en.dart:99:14 - override_on_non_overriding_member
+  error - Target of URI doesn't exist: 'timer_localizations.dart' - lib\plugins\timer\l10n\timer_localizations_zh.dart:1:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\plugins\timer\l10n\timer_localizations_zh.dart:3:36 - extends_non_class
+  error - Expected a type name - lib\plugins\timer\l10n\timer_localizations_zh.dart:3:36 - expected_type_name
+  error - Too many positional arguments: 0 expected, but 1 found - lib\plugins\timer\l10n\timer_localizations_zh.dart:4:34 - extra_positional_arguments
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:7:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:11:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:14:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:17:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:20:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:23:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:26:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:29:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:32:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:35:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:38:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:41:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:44:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:47:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:50:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:53:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:56:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:59:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:62:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:65:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:68:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:71:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:75:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:78:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:81:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:84:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:87:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:90:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:93:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:96:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\timer\l10n\timer_localizations_zh.dart:99:14 - override_on_non_overriding_member
+   info - Invalid use of a private type in a public API - lib\plugins\timer\views\add_timer_item_dialog.dart:12:3 - library_private_types_in_public_api
+   info - Invalid use of a private type in a public API - lib\plugins\timer\views\add_timer_task_dialog.dart:18:3 - library_private_types_in_public_api
+   info - Invalid use of a private type in a public API - lib\plugins\timer\views\timer_task_card.dart:27:3 - library_private_types_in_public_api
+   info - Unnecessary empty statement - lib\plugins\todo\screens\todo_list_selector_screen.dart:480:5 - empty_statements
+   info - The 'child' argument should be last in widget constructor invocations - lib\plugins\todo\views\todo_bottombar_view.dart:240:19 - sort_child_properties_last
+   info - Invalid use of a private type in a public API - lib\plugins\todo\widgets\filter_dialog.dart:16:3 - library_private_types_in_public_api
+   info - Invalid use of a private type in a public API - lib\plugins\todo\widgets\filter_dialog.dart:233:3 - library_private_types_in_public_api
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\plugins\tracker\screens\goal_detail_screen.dart:143:45 - invocation_of_non_function_expression
+warning - Unused import: 'package:get/get.dart' - lib\plugins\tracker\screens\search_results_screen.dart:5:8 - unused_import
+  error - Target of URI doesn't exist: 'l10n/tracker_localizations.dart' - lib\plugins\tracker\tracker_plugin.dart:31:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'tts_localizations.dart' - lib\plugins\tts\l10n\tts_localizations_en.dart:1:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\plugins\tts\l10n\tts_localizations_en.dart:4:34 - extends_non_class
+  error - Expected a type name - lib\plugins\tts\l10n\tts_localizations_en.dart:4:34 - expected_type_name
+  error - No associated positional super constructor parameter - lib\plugins\tts\l10n\tts_localizations_en.dart:5:28 - super_formal_parameter_without_associated_positional
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:7:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:10:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:13:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:16:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:19:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:22:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:25:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:28:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:31:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:34:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:37:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:40:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:43:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:46:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:49:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:52:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:55:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:58:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:61:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:64:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:67:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:70:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:73:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:76:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:79:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:82:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:85:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:88:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:91:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:94:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:97:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:100:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:103:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:106:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:109:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:112:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:115:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:118:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:121:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:124:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:127:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:130:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:133:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:136:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:139:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:142:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:145:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:148:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:151:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:154:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:157:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:160:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:163:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:166:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:169:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:172:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:175:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:178:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:181:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:184:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:187:14 - override_on_non_overriding_member
+warning - The method doesn't override an inherited method - lib\plugins\tts\l10n\tts_localizations_en.dart:190:10 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:193:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:196:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:199:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:202:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_en.dart:205:14 - override_on_non_overriding_member
+  error - Target of URI doesn't exist: 'tts_localizations.dart' - lib\plugins\tts\l10n\tts_localizations_zh.dart:1:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\plugins\tts\l10n\tts_localizations_zh.dart:4:34 - extends_non_class
+  error - Expected a type name - lib\plugins\tts\l10n\tts_localizations_zh.dart:4:34 - expected_type_name
+  error - No associated positional super constructor parameter - lib\plugins\tts\l10n\tts_localizations_zh.dart:5:28 - super_formal_parameter_without_associated_positional
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:7:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:10:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:13:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:16:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:19:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:22:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:25:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:28:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:31:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:34:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:37:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:40:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:43:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:46:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:49:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:52:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:55:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:58:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:61:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:64:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:67:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:70:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:73:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:76:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:79:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:82:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:85:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:88:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:91:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:94:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:97:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:100:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:103:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:106:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:109:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:112:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:115:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:118:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:121:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:124:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:127:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:130:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:133:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:136:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:139:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:142:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:145:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:148:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:151:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:154:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:157:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:160:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:163:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:166:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:169:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:172:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:175:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:178:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:181:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:184:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:187:14 - override_on_non_overriding_member
+warning - The method doesn't override an inherited method - lib\plugins\tts\l10n\tts_localizations_zh.dart:190:10 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:193:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:196:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:199:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:202:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\plugins\tts\l10n\tts_localizations_zh.dart:205:14 - override_on_non_overriding_member
+warning - Unused import: 'package:get/get.dart' - lib\plugins\tts\services\system_tts_service.dart:9:8 - unused_import
+  error - Undefined name 'l10n' - lib\screens\about_screen\about_screen.dart:89:21 - undefined_identifier
+  error - Undefined name 'l10n' - lib\screens\about_screen\about_screen.dart:148:24 - undefined_identifier
+  error - Undefined name 'l10n' - lib\screens\about_screen\about_screen.dart:163:21 - undefined_identifier
+  error - Undefined name 'l10n' - lib\screens\about_screen\about_screen.dart:172:17 - undefined_identifier
+  error - Undefined name 'l10n' - lib\screens\about_screen\about_screen.dart:181:22 - undefined_identifier
+  error - Undefined name 'l10n' - lib\screens\about_screen\about_screen.dart:187:24 - undefined_identifier
+  error - Undefined name 'l10n' - lib\screens\about_screen\about_screen.dart:188:22 - undefined_identifier
+  error - Undefined name 'l10n' - lib\screens\about_screen\about_screen.dart:194:24 - undefined_identifier
+  error - Undefined name 'l10n' - lib\screens\about_screen\about_screen.dart:195:22 - undefined_identifier
+warning - Unused import: 'package:get/get.dart' - lib\screens\home_screen\card_size_manager.dart:3:8 - unused_import
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\home_screen.dart:841:25 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\home_screen.dart:970:15 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\home_screen.dart:987:21 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\home_screen.dart:1031:23 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\home_screen.dart:1059:7 - undefined_identifier
+warning - Unused import: 'package:get/get.dart' - lib\screens\home_screen\models\home_folder_item.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\screens\home_screen\models\layout_config.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\screens\home_screen\models\plugin_widget_config.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\screens\home_screen\plugin_card.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\screens\home_screen\plugin_grid.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\screens\home_screen\plugin_order_manager.dart:3:8 - unused_import
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:586:31 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:589:31 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:612:33 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:632:29 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:660:33 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:669:33 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:698:33 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:718:29 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:747:33 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:756:33 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:777:23 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:793:23 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:844:35 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\home_screen\widgets\background_settings_page.dart:847:35 - undefined_identifier
+warning - Unused import: 'package:get/get.dart' - lib\screens\home_screen\widgets\generic_plugin_widget.dart:3:8 - unused_import
+   info - The private field _quickLayoutType could be 'final' - lib\screens\home_screen\widgets\home_grid.dart:51:10 - prefer_final_fields
+  error - Too many positional arguments: 1 expected, but 2 found - lib\screens\home_screen\widgets\home_grid.dart:63:40 - extra_positional_arguments
+  error - Undefined name 'l10n' - lib\screens\home_screen\widgets\home_grid.dart:63:40 - undefined_identifier
+warning - Unused import: 'package:get/get.dart' - lib\screens\home_screen\widgets\home_widget.dart:2:8 - unused_import
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:47:19 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:65:31 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:70:31 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:124:27 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:126:24 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:127:24 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:164:27 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:166:24 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:167:24 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:210:27 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:211:30 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:290:17 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:344:31 - undefined_identifier
+  error - Undefined name 'screensL10n' - lib\screens\home_screen\widgets\widget_settings_dialog.dart:411:25 - undefined_identifier
+  error - Undefined name 'ScreensLocalizations' - lib\screens\intent_test_screen\intent_test_screen.dart:425:39 - undefined_identifier
+warning - Unused import: 'package:get/get.dart' - lib\screens\js_console\widgets\code_editor.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\screens\js_console\widgets\output_viewer.dart:2:8 - unused_import
+  error - Undefined name 'localizations' - lib\screens\settings_screen\controllers\base_settings_controller.dart:17:25 - undefined_identifier
+  error - Undefined name 'localizations' - lib\screens\settings_screen\controllers\base_settings_controller.dart:26:26 - undefined_identifier
+  error - Undefined name 'localizations' - lib\screens\settings_screen\controllers\base_settings_controller.dart:37:26 - undefined_identifier
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\screens\settings_screen\controllers\full_backup_controller.dart:59:23 - invocation_of_non_function_expression
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\screens\settings_screen\controllers\full_backup_controller.dart:160:19 - invocation_of_non_function_expression
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\screens\settings_screen\controllers\full_backup_controller.dart:319:21 - invocation_of_non_function_expression
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\screens\settings_screen\controllers\import_controller.dart:174:21 - invocation_of_non_function_expression
+warning - Unused import: 'package:get/get.dart' - lib\screens\settings_screen\controllers\rebuild_controller.dart:2:8 - unused_import
+   info - The imported package 'flutter_localizations' isn't a dependency of the importing package - lib\screens\settings_screen\controllers\rebuild_controller.dart:4:8 - depend_on_referenced_packages
+warning - Unused import: 'package:get/get.dart' - lib\screens\settings_screen\controllers\settings_screen_controller.dart:4:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\screens\settings_screen\controllers\webdav_sync_controller.dart:6:8 - unused_import
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\screens\settings_screen\screens\data_management_screen.dart:164:21 - invocation_of_non_function_expression
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\screens\settings_screen\screens\data_management_screen.dart:205:21 - invocation_of_non_function_expression
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\screens\settings_screen\screens\data_management_screen.dart:325:23 - invocation_of_non_function_expression
+warning - Unused import: 'package:get/get.dart' - lib\screens\settings_screen\widgets\backup_progress_dialog.dart:2:8 - unused_import
+   info - Invalid use of a private type in a public API - lib\screens\settings_screen\widgets\folder_selection_dialog.dart:11:3 - library_private_types_in_public_api
+   info - Invalid use of a private type in a public API - lib\screens\settings_screen\widgets\plugin_selection_dialog.dart:12:3 - library_private_types_in_public_api
+warning - Unused import: 'package:get/get.dart' - lib\widgets\avatar_picker.dart:5:8 - unused_import
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\widgets\backup_time_picker.dart:158:23 - invocation_of_non_function_expression
+warning - Unused import: 'package:get/get.dart' - lib\widgets\calendar_strip_date_picker.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\widgets\custom_dialog.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\widgets\enhanced_calendar\enhanced_calendar.dart:2:8 - unused_import
+  error - Target of URI doesn't exist: 'group_selector_localizations.dart' - lib\widgets\l10n\group_selector_localizations_en.dart:1:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\widgets\l10n\group_selector_localizations_en.dart:3:44 - extends_non_class
+  error - Expected a type name - lib\widgets\l10n\group_selector_localizations_en.dart:3:44 - expected_type_name
+  error - Too many positional arguments: 0 expected, but 1 found - lib\widgets\l10n\group_selector_localizations_en.dart:4:42 - extra_positional_arguments
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_en.dart:7:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_en.dart:10:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_en.dart:13:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_en.dart:16:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_en.dart:19:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_en.dart:22:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_en.dart:25:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_en.dart:28:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_en.dart:31:14 - override_on_non_overriding_member
+  error - Target of URI doesn't exist: 'group_selector_localizations.dart' - lib\widgets\l10n\group_selector_localizations_zh.dart:1:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\widgets\l10n\group_selector_localizations_zh.dart:3:44 - extends_non_class
+  error - Expected a type name - lib\widgets\l10n\group_selector_localizations_zh.dart:3:44 - expected_type_name
+  error - Too many positional arguments: 0 expected, but 1 found - lib\widgets\l10n\group_selector_localizations_zh.dart:4:42 - extra_positional_arguments
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_zh.dart:7:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_zh.dart:10:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_zh.dart:13:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_zh.dart:16:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_zh.dart:19:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_zh.dart:22:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_zh.dart:25:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_zh.dart:28:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\group_selector_localizations_zh.dart:31:14 - override_on_non_overriding_member
+  error - Target of URI doesn't exist: 'image_picker_localizations.dart' - lib\widgets\l10n\image_picker_localizations_en.dart:1:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\widgets\l10n\image_picker_localizations_en.dart:3:42 - extends_non_class
+  error - Expected a type name - lib\widgets\l10n\image_picker_localizations_en.dart:3:42 - expected_type_name
+  error - No associated positional super constructor parameter - lib\widgets\l10n\image_picker_localizations_en.dart:4:36 - super_formal_parameter_without_associated_positional
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:7:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:10:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:13:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:16:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:19:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:22:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:26:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:29:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:32:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:35:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:38:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:41:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:44:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:47:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:50:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:53:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:56:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:59:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:62:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:65:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:68:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_en.dart:71:14 - override_on_non_overriding_member
+  error - Target of URI doesn't exist: 'image_picker_localizations.dart' - lib\widgets\l10n\image_picker_localizations_zh.dart:1:8 - uri_does_not_exist
+  error - Classes can only extend other classes - lib\widgets\l10n\image_picker_localizations_zh.dart:3:42 - extends_non_class
+  error - Expected a type name - lib\widgets\l10n\image_picker_localizations_zh.dart:3:42 - expected_type_name
+  error - No associated positional super constructor parameter - lib\widgets\l10n\image_picker_localizations_zh.dart:4:36 - super_formal_parameter_without_associated_positional
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:7:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:10:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:13:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:16:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:19:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:22:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:25:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:28:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:31:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:34:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:37:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:40:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:43:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:46:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:49:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:52:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:55:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:58:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:61:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:64:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:67:14 - override_on_non_overriding_member
+warning - The getter doesn't override an inherited getter - lib\widgets\l10n\image_picker_localizations_zh.dart:70:14 - override_on_non_overriding_member
+warning - Unused import: 'package:get/get.dart' - lib\widgets\memento_editor\memento_editor.dart:4:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\widgets\quill_viewer\quill_viewer.dart:3:8 - unused_import
+warning - The left operand can't be null, so the right operand is never executed - lib\widgets\route_history_dialog\route_history_dialog.dart:117:43 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\widgets\route_history_dialog\route_history_dialog.dart:121:19 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\widgets\route_history_dialog\route_history_dialog.dart:126:51 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\widgets\route_history_dialog\route_history_dialog.dart:130:52 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\widgets\route_history_dialog\route_history_dialog.dart:176:49 - dead_null_aware_expression
+  error - The expression doesn't evaluate to a function, so it can't be invoked - lib\widgets\route_history_dialog\route_history_dialog.dart:310:13 - invocation_of_non_function_expression
+warning - Unused import: 'package:get/get.dart' - lib\widgets\statistics\components\date_range_selector.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\widgets\statistics\models\statistics_models.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\widgets\statistics\utils\statistics_calculator.dart:2:8 - unused_import
+   info - The argument type 'Map<String, dynamic>' isn't related to 'String' - lib\widgets\statistics\utils\statistics_calculator.dart:50:57 - collection_methods_unrelated_type
+  error - Undefined name '_localizations' - lib\widgets\super_cupertino_navigation_wrapper.dart:210:12 - undefined_identifier
+  error - Undefined name '_localizations' - lib\widgets\super_cupertino_navigation_wrapper.dart:215:17 - undefined_identifier
+  error - Undefined name '_localizations' - lib\widgets\super_cupertino_navigation_wrapper.dart:258:13 - undefined_identifier
+  error - Undefined name '_localizations' - lib\widgets\super_cupertino_navigation_wrapper.dart:389:54 - undefined_identifier
+warning - Unused import: 'package:get/get.dart' - lib\widgets\tag_manager_dialog\models\tag_manager_config.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\widgets\tag_manager_dialog\states\tag_manager_dialog_state.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\widgets\tag_manager_dialog\widgets\dialog_toolbar.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\widgets\tag_manager_dialog\widgets\tag_list.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\widgets\tag_manager_dialog\widgets\tag_manager_dialog.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\widgets\widget_config_editor\models\color_config.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\widgets\widget_config_editor\models\widget_config.dart:2:8 - unused_import
+warning - Unused import: 'package:get/get.dart' - lib\widgets\widget_config_editor\models\widget_size.dart:2:8 - unused_import
+   info - The package name 'Memento' isn't a lower_case_with_underscores identifier - pubspec.yaml:1:7 - package_names
+
+887 issues found. (ran in 8.5s)

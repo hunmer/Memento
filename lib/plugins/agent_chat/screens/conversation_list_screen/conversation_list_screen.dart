@@ -295,9 +295,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                   leading: const Icon(Icons.chat),
                   title: Text('agent_chat_channel'.tr),
                   subtitle: Text(
-                    AgentChatLocalizations.of(
-                      context,
-                    ).createNewConversationChannel,
+                    'agent_chat_createNewConversationChannel'.tr,
                   ),
                   onTap: () => Navigator.pop(context, 'channel'),
                 ),
@@ -815,7 +813,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     }
   }
 
-
   /// 会话菜单选择
   Future<void> _onConversationMenuSelected(
     String value,
@@ -835,7 +832,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         break;
     }
   }
-
 
   /// 显示编辑会话对话框
   Future<void> _showEditConversationDialog(Conversation conversation) async {

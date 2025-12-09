@@ -52,17 +52,17 @@ class ContactHomeWidgets {
   /// 返回联系人插件支持的所有统计项类型定义
   /// 实际数据值由 _buildOverviewWidget 在 FutureBuilder 中异步获取并更新
   static List<StatItemData> _getAvailableStats(BuildContext context) {
-    final l10n = ContactLocalizations.of(context);
+
     return [
       StatItemData(
         id: 'total_contacts',
-        label: l10n.totalContacts,
+        label: 'contact_totalContacts'.tr,
         value: '0', // 占位符，实际值由 _buildOverviewWidget 异步获取
         highlight: false,
       ),
       StatItemData(
         id: 'recent_contacts',
-        label: l10n.recentContacts,
+        label: 'contact_recentContacts'.tr,
         value: '0', // 占位符，实际值由 _buildOverviewWidget 异步获取
         highlight: false,
         color: Colors.green,
@@ -73,7 +73,6 @@ class ContactHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = ContactLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -97,7 +96,7 @@ class ContactHomeWidgets {
 
           // 使用通用小组件
           return GenericPluginWidget(
-            pluginName: l10n.name,
+            pluginName: 'contact_name'.tr,
             pluginIcon: Icons.contacts,
             pluginDefaultColor: Colors.deepPurple,
             availableItems: availableItems,
@@ -116,7 +115,6 @@ class ContactHomeWidgets {
       final plugin = PluginManager.instance.getPlugin('contact') as ContactPlugin?;
       if (plugin == null) return _getAvailableStats(context);
 
-      final l10n = ContactLocalizations.of(context);
       final controller = plugin.controller;
       final contacts = await controller.getAllContacts();
       final recentCount = await controller.getRecentlyContactedCount();
@@ -124,13 +122,13 @@ class ContactHomeWidgets {
       return [
         StatItemData(
           id: 'total_contacts',
-          label: l10n.totalContacts,
+          label: 'contact_totalContacts'.tr,
           value: '${contacts.length}',
           highlight: false,
         ),
         StatItemData(
           id: 'recent_contacts',
-          label: l10n.recentContacts,
+          label: 'contact_recentContacts'.tr,
           value: '$recentCount',
           highlight: recentCount > 0,
           color: Colors.green,

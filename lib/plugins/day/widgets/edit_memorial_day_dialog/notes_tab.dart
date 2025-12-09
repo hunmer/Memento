@@ -17,7 +17,7 @@ class NotesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = DayLocalizations.of(context);
+    final localizations = ;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

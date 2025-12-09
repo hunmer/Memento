@@ -7,6 +7,7 @@ import 'package:Memento/plugins/diary/models/diary_entry.dart';
 import 'package:Memento/plugins/diary/diary_plugin.dart';
 import 'package:Memento/plugins/diary/sample_data.dart';
 
+import 'package:get/get.dart';
 class DiaryUtils {
   static const String _pluginDir = 'diary';
 

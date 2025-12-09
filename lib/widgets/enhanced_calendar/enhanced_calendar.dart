@@ -279,8 +279,6 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
     );
   }
 
-
-
   // 预留方法：未来可以扩展头部右侧按钮功能
   // List<Widget> _buildRightActions(BuildContext context) {
   //   final actions = <Widget>[];

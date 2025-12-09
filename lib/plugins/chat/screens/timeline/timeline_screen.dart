@@ -105,11 +105,10 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ChatLocalizations.of(context);
 
     return SuperCupertinoNavigationWrapper(
-      title: Text(l10n.timelineTab),
-      largeTitle: l10n.timelineTab,
+      title: Text('chat_timelineTab'.tr),
+      largeTitle: 'chat_timelineTab'.tr,
       enableSearchBar: true,
       searchPlaceholder: '搜索消息...',
       onSearchChanged: (query) {
@@ -154,11 +153,11 @@ class _TimelineScreenState extends State<TimelineScreen> {
                 _controller.isFilterActive) {
               return Center(
                 child: Text(
-                  '${l10n.noMessagesFound} "${_controller.searchQuery}"',
+                  '${'chat_noMessagesFound'.tr} "${_controller.searchQuery}"',
                 ),
               );
             }
-            return Center(child: Text(l10n.noMessagesYet));
+            return Center(child: Text('chat_noMessagesYet'.tr));
           }
 
           return RefreshIndicator(

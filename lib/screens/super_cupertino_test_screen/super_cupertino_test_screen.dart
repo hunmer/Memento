@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import '../l10n/screens_localizations.dart';
-
 class SuperCupertinoTestScreen extends StatefulWidget {
   const SuperCupertinoTestScreen({super.key});
 

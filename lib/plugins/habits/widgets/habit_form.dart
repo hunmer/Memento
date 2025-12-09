@@ -56,7 +56,6 @@ class _HabitFormState extends State<HabitForm> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return Form(
       key: _formKey,
@@ -192,10 +191,10 @@ class _HabitFormState extends State<HabitForm> {
             const SizedBox(height: 24),
             TextFormField(
               controller: _titleController,
-              decoration: InputDecoration(labelText: l10n.title),
+              decoration: InputDecoration(labelText: 'habits_title'.tr),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return l10n.pleaseEnterTitle;
+                  return 'habits_pleaseEnterTitle'.tr;
                 }
                 return null;
               },
@@ -203,13 +202,13 @@ class _HabitFormState extends State<HabitForm> {
             const SizedBox(height: 16),
             TextField(
               controller: _notesController,
-              decoration: InputDecoration(labelText: l10n.notes),
+              decoration: InputDecoration(labelText: 'habits_notes'.tr),
               maxLines: 3,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _groupController,
-              decoration: InputDecoration(labelText: l10n.group),
+              decoration: InputDecoration(labelText: 'habits_group'.tr),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -226,11 +225,11 @@ class _HabitFormState extends State<HabitForm> {
                   _skills.any((s) => s.id == _selectedSkillId)
                       ? _selectedSkillId
                       : null,
-              decoration: InputDecoration(labelText: l10n.skill),
+              decoration: InputDecoration(labelText: 'habits_skill'.tr),
               items: [
                 DropdownMenuItem<String>(
                   value: null,
-                  child: Text(l10n.selectSkill),
+                  child: Text('habits_selectSkill'.tr),
                 ),
                 ..._skills.map((skill) {
                   return DropdownMenuItem<String>(
@@ -246,7 +245,7 @@ class _HabitFormState extends State<HabitForm> {
               },
               validator: (value) {
                 if (value == null) {
-                  return l10n.selectSkill;
+                  return 'habits_selectSkill'.tr;
                 }
                 return null;
               },
@@ -259,7 +258,7 @@ class _HabitFormState extends State<HabitForm> {
                   _saveHabit();
                 }
               },
-              child: Text(l10n.save),
+              child: Text('habits_save'.tr),
             ),
           ],
         ),

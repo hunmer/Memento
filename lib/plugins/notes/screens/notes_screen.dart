@@ -120,7 +120,6 @@ class _NotesMainViewState extends NotesMainViewState
     // 实现更多选项菜单
   }
 
-
   /// 保存滚动位置
   void _saveScrollPosition() {
     // 实现滚动位置保存

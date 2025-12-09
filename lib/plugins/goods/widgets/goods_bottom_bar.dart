@@ -74,18 +74,17 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
 
   /// 创建新仓库
   Future<void> _createWarehouse() async {
-    final l10n = GoodsLocalizations.of(context);
 
     await NavigationHelper.push(context, WarehouseForm(
               onSave: (warehouse) async {
                 try {
                   await widget.plugin.saveWarehouse(warehouse);
                   if (mounted) {
-                    Toast.success(l10n.warehouseCreated ?? '仓库已创建');
+                    Toast.success('goods_warehouseCreated'.tr ?? '仓库已创建');
                   }
                 } catch (e) {
                   if (mounted) {
-                    Toast.error('${l10n.createWarehouseFailed ?? '创建仓库失败'}: $e');
+                    Toast.error('${'goods_createWarehouseFailed'.tr ?? '创建仓库失败'}: $e');
                   }
                 }
               },
@@ -104,11 +103,10 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
 
   /// 添加物品
   Future<void> _addItem() async {
-    final l10n = GoodsLocalizations.of(context);
 
     // 如果没有仓库，提示先创建仓库
     if (widget.plugin.warehouses.isEmpty) {
-      Toast.info(l10n.createWarehouseFirst ?? '请先创建仓库');
+      Toast.info('goods_createWarehouseFirst'.tr ?? '请先创建仓库');
       return;
     }
 
@@ -120,11 +118,11 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
                   final warehouseId = widget.plugin.warehouses.first.id;
                   await widget.plugin.saveGoodsItem(warehouseId, item);
                   if (mounted) {
-                    Toast.success(l10n.itemCreated ?? '物品已创建');
+                    Toast.success('goods_itemCreated'.tr ?? '物品已创建');
                   }
                 } catch (e) {
                   if (mounted) {
-                    Toast.error('${l10n.createItemFailed ?? '创建物品失败'}: $e');
+                    Toast.error('${'goods_createItemFailed'.tr ?? '创建物品失败'}: $e');
                   }
                 }
               },

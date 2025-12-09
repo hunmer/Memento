@@ -6,7 +6,6 @@ import 'package:Memento/plugins/habits/widgets/habits_list/habits_view.dart';
 import 'package:Memento/plugins/habits/widgets/skills_list.dart';
 import 'package:Memento/plugins/habits/widgets/habit_form.dart';
 import 'package:Memento/plugins/habits/widgets/skill_form.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/core/widgets/keep_alive_wrapper.dart';
 import 'package:flutter/foundation.dart';
@@ -87,10 +86,10 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
 
   /// 添加习惯
   Future<void> _addHabit() async {
-    final l10n = HabitsLocalizations.of(context);
+
     await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
-                title: Text(l10n.newHabit),
+                title: Text('nfc_newHabit'.tr),
                 backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
               ),
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -104,10 +103,10 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
 
   /// 添加技能
   Future<void> _addSkill() async {
-    final l10n = HabitsLocalizations.of(context);
+
     await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
-                title: Text(l10n.createSkill),
+                title: Text('nfc_createSkill'.tr),
                 backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
               ),
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,

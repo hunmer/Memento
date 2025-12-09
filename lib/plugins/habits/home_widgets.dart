@@ -93,7 +93,6 @@ class HabitsHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = HabitsLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -114,7 +113,7 @@ class HabitsHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'habits_name'.tr,
         pluginIcon: Icons.auto_awesome,
         pluginDefaultColor: Colors.amber,
         availableItems: availableItems,

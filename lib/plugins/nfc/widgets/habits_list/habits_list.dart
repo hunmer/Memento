@@ -5,7 +5,6 @@ import 'package:Memento/plugins/habits/widgets/habit_form.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habits_app_bar.dart';
 
 class HabitsList extends StatefulWidget {
@@ -38,10 +37,10 @@ class _HabitsListState extends State<HabitsList> {
   }
 
   Future<void> _showHabitForm(BuildContext context, [Habit? habit]) async {
-    final l10n = HabitsLocalizations.of(context);
+
     await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
-                title: Text(habit == null ? l10n.createHabit : l10n.editHabit),
+                title: Text(habit == null ? 'nfc_createHabit'.tr : 'nfc_editHabit'.tr),
                 actions: [
                   if (habit != null)
                     IconButton(
@@ -74,7 +73,6 @@ class _HabitsListState extends State<HabitsList> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return Column(
       children: [

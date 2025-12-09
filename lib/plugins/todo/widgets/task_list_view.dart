@@ -272,19 +272,19 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
           return await showDialog<bool>(
             context: context,
             builder: (BuildContext context) {
-              final l10n = TodoLocalizations.of(context);
+
                 return AlertDialog(
-                title: Text(l10n.deleteTaskTitle),
-                content: Text('${l10n.deleteTaskMessage.replaceFirst('此任务', '')}"${widget.task.title}" 吗？'),
+                title: Text('todo_deleteTaskTitle'.tr),
+                content: Text('${'todo_deleteTaskMessage'.tr.replaceFirst('此任务', '')}"${widget.task.title}" 吗？'),
                 actions: <Widget>[
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: Text(l10n.cancel),
+                    child: Text('todo_cancel'.tr),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
                     style: TextButton.styleFrom(foregroundColor: Colors.red),
-                    child: Text(l10n.delete),
+                    child: Text('todo_delete'.tr),
                   ),
                 ],
               );
@@ -758,7 +758,6 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
       ),
     );
   }
-
 
   Widget _buildTag(
     String text,

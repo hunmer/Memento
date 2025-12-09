@@ -41,7 +41,6 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     controller = NotesController(storage);
     await controller.initialize();
 
-
     _isInitialized = true;
 
     // 注册 JS API（最后一步）

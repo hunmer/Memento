@@ -17,7 +17,7 @@ class MemorialDayListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = DayLocalizations.of(context);
+    final localizations = ;
 
     Widget content = Card(
       margin: const EdgeInsets.only(bottom: 8),

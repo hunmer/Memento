@@ -1,4 +1,3 @@
-import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
@@ -36,7 +35,7 @@ mixin NoteItem on NotesMainViewState, NoteOperations, FolderSelectionDialog {
                     ),
                     ListTile(
                       leading: const Icon(Icons.folder),
-                      title: Text(NodesLocalizations.of(context).moveTo),
+                      title: Text(.moveTo),
                       onTap: () {
                         Navigator.pop(context);
                         moveNote(note);

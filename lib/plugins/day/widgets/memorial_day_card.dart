@@ -69,7 +69,7 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final localizations = DayLocalizations.of(context);
+    final localizations = ;
 
     return Card(
       clipBehavior: Clip.antiAlias,

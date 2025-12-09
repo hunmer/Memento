@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class DialogActions extends StatelessWidget {
   final int selectedCount;
   final VoidCallback onClear;

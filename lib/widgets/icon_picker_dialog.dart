@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'custom_dialog.dart';
 import 'package:Memento/constants/app_icons.dart';
 
-
 class IconPickerDialog extends StatefulWidget {
   final IconData currentIcon;
   final bool enableIconToImage; // 是否启用图标转图片功能

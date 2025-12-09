@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
@@ -58,7 +57,7 @@ mixin NoteOperations on NotesMainViewState {
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 child: Text(
-                  NodesLocalizations.of(context).delete,
+                  .delete,
                   style: TextStyle(color: Colors.red),
                 ),
               ),

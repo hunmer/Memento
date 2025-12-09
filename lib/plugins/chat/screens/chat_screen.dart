@@ -48,11 +48,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ChatLocalizations.of(context);
 
     return SuperCupertinoNavigationWrapper(
-      title: Text(l10n.chatRoom),
-      largeTitle: l10n.chatRoom,
+      title: Text('chat_chatRoom'.tr),
+      largeTitle: 'chat_chatRoom'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: Column(
         children: [
@@ -99,7 +98,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   controller: _textController,
                   focusNode: _focusNode,
                   decoration: InputDecoration(
-                    hintText: l10n.enterMessage,
+                    hintText: 'chat_enterMessage'.tr,
                     border: InputBorder.none,
                   ),
                   onSubmitted: _handleSubmitted,

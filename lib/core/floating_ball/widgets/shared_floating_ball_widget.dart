@@ -192,7 +192,6 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
 
   double get _currentSize => widget.baseSize * _sizeScale;
 
-
   @override
   void dispose() {
     _longPressTimer?.cancel();
@@ -359,7 +358,6 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
   void _handleTap(TapDownDetails details) {
     final now = DateTime.now();
     final currentPosition = details.globalPosition;
-
 
     // 检查是否是双击
     if (_lastTapTime != null) {

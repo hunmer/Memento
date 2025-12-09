@@ -59,11 +59,11 @@ class GoodsHomeWidgets {
       final totalItems = plugin.getTotalItemsCount();
       final totalValue = plugin.getTotalItemsValue();
       final unusedItems = plugin.getUnusedItemsCount();
-      final l10n = GoodsLocalizations.of(context);
+
       return [
         StatItemData(
           id: 'total_quantity',
-          label: l10n.totalGoods,
+          label: 'goods_totalGoods'.tr,
           value: '$totalItems',
           highlight: false,
         ),
@@ -89,7 +89,6 @@ class GoodsHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = GoodsLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -110,7 +109,7 @@ class GoodsHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'goods_name'.tr,
         pluginIcon: Icons.dashboard,
         pluginDefaultColor: _goodsColor,
         availableItems: availableItems,

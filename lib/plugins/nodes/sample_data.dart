@@ -284,7 +284,6 @@ class NodesSampleData {
       isExpanded: true,
     );
 
-
     final widgetNode = Node(
       id: 'node-widget',
       title: 'Widget 组件',

@@ -44,12 +44,11 @@ class MessageInputActionsBuilder {
   /// 获取所有可用的消息输入动作
   List<MessageInputAction> buildActions() {
     final List<MessageInputAction> actions = [];
-    final chatLocalizations = ChatLocalizations.of(context);
 
     // 添加高级编辑器动作
     actions.add(
       MessageInputAction(
-        title: chatLocalizations.advancedEditor,
+        title: 'chat_advancedEditor'.tr,
         icon: Icons.edit_note,
         onTap:
             () => handleAdvancedEditor(
@@ -62,7 +61,7 @@ class MessageInputActionsBuilder {
     // 添加图片选择动作
     actions.add(
       MessageInputAction(
-        title: chatLocalizations.photo,
+        title: 'chat_photo'.tr,
         icon: Icons.photo,
         onTap:
             () => handleImageSelection(
@@ -77,7 +76,7 @@ class MessageInputActionsBuilder {
     // 添加拍照动作
     actions.add(
       MessageInputAction(
-        title: chatLocalizations.takePhoto,
+        title: 'chat_takePhoto'.tr,
         icon: Icons.camera_alt,
         onTap:
             () => handleImageSelection(
@@ -93,7 +92,7 @@ class MessageInputActionsBuilder {
     // 在Web平台上不支持视频拍摄，但我们仍然显示按钮，点击后会提示不支持
     actions.add(
       MessageInputAction(
-        title: chatLocalizations.recordVideo,
+        title: 'chat_recordVideo'.tr,
         icon: Icons.videocam,
         onTap:
             () => handleVideoSelection(
@@ -107,7 +106,7 @@ class MessageInputActionsBuilder {
     // 添加视频选择动作
     actions.add(
       MessageInputAction(
-        title: chatLocalizations.video,
+        title: 'chat_video'.tr,
         icon: Icons.video_library,
         onTap:
             () => handleLocalVideoSelection(
@@ -121,7 +120,7 @@ class MessageInputActionsBuilder {
     // 添加文件选择动作
     actions.add(
       MessageInputAction(
-        title: chatLocalizations.file,
+        title: 'chat_file'.tr,
         icon: Icons.attach_file,
         onTap:
             () => handleFileSelection(
@@ -137,7 +136,7 @@ class MessageInputActionsBuilder {
     if (!kIsWeb) {
       actions.add(
         MessageInputAction(
-          title: chatLocalizations.audioRecording,
+          title: 'chat_audioRecording'.tr,
           icon: Icons.mic,
           onTap:
               () => handleAudioRecording(
@@ -152,7 +151,7 @@ class MessageInputActionsBuilder {
     // 添加智能体动作
     actions.add(
       MessageInputAction(
-        title: chatLocalizations.smartAgent,
+        title: 'chat_smartAgent'.tr,
         icon: Icons.smart_toy,
         onTap: () {
           // 直接在文本框末尾添加 @ 符号，这会触发 MessageInput 中的处理逻辑

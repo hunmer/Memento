@@ -47,7 +47,6 @@ class UserService {
     }
   }
 
-
   UserService(this._plugin);
 
   Future<void> initialize() async {

@@ -37,10 +37,10 @@ class _HabitsListState extends State<HabitsList> {
   }
 
   Future<void> _showHabitForm(BuildContext context, [Habit? habit]) async {
-    final l10n = HabitsLocalizations.of(context);
+
     await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
-                title: Text(habit == null ? l10n.createHabit : l10n.editHabit),
+                title: Text(habit == null ? 'habits_createHabit'.tr : 'habits_editHabit'.tr),
                 actions: [
                   if (habit != null)
                     IconButton(
@@ -73,7 +73,6 @@ class _HabitsListState extends State<HabitsList> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return Column(
       children: [

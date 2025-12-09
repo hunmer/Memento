@@ -262,19 +262,19 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   // 构建任务列表视图（第一个tab）
   Widget _buildTaskListView() {
-    final l10n = TodoLocalizations.of(context);
+
     return SuperCupertinoNavigationWrapper(
-      title: Text(l10n.todoTasks),
-      largeTitle: l10n.todoTasks,
+      title: Text('todo_todoTasks'.tr),
+      largeTitle: 'todo_todoTasks'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       enableSearchBar: true,
-      searchPlaceholder: l10n.searchTasksHint,
+      searchPlaceholder: 'todo_searchTasksHint'.tr,
       enableSearchFilter: true,
       filterLabels: {
-        'title': l10n.searchTitle,
-        'description': l10n.searchDescription,
-        'tag': l10n.searchTag,
-        'subtask': l10n.searchSubtask,
+        'title': 'todo_searchTitle'.tr,
+        'description': 'todo_searchDescription'.tr,
+        'tag': 'todo_searchTag'.tr,
+        'subtask': 'todo_searchSubtask'.tr,
       },
       onSearchChanged: (query) {
         // 实时搜索功能
@@ -379,10 +379,10 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   // 构建历史记录视图（第二个tab）
   Widget _buildHistoryView() {
-    final l10n = TodoLocalizations.of(context);
+
     return SuperCupertinoNavigationWrapper(
-      title: Text(l10n.historyTitle),
-      largeTitle: l10n.historyTitle,
+      title: Text('todo_historyTitle'.tr),
+      largeTitle: 'todo_historyTitle'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         IconButton(
@@ -392,17 +392,17 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
               context: context,
               builder:
                   (context) => AlertDialog(
-                    title: Text(l10n.clearHistoryTitle),
-                    content: Text(l10n.clearHistoryMessage),
+                    title: Text('todo_clearHistoryTitle'.tr),
+                    content: Text('todo_clearHistoryMessage'.tr),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
-                        child: Text(l10n.cancel),
+                        child: Text('todo_cancel'.tr),
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context, true),
                         child: Text(
-                          l10n.clearHistoryAction,
+                          'todo_clearHistoryAction'.tr,
                           style: const TextStyle(color: Colors.red),
                         ),
                       ),
@@ -458,7 +458,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   // 构建搜索结果视图
   Widget _buildSearchResults() {
-    final l10n = TodoLocalizations.of(context);
+
     return AnimatedBuilder(
       animation: _plugin.taskController,
       builder: (context, _) {
@@ -476,7 +476,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  l10n.searchInputHint,
+                  'todo_searchInputHint'.tr,
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[600],
@@ -484,7 +484,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  l10n.searchSupportHint,
+                  'todo_searchSupportHint'.tr,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[500],
@@ -507,7 +507,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  l10n.noMatchingTasks,
+                  'todo_noMatchingTasks'.tr,
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[600],
@@ -515,7 +515,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  l10n.tryOtherKeywords,
+                  'todo_tryOtherKeywords'.tr,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[500],

@@ -72,7 +72,6 @@ class _StoreBottomBarState extends State<StoreBottomBar>
     });
   }
 
-
   /// 显示添加积分对话框
   void _showAddPointsDialog() {
     final TextEditingController pointsController = TextEditingController();

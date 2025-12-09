@@ -284,8 +284,6 @@ class ImageUtils {
     return absolutePath;
   }
 
-
-
   /// 根据文件路径判断图片类型
   static ImageType getImageType(String? imagePath) {
     if (imagePath == null || imagePath.isEmpty) {

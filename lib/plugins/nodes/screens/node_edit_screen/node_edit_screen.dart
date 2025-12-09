@@ -89,7 +89,7 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
 
   @override
   Widget build(BuildContext context) {
-    final l10n = NodesLocalizations.of(context);
+
     final controller = Provider.of<NodesController>(context);
 
     return Scaffold(
@@ -98,7 +98,7 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(widget.isNew ? l10n.addNode : l10n.editNode),
+        title: Text(widget.isNew ? 'nodes_addNode'.tr : 'nodes_editNode'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
@@ -108,9 +108,9 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: l10n.basicInfo),
-            Tab(text: l10n.dateAndFields),
-            Tab(text: l10n.notes),
+            Tab(text: 'nodes_basicInfo'.tr),
+            Tab(text: 'nodes_dateAndFields'.tr),
+            Tab(text: 'nodes_notes'.tr),
           ],
         ),
       ),
@@ -129,7 +129,7 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
   }
 
   // Tab 1: 基本信息
-  Widget _buildBasicInfoTab(BuildContext context, NodesController controller, NodesLocalizations l10n) {
+  Widget _buildBasicInfoTab(BuildContext context, NodesController controller, ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -148,7 +148,7 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
           TextField(
             controller: _titleController,
             decoration: InputDecoration(
-              labelText: l10n.nodeTitle,
+              labelText: 'nodes_nodeTitle'.tr,
               border: const OutlineInputBorder(),
             ),
           ),
@@ -192,7 +192,7 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
   }
 
   // Tab 2: 时间与字段
-  Widget _buildDateAndFieldsTab(BuildContext context, NodesLocalizations l10n) {
+  Widget _buildDateAndFieldsTab(BuildContext context, ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -235,7 +235,7 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
   }
 
   // Tab 3: 笔记内容
-  Widget _buildNotesTab(BuildContext context, NodesLocalizations l10n) {
+  Widget _buildNotesTab(BuildContext context, ) {
     return Column(
       children: [
         // Quill 工具栏

@@ -106,7 +106,6 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   Future<void> initialize() async {
     _controller = NodesController(storage);
 
-
     _isInitialized = true;
 
     // 注册 JS API（最后一步）

@@ -178,14 +178,14 @@ class _WarehouseFormState extends State<WarehouseForm> {
   }
 
   void _delete() async {
-    final l10n = GoodsLocalizations.of(context);
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(l10n.confirmDelete),
+            title: Text('goods_confirmDelete'.tr),
             content: Text(
-              l10n.confirmDeleteWarehouseMessage.replaceFirst(
+              'goods_confirmDeleteWarehouseMessage'.tr.replaceFirst(
                 '%s',
                 widget.warehouse!.title,
               ),
@@ -218,7 +218,6 @@ class _WarehouseFormState extends State<WarehouseForm> {
   Widget build(BuildContext context) {
     final isEdit = widget.warehouse != null;
     final theme = Theme.of(context);
-    final l10n = GoodsLocalizations.of(context);
 
     return Scaffold(
       body: SafeArea(
@@ -236,8 +235,8 @@ class _WarehouseFormState extends State<WarehouseForm> {
                   Expanded(
                     child: Text(
                       isEdit
-                          ? (l10n.editWarehouseTitle)
-                          : (l10n.createWarehouse ?? '新建仓库'),
+                          ? ('goods_editWarehouseTitle'.tr)
+                          : ('goods_createWarehouse'.tr ?? '新建仓库'),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
@@ -328,7 +327,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
                           Padding(
                             padding: const EdgeInsets.only(left: 4, bottom: 8),
                             child: Text(
-                              l10n.warehouseName,
+                              'goods_warehouseName'.tr,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.hintColor,
                                 fontWeight: FontWeight.w500,
@@ -340,7 +339,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
                             textAlign: TextAlign.center,
                             style: const TextStyle(fontSize: 18),
                             decoration: InputDecoration(
-                              hintText: l10n.warehouseNameHint,
+                              hintText: 'goods_warehouseNameHint'.tr,
                               filled: true,
                               fillColor: theme.cardColor,
                               border: OutlineInputBorder(
@@ -371,7 +370,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
                           foregroundColor: theme.colorScheme.error,
                         ),
                         icon: const Icon(Icons.delete_outline),
-                        label: Text(l10n.deleteWarehouse),
+                        label: Text('goods_deleteWarehouse'.tr),
                         onPressed: _delete,
                       ),
                     ],
@@ -395,7 +394,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
                     shadowColor: _selectedColor.withValues(alpha: 0.4),
                   ),
                   child: Text(
-                    isEdit ? (l10n.save) : (l10n.confirm),
+                    isEdit ? ('goods_save'.tr) : ('goods_confirm'.tr),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

@@ -1,7 +1,7 @@
 import 'tts_localizations.dart';
 
 /// TTS插件中文本地化
-class TTSLocalizationsZh extends TTSLocalizations {
+class TTSLocalizationsZh extends {
   TTSLocalizationsZh(super.locale);
   @override
   String get name => '语音朗读';

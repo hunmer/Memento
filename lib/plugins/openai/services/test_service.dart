@@ -45,7 +45,7 @@ class TestService {
     Map<String, dynamic>? formValues,
   }) async {
     // 获取本地化实例
-    final l10n = OpenAILocalizations.of(context);
+
     // 如果没有提供初始值，则尝试加载上次输入的文本
     String loadedInitialValue = initialValue ?? await getLastInput();
 
@@ -54,8 +54,8 @@ class TestService {
       barrierDismissible: false, // 防止点击外部关闭对话框导致控制器过早处置
       builder: (BuildContext dialogContext) {
         return _TextInputDialog(
-          title: title ?? l10n.testInput,
-          hintText: hintText ?? l10n.enterTestText,
+          title: title ?? 'openai_testInput'.tr,
+          hintText: hintText ?? 'openai_enterTestText'.tr,
           initialValue: loadedInitialValue,
           enableImagePicker: enableImagePicker,
           testAgent: testAgent,
@@ -142,12 +142,12 @@ API端点: ${agent.baseUrl}
       final l10n = OpenAILocalizations.defaultLocalizations;
       return '''
 错误: 请求处理失败
-${l10n.errorDetails}: ${e.toString()}
+${'openai_errorDetails'.tr}: ${e.toString()}
 
-${l10n.checkItems}:
-1. ${l10n.apiKeyConfig}
-2. ${l10n.networkConnection}
-3. ${l10n.serviceEndpoint}
+${'openai_checkItems'.tr}:
+1. ${'openai_apiKeyConfig'.tr}
+2. ${'openai_networkConnection'.tr}
+3. ${'openai_serviceEndpoint'.tr}
 ''';
     }
   }
@@ -161,7 +161,6 @@ ${l10n.checkItems}:
 
     // 使用独立的context避免MediaQuery依赖问题
     // 获取本地化实例
-    final l10n = OpenAILocalizations.of(context);
 
     showDialog(
       context: context,
@@ -169,7 +168,7 @@ ${l10n.checkItems}:
       useRootNavigator: true,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text(l10n.testResponse),
+          title: Text('openai_testResponse'.tr),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,7 +178,7 @@ ${l10n.checkItems}:
                 if (containsImageUrl) ...[
                   const SizedBox(height: 16),
                   Text(
-                    '${l10n.previewImages}:',
+                    '${'openai_previewImages'.tr}:',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
@@ -190,7 +189,7 @@ ${l10n.checkItems}:
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(l10n.close),
+              child: Text('openai_close'.tr),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
@@ -208,10 +207,9 @@ ${l10n.checkItems}:
     final matches = urlRegex.allMatches(response);
 
     // 获取本地化实例
-    final l10n = OpenAILocalizations.of(context);
 
     if (matches.isEmpty) {
-      return Text(l10n.imageLoadFailed);
+      return Text('openai_imageLoadFailed'.tr);
     }
 
     // 使用ValueKey生成唯一键以避免重复键问题
@@ -266,7 +264,7 @@ ${l10n.checkItems}:
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Text(l10n.imageLoadFailed),
+                          child: Text('openai_imageLoadFailed'.tr),
                         );
                       },
                     ),
@@ -343,8 +341,8 @@ class _TextInputDialogState extends State<_TextInputDialog> {
     } catch (e) {
       debugPrint('加载上次输入失败: $e');
       if (!_isDisposed) {
-        final l10n = OpenAILocalizations.of(context);
-        toastService.showToast(l10n.lastInputLoadFailed);
+
+        toastService.showToast('openai_lastInputLoadFailed'.tr);
       }
     } finally {
       if (!_isDisposed) {
@@ -378,8 +376,8 @@ class _TextInputDialogState extends State<_TextInputDialog> {
     final input = _controller.text.trim();
     if (input.isEmpty) {
       if (!_isDisposed) {
-        final l10n = OpenAILocalizations.of(context);
-        toastService.showToast(l10n.enterTestText);
+
+        toastService.showToast('openai_enterTestText'.tr);
       }
       return;
     }
@@ -426,7 +424,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
     return AlertDialog(
       title: Builder(
         builder: (context) {
-          final l10n = OpenAILocalizations.of(context);
+
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -441,7 +439,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                         : const Icon(Icons.refresh, size: 20),
-                tooltip: l10n.loadLastInput,
+                tooltip: 'openai_loadLastInput'.tr,
                 onPressed: _isLoading ? null : _loadLastInput,
               ),
             ],
@@ -470,11 +468,11 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                   children: [
                     Builder(
                       builder: (context) {
-                        final l10n = OpenAILocalizations.of(context);
+
                         return ElevatedButton.icon(
                           onPressed: _pickImage,
                           icon: const Icon(Icons.image),
-                          label: Text(l10n.selectImage),
+                          label: Text('openai_selectImage'.tr),
                         );
                       },
                     ),
@@ -483,13 +481,13 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                     Expanded(
                       child: Builder(
                         builder: (context) {
-                          final l10n = OpenAILocalizations.of(context);
+
                           return _selectedImage != null
                               ? Text(
-                                '${l10n.selectedImage}: ${_selectedImage!.path.split('/').last}',
+                                '${'openai_selectedImage'.tr}: ${_selectedImage!.path.split('/').last}',
                                 overflow: TextOverflow.ellipsis,
                               )
-                              : Text(l10n.noImageSelected);
+                              : Text('openai_noImageSelected'.tr);
                         },
                       ),
                     ),
@@ -497,14 +495,14 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                     const SizedBox(width: 8),
                     Builder(
                       builder: (context) {
-                        final l10n = OpenAILocalizations.of(context);
+
                         return TextButton(
                           onPressed: () {
                             setState(() {
                               _testResult = null;
                             });
                           },
-                          child: Text(l10n.clearOutput),
+                          child: Text('openai_clearOutput'.tr),
                         );
                       },
                     ),
@@ -529,9 +527,9 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                 const SizedBox(height: 8),
                 Builder(
                   builder: (context) {
-                    final l10n = OpenAILocalizations.of(context);
+
                     return Text(
-                      l10n.testResponse,
+                      'openai_testResponse'.tr,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -577,7 +575,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
       actions: <Widget>[
         Builder(
           builder: (context) {
-            final l10n = OpenAILocalizations.of(context);
+
             return TextButton(
               onPressed:
                   _isTesting
@@ -587,7 +585,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                           Navigator.of(context).pop();
                         }
                       },
-              child: Text(l10n.close),
+              child: Text('openai_close'.tr),
             );
           },
         ),
@@ -595,19 +593,19 @@ class _TextInputDialogState extends State<_TextInputDialog> {
         if (widget.testAgent != null)
           Builder(
             builder: (context) {
-              final l10n = OpenAILocalizations.of(context);
+
               return ElevatedButton(
                 onPressed: _isTesting ? null : _runTest,
-                child: Text(l10n.testAgent),
+                child: Text('openai_testAgent'.tr),
               );
             },
           )
         else
           Builder(
             builder: (context) {
-              final l10n = OpenAILocalizations.of(context);
+
               return TextButton(
-                child: Text(l10n.save),
+                child: Text('openai_save'.tr),
                 onPressed: () {
                   if (!_isDisposed) {
                     final text = _controller.text;

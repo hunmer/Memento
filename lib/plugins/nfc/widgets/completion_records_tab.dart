@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
@@ -41,7 +40,6 @@ class _SkillRecordHistoryListState extends State<SkillRecordHistoryList> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return CommonRecordList<CompletionRecord>(
       records: _records,
@@ -49,7 +47,7 @@ class _SkillRecordHistoryListState extends State<SkillRecordHistoryList> {
       onDelete: widget.controller.deleteCompletionRecord,
       getDate: (record) => record.date.toString(),
       getNotes: (record) => record.notes,
-      getDeleteMessage: () => l10n.recordDeleted,
+      getDeleteMessage: () => 'nfc_recordDeleted'.tr,
       itemKey: (record) => Key(record.id),
     );
   }
@@ -58,13 +56,13 @@ class _SkillRecordHistoryListState extends State<SkillRecordHistoryList> {
     BuildContext context,
     CompletionRecord record,
   ) async {
-    final l10n = HabitsLocalizations.of(context);
+
     return await showDialog<bool>(
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(l10n.deleteRecord),
-                content: Text(l10n.deleteRecordMessage),
+                title: Text('nfc_deleteRecord'.tr),
+                content: Text('nfc_deleteRecordMessage'.tr),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
@@ -96,7 +94,6 @@ class CompletionRecordsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return FutureBuilder(
       future: Future.wait([
@@ -119,11 +116,11 @@ class CompletionRecordsTab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${l10n.completions}: $count',
+                    '${'nfc_completions'.tr}: $count',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Text(
-                    '${l10n.totalDuration}: ${HabitsUtils.formatDuration(duration)}',
+                    '${'nfc_totalDuration'.tr}: ${HabitsUtils.formatDuration(duration)}',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   if (skill.description != null) ...[

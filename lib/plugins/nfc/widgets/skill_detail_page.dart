@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/widgets/completion_records_tab.dart';
 import 'package:Memento/plugins/habits/widgets/statistics_tab.dart';
@@ -30,7 +29,6 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -54,11 +52,11 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
         items: [
           BottomNavigationBarItem(
             icon: const Icon(Icons.list),
-            label: l10n.records,
+            label: 'nfc_records'.tr,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.bar_chart),
-            label: l10n.statistics,
+            label: 'nfc_statistics'.tr,
           ),
         ],
       ),
@@ -83,7 +81,7 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
   }
 
   Future<void> _navigateToEdit(BuildContext context) async {
-    HabitsLocalizations.of(context);
+    ;
     await NavigationHelper.push(
       context,
       SkillForm(
@@ -98,24 +96,24 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
   }
 
   Future<void> _confirmDelete(BuildContext context) async {
-    final l10n = HabitsLocalizations.of(context);
+
     return showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(l10n.deleteSkill),
-            content: Text(l10n.deleteSkillConfirmation),
+            title: Text('nfc_deleteSkill'.tr),
+            content: Text('nfc_deleteSkillConfirmation'.tr),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel),
+                child: Text('nfc_cancel'.tr),
               ),
               TextButton(
                 onPressed: () async {
                   await widget.skillController.deleteSkill(widget.skill.id);
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
-                child: Text(l10n.delete),
+                child: Text('nfc_delete'.tr),
               ),
             ],
           ),

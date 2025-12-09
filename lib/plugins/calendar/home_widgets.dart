@@ -58,7 +58,7 @@ class CalendarHomeWidgets {
       final eventCount = allEvents.length;
 
       // 获取7天内的活动数量
-      final l10n = CalendarLocalizations.of(context);
+
       final now = DateTime.now();
       final sevenDaysLater = now.add(const Duration(days: 7));
       final upcomingEventCount = allEvents.where((event) {
@@ -74,20 +74,20 @@ class CalendarHomeWidgets {
       return [
         StatItemData(
           id: 'event_count',
-          label: l10n.activityCount,
+          label: 'calendar_activityCount'.tr,
           value: '$eventCount',
           highlight: false,
         ),
         StatItemData(
           id: 'week_events',
-          label: l10n.sevenDaysActivity,
+          label: 'calendar_sevenDaysActivity'.tr,
           value: '$upcomingEventCount',
           highlight: upcomingEventCount > 0,
           color: Colors.orange,
         ),
         StatItemData(
           id: 'expired_events',
-          label: l10n.expiredActivity,
+          label: 'calendar_expiredActivity'.tr,
           value: '$expiredEventCount',
           highlight: expiredEventCount > 0,
           color: Colors.red,
@@ -101,7 +101,6 @@ class CalendarHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = CalendarLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -122,7 +121,7 @@ class CalendarHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'calendar_name'.tr,
         pluginIcon: Icons.calendar_month,
         pluginDefaultColor: const Color.fromARGB(255, 211, 91, 91),
         availableItems: availableItems,

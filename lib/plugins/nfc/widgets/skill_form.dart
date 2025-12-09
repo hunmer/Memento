@@ -5,7 +5,6 @@ import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 
@@ -47,7 +46,6 @@ class _SkillFormState extends State<SkillForm> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -217,7 +215,7 @@ class _SkillFormState extends State<SkillForm> {
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 16),
-          ElevatedButton(onPressed: _saveSkill, child: Text(l10n.save)),
+          ElevatedButton(onPressed: _saveSkill, child: Text('nfc_save'.tr)),
         ],
       ),
     );

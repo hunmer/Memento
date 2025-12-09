@@ -1,6 +1,6 @@
 import 'group_selector_localizations.dart';
 
-class GroupSelectorLocalizationsZh extends GroupSelectorLocalizations {
+class GroupSelectorLocalizationsZh extends {
   GroupSelectorLocalizationsZh() : super('zh');
 
   @override

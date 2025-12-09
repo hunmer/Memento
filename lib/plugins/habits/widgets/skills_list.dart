@@ -107,10 +107,10 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
+
     return SuperCupertinoNavigationWrapper(
-      title: Text(l10n.skills),
-      largeTitle: l10n.skills,
+      title: Text('habits_skills'.tr),
+      largeTitle: 'habits_skills'.tr,
       enableLargeTitle: true,
       enableSearchBar: true,
       searchPlaceholder: '搜索技能标题、描述或分组',
@@ -184,12 +184,12 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
       );
     }
 
-    return _buildCardView(_filteredSkills, HabitsLocalizations.of(context));
+    return _buildCardView(_filteredSkills, );
   }
 
   /// 显示排序菜单
   void _showSortMenu() {
-    final l10n = HabitsLocalizations.of(context);
+
     showModalBottomSheet(
       context: context,
       builder:
@@ -198,7 +198,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
             children: [
               ListTile(
                 leading: const Icon(Icons.sort_by_alpha),
-                title: Text(l10n.sortByName),
+                title: Text('habits_sortByName'.tr),
                 onTap: () {
                   setState(() {
                     _skills.sort((a, b) => a.title.compareTo(b.title));
@@ -208,7 +208,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
               ),
               ListTile(
                 leading: const Icon(Icons.format_list_numbered),
-                title: Text(l10n.sortByCompletions),
+                title: Text('habits_sortByCompletions'.tr),
                 onTap: () async {
                   final counts = await Future.wait(
                     _skills.map(
@@ -230,7 +230,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
               ),
               ListTile(
                 leading: const Icon(Icons.timer),
-                title: Text(l10n.sortByDuration),
+                title: Text('habits_sortByDuration'.tr),
                 onTap: () async {
                   final durations = await Future.wait(
                     _skills.map(
@@ -255,7 +255,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildCardView(List<Skill> skills, HabitsLocalizations l10n) {
+  Widget _buildCardView(List<Skill> skills, ) {
     // 按group分组
     final groupedSkills = <String, List<Skill>>{};
     for (final skill in skills) {

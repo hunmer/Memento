@@ -18,7 +18,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 class HabitSearchResultsWidget extends StatelessWidget {
   final List<Habit> habits;
   final HabitController controller;
-  final HabitsLocalizations l10n;
+  final ;
   final Function(Habit)? onHabitTap;
 
   const HabitSearchResultsWidget({
@@ -172,10 +172,10 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
   }
 
   Future<void> _showHabitForm(BuildContext context, [Habit? habit]) async {
-    final l10n = HabitsLocalizations.of(context);
+
     await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
-                title: Text(habit == null ? l10n.createHabit : l10n.editHabit),
+                title: Text(habit == null ? 'habits_createHabit'.tr : 'habits_editHabit'.tr),
                 actions: [
                   if (habit != null)
                     IconButton(
@@ -200,7 +200,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
     );
   }
 
-  Widget _buildCardView(List<Habit> habits, HabitsLocalizations l10n) {
+  Widget _buildCardView(List<Habit> habits, ) {
     final habitsPlugin =
         PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
     final skillController = habitsPlugin?.getSkillController();
@@ -231,10 +231,10 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
+
     return SuperCupertinoNavigationWrapper(
-      title: Text(l10n.habits),
-      largeTitle: l10n.habits,
+      title: Text('habits_habits'.tr),
+      largeTitle: 'habits_habits'.tr,
       enableLargeTitle: true,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       enableSearchBar: true, // 启用搜索栏

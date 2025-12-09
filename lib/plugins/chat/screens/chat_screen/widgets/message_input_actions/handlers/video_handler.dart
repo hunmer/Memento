@@ -16,12 +16,7 @@ Future<void> handleVideoSelection({
 }) async {
   // 检查是否在Web平台上
   if (kIsWeb) {
-    toastService.showToast(
-      LocalVideoHandlerLocalizations.getText(
-        context,
-        LocalVideoHandlerLocalizations.videoCantBeSelectedOnWeb,
-      ),
-    );
+    toastService.showToast('chat_videoNotSupportedOnWeb'.tr);
     return;
   }
 
@@ -37,12 +32,7 @@ Future<void> handleVideoSelection({
           // 将视频转换为文件
           final File videoFile = File(video.path);
           if (!await videoFile.exists()) {
-            toastService.showToast(
-              LocalVideoHandlerLocalizations.getText(
-                context,
-                LocalVideoHandlerLocalizations.videoFileNotExist,
-              ),
-            );
+            toastService.showToast('chat_videoNotExist'.tr);
             return;
           }
 
@@ -80,21 +70,13 @@ Future<void> handleVideoSelection({
           onFileSelected?.call(metadata);
         } catch (processingError) {
           toastService.showToast(
-            LocalVideoHandlerLocalizations.getText(
-              context,
-              LocalVideoHandlerLocalizations.videoProcessingFailed,
-              processingError.toString(),
-            ),
+            'chat_videoProcessingFailed'.trParams({'processingError': processingError.toString()}),
           );
         }
       }
     } catch (e) {
       toastService.showToast(
-        LocalVideoHandlerLocalizations.getText(
-          context,
-          LocalVideoHandlerLocalizations.videoSelectionFailed,
-          e.toString(),
-        ),
+        'chat_videoSelectionFailed'.trParams({'e': e.toString()}),
       );
     }
     return; // 在 macOS 上处理完成后返回，不执行下面的相机拍摄代码
@@ -113,12 +95,7 @@ Future<void> handleVideoSelection({
         // 将视频转换为文件
         final File videoFile = File(video.path);
         if (!await videoFile.exists()) {
-          toastService.showToast(
-            LocalVideoHandlerLocalizations.getText(
-              context,
-              LocalVideoHandlerLocalizations.videoFileNotExist,
-            ),
-          );
+          toastService.showToast('chat_videoNotExist'.tr);
           return;
         }
 
@@ -157,25 +134,17 @@ Future<void> handleVideoSelection({
 
         // 显示视频选择成功的提示
         toastService.showToast(
-          '${LocalVideoHandlerLocalizations.getText(context, LocalVideoHandlerLocalizations.videoSent)}: ${path.basename(video.path)}',
+          '${'chat_videoSent'.tr}: ${path.basename(video.path)}',
         );
       } catch (processingError) {
         toastService.showToast(
-          LocalVideoHandlerLocalizations.getText(
-            context,
-            LocalVideoHandlerLocalizations.videoProcessingFailed,
-            processingError.toString(),
-          ),
+          'chat_videoProcessingFailed'.trParams({'processingError': processingError.toString()}),
         );
       }
     }
   } catch (e) {
     toastService.showToast(
-      LocalVideoHandlerLocalizations.getText(
-        context,
-        LocalVideoHandlerLocalizations.videoSelectionFailed,
-        e.toString(),
-      ),
+      'chat_videoSelectionFailed'.trParams({'e': e.toString()}),
     );
   }
 }

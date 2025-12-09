@@ -112,7 +112,6 @@ class ScriptLoader {
     }
   }
 
-
   /// Web平台扫描脚本（使用索引文件）
   Future<List<ScriptInfo>> _scanScriptsWeb(String scriptsPath) async {
     try {

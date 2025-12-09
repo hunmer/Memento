@@ -658,9 +658,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                AgentChatLocalizations.of(
-                                  context,
-                                ).allToolsEnabled,
+                                'agent_chat_allToolsEnabled'.tr,
                               ),
                       ],
                     ),

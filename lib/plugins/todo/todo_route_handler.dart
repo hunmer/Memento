@@ -154,7 +154,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
   }
 
   void _showTaskDetailDialog(BuildContext context, Task task) {
-    final l10n = TodoLocalizations.of(context);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -166,7 +166,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
             children: [
               if (task.description != null && task.description!.isNotEmpty) ...[
                 Text(
-                  l10n.description,
+                  'todo_description'.tr,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -177,7 +177,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
               ],
               if (task.tags.isNotEmpty) ...[
                 Text(
-                  l10n.tags,
+                  'todo_tags'.tr,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -196,7 +196,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
                 const SizedBox(height: 16),
               ],
               Text(
-                l10n.timer,
+                'todo_timer'.tr,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -218,7 +218,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
                 children: [
                   ElevatedButton.icon(
                     icon: const Icon(Icons.play_arrow),
-                    label: Text(l10n.start),
+                    label: Text('todo_start'.tr),
                     onPressed: task.status != TaskStatus.inProgress
                         ? () {
                             _plugin.taskController.updateTaskStatus(
@@ -231,7 +231,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
                   ),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.pause),
-                    label: Text(l10n.pause),
+                    label: Text('todo_pause'.tr),
                     onPressed: task.status == TaskStatus.inProgress
                         ? () {
                             _plugin.taskController.updateTaskStatus(
@@ -244,7 +244,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
                   ),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.check),
-                    label: Text(l10n.complete),
+                    label: Text('todo_complete'.tr),
                     onPressed: task.status != TaskStatus.done
                         ? () {
                             _plugin.taskController.updateTaskStatus(
@@ -263,7 +263,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.close),
+            child: Text('todo_close'.tr),
           ),
           TextButton(
             onPressed: () {
@@ -279,23 +279,23 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
                 ),
               );
             },
-            child: Text(l10n.edit),
+            child: Text('todo_edit'.tr),
           ),
           TextButton(
             onPressed: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text(l10n.deleteTask),
-                  content: Text(l10n.confirmDeleteThisTask),
+                  title: Text('todo_deleteTask'.tr),
+                  content: Text('todo_confirmDeleteThisTask'.tr),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: Text(l10n.cancel),
+                      child: Text('todo_cancel'.tr),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: Text(l10n.delete),
+                      child: Text('todo_delete'.tr),
                     ),
                   ],
                 ),
@@ -307,7 +307,7 @@ class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail>
               }
             },
             child: Text(
-              l10n.delete,
+              'todo_delete'.tr,
               style: const TextStyle(color: Colors.red),
             ),
           ),

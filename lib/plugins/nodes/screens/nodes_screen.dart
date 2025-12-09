@@ -29,7 +29,7 @@ class _NodesScreenState extends State<NodesScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<NodesController>(context, listen: true);
-    final l10n = NodesLocalizations.of(context);
+
     final currentNotebook = controller.getNotebook(widget.notebook.id);
     final theme = Theme.of(context);
 
@@ -70,14 +70,14 @@ class _NodesScreenState extends State<NodesScreen> {
                   value: 'copy',
                   child: ListTile(
                     leading: const Icon(Icons.copy),
-                    title: Text(l10n.copyToText),
+                    title: Text('nodes_copyToText'.tr),
                   ),
                 ),
                 PopupMenuItem<String>(
                   value: 'clear',
                   child: ListTile(
                     leading: const Icon(Icons.clear_all),
-                    title: Text(l10n.clearNodes),
+                    title: Text('nodes_clearNodes'.tr),
                   ),
                 ),
               ],
@@ -86,7 +86,7 @@ class _NodesScreenState extends State<NodesScreen> {
       body: Stack(
         children: [
           currentNotebook?.nodes.isEmpty ?? true
-              ? Center(child: Text(l10n.noNodesYet))
+              ? Center(child: Text('nodes_noNodesYet'.tr))
               : ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: currentNotebook?.nodes.length ?? 0,
@@ -157,25 +157,25 @@ class _NodesScreenState extends State<NodesScreen> {
     NodesController controller,
     Notebook notebook,
   ) {
-    final l10n = NodesLocalizations.of(context);
+
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(l10n.clearNodesTitle),
-            content: Text(l10n.clearNodesConfirm),
+            title: Text('nodes_clearNodesTitle'.tr),
+            content: Text('nodes_clearNodesConfirm'.tr),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel),
+                child: Text('nodes_cancel'.tr),
               ),
               TextButton(
                 onPressed: () {
                   controller.clearNodes(notebook.id);
                   Navigator.pop(context);
-                  Toast.success(l10n.nodesCleared);
+                  Toast.success('nodes_nodesCleared'.tr);
                 },
-                child: Text(l10n.clear),
+                child: Text('nodes_clear'.tr),
               ),
             ],
           ),

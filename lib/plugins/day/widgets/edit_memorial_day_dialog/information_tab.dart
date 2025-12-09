@@ -17,7 +17,7 @@ class InformationTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localizations = DayLocalizations.of(context);
+    final localizations = ;
 
     return SingleChildScrollView(
       child: Column(

@@ -52,11 +52,11 @@ class _FilterDialogState extends State<FilterDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ChatLocalizations.of(context);
+
     final theme = Theme.of(context);
 
     return AlertDialog(
-      title: Text(l10n.advancedFilter),
+      title: Text('chat_advancedFilter'.tr),
       content: SizedBox(
         width: double.maxFinite,
         child: ListView(
@@ -64,13 +64,13 @@ class _FilterDialogState extends State<FilterDialog> {
           children: [
             // 搜索范围选项
             Text(
-              l10n.searchIn,
+              'chat_searchIn'.tr,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
 
             CheckboxListTile(
-              title: Text(l10n.channelNames),
+              title: Text('chat_channelNames'.tr),
               value: _filter.includeChannels,
               onChanged: (value) {
                 setState(() {
@@ -81,7 +81,7 @@ class _FilterDialogState extends State<FilterDialog> {
             ),
 
             CheckboxListTile(
-              title: Text(l10n.usernames),
+              title: Text('chat_usernames'.tr),
               value: _filter.includeUsernames,
               onChanged: (value) {
                 setState(() {
@@ -92,7 +92,7 @@ class _FilterDialogState extends State<FilterDialog> {
             ),
 
             CheckboxListTile(
-              title: Text(l10n.messageContent),
+              title: Text('chat_messageContent'.tr),
               value: _filter.includeContent,
               onChanged: (value) {
                 setState(() {
@@ -143,7 +143,7 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 日期范围选择
             Text(
-              l10n.dateRange,
+              'chat_dateRange'.tr,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -156,7 +156,7 @@ class _FilterDialogState extends State<FilterDialog> {
                     label: Text(
                       _filter.startDate != null
                           ? '${_filter.startDate!.day}/${_filter.startDate!.month}/${_filter.startDate!.year}'
-                          : l10n.startDate,
+                          : 'chat_startDate'.tr,
                     ),
                     onPressed: () => _selectDate(context, true),
                   ),
@@ -168,7 +168,7 @@ class _FilterDialogState extends State<FilterDialog> {
                     label: Text(
                       _filter.endDate != null
                           ? '${_filter.endDate!.day}/${_filter.endDate!.month}/${_filter.endDate!.year}'
-                          : l10n.endDate,
+                          : 'chat_endDate'.tr,
                     ),
                     onPressed: () => _selectDate(context, false),
                   ),
@@ -186,7 +186,7 @@ class _FilterDialogState extends State<FilterDialog> {
                       _filter.endDate = null;
                     });
                   },
-                  child: Text(l10n.clearDates),
+                  child: Text('chat_clearDates'.tr),
                 ),
               ),
 
@@ -194,13 +194,13 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 频道选择
             Text(
-              l10n.selectChannels,
+              'chat_selectChannels'.tr,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
 
             if (_availableChannels.isEmpty)
-              Text(l10n.noChannelsAvailable)
+              Text('chat_noChannelsAvailable'.tr)
             else
               Wrap(
                 spacing: 8,
@@ -230,13 +230,13 @@ class _FilterDialogState extends State<FilterDialog> {
 
             // 用户选择
             Text(
-              l10n.selectUsers,
+              'chat_selectUsers'.tr,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
 
             if (_availableUsers.isEmpty)
-              Text(l10n.noUsersAvailable)
+              Text('chat_noUsersAvailable'.tr)
             else
               Wrap(
                 spacing: 8,

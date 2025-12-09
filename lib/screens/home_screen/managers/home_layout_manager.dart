@@ -587,7 +587,6 @@ class HomeLayoutManager extends ChangeNotifier {
     await _syncActiveLayout(_items.map((item) => item.toJson()).toList());
   }
 
-
   /// 获取当前活动的布局配置
   Future<LayoutConfig?> getCurrentLayoutConfig() async {
     if (_activeLayoutId == null) {

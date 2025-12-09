@@ -145,8 +145,7 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = GoodsLocalizations.of(context);
-    
+
     // Calculate daily cost
     double? dailyCost;
     if (widget.item.totalPrice != null && widget.item.purchaseDate != null) {
@@ -260,14 +259,14 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
                         ),
                         const SizedBox(width: 2),
                         Text(
-                          l10n.dailyCost,
+                          'goods_dailyCost'.tr,
                           style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
                         ),
                       ],
                     ),
                     Text(
                       dailyCost != null 
-                          ? '¥${dailyCost.toStringAsFixed(3)}/${l10n.day}'
+                          ? '¥${dailyCost.toStringAsFixed(3)}/${'goods_day'.tr}'
                           : '-',
                       style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
                     ),
@@ -291,7 +290,7 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
                           const SizedBox(width: 2),
                           Expanded(
                             child: Text(
-                              widget.item.tags.isNotEmpty ? widget.item.tags.first : l10n.noItems.replaceAll('没有物品', '未分类').replaceAll('No Items', 'Uncategorized'), // Fallback
+                              widget.item.tags.isNotEmpty ? widget.item.tags.first : 'goods_noItems'.tr.replaceAll('没有物品', '未分类').replaceAll('No Items', 'Uncategorized'), // Fallback
                               style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -331,7 +330,7 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '$daysOwned${l10n.days} / $usageCount${l10n.times}',
+                      '$daysOwned${'goods_days'.tr} / $usageCount${'goods_times'.tr}',
                        style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
                     ),
                     Row(
@@ -346,7 +345,7 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          l10n.inPlace,
+                          'goods_inPlace'.tr,
                           style: theme.textTheme.bodySmall?.copyWith(fontSize: 10),
                         ),
                       ],

@@ -127,7 +127,7 @@ class _ChannelDialogState extends State<ChannelDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+          child: Text('common_cancel'.tr),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -202,8 +202,8 @@ class _ChannelDialogState extends State<ChannelDialog> {
           },
           child: Text(
             widget.isEditMode
-                ? '保存'
-                : MaterialLocalizations.of(context).okButtonLabel,
+                ? 'common_save'.tr
+                : 'common_ok'.tr,
           ),
         ),
       ],

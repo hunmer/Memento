@@ -8,7 +8,6 @@ import 'package:Memento/plugins/habits/widgets/habit_form.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habits_app_bar.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habit_card.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
@@ -107,10 +106,10 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
   }
 
   Future<void> _showHabitForm(BuildContext context, [Habit? habit]) async {
-    final l10n = HabitsLocalizations.of(context);
+
     await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
-                title: Text(habit == null ? l10n.createHabit : l10n.editHabit),
+                title: Text(habit == null ? 'nfc_createHabit'.tr : 'nfc_editHabit'.tr),
                 actions: [
                   if (habit != null)
                     IconButton(
@@ -135,7 +134,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
     );
   }
 
-  Widget _buildCardView(List<Habit> habits, HabitsLocalizations l10n) {
+  Widget _buildCardView(List<Habit> habits, ) {
     final habitsPlugin =
         PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
     final skillController = habitsPlugin?.getSkillController();
@@ -166,7 +165,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
+
     return Column(
       children: [
         HabitsAppBar(

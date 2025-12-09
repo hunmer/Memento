@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/notification_controller.dart';
 import 'package:memento_notifications/memento_notifications.dart';
-import '../l10n/screens_localizations.dart';
-
 /// 通知测试页面 - 用于测试 awesome_notifications 功能
 class NotificationTestPage extends StatefulWidget {
   const NotificationTestPage({super.key});

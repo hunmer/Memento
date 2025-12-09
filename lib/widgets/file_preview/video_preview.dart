@@ -1,6 +1,5 @@
 import 'dart:io';
 
-
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';

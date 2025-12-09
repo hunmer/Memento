@@ -5,7 +5,6 @@ import 'models/widget_config.dart';
 import 'models/widget_size.dart';
 import 'models/color_config.dart';
 
-
 /// 通用小组件配置编辑器
 ///
 /// 提供实时预览、颜色配置和透明度调节功能，

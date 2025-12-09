@@ -234,12 +234,12 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
             child: OpenContainer(
               transitionType: ContainerTransitionType.fade,
               openBuilder: (context, _) {
-                final l10n = HabitsLocalizations.of(context);
+
                 if (_currentPage == 0) {
                   // Tab0: 添加习惯
                   return Scaffold(
                     appBar: AppBar(
-                      title: Text(l10n.newHabit),
+                      title: Text('habits_newHabit'.tr),
                       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                     ),
                     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -253,7 +253,7 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
                   // Tab1: 添加技能
                   return Scaffold(
                     appBar: AppBar(
-                      title: Text(l10n.createSkill),
+                      title: Text('habits_createSkill'.tr),
                       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                     ),
                     backgroundColor: Theme.of(context).scaffoldBackgroundColor,

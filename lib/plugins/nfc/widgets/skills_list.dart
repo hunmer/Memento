@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/plugins/habits/widgets/skill_form.dart';
@@ -80,7 +79,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = HabitsLocalizations.of(context);
+
     return Column(
       children: [
         _buildAppBar(context, l10n),
@@ -94,9 +93,9 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context, HabitsLocalizations l10n) {
+  AppBar _buildAppBar(BuildContext context, ) {
     return AppBar(
-      title: Text(l10n.skills),
+      title: Text('nfc_skills'.tr),
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       leading:
           (Platform.isAndroid || Platform.isIOS)
@@ -119,7 +118,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildListView(List<Skill> skills, HabitsLocalizations l10n) {
+  Widget _buildListView(List<Skill> skills, ) {
     // 按group分组
     final groupedSkills = <String, List<Skill>>{};
     for (final skill in skills) {
@@ -193,7 +192,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildCardView(List<Skill> skills, HabitsLocalizations l10n) {
+  Widget _buildCardView(List<Skill> skills, ) {
     // 按group分组
     final groupedSkills = <String, List<Skill>>{};
     for (final skill in skills) {
@@ -394,7 +393,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
   }
 
   void _showSortMenu() {
-    final l10n = HabitsLocalizations.of(context);
+
     showModalBottomSheet(
       context: context,
       builder:
@@ -403,7 +402,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
             children: [
               ListTile(
                 leading: const Icon(Icons.sort_by_alpha),
-                title: Text(l10n.sortByName),
+                title: Text('nfc_sortByName'.tr),
                 onTap: () {
                   setState(() {
                     _skills.sort((a, b) => a.title.compareTo(b.title));
@@ -413,7 +412,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
               ),
               ListTile(
                 leading: const Icon(Icons.format_list_numbered),
-                title: Text(l10n.sortByCompletions),
+                title: Text('nfc_sortByCompletions'.tr),
                 onTap: () async {
                   final counts = await Future.wait(
                     _skills.map(
@@ -435,7 +434,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
               ),
               ListTile(
                 leading: const Icon(Icons.timer),
-                title: Text(l10n.sortByDuration),
+                title: Text('nfc_sortByDuration'.tr),
                 onTap: () async {
                   final durations = await Future.wait(
                     _skills.map(
@@ -461,10 +460,10 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
   }
 
   Future<void> _showSkillForm(BuildContext context, [Skill? skill]) async {
-    final l10n = HabitsLocalizations.of(context);
+
     await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
-                title: Text(skill == null ? l10n.createSkill : l10n.editSkill),
+                title: Text(skill == null ? 'nfc_createSkill'.tr : 'nfc_editSkill'.tr),
                 actions: [
                   if (skill != null)
                     IconButton(

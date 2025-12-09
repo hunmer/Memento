@@ -14,12 +14,11 @@ class StatusDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = NodesLocalizations.of(context);
 
     return DropdownButtonFormField<NodeStatus>(
       initialValue: value,
       decoration: InputDecoration(
-        labelText: l10n.status,
+        labelText: 'nodes_status'.tr,
         border: const OutlineInputBorder(),
       ),
       items:
@@ -27,16 +26,16 @@ class StatusDropdown extends StatelessWidget {
             String label;
             switch (status) {
               case NodeStatus.none:
-                label = l10n.none;
+                label = 'nodes_none'.tr;
                 break;
               case NodeStatus.todo:
-                label = l10n.todo;
+                label = 'nodes_todo'.tr;
                 break;
               case NodeStatus.doing:
-                label = l10n.doing;
+                label = 'nodes_doing'.tr;
                 break;
               case NodeStatus.done:
-                label = l10n.done;
+                label = 'nodes_done'.tr;
                 break;
             }
             return DropdownMenuItem(value: status, child: Text(label));

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
-import 'package:Memento/core/event/event.dart';
+import 'package:Memento/core/event/event.dart' as memento_event;
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'widget_service.dart';
 import 'package:Memento/plugins/chat/sample_data.dart';
@@ -517,9 +517,9 @@ class ChannelService {
       ]);
 
       // 发送消息更新事件
-      eventManager.broadcast(
+      memento_event.EventManager.instance.broadcast(
         'onMessageUpdated',
-        Value<Message>(message, 'onMessageUpdated'),
+        memento_event.Value<Message>(message, 'onMessageUpdated'),
       );
 
       // 立即通知UI更新，确保消息显示
@@ -667,9 +667,9 @@ class ChannelService {
       }
 
       // 通过事件系统广播消息更新
-      eventManager.broadcast(
+      memento_event.EventManager.instance.broadcast(
         'onMessageUpdated',
-        Value<Message>(message, 'onMessageUpdated'),
+        memento_event.Value<Message>(message, 'onMessageUpdated'),
       );
       // 统一通知UI更新，避免多次触发
       _plugin.refresh();

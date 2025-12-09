@@ -81,7 +81,6 @@ class TimerHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = TimerLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -102,7 +101,7 @@ class TimerHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'timer_name'.tr,
         pluginIcon: Icons.timer,
         pluginDefaultColor: Colors.blueGrey,
         availableItems: availableItems,

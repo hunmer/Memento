@@ -251,7 +251,7 @@ class _CalendarAlbumWeeklySelectorScreenState
   }
 
   /// 构建实时预览组件
-  Widget _buildPreview(BuildContext context, WidgetConfig config, CalendarAlbumLocalizations l10n) {
+  Widget _buildPreview(BuildContext context, WidgetConfig config) {
     final primaryColor = config.getColor('primary') ?? const Color(0xFF5A9E9A);
     final accentColor = config.getColor('accent') ?? Colors.white;
     final opacity = config.opacity;
@@ -276,7 +276,7 @@ class _CalendarAlbumWeeklySelectorScreenState
         children: [
           // 顶部标题
           Text(
-            l10n.oneDayOnePhoto,
+            'calendar_album_oneDayOnePhoto'.tr,
             style: TextStyle(
               color: accentColor,
               fontSize: 18,
@@ -286,7 +286,7 @@ class _CalendarAlbumWeeklySelectorScreenState
           const SizedBox(height: 12),
           // 周信息
           Text(
-            l10n.weekInfo,
+            'calendar_album_weekInfo'.tr,
             style: TextStyle(
               color: accentColor.withOpacity(0.8),
               fontSize: 12,
@@ -334,15 +334,14 @@ class _CalendarAlbumWeeklySelectorScreenState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = CalendarAlbumLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.configWeeklyAlbumWidget),
+        title: Text('calendar_album_configWeeklyAlbumWidget'.tr),
         actions: [
           TextButton(
             onPressed: _saveAndFinish,
-            child: Text(l10n.complete, style: const TextStyle(color: Colors.white)),
+            child: Text('calendar_album_complete'.tr, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -362,14 +361,14 @@ class _CalendarAlbumWeeklySelectorScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            l10n.configDescription,
+                            'calendar_album_configDescription'.tr,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            l10n.configDescriptionText,
+                            'calendar_album_configDescriptionText'.tr,
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
@@ -380,7 +379,7 @@ class _CalendarAlbumWeeklySelectorScreenState
 
                   // 主题配置编辑器
                   Text(
-                    l10n.widgetStyle,
+                    'calendar_album_widgetStyle'.tr,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -394,7 +393,7 @@ class _CalendarAlbumWeeklySelectorScreenState
                         _widgetConfig = newConfig;
                       });
                     },
-                    previewBuilder: (context, config) => _buildPreview(context, config, l10n),
+                    previewBuilder: (context, config) => _buildPreview(context, config),
                   ),
                 ],
               ),

@@ -29,14 +29,6 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.onEnterMultiSelect,
   });
 
-  String _getLocalizedText(
-    BuildContext context,
-    String defaultText,
-    String Function(ChatLocalizations) getter,
-  ) {
-    final localizations = ChatLocalizations.of(context);
-    return localizations != null ? getter(localizations) : defaultText;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +39,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: onExitMultiSelect,
         ),
         title: Text(
-          _getLocalizedText(
-            context,
-            '$selectedCount selected',
-            (l) => l.selectedMessages.replaceAll(
-              '{count}',
-              selectedCount.toString(),
-            ),
-          ),
+          'chat_selectedMessages'.trParams({'count': selectedCount.toString()}),
         ),
         actions: [
           IconButton(icon: const Icon(Icons.copy), onPressed: onCopySelected),
@@ -82,13 +67,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       const Icon(Icons.check_box_outlined, size: 20),
                       const SizedBox(width: 8),
-                      Text(
-                        _getLocalizedText(
-                          context,
-                          'Select Multiple',
-                          (l) => l.multiSelectMode,
-                        ),
-                      ),
+                      Text('chat_multiSelectMode'.tr),
                     ],
                   ),
                 ),
@@ -98,13 +77,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       const Icon(Icons.delete_sweep, size: 20),
                       const SizedBox(width: 8),
-                      Text(
-                        _getLocalizedText(
-                          context,
-                          'Clear Messages',
-                          (l) => l.clearMessages,
-                        ),
-                      ),
+                      Text('chat_clearMessages'.tr),
                     ],
                   ),
                 ),
@@ -114,13 +87,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                       const Icon(Icons.wallpaper, size: 20),
                       const SizedBox(width: 8),
-                      Text(
-                        _getLocalizedText(
-                          context,
-                          'Set Background',
-                          (l) => l.setBackground,
-                        ),
-                      ),
+                      Text('chat_setBackground'.tr),
                     ],
                   ),
                 ),

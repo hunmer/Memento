@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'tts_base_service.dart';
 import 'package:Memento/plugins/tts/models/tts_voice.dart';
 
+import 'package:get/get.dart';
 /// 系统TTS服务实现 (使用flutter_tts)
 class SystemTTSService extends TTSBaseService {
   static final _log = Logger('SystemTTSService');

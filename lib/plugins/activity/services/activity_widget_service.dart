@@ -118,7 +118,6 @@ class ActivityWidgetService {
     return heatmap;
   }
 
-
   /// 统计标签时长
   ///
   /// [activities]: 活动记录列表

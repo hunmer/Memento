@@ -1,6 +1,6 @@
 import 'image_picker_localizations.dart';
 
-class ImagePickerLocalizationsZh extends ImagePickerLocalizations {
+class ImagePickerLocalizationsZh extends {
   ImagePickerLocalizationsZh(super.locale);
 
   @override

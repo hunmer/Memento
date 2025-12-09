@@ -24,7 +24,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<NodesController>(context);
-    final l10n = NodesLocalizations.of(context);
+
     final theme = Theme.of(context);
 
     // 过滤笔记本列表
@@ -38,13 +38,13 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
 
     return SuperCupertinoNavigationWrapper(
       title: Text(
-        l10n.notebooks,
+        'nodes_notebooks'.tr,
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
-      largeTitle: l10n.notebooks,
+      largeTitle: 'nodes_notebooks'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       enableSearchBar: true,
-      searchPlaceholder: l10n.searchNotebooks,
+      searchPlaceholder: 'nodes_searchNotebooks'.tr,
       onSearchChanged: (query) {
         setState(() {
           _searchQuery = query;
@@ -87,16 +87,16 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                 context: context,
                 builder:
                     (context) => AlertDialog(
-                      title: Text(l10n.deleteNotebook),
+                      title: Text('nodes_deleteNotebook'.tr),
                       content: Text(
-                        NodesLocalizations.of(context)
+                        
                             .deleteNotebookConfirmation
                             .replaceAll('{notebook.title}', notebook.title),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: Text(l10n.cancel),
+                          child: Text('nodes_cancel'.tr),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
@@ -174,7 +174,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
     BuildContext context,
     List<Notebook> notebooks,
     NodesController controller,
-    NodesLocalizations l10n,
+    ,
   ) {
     if (_searchQuery.isEmpty) {
       return const SizedBox.shrink();
@@ -192,7 +192,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              l10n.noResultsFound,
+              'nodes_noResultsFound'.tr,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -221,7 +221,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
               overflow: TextOverflow.ellipsis,
             ),
             subtitle: Text(
-              '${notebook.nodes.length} ${l10n.nodes}',
+              '${notebook.nodes.length} ${'nodes_nodes'.tr}',
             ),
             trailing: IconButton(
               icon: const Icon(Icons.more_vert),
@@ -242,7 +242,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
   }
 
   void _showAddNotebookDialog(BuildContext context) {
-    final l10n = NodesLocalizations.of(context);
+
     final nodesController = Provider.of<NodesController>(
       context,
       listen: false,
@@ -257,7 +257,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text(l10n.addNotebook),
+              title: Text('nodes_addNotebook'.tr),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -278,14 +278,14 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: titleController,
-                    decoration: InputDecoration(labelText: l10n.notebookTitle),
+                    decoration: InputDecoration(labelText: 'nodes_notebookTitle'.tr),
                   ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.cancel),
+                  child: Text('nodes_cancel'.tr),
                 ),
                 TextButton(
                   onPressed: () {
@@ -298,7 +298,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                       Navigator.pop(context);
                     }
                   },
-                  child: Text(l10n.save),
+                  child: Text('nodes_save'.tr),
                 ),
               ],
             );
@@ -319,7 +319,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.edit),
-                  title: Text(l10n.editNotebook),
+                  title: Text('nodes_editNotebook'.tr),
                   onTap: () {
                     Navigator.pop(context); // 关闭 BottomSheet
                     _showEditNotebookDialog(parentContext, notebook);
@@ -327,7 +327,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.delete),
-                  title: Text(l10n.deleteNotebook),
+                  title: Text('nodes_deleteNotebook'.tr),
                   onTap: () {
                     Navigator.pop(context); // 关闭 BottomSheet
                     _showDeleteNotebookDialog(parentContext, notebook);
@@ -340,7 +340,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
   }
 
   void _showEditNotebookDialog(BuildContext context, Notebook notebook) {
-    final l10n = NodesLocalizations.of(context);
+
     final nodesController = Provider.of<NodesController>(
       context,
       listen: false,
@@ -355,7 +355,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text(l10n.editNotebook),
+              title: Text('nodes_editNotebook'.tr),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -376,14 +376,14 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: titleController,
-                    decoration: InputDecoration(labelText: l10n.notebookTitle),
+                    decoration: InputDecoration(labelText: 'nodes_notebookTitle'.tr),
                   ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.cancel),
+                  child: Text('nodes_cancel'.tr),
                 ),
                 TextButton(
                   onPressed: () {
@@ -399,7 +399,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                       Navigator.pop(context);
                     }
                   },
-                  child: Text(l10n.save),
+                  child: Text('nodes_save'.tr),
                 ),
               ],
             );
@@ -410,7 +410,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
   }
 
   void _showDeleteNotebookDialog(BuildContext context, Notebook notebook) {
-    final l10n = NodesLocalizations.of(context);
+
     final nodesController = Provider.of<NodesController>(
       context,
       listen: false,
@@ -420,21 +420,21 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(l10n.deleteNotebook),
+            title: Text('nodes_deleteNotebook'.tr),
             content: Text(
               'Are you sure you want to delete "${notebook.title}"?',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel),
+                child: Text('nodes_cancel'.tr),
               ),
               TextButton(
                 onPressed: () {
                   nodesController.deleteNotebook(notebook.id);
                   Navigator.pop(context);
                 },
-                child: Text(l10n.deleteNode),
+                child: Text('nodes_deleteNode'.tr),
               ),
             ],
           ),

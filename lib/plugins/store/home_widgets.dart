@@ -96,7 +96,6 @@ class StoreHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = StoreLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -117,7 +116,7 @@ class StoreHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'store_name'.tr,
         pluginIcon: Icons.store,
         pluginDefaultColor: Colors.pinkAccent,
         availableItems: availableItems,

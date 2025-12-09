@@ -587,9 +587,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                         const CircularProgressIndicator(),
                         const SizedBox(height: 16),
                         Text(
-                          AgentChatLocalizations.of(
-                            context,
-                          ).resettingDefaultTemplates,
+                          'agent_chat_resettingDefaultTemplates'.tr,
                         ),
                   ],
                 ),

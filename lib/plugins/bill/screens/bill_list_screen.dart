@@ -293,14 +293,13 @@ class _BillListScreenState extends State<BillListScreen> {
   }
 
   String _getCategoryLabel(String key) {
-    final l10n = BillLocalizations.of(context);
     switch (key) {
       case 'all':
-        return l10n.all;
+        return 'bill_all'.tr;
       case 'income':
-        return l10n.income;
+        return 'bill_income'.tr;
       case 'expense':
-        return l10n.expense;
+        return 'bill_expense'.tr;
       default:
         return key;
     }
@@ -308,8 +307,6 @@ class _BillListScreenState extends State<BillListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = BillLocalizations.of(context);
-
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -399,7 +396,7 @@ class _BillListScreenState extends State<BillListScreen> {
             ),
 
             // Content - Only List View
-            _buildListView(l10n),
+            _buildListView(),
           ],
         ),
       ),
@@ -466,7 +463,7 @@ class _BillListScreenState extends State<BillListScreen> {
   }
 
   
-  Widget _buildListView(BillLocalizations l10n) {
+  Widget _buildListView() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final filteredBills = _filteredBills;
 
@@ -514,7 +511,7 @@ class _BillListScreenState extends State<BillListScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 50),
                     child: Text(
-                      l10n.noBills,
+                      'bill_noBills'.tr,
                       style: TextStyle(color: Colors.grey[500]),
                     ),
                   ),

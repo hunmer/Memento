@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
-import 'package:Memento/core/event/event.dart';
+import 'package:Memento/core/event/event.dart' as memento_event;
 import 'package:Memento/plugins/chat/models/message.dart';
 
 class MessageInputState {
@@ -108,7 +108,6 @@ class MessageInputState {
           metadata: message.metadata,
         );
 
-
         // 清空输入框并保持焦点
         controller.clear();
         focusNode.requestFocus();
@@ -119,9 +118,9 @@ class MessageInputState {
         }
         
         // 广播消息事件
-        EventManager.instance.broadcast(
+        memento_event.EventManager.instance.broadcast(
           'onMessageSent',
-          Value<Message>(message),
+          memento_event.Value<Message>(message),
         );
         
       }

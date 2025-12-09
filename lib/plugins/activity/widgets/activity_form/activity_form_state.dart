@@ -20,8 +20,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ActivityLocalizations.of(context);
-    final appL10n = AppLocalizations.of(context)!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark ? const Color(0xFF27272A) : Colors.white;
     final primaryColor = Theme.of(context).primaryColor;
@@ -74,7 +72,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
                   controller: _titleController,
                   style: const TextStyle(fontSize: 16),
                   decoration: InputDecoration(
-                    hintText: l10n.activityName,
+                    hintText: 'activity_activityName'.tr,
                     hintStyle: TextStyle(color: Colors.grey[400]),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.zero,
@@ -96,7 +94,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
                         Expanded(
                           child: _buildTimeBox(
                             context,
-                            label: appL10n.startTime,
+                            label: 'activity_startTime'.tr,
                             time: _startTime,
                             onTap: () => _selectTime(context, true),
                             isDark: isDark,
@@ -106,7 +104,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
                         Expanded(
                           child: _buildTimeBox(
                             context,
-                            label: appL10n.endTime,
+                            label: 'activity_endTime'.tr,
                             time: _endTime,
                             onTap: () => _selectTime(context, false),
                             isDark: isDark,
@@ -132,7 +130,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                l10n.duration,
+                                'activity_duration'.tr,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey[500],
@@ -216,7 +214,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
                         TextField(
                           controller: _tagsController,
                           decoration: InputDecoration(
-                            hintText: appL10n.tags,
+                            hintText: 'app_tags'.tr,
                             hintStyle: TextStyle(color: Colors.grey[400]),
                             border: UnderlineInputBorder(
                               borderSide: BorderSide(color: Colors.grey[300]!),
@@ -317,7 +315,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
                   controller: _descriptionController,
                   style: const TextStyle(fontSize: 16),
                   decoration: InputDecoration(
-                    hintText: l10n.contentHint,
+                    hintText: 'activity_contentHint'.tr,
                     hintStyle: TextStyle(color: Colors.grey[400]),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.zero,
@@ -357,7 +355,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
                 elevation: 0,
               ),
               child: Text(
-                appL10n.save,
+                'app_save'.tr,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -476,8 +474,8 @@ class ActivityFormState extends State<ActivityFormWidget> {
     // Fallback if l10n regex fails (it might be risky).
     // The prompt image shows "7小时 41分钟".
     // Let's just use "h" and "m" or try to get "小时" "分钟" if we know the locale is Chinese.
-    // Or just use l10n.hours and l10n.minutes if they exist as standalone words.
-    // DiaryLocalizations seems to have `hoursFormat` which returns "x hours".
+    // Or just use 'activity_hours'.tr and 'activity_minutes'.tr if they exist as standalone words.
+    // seems to have `hoursFormat` which returns "x hours".
 
     // Safe approach:
     return '${hours}h ${minutes}m';
@@ -724,7 +722,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
   Future<void> _handleSave() async {
     if (!mounted) return;
-    final l10n = ActivityLocalizations.of(context);
     // 创建DateTime对象
     final now = widget.selectedDate;
     final startDateTime = DateTime(
@@ -751,7 +748,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
     // 检查时间间隔是否小于1分钟
     final duration = endDateTime.difference(startDateTime);
     if (duration.inMinutes < 1) {
-      toastService.showToast('活动时间必须至少为${'activity_minutesFormat'.tr(1).replaceAll('1 ', '')}');
+      toastService.showToast('活动时间必须至少为1分钟');
       return;
     }
 
@@ -781,16 +778,16 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
     // 确保有未分组标签组
     TagGroup? unGroupedTags = tagGroups.firstWhere(
-      (group) => group.name == l10n.ungrouped,
+      (group) => group.name == 'activity_ungrouped'.tr,
       orElse: () {
-        final newGroup = TagGroup(name: l10n.ungrouped, tags: []);
+        final newGroup = TagGroup(name: 'activity_ungrouped'.tr, tags: []);
         // 如果列表为空，直接添加；否则在合适的位置插入
         if (tagGroups.isEmpty) {
           tagGroups.add(newGroup);
         } else {
           // 在"所有"标签组后面插入（如果存在），否则插入到开头
           final allTagsIndex = tagGroups.indexWhere(
-            (group) => group.name == l10n.all,
+            (group) => group.name == 'activity_all'.tr,
           );
           if (allTagsIndex != -1) {
             tagGroups.insert(allTagsIndex + 1, newGroup);

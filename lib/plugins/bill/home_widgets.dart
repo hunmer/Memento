@@ -53,7 +53,6 @@ class BillHomeWidgets {
     try {
       final plugin = PluginManager.instance.getPlugin('bill') as BillPlugin?;
       if (plugin == null) return [];
-      final l10n = BillLocalizations.of(context);
       final todayFinance = plugin.controller.getTodayFinance();
       final monthFinance = plugin.controller.getMonthFinance();
       final monthBillCount = plugin.controller.getMonthBillCount();
@@ -61,21 +60,21 @@ class BillHomeWidgets {
       return [
         StatItemData(
           id: 'today_finance',
-          label: l10n.todayFinance,
+          label: 'bill_todayFinance'.tr,
           value: '¥${todayFinance.toStringAsFixed(2)}',
           highlight: todayFinance != 0,
           color: todayFinance >= 0 ? Colors.green : Colors.red,
         ),
         StatItemData(
           id: 'month_finance',
-          label: l10n.monthFinance,
+          label: 'bill_monthFinance'.tr,
           value: '¥${monthFinance.toStringAsFixed(2)}',
           highlight: monthFinance != 0,
           color: monthFinance >= 0 ? Colors.green : Colors.red,
         ),
         StatItemData(
           id: 'month_bills',
-          label: l10n.monthlyRecord,
+          label: 'bill_monthlyRecord'.tr,
           value: '$monthBillCount',
           highlight: false,
         ),
@@ -88,7 +87,6 @@ class BillHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = BillLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -109,7 +107,7 @@ class BillHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'bill_name'.tr,
         pluginIcon: Icons.account_balance_wallet,
         pluginDefaultColor: Colors.green,
         availableItems: availableItems,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:Memento/core/event/event.dart';
+import 'package:Memento/core/event/event.dart' as memento_event;
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'components/avatar.dart';
@@ -71,7 +71,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     _currentMessage = widget.message;
     _currentReplyToId = widget.message.replyToId;
     _loadReplyMessage();
-    _messageUpdateSubscriptionId = eventManager.subscribe(
+    _messageUpdateSubscriptionId = memento_event.EventManager.instance.subscribe(
       'onMessageUpdated',
       _handleMessageUpdated,
     );
@@ -92,12 +92,12 @@ class _MessageBubbleState extends State<MessageBubble> {
   @override
   void dispose() {
     // ignore: deprecated_member_use_from_same_package
-    eventManager.unsubscribeById(_messageUpdateSubscriptionId);
+    memento_event.EventManager.instance.unsubscribeById(_messageUpdateSubscriptionId);
     super.dispose();
   }
 
-  void _handleMessageUpdated(EventArgs args) {
-    if (args is! Value<Message>) {
+  void _handleMessageUpdated(memento_event.EventArgs args) {
+    if (args is! memento_event.Value<Message>) {
       return;
     }
     final updatedMessage = args.value;

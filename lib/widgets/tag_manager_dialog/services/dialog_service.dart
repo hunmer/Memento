@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart';
 
-
-
 /// 对话框服务类，处理标签管理对话框的各种操作
 class DialogService {
   /// 创建新分组
