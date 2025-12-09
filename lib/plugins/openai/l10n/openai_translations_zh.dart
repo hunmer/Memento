@@ -13,6 +13,12 @@ final Map<String, String> openaiTranslationsZh = {
   'openai_initDefaultAgent': '已初始化默认智能体',
   'openai_errorReadingAgents': '读取智能体数据出错',
 
+  // Home Widget Strings
+  'openai_widgetName': 'AI 助手',
+  'openai_widgetDescription': '快速打开 AI 助手',
+  'openai_overviewName': 'AI 助手概览',
+  'openai_overviewDescription': '显示智能体统计信息',
+
   // Tab titles
   'openai_form': '表单',
   'openai_output': '输出',

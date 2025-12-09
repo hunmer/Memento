@@ -111,4 +111,10 @@ const Map<String, String> goodsTranslationsZh = {
   'goods_dateTime': '日期时间',
   'goods_usageHistory': '使用历史',
   'goods_totalGoods': '物品总数',
+
+  // Home Widget Strings
+  'goods_widgetName': '物品',
+  'goods_widgetDescription': '快速打开物品管理',
+  'goods_overviewName': '物品概览',
+  'goods_overviewDescription': '显示物品统计信息',
 };

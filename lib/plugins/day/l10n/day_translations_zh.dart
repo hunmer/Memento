@@ -37,4 +37,10 @@ final Map<String, String> dayTranslationsZh = {
   'day_memorialDaysCount': '纪念日数',
   'day_upcoming': '即将到来',
   'day_localImage': '本地图片',
+
+  // Home Widget Strings
+  'day_widgetName': '纪念日',
+  'day_widgetDescription': '快速打开纪念日',
+  'day_overviewName': '纪念日概览',
+  'day_overviewDescription': '显示纪念日统计信息',
 };

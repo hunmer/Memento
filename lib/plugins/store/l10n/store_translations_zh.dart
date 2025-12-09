@@ -139,4 +139,10 @@ const Map<String, String> storeTranslationsZh = {
 
   // 工具方法
   'store_labelColon': '@label: ',
+
+  // Home Widget Strings
+  'store_widgetName': '积分商店',
+  'store_widgetDescription': '快速打开积分商店',
+  'store_overviewName': '积分商店概览',
+  'store_overviewDescription': '显示积分和商品统计',
 };

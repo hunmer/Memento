@@ -105,5 +105,11 @@ class BillTranslationsEn {
     'bill_add': 'Add',
     'bill_edit': 'Edit',
     'bill_monthlyRecord': 'Monthly Records',
+
+    // Home Widget Strings
+    'bill_widgetName': 'Bill',
+    'bill_widgetDescription': 'Quick access to bills',
+    'bill_overviewName': 'Bill Overview',
+    'bill_overviewDescription': 'Display income and expense statistics',
   };
 }

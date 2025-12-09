@@ -98,5 +98,11 @@ class CheckinTranslationsZh {
     'checkin_calendarStyle': '日历风格',
     'checkin_configureCheckinWidget': '配置打卡小组件',
     'checkin_emptyData': '暂无数据',
+
+    // Home Widget Strings
+    'checkin_widgetName': '签到',
+    'checkin_widgetDescription': '快速打开签到',
+    'checkin_overviewName': '签到概览',
+    'checkin_overviewDescription': '显示签到统计信息',
   };
 }

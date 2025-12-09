@@ -111,4 +111,10 @@ const Map<String, String> goodsTranslationsEn = {
   'goods_dateTime': 'Date Time',
   'goods_usageHistory': 'Usage History',
   'goods_totalGoods': 'Total Items',
+
+  // Home Widget Strings
+  'goods_widgetName': 'Goods',
+  'goods_widgetDescription': 'Quick access to goods management',
+  'goods_overviewName': 'Goods Overview',
+  'goods_overviewDescription': 'Display goods statistics',
 };

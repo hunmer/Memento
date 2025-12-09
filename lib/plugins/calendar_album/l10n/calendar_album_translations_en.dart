@@ -108,5 +108,11 @@ class CalendarAlbumTranslationsEn {
     'calendar_album_confirm': 'Confirm',
     'calendar_album_diary_for_date': ' diary',
     'calendar_album_new_diary': 'New Diary',
+
+    // Home Widget Strings
+    'calendar_album_widgetName': 'Calendar Album',
+    'calendar_album_widgetDescription': 'Quick access to calendar album',
+    'calendar_album_overviewName': 'Calendar Album Overview',
+    'calendar_album_overviewDescription': 'Display album statistics',
   };
 }

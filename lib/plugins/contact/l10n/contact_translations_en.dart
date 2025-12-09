@@ -107,4 +107,10 @@ const Map<String, String> contactTranslationsEn = {
   'contact_customActivityEvents': 'Custom Activity Events',
   'contact_addCustomEvent': 'Add custom event',
   'contact_pickColor': 'Pick a color',
+
+  // Home Widget Strings
+  'contact_widgetName': 'Contacts',
+  'contact_widgetDescription': 'Quick access to contacts',
+  'contact_overviewName': 'Contacts Overview',
+  'contact_overviewDescription': 'Display contacts statistics',
 };

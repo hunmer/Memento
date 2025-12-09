@@ -98,5 +98,11 @@ class CheckinTranslationsEn {
     'checkin_calendarStyle': 'Calendar Style',
     'checkin_configureCheckinWidget': 'Configure Check-in Widget',
     'checkin_emptyData': 'No data available',
+
+    // Home Widget Strings
+    'checkin_widgetName': 'Check-in',
+    'checkin_widgetDescription': 'Quick access to check-in',
+    'checkin_overviewName': 'Check-in Overview',
+    'checkin_overviewDescription': 'Display check-in statistics',
   };
 }

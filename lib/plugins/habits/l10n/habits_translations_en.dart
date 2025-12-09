@@ -147,5 +147,11 @@ class HabitsTranslationsEn {
     'habits_completeTimer': 'Complete Timer',
     'habits_continueAdjust': 'Continue Adjust',
     'habits_confirmComplete': 'Confirm Complete',
+
+    // Home Widget Strings
+    'habits_widgetName': 'Habits',
+    'habits_widgetDescription': 'Quick access to habits tracker',
+    'habits_overviewName': 'Habits Overview',
+    'habits_overviewDescription': 'Display habits statistics',
   };
 }
