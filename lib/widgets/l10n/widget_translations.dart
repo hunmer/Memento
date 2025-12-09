@@ -1,10 +1,12 @@
+import 'package:get/get.dart';
 import 'widget_translations_zh.dart';
 import 'widget_translations_en.dart';
 
-/// Widgets 组件多语言翻译
-class WidgetTranslations {
-  static const Map<String, Map<String, String>> translations = {
-    'zh': widgetTranslationsZh,
-    'en': widgetTranslationsEn,
-  };
+/// Widget 通用组件国际化翻译
+class WidgetTranslations extends Translations {
+  @override
+  Map<String, Map<String, String>> get keys => {
+        'zh_CN': zhCN,
+        'en_US': enUS,
+      };
 }

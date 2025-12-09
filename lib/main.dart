@@ -1,51 +1,18 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:Memento/core/app_widgets/page_transitions.dart';
-// GetX翻译导入
-import 'package:Memento/core/floating_ball/l10n/floating_ball_translations.dart';
-import 'package:Memento/plugins/nfc/l10n/nfc_translations.dart';
-import 'package:Memento/plugins/tts/l10n/tts_translations.dart';
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_translations.dart';
-import 'package:Memento/screens/settings_screen/screens/data_management_translations.dart';
-import 'package:Memento/screens/settings_screen/l10n/settings_screen_translations.dart';
-import 'package:Memento/screens/settings_screen/widgets/l10n/webdav_translations.dart';
-import 'package:Memento/screens/l10n/screens_translations.dart';
-import 'package:Memento/widgets/l10n/group_selector_translations.dart';
-import 'package:Memento/widgets/l10n/image_picker_translations.dart';
-import 'package:Memento/widgets/l10n/location_picker_translations.dart';
 
-// 旧的Localizations导入(待迁移的模块)
-import 'package:Memento/core/l10n/core_localizations.dart';
-import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
-import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
-import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
-import 'package:Memento/plugins/database/l10n/database_localizations.dart';
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
-import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
-import 'package:Memento/plugins/scripts_center/l10n/scripts_center_localizations.dart';
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
-import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
-import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
-import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
-import 'package:Memento/widgets/l10n/widget_localizations.dart';
+// GetX 统一翻译导入
+import 'package:Memento/l10n/unified_translations.dart';
+
+// 第三方库国际化
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 
 import 'package:flutter/material.dart';
 import 'core/services/plugin_widget_sync_helper.dart';
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'plugins/chat/l10n/chat_localizations.dart';
-import 'plugins/diary/l10n/diary_localizations.dart';
-import 'plugins/day/l10n/day_localizations.dart';
-import 'plugins/checkin/l10n/checkin_localizations.dart';
-import 'plugins/activity/l10n/activity_localizations.dart';
-import 'plugins/openai/l10n/openai_localizations.dart';
-import 'plugins/notes/l10n/notes_localizations.dart';
-import 'plugins/tracker/l10n/tracker_localizations.dart';
-import 'plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'screens/route.dart';
 import 'screens/settings_screen/controllers/auto_update_controller.dart';
 
@@ -85,7 +52,7 @@ class WidgetUriHandler extends StatelessWidget {
                 children: [
                   const CircularProgressIndicator(),
                   const SizedBox(height: 16),
-                  Text(CoreLocalizations.of(context)!.starting),
+                  Text('core_starting'.tr),
                 ],
               ),
             ),
@@ -97,60 +64,6 @@ class WidgetUriHandler extends StatelessWidget {
       },
       child: child,
     );
-  }
-}
-
-/// 合并多个GetX翻译类
-class _CombinedTranslations extends Translations {
-  @override
-  Map<String, Map<String, String>> get keys {
-    // 实例化所有已迁移模块的翻译类
-    final ttsTranslations = TTSTranslations();
-    final nfcTranslations = NfcTranslations();
-    final floatingBallTranslations = FloatingBallTranslations();
-    final webdavTranslations = WebDAVTranslations();
-    final dataManagementTranslations = DataManagementTranslations();
-    final settingsScreenTranslations = SettingsScreenTranslations();
-    final screensTranslations = ScreensTranslations();
-    final groupSelectorTranslations = GroupSelectorTranslations();
-    final imagPickerTranslations = ImagePickerTranslations();
-    final locationPickerTranslations = LocationPickerTranslations();
-    final agentChatTranslations = AgentChatTranslations();
-
-    // 合并所有翻译
-    final Map<String, Map<String, String>> combined = {};
-
-    // 合并中文翻译
-    combined['zh_CN'] = {
-      ...?ttsTranslations.keys['zh_CN'],
-      ...?nfcTranslations.keys['zh_CN'],
-      ...?floatingBallTranslations.keys['zh_CN'],
-      ...?webdavTranslations.keys['zh_CN'],
-      ...?dataManagementTranslations.keys['zh_CN'],
-      ...?settingsScreenTranslations.keys['zh_CN'],
-      ...?screensTranslations.keys['zh_CN'],
-      ...?groupSelectorTranslations.keys['zh_CN'],
-      ...?imagPickerTranslations.keys['zh_CN'],
-      ...?locationPickerTranslations.keys['zh_CN'],
-      ...?agentChatTranslations.keys['zh_CN'],
-    };
-
-    // 合并英文翻译
-    combined['en_US'] = {
-      ...?ttsTranslations.keys['en_US'],
-      ...?nfcTranslations.keys['en_US'],
-      ...?floatingBallTranslations.keys['en_US'],
-      ...?webdavTranslations.keys['en_US'],
-      ...?dataManagementTranslations.keys['en_US'],
-      ...?settingsScreenTranslations.keys['en_US'],
-      ...?screensTranslations.keys['en_US'],
-      ...?groupSelectorTranslations.keys['en_US'],
-      ...?imagPickerTranslations.keys['en_US'],
-      ...?locationPickerTranslations.keys['en_US'],
-      ...?agentChatTranslations.keys['en_US'],
-    };
-
-    return combined;
   }
 }
 
@@ -263,7 +176,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       builder:
           (theme, darkTheme) => WidgetUriHandler(
             child: GetMaterialApp(
-              translations: _CombinedTranslations(),
+              translations: UnifiedTranslations(),
               locale: globalConfigManager.getLocale().languageCode == 'zh'
                   ? const Locale('zh', 'CN')
                   : const Locale('en', 'US'),
@@ -271,37 +184,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               scaffoldMessengerKey: scaffoldMessengerKey,
               navigatorKey: navigatorKey,
               title: 'Memento',
-              debugShowCheckedModeBanner: false, // 关闭调试横幅
-              localizationsDelegates: [
-              AppLocalizations.delegate,
-              DiaryLocalizations.delegate,
-              StoreLocalizations.delegate,
-              CheckinLocalizations.delegate,
-              DatabaseLocalizations.delegate,
-              ActivityLocalizations.delegate,
-              TimerLocalizations.delegate,
-              ChatLocalizations.delegate,
-              ContactLocalizations.delegate,
-              TrackerLocalizations.delegate,
-              HabitsLocalizations.delegate,
-              CalendarLocalizations.delegate,
-              FilePreviewLocalizations.delegate,
-                WidgetLocalizations.delegate,
-              BillLocalizations.delegate,
-              DayLocalizationsDelegate.delegate,
-              OpenAILocalizationsDelegate.delegate,
-              NotesLocalizations.delegate,
-              TodoLocalizations.delegate,
-              CalendarAlbumLocalizations.delegate,
-              CoreLocalizationsDelegate(),
-              GoodsLocalizations.delegate,
-              NodesLocalizations.delegate,
-              SfGlobalLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              FlutterQuillLocalizations.delegate,
-                ScriptsCenterLocalizations.delegate,
+              debugShowCheckedModeBanner: false,
+              localizationsDelegates: const [
+                // 仅保留第三方库的国际化
+                SfGlobalLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                FlutterQuillLocalizations.delegate,
             ],
             supportedLocales: const [
               Locale('zh', 'CN'), // 中文
@@ -322,8 +212,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             routes: AppRoutes.routes,
             onGenerateRoute: AppRoutes.generateRoute,
               onGenerateTitle:
-                  (BuildContext context) =>
-                      AppLocalizations.of(context)!.appTitle,
+                  (BuildContext context) => 'app_appTitle'.tr,
             ),
           ),
     );

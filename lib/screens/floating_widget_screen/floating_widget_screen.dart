@@ -323,7 +323,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           min: 50,
                           max: 150,
                           divisions: 10,
-                          label: 'screens_ballSizeDp'.trParams({'size': _controller.ballSize.round(.toString()}),
+                          label: 'screens_ballSizeDp'.trParams({'size': _controller.ballSize.round().toString()}),
                           onChanged: (value) {
                             _controller.setBallSize(value);
                             setState(() {});
@@ -333,7 +333,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                           }
                         ),
                       ),
-                      Text('screens_ballSizeDp'.trParams({'size': _controller.ballSize.round(.toString()}))
+                      Text('screens_ballSizeDp'.trParams({'size': _controller.ballSize.round().toString()}))
                     ],
                   ),
                 ),
@@ -411,7 +411,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                 leading: const Icon(Icons.location_on),
                 title: Text('screens_currentPosition'.tr),
                 subtitle: Text(
-                  'screens_xPositionYPosition'.trParams({'x': _controller.lastPosition!.x.toDouble().toStringAsFixed(0), 'y': _controller.lastPosition!.y.toDouble(.toStringAsFixed(0))})
+                  'screens_xPositionYPosition'.trParams({'x': _controller.lastPosition!.x.toDouble().toStringAsFixed(0), 'y': _controller.lastPosition!.y.toDouble().toStringAsFixed(0)})
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.refresh),

@@ -59,6 +59,7 @@ class _HomeGridState extends State<HomeGrid> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ScreensLocalizations.of(context);
     if (widget.items.isEmpty) {
       return _buildEmptyState(context, l10n);
     }

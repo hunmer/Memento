@@ -1,0 +1,63 @@
+/// Notes plugin English translations
+///
+/// All keys are prefixed with 'notes_'
+final Map<String, String> notesTranslationsEn = {
+  // Plugin basic information
+  'notes_name': 'Notes',
+  'notes_notesPluginDescription': 'A simple note-taking plugin for Memento',
+
+  // Statistics
+  'notes_totalNotes': 'Total',
+  'notes_recentNotes': 'Recent',
+
+  // Folder and note operations
+  'notes_newNote': 'New Note',
+  'notes_newFolder': 'New Folder',
+  'notes_editNote': 'Edit',
+  'notes_moveNote': 'Move to',
+  'notes_deleteNote': 'Delete',
+  'notes_deleteNoteConfirm': 'Are you sure you want to delete this note? This action cannot be undone.',
+  'notes_renameFolder': 'Rename Folder',
+  'notes_deleteFolder': 'Delete Folder',
+  'notes_deleteFolderConfirm': 'Are you sure you want to delete this folder? All content in this folder will be deleted and cannot be recovered.',
+  'notes_emptyFolder': 'This folder is empty',
+
+  // Search
+  'notes_searchHint': 'Search notes...',
+  'notes_search': 'Search',
+  'notes_noSearchResults': 'No search results',
+
+  // List headers
+  'notes_folders': 'Folders',
+  'notes_notes': 'Notes',
+
+  // Button text
+  'notes_cancel': 'Cancel',
+  'notes_confirm': 'Confirm',
+  'notes_edit': 'Edit',
+  'notes_delete': 'Delete',
+  'notes_moveTo': 'Move to',
+
+  // Input hints
+  'notes_folderNameHint': 'Folder name',
+
+  // Additional text
+  'notes_createNew': 'Create new',
+  'notes_movedTo': 'Moved to @folderName',
+  'notes_filter': 'Filter',
+  'notes_tags': 'Tags',
+  'notes_dateRange': 'Date Range',
+  'notes_clearAll': 'Clear All',
+  'notes_apply': 'Apply',
+  'notes_typeToSearch': 'Type to search',
+  'notes_noResultsFound': 'No results found',
+
+  'notes_movedToFolder': 'Moved to @folderName',
+  'notes_selectSubfolder': 'Select subfolder',
+
+  // Folder selection
+  'notes_selectFolder': 'Select Folder',
+  'notes_selectTag': 'Select Tag',
+  'notes_noTagsAvailable': 'No Tags Available',
+  'notes_allTags': 'All Tags',
+};

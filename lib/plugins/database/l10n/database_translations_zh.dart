@@ -1,57 +1,57 @@
-/// Database插件中文翻译
-const Map<String, String> databaseTranslationsZh = {
-  // 基础信息
-  'database_name': '数据库',
-  'database_pluginDescription': '用于管理数据库的插件',
+/// 数据库插件中文翻译
+class DatabaseTranslationsZh {
+  static const Map<String, String> translations = {
+    // 插件基本信息
+    'database_name': '数据库',
+    'database_plugin_description': '用于管理数据库的插件',
 
-  // 记录相关
-  'database_deleteRecordTitle': '删除记录',
-  'database_deleteRecordMessage': '确定要删除"@name"吗?',
-  'database_untitledRecord': '未命名',
+    // 记录相关
+    'database_delete_record_title': '删除记录',
+    'database_delete_record_message': '确定要删除"@name"吗?',
+    'database_untitled_record': '未命名',
 
-  // 通用操作
-  'database_edit': '编辑',
-  'database_delete': '删除',
-  'database_cancel': '取消',
-  'database_save': '保存',
-  'database_ok': '确定',
+    // 通用操作
+    'database_edit': '编辑',
+    'database_delete': '删除',
+    'database_cancel': '取消',
+    'database_save': '保存',
+    'database_ok': '确定',
 
-  // 数据库编辑
-  'database_editDatabaseTitle': '编辑数据库',
-  'database_informationTabTitle': '基本信息',
-  'database_fieldsTabTitle': '字段',
-  'database_databaseNameLabel': '数据库名称',
-  'database_uploadCoverImage': '上传封面图片',
-  'database_descriptionLabel': '描述',
-  'database_defaultValueLabel': '默认值',
+    // 数据库编辑
+    'database_edit_database_title': '编辑数据库',
+    'database_information_tab_title': '基本信息',
+    'database_fields_tab_title': '字段',
+    'database_database_name_label': '数据库名称',
+    'database_upload_cover_image': '上传封面图片',
+    'database_description_label': '描述',
 
-  // 字段相关
-  'database_selectFieldTypeTitle': '选择字段类型',
-  'database_fieldNameLabel': '字段名称',
-  'database_newFieldTitle': '新建@type字段',
+    // 字段相关
+    'database_field_name_label': '字段名称',
+    'database_default_value_label': '默认值',
+    'database_select_field_type_title': '选择字段类型',
+    'database_new_field_title': '新建@type字段',
+    'database_save_failed_message': '保存失败: @error',
 
-  // 消息提示
-  'database_saveFailedMessage': '保存失败: @error',
-  'database_loadFailedMessage': '加载失败',
-  'database_deleteSuccessMessage': '删除成功',
-  'database_deleteFailedMessage': '删除失败: @error',
-  'database_copySuccess': '复制成功',
+    // 数据库列表
+    'database_database_list_title': '数据库列表',
+    'database_new_database_default_name': '新建数据库',
+    'database_load_failed_message': '加载失败',
+    'database_no_databases_message': '暂无数据库',
+    'database_add_database_hint': '点击右下角按钮添加',
+    'database_copy_success_message': '复制成功',
 
-  // 数据库列表
-  'database_databaseListTitle': '数据库列表',
-  'database_newDatabaseDefaultName': '新建数据库',
-  'database_noDatabasesMessage': '暂无数据库',
-  'database_addDatabaseHint': '点击右下角按钮添加',
-  'database_totalDatabasesCount': '总数据库数',
-  'database_totalDatabases': '总数据库数',
+    // 删除确认
+    'database_confirm_delete_title': '确认删除',
+    'database_confirm_delete_message': '确定要删除数据库"@name"吗?',
+    'database_delete_success_message': '删除成功',
+    'database_delete_failed_message': '删除失败: @error',
 
-  // 确认对话框
-  'database_confirmDeleteTitle': '确认删除',
-  'database_confirmDeleteMessage': '确定要删除数据库"@name"吗?',
-
-  // 其他
-  'database_selectImage': '选择图片',
-  'database_deleteAction': '删除',
-  'database_editRecordTitle': '编辑记录',
-  'database_copySuccessMessage': '复制成功',
-};
+    // 统计信息
+    'database_total_databases_count': '总数据库数',
+    'database_select_image': '选择图片',
+    'database_copy_success': '复制成功',
+    'database_delete_action': '删除',
+    'database_edit_record_title': '编辑记录',
+    'database_total_databases': '总数据库数',
+  };
+}
