@@ -167,7 +167,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Center(
-                    child: Text(WidgetLocalizations.of(context).noData),
+                    child: Text(WidgetLocalizations.of(context)!.noData),
                   ),
                 )
           else

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'agent_chat_localizations_en.dart';
+import 'agent_chat_localizations_zh.dart';
 
-class AgentChatLocalizations {
+abstract class AgentChatLocalizations {
   const AgentChatLocalizations(this.locale);
 
   final Locale locale;
@@ -138,12 +141,22 @@ class AgentChatLocalizations {
   String confirmDeleteConversation(String title) => '确定要删除会话 "$title" 吗？\n\n此操作将同时删除所有消息记录，且不可恢复。';
 
   // 空状态
-  String get loadingToolTemplates => '正在加载工具模板...';
-  String get noToolTemplates => '暂无工具模板';
-  String get noChannels => '暂无频道';
-  String get noGroups => '暂无分组';
-  String get noMessages => '暂无消息';
-  String get emptyConversationHistory => '空白的对话历史';
+  String get loadingToolTemplates;
+  String get noToolTemplates;
+  String get noChannels;
+  String get noGroups;
+  String get noMessages;
+  String get emptyConversationHistory;
+
+  // Widget Home Strings
+  String get name;
+  String get description;
+  String get overview;
+  String get overviewDescription;
+  String get totalConversations;
+  String get unreadMessages;
+  String get totalGroups;
+  String get loadFailed;
 }
 
 class _AgentChatLocalizationsDelegate
@@ -157,9 +170,25 @@ class _AgentChatLocalizationsDelegate
 
   @override
   Future<AgentChatLocalizations> load(Locale locale) async {
-    return AgentChatLocalizations(locale);
+    return SynchronousFuture<AgentChatLocalizations>(
+      lookupAgentChatLocalizations(locale),
+    );
   }
 
   @override
   bool shouldReload(LocalizationsDelegate<AgentChatLocalizations> old) => false;
+}
+
+AgentChatLocalizations lookupAgentChatLocalizations(Locale locale) {
+  switch (locale.languageCode) {
+    case 'en':
+      return AgentChatLocalizationsEn();
+    case 'zh':
+      return AgentChatLocalizationsZh();
+  }
+
+  throw FlutterError(
+    'AgentChatLocalizations.delegate failed to load unsupported locale "$locale". '
+    'This is likely an issue with the localizations setup.',
+  );
 }

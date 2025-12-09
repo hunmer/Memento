@@ -199,8 +199,21 @@ class TrackerLocalizationsEn extends TrackerLocalizations {
   @override
   String get recordValueWithUnit => 'Record Value (\${unit})';
 
+  // Widget Home Strings
   @override
   String get name => 'Goal Tracker';
+
+  @override
+  String get iconDescription => 'Quick access to Goal Tracker';
+
+  @override
+  String get overview => 'Goal Tracker Overview';
+
+  @override
+  String get overviewDescription => 'Display today and monthly completion statistics';
+
+  @override
+  String get loadFailed => 'Load Failed';
 
   // Widget configuration
   @override

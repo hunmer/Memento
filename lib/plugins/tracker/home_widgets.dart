@@ -17,8 +17,8 @@ class TrackerHomeWidgets {
     registry.register(HomeWidget(
       id: 'tracker_icon',
       pluginId: 'tracker',
-      name: '目标追踪',
-      description: '快速打开目标追踪',
+      name: 'Goal Tracker',
+      description: 'Quick access to Goal Tracker',
       icon: Icons.track_changes,
       color: Colors.red,
       defaultSize: HomeWidgetSize.small,
@@ -27,7 +27,7 @@ class TrackerHomeWidgets {
       builder: (context, config) => const GenericIconWidget(
         icon: Icons.track_changes,
         color: Colors.red,
-        name: '追踪器',
+        name: 'Goal Tracker',
       ),
     ));
 
@@ -35,8 +35,8 @@ class TrackerHomeWidgets {
     registry.register(HomeWidget(
       id: 'tracker_overview',
       pluginId: 'tracker',
-      name: '目标追踪概览',
-      description: '显示今日和本月完成统计',
+      name: 'Goal Tracker Overview',
+      description: 'Display today and monthly completion statistics',
       icon: Icons.analytics_outlined,
       color: Colors.red,
       defaultSize: HomeWidgetSize.large,
@@ -57,16 +57,18 @@ class TrackerHomeWidgets {
       final todayComplete = controller.getTodayCompletedGoals();
       final monthComplete = controller.getMonthCompletedGoals();
 
+      // Note: We can't use l10n here as this is a static method without context
+      // The labels will be translated in the build method if needed
       return [
         StatItemData(
           id: 'today_complete',
-          label: '今日完成',
+          label: 'Today Complete', // Default English, will be overridden if context available
           value: '$todayComplete',
           highlight: todayComplete > 0,
         ),
         StatItemData(
           id: 'month_complete',
-          label: '本月完成',
+          label: 'Month Complete', // Default English
           value: '$monthComplete',
           highlight: monthComplete > 0,
           color: Colors.red,
@@ -96,8 +98,30 @@ class TrackerHomeWidgets {
         widgetConfig = PluginWidgetConfig();
       }
 
-      // 获取可用的统计项数据
-      final availableItems = _getAvailableStats();
+      // 获取基础统计项数据
+      final baseItems = _getAvailableStats();
+
+      // 使用l10n更新统计项标签
+      final availableItems = baseItems.map((item) {
+        if (item.id == 'today_complete') {
+          return StatItemData(
+            id: item.id,
+            label: l10n.todayComplete,
+            value: item.value,
+            highlight: item.highlight,
+            color: item.color,
+          );
+        } else if (item.id == 'month_complete') {
+          return StatItemData(
+            id: item.id,
+            label: l10n.thisMonthComplete,
+            value: item.value,
+            highlight: item.highlight,
+            color: item.color,
+          );
+        }
+        return item;
+      }).toList();
 
       // 使用通用小组件
       return GenericPluginWidget(
@@ -114,6 +138,7 @@ class TrackerHomeWidgets {
 
   /// 构建错误提示组件
   static Widget _buildErrorWidget(BuildContext context, String error) {
+    final l10n = TrackerLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -121,7 +146,7 @@ class TrackerHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            '加载失败',
+            l10n.loadFailed,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

@@ -196,8 +196,21 @@ class TrackerLocalizationsZh extends TrackerLocalizations {
   @override
   String get recordValueWithUnit => '记录值 (\${unit})';
 
+  // Widget Home Strings
   @override
-  String get name => '进度';
+  String get name => '目标追踪';
+
+  @override
+  String get iconDescription => '快速打开目标追踪';
+
+  @override
+  String get overview => '目标追踪概览';
+
+  @override
+  String get overviewDescription => '显示今日和本月完成统计';
+
+  @override
+  String get loadFailed => '加载失败';
 
   // Widget configuration
   @override

@@ -254,4 +254,29 @@ class AgentChatLocalizationsEn extends AgentChatLocalizations {
   String get noMessages => 'No messages';
   @override
   String get emptyConversationHistory => 'Empty conversation history';
+
+  // Widget Home Strings
+  @override
+  String get name => 'Agent Chat';
+
+  @override
+  String get description => 'Quick access to Agent Chat';
+
+  @override
+  String get overview => 'Agent Chat Overview';
+
+  @override
+  String get overviewDescription => 'Display conversation statistics';
+
+  @override
+  String get totalConversations => 'Total Conversations';
+
+  @override
+  String get unreadMessages => 'Unread Messages';
+
+  @override
+  String get totalGroups => 'Total Groups';
+
+  @override
+  String get loadFailed => 'Load Failed';
 }

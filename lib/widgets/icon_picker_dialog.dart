@@ -142,7 +142,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
   @override
   Widget build(BuildContext context) {
     return CustomDialog(
-      title: WidgetLocalizations.of(context).selectIcon,
+      title: WidgetLocalizations.of(context)!.selectIcon,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -150,7 +150,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
           TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: WidgetLocalizations.of(context).searchIcons,
+              hintText: WidgetLocalizations.of(context)!.searchIcons,
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -188,7 +188,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                 ),
                 Expanded(
                   child: Text(
-                    WidgetLocalizations.of(context).convertIconToImage,
+                    WidgetLocalizations.of(context)!.convertIconToImage,
                   ),
                 ),
                 IconButton(
@@ -198,25 +198,25 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                       context: context,
                       builder: (context) => AlertDialog(
                             title: Text(
-                              WidgetLocalizations.of(context).iconToImage,
+                              WidgetLocalizations.of(context)!.iconToImage,
                             ),
                         content: Text(
                               WidgetLocalizations.of(
                                 context,
-                              ).iconToImageDescription,
+                              )!.iconToImageDescription,
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
                                 child: Text(
-                                  WidgetLocalizations.of(context).confirm,
+                                  WidgetLocalizations.of(context)!.confirm,
                                 ),
                           ),
                         ],
                       ),
                     );
                   },
-                  tooltip: WidgetLocalizations.of(context).whatIsIconToImage,
+                  tooltip: WidgetLocalizations.of(context)!.whatIsIconToImage,
                 ),
               ],
             ),
@@ -284,7 +284,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(WidgetLocalizations.of(context).cancel),
+          child: Text(WidgetLocalizations.of(context)!.cancel),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -295,7 +295,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
               Navigator.pop(context, selectedIcon);
             }
           },
-          child: Text(WidgetLocalizations.of(context).confirm),
+          child: Text(WidgetLocalizations.of(context)!.confirm),
         ),
       ],
     );

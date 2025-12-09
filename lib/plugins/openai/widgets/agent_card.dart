@@ -18,9 +18,8 @@ class AgentCard extends StatelessWidget {
         return AgentEditScreen(agent: agent);
       },
       closedBuilder: (BuildContext context, VoidCallback openContainer) {
-        return Card(
+        return Material(
           clipBehavior: Clip.antiAlias,
-          elevation: 2,
           child: InkWell(
             onTap: openContainer,
             child: Column(

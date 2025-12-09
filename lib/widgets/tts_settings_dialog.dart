@@ -76,7 +76,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
         children: [
           Icon(Icons.record_voice_over, size: 24),
           SizedBox(width: 8),
-          Text(WidgetLocalizations.of(context).voiceBroadcastSettings),
+          Text(WidgetLocalizations.of(context)!.voiceBroadcastSettings),
         ],
       ),
       content:
@@ -94,10 +94,10 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                     // 启用开关
                     SwitchListTile(
                       title: Text(
-                        WidgetLocalizations.of(context).enableAutoRead,
+                        WidgetLocalizations.of(context)!.enableAutoRead,
                       ),
                       subtitle: Text(
-                        WidgetLocalizations.of(context).autoReadAIMessage,
+                        WidgetLocalizations.of(context)!.autoReadAIMessage,
                       ),
                       value: _enabled,
                       onChanged: (value) {
@@ -111,7 +111,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                     // 服务选择
                     if (_enabled && _services.isNotEmpty) ...[
                       Text(
-                        WidgetLocalizations.of(context).selectTTSService,
+                        WidgetLocalizations.of(context)!.selectTTSService,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -151,7 +151,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                                         child: Text(
                                           WidgetLocalizations.of(
                                             context,
-                                          ).defaultLabel,
+                                          )!.defaultLabel,
                                           style: const TextStyle(
                                             fontSize: 10,
                                             color: Colors.blue,
@@ -206,7 +206,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                               child: Text(
                                 WidgetLocalizations.of(
                                   context,
-                                ).noTTSServiceAvailable,
+                                )!.noTTSServiceAvailable,
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ),
@@ -219,7 +219,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(WidgetLocalizations.of(context).cancel),
+          child: Text(WidgetLocalizations.of(context)!.cancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -229,7 +229,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
             );
             Navigator.of(context).pop(result);
           },
-          child: Text(WidgetLocalizations.of(context).confirm),
+          child: Text(WidgetLocalizations.of(context)!.confirm),
         ),
       ],
     );
@@ -239,7 +239,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
   String _getServiceTypeText(BuildContext context, TTSServiceConfig service) {
     String typeText = service.type.displayName;
     if (!service.isEnabled) {
-      typeText += WidgetLocalizations.of(context).disabled;
+      typeText += WidgetLocalizations.of(context)!.disabled;
     }
     if (service.voice != null && service.voice!.isNotEmpty) {
       typeText += ' · ${service.voice}';

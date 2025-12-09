@@ -160,4 +160,18 @@ class WidgetLocalizationsEn extends WidgetLocalizations {
   // 应用启动文本
   @override
   String get starting => 'Starting...';
+
+  // SuperCupertinoNavigationWrapper 国际化文本
+  @override
+  String get search => 'Search';
+  @override
+  String get searchScope => 'Search Scope';
+  @override
+  String get back => 'Back';
+  @override
+  String get activity => 'Activity';
+  @override
+  String get tag => 'Tag';
+  @override
+  String get comment => 'Comment';
 }

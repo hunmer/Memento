@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.dart';
+import 'l10n/widget_localizations.dart';
 
 
 /// Super Cupertino Navigation Bar 的封装组件
@@ -117,7 +118,7 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
     this.enableBottomBar = false,
     this.bottomBarHeight = 40,
     this.bottomBarChild,
-    this.searchPlaceholder = '搜索',
+    this.searchPlaceholder = '', // 改为空字符串，通过国际化获取默认值
     this.onSearchChanged,
     this.onSearchSubmitted,
     this.searchBody,
@@ -139,11 +140,7 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
     this.onAdvancedSearchChanged,
     // 搜索过滤器参数
     this.enableSearchFilter = false,
-    this.filterLabels = const {
-      'activity': '活动',
-      'tag': '标签',
-      'comment': '注释',
-    },
+    this.filterLabels = const {}, // 改为空映射，通过国际化获取默认值
     this.onSearchFilterChanged,
     this.onLeadingPressed,
   });
@@ -162,6 +159,9 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
     'tag': true,
     'comment': true,
   };
+
+  /// 获取国际化文本
+  WidgetLocalizations? get _localizations => WidgetLocalizations.of(context);
 
   @override
   void dispose() {
@@ -209,11 +209,39 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
     widget.onSearchFilterChanged?.call(Map.from(_searchFilters));
   }
 
+  /// 获取默认的搜索占位符
+  String _getDefaultSearchPlaceholder() {
+    return _localizations?.search ?? '搜索';
+  }
+
+  /// 获取默认的过滤器标签
+  Map<String, String> _getDefaultFilterLabels() {
+    final loc = _localizations;
+    if (loc == null) {
+      return {
+        'activity': '活动',
+        'tag': '标签',
+        'comment': '注释',
+      };
+    }
+
+    return {
+      'activity': loc.activity,
+      'tag': loc.tag,
+      'comment': loc.comment,
+    };
+  }
+
   /// 构建搜索过滤器
   Widget _buildSearchFilter() {
     if (!widget.enableSearchFilter) {
       return const SizedBox.shrink();
     }
+
+    // 获取过滤器标签（使用默认或自定义）
+    final filterLabels = widget.filterLabels.isNotEmpty
+        ? widget.filterLabels
+        : _getDefaultFilterLabels();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -230,9 +258,9 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 4),
-          const Text(
-            '搜索范围',
-            style: TextStyle(
+          Text(
+            _localizations?.searchScope ?? '搜索范围',
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: Colors.grey,
@@ -241,7 +269,7 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
           const SizedBox(height: 8),
           Wrap(
             spacing: 16,
-            children: widget.filterLabels.entries.map((entry) {
+            children: filterLabels.entries.map((entry) {
               final key = entry.key;
               final label = entry.value;
               final value = _searchFilters[key] ?? true;
@@ -362,7 +390,7 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
                 )
               : null),
       title: widget.title,
-      previousPageTitle: widget.previousPageTitle ?? "返回",
+      previousPageTitle: widget.previousPageTitle ?? _localizations?.back ?? "返回",
       actions: widget.actions != null && widget.actions!.isNotEmpty
           ? Wrap(
               spacing: 4,
@@ -400,7 +428,9 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
       enabled: true,
       scrollBehavior: SearchBarScrollBehavior.pinned,
       resultBehavior: SearchBarResultBehavior.neverVisible,
-      placeholderText: widget.searchPlaceholder,
+      placeholderText: widget.searchPlaceholder.isNotEmpty
+          ? widget.searchPlaceholder
+          : _getDefaultSearchPlaceholder(),
       searchController: _searchController,
       onChanged: (value) {
         widget.onSearchChanged?.call(value);

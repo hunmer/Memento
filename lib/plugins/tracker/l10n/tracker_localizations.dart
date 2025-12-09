@@ -102,7 +102,12 @@ abstract class TrackerLocalizations {
 
   get recordValueWithUnit;
 
+  // Widget Home Strings
   String get name;
+  String get iconDescription;
+  String get overview;
+  String get overviewDescription;
+  String get loadFailed;
 
   // Widget configuration
   String get configureGoalProgressBarWidget; // 配置目标进度条小组件
