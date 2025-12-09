@@ -253,12 +253,6 @@ class CalendarAlbumLocalizationsZh extends CalendarAlbumLocalizations {
   String get tryOtherKeywords => '试试其他关键词';
 
   @override
-  String get title => '标题';
-
-  @override
-  String get content => '内容';
-
-  @override
   String get tag => '标签';
 
   @override

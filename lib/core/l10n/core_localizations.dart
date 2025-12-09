@@ -113,7 +113,7 @@ abstract class CoreLocalizations {
   String get searchActions;
   String get actionConfig;
   String get noDescription;
-  String get actionsCount(int count);
+  String actionsCount(int count);
 
   // Action Group Editor
   String get editActionGroup;

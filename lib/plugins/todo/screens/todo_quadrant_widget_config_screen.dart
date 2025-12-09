@@ -395,7 +395,7 @@ class _TodoQuadrantWidgetConfigScreenState extends State<TodoQuadrantWidgetConfi
           TextButton(
             onPressed: _isLoading ? null : _saveAndFinish,
             child: Text(
-              _isLoading ? l10n.loading ?? 'Loading...' : 'Done',
+              _isLoading ? l10n.loading : 'Done',
               style: const TextStyle(color: Colors.white),
             ),
           ),

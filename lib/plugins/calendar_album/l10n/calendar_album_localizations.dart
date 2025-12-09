@@ -162,8 +162,6 @@ abstract class CalendarAlbumLocalizations {
   String get enterKeywordToSearch;
   String get noMatchingDiaries;
   String get tryOtherKeywords;
-  String get title;
-  String get content;
   String get tag;
   String get backToCurrentMonth;
   String get selectMonth;

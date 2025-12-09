@@ -131,7 +131,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context)!.groupManagement),
+            title: Text(AgentChatLocalizations.of(context).groupManagement),
             content: SizedBox(
               width: double.maxFinite,
               child: ListView.builder(
@@ -146,25 +146,25 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                       onSelected: (value) => _onGroupMenuSelected(value, group),
                       itemBuilder:
                           (context) => [
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: 'edit',
                               child: Row(
                                 children: [
-                                  Icon(Icons.edit),
-                                  SizedBox(width: 8),
-                                  Text(AgentChatLocalizations.of(context)!.edit),
+                                  const Icon(Icons.edit),
+                                  const SizedBox(width: 8),
+                                  Text(AgentChatLocalizations.of(context).edit),
                                 ],
                               ),
                             ),
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: 'delete',
                               child: Row(
                                 children: [
-                                  Icon(Icons.delete, color: Colors.red),
-                                  SizedBox(width: 8),
+                                  const Icon(Icons.delete, color: Colors.red),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    AgentChatLocalizations.of(context)!.delete,
-                                    style: TextStyle(color: Colors.red),
+                                    AgentChatLocalizations.of(context).delete,
+                                    style: const TextStyle(color: Colors.red),
                                   ),
                                 ],
                               ),
@@ -178,7 +178,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AgentChatLocalizations.of(context)!.close),
+                child: Text(AgentChatLocalizations.of(context).close),
               ),
             ],
           ),
@@ -210,7 +210,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: Text(AgentChatLocalizations.of(context)!.editGroup),
+              title: Text(AgentChatLocalizations.of(context).editGroup),
               content: TextField(
                 controller: nameController,
                 decoration: const InputDecoration(labelText: '分组名称'),
@@ -219,11 +219,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text(AgentChatLocalizations.of(context)!.cancel),
+                  child: Text(AgentChatLocalizations.of(context).cancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: Text(AgentChatLocalizations.of(context)!.save),
+                  child: Text(AgentChatLocalizations.of(context).save),
                 ),
               ],
             ),
@@ -248,17 +248,19 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context)!.confirmDelete),
-            content: Text(AgentChatLocalizations.of(context)!.confirmDeleteGroup(group.name)),
+            title: Text(AgentChatLocalizations.of(context).confirmDelete),
+            content: Text(
+              AgentChatLocalizations.of(context).confirmDeleteGroup(group.name),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AgentChatLocalizations.of(context)!.cancel),
+                child: Text(AgentChatLocalizations.of(context).cancel),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: Text(AgentChatLocalizations.of(context)!.delete),
+                child: Text(AgentChatLocalizations.of(context).delete),
               ),
             ],
           ),
@@ -284,20 +286,26 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context)!.selectTypeToCreate),
+            title: Text(AgentChatLocalizations.of(context).selectTypeToCreate),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
                   leading: const Icon(Icons.chat),
-                  title: Text(AgentChatLocalizations.of(context)!.channel),
-                  subtitle: Text(AgentChatLocalizations.of(context)!.createNewConversationChannel),
+                  title: Text(AgentChatLocalizations.of(context).channel),
+                  subtitle: Text(
+                    AgentChatLocalizations.of(
+                      context,
+                    ).createNewConversationChannel,
+                  ),
                   onTap: () => Navigator.pop(context, 'channel'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.folder),
-                  title: Text(AgentChatLocalizations.of(context)!.group),
-                  subtitle: Text(AgentChatLocalizations.of(context)!.createNewGroupCategory),
+                  title: Text(AgentChatLocalizations.of(context).group),
+                  subtitle: Text(
+                    AgentChatLocalizations.of(context).createNewGroupCategory,
+                  ),
                   onTap: () => Navigator.pop(context, 'group'),
                 ),
               ],
@@ -321,7 +329,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: Text(AgentChatLocalizations.of(context)!.addChannel),
+              title: Text(AgentChatLocalizations.of(context).addChannel),
               content: TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
@@ -333,11 +341,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text(AgentChatLocalizations.of(context)!.cancel),
+                  child: Text(AgentChatLocalizations.of(context).cancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: Text(AgentChatLocalizations.of(context)!.create),
+                  child: Text(AgentChatLocalizations.of(context).create),
                 ),
               ],
             ),
@@ -371,7 +379,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: Text(AgentChatLocalizations.of(context)!.addGroup),
+              title: Text(AgentChatLocalizations.of(context).addGroup),
               content: TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
@@ -383,11 +391,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text(AgentChatLocalizations.of(context)!.cancel),
+                  child: Text(AgentChatLocalizations.of(context).cancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: Text(AgentChatLocalizations.of(context)!.create),
+                  child: Text(AgentChatLocalizations.of(context).create),
                 ),
               ],
             ),
@@ -418,8 +426,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         _controller.conversationService.conversations.isNotEmpty;
 
     return SuperCupertinoNavigationWrapper(
-      title: Text(AgentChatLocalizations.of(context)!.aiChat),
-      largeTitle: AgentChatLocalizations.of(context)!.aiChat,
+      title: Text(AgentChatLocalizations.of(context).aiChat),
+      largeTitle: AgentChatLocalizations.of(context).aiChat,
       enableLargeTitle: true,
       enableSearchBar: true,
       searchPlaceholder: '搜索会话...',
@@ -440,7 +448,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         // 分组管理按钮
         IconButton(
           icon: const Icon(Icons.folder_outlined, size: 24),
-          tooltip: AgentChatLocalizations.of(context)!.groupManagement,
+          tooltip: AgentChatLocalizations.of(context).groupManagement,
           onPressed: _openGroupManagement,
         ),
         // 工具管理按钮
@@ -600,7 +608,10 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: Text(AgentChatLocalizations.of(context)!.clear, style: TextStyle(fontSize: 12)),
+                  child: Text(
+                    AgentChatLocalizations.of(context).clear,
+                    style: TextStyle(fontSize: 12),
+                  ),
                 ),
             ],
           ),
@@ -753,23 +764,26 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit),
-                          SizedBox(width: 8),
-                          Text(AgentChatLocalizations.of(context)!.edit),
+                          const Icon(Icons.edit),
+                          const SizedBox(width: 8),
+                          Text(AgentChatLocalizations.of(context).edit),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text(AgentChatLocalizations.of(context)!.delete, style: TextStyle(color: Colors.red)),
+                          const Icon(Icons.delete, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text(
+                            AgentChatLocalizations.of(context).delete,
+                            style: const TextStyle(color: Colors.red),
+                          ),
                         ],
                       ),
                     ),
@@ -831,7 +845,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: Text(AgentChatLocalizations.of(context)!.editConversation),
+              title: Text(AgentChatLocalizations.of(context).editConversation),
               content: TextField(
                 controller: titleController,
                 decoration: const InputDecoration(labelText: '会话标题'),
@@ -840,11 +854,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text(AgentChatLocalizations.of(context)!.cancel),
+                  child: Text(AgentChatLocalizations.of(context).cancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: Text(AgentChatLocalizations.of(context)!.save),
+                  child: Text(AgentChatLocalizations.of(context).save),
                 ),
               ],
             ),
@@ -870,19 +884,21 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context)!.confirmDelete),
+            title: Text(AgentChatLocalizations.of(context).confirmDelete),
             content: Text(
-              AgentChatLocalizations.of(context)!.confirmDeleteConversation(conversation.title),
+              AgentChatLocalizations.of(
+                context,
+              ).confirmDeleteConversation(conversation.title),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AgentChatLocalizations.of(context)!.cancel),
+                child: Text(AgentChatLocalizations.of(context).cancel),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: Text(AgentChatLocalizations.of(context)!.delete),
+                child: Text(AgentChatLocalizations.of(context).delete),
               ),
             ],
           ),

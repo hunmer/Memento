@@ -57,7 +57,11 @@ class HomeCard extends StatelessWidget {
               return Scaffold(body: plugin.buildMainView(context));
             }
           }
-          return Scaffold(body: Center(child: Text(ScreensLocalizations.of(context)!.cannotOpenPlugin)));
+          return Scaffold(
+            body: Center(
+              child: Text(ScreensLocalizations.of(context).cannotOpenPlugin),
+            ),
+          );
         },
         closedElevation: 0,
         closedShape: RoundedRectangleBorder(

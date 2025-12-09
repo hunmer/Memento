@@ -53,7 +53,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     return AlertDialog(
       title: Text(l10n.createNewFolder),
       content: SingleChildScrollView(
@@ -159,7 +159,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
   /// 创建文件夹
   void _createFolder() {
     final name = _nameController.text.trim();
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
 
     if (name.isEmpty) {
       toastService.showToast(l10n.pleaseEnterFolderName);

@@ -11,7 +11,6 @@ import 'package:Memento/core/action/action_manager.dart';
 import 'package:Memento/core/action/widgets/action_selector_dialog.dart';
 import 'package:Memento/core/action/models/action_instance.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/core/l10n/core_localizations.dart';
 
 /// 悬浮按钮编辑对话框
 class FloatingButtonEditDialog extends StatefulWidget {

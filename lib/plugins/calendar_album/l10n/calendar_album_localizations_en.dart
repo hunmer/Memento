@@ -246,12 +246,6 @@ class CalendarAlbumLocalizationsEn extends CalendarAlbumLocalizations {
   String get tryOtherKeywords => 'Try other keywords';
 
   @override
-  String get title => 'Title';
-
-  @override
-  String get content => 'Content';
-
-  @override
   String get tag => 'Tag';
 
   @override

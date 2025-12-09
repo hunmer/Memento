@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'nfc_localizations.dart';
 
 /// NFC插件的英文本地化实现

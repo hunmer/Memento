@@ -220,7 +220,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
       );
     }
 
-    final timeRangeOptions = _getTimeRangeOptions(context);
+    _getTimeRangeOptions(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -478,7 +478,7 @@ class _TodoListSelectorScreenState extends State<TodoListSelectorScreen> {
 
   /// 保存配置并关闭界面
   Future<void> _saveAndFinish() async {
-    final l10n = TodoLocalizations.of(context);
+    TodoLocalizations.of(context);
     final timeRangeOptions = _getTimeRangeOptions(context);
 
     if (widget.widgetId == null) {

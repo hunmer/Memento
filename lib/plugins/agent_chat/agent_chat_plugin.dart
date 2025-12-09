@@ -274,7 +274,7 @@ class _AgentChatMainViewState extends State<AgentChatMainView> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(AgentChatLocalizations.of(context)!.goBack),
+                    child: Text(AgentChatLocalizations.of(context).goBack),
                   ),
                 ],
               ),

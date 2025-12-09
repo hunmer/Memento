@@ -58,7 +58,7 @@ class _HomeGridState extends State<HomeGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     if (widget.items.isEmpty) {
       return _buildEmptyState(context, l10n);
     }
@@ -341,7 +341,7 @@ class _HomeGridState extends State<HomeGrid> {
   Future<Map<String, String>?> _showQuickCreateLayoutDialog(
     BuildContext context,
   ) async {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     final TextEditingController nameController = TextEditingController(
       text: l10n.quickLayout,
     );
@@ -415,7 +415,7 @@ Future<_DragToFolderAction?> _showDragToFolderDialog(
   HomeItem draggedItem,
   HomeFolderItem targetFolder,
 ) async {
-  final l10n = ScreensLocalizations.of(context)!;
+  final l10n = ScreensLocalizations.of(context);
   // 获取拖拽项的名称
   String itemName;
   if (draggedItem is HomeWidgetItem) {

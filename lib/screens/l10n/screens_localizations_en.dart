@@ -277,8 +277,6 @@ class ScreensLocalizationsEn extends ScreensLocalizations {
   @override
   String get manageSystemFloatingBall => 'Manage system-level floating ball functionality';
   @override
-  String get intentTest => 'Intent Test';
-  @override
   String get testDynamicIntentAndDeepLink => 'Test dynamic Intent registration and deep linking';
 
   // base_settings_controller
@@ -337,7 +335,10 @@ class ScreensLocalizationsEn extends ScreensLocalizations {
   @override
   String itemCount(int count) => '$count items';
   @override
-  String layoutBackgroundSettings(String layoutName) => '${layoutName} - Background Settings';
+  String layoutBackgroundSettings(String layoutName) =>
+      '$layoutName - Background Settings';
+  @override
+  String get layoutBackgroundSettingsTitle => 'Layout Background Settings';
   @override
   String get addWidgets => 'Add Widgets';
   @override
@@ -388,8 +389,6 @@ class ScreensLocalizationsEn extends ScreensLocalizations {
   String get mediumSize => 'Medium (Horizontal Card)';
   @override
   String get largeSize => 'Large (Square Card)';
-  @override
-  String confirmDeleteLayout(String layoutName) => 'Are you sure you want to delete layout "$layoutName"? This action cannot be undone.';
   @override
   String get noLayoutName => 'No layout name';
   @override
@@ -449,8 +448,6 @@ class ScreensLocalizationsEn extends ScreensLocalizations {
   @override
   String get backgroundColorOpacityDescription => 'Adjust only the background color opacity, does not affect text';
   @override
-  String get layoutBackgroundSettings => 'Layout Background Settings';
-  @override
   String get layoutBackgroundSettingsDescription => 'Set background images for each layout individually, priority higher than global background image';
   @override
   String get noSavedLayouts => 'No saved layouts';
@@ -466,10 +463,6 @@ class ScreensLocalizationsEn extends ScreensLocalizations {
   String get oneHundredPercentOpaque => '100% (Opaque)';
 
   // folder_dialog
-  @override
-  String get addToFolder => 'Add to Folder';
-  @override
-  String get editFolder => 'Edit Folder';
   @override
   String get folderIsEmpty => 'The folder is empty';
   @override
@@ -505,52 +498,11 @@ class ScreensLocalizationsEn extends ScreensLocalizations {
 
   // layout_manager_dialog
   @override
-  String get pleaseEnterLayoutName => 'Please enter layout name';
-  @override
   String get renameSuccess => 'Rename successful';
   @override
   String get deleteSuccess => 'Delete successful';
 
-  // layout_type_selector
-  @override
-  String get emptyLayout => 'Empty Layout';
-  @override
-  String get emptyLayoutDescription => 'Empty layout without any widgets';
-  @override
-  String get all1x1Widgets => 'All 1x1 Widgets';
-  @override
-  String get all1x1WidgetsDescription => 'Add all widgets that support 1x1 size';
-  @override
-  String get all2x2Widgets => 'All 2x2 Widgets';
-  @override
-  String get all2x2WidgetsDescription => 'Add all widgets that support 2x2 size';
-
-  // widget_settings_dialog
-  @override
-  String get widgetSettings => 'Widget Settings';
-  @override
-  String get oneColumn => 'One Column';
-  @override
-  String get twoColumns => 'Two Columns';
-  @override
-  String get backgroundImage => 'Background Image';
-  @override
-  String get alreadySet => 'Already Set';
-  @override
-  String get notSet => 'Not Set';
-  @override
-  String get iconColor => 'Icon Color';
-  @override
-  String get customized => 'Customized';
-  @override
-  String get useDefault => 'Use Default';
-  @override
-  String get backgroundColor => 'Background Color';
-  @override
-  String get effectWhenNoBackgroundImage => 'Takes effect when no background image';
-  @override
-  String get customColorWithTransparency => 'Custom Color (Supports Transparency)';
-  @override
+@override
   String get presetColors => 'Preset Colors';
   @override
   String get quickSelectPresetColors => 'Quick Select Preset Colors';

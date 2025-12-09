@@ -6,7 +6,7 @@ import 'package:Memento/core/route/page_visit_record.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
-import 'package:Memento/widgets/l10n/widgets_localizations.dart';
+import 'package:Memento/widgets/l10n/widget_localizations.dart';
 
 /// 路由历史记录对话框
 ///
@@ -105,16 +105,16 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(WidgetsLocalizations.of(context).confirmClear),
-        content: Text(WidgetsLocalizations.of(context).confirmEmptyHistory),
+            title: Text(WidgetLocalizations.of(context).confirmClear),
+            content: Text(WidgetLocalizations.of(context).confirmEmptyHistory),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(WidgetsLocalizations.of(context).cancel),
+                child: Text(WidgetLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(WidgetsLocalizations.of(context).confirm),
+                child: Text(WidgetLocalizations.of(context).confirm),
           ),
         ],
       ),
@@ -160,7 +160,7 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    WidgetsLocalizations.of(context).routeHistory,
+                    WidgetLocalizations.of(context).routeHistory,
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.bold,
@@ -175,7 +175,7 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                       onPressed: _clearHistory,
-                      tooltip: WidgetsLocalizations.of(context).clearHistory,
+                      tooltip: WidgetLocalizations.of(context).clearHistory,
                     ),
                   // 关闭按钮
                   IconButton(
@@ -220,14 +220,14 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              WidgetsLocalizations.of(context).noHistory,
+              WidgetLocalizations.of(context).noHistory,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
-              WidgetsLocalizations.of(context).visitPageAutoRecord,
+              WidgetLocalizations.of(context).visitPageAutoRecord,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   ),
@@ -294,7 +294,7 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
           ),
           const SizedBox(width: 4),
           Text(
-            WidgetsLocalizations.of(context).visits(record.visitCount),
+            WidgetLocalizations.of(context).visits(record.visitCount),
             style: TextStyle(
               fontSize: 12,
               color: theme.colorScheme.outline,

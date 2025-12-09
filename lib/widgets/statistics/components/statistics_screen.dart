@@ -3,7 +3,7 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/widgets/statistics/models/statistics_models.dart';
 import 'date_range_selector.dart';
 import 'chart_components.dart';
-import 'package:Memento/widgets/l10n/widgets_localizations.dart';
+import 'package:Memento/widgets/l10n/widget_localizations.dart';
 
 /// 通用的统计屏幕组件
 class StatisticsScreen extends StatefulWidget {
@@ -164,9 +164,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 )
           else if (_data == null)
             widget.config.emptyWidget ??
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: Text(WidgetsLocalizations.of(context).noData)),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Center(
+                    child: Text(WidgetLocalizations.of(context).noData),
+                  ),
                 )
           else
             Expanded(

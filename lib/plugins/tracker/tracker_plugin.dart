@@ -46,17 +46,6 @@ class _TrackerMainViewState extends State<TrackerMainView> {
     });
   }
 
-  void _addGoal() {
-    // 打开目标编辑页面
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => GoalEditPage(
-        controller: TrackerPlugin.instance.controller,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

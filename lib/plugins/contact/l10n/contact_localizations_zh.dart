@@ -255,9 +255,6 @@ class ContactLocalizationsZh extends ContactLocalizations {
   String get customFields => '自定义字段';
 
   @override
-  String get addCustomField => '添加自定义字段';
-
-  @override
   String get customActivityEvents => '自定义活动事件';
 
   @override

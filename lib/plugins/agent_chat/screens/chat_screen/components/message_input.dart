@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/agent_chat/controllers/chat_controller.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_command.dart';
@@ -542,7 +543,7 @@ class _MessageInputState extends State<MessageInput> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.image),
-                  title: Text(AgentChatLocalizations.of(context)!.image),
+                  title: Text(AgentChatLocalizations.of(context).image),
                   onTap: () {
                     Navigator.pop(context);
                     widget.controller.pickImages();
@@ -550,7 +551,7 @@ class _MessageInputState extends State<MessageInput> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.description),
-                  title: Text(AgentChatLocalizations.of(context)!.document),
+                  title: Text(AgentChatLocalizations.of(context).document),
                   onTap: () {
                     Navigator.pop(context);
                     widget.controller.pickDocuments();
@@ -624,7 +625,7 @@ class _MessageInputState extends State<MessageInput> {
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
             const SizedBox(width: 12),
-            Text(AgentChatLocalizations.of(context)!.loadingToolTemplates, style: TextStyle(color: Colors.grey[700])),
+            Text(AgentChatLocalizations.of(context).loadingToolTemplates, style: TextStyle(color: Colors.grey[700])),
           ],
         ),
       );

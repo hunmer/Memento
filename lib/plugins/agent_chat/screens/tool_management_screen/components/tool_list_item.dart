@@ -77,12 +77,14 @@ class ToolListItem extends StatelessWidget {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(AgentChatLocalizations.of(context)!.confirmDelete),
-                content: Text(AgentChatLocalizations.of(context)!.confirmDeleteTool(toolId)),
+                title: Text(AgentChatLocalizations.of(context).confirmDelete),
+                content: Text(
+                  AgentChatLocalizations.of(context).confirmDeleteTool(toolId),
+                ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: Text(AgentChatLocalizations.of(context)!.cancel),
+                    child: Text(AgentChatLocalizations.of(context).cancel),
                   ),
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context, true),
@@ -90,7 +92,7 @@ class ToolListItem extends StatelessWidget {
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                     ),
-                    child: Text(AgentChatLocalizations.of(context)!.delete),
+                    child: Text(AgentChatLocalizations.of(context).delete),
                   ),
                 ],
               ),

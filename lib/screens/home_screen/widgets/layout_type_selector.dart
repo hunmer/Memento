@@ -29,7 +29,7 @@ class _LayoutTypeSelectorState extends State<LayoutTypeSelector> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

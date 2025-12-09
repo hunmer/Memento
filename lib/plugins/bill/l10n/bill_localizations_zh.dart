@@ -219,12 +219,6 @@ class BillLocalizationsZh extends BillLocalizations {
   String get quickBookkeepingConfig => '快捷记账配置';
 
   @override
-  String get income => '收入';
-
-  @override
-  String get save => '保存';
-
-  @override
   String get addQuickPreset => '添加快捷预设';
 
   @override
@@ -253,9 +247,6 @@ class BillLocalizationsZh extends BillLocalizations {
 
   @override
   String get presetAmountHint => '留空则每次手动输入';
-
-  @override
-  String get expense => '支出';
 
   @override
   String get add => '添加';

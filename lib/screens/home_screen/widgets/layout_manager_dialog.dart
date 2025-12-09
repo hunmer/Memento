@@ -49,7 +49,7 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
         setState(() {
           _isLoading = false;
         });
-        final l10n = ScreensLocalizations.of(context)!;
+        final l10n = ScreensLocalizations.of(context);
         toastService.showToast('${l10n.loadLayoutFailed}：$e');
       }
     }
@@ -57,7 +57,7 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
 
   /// 切换到指定布局
   Future<void> _switchLayout(LayoutConfig layout) async {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     try {
       await _layoutManager.loadLayoutConfig(layout.id);
       if (mounted) {
@@ -76,7 +76,7 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
 
   /// 显示重命名对话框
   void _showRenameDialog(LayoutConfig layout) {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     final TextEditingController controller = TextEditingController(text: layout.name);
 
     showDialog(
@@ -126,7 +126,7 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
 
   /// 确认删除布局
   void _confirmDelete(LayoutConfig layout) {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -175,7 +175,7 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     return AlertDialog(
       title: Text(l10n.layoutManagement),
       content: SizedBox(
@@ -330,7 +330,7 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
 
   /// 创建布局
   Future<void> _createLayout() async {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       toastService.showToast(l10n.pleaseEnterLayoutName);
@@ -388,7 +388,7 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context)!;
+    final l10n = ScreensLocalizations.of(context);
     return AlertDialog(
       title: Text(l10n.newLayout),
       content: SingleChildScrollView(

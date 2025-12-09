@@ -328,8 +328,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.code),
-            title: Text(ScreensLocalizations.of(context)!.jsConsole),
-            subtitle: Text(ScreensLocalizations.of(context)!.testJavaScriptAPI),
+            title: Text(ScreensLocalizations.of(context).jsConsole),
+            subtitle: Text(ScreensLocalizations.of(context).testJavaScriptAPI),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/js_console');
@@ -337,8 +337,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.widgets),
-            title: Text(ScreensLocalizations.of(context)!.jsonDynamicWidgetTest),
-            subtitle: Text(ScreensLocalizations.of(context)!.testAndPreviewDynamicUI),
+            title: Text(ScreensLocalizations.of(context).jsonDynamicWidgetTest),
+            subtitle: Text(
+              ScreensLocalizations.of(context).testAndPreviewDynamicUI,
+            ),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/json_dynamic_test');
@@ -346,8 +348,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.navigation),
-            title: Text(ScreensLocalizations.of(context)!.superCupertinoNavigationTest),
-            subtitle: Text(ScreensLocalizations.of(context)!.testIOSStyleNavigation),
+            title: Text(
+              ScreensLocalizations.of(context).superCupertinoNavigationTest,
+            ),
+            subtitle: Text(
+              ScreensLocalizations.of(context).testIOSStyleNavigation,
+            ),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/super_cupertino_test');
@@ -355,7 +361,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.notifications),
-            title: Text(ScreensLocalizations.of(context)!.notificationTest),
+            title: Text(ScreensLocalizations.of(context).notificationTest),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/notification_test');
@@ -363,8 +369,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.touch_app),
-            title: Text(ScreensLocalizations.of(context)!.floatingBallSettings),
-            subtitle: Text(ScreensLocalizations.of(context)!.manageSystemFloatingBall),
+            title: Text(ScreensLocalizations.of(context).floatingBallSettings),
+            subtitle: Text(ScreensLocalizations.of(context).manageSystemFloatingBall),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/floating_ball');
@@ -372,8 +378,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.link),
-            title: Text(ScreensLocalizations.of(context)!.intentTest),
-            subtitle: Text(ScreensLocalizations.of(context)!.testDynamicIntentAndDeepLink),
+            title: Text(ScreensLocalizations.of(context).intentTest),
+            subtitle: Text(ScreensLocalizations.of(context).testDynamicIntentAndDeepLink),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/intent_test');

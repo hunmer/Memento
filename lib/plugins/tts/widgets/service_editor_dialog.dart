@@ -104,6 +104,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
     if (_loadingVoices) return;
 
     setState(() => _loadingVoices = true);
+    final loc = TTSLocalizations.of(context);
 
     try {
       // 创建临时服务实例来获取语音列表
@@ -295,17 +296,17 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                     },
                   ),
                   if (_loadingVoices)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8.0),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
                       child: Row(
                         children: [
-                          SizedBox(
+                          const SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
-                          SizedBox(width: 8),
-                          Text(TTSLocalizations.of(context).loadingVoiceList, style: TextStyle(fontSize: 12)),
+                          const SizedBox(width: 8),
+                          Text(TTSLocalizations.of(context).loadingVoiceList, style: const TextStyle(fontSize: 12)),
                         ],
                       ),
                     ),
@@ -325,17 +326,20 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                     ),
                     enabled: false,
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 8.0),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
                     child: Row(
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
-                        SizedBox(width: 8),
-                        Text(TTSLocalizations.of(context).loadingVoiceList, style: TextStyle(fontSize: 12)),
+                        const SizedBox(width: 8),
+                        Text(
+                          TTSLocalizations.of(context).loadingVoiceList,
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ],
                     ),
                   ),
@@ -427,7 +431,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.settings_input_composite),
                 ),
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'audio',
                     child: Text(loc.directAudioReturn),
@@ -640,6 +644,8 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+
+    final loc = TTSLocalizations.of(context);
 
     try {
       final service = TTSServiceConfig(

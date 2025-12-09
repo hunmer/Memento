@@ -404,42 +404,42 @@ class _ChatScreenState extends State<ChatScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+                  PopupMenuItem(
                 value: 'tool_management',
                 child: Row(
                   children: [
-                    Icon(Icons.build_outlined),
-                    SizedBox(width: 12),
+                        const Icon(Icons.build_outlined),
+                        const SizedBox(width: 12),
                     Text(AgentChatLocalizations.of(context).toolManagement),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+                  PopupMenuItem(
                 value: 'token_stats',
                 child: Row(
                   children: [
-                    Icon(Icons.analytics_outlined),
-                    SizedBox(width: 12),
+                        const Icon(Icons.analytics_outlined),
+                        const SizedBox(width: 12),
                     Text(AgentChatLocalizations.of(context).tokenStatistics),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+                  PopupMenuItem(
                 value: 'clear_messages',
                 child: Row(
                   children: [
-                    Icon(Icons.delete_sweep),
-                    SizedBox(width: 12),
+                        const Icon(Icons.delete_sweep),
+                        const SizedBox(width: 12),
                     Text(AgentChatLocalizations.of(context).confirmClear),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+                  PopupMenuItem(
                 value: 'settings',
                 child: Row(
                   children: [
-                    Icon(Icons.settings),
-                    SizedBox(width: 12),
+                        const Icon(Icons.settings),
+                        const SizedBox(width: 12),
                     Text(AgentChatLocalizations.of(context).conversationSettings),
                   ],
                 ),
@@ -505,7 +505,10 @@ class _ChatScreenState extends State<ChatScreen> {
                                   }
                                 },
                                 icon: const Icon(Icons.clear_all, size: 14),
-                                label: Text(AgentChatLocalizations.of(context)!.clear, style: TextStyle(fontSize: 12)),
+                                label: Text(
+                                  AgentChatLocalizations.of(context).clear,
+                                  style: TextStyle(fontSize: 12),
+                                ),
                                 style: TextButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(horizontal: 8),
                                   minimumSize: const Size(0, 28),
@@ -1091,7 +1094,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text(AgentChatLocalizations.of(context)!.clear),
+                child: Text(AgentChatLocalizations.of(context).clear),
               ),
             ],
           ),

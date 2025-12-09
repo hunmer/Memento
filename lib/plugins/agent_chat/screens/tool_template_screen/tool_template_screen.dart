@@ -67,7 +67,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AgentChatLocalizations.of(context)!.toolTemplate),
+        title: Text(AgentChatLocalizations.of(context).toolTemplate),
         actions: [
           // 标签过滤按钮
           if (allTags.isNotEmpty)
@@ -163,7 +163,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                           },
                           icon: const Icon(Icons.clear_all, size: 16),
                           label: Text(
-                            AgentChatLocalizations.of(context)!.clear,
+                            AgentChatLocalizations.of(context).clear,
                             style: TextStyle(fontSize: 12),
                           ),
                         ),
@@ -260,7 +260,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                         Navigator.pop(context);
                       },
                       icon: const Icon(Icons.send, size: 18),
-                      label: Text(AgentChatLocalizations.of(context)!.use),
+                      label: Text(AgentChatLocalizations.of(context).use),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -283,23 +283,37 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
+                          PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit, size: 18, color: Colors.blue),
-                            SizedBox(width: 8),
-                            Text(AgentChatLocalizations.of(context)!.edit, style: TextStyle(color: Colors.blue)),
+                                const Icon(
+                                  Icons.edit,
+                                  size: 18,
+                                  color: Colors.blue,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AgentChatLocalizations.of(context).edit,
+                                  style: const TextStyle(color: Colors.blue),
+                                ),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete, size: 18, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text(AgentChatLocalizations.of(context)!.delete, style: TextStyle(color: Colors.red)),
+                                const Icon(
+                                  Icons.delete,
+                                  size: 18,
+                                  color: Colors.red,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  AgentChatLocalizations.of(context).delete,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
                           ],
                         ),
                       ),
@@ -451,19 +465,23 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AgentChatLocalizations.of(context)!.deleteConfirmation),
-        content: Text(AgentChatLocalizations.of(context)!.confirmDeleteTemplate(template.name)),
+            title: Text(AgentChatLocalizations.of(context).deleteConfirmation),
+            content: Text(
+              AgentChatLocalizations.of(
+                context,
+              ).confirmDeleteTemplate(template.name),
+            ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(AgentChatLocalizations.of(context)!.cancel),
+            child: Text(AgentChatLocalizations.of(context).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
             ),
-            child: Text(AgentChatLocalizations.of(context)!.delete),
+                child: Text(AgentChatLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -522,11 +540,11 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+            title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange),
-            SizedBox(width: 8),
-            Text(AgentChatLocalizations.of(context)!.resetConfirmation),
+                const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                const SizedBox(width: 8),
+                Text(AgentChatLocalizations.of(context).resetConfirmation),
           ],
         ),
         content: const Text(
@@ -537,7 +555,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(AgentChatLocalizations.of(context)!.cancel),
+                child: Text(AgentChatLocalizations.of(context).cancel),
           ),
           FilledButton.icon(
             onPressed: () => Navigator.pop(context, true),
@@ -545,7 +563,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
               backgroundColor: Colors.orange,
             ),
             icon: const Icon(Icons.restore),
-            label: Text(AgentChatLocalizations.of(context)!.reset),
+                label: Text(AgentChatLocalizations.of(context).reset),
           ),
         ],
       ),
@@ -559,16 +577,21 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => const Center(
+          builder:
+              (context) => Center(
             child: Card(
               child: Padding(
-                padding: EdgeInsets.all(24.0),
+                    padding: const EdgeInsets.all(24.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text(AgentChatLocalizations.of(context)!.resettingDefaultTemplates),
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 16),
+                        Text(
+                          AgentChatLocalizations.of(
+                            context,
+                          ).resettingDefaultTemplates,
+                        ),
                   ],
                 ),
               ),
@@ -634,7 +657,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
         children: [
           const Icon(Icons.filter_list, size: 24),
           const SizedBox(width: 8),
-          Text(AgentChatLocalizations.of(context)!.selectTagFilter),
+          Text(AgentChatLocalizations.of(context).selectTagFilter),
           const Spacer(),
           if (_selectedTags.isNotEmpty)
             TextButton(
@@ -643,7 +666,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
                   _selectedTags.clear();
                 });
               },
-              child: Text(AgentChatLocalizations.of(context)!.clear),
+              child: Text(AgentChatLocalizations.of(context).clear),
             ),
         ],
       ),
@@ -719,7 +742,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(AgentChatLocalizations.of(context)!.cancel),
+          child: Text(AgentChatLocalizations.of(context).cancel),
         ),
         FilledButton.icon(
           onPressed: () => Navigator.pop(context, _selectedTags),
@@ -730,7 +753,7 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
                     label: Text(_selectedTags.length.toString()),
                     child: const Icon(Icons.check),
                   ),
-          label: Text(AgentChatLocalizations.of(context)!.confirm),
+          label: Text(AgentChatLocalizations.of(context).confirm),
         ),
       ],
     );

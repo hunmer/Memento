@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import 'models/ai_agent.dart';
 import 'models/prompt_preset.dart';
 
 /// OpenAI 插件示例数据

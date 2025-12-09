@@ -6,8 +6,6 @@ import 'package:Memento/plugins/store/widgets/add_product_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
-import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/store/store_plugin.dart';
@@ -74,11 +72,6 @@ class _StoreBottomBarState extends State<StoreBottomBar>
     });
   }
 
-  /// 添加商品
-  Future<void> _addProduct() async {
-    await NavigationHelper.push(context, AddProductPage(controller: widget.plugin.controller),
-    );
-  }
 
   /// 显示添加积分对话框
   void _showAddPointsDialog() {

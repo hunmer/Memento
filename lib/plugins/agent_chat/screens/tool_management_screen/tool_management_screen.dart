@@ -94,7 +94,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
     final selectedPlugin = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AgentChatLocalizations.of(context)!.selectPlugin),
+            title: Text(AgentChatLocalizations.of(context).selectPlugin),
         content: SizedBox(
           width: double.maxFinite,
           child: ScrollConfiguration(
@@ -168,16 +168,16 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(AgentChatLocalizations.of(context)!.confirmImport),
-          content: Text(AgentChatLocalizations.of(context)!.importConfigOverride),
+          title: Text(AgentChatLocalizations.of(context).confirmImport),
+          content: Text(AgentChatLocalizations.of(context).importConfigOverride),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(AgentChatLocalizations.of(context)!.cancel),
+              child: Text(AgentChatLocalizations.of(context).cancel),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text(AgentChatLocalizations.of(context)!.confirm),
+              child: Text(AgentChatLocalizations.of(context).confirm),
             ),
           ],
         ),
@@ -234,12 +234,16 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AgentChatLocalizations.of(context)!.confirmRestoreDefault),
-        content: Text(AgentChatLocalizations.of(context)!.restoreDefaultDescription),
+            title: Text(
+              AgentChatLocalizations.of(context).confirmRestoreDefault,
+            ),
+            content: Text(
+              AgentChatLocalizations.of(context).restoreDefaultDescription,
+            ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(AgentChatLocalizations.of(context)!.cancel),
+            child: Text(AgentChatLocalizations.of(context).cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -247,7 +251,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: Text(AgentChatLocalizations.of(context)!.restoreDefault),
+                child: Text(AgentChatLocalizations.of(context).restoreDefault),
           ),
         ],
       ),
@@ -340,7 +344,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: FilterChip(
-                label: Text(AgentChatLocalizations.of(context)!.all),
+                label: Text(AgentChatLocalizations.of(context).all),
                 selected: _selectedPluginFilter == null,
                 onSelected: (selected) {
                   setState(() {
@@ -359,7 +363,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: FilterChip(
-                  label: Text(AgentChatLocalizations.of(context)!.pluginInfo(pluginId, enabledCount, totalCount)),
+                  label: Text(AgentChatLocalizations.of(context).pluginInfo(pluginId, enabledCount, totalCount)),
                   selected: _selectedPluginFilter == pluginId,
                   onSelected: (selected) {
                     setState(() {
@@ -380,7 +384,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AgentChatLocalizations.of(context)!.toolManagement),
+        title: Text(AgentChatLocalizations.of(context).toolManagement),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
@@ -403,44 +407,47 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+                  PopupMenuItem(
                 value: 'add',
                 child: Row(
                   children: [
-                    Icon(Icons.add),
-                    SizedBox(width: 12),
-                    Text(AgentChatLocalizations.of(context)!.addTool),
+                        const Icon(Icons.add),
+                        const SizedBox(width: 12),
+                        Text(AgentChatLocalizations.of(context).addTool),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+                  PopupMenuItem(
                 value: 'import',
                 child: Row(
                   children: [
-                    Icon(Icons.file_download),
-                    SizedBox(width: 12),
-                    Text(AgentChatLocalizations.of(context)!.importConfig),
+                        const Icon(Icons.file_download),
+                        const SizedBox(width: 12),
+                        Text(AgentChatLocalizations.of(context).importConfig),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+                  PopupMenuItem(
                 value: 'export',
                 child: Row(
                   children: [
-                    Icon(Icons.file_upload),
-                    SizedBox(width: 12),
-                    Text(AgentChatLocalizations.of(context)!.exportConfig),
+                        const Icon(Icons.file_upload),
+                        const SizedBox(width: 12),
+                        Text(AgentChatLocalizations.of(context).exportConfig),
                   ],
                 ),
               ),
               const PopupMenuDivider(),
-              const PopupMenuItem(
+                  PopupMenuItem(
                 value: 'reset',
                 child: Row(
                   children: [
-                    Icon(Icons.restore, color: Colors.red),
-                    SizedBox(width: 12),
-                    Text(AgentChatLocalizations.of(context)!.restoreDefault, style: TextStyle(color: Colors.red)),
+                        const Icon(Icons.restore, color: Colors.red),
+                        const SizedBox(width: 12),
+                        Text(
+                          AgentChatLocalizations.of(context).restoreDefault,
+                          style: const TextStyle(color: Colors.red),
+                        ),
                   ],
                 ),
               ),
@@ -475,7 +482,11 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                 // 工具列表
                 Expanded(
                   child: _allPluginTools.isEmpty
-                      ? Center(child: Text(AgentChatLocalizations.of(context)!.noToolConfig))
+                            ? Center(
+                              child: Text(
+                                AgentChatLocalizations.of(context).noToolConfig,
+                              ),
+                            )
                       : ScrollConfiguration(
                           behavior: ScrollConfiguration.of(context).copyWith(
                             dragDevices: {
@@ -618,7 +629,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
           children: [
             const Icon(Icons.block, color: Colors.grey),
             const SizedBox(width: 8),
-            Text(AgentChatLocalizations.of(context)!.disabledTools),
+                Text(AgentChatLocalizations.of(context).disabledTools),
             const Spacer(),
             Text(
               '${disabledTools.length} 个',
@@ -629,15 +640,23 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
         content: SizedBox(
           width: double.maxFinite,
           child: disabledTools.isEmpty
-              ? const Center(
+                      ? Center(
                   child: Padding(
-                    padding: EdgeInsets.all(32),
+                          padding: const EdgeInsets.all(32),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle, size: 64, color: Colors.green),
-                        SizedBox(height: 16),
-                        Text(AgentChatLocalizations.of(context)!.allToolsEnabled),
+                              const Icon(
+                                Icons.check_circle,
+                                size: 64,
+                                color: Colors.green,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                AgentChatLocalizations.of(
+                                  context,
+                                ).allToolsEnabled,
+                              ),
                       ],
                     ),
                   ),
@@ -721,16 +740,28 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                 final confirmed = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: Text(AgentChatLocalizations.of(context)!.confirmEnableAll),
-                    content: Text(AgentChatLocalizations.of(context)!.confirmEnableAllTools(disabledTools.length)),
+                            title: Text(
+                              AgentChatLocalizations.of(
+                                context,
+                              ).confirmEnableAll,
+                            ),
+                            content: Text(
+                              AgentChatLocalizations.of(
+                                context,
+                              ).confirmEnableAllTools(disabledTools.length),
+                            ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
-                        child: Text(AgentChatLocalizations.of(context)!.cancel),
+                                child: Text(
+                                  AgentChatLocalizations.of(context).cancel,
+                                ),
                       ),
                       ElevatedButton(
                         onPressed: () => Navigator.pop(context, true),
-                        child: Text(AgentChatLocalizations.of(context)!.enableAll),
+                                child: Text(
+                                  AgentChatLocalizations.of(context).enableAll,
+                                ),
                       ),
                     ],
                   ),
@@ -754,11 +785,11 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                 }
               },
               icon: const Icon(Icons.done_all),
-              label: Text(AgentChatLocalizations.of(context)!.enableAll),
+                  label: Text(AgentChatLocalizations.of(context).enableAll),
             ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(AgentChatLocalizations.of(context)!.close),
+                child: Text(AgentChatLocalizations.of(context).close),
           ),
         ],
       ),

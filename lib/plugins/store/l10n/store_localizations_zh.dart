@@ -330,21 +330,8 @@ class StoreLocalizationsZh extends StoreLocalizations {
   @override
   String get defaultSort => '默认排序';
 
-  @override
-  String get sortByStock => '按库存排序';
-
-  @override
-  String get sortByPrice => '按价格排序';
 
   @override
   String get sortByExpiryDate => '按兑换期限';
 
-  @override
-  String get allItems => '全部物品';
-
-  @override
-  String get usable => '可使用';
-
-  @override
-  String get expired => '已过期';
 }

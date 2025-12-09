@@ -264,22 +264,22 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             l10n.autoHideInApp,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             l10n.autoHideInAppDescription,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Colors.grey,
                             ),
@@ -419,7 +419,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                 leading: const Icon(Icons.location_on),
                 title: Text(l10n.currentPosition),
                 subtitle: Text(
-                  l10n.xPositionYPosition(_controller.lastPosition!.x, _controller.lastPosition!.y),
+                  l10n.xPositionYPosition(_controller.lastPosition!.x.toDouble(), _controller.lastPosition!.y.toDouble()),
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.refresh),

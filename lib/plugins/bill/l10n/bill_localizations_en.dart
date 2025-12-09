@@ -223,12 +223,6 @@ class BillLocalizationsEn extends BillLocalizations {
   String get quickBookkeepingConfig => 'Quick Bookkeeping Config';
 
   @override
-  String get income => 'Income';
-
-  @override
-  String get save => 'Save';
-
-  @override
   String get addQuickPreset => 'Add Quick Preset';
 
   @override
@@ -257,10 +251,6 @@ class BillLocalizationsEn extends BillLocalizations {
 
   @override
   String get presetAmountHint => 'Leave blank to enter manually each time';
-
-  @override
-  String get expense => 'Expense';
-
   @override
   String get add => 'Add';
 

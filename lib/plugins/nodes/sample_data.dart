@@ -284,21 +284,6 @@ class NodesSampleData {
       isExpanded: true,
     );
 
-    final basicNode = Node(
-      id: 'node-basic',
-      title: '基础语法',
-      createdAt: DateTime(2025, 1, 2, 20, 0),
-      tags: ['基础', 'Dart'],
-      status: NodeStatus.done,
-      customFields: [
-        CustomField(key: '完成度', value: '100%'),
-        CustomField(key: '学习资源', value: '《Dart语言程序设计》'),
-      ],
-      notes: '掌握Dart语言基础语法、面向对象编程',
-      parentId: 'node-flutter',
-      pathValue: 'Flutter 开发进阶/基础语法',
-      color: Colors.green,
-    );
 
     final widgetNode = Node(
       id: 'node-widget',

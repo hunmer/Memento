@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
 import 'package:Memento/plugins/tts/models/tts_service_config.dart';
 import 'package:Memento/plugins/tts/models/tts_service_type.dart';
-import 'package:Memento/widgets/l10n/widgets_localizations.dart';
+import 'package:Memento/widgets/l10n/widget_localizations.dart';
 
 /// TTS设置对话框
 ///
@@ -76,7 +76,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
         children: [
           Icon(Icons.record_voice_over, size: 24),
           SizedBox(width: 8),
-          Text(WidgetsLocalizations.of(context).voiceBroadcastSettings),
+          Text(WidgetLocalizations.of(context).voiceBroadcastSettings),
         ],
       ),
       content:
@@ -93,8 +93,12 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                   children: [
                     // 启用开关
                     SwitchListTile(
-                      title: Text(WidgetsLocalizations.of(context).enableAutoRead),
-                      subtitle: Text(WidgetsLocalizations.of(context).autoReadAIMessage),
+                      title: Text(
+                        WidgetLocalizations.of(context).enableAutoRead,
+                      ),
+                      subtitle: Text(
+                        WidgetLocalizations.of(context).autoReadAIMessage,
+                      ),
                       value: _enabled,
                       onChanged: (value) {
                         setState(() {
@@ -107,7 +111,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                     // 服务选择
                     if (_enabled && _services.isNotEmpty) ...[
                       Text(
-                        WidgetsLocalizations.of(context).selectTTSService,
+                        WidgetLocalizations.of(context).selectTTSService,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -145,7 +149,9 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                                           ),
                                         ),
                                         child: Text(
-                                          WidgetsLocalizations.of(context).defaultLabel,
+                                          WidgetLocalizations.of(
+                                            context,
+                                          ).defaultLabel,
                                           style: const TextStyle(
                                             fontSize: 10,
                                             color: Colors.blue,
@@ -188,13 +194,19 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: Colors.orange.shade200),
                         ),
-                        child: const Row(
+                        child: Row(
                           children: [
-                            Icon(Icons.warning, color: Colors.orange, size: 20),
-                            SizedBox(width: 8),
+                            const Icon(
+                              Icons.warning,
+                              color: Colors.orange,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                WidgetsLocalizations.of(context).noTTSServiceAvailable,
+                                WidgetLocalizations.of(
+                                  context,
+                                ).noTTSServiceAvailable,
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ),
@@ -207,7 +219,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(WidgetsLocalizations.of(context).cancel),
+          child: Text(WidgetLocalizations.of(context).cancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -217,7 +229,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
             );
             Navigator.of(context).pop(result);
           },
-          child: Text(WidgetsLocalizations.of(context).confirm),
+          child: Text(WidgetLocalizations.of(context).confirm),
         ),
       ],
     );
@@ -227,7 +239,7 @@ class _TTSSettingsDialogState extends State<TTSSettingsDialog> {
   String _getServiceTypeText(BuildContext context, TTSServiceConfig service) {
     String typeText = service.type.displayName;
     if (!service.isEnabled) {
-      typeText += WidgetsLocalizations.of(context).disabled;
+      typeText += WidgetLocalizations.of(context).disabled;
     }
     if (service.voice != null && service.voice!.isNotEmpty) {
       typeText += ' · ${service.voice}';

@@ -130,8 +130,8 @@ class _SuperCupertinoTestScreenState extends State<SuperCupertinoTestScreen> {
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
-      title: Text(ScreensLocalizations.of(context)!.superCupertinoTest),
-      largeTitle: ScreensLocalizations.of(context)!.fruitList,
+      title: Text(ScreensLocalizations.of(context).superCupertinoTest),
+      largeTitle: ScreensLocalizations.of(context).fruitList,
       body: ListView.separated(
         padding: EdgeInsets.zero,
         itemCount: _filteredItems.length,
@@ -144,7 +144,7 @@ class _SuperCupertinoTestScreenState extends State<SuperCupertinoTestScreen> {
               child: Icon(_getFruitIcon(item), color: Colors.white, size: 20),
             ),
             title: Text(item),
-            subtitle: Text(ScreensLocalizations.of(context)!.fruitIndex(index)),
+            subtitle: Text(ScreensLocalizations.of(context).fruitIndex(index)),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               toastService.showToast('你选择了: $item');
