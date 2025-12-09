@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'screens/day_home_screen.dart';
 import 'controllers/day_controller.dart';
@@ -74,6 +75,9 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
+
+    // 注册数据选择器
+    _registerDataSelectors();
   }
 
   // 获取纪念日总数
@@ -552,6 +556,59 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
       }
       return jsonEncode(matchedDays.first.toJson());
     }
+  }
+
+  // ==================== 数据选择器注册 ====================
+
+  void _registerDataSelectors() {
+    pluginDataSelectorService.registerSelector(SelectorDefinition(
+      id: 'day.memorial',
+      pluginId: id,
+      name: '选择纪念日',
+      icon: icon,
+      color: color,
+      searchable: true,
+      selectionMode: SelectionMode.single,
+      steps: [
+        SelectorStep(
+          id: 'memorial',
+          title: '选择纪念日',
+          viewType: SelectorViewType.list,
+          isFinalStep: true,
+          dataLoader: (_) async {
+            return _controller.memorialDays.map((day) {
+              // 计算倒计时文本
+              String subtitle;
+              if (day.isToday) {
+                subtitle = '今天';
+              } else if (day.daysRemaining > 0) {
+                subtitle = '剩余 ${day.daysRemaining} 天';
+              } else {
+                subtitle = '已过 ${day.daysPassed} 天';
+              }
+
+              // 添加日期信息
+              subtitle += ' · ${day.formattedTargetDate}';
+
+              return SelectableItem(
+                id: day.id,
+                title: day.title,
+                subtitle: subtitle,
+                icon: Icons.event_outlined,
+                rawData: day,
+              );
+            }).toList();
+          },
+          searchFilter: (items, query) {
+            if (query.isEmpty) return items;
+            final lowerQuery = query.toLowerCase();
+            return items.where((item) =>
+              item.title.toLowerCase().contains(lowerQuery)
+            ).toList();
+          },
+        ),
+      ],
+    ));
   }
 
   void dispose() {
