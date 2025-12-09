@@ -96,9 +96,6 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
-    // 初始化插件
-    await initialize();
-
     // 监听计时器事件，同步小组件数据
     EventManager.instance.subscribe('habit_timer_started', _onTimerEvent);
     EventManager.instance.subscribe('habit_timer_stopped', _onTimerEvent);

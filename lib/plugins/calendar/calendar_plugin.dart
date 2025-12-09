@@ -136,8 +136,6 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
-    await initialize();
-
     // 获取Todo插件的TaskController实例
     final todoPlugin = pluginManager.getPlugin('todo') as TodoPlugin?;
     if (todoPlugin != null) {

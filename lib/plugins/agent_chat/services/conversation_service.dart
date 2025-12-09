@@ -395,6 +395,7 @@ class ConversationService extends ChangeNotifier {
 
   /// 刷新会话列表
   Future<void> refresh() async {
-    await initialize();
+    // 插件已在 initialize() 中完成初始化
+    // 这里可以添加额外的应用级注册逻辑
   }
 }

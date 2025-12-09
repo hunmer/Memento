@@ -217,7 +217,8 @@ class ScriptsCenterPlugin extends BasePlugin {
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
-    await initialize();
+    // 插件已在 initialize() 中完成初始化
+    // 这里可以添加额外的应用级注册逻辑
 
     // 延迟设置触发器，确保其他插件已初始化
     Future.delayed(const Duration(milliseconds: 500), () {

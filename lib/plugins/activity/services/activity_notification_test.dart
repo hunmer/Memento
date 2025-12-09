@@ -129,7 +129,8 @@ class ActivityNotificationTest {
     debugPrint('[ActivityNotificationTest] 开始运行所有测试...');
 
     if (!_isInitialized) {
-      await initialize();
+      // 插件已在 initialize() 中完成初始化
+    // 这里可以添加额外的应用级注册逻辑
     }
 
     final results = <String, bool>{};
