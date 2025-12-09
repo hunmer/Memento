@@ -92,7 +92,7 @@ mixin FolderSelectionDialog on NotesMainViewState {
                 TextButton(
                   onPressed: () => Navigator.pop(context, parentFolder),
                   child: Text(
-                    .selectCurrentFolder,
+                    'notes_selectCurrentFolder'.tr,
                   ),
                 ),
             ],

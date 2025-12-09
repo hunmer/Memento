@@ -207,24 +207,15 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
 
   /// 获取默认的搜索占位符
   String _getDefaultSearchPlaceholder() {
-    return _localizations?.search ?? '搜索';
+    return 'core_search'.tr;
   }
 
   /// 获取默认的过滤器标签
   Map<String, String> _getDefaultFilterLabels() {
-    final loc = _localizations;
-    if (loc == null) {
-      return {
-        'activity': '活动',
-        'tag': '标签',
-        'comment': '注释',
-      };
-    }
-
     return {
-      'activity': loc.activity,
-      'tag': loc.tag,
-      'comment': loc.comment,
+      'activity': 'core_activity'.tr,
+      'tag': 'core_tag'.tr,
+      'comment': 'core_comment'.tr,
     };
   }
 
@@ -255,7 +246,7 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
         children: [
           const SizedBox(height: 4),
           Text(
-            _localizations?.searchScope ?? '搜索范围',
+            'core_searchScope'.tr,
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
@@ -386,7 +377,7 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
                 )
               : null),
       title: widget.title,
-      previousPageTitle: widget.previousPageTitle ?? _localizations?.back ?? "返回",
+      previousPageTitle: widget.previousPageTitle ?? 'core_back'.tr,
       actions: widget.actions != null && widget.actions!.isNotEmpty
           ? Wrap(
               spacing: 4,

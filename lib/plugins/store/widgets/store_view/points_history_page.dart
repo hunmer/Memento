@@ -121,8 +121,7 @@ class _PointsHistoryContentState extends State<PointsHistoryContent> {
               color: log.type == '获得' ? Colors.green : Colors.red,
             ),
             title: Text(
-              
-                  .pointsHistoryEntry
+              'store_pointsHistoryEntry'.tr
                   .replaceFirst('{value}', log.value.toString())
                   .replaceFirst('{type}', log.type),
             ),

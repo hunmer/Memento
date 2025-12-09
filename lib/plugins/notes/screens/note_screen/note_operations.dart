@@ -79,8 +79,8 @@ Future<void> deleteNoteDialog(
     context: context,
     builder:
         (context) => AlertDialog(
-          title: Text(.deleteNote),
-          content: Text(.deleteNoteConfirmation),
+          title: Text('notes_deleteNote'.tr),
+          content: Text('notes_deleteNoteConfirmation'.tr),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -89,7 +89,7 @@ Future<void> deleteNoteDialog(
             TextButton(
               onPressed: () => Navigator.pop(context, true),
               child: Text(
-                .delete,
+                'notes_delete'.tr,
                 style: TextStyle(color: Colors.red),
               ),
             ),

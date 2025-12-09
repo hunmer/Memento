@@ -14,7 +14,7 @@ class BaseSettingsController extends ChangeNotifier {
       context: context,
       builder:
           (context) => SimpleDialog(
-            title: Text(localizations.selectLanguage),
+            title: Text('settingsScreen_selectLanguage'.tr),
             children: [
               SimpleDialogOption(
                 onPressed: () => Navigator.pop(context, const Locale('zh')),
@@ -23,7 +23,7 @@ class BaseSettingsController extends ChangeNotifier {
                     if (_currentLocale.languageCode == 'zh')
                       Icon(Icons.check, color: Colors.blue),
                     const SizedBox(width: 8),
-                    Text(localizations.chinese),
+                    Text('settingsScreen_chinese'.tr),
                   ],
                 ),
               ),
@@ -34,7 +34,7 @@ class BaseSettingsController extends ChangeNotifier {
                     if (_currentLocale.languageCode == 'en')
                       Icon(Icons.check, color: Colors.blue),
                     const SizedBox(width: 8),
-                    Text(localizations.english),
+                    Text('settingsScreen_english'.tr),
                   ],
                 ),
               ),
