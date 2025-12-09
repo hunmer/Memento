@@ -53,14 +53,14 @@ class EntryDetailAppBar extends StatelessWidget implements PreferredSizeWidget {
               context: context,
               builder:
                   (context) => AlertDialog(
-                    title: Text(AppLocalizations.of(context)!.delete),
+                    title: Text('app_delete'.tr),
                     content: Text(
-                      '${AppLocalizations.of(context)!.delete} "${entry.title}"?',
+                      '${'app_delete'.tr} "${entry.title}"?',
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: Text(AppLocalizations.of(context)!.cancel),
+                        child: Text('app_cancel'.tr),
                       ),
                       TextButton(
                         onPressed: () {
@@ -68,7 +68,7 @@ class EntryDetailAppBar extends StatelessWidget implements PreferredSizeWidget {
                           Navigator.of(context).pop(); // 关闭对话框
                           Navigator.of(context).pop(); // 返回上一页
                         },
-                        child: Text(AppLocalizations.of(context)!.delete),
+                        child: Text('app_delete'.tr),
                       ),
                     ],
                   ),

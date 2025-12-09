@@ -1,6 +1,6 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/widgets/backup_time_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/screens/settings_screen/controllers/settings_screen_controller.dart';
 
@@ -45,7 +45,6 @@ class BackupService {
   }
 
   Future<void> showBackupOptionsDialog() async {
-    final l10n = AppLocalizations.of(context);
     // 在弹出对话框之前先保存当前备份检查日期
     _controller.resetBackupCheckDate();
 
@@ -53,20 +52,20 @@ class BackupService {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(l10n!.backupOptions),
-            content: Text(l10n.selectBackupMethod),
+            title: Text('app_backupOptions'.tr),
+            content: Text('app_selectBackupMethod'.tr),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, 'export'),
-                child: Text(l10n.exportAppData),
+                child: Text('app_exportAppData'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, 'full'),
-                child: Text(l10n.fullBackup),
+                child: Text('app_fullBackup'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, 'webdav'),
-                child: Text(l10n.webdavSync),
+                child: Text('app_webdavSync'.tr),
               ),
             ],
           ),

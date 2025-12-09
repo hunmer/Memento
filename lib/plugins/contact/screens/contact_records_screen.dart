@@ -59,18 +59,18 @@ class _ContactRecordsScreenState extends State<ContactRecordsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.confirmDelete),
+        title: Text('app_confirmDelete'.tr),
         content: Text(
           'contact_deleteConfirmMessage'.tr,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(AppLocalizations.of(context)!.cancel),
+            child: Text('app_cancel'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(AppLocalizations.of(context)!.delete),
+            child: Text('app_delete'.tr),
           ),
         ],
       ),

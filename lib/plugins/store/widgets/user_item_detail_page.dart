@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'dart:io';
 
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
@@ -65,14 +64,14 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: Text(AppLocalizations.of(context)!.cancel),
+                          child: Text('app_cancel'.tr),
                         ),
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context);
                             _useCurrentItem();
                           },
-                          child: Text(AppLocalizations.of(context)!.ok),
+                          child: Text('app_ok'.tr),
                         ),
                       ],
                     ),

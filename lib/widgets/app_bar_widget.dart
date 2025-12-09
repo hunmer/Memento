@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final String? titleKey;
@@ -14,8 +12,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayTitle =
-        title ?? (titleKey != null ? localizations.getString(titleKey!) : '');
+    final displayTitle = title ?? (titleKey != null ? titleKey!.tr : '');
 
     return AppBar(
       title: Text(displayTitle),
@@ -31,18 +28,4 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-}
-
-extension AppLocalizationsX on AppLocalizations {
-  String getString(String key) {
-    switch (key) {
-      case 'appTitle':
-        return appTitle;
-      case 'pluginManager':
-        return pluginManager;
-      // Add more cases for other localized strings as needed
-      default:
-        return key; // Return the key itself if not found
-    }
-  }
 }

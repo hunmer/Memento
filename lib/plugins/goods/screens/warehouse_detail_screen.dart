@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:Memento/core/event/event_manager.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/goods/models/warehouse.dart';
@@ -132,11 +131,11 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                           ),
                           actions: [
                             TextButton(
-                              child: Text(AppLocalizations.of(context)!.cancel),
+                              child: Text('app_cancel'.tr),
                               onPressed: () => Navigator.pop(context, false),
                             ),
                             TextButton(
-                              child: Text(AppLocalizations.of(context)!.ok),
+                              child: Text('app_ok'.tr),
                               onPressed: () => Navigator.pop(context, true),
                             ),
                           ],
@@ -171,7 +170,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                           ),
                           actions: [
                             TextButton(
-                              child: Text(AppLocalizations.of(context)!.cancel),
+                              child: Text('app_cancel'.tr),
                               onPressed: () => Navigator.pop(context, false),
                             ),
                             TextButton(
@@ -179,7 +178,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                                 foregroundColor: Colors.red,
                               ),
                               onPressed: () => Navigator.pop(context, true),
-                              child: Text(AppLocalizations.of(context)!.delete),
+                              child: Text('app_delete'.tr),
                             ),
                           ],
                         ),

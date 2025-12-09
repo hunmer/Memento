@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'dart:io';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/tracker/widgets/timer_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -305,7 +304,7 @@ class GoalCard extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -324,7 +323,7 @@ class GoalCard extends StatelessWidget {
                     Navigator.pop(context);
                   }
                 },
-                child: Text(AppLocalizations.of(context)!.save),
+                child: Text('app_save'.tr),
               ),
             ],
           ),

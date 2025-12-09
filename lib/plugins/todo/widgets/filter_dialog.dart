@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
 
@@ -182,7 +181,7 @@ class _FilterDialogState extends State<FilterDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
         ),
         TextButton(
           onPressed: () {
@@ -270,11 +269,11 @@ class _MultiSelectDialogState extends State<MultiSelectDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, _selectedItems),
-          child: Text(AppLocalizations.of(context)!.ok),
+          child: Text('app_ok'.tr),
         ),
       ],
     );

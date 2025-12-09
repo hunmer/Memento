@@ -20,7 +20,7 @@ class DeleteChannelDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
         ),
         ElevatedButton(
           onPressed: () {
@@ -32,7 +32,7 @@ class DeleteChannelDialog extends StatelessWidget {
             foregroundColor: Colors.white, // 设置文字颜色为白色，确保在红色背景上清晰可见
           ),
           child: Text(
-            AppLocalizations.of(context)!.delete,
+            'app_delete'.tr,
             style: TextStyle(
               fontWeight: FontWeight.bold, // 加粗文字增强可见性
             ),

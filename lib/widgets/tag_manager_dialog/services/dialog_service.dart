@@ -16,7 +16,7 @@ class DialogService {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(TagManagerLocalizations.of(context, 'newGroup')),
+            title: Text('tagManager_newGroup'.tr),
             content: TextField(
               autofocus: true,
               controller: textController,
@@ -26,11 +26,11 @@ class DialogService {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(TagManagerLocalizations.of(context, 'cancel')),
+                child: Text('tagManager_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(textController.text),
-                child: Text(TagManagerLocalizations.of(context, 'confirm')),
+                child: Text('tagManager_confirm'.tr),
               ),
             ],
           ),
@@ -47,7 +47,7 @@ class DialogService {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(TagManagerLocalizations.of(context, 'newTag')),
+            title: Text('tagManager_newTag'.tr),
             content: TextField(
               autofocus: true,
               controller: textController,
@@ -57,11 +57,11 @@ class DialogService {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(TagManagerLocalizations.of(context, 'cancel')),
+                child: Text('tagManager_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(textController.text),
-                child: Text(TagManagerLocalizations.of(context, 'confirm')),
+                child: Text('tagManager_confirm'.tr),
               ),
             ],
           ),
@@ -82,7 +82,7 @@ class DialogService {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(TagManagerDialogLocalizations.getEditGroup(context)),
+            title: Text('tagManager_editGroup'.tr),
             content: TextField(
               autofocus: true,
               controller: textController,
@@ -93,19 +93,19 @@ class DialogService {
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
                 onPressed:
                     () => Navigator.of(context).pop({'action': 'delete'}),
-                child: Text(TagManagerLocalizations.of(context, 'deleteGroup')),
+                child: Text('tagManager_deleteGroup'.tr),
               ),
               const Spacer(),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text(TagManagerLocalizations.of(context, 'cancel')),
+                child: Text('tagManager_cancel'.tr),
               ),
               TextButton(
                 onPressed:
                     () => Navigator.of(
                       context,
                     ).pop({'action': 'rename', 'name': textController.text}),
-                child: Text(TagManagerLocalizations.of(context, 'confirm')),
+                child: Text('tagManager_confirm'.tr),
               ),
             ],
           ),

@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'dart:io';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
@@ -269,13 +268,13 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(AppLocalizations.of(context)!.cancel),
+                  child: Text('app_cancel'.tr),
                 ),
                 ElevatedButton(
                   onPressed:
                       _selectedAgents.isEmpty ? null : _handleSelectionComplete,
                   child: Text(
-                    '${AppLocalizations.of(context)!.select} (${_selectedAgents.length})',
+                    '${'app_select'.tr} (${_selectedAgents.length})',
                   ),
                 ),
               ],

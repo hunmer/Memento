@@ -17,7 +17,7 @@ class DatePickerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(AppLocalizations.of(context)!.selectDate),
+      title: Text('app_selectDate'.tr),
       content: SizedBox(
         width: double.maxFinite,
         height: 300,
@@ -46,7 +46,7 @@ class DatePickerDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
         ),
       ],
     );

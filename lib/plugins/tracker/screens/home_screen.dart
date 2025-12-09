@@ -4,7 +4,6 @@ import 'package:animations/animations.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:Memento/plugins/tracker/screens/goal_detail_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -135,12 +134,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
-                        child: Text(AppLocalizations.of(context)!.cancel),
+                        child: Text('app_cancel'.tr),
                       ),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(true),
                         child: Text(
-                          AppLocalizations.of(context)!.delete,
+                          'app_delete'.tr,
                           style: const TextStyle(color: Colors.red),
                         ),
                       ),

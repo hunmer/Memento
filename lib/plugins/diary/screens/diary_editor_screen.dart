@@ -1,4 +1,3 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/widgets/memento_editor/memento_editor.dart';
@@ -99,7 +98,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
                 ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.close),
+                child: Text('app_close'.tr),
               ),
             ],
           ),
@@ -116,7 +115,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
               TextButton(
                 onPressed: () async {

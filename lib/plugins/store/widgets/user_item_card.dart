@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -60,14 +59,14 @@ class UserItemCard extends StatelessWidget {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text(AppLocalizations.of(context)!.cancel),
+                      child: Text('app_cancel'.tr),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context);
                         onUse();
                       },
-                      child: Text(AppLocalizations.of(context)!.confirm),
+                      child: Text('app_confirm'.tr),
                     ),
                   ],
                 ),

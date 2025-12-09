@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
-
-
 import 'package:Memento/screens/home_screen/home_screen.dart';
 
 class RebuildController {
@@ -51,10 +48,6 @@ class RebuildController {
             useMaterial3: true,
           ),
           localizationsDelegates: const [
-            AppLocalizations.delegate,
-            ChatLocalizations.delegate,
-            DayLocalizationsDelegate.delegate,
-            nodes_l10n.NodesLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,

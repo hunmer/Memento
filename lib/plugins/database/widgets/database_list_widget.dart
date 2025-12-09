@@ -71,7 +71,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                         _databasesFuture = widget.service.getAllDatabases();
                       });
                     },
-                    child: Text(AppLocalizations.of(context)!.retry),
+                    child: Text('app_retry'.tr),
                   ),
                 ],
               ),
@@ -209,7 +209,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
             children: [
               ListTile(
                 leading: const Icon(Icons.edit),
-                title: Text(AppLocalizations.of(context)!.edit),
+                title: Text('app_edit'.tr),
                 onTap: () async {
                   Navigator.pop(context);
                   final result = await NavigationHelper.push<bool>(
@@ -228,7 +228,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
               ),
               ListTile(
                 leading: const Icon(Icons.copy),
-                title: Text(AppLocalizations.of(context)!.copy),
+                title: Text('app_copy'.tr),
                 onTap: () async {
                   Navigator.pop(context);
                   final newDatabase = database.copyWith(id: Uuid().v4());
@@ -264,7 +264,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
-                              child: Text(AppLocalizations.of(context)!.cancel),
+                              child: Text('app_cancel'.tr),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),

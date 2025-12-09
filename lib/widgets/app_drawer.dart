@@ -26,11 +26,8 @@ class AppDrawer extends StatelessWidget {
 
                 if (snapshot.hasError) {
                   return Center(
-                    child: Text(
-                      AppLocalizations.of(
-                        context,
-                      )!.failedToLoadPlugins(snapshot.error.toString()),
-                    ),
+                    child: Text('app_failedToLoadPlugins'.tr
+                        .replaceFirst('{error}', snapshot.error.toString())),
                   );
                 }
 

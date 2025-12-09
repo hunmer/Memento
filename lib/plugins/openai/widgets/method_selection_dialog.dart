@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/models/plugin_analysis_method.dart';
 
@@ -34,7 +33,7 @@ class MethodSelectionDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
         ),
       ],
     );

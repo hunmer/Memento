@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:flutter/material.dart';
@@ -352,7 +351,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                       foregroundColor:
                           isDark ? Colors.white70 : Colors.grey[600],
                     ),
-                    child: Text(AppLocalizations.of(context)!.cancel),
+                    child: Text('app_cancel'.tr),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
@@ -369,7 +368,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                         vertical: 12,
                       ),
                     ),
-                    child: Text(AppLocalizations.of(context)!.ok),
+                    child: Text('app_ok'.tr),
                   ),
                 ],
               ),

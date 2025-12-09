@@ -51,16 +51,12 @@ class PermissionController {
           barrierDismissible: false,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text(
-                AppLocalizations.of(
-                  context,
-                )!.permissionRequired(permissionName),
-              ),
-              content: Text(
-                AppLocalizations.of(
-                  context,
-                )!.permissionRequiredForApp(permissionName),
-              ),
+              title: Text('app_permissionRequired'
+                  .tr
+                  .replaceFirst('{permissionName}', permissionName)),
+              content: Text('app_permissionRequiredForApp'
+                  .tr
+                  .replaceFirst('{permissionName}', permissionName)),
               actions: <Widget>[
                 TextButton(
                   child: Text('app_notNow'.tr),
@@ -127,9 +123,9 @@ class PermissionController {
             if (!granted) {
               if (!_mounted) return false;
 
-              Toast.error(AppLocalizations.of(
-                context,
-              )!.permissionRequiredInSettings(permissionName));
+              Toast.error('app_permissionRequiredInSettings'
+                  .tr
+                  .replaceFirst('{permissionName}', permissionName));
               return false;
             }
           }

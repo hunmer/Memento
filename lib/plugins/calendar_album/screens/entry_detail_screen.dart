@@ -158,7 +158,6 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final calendarController = Provider.of<CalendarController>(context);
     final tagController = Provider.of<TagController>(context);
 
@@ -195,12 +194,12 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                 context: context,
                 builder:
                     (context) => AlertDialog(
-                      title: Text(l10n.delete),
-                      content: Text('${l10n.delete} "${currentEntry.title}"?'),
+                      title: Text('app_delete'.tr),
+                      content: Text('${'app_delete'.tr} "${currentEntry.title}"?'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: Text(l10n.cancel),
+                          child: Text('app_cancel'.tr),
                         ),
                         TextButton(
                           onPressed: () {
@@ -208,7 +207,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                             Navigator.of(context).pop();
                             Navigator.of(context).pop();
                           },
-                          child: Text(l10n.delete),
+                          child: Text('app_delete'.tr),
                         ),
                       ],
                     ),

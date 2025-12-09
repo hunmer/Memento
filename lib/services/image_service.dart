@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:path/path.dart' as path;
@@ -92,13 +92,13 @@ class ImageService {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.selectImage),
+            title: Text('app_selectImage'.tr),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
                   leading: const Icon(Icons.photo_library),
-                  title: Text(AppLocalizations.of(context)!.selectFromGallery),
+                  title: Text('app_selectFromGallery'.tr),
                   onTap: () async {
                     Navigator.pop(context);
                     imageFile = await pickImageFromGallery();
@@ -107,7 +107,7 @@ class ImageService {
                 if (isMobilePlatform)
                   ListTile(
                     leading: const Icon(Icons.camera_alt),
-                    title: Text(AppLocalizations.of(context)!.takePhoto),
+                    title: Text('app_takePhoto'.tr),
                     onTap: () async {
                       Navigator.pop(context);
                       imageFile = await takePhoto();
@@ -118,7 +118,7 @@ class ImageService {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
               ),
             ],
           ),

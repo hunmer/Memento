@@ -1,6 +1,6 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
 import 'folder_selection_dialog.dart';
 import 'note_operations.dart';
@@ -28,7 +28,7 @@ mixin NoteItem on NotesMainViewState, NoteOperations, FolderSelectionDialog {
                   children: [
                     ListTile(
                       leading: const Icon(Icons.edit),
-                      title: Text(AppLocalizations.of(context)!.edit),
+                      title: Text('app_edit'.tr),
                       onTap: () {
                         Navigator.pop(context);
                         editNote(note);

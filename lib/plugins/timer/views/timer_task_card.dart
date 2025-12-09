@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'dart:async';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:Memento/plugins/timer/models/timer_task.dart';
@@ -317,7 +316,7 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
             children: [
               ListTile(
                 leading: const Icon(Icons.edit),
-                title: Text(AppLocalizations.of(context)!.edit),
+                title: Text('app_edit'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   widget.onEdit(task);
@@ -333,7 +332,7 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
               ),
               ListTile(
                 leading: const Icon(Icons.delete),
-                title: Text(AppLocalizations.of(context)!.delete),
+                title: Text('app_delete'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   widget.onDelete(task);

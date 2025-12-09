@@ -102,7 +102,7 @@ class MoodSelector extends StatelessWidget {
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: Text(AppLocalizations.of(context)!.cancel),
+                        child: Text('app_cancel'.tr),
                       ),
                       TextButton(
                         onPressed: () {
@@ -110,7 +110,7 @@ class MoodSelector extends StatelessWidget {
                             Navigator.of(context).pop(controller.text);
                           }
                         },
-                        child: Text(AppLocalizations.of(context)!.confirm),
+                        child: Text('app_confirm'.tr),
                       ),
                     ],
                   ),

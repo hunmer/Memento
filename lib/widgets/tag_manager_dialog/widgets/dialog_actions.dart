@@ -27,22 +27,20 @@ class DialogActions extends StatelessWidget {
           onPressed: enableClear ? onClear : null,
           icon: const Icon(Icons.clear_all),
           label: Text(
-            TagManagerLocalizations.of(
-              context,
-              'clearSelected',
-            ).replaceFirst('\$selectedCount', selectedCount.toString()),
+            'tagManager_clearSelected'.tr
+                .replaceFirst('\$selectedCount', selectedCount.toString()),
           ),
         ),
         Row(
           children: [
             TextButton(
               onPressed: onCancel,
-              child: Text(TagManagerLocalizations.of(context, 'cancel')),
+              child: Text('tagManager_cancel'.tr),
             ),
             const SizedBox(width: 8),
             ElevatedButton(
               onPressed: onConfirm,
-              child: Text(TagManagerLocalizations.of(context, 'confirm')),
+              child: Text('tagManager_confirm'.tr),
             ),
           ],
         ),

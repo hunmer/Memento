@@ -1,5 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
 import 'folder_operations.dart';
@@ -35,7 +35,7 @@ class FolderListTile extends StatelessWidget {
                   children: [
                     ListTile(
                       leading: const Icon(Icons.edit),
-                      title: Text(AppLocalizations.of(context)!.rename),
+                      title: Text('app_rename'.tr),
                       onTap: () async {
                         Navigator.pop(context);
                         await renameFolderDialog(

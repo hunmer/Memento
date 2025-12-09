@@ -1,6 +1,6 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
@@ -38,7 +38,7 @@ Future<Folder?> showFolderSelectionDialog(
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(AppLocalizations.of(context)!.cancel),
+              child: Text('app_cancel'.tr),
             ),
             if (parentFolder != null && parentFolder.id != currentFolderId)
               TextButton(

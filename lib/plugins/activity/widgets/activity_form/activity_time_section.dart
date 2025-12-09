@@ -24,9 +24,6 @@ class ActivityTimeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DiaryLocalizations.of(context);
-    final appL10n = AppLocalizations.of(context)!;
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -44,7 +41,7 @@ class ActivityTimeSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    appL10n.startTime,
+                    'app_startTime'.tr,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
@@ -67,7 +64,7 @@ class ActivityTimeSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  appL10n.interval,
+                  'app_interval'.tr,
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                   textAlign: TextAlign.center,
                 ),
@@ -106,7 +103,7 @@ class ActivityTimeSection extends StatelessWidget {
                         builder: (context, index) {
                           return Center(
                             child: Text(
-                              '$index${appL10n.minutes}',
+                              '$index${'app_minutes'.tr}',
                               style: const TextStyle(fontSize: 14),
                             ),
                           );
@@ -137,7 +134,7 @@ class ActivityTimeSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    appL10n.endTime,
+                    'app_endTime'.tr,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),

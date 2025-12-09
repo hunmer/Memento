@@ -125,7 +125,7 @@ class _ContactSelectorState extends State<ContactSelector> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(AppLocalizations.of(context)!.cancel),
+                  child: Text('app_cancel'.tr),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
@@ -133,7 +133,7 @@ class _ContactSelectorState extends State<ContactSelector> {
                     widget.onContactsSelected(_selectedIds);
                     Navigator.of(context).pop();
                   },
-                  child: Text(AppLocalizations.of(context)!.ok),
+                  child: Text('app_ok'.tr),
                 ),
               ],
             ),

@@ -192,14 +192,14 @@ class MetadataDisplay extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text(AppLocalizations.of(context)!.cancel),
+                  child: Text('app_cancel'.tr),
                 ),
                 TextButton(
                   onPressed: () {
                     onContextRangeChange(currentValue.round());
                     Navigator.of(context).pop();
                   },
-                  child: Text(AppLocalizations.of(context)!.ok),
+                  child: Text('app_ok'.tr),
                 ),
               ],
             );

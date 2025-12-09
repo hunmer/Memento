@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'dart:io';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:uuid/uuid.dart';
@@ -64,7 +63,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.selectBackgroundColor),
+          title: Text('app_selectBackgroundColor'.tr),
           content: SingleChildScrollView(
             child: ColorPicker(
               pickerColor: _selectedColor,
@@ -75,7 +74,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(AppLocalizations.of(context)!.ok),
+              child: Text('app_ok'.tr),
               onPressed: () {
                 Navigator.of(context).pop(newColor);
               },
@@ -193,14 +192,14 @@ class _WarehouseFormState extends State<WarehouseForm> {
             ),
             actions: [
               TextButton(
-                child: Text(AppLocalizations.of(context)!.cancel),
+                child: Text('app_cancel'.tr),
                 onPressed: () => Navigator.pop(context, false),
               ),
               TextButton(
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.error,
                 ),
-                child: Text(AppLocalizations.of(context)!.delete),
+                child: Text('app_delete'.tr),
                 onPressed: () => Navigator.pop(context, true),
               ),
             ],

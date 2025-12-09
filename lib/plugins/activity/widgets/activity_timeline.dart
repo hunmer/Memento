@@ -119,7 +119,7 @@ class ActivityTimeline extends StatelessWidget {
                 actions: <Widget>[
                     TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: Text(AppLocalizations.of(context)!.cancel),
+                    child: Text('app_cancel'.tr),
                     ),
                     TextButton(
                     onPressed: () => Navigator.of(context).pop(true),

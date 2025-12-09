@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
@@ -32,13 +31,13 @@ Future<void> createNewFolder(
             onPressed: () {
               Navigator.pop(context);
             },
-            child: Text(AppLocalizations.of(context)!.cancel),
+            child: Text('app_cancel'.tr),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, folderNameController.text);
             },
-            child: Text(AppLocalizations.of(context)!.ok),
+            child: Text('app_ok'.tr),
           ),
         ],
       );
@@ -77,13 +76,13 @@ Future<void> renameFolderDialog(
             onPressed: () {
               Navigator.pop(context);
             },
-            child: Text(AppLocalizations.of(context)!.cancel),
+            child: Text('app_cancel'.tr),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, renameController.text);
             },
-            child: Text(AppLocalizations.of(context)!.ok),
+            child: Text('app_ok'.tr),
           ),
         ],
       );
@@ -112,12 +111,12 @@ Future<void> deleteFolderDialog(
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(AppLocalizations.of(context)!.cancel),
+              child: Text('app_cancel'.tr),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
               child: Text(
-                AppLocalizations.of(context)!.delete,
+                'app_delete'.tr,
                 style: TextStyle(color: Colors.red),
               ),
             ),
