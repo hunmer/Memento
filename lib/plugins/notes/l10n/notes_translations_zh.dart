@@ -66,4 +66,9 @@ final Map<String, String> notesTranslationsZh = {
   'notes_widgetDescription': '快速打开笔记',
   'notes_overviewName': '笔记概览',
   'notes_overviewDescription': '显示笔记统计信息',
+
+  // 界面标题
+  'notes_myNotes': '我的笔记',
+  'notes_searchPlaceholder': '搜索笔记、标签、内容...',
+  'notes_defaultFolderName': '笔记',
 };

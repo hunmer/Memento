@@ -37,6 +37,8 @@ final Map<String, String> dayTranslationsEn = {
   'day_memorialDaysCount': 'Days',
   'day_upcoming': 'Upcoming',
   'day_localImage': 'Local Image',
+  'day_memorialDaysListTitle': 'Memorial Days List',
+  'day_searchPlaceholder': 'Search memorial days by title and notes',
 
   // Home Widget Strings
   'day_widgetName': 'Memorial Day',

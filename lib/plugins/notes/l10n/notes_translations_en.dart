@@ -66,4 +66,9 @@ final Map<String, String> notesTranslationsEn = {
   'notes_widgetDescription': 'Quick access to notes',
   'notes_overviewName': 'Notes Overview',
   'notes_overviewDescription': 'Display notes statistics',
+
+  // Interface titles
+  'notes_myNotes': 'My Notes',
+  'notes_searchPlaceholder': 'Search notes, tags, content...',
+  'notes_defaultFolderName': 'Notes',
 };

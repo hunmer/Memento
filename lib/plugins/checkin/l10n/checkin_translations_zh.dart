@@ -99,6 +99,8 @@ class CheckinTranslationsZh {
     'checkin_configureCheckinWidget': '配置打卡小组件',
     'checkin_emptyData': '暂无数据',
 
+    'checkin_checkinListTitle': '打卡列表',
+    'checkin_searchPlaceholder': '搜索打卡项目',
     // Home Widget Strings
     'checkin_widgetName': '签到',
     'checkin_widgetDescription': '快速打开签到',

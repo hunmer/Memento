@@ -111,5 +111,8 @@ class BillTranslationsZh {
     'bill_widgetDescription': '快速打开账单',
     'bill_overviewName': '账单概览',
     'bill_overviewDescription': '显示收支统计信息',
+
+    // 界面搜索
+    'bill_searchPlaceholder': '搜索账单名称/分类/笔记',
   };
 }

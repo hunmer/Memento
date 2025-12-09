@@ -382,11 +382,11 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       title: Text(
         _viewModeController.isGridMode && _viewModeController.selectedMinutes > 0
             ? '${_viewModeController.selectedMinutes}分钟已选择'
-            : '活动',
+            : 'activity_myActivities'.tr,
       ),
-      largeTitle: '活动',
+      largeTitle: 'activity_myActivities'.tr,
       enableSearchBar: true,
-      searchPlaceholder: '搜索活动、标签或注释...',
+      searchPlaceholder: 'activity_searchPlaceholder'.tr,
       onSearchChanged: _onSearchChanged,
       enableSearchFilter: true,
       onSearchFilterChanged: _onSearchFilterChanged,

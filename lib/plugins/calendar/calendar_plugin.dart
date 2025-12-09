@@ -1212,7 +1212,7 @@ class _CalendarMainViewState extends State<CalendarMainView> {
           ),
           enableLargeTitle: true,
           enableSearchBar: true,
-          searchPlaceholder: '搜索事件标题或描述...',
+          searchPlaceholder: 'calendar_searchPlaceholder'.tr,
           searchBody: _buildSearchResults(searchResults),
           onSearchChanged: (query) {
             setState(() {

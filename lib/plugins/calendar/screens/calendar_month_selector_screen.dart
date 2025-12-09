@@ -499,7 +499,7 @@ class _CalendarMonthSelectorScreenState
         '配置日历月视图小组件',
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
-      largeTitle: '日历小组件',
+      largeTitle: 'calendar_widgetSelector'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: Stack(
         children: [

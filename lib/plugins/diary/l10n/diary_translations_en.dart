@@ -74,5 +74,6 @@ class DiaryTranslationsEn {
     'diary_interval': 'Interval',
     'diary_minutes': 'minutes',
     'diary_tags': 'Tags',
+    'diary_searchPlaceholder': 'Search diary content...',
   };
 }

@@ -429,7 +429,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       largeTitle: 'agent_chat_aiChat'.tr,
       enableLargeTitle: true,
       enableSearchBar: true,
-      searchPlaceholder: '搜索会话...',
+      searchPlaceholder: 'agent_chat_searchPlaceholder'.tr,
       onSearchChanged: (query) {
         _controller.setSearchQuery(query);
       },

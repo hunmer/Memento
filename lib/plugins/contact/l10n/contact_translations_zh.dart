@@ -108,6 +108,8 @@ const Map<String, String> contactTranslationsZh = {
   'contact_addCustomEvent': '添加自定义事件',
   'contact_pickColor': '选择颜色',
 
+  'contact_contactListTitle': '联系人列表',
+  'contact_searchPlaceholder': '搜索联系人姓名、电话、备注...',
   // Home Widget Strings
   'contact_widgetName': '联系人',
   'contact_widgetDescription': '快速打开联系人',

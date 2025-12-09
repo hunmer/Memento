@@ -143,4 +143,7 @@ const Map<String, String> agentChatTranslationsEn = {
   'agent_chat_unreadMessages': 'Unread Messages',
   'agent_chat_totalGroups': 'Total Groups',
   'agent_chat_loadFailed': 'Load Failed',
+
+  // Interface search
+  'agent_chat_searchPlaceholder': 'Search conversations...',
 };

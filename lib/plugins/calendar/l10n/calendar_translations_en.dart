@@ -46,4 +46,8 @@ const Map<String, String> calendarTranslationsEn = {
   'calendar_widgetDescription': 'Quick access to calendar',
   'calendar_overviewName': 'Calendar Overview',
   'calendar_overviewDescription': 'Display schedule statistics',
+
+  // Interface search
+  'calendar_widgetSelector': 'Calendar Widget',
+  'calendar_searchPlaceholder': 'Search event title or description...',
 };

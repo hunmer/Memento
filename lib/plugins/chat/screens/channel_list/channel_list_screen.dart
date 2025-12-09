@@ -57,9 +57,9 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
       title: Text('chat_channelList'.tr),
-      largeTitle: '频道列表',
+      largeTitle: 'chat_channelListTitle'.tr,
       enableSearchBar: true,
-      searchPlaceholder: '搜索频道名称',
+      searchPlaceholder: 'chat_searchPlaceholder'.tr,
       onSearchChanged: (query) {
         _controller.setSearchQuery(query);
       },

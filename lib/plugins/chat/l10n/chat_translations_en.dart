@@ -171,5 +171,9 @@ class ChatTranslationsEn {
     'chat_reset': 'Reset',
     'chat_apply': 'Apply',
     'chat_fileOpenFailed': 'Failed to open file: @e',
+
+    // Interface search
+    'chat_channelListTitle': 'Channel List',
+    'chat_searchPlaceholder': 'Search channel name',
   };
 }
