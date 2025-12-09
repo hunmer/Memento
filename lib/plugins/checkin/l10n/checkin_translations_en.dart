@@ -99,6 +99,8 @@ class CheckinTranslationsEn {
     'checkin_configureCheckinWidget': 'Configure Check-in Widget',
     'checkin_emptyData': 'No data available',
 
+    'checkin_checkinListTitle': 'Check-in List',
+    'checkin_searchPlaceholder': 'Search check-in items',
     // Home Widget Strings
     'checkin_widgetName': 'Check-in',
     'checkin_widgetDescription': 'Quick access to check-in',

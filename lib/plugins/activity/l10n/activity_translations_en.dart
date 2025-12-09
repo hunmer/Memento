@@ -131,5 +131,9 @@ class ActivityTranslationsEn {
     'activity_minutesSelected': '@minutes minutes selected',
     'activity_switchToTimelineView': 'Switch to timeline view',
     'activity_switchToGridView': 'Switch to grid view',
+
+    // Interface titles
+    'activity_myActivities': 'My Activities',
+    'activity_searchPlaceholder': 'Search activities, tags, or notes...',
   };
 }

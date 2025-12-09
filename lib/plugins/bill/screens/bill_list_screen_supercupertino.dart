@@ -289,7 +289,7 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
       title: Text('bill_billList'.tr),
       largeTitle: 'bill_billList'.tr,
       enableSearchBar: true,
-      searchPlaceholder: '搜索账单名称/分类/笔记',
+      searchPlaceholder: 'bill_searchPlaceholder'.tr,
       onSearchChanged: (value) {
         setState(() {
           _searchQuery = value;

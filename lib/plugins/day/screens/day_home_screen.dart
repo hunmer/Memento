@@ -117,11 +117,11 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
               'day_memorialDays'.tr,
               style: TextStyle(color: theme.textTheme.titleLarge?.color),
             ),
-            largeTitle: '纪念日',
+            largeTitle: 'day_memorialDaysListTitle'.tr,
             automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
             // 启用搜索栏
             enableSearchBar: true,
-            searchPlaceholder: '搜索纪念日标题和笔记',
+            searchPlaceholder: 'day_searchPlaceholder'.tr,
             // 搜索回调
             onSearchChanged: (query) {
               setState(() {

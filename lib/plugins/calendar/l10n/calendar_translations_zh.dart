@@ -46,4 +46,8 @@ const Map<String, String> calendarTranslationsZh = {
   'calendar_widgetDescription': '快速打开日历',
   'calendar_overviewName': '日历概览',
   'calendar_overviewDescription': '显示日程统计信息',
+
+  // 界面搜索
+  'calendar_widgetSelector': '日历小组件',
+  'calendar_searchPlaceholder': '搜索事件标题或描述...',
 };

@@ -109,7 +109,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       largeTitle: 'diary_myDiary'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       enableSearchBar: true,
-      searchPlaceholder: '搜索日记内容...',
+      searchPlaceholder: 'diary_searchPlaceholder'.tr,
       onSearchChanged: _handleSearch,
       onSearchSubmitted: _handleSearch,
       body: _buildCalendarView(),

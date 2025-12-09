@@ -143,4 +143,7 @@ const Map<String, String> agentChatTranslationsZh = {
   'agent_chat_unreadMessages': '未读消息',
   'agent_chat_totalGroups': '分组总数',
   'agent_chat_loadFailed': '加载失败',
+
+  // 界面搜索
+  'agent_chat_searchPlaceholder': '搜索会话...',
 };

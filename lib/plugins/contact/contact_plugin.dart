@@ -938,7 +938,7 @@ class ContactMainViewState extends State<ContactMainView> {
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
       title: Text('contact_contacts'.tr),
-      largeTitle: 'contact_contacts'.tr,
+      largeTitle: 'contact_contactListTitle'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: FutureBuilder<List<Contact>>(
         future: _controller.getFilteredAndSortedContacts(),
@@ -991,7 +991,7 @@ class ContactMainViewState extends State<ContactMainView> {
       ),
       // 启用搜索栏
       enableSearchBar: true,
-      searchPlaceholder: '搜索联系人姓名、电话、备注...',
+      searchPlaceholder: 'contact_searchPlaceholder'.tr,
       onSearchChanged: (query) {
         _searchContacts(query);
       },

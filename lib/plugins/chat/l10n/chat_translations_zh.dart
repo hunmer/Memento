@@ -166,5 +166,9 @@ class ChatTranslationsZh {
     'chat_reset': '重置',
     'chat_apply': '应用',
     'chat_fileOpenFailed': '打开文件失败: @e',
+
+    // 界面搜索
+    'chat_channelListTitle': '频道列表',
+    'chat_searchPlaceholder': '搜索频道名称',
   };
 }

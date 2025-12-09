@@ -111,5 +111,8 @@ class BillTranslationsEn {
     'bill_widgetDescription': 'Quick access to bills',
     'bill_overviewName': 'Bill Overview',
     'bill_overviewDescription': 'Display income and expense statistics',
+
+    // Interface search
+    'bill_searchPlaceholder': 'Search bills by name, category, or note',
   };
 }

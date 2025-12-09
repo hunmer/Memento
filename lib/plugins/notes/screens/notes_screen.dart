@@ -37,10 +37,10 @@ class _NotesMainViewState extends NotesMainViewState
     final theme = Theme.of(context);
     return SuperCupertinoNavigationWrapper(
       title: Text(
-        currentFolder?.name ?? '笔记',
+        currentFolder?.name ?? 'notes_defaultFolderName'.tr,
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
-      largeTitle: '我的笔记',
+      largeTitle: 'notes_myNotes'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: _buildBody(),
       enableLargeTitle: true,
@@ -48,7 +48,7 @@ class _NotesMainViewState extends NotesMainViewState
       enableFilterBar: true,
       filterBarHeight: 50,
       filterBarChild: _buildFilterBar(),
-      searchPlaceholder: '搜索笔记、标签、内容...',
+      searchPlaceholder: 'notes_searchPlaceholder'.tr,
       onSearchChanged: _handleSearchChanged,
       onSearchSubmitted: _handleSearchSubmitted,
       actions: [

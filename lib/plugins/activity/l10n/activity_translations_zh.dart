@@ -129,5 +129,9 @@ class ActivityTranslationsZh {
     'activity_minutesSelected': '@minutes分钟已选中',
     'activity_switchToTimelineView': '切换到时间线视图',
     'activity_switchToGridView': '切换到网格视图',
+
+    // 界面标题
+    'activity_myActivities': '活动',
+    'activity_searchPlaceholder': '搜索活动、标签或注释...',
   };
 }

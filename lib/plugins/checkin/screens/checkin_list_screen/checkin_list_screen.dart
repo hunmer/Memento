@@ -59,7 +59,7 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
 
     return SuperCupertinoNavigationWrapper(
       title: Text('checkin_name'.tr),
-      largeTitle: '签到记录',
+      largeTitle: 'checkin_checkinListTitle'.tr,
       body: Column(
         children: [
           // 打卡项目列表（不包含过滤栏）
@@ -101,7 +101,7 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
       ),
       // ========== 搜索相关配置 ==========
       enableSearchBar: true,
-      searchPlaceholder: '搜索打卡项目或分组',
+      searchPlaceholder: 'checkin_searchPlaceholder'.tr,
       onSearchChanged: (query) => controller.onSearchChanged(query),
       onSearchSubmitted: (query) => controller.onSearchChanged(query),
       searchBody: _buildSearchResults(searchResults),

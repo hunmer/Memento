@@ -72,5 +72,6 @@ class DiaryTranslationsZh {
     'diary_interval': '间隔',
     'diary_minutes': '分钟',
     'diary_tags': '标签',
+    'diary_searchPlaceholder': '搜索日记内容...',
   };
 }
