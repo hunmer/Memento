@@ -105,5 +105,11 @@ class BillTranslationsZh {
     'bill_add': '添加',
     'bill_edit': '编辑',
     'bill_monthlyRecord': '月度记账',
+
+    // Home Widget Strings
+    'bill_widgetName': '账单',
+    'bill_widgetDescription': '快速打开账单',
+    'bill_overviewName': '账单概览',
+    'bill_overviewDescription': '显示收支统计信息',
   };
 }

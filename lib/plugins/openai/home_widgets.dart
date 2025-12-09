@@ -24,7 +24,7 @@ class OpenAIHomeWidgets {
       color: Colors.deepOrange,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: 'home_categoryTool'.tr,
+      category: 'home_categoryTools'.tr,
       builder: (context, config) => GenericIconWidget(
         icon: Icons.smart_toy,
         color: Colors.deepOrange,
@@ -42,7 +42,7 @@ class OpenAIHomeWidgets {
       color: Colors.deepOrange,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: 'home_categoryTool'.tr,
+      category: 'home_categoryTools'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));

@@ -40,4 +40,10 @@ const Map<String, String> calendarTranslationsZh = {
   'calendar_activityCount': '活动数量',
   'calendar_sevenDaysActivity': '7天活动',
   'calendar_expiredActivity': '过期活动',
+
+  // Home Widget Strings
+  'calendar_widgetName': '日历',
+  'calendar_widgetDescription': '快速打开日历',
+  'calendar_overviewName': '日历概览',
+  'calendar_overviewDescription': '显示日程统计信息',
 };

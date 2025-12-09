@@ -141,5 +141,11 @@ class HabitsTranslationsZh {
     'habits_completeTimer': '完成计时',
     'habits_continueAdjust': '继续调整',
     'habits_confirmComplete': '确定完成',
+
+    // Home Widget Strings
+    'habits_widgetName': '习惯',
+    'habits_widgetDescription': '快速打开习惯追踪',
+    'habits_overviewName': '习惯概览',
+    'habits_overviewDescription': '显示习惯统计信息',
   };
 }

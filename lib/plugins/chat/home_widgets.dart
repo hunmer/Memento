@@ -18,17 +18,17 @@ class ChatHomeWidgets {
     registry.register(HomeWidget(
       id: 'chat_icon',
       pluginId: 'chat',
-      name: 'chat_widget_name',
-      description: 'chat_widget_description',
+      name: 'chat_widgetName'.tr,
+      description: 'chat_widgetDescription'.tr,
       icon: Icons.chat_bubble,
       color: Colors.indigoAccent,
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
-      category: 'communication_category',
-      builder: (context, config) => const GenericIconWidget(
+      category: 'home_categoryCommunication'.tr,
+      builder: (context, config) => GenericIconWidget(
         icon: Icons.chat_bubble,
         color: Colors.indigoAccent,
-        name: 'chat_widget_icon',
+        name: 'chat_widgetName'.tr,
       ),
     ));
 
@@ -36,13 +36,13 @@ class ChatHomeWidgets {
     registry.register(HomeWidget(
       id: 'chat_overview',
       pluginId: 'chat',
-      name: 'chat_overview_widget_name',
-      description: 'chat_overview_widget_description',
+      name: 'chat_overviewName'.tr,
+      description: 'chat_overviewDescription'.tr,
       icon: Icons.chat_bubble_outline,
       color: Colors.indigoAccent,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
-      category: 'communication_category',
+      category: 'home_categoryCommunication'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
@@ -108,7 +108,7 @@ class ChatHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: 'chat_chatWidgetName'.tr,
+        pluginName: 'chat_widgetName'.tr,
         pluginIcon: Icons.chat_bubble,
         pluginDefaultColor: Colors.indigoAccent,
         availableItems: availableItems,
@@ -129,7 +129,7 @@ class ChatHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            'chat_loadFailed'.tr,
+            'home_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

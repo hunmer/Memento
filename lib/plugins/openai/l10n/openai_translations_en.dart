@@ -13,6 +13,12 @@ final Map<String, String> openaiTranslationsEn = {
   'openai_initDefaultAgent': 'Default agent initialized',
   'openai_errorReadingAgents': 'Error reading agents data',
 
+  // Home Widget Strings
+  'openai_widgetName': 'AI Assistant',
+  'openai_widgetDescription': 'Quick access to AI Assistant',
+  'openai_overviewName': 'AI Assistant Overview',
+  'openai_overviewDescription': 'Display agent statistics',
+
   // Tab titles
   'openai_form': 'Form',
   'openai_output': 'Output',

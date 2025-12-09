@@ -135,11 +135,11 @@ class ChatTranslationsEn {
     'chat_smartAgent': 'Smart Agent',
 
     // Widget related
-    'chat_chatWidgetName': 'Chat',
-    'chat_chatWidgetDescription': 'Quick access to chat',
+    'chat_widgetName': 'Chat',
+    'chat_widgetDescription': 'Quick access to chat',
     'chat_chatWidgetIcon': 'Chat',
-    'chat_chatOverviewWidgetName': 'Chat Overview',
-    'chat_chatOverviewWidgetDescription': 'Show channel and message statistics',
+    'chat_overviewName': 'Chat Overview',
+    'chat_overviewDescription': 'Display channel and message statistics',
     'chat_communicationCategory': 'Communication',
     'chat_loadFailed': 'Load Failed',
 

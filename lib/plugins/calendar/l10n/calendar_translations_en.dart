@@ -40,4 +40,10 @@ const Map<String, String> calendarTranslationsEn = {
   'calendar_activityCount': 'Activity Count',
   'calendar_sevenDaysActivity': '7-Day Activities',
   'calendar_expiredActivity': 'Expired Activities',
+
+  // Home Widget Strings
+  'calendar_widgetName': 'Calendar',
+  'calendar_widgetDescription': 'Quick access to calendar',
+  'calendar_overviewName': 'Calendar Overview',
+  'calendar_overviewDescription': 'Display schedule statistics',
 };

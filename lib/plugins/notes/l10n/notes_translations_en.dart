@@ -60,4 +60,10 @@ final Map<String, String> notesTranslationsEn = {
   'notes_selectTag': 'Select Tag',
   'notes_noTagsAvailable': 'No Tags Available',
   'notes_allTags': 'All Tags',
+
+  // Home Widget Strings
+  'notes_widgetName': 'Notes',
+  'notes_widgetDescription': 'Quick access to notes',
+  'notes_overviewName': 'Notes Overview',
+  'notes_overviewDescription': 'Display notes statistics',
 };

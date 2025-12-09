@@ -60,4 +60,10 @@ final Map<String, String> notesTranslationsZh = {
   'notes_selectTag': '选择标签',
   'notes_noTagsAvailable': '暂无标签',
   'notes_allTags': '全部标签',
+
+  // Home Widget Strings
+  'notes_widgetName': '笔记',
+  'notes_widgetDescription': '快速打开笔记',
+  'notes_overviewName': '笔记概览',
+  'notes_overviewDescription': '显示笔记统计信息',
 };

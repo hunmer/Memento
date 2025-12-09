@@ -130,11 +130,11 @@ class ChatTranslationsZh {
     'chat_smartAgent': '智能体',
 
     // 小组件相关
-    'chat_chatWidgetName': '聊天',
-    'chat_chatWidgetDescription': '快速打开聊天',
+    'chat_widgetName': '聊天',
+    'chat_widgetDescription': '快速打开聊天',
     'chat_chatWidgetIcon': '聊天',
-    'chat_chatOverviewWidgetName': '聊天概览',
-    'chat_chatOverviewWidgetDescription': '显示频道和消息统计',
+    'chat_overviewName': '聊天概览',
+    'chat_overviewDescription': '显示频道和消息统计',
     'chat_communicationCategory': '通讯',
     'chat_loadFailed': '加载失败',
 

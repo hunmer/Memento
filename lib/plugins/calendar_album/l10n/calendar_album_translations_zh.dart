@@ -105,5 +105,11 @@ class CalendarAlbumTranslationsZh {
     'calendar_album_confirm': '确定',
     'calendar_album_diary_for_date': '的日记',
     'calendar_album_new_diary': '新建日记',
+
+    // Home Widget Strings
+    'calendar_album_widgetName': '日历相册',
+    'calendar_album_widgetDescription': '快速打开日历相册',
+    'calendar_album_overviewName': '日历相册概览',
+    'calendar_album_overviewDescription': '显示相册统计信息',
   };
 }

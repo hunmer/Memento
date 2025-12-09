@@ -139,4 +139,10 @@ const Map<String, String> storeTranslationsEn = {
 
   // Utility methods
   'store_labelColon': '@label: ',
+
+  // Home Widget Strings
+  'store_widgetName': 'Store',
+  'store_widgetDescription': 'Quick access to store',
+  'store_overviewName': 'Store Overview',
+  'store_overviewDescription': 'Display points and products statistics',
 };
