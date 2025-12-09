@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/widgets/icon_picker_dialog.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
@@ -363,12 +363,12 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: Text(FloatingBallLocalizations.of(context)!.clearIconImage),
-                            content: Text(FloatingBallLocalizations.of(context)!.confirmClearIconImage),
+                            title: Text('floating_ball_clearIconImage'.tr),
+                            content: Text('floating_ball_confirmClearIconImage'.tr),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
-                                child: Text(FloatingBallLocalizations.of(context)!.cancel),
+                                child: Text('floating_ball_cancel'.tr),
                               ),
                               ElevatedButton(
                                 onPressed: () {
@@ -379,7 +379,7 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.red,
                                 ),
-                                child: Text(FloatingBallLocalizations.of(context)!.clear),
+                                child: Text('floating_ball_clear'.tr),
                               ),
                             ],
                           ),
@@ -398,7 +398,7 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
                     child: ElevatedButton.icon(
                       onPressed: _pickIcon,
                       icon: const Icon(Icons.tag),
-                      label: Text(FloatingBallLocalizations.of(context)!.selectIcon),
+                      label: Text('floating_ball_selectIcon'.tr),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -473,12 +473,12 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: Text(FloatingBallLocalizations.of(context)!.cancel),
+                    child: Text('floating_ball_cancel'.tr),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: _save,
-                    child: Text(FloatingBallLocalizations.of(context)!.save),
+                    child: Text('floating_ball_save'.tr),
                   ),
                 ],
               ),

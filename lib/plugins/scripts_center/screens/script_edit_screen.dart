@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/scripts_center/l10n/scripts_center_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 import 'package:Memento/plugins/scripts_center/models/script_input.dart';
@@ -5,7 +6,7 @@ import 'package:Memento/plugins/scripts_center/models/script_trigger.dart';
 import 'package:Memento/plugins/scripts_center/services/script_manager.dart';
 import 'package:Memento/plugins/scripts_center/widgets/script_input_edit_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/scripts_center/l10n/scripts_center_localizations.dart';
+import 'package:get/get.dart';
 
 /// 脚本编辑屏幕
 ///
@@ -466,7 +467,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                   toastService.showToast('代码格式化功能即将推出');
                 },
                 icon: const Icon(Icons.format_align_left, size: 18),
-                label: Text(ScriptsCenterLocalizations.of(context).format),
+                label: Text('scripts_center_format'.tr),
               ),
             ],
           ),
@@ -541,7 +542,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
               ElevatedButton.icon(
                 onPressed: _showAddTriggerDialog,
                 icon: const Icon(Icons.add),
-                label: Text(ScriptsCenterLocalizations.of(context).addTrigger),
+                label: Text('scripts_center_addTrigger'.tr),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
                   foregroundColor: Colors.white,
@@ -611,10 +612,22 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(ScriptsCenterLocalizations.of(context).categoryLabel(eventOption.category)),
-                            Text(ScriptsCenterLocalizations.of(context).descriptionLabel(eventOption.description)),
+                              Text(
+                                'scripts_center_categoryLabel'.trParams({
+                                  'category': eventOption.category,
+                                }),
+                              ),
+                              Text(
+                                'scripts_center_descriptionLabel'.trParams({
+                                  'description': eventOption.description,
+                                }),
+                              ),
                             if (trigger.delay != null && trigger.delay! > 0)
-                              Text(ScriptsCenterLocalizations.of(context).delayLabel(trigger.delay!)),
+                                Text(
+                                  'scripts_center_delayLabel'.trParams({
+                                    'delay': trigger.delay!.toString(),
+                                  }),
+                                ),
                           ],
                         ),
                         trailing: IconButton(
@@ -653,11 +666,11 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
             items: [
               DropdownMenuItem(
                 value: 'module',
-                child: Text(ScriptsCenterLocalizations.of(context).moduleType),
+                child: Text('scripts_center_moduleType'.tr),
               ),
               DropdownMenuItem(
                 value: 'standalone',
-                child: Text(ScriptsCenterLocalizations.of(context).standaloneType),
+                child: Text('scripts_center_standaloneType'.tr),
               ),
             ],
             onChanged: (value) {

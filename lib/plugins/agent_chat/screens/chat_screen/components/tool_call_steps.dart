@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
 
 /// 工具调用步骤展示组件
@@ -277,7 +277,7 @@ class _ToolCallStepsState extends State<ToolCallSteps> {
                         onPressed: () => widget.onRerunStep!(index),
                         icon: const Icon(Icons.replay, size: 16),
                         label: Text(
-                          AgentChatLocalizations.of(context).executeAgain,
+                          'agent_chat_executeAgain'.tr,
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange[50],

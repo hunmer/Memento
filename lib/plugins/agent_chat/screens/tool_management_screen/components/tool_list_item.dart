@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_config_manager.dart';
 import 'tool_editor_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
-
 /// 工具列表项组件
 class ToolListItem extends StatelessWidget {
   final String pluginId;
@@ -77,14 +76,14 @@ class ToolListItem extends StatelessWidget {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(AgentChatLocalizations.of(context).confirmDelete),
+                title: Text('agent_chat_confirmDelete'.tr),
                 content: Text(
-                  AgentChatLocalizations.of(context).confirmDeleteTool(toolId),
+                  'agent_chat_confirmDeleteTool'.trParams({'toolId': toolId}),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: Text(AgentChatLocalizations.of(context).cancel),
+                    child: Text('agent_chat_cancel'.tr),
                   ),
                   ElevatedButton(
                     onPressed: () => Navigator.pop(context, true),
@@ -92,7 +91,7 @@ class ToolListItem extends StatelessWidget {
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                     ),
-                    child: Text(AgentChatLocalizations.of(context).delete),
+                    child: Text('agent_chat_delete'.tr),
                   ),
                 ],
               ),

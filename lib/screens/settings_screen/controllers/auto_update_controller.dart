@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:Memento/screens/settings_screen/l10n/settings_screen_localizations.dart';
 import 'package:Memento/core/utils/network.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:get/get.dart';
 
 class AutoUpdateController extends ChangeNotifier {
   BuildContext? context;
@@ -133,9 +133,7 @@ class AutoUpdateController extends ChangeNotifier {
       return false;
     } catch (e) {
       if (context?.mounted ?? false) {
-        Toast.error(SettingsScreenLocalizations.of(
-          context!,
-        ).updateCheckFailed.replaceFirst('{error}', e.toString()));
+        Toast.error('settings_screen_updateCheckFailed'.trParams({'error': e.toString()}));
       }
     } finally {
       client.close();
@@ -194,7 +192,7 @@ class AutoUpdateController extends ChangeNotifier {
 
       if (!hasUpdate) {
         if (context != null) {
-          Toast.show(SettingsScreenLocalizations.of(context!).alreadyLatestVersion);
+          Toast.show('settings_screen_alreadyLatestVersion'.tr);
         }
         return;
       }
@@ -205,19 +203,17 @@ class AutoUpdateController extends ChangeNotifier {
         context: context!,
         builder:
             (context) => AlertDialog(
-              title: Text(
-                SettingsScreenLocalizations.of(context).updateAvailableTitle,
-              ),
+              title: Text('settings_screen_updateAvailableTitle'.tr),
               content: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      SettingsScreenLocalizations.of(context)
-                          .updateAvailableContent
-                          .replaceFirst('{currentVersion}', _currentVersion)
-                          .replaceFirst('{latestVersion}', _latestVersion),
+                      'settings_screen_updateAvailableContent'.trParams({
+                        'currentVersion': _currentVersion,
+                        'latestVersion': _latestVersion,
+                      }),
                     ),
                     const SizedBox(height: 8),
                     Text(_releaseNotes),
@@ -227,27 +223,21 @@ class AutoUpdateController extends ChangeNotifier {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    SettingsScreenLocalizations.of(context).updateLaterButton,
-                  ),
+                  child: Text('settings_screen_updateLaterButton'.tr),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                     openReleasePage();
                   },
-                  child: Text(
-                    SettingsScreenLocalizations.of(context).updateViewButton,
-                  ),
+                  child: Text('settings_screen_updateViewButton'.tr),
                 ),
               ],
             ),
       );
     } catch (e) {
       if (context?.mounted ?? false) {
-        Toast.error(SettingsScreenLocalizations.of(
-          context!,
-        ).updateCheckFailed.replaceFirst('{error}', e.toString()));
+        Toast.error('settings_screen_updateCheckFailed'.trParams({'error': e.toString()}));
       }
     } finally {
       _isShowingUpdateDialog = false;

@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/agent_chat/controllers/chat_controller.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
@@ -20,8 +21,6 @@ import 'components/message_input.dart';
 import 'components/save_tool_dialog.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
-
 /// 聊天界面
 class ChatScreen extends StatefulWidget {
   final Conversation conversation;
@@ -346,7 +345,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    _controller.currentAgent?.name ?? AgentChatLocalizations.of(context).selectAgent,
+                    _controller.currentAgent?.name ?? 'agent_chat_selectAgent'.tr,
                     style: TextStyle(
                       fontSize: 12,
                       color:
@@ -410,7 +409,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                         const Icon(Icons.build_outlined),
                         const SizedBox(width: 12),
-                    Text(AgentChatLocalizations.of(context).toolManagement),
+                    Text('agent_chat_toolManagement'.tr),
                   ],
                 ),
               ),
@@ -420,7 +419,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                         const Icon(Icons.analytics_outlined),
                         const SizedBox(width: 12),
-                    Text(AgentChatLocalizations.of(context).tokenStatistics),
+                    Text('agent_chat_tokenStatistics'.tr),
                   ],
                 ),
               ),
@@ -430,7 +429,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                         const Icon(Icons.delete_sweep),
                         const SizedBox(width: 12),
-                    Text(AgentChatLocalizations.of(context).confirmClear),
+                    Text('agent_chat_confirmClear'.tr),
                   ],
                 ),
               ),
@@ -440,7 +439,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   children: [
                         const Icon(Icons.settings),
                         const SizedBox(width: 12),
-                    Text(AgentChatLocalizations.of(context).conversationSettings),
+                    Text('agent_chat_conversationSettings'.tr),
                   ],
                 ),
               ),
@@ -486,16 +485,16 @@ class _ChatScreenState extends State<ChatScreen> {
                                   final confirm = await showDialog<bool>(
                                     context: context,
                                     builder: (context) => AlertDialog(
-                                      title: Text(AgentChatLocalizations.of(context).confirmClear),
-                                      content: Text(AgentChatLocalizations.of(context).confirmClearTools),
+                                      title: Text('agent_chat_confirmClear'.tr),
+                                      content: Text('agent_chat_confirmClearTools'.tr),
                                       actions: [
                                         TextButton(
                                           onPressed: () => Navigator.pop(context, false),
-                                          child: Text(AgentChatLocalizations.of(context).cancel),
+                                          child: Text('agent_chat_cancel'.tr),
                                         ),
                                         TextButton(
                                           onPressed: () => Navigator.pop(context, true),
-                                          child: Text(AgentChatLocalizations.of(context).confirm),
+                                          child: Text('agent_chat_confirm'.tr),
                                         ),
                                       ],
                                     ),
@@ -506,7 +505,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 },
                                 icon: const Icon(Icons.clear_all, size: 14),
                                 label: Text(
-                                  AgentChatLocalizations.of(context).clear,
+                                  'agent_chat_clear'.tr,
                                   style: TextStyle(fontSize: 12),
                                 ),
                                 style: TextButton.styleFrom(
@@ -785,7 +784,7 @@ class _ChatScreenState extends State<ChatScreen> {
             OutlinedButton.icon(
               onPressed: _showAgentSelector,
               icon: const Icon(Icons.smart_toy),
-              label: Text(AgentChatLocalizations.of(context).selectAgent),
+              label: Text('agent_chat_selectAgent'.tr),
             ),
         ],
       ),
@@ -832,7 +831,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   });
                 },
                 icon: const Icon(Icons.add_circle_outline, size: 18),
-                label: Text(AgentChatLocalizations.of(context).createNewChat),
+                label: Text('agent_chat_createNewChat'.tr),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     side: BorderSide(color: Colors.blue.withValues(alpha: 0.5)),
@@ -852,7 +851,7 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context).tokenStatistics),
+            title: Text('agent_chat_tokenStatistics'.tr),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -872,7 +871,7 @@ class _ChatScreenState extends State<ChatScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AgentChatLocalizations.of(context).close),
+                child: Text('agent_chat_close'.tr),
               ),
             ],
           ),
@@ -982,7 +981,7 @@ class _ChatScreenState extends State<ChatScreen> {
           (context) => StatefulBuilder(
             builder:
                 (context, setDialogState) => AlertDialog(
-                  title: Text(AgentChatLocalizations.of(context).conversationSettings),
+                  title: Text('agent_chat_conversationSettings'.tr),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -996,7 +995,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         children: [
                           Expanded(
                             child: RadioListTile<int?>(
-                              title: Text(AgentChatLocalizations.of(context).useGlobalSettings),
+                              title: Text('agent_chat_useGlobalSettings'.tr),
                               value: null,
                             ),
                           ),
@@ -1006,7 +1005,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         children: [
                           Expanded(
                             child: RadioListTile<int?>(
-                              title: Text(AgentChatLocalizations.of(context).custom),
+                              title: Text('agent_chat_custom'.tr),
                               value: -1, // 用-1表示自定义模式
                             ),
                           ),
@@ -1049,7 +1048,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text(AgentChatLocalizations.of(context).cancel),
+                      child: Text('agent_chat_cancel'.tr),
                     ),
                     TextButton(
                       onPressed: () async {
@@ -1063,7 +1062,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           toastService.showToast('Settings saved');
                         }
                       },
-                      child: Text(AgentChatLocalizations.of(context).save),
+                      child: Text('agent_chat_save'.tr),
                     ),
                   ],
                 ),
@@ -1082,7 +1081,7 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context).confirmClear),
+            title: Text('agent_chat_confirmClear'.tr),
             content: Text(
               '确定要清空当前会话的所有消息吗？\n\n'
               '当前共有 ${_controller.messages.length} 条消息，此操作不可恢复。',
@@ -1090,11 +1089,11 @@ class _ChatScreenState extends State<ChatScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AgentChatLocalizations.of(context).cancel),
+                child: Text('agent_chat_cancel'.tr),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text(AgentChatLocalizations.of(context).clear),
+                child: Text('agent_chat_clear'.tr),
               ),
             ],
           ),
@@ -1130,7 +1129,7 @@ class _ChatScreenState extends State<ChatScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: Text(AgentChatLocalizations.of(context).selectAgent),
+              title: Text('agent_chat_selectAgent'.tr),
               content: SizedBox(
                 width: double.maxFinite,
                 child: ListView.builder(
@@ -1177,7 +1176,7 @@ class _ChatScreenState extends State<ChatScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(AgentChatLocalizations.of(context).cancel),
+                  child: Text('agent_chat_cancel'.tr),
                 ),
               ],
             ),
@@ -1210,17 +1209,17 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context).confirmDelete),
-            content: Text(AgentChatLocalizations.of(context).confirmDeleteMessage),
+            title: Text('agent_chat_confirmDelete'.tr),
+            content: Text('agent_chat_confirmDeleteMessage'.tr),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AgentChatLocalizations.of(context).cancel),
+                child: Text('agent_chat_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: Text(AgentChatLocalizations.of(context).delete),
+                child: Text('agent_chat_delete'.tr),
               ),
             ],
           ),

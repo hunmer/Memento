@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/database/l10n/database_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/database/controllers/database_controller.dart';
 import 'package:Memento/plugins/database/widgets/database_detail_widget.dart';
 import 'package:Memento/plugins/database/widgets/database_edit_widget.dart';
@@ -34,12 +34,11 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = DatabaseLocalizations.of(context);
     final theme = Theme.of(context);
 
     return SuperCupertinoNavigationWrapper(
-      title: Text(l10n.databaseListTitle),
-      largeTitle: l10n.databaseListTitle,
+      title: Text('database_databaseListTitle'.tr),
+      largeTitle: 'database_databaseListTitle'.tr,
       enableLargeTitle: true,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: FutureBuilder<List<DatabaseModel>>(
@@ -57,7 +56,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
                   Text(
-                    l10n.loadFailedMessage,
+                    'database_loadFailedMessage'.tr,
                     style: theme.textTheme.titleMedium?.copyWith(color: Colors.red),
                   ),
                   const SizedBox(height: 8),
@@ -90,14 +89,14 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   const Icon(Icons.inbox, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   Text(
-                    DatabaseLocalizations.of(context).noDatabasesMessage,
+                    'database_noDatabasesMessage'.tr,
                     style: Theme.of(
                       context,
                     ).textTheme.titleMedium?.copyWith(color: Colors.grey),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    DatabaseLocalizations.of(context).addDatabaseHint,
+                    'database_addDatabaseHint'.tr,
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: Colors.grey),
@@ -236,7 +235,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   final newDatabase = database.copyWith(id: Uuid().v4());
                   await widget.service.createDatabase(newDatabase);
                   if (mounted) {
-                    Toast.success(DatabaseLocalizations.of(context).copySuccess);
+                    Toast.success('database_copySuccess'.tr);
                     setState(() {
                       _databasesFuture = widget.service.getAllDatabases();
                     });
@@ -246,7 +245,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
                 title: Text(
-                  DatabaseLocalizations.of(context).deleteAction,
+                  'database_deleteAction'.tr,
                   style: const TextStyle(color: Colors.red),
                 ),
                 onTap: () async {
@@ -256,14 +255,12 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                     builder:
                         (context) => AlertDialog(
                           title: Text(
-                            DatabaseLocalizations.of(
-                              context,
-                            ).confirmDeleteTitle,
+                            'database_confirmDeleteTitle'.tr,
                           ),
                           content: Text(
-                            DatabaseLocalizations.of(context)
-                                .confirmDeleteMessage
-                                .replaceFirst('%s', database.name),
+                            'database_confirmDeleteMessage'.trParams({
+                              'name': database.name,
+                            }),
                           ),
                           actions: [
                             TextButton(
@@ -273,7 +270,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
                               child: Text(
-                                DatabaseLocalizations.of(context).delete,
+                                'database_delete'.tr,
                                 style: const TextStyle(color: Colors.red),
                               ),
                             ),
@@ -284,18 +281,16 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                     try {
                       await widget.service.deleteDatabase(database.id);
                       if (mounted) {
-                        Toast.success(DatabaseLocalizations.of(
-                          context,
-                        ).deleteSuccessMessage);
+                        Toast.success('database_deleteSuccessMessage'.tr);
                         setState(() {
                           _databasesFuture = widget.service.getAllDatabases();
                         });
                       }
                     } catch (e) {
                       if (mounted) {
-                        Toast.error(DatabaseLocalizations.of(context)
-                            .deleteFailedMessage
-                            .replaceFirst('%s', e.toString()));
+                        Toast.error('database_deleteFailedMessage'.trParams({
+                          'error': e.toString(),
+                        }));
                       }
                     }
                   }

@@ -6,7 +6,7 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'database_plugin.dart';
-import 'l10n/database_localizations.dart';
+import 'package:get/get.dart';
 
 /// 数据库插件的主页小组件注册
 class DatabaseHomeWidgets {
@@ -59,11 +59,10 @@ class DatabaseHomeWidgets {
       plugin.service.getDatabaseCount().then((count) {
         databaseCount = count;
       });
-      final l10n = DatabaseLocalizations.of(context);
       return [
         StatItemData(
           id: 'total_databases',
-          label: l10n.totalDatabases,
+          label: 'database_totalDatabases'.tr,
           value: '$databaseCount',
           highlight: databaseCount > 0,
           color: Colors.deepPurple,
@@ -77,8 +76,6 @@ class DatabaseHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = DatabaseLocalizations.of(context);
-
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
       try {
@@ -98,7 +95,7 @@ class DatabaseHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'database_name'.tr,
         pluginIcon: Icons.storage,
         pluginDefaultColor: Colors.deepPurple,
         availableItems: availableItems,

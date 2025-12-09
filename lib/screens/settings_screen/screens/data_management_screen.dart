@@ -8,7 +8,7 @@ import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:file_picker/file_picker.dart';
-import 'data_management_localizations.dart';
+import 'package:get/get.dart';
 
 class DataManagementScreen extends StatefulWidget {
   const DataManagementScreen({super.key});
@@ -38,7 +38,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       });
       await _refreshFiles();
     } catch (e) {
-      Toast.error('${DataManagementLocalizations.of(context).directoryLoadFailed}: ${e.toString()}');
+      Toast.error('${'data_management_directoryLoadFailed'.tr}: ${e.toString()}');
       debugPrint('Documents directory load error: ${e.toString()}');
     }
   }
@@ -57,7 +57,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         });
       });
     } catch (e) {
-      Toast.error('${DataManagementLocalizations.of(context).directoryAccessFailed}: ${e.toString()}');
+      Toast.error('${'data_management_directoryAccessFailed'.tr}: ${e.toString()}');
       debugPrint('Directory access error: ${e.toString()}');
     }
   }
@@ -93,20 +93,19 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(DataManagementLocalizations.of(context).confirmDelete),
+            title: Text('data_management_confirmDelete'.tr),
             content: Text(
-              DataManagementLocalizations.of(context).confirmDeleteItems
-                  .replaceFirst('%d', selectedPaths.length.toString()),
+              'data_management_confirmDeleteItems'.trParams({'count': selectedPaths.length.toString()}),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(DataManagementLocalizations.of(context).cancel),
+                child: Text('data_management_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 child: Text(
-                  DataManagementLocalizations.of(context).delete,
+                  'data_management_delete'.tr,
                   style: const TextStyle(color: Colors.red),
                 ),
               ),
@@ -126,7 +125,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         selectedItems.clear();
         _refreshFiles();
       });
-      Toast.success(DataManagementLocalizations.of(context).deleteSuccess);
+      Toast.success('data_management_deleteSuccess'.tr);
     }
   }
 
@@ -173,21 +172,21 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(DataManagementLocalizations.of(context).rename),
+            title: Text('data_management_rename'.tr),
             content: TextField(
               controller: nameController,
               decoration: InputDecoration(
-                hintText: DataManagementLocalizations.of(context).rename,
+                hintText: 'data_management_rename'.tr,
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(DataManagementLocalizations.of(context).cancel),
+                child: Text('data_management_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, nameController.text),
-                child: Text(DataManagementLocalizations.of(context).create),
+                child: Text('data_management_create'.tr),
               ),
             ],
           ),
@@ -222,7 +221,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                   onTap: () {
                     Navigator.pop(context);
                     // 这里可以添加编辑文件的逻辑
-                    Toast.show(DataManagementLocalizations.of(context).editNotImplemented);
+                    Toast.show('data_management_editNotImplemented'.tr);
                   },
                 ),
               ListTile(
@@ -271,7 +270,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
 
       _refreshFiles();
 
-      Toast.show('${DataManagementLocalizations.of(context).importSuccess}: $successCount, ${DataManagementLocalizations.of(context).importFailed}: $failCount');
+      Toast.show('${'data_management_importSuccess'.tr}: $successCount, ${'data_management_importFailed'.tr}: $failCount');
     }
   }
 
@@ -331,7 +330,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       // 删除临时目录
       await tempDir.delete(recursive: true);
     } catch (e) {
-      Toast.error('${DataManagementLocalizations.of(context).exportFailed}: ${e.toString()}');
+      Toast.error('${'data_management_exportFailed'.tr}: ${e.toString()}');
       debugPrint('Export error: ${e.toString()}');
       debugPrintStack();
     }
@@ -361,21 +360,21 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(DataManagementLocalizations.of(context).newFile),
+            title: Text('data_management_newFile'.tr),
             content: TextField(
               controller: nameController,
               decoration: InputDecoration(
-                hintText: DataManagementLocalizations.of(context).newFile,
+                hintText: 'data_management_newFile'.tr,
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(DataManagementLocalizations.of(context).cancel),
+                child: Text('data_management_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, nameController.text),
-                child: Text(DataManagementLocalizations.of(context).create),
+                child: Text('data_management_create'.tr),
               ),
             ],
           ),
@@ -394,21 +393,21 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(DataManagementLocalizations.of(context).newFolder),
+            title: Text('data_management_newFolder'.tr),
             content: TextField(
               controller: nameController,
               decoration: InputDecoration(
-                hintText: DataManagementLocalizations.of(context).newFolder,
+                hintText: 'data_management_newFolder'.tr,
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(DataManagementLocalizations.of(context).cancel),
+                child: Text('data_management_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, nameController.text),
-                child: Text(DataManagementLocalizations.of(context).create),
+                child: Text('data_management_create'.tr),
               ),
             ],
           ),
@@ -436,7 +435,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       appBar: AppBar(
         title: Text(
           currentDirectory?.path.split('/').last ??
-              DataManagementLocalizations.of(context).dataManagementTitle,
+              'data_management_dataManagementTitle'.tr,
         ),
         leading:
             directoryStack.length > 1
@@ -449,28 +448,28 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _refreshFiles,
-            tooltip: DataManagementLocalizations.of(context).refresh,
+            tooltip: 'data_management_refresh'.tr,
           ),
           IconButton(
             icon: const Icon(Icons.upload_file),
             onPressed: _importFiles,
-            tooltip: DataManagementLocalizations.of(context).importFiles,
+            tooltip: 'data_management_importFiles'.tr,
           ),
           if (selectedItems.isNotEmpty) ...[
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _deleteSelected,
-              tooltip: DataManagementLocalizations.of(context).deleteSelected,
+              tooltip: 'data_management_deleteSelected'.tr,
             ),
             IconButton(
               icon: const Icon(Icons.drive_file_move),
               onPressed: _moveSelected,
-              tooltip: DataManagementLocalizations.of(context).moveSelected,
+              tooltip: 'data_management_moveSelected'.tr,
             ),
             IconButton(
               icon: const Icon(Icons.download),
               onPressed: _exportSelected,
-              tooltip: DataManagementLocalizations.of(context).exportSelected,
+              tooltip: 'data_management_exportSelected'.tr,
             ),
           ],
         ],
@@ -530,7 +529,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.create_new_folder),
                     label: Text(
-                      DataManagementLocalizations.of(context).newFolder,
+                      'data_management_newFolder'.tr,
                     ),
                     onPressed: _createNewFolder,
                   ),
@@ -540,7 +539,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.note_add),
                     label: Text(
-                      DataManagementLocalizations.of(context).newFile,
+                      'data_management_newFile'.tr,
                     ),
                     onPressed: _createNewFile,
                   ),
@@ -652,9 +651,7 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
                 : folders.isEmpty
                 ? Center(
                   child: Text(
-                    DataManagementLocalizations.of(
-                      context,
-                    ).directoryAccessFailed,
+                    'data_management_directoryAccessFailed'.tr,
                   ),
                 )
                 : ListView.builder(
@@ -670,7 +667,7 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
                       title:
                           folder.path == '..'
                               ? Text(
-                                DataManagementLocalizations.of(context).move,
+                                'data_management_move'.tr,
                               )
                               : Text(path.basename(folder.path)),
                       onTap:
@@ -688,7 +685,7 @@ class _FolderPickerDialogState extends State<FolderPickerDialog> {
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, currentDirectory),
-          child: Text(DataManagementLocalizations.of(context).select),
+          child: Text('data_management_select'.tr),
         ),
       ],
     );

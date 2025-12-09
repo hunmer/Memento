@@ -10,13 +10,14 @@ import 'package:Memento/screens/home_screen/models/layout_config.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/widgets/app_drawer.dart';
 import 'package:Memento/core/floating_ball/floating_ball_service.dart';
 import 'package:Memento/core/global_flags.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'managers/home_layout_manager.dart';
 import 'widgets/home_grid.dart';
 import 'widgets/add_widget_dialog.dart';
@@ -430,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 const Divider(),
                 ListTile(
               leading: const Icon(Icons.create_new_folder),
-                  title: Text(ScreensLocalizations.of(context).createNewFolder),
+                  title: Text('screens_createNewFolder'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _showCreateFolderDialog();
@@ -438,7 +439,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ),
             ListTile(
               leading: const Icon(Icons.add_box),
-              title: Text(ScreensLocalizations.of(context).addWidget),
+                  title: Text('screens_addWidget'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _showAddWidgetDialog();
@@ -447,7 +448,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.save),
-              title: Text(ScreensLocalizations.of(context).saveCurrentLayout),
+                  title: Text('screens_saveCurrentLayout'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _showSaveLayoutDialog();
@@ -455,7 +456,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ),
             ListTile(
               leading: const Icon(Icons.layers),
-              title: Text(ScreensLocalizations.of(context).manageLayouts),
+                  title: Text('screens_manageLayouts'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _showLayoutManagerDialog();
@@ -463,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ),
                 ListTile(
                   leading: const Icon(Icons.palette),
-                  title: Text(ScreensLocalizations.of(context).themeSettings),
+                  title: Text('screens_themeSettings'.tr),
                   onTap: () {
                     Navigator.pop(context);
                     _showThemeSettings();
@@ -472,9 +473,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.grid_view),
-                  title: Text(ScreensLocalizations.of(context).gridSettings),
+                  title: Text('screens_gridSettings'.tr),
                   subtitle: Text(
-                    '${_layoutManager.gridCrossAxisCount} 列 · ${_layoutManager.gridAlignment == "top" ? ScreensLocalizations.of(context).topDisplay : ScreensLocalizations.of(context).centerDisplay}',
+                    '${_layoutManager.gridCrossAxisCount} 列 · ${_layoutManager.gridAlignment == "top" ? 'screens_topDisplay'.tr : 'screens_centerDisplay'.tr}',
                   ),
               onTap: () {
                 Navigator.pop(context);
@@ -483,7 +484,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ),
             ListTile(
               leading: const Icon(Icons.delete_sweep),
-                  title: Text(ScreensLocalizations.of(context).clearLayout),
+                  title: Text('screens_clearLayout'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _confirmClearLayout();
@@ -521,12 +522,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(ScreensLocalizations.of(context).confirmClear),
-        content: Text(ScreensLocalizations.of(context).confirmClearAllWidgets),
+            title: Text('screens_confirmClear'.tr),
+            content: Text('screens_confirmClearAllWidgets'.tr),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-                child: Text(ScreensLocalizations.of(context).cancel),
+                child: Text('screens_cancel'.tr),
           ),
           TextButton(
             onPressed: () {
@@ -535,10 +536,10 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 _layoutManager.clear();
               });
                   Toast.success(
-                    ScreensLocalizations.of(context).allWidgetsCleared,
+                    'screens_allWidgetsCleared'.tr,
                   );
             },
-                child: Text(ScreensLocalizations.of(context).confirm),
+                child: Text('screens_confirm'.tr),
           ),
         ],
       ),
@@ -600,26 +601,26 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-            title: Text(ScreensLocalizations.of(context).saveCurrentLayout),
+            title: Text('screens_saveCurrentLayout'.tr),
         content: TextField(
           controller: nameController,
           decoration: InputDecoration(
-                labelText: ScreensLocalizations.of(context).layoutName,
-                hintText: ScreensLocalizations.of(context).layoutNameHint,
+                labelText: 'screens_layoutName'.tr,
+                hintText: 'screens_layoutNameHint'.tr,
           ),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-                child: Text(ScreensLocalizations.of(context).cancel),
+                child: Text('screens_cancel'.tr),
           ),
           TextButton(
             onPressed: () async {
               final name = nameController.text.trim();
               if (name.isEmpty) {
                     Toast.error(
-                      ScreensLocalizations.of(context).pleaseEnterLayoutName,
+                      'screens_pleaseEnterLayoutName'.tr,
                     );
                 return;
               }
@@ -633,18 +634,18 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 await _updateCurrentLayoutName();
                 if (mounted) {
                       Toast.success(
-                        ScreensLocalizations.of(context).layoutSaved(name),
+                        'screens_layoutSaved'.trParams({'name': name}),
                       );
                 }
               } catch (e) {
                 if (mounted) {
                       Toast.error(
-                        '${ScreensLocalizations.of(context).saveFailed}: $e',
+                        '${'screens_saveFailed'.tr}: $e',
                       );
                 }
               }
             },
-                child: Text(ScreensLocalizations.of(context).save),
+                child: Text('screens_save'.tr),
           ),
         ],
       ),
@@ -700,7 +701,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                   ListTile(
                     leading: const Icon(Icons.settings),
                     title: Text(
-                      ScreensLocalizations.of(context).widgetSettings,
+                      'screens_widgetSettings'.tr,
                     ),
                     onTap: () {
                       Navigator.pop(context);
@@ -710,7 +711,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 if (item is HomeWidgetItem)
                   ListTile(
                     leading: const Icon(Icons.aspect_ratio),
-                    title: Text(ScreensLocalizations.of(context).adjustSize),
+                    title: Text('screens_adjustSize'.tr),
                     onTap: () {
                       Navigator.pop(context);
                       _showSizeAdjuster(item);
@@ -720,7 +721,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 ListTile(
                   leading: const Icon(Icons.delete, color: Colors.red),
                   title: Text(
-                    ScreensLocalizations.of(context).delete,
+                    'screens_delete'.tr,
                     style: const TextStyle(color: Colors.red),
                   ),
                   onTap: () {
@@ -826,7 +827,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(ScreensLocalizations.of(context).selectWidgetSize),
+            title: Text('screens_selectWidgetSize'.tr),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children:
@@ -856,7 +857,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(ScreensLocalizations.of(context).cancel),
+                child: Text('screens_cancel'.tr),
               ),
             ],
           ),
@@ -865,14 +866,13 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   /// 获取尺寸标签
   String _getSizeLabel(HomeWidgetSize size) {
-    final l10n = ScreensLocalizations.of(context);
     switch (size) {
       case HomeWidgetSize.small:
-        return l10n.smallSize;
+        return 'screens_smallSize'.tr;
       case HomeWidgetSize.medium:
-        return l10n.mediumSize;
+        return 'screens_mediumSize'.tr;
       case HomeWidgetSize.large:
-        return l10n.largeSize;
+        return 'screens_largeSize'.tr;
     }
   }
 
@@ -900,25 +900,25 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(ScreensLocalizations.of(context).confirmDelete),
+            title: Text('screens_confirmDelete'.tr),
             content: Text(
-              ScreensLocalizations.of(context).confirmDeleteItem(itemName),
+              'screens_confirmDeleteItem'.trParams({'itemName': itemName}),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(ScreensLocalizations.of(context).cancel),
+                child: Text('screens_cancel'.tr),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                   _layoutManager.removeItem(item.id);
                   ToastService.instance.showToast(
-                    '"$itemName" ${ScreensLocalizations.of(context).deleted}',
+                    '"$itemName" ${'screens_deleted'.tr}',
                   );
                 },
                 child: Text(
-                  ScreensLocalizations.of(context).delete,
+                  'screens_delete'.tr,
                   style: const TextStyle(color: Colors.red),
                 ),
               ),
@@ -965,7 +965,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-            title: Text(ScreensLocalizations.of(context).confirmDelete),
+            title: Text('screens_confirmDelete'.tr),
             content: Text(
               ScreensLocalizations.of(
                 context,
@@ -974,7 +974,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-                child: Text(ScreensLocalizations.of(context).cancel),
+                child: Text('screens_cancel'.tr),
           ),
           TextButton(
             onPressed: () {
@@ -991,7 +991,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               _exitBatchMode();
             },
                 child: Text(
-                  ScreensLocalizations.of(context).delete,
+                  'screens_delete'.tr,
                   style: const TextStyle(color: Colors.red),
                 ),
           ),
@@ -1009,14 +1009,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         .toList();
 
     if (folders.isEmpty) {
-      Toast.warning(ScreensLocalizations.of(context).noAvailableFolders);
+      Toast.warning('screens_noAvailableFolders'.tr);
       return;
     }
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-            title: Text(ScreensLocalizations.of(context).moveToFolder),
+            title: Text('screens_moveToFolder'.tr),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -1043,7 +1043,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-                child: Text(ScreensLocalizations.of(context).cancel),
+                child: Text('screens_cancel'.tr),
           ),
         ],
       ),
@@ -1374,9 +1374,8 @@ class _GridSizeDialogState extends State<_GridSizeDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context);
     return AlertDialog(
-      title: Text(l10n.gridSettings),
+      title: Text('screens_gridSettings'.tr),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1384,21 +1383,23 @@ class _GridSizeDialogState extends State<_GridSizeDialog> {
           children: [
             // 网格大小设置
             Text(
-              l10n.gridSize,
+              'screens_gridSize'.tr,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.gridSizeDescription,
+              'screens_gridSizeDescription'.tr,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
             Row(
               children: [
                 Text(
-                  l10n.gridColumns(_currentSize),
+                  'screens_gridColumns'.trParams({
+                    'count': _currentSize.toString(),
+                  }),
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const Spacer(),
@@ -1459,14 +1460,14 @@ class _GridSizeDialogState extends State<_GridSizeDialog> {
 
             // 显示位置设置
             Text(
-              l10n.displayPosition,
+              'screens_displayPosition'.tr,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.displayPositionDescription,
+              'screens_displayPositionDescription'.tr,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -1474,12 +1475,12 @@ class _GridSizeDialogState extends State<_GridSizeDialog> {
               segments: [
                 ButtonSegment<String>(
                   value: 'top',
-                  label: Text(l10n.topDisplay),
+                  label: Text('screens_topDisplay'.tr),
                   icon: const Icon(Icons.vertical_align_top),
                 ),
                 ButtonSegment<String>(
                   value: 'center',
-                  label: Text(l10n.centerDisplay),
+                  label: Text('screens_centerDisplay'.tr),
                   icon: const Icon(Icons.vertical_align_center),
                 ),
               ],
@@ -1497,7 +1498,7 @@ class _GridSizeDialogState extends State<_GridSizeDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.complete),
+          child: Text('screens_complete'.tr),
         ),
       ],
     );

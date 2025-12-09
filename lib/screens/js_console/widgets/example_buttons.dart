@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
 import 'package:provider/provider.dart';
@@ -25,7 +26,7 @@ class ExampleButtons extends StatelessWidget {
             color: Colors.grey[200],
             child: Center(
               child: Text(
-                ScreensLocalizations.of(context).loadingExamples,
+                'screens_loadingExamples'.tr,
                 style: const TextStyle(fontSize: 12),
               ),
             ),
@@ -39,7 +40,7 @@ class ExampleButtons extends StatelessWidget {
             color: Colors.grey[200],
             child: Center(
               child: Text(
-                ScreensLocalizations.of(context).noAvailableExamples,
+                'screens_noAvailableExamples'.tr,
                 style: TextStyle(fontSize: 12),
               ),
             ),
@@ -63,7 +64,7 @@ class ExampleButtons extends StatelessWidget {
                   child: Row(
                     children: [
                       Text(
-                        ScreensLocalizations.of(context).selectExampleFile,
+                        'screens_selectExampleFile'.tr,
                         style: TextStyle(fontSize: 12),
                       ),
                       const SizedBox(width: 8),
@@ -72,14 +73,14 @@ class ExampleButtons extends StatelessWidget {
                           value: controller.selectedFilePath,
                           isExpanded: true,
                           hint: Text(
-                            ScreensLocalizations.of(context).allExamples,
+                            'screens_allExamples'.tr,
                             style: TextStyle(fontSize: 12),
                           ),
                           items: [
                             // "全部" 选项
                             DropdownMenuItem<String>(
                               value: null,
-                              child: Text(ScreensLocalizations.of(context).allExamples, style: TextStyle(fontSize: 12)),
+                              child: Text('screens_allExamples'.tr, style: TextStyle(fontSize: 12)),
                             ),
                             // 各个文件选项
                             ...controller.exampleFiles.map((file) {

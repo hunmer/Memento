@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as path;
+import 'package:get/get.dart';
 import 'video_preview.dart';
 
 class FilePreviewScreen extends StatefulWidget {
@@ -87,7 +87,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
       debugPrint('文件路径: $_absoluteFilePath');
       if (!fileExists) {
         if (mounted) {
-          Toast.error(FilePreviewLocalizations.of(context).fileNotExist);
+          Toast.error('file_preview_fileNotExist'.tr);
           // 清空文件路径，这样 _buildPreviewContent 会显示错误界面
           setState(() {
             _absoluteFilePath = '';
@@ -102,8 +102,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
     } catch (e) {
       if (mounted) {
         Toast.error(
-          FilePreviewLocalizations.of(context).errorFilePreviewFailed +
-              e.toString(),
+          '${'file_preview_errorFilePreviewFailed'.tr}${e.toString()}',
         );
         // 出错时也清空文件路径
         setState(() {
@@ -138,14 +137,13 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
         ], text: '分享文件：${widget.fileName}');
       } else {
         if (mounted) {
-          Toast.error(FilePreviewLocalizations.of(context).fileNotExist);
+          Toast.error('file_preview_fileNotExist'.tr);
         }
       }
     } catch (e) {
       if (mounted) {
         Toast.error(
-          FilePreviewLocalizations.of(context).errorFilePreviewFailed +
-              e.toString(),
+          '${'file_preview_errorFilePreviewFailed'.tr}${e.toString()}',
         );
       }
     }
@@ -161,20 +159,20 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
             context: context,
             builder:
                 (context) => AlertDialog(
-                  title: Text(FilePreviewLocalizations.of(context).name),
+                  title: Text('file_preview_name'.tr),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${FilePreviewLocalizations.of(context).name}: ${widget.fileName}',
+                        '${'file_preview_name'.tr}: ${widget.fileName}',
                       ),
                       Text(_absoluteFilePath),
                       Text(
-                        '${FilePreviewLocalizations.of(context).fileSize}: ${_formatFileSize(widget.fileSize)}',
+                        '${'file_preview_fileSize'.tr}: ${_formatFileSize(widget.fileSize)}',
                       ),
                       Text(
-                        '${FilePreviewLocalizations.of(context).fileType}: ${widget.mimeType}',
+                        '${'file_preview_fileType'.tr}: ${widget.mimeType}',
                       ),
                     ],
                   ),
@@ -191,7 +189,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
         }
       } else {
         if (mounted) {
-          Toast.error(FilePreviewLocalizations.of(context).fileNotExist);
+          Toast.error('file_preview_fileNotExist'.tr);
         }
       }
     } catch (e) {
@@ -218,12 +216,12 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              FilePreviewLocalizations.of(context).errorFilePreviewFailed,
+              'file_preview_errorFilePreviewFailed'.tr,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
-              FilePreviewLocalizations.of(context).fileNotExist,
+              'file_preview_fileNotExist'.tr,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -267,9 +265,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    FilePreviewLocalizations.of(
-                      context,
-                    ).errorFilePreviewFailed,
+                    'file_preview_errorFilePreviewFailed'.tr,
                   ),
                 ],
               ),
@@ -290,12 +286,12 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                FilePreviewLocalizations.of(context).errorFilePreviewFailed,
+                'file_preview_errorFilePreviewFailed'.tr,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
               Text(
-                FilePreviewLocalizations.of(context).previewNotAvailable,
+                'file_preview_previewNotAvailable'.tr,
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
@@ -303,7 +299,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
               ElevatedButton(
                 onPressed: _shareFile,
                 child: Text(
-                  FilePreviewLocalizations.of(context).openWithOtherApp,
+                  'file_preview_openWithOtherApp'.tr,
                 ),
               ),
             ],

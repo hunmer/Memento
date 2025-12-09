@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_service.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
-
 const _uuid = Uuid();
 
 /// 工具模板执行对话框
@@ -173,7 +172,7 @@ class _TemplateExecutionDialogState extends State<TemplateExecutionDialog> {
           TextButton.icon(
             onPressed: _copyAllResults,
             icon: const Icon(Icons.copy, size: 18),
-            label: Text(AgentChatLocalizations.of(context).copyResult),
+            label: Text('agent_chat_copyResult'.tr),
           ),
         // 关闭按钮
         FilledButton(

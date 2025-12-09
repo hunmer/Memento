@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_service.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_state.dart';

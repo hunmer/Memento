@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
@@ -6,7 +7,6 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'agent_chat_plugin.dart';
-import 'l10n/agent_chat_localizations.dart';
 
 /// Agent Chat插件的主页小组件注册
 class AgentChatHomeWidgets {
@@ -98,7 +98,6 @@ class AgentChatHomeWidgets {
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
     try {
-      final l10n = AgentChatLocalizations.of(context);
 
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -117,12 +116,12 @@ class AgentChatHomeWidgets {
       // 获取基础统计项数据
       final baseItems = _getAvailableStats(context);
 
-      // 使用l10n更新统计项标签
+      // 使用GetX翻译更新统计项标签
       final availableItems = baseItems.map((item) {
         if (item.id == 'total_conversations') {
           return StatItemData(
             id: item.id,
-            label: l10n.totalConversations,
+            label: 'agent_chat_totalConversations'.tr,
             value: item.value,
             highlight: item.highlight,
             color: item.color,
@@ -130,7 +129,7 @@ class AgentChatHomeWidgets {
         } else if (item.id == 'unread_messages') {
           return StatItemData(
             id: item.id,
-            label: l10n.unreadMessages,
+            label: 'agent_chat_unreadMessages'.tr,
             value: item.value,
             highlight: item.highlight,
             color: item.color,
@@ -138,7 +137,7 @@ class AgentChatHomeWidgets {
         } else if (item.id == 'total_groups') {
           return StatItemData(
             id: item.id,
-            label: l10n.totalGroups,
+            label: 'agent_chat_totalGroups'.tr,
             value: item.value,
             highlight: item.highlight,
             color: item.color,
@@ -149,7 +148,7 @@ class AgentChatHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
-        pluginName: l10n.name,
+        pluginName: 'agent_chat_name'.tr,
         pluginIcon: Icons.chat_bubble_outline,
         pluginDefaultColor: const Color(0xFF2196F3),
         availableItems: availableItems,
@@ -162,7 +161,6 @@ class AgentChatHomeWidgets {
 
   /// 构建错误提示组件
   static Widget _buildErrorWidget(BuildContext context, String error) {
-    final l10n = AgentChatLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -170,7 +168,7 @@ class AgentChatHomeWidgets {
           const Icon(Icons.error_outline, size: 32, color: Colors.red),
           const SizedBox(height: 8),
           Text(
-            l10n.loadFailed,
+            'agent_chat_loadFailed'.tr,
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
@@ -15,8 +17,6 @@ import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_tem
 import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
-
 /// 会话列表屏幕
 class ConversationListScreen extends StatefulWidget {
   const ConversationListScreen({super.key});
@@ -131,7 +131,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context).groupManagement),
+            title: Text('agent_chat_groupManagement'.tr),
             content: SizedBox(
               width: double.maxFinite,
               child: ListView.builder(
@@ -152,7 +152,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                                 children: [
                                   const Icon(Icons.edit),
                                   const SizedBox(width: 8),
-                                  Text(AgentChatLocalizations.of(context).edit),
+                                  Text('agent_chat_edit'.tr),
                                 ],
                               ),
                             ),
@@ -163,7 +163,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                                   const Icon(Icons.delete, color: Colors.red),
                                   const SizedBox(width: 8),
                                   Text(
-                                    AgentChatLocalizations.of(context).delete,
+                                    'agent_chat_delete'.tr,
                                     style: const TextStyle(color: Colors.red),
                                   ),
                                 ],
@@ -178,7 +178,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AgentChatLocalizations.of(context).close),
+                child: Text('agent_chat_close'.tr),
               ),
             ],
           ),
@@ -210,7 +210,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: Text(AgentChatLocalizations.of(context).editGroup),
+              title: Text('agent_chat_editGroup'.tr),
               content: TextField(
                 controller: nameController,
                 decoration: const InputDecoration(labelText: '分组名称'),
@@ -219,11 +219,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text(AgentChatLocalizations.of(context).cancel),
+                  child: Text('agent_chat_cancel'.tr),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: Text(AgentChatLocalizations.of(context).save),
+                  child: Text('agent_chat_save'.tr),
                 ),
               ],
             ),
@@ -248,19 +248,21 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context).confirmDelete),
+            title: Text('agent_chat_confirmDelete'.tr),
             content: Text(
-              AgentChatLocalizations.of(context).confirmDeleteGroup(group.name),
+              'agent_chat_confirmDeleteGroup'.trParams({
+                'groupName': group.name,
+              }),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AgentChatLocalizations.of(context).cancel),
+                child: Text('agent_chat_cancel'.tr),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: Text(AgentChatLocalizations.of(context).delete),
+                child: Text('agent_chat_delete'.tr),
               ),
             ],
           ),
@@ -286,13 +288,13 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context).selectTypeToCreate),
+            title: Text('agent_chat_selectTypeToCreate'.tr),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
                   leading: const Icon(Icons.chat),
-                  title: Text(AgentChatLocalizations.of(context).channel),
+                  title: Text('agent_chat_channel'.tr),
                   subtitle: Text(
                     AgentChatLocalizations.of(
                       context,
@@ -302,9 +304,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.folder),
-                  title: Text(AgentChatLocalizations.of(context).group),
+                  title: Text('agent_chat_group'.tr),
                   subtitle: Text(
-                    AgentChatLocalizations.of(context).createNewGroupCategory,
+                    'agent_chat_createNewGroupCategory'.tr,
                   ),
                   onTap: () => Navigator.pop(context, 'group'),
                 ),
@@ -329,7 +331,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: Text(AgentChatLocalizations.of(context).addChannel),
+              title: Text('agent_chat_addChannel'.tr),
               content: TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
@@ -341,11 +343,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text(AgentChatLocalizations.of(context).cancel),
+                  child: Text('agent_chat_cancel'.tr),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: Text(AgentChatLocalizations.of(context).create),
+                  child: Text('agent_chat_create'.tr),
                 ),
               ],
             ),
@@ -379,7 +381,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: Text(AgentChatLocalizations.of(context).addGroup),
+              title: Text('agent_chat_addGroup'.tr),
               content: TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
@@ -391,11 +393,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text(AgentChatLocalizations.of(context).cancel),
+                  child: Text('agent_chat_cancel'.tr),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: Text(AgentChatLocalizations.of(context).create),
+                  child: Text('agent_chat_create'.tr),
                 ),
               ],
             ),
@@ -426,8 +428,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         _controller.conversationService.conversations.isNotEmpty;
 
     return SuperCupertinoNavigationWrapper(
-      title: Text(AgentChatLocalizations.of(context).aiChat),
-      largeTitle: AgentChatLocalizations.of(context).aiChat,
+      title: Text('agent_chat_aiChat'.tr),
+      largeTitle: 'agent_chat_aiChat'.tr,
       enableLargeTitle: true,
       enableSearchBar: true,
       searchPlaceholder: '搜索会话...',
@@ -448,7 +450,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         // 分组管理按钮
         IconButton(
           icon: const Icon(Icons.folder_outlined, size: 24),
-          tooltip: AgentChatLocalizations.of(context).groupManagement,
+          tooltip: 'agent_chat_groupManagement'.tr,
           onPressed: _openGroupManagement,
         ),
         // 工具管理按钮
@@ -609,7 +611,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    AgentChatLocalizations.of(context).clear,
+                    'agent_chat_clear'.tr,
                     style: TextStyle(fontSize: 12),
                   ),
                 ),
@@ -770,7 +772,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                         children: [
                           const Icon(Icons.edit),
                           const SizedBox(width: 8),
-                          Text(AgentChatLocalizations.of(context).edit),
+                          Text('agent_chat_edit'.tr),
                         ],
                       ),
                     ),
@@ -781,7 +783,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                           const Icon(Icons.delete, color: Colors.red),
                           const SizedBox(width: 8),
                           Text(
-                            AgentChatLocalizations.of(context).delete,
+                            'agent_chat_delete'.tr,
                             style: const TextStyle(color: Colors.red),
                           ),
                         ],
@@ -845,7 +847,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: Text(AgentChatLocalizations.of(context).editConversation),
+              title: Text('agent_chat_editConversation'.tr),
               content: TextField(
                 controller: titleController,
                 decoration: const InputDecoration(labelText: '会话标题'),
@@ -854,11 +856,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text(AgentChatLocalizations.of(context).cancel),
+                  child: Text('agent_chat_cancel'.tr),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: Text(AgentChatLocalizations.of(context).save),
+                  child: Text('agent_chat_save'.tr),
                 ),
               ],
             ),
@@ -884,21 +886,21 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AgentChatLocalizations.of(context).confirmDelete),
+            title: Text('agent_chat_confirmDelete'.tr),
             content: Text(
-              AgentChatLocalizations.of(
-                context,
-              ).confirmDeleteConversation(conversation.title),
+              'agent_chat_confirmDeleteConversation'.trParams({
+                'title': conversation.title,
+              }),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(AgentChatLocalizations.of(context).cancel),
+                child: Text('agent_chat_cancel'.tr),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: Text(AgentChatLocalizations.of(context).delete),
+                child: Text('agent_chat_delete'.tr),
               ),
             ],
           ),

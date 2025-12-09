@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:Memento/plugins/database/l10n/database_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:Memento/plugins/database/models/database_field.dart';
@@ -89,7 +89,7 @@ class FieldController {
                   onChanged(pickedFile.path);
                 }
               },
-              child: Text(DatabaseLocalizations.of(context).selectImage),
+              child: Text('database_selectImage'.tr),
             ),
           ],
         );

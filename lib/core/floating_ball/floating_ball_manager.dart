@@ -2,7 +2,7 @@ import 'dart:core';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
-import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -69,7 +69,7 @@ class FloatingBallManager {
             if (lastPlugin != null) {
               PluginManager.instance.openPlugin(context, lastPlugin);
             } else {
-              Toast.info(FloatingBallLocalizations.of(context)!.noRecentPlugin);
+              Toast.info('floating_ball_noRecentPlugin'.tr);
             }
           }
         },
@@ -94,7 +94,7 @@ class FloatingBallManager {
     '刷新页面':
         (context) => () {
           if (context.mounted) {
-            Toast.success(FloatingBallLocalizations.of(context)!.pageRefreshed);
+            Toast.success('floating_ball_pageRefreshed'.tr);
           }
         },
     '路由历史记录':

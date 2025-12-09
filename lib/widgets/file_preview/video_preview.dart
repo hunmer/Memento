@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:get/get.dart';
 import '../../../utils/image_utils.dart';
 
 class VideoPreview extends StatefulWidget {
@@ -98,7 +98,7 @@ class _VideoPreviewState extends State<VideoPreview> {
               ),
               const SizedBox(height: 16),
               Text(
-                FilePreviewLocalizations.of(context).videoLoadFailed,
+                'file_preview_videoLoadFailed'.tr,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),

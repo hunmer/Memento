@@ -1,4 +1,4 @@
-import 'package:Memento/core/floating_ball/l10n/floating_ball_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/action/action_manager.dart';
@@ -61,9 +61,8 @@ class _FloatingBallSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final l10n = FloatingBallLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n!.floatingBallSettings)),
+      appBar: AppBar(title: Text('floating_ball_floatingBallSettings'.tr)),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -75,14 +74,14 @@ class _FloatingBallSettingsScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.floatingBallSettings,
+                    'floating_ball_floatingBallSettings'.tr,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(l10n.enableFloatingBall),
+                      Text('floating_ball_enableFloatingBall'.tr),
                       Switch(
                         value: _isEnabled,
                         onChanged: (value) async {
@@ -114,13 +113,13 @@ class _FloatingBallSettingsScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.floatingBallSettings,
+                    'floating_ball_floatingBallSettings'.tr,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Text(l10n.small),
+                      Text('floating_ball_small'.tr),
                       Expanded(
                         child: Slider(
                           value: _sizeScale,
@@ -136,7 +135,7 @@ class _FloatingBallSettingsScreenState
                           },
                         ),
                       ),
-                      Text(l10n.large),
+                      Text('floating_ball_large'.tr),
                     ],
                   ),
                 ],
@@ -154,7 +153,7 @@ class _FloatingBallSettingsScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.floatingBallSettings,
+                    'floating_ball_floatingBallSettings'.tr,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -176,16 +175,16 @@ class _FloatingBallSettingsScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.resetPosition,
+                    'floating_ball_resetPosition'.tr,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: () {
                       _manager.resetPosition();
-                      Toast.success(l10n.positionReset);
+                      Toast.success('floating_ball_positionReset'.tr);
                     },
-                    child: Text(l10n.resetPosition),
+                    child: Text('floating_ball_resetPosition'.tr),
                   ),
                 ],
               ),
@@ -198,7 +197,6 @@ class _FloatingBallSettingsScreenState
 
   // 构建所有手势动作选择器
   List<Widget> _buildGestureActionSelectors() {
-    final l10n = FloatingBallLocalizations.of(context);
     final List<Widget> selectors = [];
 
     for (var gesture in FloatingBallGesture.values) {
@@ -218,7 +216,7 @@ class _FloatingBallSettingsScreenState
               subtitle: Text(
                 displayText,
                 style: TextStyle(
-                  color: displayText == l10n!.notSet ? Colors.grey[600] : null,
+                  color: displayText == 'floating_ball_notSet'.tr ? Colors.grey[600] : null,
                 ),
               ),
               trailing: const Icon(Icons.chevron_right),
@@ -316,22 +314,21 @@ class _FloatingBallSettingsScreenState
 
   // 获取手势名称
   String _getGestureName(FloatingBallGesture gesture) {
-    final l10n = FloatingBallLocalizations.of(context);
     switch (gesture) {
       case FloatingBallGesture.tap:
-        return l10n!.tapGesture;
+        return 'floating_ball_tapGesture'.tr;
       case FloatingBallGesture.doubleTap:
-        return l10n!.doubleTapGesture;
+        return 'floating_ball_doubleTapGesture'.tr;
       case FloatingBallGesture.longPress:
-        return l10n!.longPressGesture;
+        return 'floating_ball_longPressGesture'.tr;
       case FloatingBallGesture.swipeUp:
-        return l10n!.swipeUpGesture;
+        return 'floating_ball_swipeUpGesture'.tr;
       case FloatingBallGesture.swipeDown:
-        return l10n!.swipeDownGesture;
+        return 'floating_ball_swipeDownGesture'.tr;
       case FloatingBallGesture.swipeLeft:
-        return l10n!.swipeLeftGesture;
+        return 'floating_ball_swipeLeftGesture'.tr;
       case FloatingBallGesture.swipeRight:
-        return l10n!.swipeRightGesture;
+        return 'floating_ball_swipeRightGesture'.tr;
     }
   }
 }

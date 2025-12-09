@@ -1,5 +1,6 @@
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/database/l10n/database_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/database/controllers/field_controller.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
@@ -57,12 +58,12 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(DatabaseLocalizations.of(context).editDatabaseTitle),
+        title: Text('database_editDatabaseTitle'.tr),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: DatabaseLocalizations.of(context).informationTabTitle),
-            Tab(text: DatabaseLocalizations.of(context).fieldsTabTitle),
+            Tab(text: 'database_informationTabTitle'.tr),
+            Tab(text: 'database_fieldsTabTitle'.tr),
           ],
         ),
         actions: [
@@ -91,7 +92,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
             TextFormField(
               initialValue: _editedDatabase.name,
               decoration: InputDecoration(
-                labelText: DatabaseLocalizations.of(context).databaseNameLabel,
+                labelText: 'database_databaseNameLabel'.tr,
               ),
               onChanged: (value) {
                 _editedDatabase = _editedDatabase.copyWith(name: value);
@@ -100,13 +101,13 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: _pickImage,
-              child: Text(DatabaseLocalizations.of(context).uploadCoverImage),
+              child: Text('database_uploadCoverImage'.tr),
             ),
             const SizedBox(height: 16),
             TextFormField(
               initialValue: _editedDatabase.description,
               decoration: InputDecoration(
-                labelText: DatabaseLocalizations.of(context).descriptionLabel,
+                labelText: 'database_descriptionLabel'.tr,
               ),
               maxLines: 3,
               onChanged: (value) {
@@ -186,8 +187,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                     TextFormField(
                       initialValue: field.name,
                       decoration: InputDecoration(
-                        labelText:
-                            DatabaseLocalizations.of(context).fieldNameLabel,
+                        labelText: 'database_fieldNameLabel'.tr,
                       ),
                       onChanged: (value) => field = field.copyWith(name: value),
                     ),
@@ -196,10 +196,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                         field.type == 'Password')
                       TextFormField(
                         decoration: InputDecoration(
-                          labelText:
-                              DatabaseLocalizations.of(
-                                context,
-                              ).defaultValueLabel,
+                          labelText: 'database_defaultValueLabel'.tr,
                           hintText:
                               'Enter default ${field.type.toLowerCase()} value',
                         ),
@@ -246,7 +243,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
       context: context,
       builder:
           (context) => SimpleDialog(
-            title: Text(DatabaseLocalizations.of(context).selectFieldTypeTitle),
+            title: Text('database_selectFieldTypeTitle'.tr),
             children: [
               for (final type in FieldController.getFieldTypes())
                 FieldController.buildFieldTypeTile(
@@ -277,9 +274,9 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
     if (fieldType != null) {
       final newField = FieldModel(
         id: const Uuid().v4(),
-        name: DatabaseLocalizations.of(
-          context,
-        ).newFieldTitle.replaceFirst('%s', fieldType),
+        name: 'database_newFieldTitle'.trParams({
+          'type': fieldType,
+        }),
         type: fieldType,
       );
       await _editField(newField);
@@ -320,9 +317,9 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
     } catch (e, stackTrace) {
       debugPrint('Save failed: $e\n$stackTrace');
       if (mounted) {
-        Toast.error(DatabaseLocalizations.of(
-          context,
-        ).saveFailedMessage.replaceFirst('%s', e.toString()));
+        Toast.error(
+          'database_saveFailedMessage'.trParams({'error': e.toString()}),
+        );
       }
     }
   }

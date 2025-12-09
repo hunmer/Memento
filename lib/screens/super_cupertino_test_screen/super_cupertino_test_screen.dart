@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import '../l10n/screens_localizations.dart';
@@ -130,8 +131,8 @@ class _SuperCupertinoTestScreenState extends State<SuperCupertinoTestScreen> {
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
-      title: Text(ScreensLocalizations.of(context).superCupertinoTest),
-      largeTitle: ScreensLocalizations.of(context).fruitList,
+      title: Text('screens_superCupertinoTest'.tr),
+      largeTitle: 'screens_fruitList'.tr,
       body: ListView.separated(
         padding: EdgeInsets.zero,
         itemCount: _filteredItems.length,
@@ -144,7 +145,7 @@ class _SuperCupertinoTestScreenState extends State<SuperCupertinoTestScreen> {
               child: Icon(_getFruitIcon(item), color: Colors.white, size: 20),
             ),
             title: Text(item),
-            subtitle: Text(ScreensLocalizations.of(context).fruitIndex(index)),
+            subtitle: Text('screens_fruitIndex'.trParams({'index': (index + 1).toString()})),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               toastService.showToast('你选择了: $item');

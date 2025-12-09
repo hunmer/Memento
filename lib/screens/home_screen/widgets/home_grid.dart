@@ -1,11 +1,12 @@
+import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'home_card.dart';
 import 'layout_type_selector.dart';
 
@@ -58,7 +59,6 @@ class _HomeGridState extends State<HomeGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context);
     if (widget.items.isEmpty) {
       return _buildEmptyState(context, l10n);
     }
@@ -309,14 +309,14 @@ class _HomeGridState extends State<HomeGrid> {
           ),
           const SizedBox(height: 16),
           Text(
-            l10n.noWidgetsYet,
+            'screens_noWidgetsYet'.tr,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Theme.of(context).disabledColor,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            l10n.clickPlusToAdd,
+            'screens_clickPlusToAdd'.tr,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).disabledColor,
             ),
@@ -330,7 +330,7 @@ class _HomeGridState extends State<HomeGrid> {
               }
             },
             icon: const Icon(Icons.add_circle_outline),
-            label: Text(l10n.quickCreateLayout),
+            label: Text('screens_quickCreateLayout'.tr),
           ),
         ],
       ),
@@ -341,9 +341,8 @@ class _HomeGridState extends State<HomeGrid> {
   Future<Map<String, String>?> _showQuickCreateLayoutDialog(
     BuildContext context,
   ) async {
-    final l10n = ScreensLocalizations.of(context);
     final TextEditingController nameController = TextEditingController(
-      text: l10n.quickLayout,
+      text: 'screens_quickLayout'.tr,
     );
     String selectedType = _quickLayoutType;
 
@@ -351,7 +350,7 @@ class _HomeGridState extends State<HomeGrid> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(l10n.quickCreateLayout),
+            title: Text('screens_quickCreateLayout'.tr),
             content: SizedBox(
               width: double.maxFinite,
               child: Column(
@@ -360,12 +359,12 @@ class _HomeGridState extends State<HomeGrid> {
                   TextField(
                     controller: nameController,
                     decoration: InputDecoration(
-                      labelText: l10n.layoutName,
-                      hintText: l10n.layoutNameHint,
+                      labelText: 'screens_layoutName'.tr,
+                      hintText: 'screens_layoutNameHint'.tr,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Text(l10n.selectLayoutTemplate),
+                  Text('screens_selectLayoutTemplate'.tr),
                   const SizedBox(height: 16),
                   LayoutTypeSelector(
                     initialType: selectedType,
@@ -379,7 +378,7 @@ class _HomeGridState extends State<HomeGrid> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(l10n.cancel),
+                child: Text('screens_cancel'.tr),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -387,12 +386,16 @@ class _HomeGridState extends State<HomeGrid> {
                   if (name.isEmpty) {
                     ScaffoldMessenger.of(
                       context,
-                    ).showSnackBar(SnackBar(content: Text(l10n.pleaseEnterLayoutName)));
+                    ).showSnackBar(
+                      SnackBar(
+                        content: Text('screens_pleaseEnterLayoutName'.tr),
+                      ),
+                    );
                     return;
                   }
                   Navigator.pop(context, {'name': name, 'type': selectedType});
                 },
-                child: Text(l10n.create),
+                child: Text('screens_create'.tr),
               ),
         ],
       ),
@@ -415,43 +418,49 @@ Future<_DragToFolderAction?> _showDragToFolderDialog(
   HomeItem draggedItem,
   HomeFolderItem targetFolder,
 ) async {
-  final l10n = ScreensLocalizations.of(context);
   // 获取拖拽项的名称
   String itemName;
   if (draggedItem is HomeWidgetItem) {
     final registry = HomeWidgetRegistry();
-    itemName = registry.getWidget(draggedItem.widgetId)?.name ?? l10n.component;
+    itemName =
+        registry.getWidget(draggedItem.widgetId)?.name ??
+        'screens_component'.tr;
   } else if (draggedItem is HomeFolderItem) {
     itemName = draggedItem.name;
   } else {
-    itemName = l10n.item;
+    itemName = 'screens_item'.tr;
   }
 
   return showDialog<_DragToFolderAction>(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text(l10n.dragToFolder),
+          title: Text('screens_dragToFolder'.tr),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.dragItemToFolder(itemName, targetFolder.name)),
+              Text(
+                'screens_dragItemToFolder'.trParams({
+                  'item': itemName,
+                  'folder': targetFolder.name,
+                }),
+              ),
           const SizedBox(height: 16),
-          Text(l10n.pleaseSelectAction),
+              Text('screens_pleaseSelectAction'.tr),
         ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, _DragToFolderAction.cancel),
-          child: Text(l10n.cancel),
+              child: Text('screens_cancel'.tr),
         ),
         TextButton(
           onPressed: () => Navigator.pop(context, _DragToFolderAction.replace),
-          child: Text(l10n.replacePosition),
+              child: Text('screens_replacePosition'.tr),
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(context, _DragToFolderAction.addToFolder),
-          child: Text(l10n.addToFolder),
+              child: Text('screens_addToFolder'.tr),
         ),
       ],
     ),

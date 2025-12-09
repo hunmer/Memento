@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/notification_controller.dart';
 import 'package:memento_notifications/memento_notifications.dart';
 import '../l10n/screens_localizations.dart';
@@ -124,7 +125,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(ScreensLocalizations.of(context).notificationTestPage),
+        title: Text('screens_notificationTestPage'.tr),
         elevation: 2,
       ),
       body: Column(
@@ -179,7 +180,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
                     ),
-                    child: Text(ScreensLocalizations.of(context).requestPermission),
+                    child: Text('screens_requestPermission'.tr),
                   ),
               ],
             ),
@@ -320,7 +321,7 @@ class _NotificationTestPageState extends State<NotificationTestPage> {
             foregroundColor: Colors.white,
             disabledBackgroundColor: Colors.grey.shade300,
           ),
-          child: Text(ScreensLocalizations.of(context).test),
+          child: Text('screens_test'.tr),
         ),
       ),
     );

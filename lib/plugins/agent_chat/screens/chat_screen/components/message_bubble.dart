@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/services.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
@@ -493,7 +493,7 @@ class MessageBubble extends StatelessWidget {
                 children: [
                   const Icon(Icons.copy, size: 18),
                   const SizedBox(width: 8),
-                  Text(AgentChatLocalizations.of(context).copy),
+                  Text('agent_chat_copy'.tr),
                 ],
               ),
             ),
@@ -505,7 +505,7 @@ class MessageBubble extends StatelessWidget {
                   children: [
                     const Icon(Icons.edit, size: 18),
                     const SizedBox(width: 8),
-                    Text(AgentChatLocalizations.of(context).edit),
+                    Text('agent_chat_edit'.tr),
                   ],
                 ),
               ),
@@ -516,7 +516,7 @@ class MessageBubble extends StatelessWidget {
                   children: [
                     const Icon(Icons.refresh, size: 18),
                     const SizedBox(width: 8),
-                    Text(AgentChatLocalizations.of(context).regenerate),
+                    Text('agent_chat_regenerate'.tr),
                   ],
                 ),
               ),
@@ -528,7 +528,7 @@ class MessageBubble extends StatelessWidget {
                     const Icon(Icons.save, size: 18, color: Colors.blue),
                     const SizedBox(width: 8),
                     Text(
-                      AgentChatLocalizations.of(context).saveTool,
+                      'agent_chat_saveTool'.tr,
                       style: const TextStyle(color: Colors.blue),
                     ),
                   ],
@@ -542,7 +542,7 @@ class MessageBubble extends StatelessWidget {
                     const Icon(Icons.replay, size: 18, color: Colors.orange),
                     const SizedBox(width: 8),
                     Text(
-                      AgentChatLocalizations.of(context).reExecuteTool,
+                      'agent_chat_reExecuteTool'.tr,
                       style: const TextStyle(color: Colors.orange),
                     ),
                   ],
@@ -560,7 +560,7 @@ class MessageBubble extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      AgentChatLocalizations.of(context).viewDetails,
+                      'agent_chat_viewDetails'.tr,
                       style: const TextStyle(color: Colors.blue),
                     ),
                   ],
@@ -574,7 +574,7 @@ class MessageBubble extends StatelessWidget {
                     const Icon(Icons.delete, size: 18, color: Colors.red),
                     const SizedBox(width: 8),
                     Text(
-                      AgentChatLocalizations.of(context).delete,
+                      'agent_chat_delete'.tr,
                       style: const TextStyle(color: Colors.red),
                     ),
                   ],
@@ -594,7 +594,7 @@ class MessageBubble extends StatelessWidget {
           (context) => AlertDialog(
             title: Row(
               children: [
-                Text(AgentChatLocalizations.of(context).editMessage),
+                Text('agent_chat_editMessage'.tr),
                 const SizedBox(width: 8),
                 if (!message.isUser)
                   Container(
@@ -647,7 +647,7 @@ class MessageBubble extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(AgentChatLocalizations.of(context).cancel),
+                child: Text('agent_chat_cancel'.tr),
               ),
               TextButton(
                 onPressed: () {
@@ -657,7 +657,7 @@ class MessageBubble extends StatelessWidget {
                   }
                   Navigator.pop(context);
                 },
-                child: Text(AgentChatLocalizations.of(context).save),
+                child: Text('agent_chat_save'.tr),
               ),
             ],
           ),
@@ -977,7 +977,7 @@ class MessageBubble extends StatelessWidget {
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text(AgentChatLocalizations.of(context).toolExecutionResult),
+                Text('agent_chat_toolExecutionResult'.tr),
               ],
             ),
             content: SizedBox(
@@ -1122,7 +1122,7 @@ class MessageBubble extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: Text(AgentChatLocalizations.of(context).close),
+                child: Text('agent_chat_close'.tr),
               ),
             ],
           ),

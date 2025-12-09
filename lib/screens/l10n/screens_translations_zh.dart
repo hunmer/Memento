@@ -1,0 +1,279 @@
+/// Screens通用中文翻译
+final Map<String, String> screensTranslationsZh = {
+  // route.dart
+  'screens_error': '错误',
+  'screens_errorWidgetIdMissing': '错误: widgetId 参数缺失',
+  'screens_errorHabitIdRequired': 'Error: habitId is required',
+  'screens_errorHabitsPluginNotFound': 'Error: HabitsPlugin not found',
+  'screens_errorHabitNotFound': 'Error: Habit not found with id: @id',
+
+  // floating_widget_screen
+  'screens_floatingBallSettings': '悬浮球设置',
+  'screens_requestPermission': '申请权限',
+  'screens_floatingBallConfig': '悬浮球配置',
+  'screens_customizeFloatingBallAppearanceBehavior': '自定义悬浮球的外观和行为',
+  'screens_selectImageAsFloatingBall': '选择图片作为悬浮球',
+  'screens_sizeColon': '大小: ',
+  'screens_ballSizeDp': '@sizedp',
+  'screens_snapThresholdColon': '吸附阈值: ',
+  'screens_snapThresholdPx': '@thresholdpx',
+  'screens_autoRestoreFloatingBallState': '自动恢复悬浮球状态',
+  'screens_buttonCountColon': '按钮数量: ',
+  'screens_buttonCount': '@count 个',
+  'screens_manageFloatingButtons': '管理悬浮按钮',
+  'screens_currentPosition': '当前位置',
+
+  // home_screen
+  'screens_createNewFolder': '新建文件夹',
+  'screens_addWidget': '添加组件',
+  'screens_saveCurrentLayout': '保存当前布局',
+  'screens_manageLayouts': '管理布局',
+  'screens_themeSettings': '主题设置',
+  'screens_gridSettings': '网格设置',
+  'screens_clearLayout': '清空布局',
+  'screens_confirmClear': '确认清空',
+  'screens_confirmClearAllWidgets': '确定要清空所有小组件吗？此操作不可恢复。',
+  'screens_cancel': '取消',
+  'screens_confirm': '确定',
+  'screens_adjustSize': '调整大小',
+  'screens_delete': '删除',
+  'screens_selectWidgetSize': '选择组件大小',
+  'screens_confirmDelete': '确认删除',
+  'screens_confirmDeleteItem': '确定要删除 "@itemName" 吗？',
+  'screens_moveToFolder': '移动到文件夹',
+  'screens_topDisplay': '顶部显示',
+  'screens_centerDisplay': '居中显示',
+  'screens_complete': '完成',
+  'screens_clearFilterConditions': '清除筛选条件',
+
+  // background_settings_page
+  'screens_globalBackgroundSettings': '全局背景设置',
+  'screens_selectImage': '选择图片',
+  'screens_fillMode': '填充方式',
+  'screens_cover': '覆盖 (Cover)',
+  'screens_contain': '包含 (Contain)',
+  'screens_fill': '填充 (Fill)',
+  'screens_fitWidth': '适应宽度 (Fit Width)',
+  'screens_fitHeight': '适应高度 (Fit Height)',
+  'screens_none': '无缩放 (None)',
+  'screens_scaleDown': '缩小 (Scale Down)',
+  'screens_blurLevel': '模糊程度',
+  'screens_save': '保存',
+  'screens_globalBackgroundImage': '全局背景图',
+
+  // create_folder_dialog
+  'screens_selectIcon': '选择图标',
+  'screens_selectColor': '选择颜色',
+  'screens_create': '创建',
+
+  // folder_dialog
+  'screens_folderHasBeenDeleted': '文件夹已被删除',
+  'screens_moveOutOfFolder': '移出文件夹',
+  'screens_confirmDeleteThisItem': '确定要删除这个项目吗？',
+  'screens_moveFromHomePage': '从主页移入',
+  'screens_moveIn': '移入 (@count)',
+  'screens_editFolder': '编辑文件夹',
+
+  // home_card
+  'screens_cannotOpenPlugin': '无法打开插件',
+
+  // home_grid
+  'screens_quickCreateLayout': '快速创建布局',
+  'screens_selectLayoutTemplate': '选择一个布局模板快速开始：',
+  'screens_dragToFolder': '拖拽到文件夹',
+  'screens_dragItemToFolder': '将 "@item" 拖拽到文件夹 "@folder"',
+  'screens_pleaseSelectAction': '请选择操作：',
+  'screens_replacePosition': '替换位置',
+  'screens_addToFolder': '添加到文件夹',
+
+  // layout_manager_dialog
+  'screens_renameLayout': '重命名布局',
+  'screens_confirmDeleteLayout': '确定要删除布局"@layoutName"吗？此操作不可恢复。',
+  'screens_layoutManagement': '布局管理',
+  'screens_layoutInfo': '@items 个组件 · @columns 列网格',
+  'screens_switchToThisLayout': '切换到此布局',
+  'screens_rename': '重命名',
+  'screens_close': '关闭',
+
+  // layout_type_selector
+  'screens_emptyLayout': '空白布局',
+  'screens_emptyLayoutDescription': '不包含任何小组件的空白布局',
+  'screens_all1x1Widgets': '所有 1x1 小组件',
+  'screens_all1x1WidgetsDescription': '添加所有支持 1x1 尺寸的小组件',
+  'screens_all2x2Widgets': '所有 2x2 小组件',
+  'screens_all2x2WidgetsDescription': '添加所有支持 2x2 尺寸的小组件',
+
+  // widget_settings_dialog
+  'screens_oneColumn': '一列',
+  'screens_twoColumns': '两列',
+  'screens_backgroundImage': '背景图片',
+  'screens_alreadySet': '已设置',
+  'screens_notSet': '未设置',
+  'screens_iconColor': '图标颜色',
+  'screens_customized': '已自定义',
+  'screens_useDefault': '使用默认',
+  'screens_backgroundColor': '背景颜色',
+  'screens_effectWhenNoBackgroundImage': '无背景图片时生效',
+  'screens_customColorWithTransparency': '自定义颜色（支持透明度）',
+
+  // intent_test_screen
+  'screens_quickRegisterIntent': '快速注册 Intent',
+  'screens_selectPresetIntentType': '选择一个预设的 Intent 类型进行快速注册',
+  'screens_mementoTest': 'Memento 测试 (memento:///test)',
+  'screens_mementoComplete': 'Memento 完整 (memento://app.example.com/open)',
+  'screens_customApp': '自定义应用 (myapp://custom.host)',
+  'screens_intentTest': 'Intent 测试',
+  'screens_quickRegister': '快速注册',
+  'screens_bulletScheme': '• @scheme',
+
+  // js_console
+  'screens_jsConsole': 'JS Console',
+  'screens_loadingExamples': '加载示例中...',
+  'screens_noAvailableExamples': '没有可用示例',
+  'screens_selectExampleFile': '选择示例文件: ',
+  'screens_allExamples': '全部示例',
+
+  // json_dynamic_test
+  'screens_jsonDynamicUITest': 'JSON 动态 UI 测试',
+  'screens_loadFile': '加载文件',
+  'screens_previewEffect': '预览效果',
+  'screens_uiPreview': 'UI 预览',
+
+  // notification_test
+  'screens_notificationTestPage': '通知测试页面',
+  'screens_test': '测试',
+
+  // settings_screen
+  'screens_testJavaScriptAPI': '测试 JavaScript API 功能',
+  'screens_jsonDynamicWidgetTest': 'JSON Dynamic Widget 测试',
+  'screens_testAndPreviewDynamicUI': '测试和预览动态 UI 组件',
+  'screens_superCupertinoNavigationTest': 'Super Cupertino Navigation 测试',
+  'screens_testIOSStyleNavigation': '测试 iOS 风格导航栏组件',
+  'screens_notificationTest': '通知测试',
+  'screens_manageSystemFloatingBall': '管理系统级悬浮球功能',
+  'screens_testDynamicIntentAndDeepLink': '测试动态 Intent 注册和深度链接',
+
+  // base_settings_controller
+  'screens_selectLanguage': 'Select Language',
+  'screens_chinese': '中文',
+  'screens_english': 'English',
+
+  // super_cupertino_test_screen
+  'screens_superCupertinoTest': 'Super Cupertino 测试',
+  'screens_fruitList': '水果列表',
+  'screens_fruitIndex': '这是第 @index 个水果',
+
+  // Additional messages
+  'screens_floatingBallStarted': '悬浮球已启动',
+  'screens_floatingBallStopped': '悬浮球已停止',
+  'screens_pleaseEnterLayoutName': '请输入布局名称',
+  'screens_notificationPermissionGranted': '通知权限已授权',
+  'screens_notificationPermissionDenied': '通知权限被拒绝',
+  'screens_saveSuccess': '保存成功',
+  'screens_allWidgetsCleared': '已清空所有小组件',
+  'screens_layoutSaved': '布局"@name"已保存',
+  'screens_saveFailed': '保存失败',
+  'screens_noImage': '没有图片',
+  'screens_imageLoadFailed': '图片加载失败',
+  'screens_pleaseSelectImage': '请选择图片',
+  'screens_copySuccess': '复制成功',
+  'screens_copiedToClipboard': '已复制到剪贴板',
+  'screens_sendNotification': '发送通知',
+  'screens_notificationSent': '通知已发送',
+  'screens_noTestSchemeAvailable': '没有可用的测试方案',
+  'screens_widgetSettings': '小组件设置',
+  'screens_itemCount': '@count 个项目',
+  'screens_layoutBackgroundSettings': '@layoutName - 背景设置',
+  'screens_layoutBackgroundSettingsTitle': '布局背景设置',
+  'screens_addWidgets': '添加小组件',
+  'screens_clear': '清除',
+  'screens_newLayout': '新建布局',
+
+  // Additional floating ball messages
+  'screens_permissionGranted': '权限已授予',
+  'screens_permissionDenied': '权限被拒绝',
+  'screens_floatingBallStatus': '悬浮球状态',
+  'screens_running': '运行中',
+  'screens_stopped': '已停止',
+  'screens_floatingWindowPermission': '悬浮窗权限',
+  'screens_granted': '已授予',
+  'screens_notGranted': '未授予',
+  'screens_floatingBallSwitch': '悬浮球开关',
+  'screens_clickToStop': '点击停止',
+  'screens_clickToStart': '点击开启',
+  'screens_autoHideInApp': '应用内自动隐藏',
+  'screens_autoHideInAppDescription': '在应用内自动隐藏overlay悬浮球',
+  'screens_clickedButton': '点击了: @buttonName',
+  'screens_xPositionYPosition': 'X: @x, Y: @y',
+
+  // Additional home screen messages
+  'screens_confirmDeleteSelectedItems': '确定要删除选中的 @count 个项目吗？',
+  'screens_widgetSize': '@width×@height',
+  'screens_smallSize': '小 (图标)',
+  'screens_mediumSize': '中 (横向卡片)',
+  'screens_largeSize': '大 (方形卡片)',
+  'screens_noLayoutName': '没有布局名称',
+  'screens_quickCreateLayoutDescription': '选择一个布局模板快速开始：',
+  'screens_createNewLayout': '新建布局',
+  'screens_inputLayoutName': '请输入布局名称',
+  'screens_layoutName': '布局名称',
+  'screens_layoutNameHint': '例如：工作布局、娱乐布局',
+  'screens_deleted': '已删除',
+  'screens_itemsDeleted': '已删除 @count 个项目',
+  'screens_noAvailableFolders': '没有可用的文件夹，请先创建文件夹',
+  'screens_itemsMovedToFolder': '已将 @count 个项目移动到文件夹',
+  'screens_gridSize': '网格大小',
+  'screens_gridSizeDescription': '选择主页网格的列数 (1-10)',
+  'screens_gridColumns': '@count 列',
+  'screens_displayPosition': '显示位置',
+  'screens_displayPositionDescription': '选择小组件在屏幕上的对齐方式',
+  'screens_backgroundImageSet': '已设置背景图',
+  'screens_backgroundImageNotSet': '未设置背景图',
+  'screens_customBackgroundImage': '已设置独立背景图',
+  'screens_useGlobalBackgroundImage': '使用全局背景图',
+
+  // create_folder_dialog
+  'screens_folderName': '文件夹名称',
+  'screens_enterFolderName': '输入文件夹名称',
+  'screens_pleaseEnterFolderName': '请输入文件夹名称',
+  'screens_folderCreated': '已创建文件夹：@name',
+
+  // background_settings_page
+  'screens_widgetOverallOpacity': '小组件整体透明度',
+  'screens_widgetOverallOpacityDescription': '调整整个小组件的透明度（包括文字和内容）',
+  'screens_backgroundColorOpacity': '背景颜色透明度',
+  'screens_backgroundColorOpacityDescription': '仅调整小组件背景颜色的透明度，不影响文字',
+  'screens_layoutBackgroundSettingsDescription': '为每个布局单独设置背景图，优先级高于全局背景图',
+  'screens_noSavedLayouts': '暂无保存的布局',
+  'screens_saveLayoutFirst': '请先在主页保存布局',
+  'screens_clearUseGlobalBackground': '清除（使用全局背景）',
+  'screens_customBackgroundHasPriority': '单独设置的背景图优先级高于全局背景图',
+  'screens_zeroPercentFullyTransparent': '0%（完全透明）',
+  'screens_oneHundredPercentOpaque': '100%（不透明）',
+
+  // folder_dialog
+  'screens_folderIsEmpty': '文件夹是空的',
+  'screens_selectItemsToMoveToFolder': '选择要移入文件夹的项目',
+  'screens_movedToHomePage': '已移出到主页',
+  'screens_folderUpdated': '文件夹已更新',
+  'screens_clickToAddContent': '点击上方 + 按钮添加内容',
+  'screens_noItemsOnHome': '主页上没有可移入的项目',
+
+  // home_grid
+  'screens_noWidgetsYet': '还没有小组件',
+  'screens_quickLayout': '快速布局',
+  'screens_component': '组件',
+  'screens_item': '项目',
+  'screens_clickPlusToAdd': '点击右上角的 + 按钮添加',
+  'screens_loadLayoutFailed': '加载布局失败',
+  'screens_switchedToLayout': '已切换到',
+  'screens_switchFailed': '切换失败',
+  'screens_saveFirstLayoutHint': '点击右上角菜单中的"保存当前布局"来创建第一个布局配置',
+
+  // layout_manager_dialog
+  'screens_renameSuccess': '重命名成功',
+  'screens_deleteSuccess': '删除成功',
+
+  'screens_presetColors': '预设颜色',
+  'screens_quickSelectPresetColors': '快速选择预设颜色',
+};

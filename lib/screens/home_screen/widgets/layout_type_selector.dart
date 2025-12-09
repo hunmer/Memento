@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
+import 'package:get/get.dart';
 
 /// 布局类型选择器组件
 class LayoutTypeSelector extends StatefulWidget {
@@ -28,9 +28,7 @@ class _LayoutTypeSelectorState extends State<LayoutTypeSelector> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = ScreensLocalizations.of(context);
-    return Column(
+  Widget build(BuildContext context) {    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -41,8 +39,8 @@ class _LayoutTypeSelectorState extends State<LayoutTypeSelector> {
         ),
         const SizedBox(height: 12),
         RadioListTile<String>(
-          title: Text(l10n.emptyLayout),
-          subtitle: Text(l10n.emptyLayoutDescription),
+          title: Text('screens_emptyLayout'.tr),
+          subtitle: Text('screens_emptyLayoutDescription'.tr),
           value: 'empty',
           groupValue: _selectedType,
           onChanged: (value) {
@@ -53,8 +51,8 @@ class _LayoutTypeSelectorState extends State<LayoutTypeSelector> {
           },
         ),
         RadioListTile<String>(
-          title: Text(l10n.all1x1Widgets),
-          subtitle: Text(l10n.all1x1WidgetsDescription),
+          title: Text('screens_all1x1Widgets'.tr),
+          subtitle: Text('screens_all1x1WidgetsDescription'.tr),
           value: '1x1',
           groupValue: _selectedType,
           onChanged: (value) {
@@ -65,8 +63,8 @@ class _LayoutTypeSelectorState extends State<LayoutTypeSelector> {
           },
         ),
         RadioListTile<String>(
-          title: Text(l10n.all2x2Widgets),
-          subtitle: Text(l10n.all2x2WidgetsDescription),
+          title: Text('screens_all2x2Widgets'.tr),
+          subtitle: Text('screens_all2x2WidgetsDescription'.tr),
           value: '2x2',
           groupValue: _selectedType,
           onChanged: (value) {

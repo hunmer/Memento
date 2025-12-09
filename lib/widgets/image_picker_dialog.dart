@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/widgets/l10n/image_picker_localizations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,6 +9,7 @@ import 'dart:typed_data';
 import 'package:path/path.dart' as path;
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/core/services/image_compression_service.dart';
+import 'package:get/get.dart';
 
 class ImagePickerDialog extends StatefulWidget {
   final String? initialUrl;
@@ -133,8 +133,8 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
     return AlertDialog(
       title: Text(
         widget.multiple
-            ? ImagePickerLocalizations.of(context)!.selectMultipleImages
-            : ImagePickerLocalizations.of(context)!.selectImage,
+            ? 'image_picker_selectMultipleImages'.tr
+            : 'image_picker_selectImage'.tr,
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -144,8 +144,8 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
           TextField(
             controller: _urlController,
             decoration: InputDecoration(
-              labelText: ImagePickerLocalizations.of(context)!.selectImage,
-              hintText: ImagePickerLocalizations.of(context)!.chooseFromGallery,
+              labelText: 'image_picker_selectImage'.tr,
+              hintText: 'image_picker_chooseFromGallery'.tr,
               prefixIcon: Icon(Icons.link),
             ),
             onChanged: _validateUrl,
@@ -158,7 +158,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.photo_library),
                   label: Text(
-                    ImagePickerLocalizations.of(context)!.selectFromGallery,
+                    'image_picker_selectFromGallery'.tr,
                   ),
                   onPressed: () async {
                     try {
@@ -259,7 +259,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                       debugPrint('异常堆栈: $stackTrace');
                       if (context.mounted) {
                         Toast.error(
-                          '${ImagePickerLocalizations.of(context)!.selectImageFailed}: $e',
+                          '${'image_picker_selectImageFailed'.tr}: $e',
                         );
                       }
                     }
@@ -270,7 +270,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
               Expanded(
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.camera_alt),
-                  label: Text(ImagePickerLocalizations.of(context)!.takePhoto),
+                  label: Text('image_picker_takePhoto'.tr),
                   onPressed: () async {
                     try {
                       debugPrint('开始调用相机...');
@@ -366,7 +366,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                       debugPrint('异常堆栈: $stackTrace');
                       if (context.mounted) {
                         Toast.error(
-                          '${ImagePickerLocalizations.of(context)!.takePhotoFailed}: $e',
+                          '${'image_picker_takePhotoFailed'.tr}: $e',
                         );
                       }
                     }
@@ -425,7 +425,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        ImagePickerLocalizations.of(context)!.cropImage,
+                        'image_picker_cropImage'.tr,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -473,9 +473,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                               } catch (e) {
                                 if (context.mounted) {
                                   Toast.error(
-                                    ImagePickerLocalizations.of(
-                                      context,
-                                    )!.saveCroppedImageFailed,
+                                    'image_picker_saveCroppedImageFailed'.tr,
                                   );
                                 }
                                 completer.complete(null);
@@ -483,9 +481,7 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                             case CropFailure():
                               if (context.mounted) {
                                 Toast.error(
-                                  ImagePickerLocalizations.of(
-                                    context,
-                                  )!.cropFailed,
+                                  'image_picker_cropFailed'.tr,
                                 );
                               }
                               completer.complete(null);
