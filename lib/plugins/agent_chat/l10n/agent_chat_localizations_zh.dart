@@ -247,4 +247,29 @@ class AgentChatLocalizationsZh extends AgentChatLocalizations {
   String get noMessages => '暂无消息';
   @override
   String get emptyConversationHistory => '空白的对话历史';
+
+  // Widget Home Strings
+  @override
+  String get name => 'Agent Chat';
+
+  @override
+  String get description => '快速打开 Agent Chat';
+
+  @override
+  String get overview => 'Agent Chat 概览';
+
+  @override
+  String get overviewDescription => '显示会话统计信息';
+
+  @override
+  String get totalConversations => '会话总数';
+
+  @override
+  String get unreadMessages => '未读消息';
+
+  @override
+  String get totalGroups => '分组总数';
+
+  @override
+  String get loadFailed => '加载失败';
 }

@@ -154,4 +154,18 @@ class WidgetLocalizationsZh extends WidgetLocalizations {
   // 应用启动文本
   @override
   String get starting => '正在启动...';
+
+  // SuperCupertinoNavigationWrapper 国际化文本
+  @override
+  String get search => '搜索';
+  @override
+  String get searchScope => '搜索范围';
+  @override
+  String get back => '返回';
+  @override
+  String get activity => '活动';
+  @override
+  String get tag => '标签';
+  @override
+  String get comment => '注释';
 }

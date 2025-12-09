@@ -8,8 +8,8 @@ class WidgetLocalizations {
   static const LocalizationsDelegate<WidgetLocalizations> delegate =
       _WidgetLocalizationsDelegate();
 
-  static WidgetLocalizations of(BuildContext context) {
-    return Localizations.of<WidgetLocalizations>(context, WidgetLocalizations)!;
+  static WidgetLocalizations? of(BuildContext context) {
+    return Localizations.of<WidgetLocalizations>(context, WidgetLocalizations);
   }
 
   // 通用组件文本
@@ -95,6 +95,14 @@ class WidgetLocalizations {
 
   // 应用启动文本
   String get starting => '正在启动...';
+
+  // SuperCupertinoNavigationWrapper 国际化文本
+  String get search => '搜索';
+  String get searchScope => '搜索范围';
+  String get back => '返回';
+  String get activity => '活动';
+  String get tag => '标签';
+  String get comment => '注释';
 }
 
 class _WidgetLocalizationsDelegate

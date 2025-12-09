@@ -289,7 +289,7 @@ class _ColorPickerWithLabel extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(WidgetLocalizations.of(context).selectColor),
+          title: Text(WidgetLocalizations.of(context)!.selectColor),
           content: SingleChildScrollView(
             child: ColorPicker(
               pickerColor: pickerColor,
@@ -304,13 +304,13 @@ class _ColorPickerWithLabel extends StatelessWidget {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(WidgetLocalizations.of(context).cancel),
+              child: Text(WidgetLocalizations.of(context)!.cancel),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text(WidgetLocalizations.of(context).confirm),
+              child: Text(WidgetLocalizations.of(context)!.confirm),
               onPressed: () {
                 onColorChanged(pickerColor);
                 Navigator.of(context).pop();

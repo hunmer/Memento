@@ -9,7 +9,9 @@ import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
+import 'package:Memento/plugins/nfc/l10n/nfc_localizations.dart';
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
+import 'package:Memento/plugins/scripts_center/l10n/scripts_center_localizations.dart';
 import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
@@ -20,6 +22,7 @@ import 'package:Memento/screens/settings_screen/widgets/l10n/webdav_localization
 import 'package:Memento/screens/l10n/screens_localizations.dart';
 import 'package:Memento/widgets/file_preview/l10n/file_preview_localizations.dart';
 import 'package:Memento/widgets/l10n/group_selector_localizations.dart';
+import 'package:Memento/widgets/l10n/widget_localizations.dart';
 import 'package:Memento/widgets/l10n/image_picker_localizations.dart';
 import 'package:Memento/widgets/l10n/location_picker_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -226,6 +229,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               CalendarLocalizations.delegate,
               FilePreviewLocalizations.delegate,
               GroupSelectorLocalizations.delegate,
+                WidgetLocalizations.delegate,
               BillLocalizations.delegate,
               LocationPickerLocalizations.delegate,
               DayLocalizationsDelegate.delegate,
@@ -244,6 +248,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               ScreensLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
               FlutterQuillLocalizations.delegate,
+                ScriptsCenterLocalizations.delegate,
             ],
             supportedLocales: const [
               Locale('zh', ''), // 中文
