@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 
@@ -47,7 +47,7 @@ class StatisticsTab extends StatelessWidget {
                           leading: const Icon(Icons.check_circle),
                           title: Text(l10n.totalCompletions),
                           trailing: Text(
-                            HabitsLocalizations.of(context).completions +
+                            'habits_completions'.tr +
                                 ': $count',
                           ),
                         ),

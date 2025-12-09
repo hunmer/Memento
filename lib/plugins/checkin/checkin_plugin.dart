@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
@@ -8,7 +9,6 @@ import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/base_plugin.dart';
-import 'l10n/checkin_localizations.dart';
 import 'models/checkin_item.dart';
 import 'screens/checkin_list_screen/checkin_list_screen.dart';
 import 'screens/checkin_stats_screen/checkin_stats_screen.dart';
@@ -228,11 +228,11 @@ class _CheckinMainViewState extends State<CheckinMainView>
             tabs: [
               Tab(
                 icon: Icon(Icons.check_circle_outline),
-                text: CheckinLocalizations.of(context).checkinList,
+                text: 'checkin_checkinList'.tr,
               ),
               Tab(
                 icon: Icon(Icons.bar_chart_outlined),
-                text: CheckinLocalizations.of(context).checkinStats,
+                text: 'checkin_checkinStats'.tr,
               ),
             ],
           ),
@@ -430,7 +430,7 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return CheckinLocalizations.of(context).name;
+    return 'checkin_name'.tr;
   }
 
   @override
@@ -456,7 +456,7 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                CheckinLocalizations.of(context).name,
+                'checkin_name'.tr,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -473,7 +473,7 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
               Column(
                 children: [
                   Text(
-                    CheckinLocalizations.of(context).todayCheckin,
+                    'checkin_todayCheckin'.tr,
                     style: theme.textTheme.bodyMedium,
                   ),
                   Text(
@@ -489,7 +489,7 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
               Column(
                 children: [
                   Text(
-                    CheckinLocalizations.of(context).totalCheckinCount,
+                    'checkin_totalCheckinCount'.tr,
                     style: theme.textTheme.bodyMedium,
                   ),
                   Text(

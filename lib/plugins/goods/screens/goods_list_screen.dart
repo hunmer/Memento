@@ -1,7 +1,7 @@
+import 'package:get/get.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'package:Memento/plugins/goods/models/warehouse.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
@@ -148,7 +148,7 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
       // 添加"所有仓库"选项
       {
         'id': 'all_warehouses',
-        'title': GoodsLocalizations.of(context).allWarehouses,
+        'title': 'goods_allWarehouses'.tr,
       },
       // 将现有仓库转换为简单的id和title映射
       ...GoodsPlugin.instance.warehouses.map(
@@ -158,12 +158,12 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
 
     return SuperCupertinoNavigationWrapper(
       title: Text(
-        '${GoodsLocalizations.of(context).allItems} (${allItems.length})',
+        '${'goods_allItems'.tr} (${allItems.length})',
       ),
       largeTitle: '物品',
       enableLargeTitle: true,
       enableSearchBar: true,
-      searchPlaceholder: GoodsLocalizations.of(context).searchGoods,
+      searchPlaceholder: 'goods_searchGoods'.tr,
       onSearchChanged: (value) {
         setState(() {
           _searchQuery = value;
@@ -176,7 +176,7 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
         PopupMenuButton<String?>(
           icon: Icon(
             Icons.filter_list,
-            semanticLabel: GoodsLocalizations.of(context).filter,
+            semanticLabel: 'goods_filter'.tr,
             // 当有筛选时显示不同的图标颜色
             color:
                 _filterWarehouseId != null
@@ -214,8 +214,8 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
             _isGridView ? Icons.view_list : Icons.grid_view,
             semanticLabel:
                 _isGridView
-                    ? GoodsLocalizations.of(context).viewAsList
-                    : GoodsLocalizations.of(context).viewAsGrid,
+                    ? 'goods_viewAsList'.tr
+                    : 'goods_viewAsGrid'.tr,
           ),
           onPressed: () {
             setState(() {
@@ -235,16 +235,16 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
               (context) => [
                 PopupMenuItem(
                   value: 'none',
-                  child: Text(GoodsLocalizations.of(context).defaultSort),
+                  child: Text('goods_defaultSort'.tr),
                 ),
                 PopupMenuItem(
                   value: 'price',
-                  child: Text(GoodsLocalizations.of(context).sortByPrice),
+                  child: Text('goods_sortByPrice'.tr),
                 ),
                 PopupMenuItem(
                   value: 'lastUsed',
                   child: Text(
-                    GoodsLocalizations.of(context).sortByLastUsedTime,
+                    'goods_sortByLastUsedTime'.tr,
                   ),
                 ),
               ],
@@ -252,7 +252,7 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
       ],
       body:
           allItems.isEmpty
-              ? Center(child: Text(GoodsLocalizations.of(context).noItems))
+              ? Center(child: Text('goods_noItems'.tr))
               : _isGridView
               ? Padding(
                 padding: const EdgeInsets.all(16),

@@ -1,7 +1,7 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -67,7 +67,7 @@ class _TodoMainViewState extends State<TodoMainView> {
             children: [
               if (task.description != null && task.description!.isNotEmpty) ...[
                 Text(
-                  TodoLocalizations.of(context).description,
+                  'todo_description'.tr,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -78,7 +78,7 @@ class _TodoMainViewState extends State<TodoMainView> {
               ],
               if (task.tags.isNotEmpty) ...[
                 Text(
-                  TodoLocalizations.of(context).tags,
+                  'todo_tags'.tr,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -97,7 +97,7 @@ class _TodoMainViewState extends State<TodoMainView> {
                 const SizedBox(height: 16),
               ],
               Text(
-                TodoLocalizations.of(context).timer,
+                'todo_timer'.tr,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -119,7 +119,7 @@ class _TodoMainViewState extends State<TodoMainView> {
                 children: [
                   ElevatedButton.icon(
                     icon: const Icon(Icons.play_arrow),
-                    label: Text(TodoLocalizations.of(context).start),
+                    label: Text('todo_start'.tr),
                     onPressed: task.status != TaskStatus.inProgress
                         ? () {
                             _plugin.taskController.updateTaskStatus(
@@ -132,7 +132,7 @@ class _TodoMainViewState extends State<TodoMainView> {
                   ),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.pause),
-                    label: Text(TodoLocalizations.of(context).pause),
+                    label: Text('todo_pause'.tr),
                     onPressed: task.status == TaskStatus.inProgress
                         ? () {
                             _plugin.taskController.updateTaskStatus(
@@ -145,7 +145,7 @@ class _TodoMainViewState extends State<TodoMainView> {
                   ),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.check),
-                    label: Text(TodoLocalizations.of(context).complete),
+                    label: Text('todo_complete'.tr),
                     onPressed: task.status != TaskStatus.done
                         ? () {
                             _plugin.taskController.updateTaskStatus(
@@ -164,7 +164,7 @@ class _TodoMainViewState extends State<TodoMainView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(TodoLocalizations.of(context).close),
+            child: Text('todo_close'.tr),
           ),
           TextButton(
             onPressed: () {
@@ -178,23 +178,23 @@ class _TodoMainViewState extends State<TodoMainView> {
                 ),
               );
             },
-            child: Text(TodoLocalizations.of(context).edit),
+            child: Text('todo_edit'.tr),
           ),
           TextButton(
             onPressed: () async {
               final confirmed = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text(TodoLocalizations.of(context).deleteTask),
-                  content: Text(TodoLocalizations.of(context).confirmDeleteThisTask),
+                  title: Text('todo_deleteTask'.tr),
+                  content: Text('todo_confirmDeleteThisTask'.tr),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
-                      child: Text(TodoLocalizations.of(context).cancel),
+                      child: Text('todo_cancel'.tr),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(context, true),
-                      child: Text(TodoLocalizations.of(context).delete),
+                      child: Text('todo_delete'.tr),
                     ),
                   ],
                 ),
@@ -227,7 +227,7 @@ class _TodoMainViewState extends State<TodoMainView> {
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () => PluginManager.toHomeScreen(context),
                 ),
-        title: Text(TodoLocalizations.of(context).name),
+        title: Text('todo_name'.tr),
         actions: [
           // 过滤按钮
           IconButton(
@@ -278,15 +278,15 @@ class _TodoMainViewState extends State<TodoMainView> {
                 (context) => [
                   PopupMenuItem(
                     value: SortBy.dueDate,
-                    child: Text(TodoLocalizations.of(context).sortByDueDate),
+                    child: Text('todo_sortByDueDate'.tr),
                   ),
                   PopupMenuItem(
                     value: SortBy.priority,
-                    child: Text(TodoLocalizations.of(context).sortByPriority),
+                    child: Text('todo_sortByPriority'.tr),
                   ),
                   PopupMenuItem(
                     value: SortBy.custom,
-                    child: Text(TodoLocalizations.of(context).customSort),
+                    child: Text('todo_customSort'.tr),
                   ),
                 ],
           ),

@@ -1,4 +1,3 @@
-import 'package:Memento/plugins/agent_chat/l10n/agent_chat_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';

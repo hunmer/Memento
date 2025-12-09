@@ -1,10 +1,10 @@
+import 'package:get/get.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/widgets/habit_form.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/widgets/habits_list/habits_app_bar.dart';
 
 class HabitsList extends StatefulWidget {

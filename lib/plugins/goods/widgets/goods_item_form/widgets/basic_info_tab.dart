@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
@@ -108,7 +108,7 @@ class BasicInfoTab extends StatelessWidget {
               Icon(Icons.label_outline, size: 20, color: Theme.of(context).hintColor),
               const SizedBox(width: 6),
               Text(
-                GoodsLocalizations.of(context).productName,
+                'goods_productName'.tr,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).hintColor,
@@ -120,7 +120,7 @@ class BasicInfoTab extends StatelessWidget {
           TextFormField(
             controller: controller.nameController,
             decoration: InputDecoration(
-              hintText: GoodsLocalizations.of(context).enterProductName,
+              hintText: 'goods_enterProductName'.tr,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
@@ -131,7 +131,7 @@ class BasicInfoTab extends StatelessWidget {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return GoodsLocalizations.of(context).pleaseEnterProductName;
+                return 'goods_pleaseEnterProductName'.tr;
               }
               return null;
             },
@@ -249,7 +249,7 @@ class BasicInfoTab extends StatelessWidget {
         Expanded(
           child: _buildInputCard(
             context,
-            GoodsLocalizations.of(context).price,
+            'goods_price'.tr,
             Icons.paid,
             controller.priceController,
             keyboardType: TextInputType.number,
@@ -509,7 +509,7 @@ class BasicInfoTab extends StatelessWidget {
               Icon(Icons.tune, size: 20, color: Theme.of(context).hintColor),
               const SizedBox(width: 6),
               Text(
-                GoodsLocalizations.of(context).customFields,
+                'goods_customFields'.tr,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).hintColor,
@@ -721,18 +721,18 @@ class BasicInfoTab extends StatelessWidget {
           barrierDismissible: false,
           builder:
               (context) => AlertDialog(
-                title: Text(GoodsLocalizations.of(context).confirmDelete),
+                title: Text('goods_confirmDelete'.tr),
                 content: Text(
-                  GoodsLocalizations.of(context).confirmDeleteItem,
+                  'goods_confirmDeleteItem'.tr,
                 ),
                 actions: [
                   TextButton(
-                    child: Text(GoodsLocalizations.of(context).cancel),
+                    child: Text('goods_cancel'.tr),
                     onPressed: () => Navigator.pop(context),
                   ),
                   TextButton(
                     child: Text(
-                      GoodsLocalizations.of(context).delete,
+                      'goods_delete'.tr,
                       style: const TextStyle(color: Colors.red),
                     ),
                     onPressed: () {
@@ -749,7 +749,7 @@ class BasicInfoTab extends StatelessWidget {
         foregroundColor: Colors.red,
         side: const BorderSide(color: Colors.red),
       ),
-      child: Text(GoodsLocalizations.of(context).deleteProduct),
+      child: Text('goods_deleteProduct'.tr),
     );
   }
 
@@ -819,7 +819,7 @@ class BasicInfoTab extends StatelessWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        toastService.showToast(GoodsLocalizations.of(context).selectImageFailed);
+        toastService.showToast('goods_selectImageFailed'.tr);
       }
       debugPrint('选择图片时出错: $e');
     }

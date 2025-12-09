@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:Memento/widgets/widget_config_editor/widget_config_editor.dart';
@@ -6,7 +7,6 @@ import 'package:Memento/widgets/widget_config_editor/models/color_config.dart';
 import 'package:Memento/widgets/widget_config_editor/models/widget_config.dart';
 import 'package:Memento/widgets/widget_config_editor/models/widget_size.dart';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
-import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 
 /// 每周相册小组件配置界面
 class CalendarAlbumWeeklySelectorScreen extends StatefulWidget {

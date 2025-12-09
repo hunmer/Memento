@@ -1,8 +1,7 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter/gestures.dart';
 import 'package:wheel_picker/wheel_picker.dart';
-import 'package:Memento/plugins/diary/l10n/diary_localizations.dart';
 
 class ActivityTimeSection extends StatelessWidget {
   static const int _maxIntervalMinutes = 24 * 60; // cover full day range

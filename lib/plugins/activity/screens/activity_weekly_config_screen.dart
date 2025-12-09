@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
@@ -7,7 +8,6 @@ import 'package:Memento/plugins/activity/models/activity_weekly_widget_data.dart
 import 'package:Memento/plugins/activity/services/activity_widget_service.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 
 /// 周视图活动列表小组件配置界面
 ///
@@ -120,14 +120,14 @@ class _ActivityWeeklyConfigScreenState
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text(ActivityLocalizations.of(context).configWeeklyWidget)),
+        appBar: AppBar(title: Text('activity_configWeeklyWidget'.tr)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(ActivityLocalizations.of(context).configWeeklyWidget),
+        title: Text('activity_configWeeklyWidget'.tr),
         actions: [
           if (_isSaving)
             const Center(
@@ -153,7 +153,7 @@ class _ActivityWeeklyConfigScreenState
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isSaving ? null : _saveAndFinish,
         icon: const Icon(Icons.check),
-        label: Text(ActivityLocalizations.of(context).save),
+        label: Text('activity_save'.tr),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'message_input_types.dart';
 import 'message_input_state.dart';

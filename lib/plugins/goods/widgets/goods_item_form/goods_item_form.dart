@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'controllers/form_controller.dart';
@@ -57,8 +57,8 @@ class _GoodsItemFormState extends State<GoodsItemForm> {
         automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
         title: Text(
           widget.initialData == null
-              ? GoodsLocalizations.of(context).addItem
-              : GoodsLocalizations.of(context).editItem,
+              ? 'goods_addItem'.tr
+              : 'goods_editItem'.tr,
         ),
         centerTitle: true,
         leading: IconButton(
@@ -90,7 +90,7 @@ class _GoodsItemFormState extends State<GoodsItemForm> {
               elevation: 0,
             ),
             child: Text(
-              GoodsLocalizations.of(context).save,
+              'goods_save'.tr,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),

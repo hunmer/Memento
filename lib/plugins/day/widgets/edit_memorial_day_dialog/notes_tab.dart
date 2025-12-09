@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/day/l10n/day_localizations.dart';
+import 'package:get/get.dart';
 
 class NotesTab extends StatelessWidget {
   final List<String> notes;
@@ -43,7 +43,7 @@ class NotesTab extends StatelessWidget {
             Expanded(
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: DayLocalizations.of(context).enterNote,
+                  hintText: 'day_enterNote'.tr,
                 ),
                 controller: TextEditingController(text: note),
                 onChanged: (value) => onNoteChanged(index, value),

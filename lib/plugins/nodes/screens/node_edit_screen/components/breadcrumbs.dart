@@ -1,9 +1,9 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
 import 'package:Memento/plugins/nodes/models/node.dart';
-import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:Memento/plugins/nodes/screens/node_edit_screen/node_edit_screen.dart';
 
 class NodeBreadcrumbs extends StatelessWidget {
@@ -36,7 +36,7 @@ class NodeBreadcrumbs extends StatelessWidget {
         nodeIds = controller.getNodePathIds(notebookId, parentNode.id);
         debugPrint('【Breadcrumbs】父节点路径: $path');
         // 添加"新节点"作为路径的最后一个元素
-        path.add(NodesLocalizations.of(context).addNode);
+        path.add('nodes_addNode'.tr);
       }
     } else if (!isNew) {
       // 如果是编辑现有节点，显示节点自身的路径

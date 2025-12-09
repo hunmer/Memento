@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/contact/models/interaction_record_model.dart';
 import 'package:Memento/plugins/contact/models/contact_model.dart';
@@ -171,7 +170,7 @@ class _InteractionFormState extends State<InteractionForm> {
                       onTap: () => _selectDate(context),
                       child: InputDecorator(
                         decoration: InputDecoration(
-                          labelText: ContactLocalizations.of(context).dateLabel,
+                          labelText: 'contact_dateLabel'.tr,
                           border: const OutlineInputBorder(),
                           prefixIcon: const Icon(Icons.calendar_today),
                         ),
@@ -187,7 +186,7 @@ class _InteractionFormState extends State<InteractionForm> {
                       onTap: () => _selectTime(context),
                       child: InputDecorator(
                         decoration: InputDecoration(
-                          labelText: ContactLocalizations.of(context).timeLabel,
+                          labelText: 'contact_timeLabel'.tr,
                           border: const OutlineInputBorder(),
                           prefixIcon: const Icon(Icons.access_time),
                         ),
@@ -205,9 +204,9 @@ class _InteractionFormState extends State<InteractionForm> {
               TextFormField(
                 controller: _notesController,
                 decoration: InputDecoration(
-                  labelText: ContactLocalizations.of(context).notes,
+                  labelText: 'contact_notes'.tr,
                   border: const OutlineInputBorder(),
-                  hintText: ContactLocalizations.of(context).notesHint,
+                  hintText: 'contact_notesHint'.tr,
                 ),
                 maxLines: 3,
               ),
@@ -218,14 +217,14 @@ class _InteractionFormState extends State<InteractionForm> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    ContactLocalizations.of(context).otherParticipants,
+                    'contact_otherParticipants'.tr,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   IconButton(
                     icon: const Icon(Icons.person_add),
                     onPressed: _showContactSelector,
                     tooltip:
-                        ContactLocalizations.of(context).addParticipantTooltip,
+                        'contact_addParticipantTooltip'.tr,
                   ),
                 ],
               ),

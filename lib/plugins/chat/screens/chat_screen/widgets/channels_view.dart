@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/controllers/chat_screen_controller.dart';

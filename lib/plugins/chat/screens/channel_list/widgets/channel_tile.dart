@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:animations/animations.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/chat/utils/date_formatter.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 
 class ChannelTile extends StatelessWidget {
   final Channel channel;
@@ -99,7 +99,7 @@ class ChannelTile extends StatelessWidget {
                   children: [
                     const Icon(Icons.edit, size: 20),
                     const SizedBox(width: 8),
-                    Text(ChatLocalizations.of(context).edit),
+                    Text('chat_edit'.tr),
                   ],
                 ),
               ),
@@ -110,7 +110,7 @@ class ChannelTile extends StatelessWidget {
                     const Icon(Icons.delete, size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      ChatLocalizations.of(context).delete,
+                      'chat_delete'.tr,
                     ),
                   ],
                 ),
@@ -128,7 +128,7 @@ class ChannelTile extends StatelessWidget {
         text: TextSpan(
           children: [
             TextSpan(
-              text: '[${ChatLocalizations.of(context).draft}] ',
+              text: '[${'chat_draft'.tr}] ',
               style: const TextStyle(color: Colors.red, fontSize: 13),
             ),
             TextSpan(
@@ -165,7 +165,7 @@ class ChannelTile extends StatelessWidget {
         );
       } else {
         return Text(
-          ChatLocalizations.of(context).enterMessage,
+          'chat_enterMessage'.tr,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(color: Colors.grey[600], fontSize: 13),

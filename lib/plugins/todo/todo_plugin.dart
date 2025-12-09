@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'dart:convert';
-import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -35,7 +35,7 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return TodoLocalizations.of(context).name;
+    return 'todo_name'.tr;
   }
 
   @override
@@ -96,7 +96,7 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                TodoLocalizations.of(context).name,
+                'todo_name'.tr,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -111,7 +111,7 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    TodoLocalizations.of(context).totalTasksCount,
+                    'todo_totalTasksCount'.tr,
                     style: theme.textTheme.bodyMedium,
                   ),
                   Text(
@@ -126,7 +126,7 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    TodoLocalizations.of(context).weeklyTasksCount,
+                    'todo_weeklyTasksCount'.tr,
                     style: theme.textTheme.bodyMedium,
                   ),
                   Text(

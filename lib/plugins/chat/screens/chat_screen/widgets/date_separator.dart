@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../utils/date_formatter.dart' show formatDate;
 
 class DateSeparator extends StatelessWidget {

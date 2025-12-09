@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/goods/models/warehouse.dart';
@@ -85,7 +85,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
             children: [
               ListTile(
                 leading: const Icon(Icons.edit),
-                title: Text(GoodsLocalizations.of(context).editWarehouseTitle),
+                title: Text('goods_editWarehouseTitle'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   // 实现仓库编辑功能
@@ -114,7 +114,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.delete_outline),
-                title: Text(GoodsLocalizations.of(context).clearWarehouseTitle),
+                title: Text('goods_clearWarehouseTitle'.tr),
                 onTap: () async {
                   final confirm = await showDialog<bool>(
                     context: context,
@@ -153,7 +153,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
               ListTile(
                 leading: const Icon(Icons.delete_forever, color: Colors.red),
                 title: Text(
-                  GoodsLocalizations.of(context).deleteWarehouseTitle,
+                  'goods_deleteWarehouseTitle'.tr,
                   style: const TextStyle(color: Colors.red),
                 ),
                 onTap: () async {
@@ -162,7 +162,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                     builder:
                         (context) => AlertDialog(
                           title: Text(
-                            GoodsLocalizations.of(context).confirmDelete,
+                            'goods_confirmDelete'.tr,
                           ),
                           content: Text(
                             GoodsLocalizations.of(context)
@@ -298,16 +298,16 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                 (context) => [
                   PopupMenuItem(
                     value: 'none',
-                    child: Text(GoodsLocalizations.of(context).sortByDefault),
+                    child: Text('goods_sortByDefault'.tr),
                   ),
                   PopupMenuItem(
                     value: 'price',
-                    child: Text(GoodsLocalizations.of(context).sortByPrice),
+                    child: Text('goods_sortByPrice'.tr),
                   ),
                   PopupMenuItem(
                     value: 'lastUsed',
                     child: Text(
-                      GoodsLocalizations.of(context).sortByLastUsedTime,
+                      'goods_sortByLastUsedTime'.tr,
                     ),
                   ),
                 ],

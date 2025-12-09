@@ -1,11 +1,11 @@
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
 import 'package:Memento/plugins/calendar_album/screens/calendar_screen.dart';
 import 'package:Memento/plugins/calendar_album/screens/tag_screen.dart';
 import 'package:Memento/plugins/calendar_album/screens/album_screen.dart';
 import 'package:Memento/plugins/calendar_album/screens/entry_editor_screen.dart';
 import 'package:Memento/plugins/calendar_album/widgets/tag_manager_dialog.dart';
-import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -234,15 +234,15 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
             tabs: [
               Tab(
                 icon: const Icon(Icons.calendar_today),
-                text: CalendarAlbumLocalizations.of(context).calendar ?? '日历',
+                text: 'calendarAlbum_calendar'.tr ?? '日历',
               ),
               Tab(
                 icon: const Icon(Icons.tag),
-                text: CalendarAlbumLocalizations.of(context).tags ?? '标签',
+                text: 'calendarAlbum_tags'.tr ?? '标签',
               ),
               Tab(
                 icon: const Icon(Icons.photo_library),
-                text: CalendarAlbumLocalizations.of(context).album ?? '相册',
+                text: 'calendarAlbum_album'.tr ?? '相册',
               ),
             ],
           ),
@@ -287,20 +287,20 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
                   return Scaffold(
                     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                     appBar: AppBar(
-                      title: Text(CalendarAlbumLocalizations.of(context).albumStatistics),
+                      title: Text('calendarAlbum_albumStatistics'.tr),
                       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                     ),
                     body: AlertDialog(
-                      title: Text(CalendarAlbumLocalizations.of(context).albumStatistics),
+                      title: Text('calendarAlbum_albumStatistics'.tr),
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${CalendarAlbumLocalizations.of(context).totalPhotoCount}: ${allImages.length}'),
+                          Text('${'calendarAlbum_totalPhotoCount'.tr}: ${allImages.length}'),
                           const SizedBox(height: 16),
                           if (allImages.isNotEmpty) ...[
                             Text(
-                              CalendarAlbumLocalizations.of(context).recentPhotos,
+                              'calendarAlbum_recentPhotos'.tr,
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),
@@ -341,7 +341,7 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: Text(CalendarAlbumLocalizations.of(context).close),
+                          child: Text('calendarAlbum_close'.tr),
                         ),
                       ],
                     ),

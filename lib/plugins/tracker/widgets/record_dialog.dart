@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
@@ -45,7 +45,7 @@ class _RecordDialogState extends State<RecordDialog> {
             children: [
               ListTile(
                 leading: const Icon(Icons.access_time),
-                title: Text(TrackerLocalizations.of(context).recordTitle),
+                title: Text('tracker_recordTitle'.tr),
                 subtitle: Text(_formatDateTime(_recordedAt)),
                 trailing: const Icon(Icons.edit),
                 onTap: () => _pickDateTime(),
@@ -83,7 +83,7 @@ class _RecordDialogState extends State<RecordDialog> {
                   ElevatedButton(
                     onPressed: _calculateDifference,
                     child: Text(
-                      TrackerLocalizations.of(context).calculateDifference,
+                      'tracker_calculateDifference'.tr,
                     ),
                   ),
                 ],
@@ -92,7 +92,7 @@ class _RecordDialogState extends State<RecordDialog> {
               TextFormField(
                 decoration: InputDecoration(
                   labelText:
-                      '${TrackerLocalizations.of(context).note} (${TrackerLocalizations.of(context).noteHint})',
+                      '${'tracker_note'.tr} (${'tracker_noteHint'.tr})',
                   border: const OutlineInputBorder(),
                 ),
                 maxLines: 2,
@@ -105,11 +105,11 @@ class _RecordDialogState extends State<RecordDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(TrackerLocalizations.of(context).cancel),
+          child: Text('tracker_cancel'.tr),
         ),
         ElevatedButton(
           onPressed: _submit,
-          child: Text(TrackerLocalizations.of(context).confirm),
+          child: Text('tracker_confirm'.tr),
         ),
       ],
     );
@@ -151,18 +151,18 @@ class _RecordDialogState extends State<RecordDialog> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(TrackerLocalizations.of(context).calculateDifference),
+          title: Text('tracker_calculateDifference'.tr),
           content: TextFormField(
             controller: textController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              labelText: TrackerLocalizations.of(context).inputTargetValue,
+              labelText: 'tracker_inputTargetValue'.tr,
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(TrackerLocalizations.of(context).cancel),
+              child: Text('tracker_cancel'.tr),
             ),
             TextButton(
               onPressed: () {
@@ -171,7 +171,7 @@ class _RecordDialogState extends State<RecordDialog> {
                   Navigator.pop(context, value);
                 }
               },
-              child: Text(TrackerLocalizations.of(context).confirm),
+              child: Text('tracker_confirm'.tr),
             ),
           ],
         );

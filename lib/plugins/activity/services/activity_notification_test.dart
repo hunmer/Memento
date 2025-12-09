@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'activity_notification_service.dart';
 import 'activity_service.dart';
 import '../../../../core/storage/storage_manager.dart';
-import '../l10n/activity_localizations.dart';
 
 /// 活动通知功能测试工具
 class ActivityNotificationTest {
@@ -175,7 +175,7 @@ class ActivityNotificationTest {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(ActivityLocalizations.of(context).notificationTestResult),
+        title: Text('activity_notificationTestResult'.tr),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView(
@@ -224,7 +224,7 @@ class ActivityNotificationTest {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(ActivityLocalizations.of(context).confirm),
+            child: Text('activity_confirm'.tr),
           ),
         ],
       ),

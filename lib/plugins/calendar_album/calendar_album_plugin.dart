@@ -1,6 +1,7 @@
 // ignore_for_file: unintended_html_in_doc_comment
 
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
@@ -11,7 +12,6 @@ import 'controllers/calendar_controller.dart';
 
 import 'controllers/tag_controller.dart';
 import 'models/calendar_entry.dart';
-import 'l10n/calendar_album_localizations.dart';
 
 /// 日历相册插件主视图
 class CalendarAlbumMainView extends StatelessWidget {
@@ -66,7 +66,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return CalendarAlbumLocalizations.of(context).name;
+    return 'calendarAlbum_name'.tr;
   }
 
   @override
@@ -238,7 +238,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                CalendarAlbumLocalizations.of(context).name,
+                'calendarAlbum_name'.tr,
 
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
@@ -259,7 +259,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        CalendarAlbumLocalizations.of(context).todayDiary,
+                        'calendarAlbum_todayDiary'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -275,7 +275,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        CalendarAlbumLocalizations.of(context).sevenDaysDiary,
+                        'calendarAlbum_sevenDaysDiary'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -298,7 +298,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        CalendarAlbumLocalizations.of(context).allDiaries,
+                        'calendarAlbum_allDiaries'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -314,7 +314,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        CalendarAlbumLocalizations.of(context).tagCount,
+                        'calendarAlbum_tagCount'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(

@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/models/llm_models.dart';
 import 'package:Memento/plugins/openai/controllers/model_controller.dart';
@@ -52,7 +52,7 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
     } catch (e) {
       if (mounted) {
         toastService.showToast(
-          '${OpenAILocalizations.of(context).loadModelsFailed}: $e',
+          '${'openai_loadModelsFailed'.tr}: $e',
         );
       }
       setState(() {
@@ -97,7 +97,7 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(OpenAILocalizations.of(context).searchModel),
+        title: Text('openai_searchModel'.tr),
         actions: [
           if (_selectedModel != null)
             TextButton(
@@ -152,7 +152,7 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
                       return filteredModels.isEmpty
                           ? Center(
                             child: Text(
-                              OpenAILocalizations.of(context).noModelsFound,
+                              'openai_noModelsFound'.tr,
                             ),
                           )
                           : ListView.builder(
@@ -199,7 +199,7 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
                                                   ),
                                                 const SizedBox(height: 8),
                                                 Text(
-                                                  '${OpenAILocalizations.of(context).modelUrlLabel}: ${model.url}',
+                                                  '${'openai_modelUrlLabel'.tr}: ${model.url}',
                                                 ),
                                               ],
                                             ),

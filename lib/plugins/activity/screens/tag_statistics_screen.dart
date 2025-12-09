@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
@@ -144,7 +144,7 @@ class _TagStatisticsScreenState extends State<TagStatisticsScreen> {
         final taggedActivities =
             dailyActivities.where((a) {
               if (widget.tagName ==
-                  ActivityLocalizations.of(context).unnamedActivity) {
+                  'activity_unnamedActivity'.tr) {
                 return a.tags.isEmpty;
               }
               return a.tags.contains(widget.tagName);
@@ -243,7 +243,7 @@ class _TagStatisticsScreenState extends State<TagStatisticsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              '${DateFormat('yyyy-MM-dd').format(_startDate!)} ${ActivityLocalizations.of(context).to} ${DateFormat('yyyy-MM-dd').format(_endDate!)}',
+              '${DateFormat('yyyy-MM-dd').format(_startDate!)} ${'activity_to'.tr} ${DateFormat('yyyy-MM-dd').format(_endDate!)}',
               style: TextStyle(
                 fontSize: 14,
                 color: Theme.of(context).textTheme.bodySmall?.color,
@@ -360,14 +360,14 @@ class _TagStatisticsScreenState extends State<TagStatisticsScreen> {
         title: 'Trend', // Localize?
         child: SizedBox(
           height: 200,
-          child: Center(child: Text(ActivityLocalizations.of(context).noData)),
+          child: Center(child: Text('activity_noData'.tr)),
         ),
       );
     }
 
     return _buildCard(
       title:
-          '${ActivityLocalizations.of(context).timeDistributionTitle} ($_selectedRange)', // Using available key roughly
+          '${'activity_timeDistributionTitle'.tr} ($_selectedRange)', // Using available key roughly
       child: SizedBox(
         height: 200,
         child: LineChart(
@@ -475,7 +475,7 @@ class _TagStatisticsScreenState extends State<TagStatisticsScreen> {
     });
 
     return _buildCard(
-      title: ActivityLocalizations.of(context).activityRecords,
+      title: 'activity_activityRecords'.tr,
       child: Column(
         children: [
           Row(

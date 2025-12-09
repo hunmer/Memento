@@ -1,10 +1,10 @@
+import 'package:get/get.dart';
 import 'dart:io';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 // 添加本地化导入
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'request_service.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
@@ -565,7 +565,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
                     children: [
                       const CircularProgressIndicator(),
                       const SizedBox(height: 8),
-                      Text(OpenAILocalizations.of(context).testing),
+                      Text('openai_testing'.tr),
                     ],
                   ),
                 ),

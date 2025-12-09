@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'provider_settings_screen.dart';
@@ -15,8 +15,8 @@ class PluginSettingsScreen extends StatelessWidget {
         children: [
           ListTile(
             leading: const Icon(Icons.cloud),
-            title: Text(OpenAILocalizations.of(context).providerSettingsTitle),
-            subtitle: Text(OpenAILocalizations.of(context).pluginDescription),
+            title: Text('openai_providerSettingsTitle'.tr),
+            subtitle: Text('openai_pluginDescription'.tr),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               NavigationHelper.push(
@@ -28,9 +28,9 @@ class PluginSettingsScreen extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.model_training),
-            title: Text(OpenAILocalizations.of(context).modelManagement),
+            title: Text('openai_modelManagement'.tr),
             subtitle: Text(
-              OpenAILocalizations.of(context).modelManagementDescription,
+              'openai_modelManagementDescription'.tr,
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
@@ -43,9 +43,9 @@ class PluginSettingsScreen extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.text_snippet),
-            title: Text(OpenAILocalizations.of(context).promptPresetManagement),
+            title: Text('openai_promptPresetManagement'.tr),
             subtitle: Text(
-              OpenAILocalizations.of(context).promptPresetManagementDescription,
+              'openai_promptPresetManagementDescription'.tr,
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {

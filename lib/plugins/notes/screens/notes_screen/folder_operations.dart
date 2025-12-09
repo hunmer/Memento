@@ -1,7 +1,7 @@
+import 'package:get/get.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
 import 'notes_screen_state.dart';
 
@@ -13,21 +13,21 @@ mixin FolderOperations on NotesMainViewState {
       builder:
           (context) => AlertDialog(
             title: Text(
-              NotesLocalizations.of(context).newFolder,
+              'notes_newFolder'.tr,
             ),
             content: TextField(
               controller: folderNameController,
               autofocus: true,
               decoration: InputDecoration(
                 hintText:
-                    NotesLocalizations.of(context).folderNameHint,
+                    'notes_folderNameHint'.tr,
               ),
               onSubmitted: (value) => Navigator.pop(context, value),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text(NotesLocalizations.of(context).cancel),
+                child: Text('notes_cancel'.tr),
               ),
               TextButton(
                 onPressed: () {
@@ -36,7 +36,7 @@ mixin FolderOperations on NotesMainViewState {
                   }
                 },
                 child: Text(
-                  NotesLocalizations.of(context).confirm,
+                  'notes_confirm'.tr,
                 ),
               ),
             ],
@@ -57,7 +57,7 @@ mixin FolderOperations on NotesMainViewState {
       builder:
           (context) => AlertDialog(
             title: Text(
-              NotesLocalizations.of(context).renameFolder,
+              'notes_renameFolder'.tr,
             ),
             content: TextField(
               controller: renameController,
@@ -90,10 +90,10 @@ mixin FolderOperations on NotesMainViewState {
       builder:
           (context) => AlertDialog(
             title: Text(
-              NotesLocalizations.of(context).deleteFolder,
+              'notes_deleteFolder'.tr,
             ),
             content: Text(
-              NotesLocalizations.of(context).deleteFolderConfirm,
+              'notes_deleteFolderConfirm'.tr,
             ),
             actions: [
               TextButton(

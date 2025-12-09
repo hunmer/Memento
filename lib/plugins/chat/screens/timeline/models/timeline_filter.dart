@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 /// 时间线筛选器，用于筛选消息列表
 class TimelineFilter {

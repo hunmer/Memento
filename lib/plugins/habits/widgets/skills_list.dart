@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:Memento/utils/image_utils.dart';
@@ -5,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/plugins/habits/widgets/skill_detail_page.dart';

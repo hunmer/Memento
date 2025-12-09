@@ -1,10 +1,10 @@
+import 'package:get/get.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
 import 'notes_screen/folder_item.dart';
 import 'notes_screen/folder_operations.dart';
 import 'notes_screen/folder_selection_dialog.dart';
@@ -144,7 +144,7 @@ class _NotesMainViewState extends NotesMainViewState
             const SizedBox(width: 8),
             _buildFilterChip(
               icon: Icons.label_outline,
-              label: _selectedTag ?? NotesLocalizations.of(context).allTags,
+              label: _selectedTag ?? 'notes_allTags'.tr,
               onTap: () {
                 _showTagPicker();
               },
@@ -200,7 +200,7 @@ class _NotesMainViewState extends NotesMainViewState
             ),
             const SizedBox(width: 4),
             Text(
-              NotesLocalizations.of(context).clearAll,
+              'notes_clearAll'.tr,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -230,7 +230,7 @@ class _NotesMainViewState extends NotesMainViewState
               children: [
                 _buildFabChild(
                   icon: Icons.create_new_folder,
-                  label: NotesLocalizations.of(context).newFolder,
+                  label: 'notes_newFolder'.tr,
                   onPressed: () {
                     setState(() {
                       _fabExpanded = false;
@@ -256,7 +256,7 @@ class _NotesMainViewState extends NotesMainViewState
                   closedBuilder: (BuildContext context, VoidCallback openContainer) {
                     return _buildFabChild(
                       icon: Icons.note_add,
-                      label: NotesLocalizations.of(context).newNote,
+                      label: 'notes_newNote'.tr,
                       onPressed: () {
                         setState(() {
                           _fabExpanded = false;
@@ -373,8 +373,8 @@ class _NotesMainViewState extends NotesMainViewState
                       const SizedBox(height: 16),
                       Text(
                         isSearching
-                            ? NotesLocalizations.of(context).noSearchResults
-                            : NotesLocalizations.of(context).emptyFolder,
+                            ? 'notes_noSearchResults'.tr
+                            : 'notes_emptyFolder'.tr,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Theme.of(context).disabledColor,
                         ),
@@ -448,7 +448,7 @@ class _NotesMainViewState extends NotesMainViewState
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(NotesLocalizations.of(context).selectFolder),
+          title: Text('notes_selectFolder'.tr),
           content: SizedBox(
             width: double.maxFinite,
             height: 300,
@@ -475,7 +475,7 @@ class _NotesMainViewState extends NotesMainViewState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(NotesLocalizations.of(context).cancel),
+              child: Text('notes_cancel'.tr),
             ),
           ],
         );
@@ -503,13 +503,13 @@ class _NotesMainViewState extends NotesMainViewState
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(NotesLocalizations.of(context).selectTag),
+          title: Text('notes_selectTag'.tr),
           content: SizedBox(
             width: double.maxFinite,
             height: 300,
             child:
                 tagsList.isEmpty
-                    ? Center(child: Text(NotesLocalizations.of(context).noTagsAvailable('')))
+                    ? Center(child: Text('notes_noTagsAvailable'.tr('')))
                     : ListView.builder(
                       itemCount:
                           tagsList.length + 1, // +1 for "All Tags" option
@@ -518,7 +518,7 @@ class _NotesMainViewState extends NotesMainViewState
                           // "All Tags" option
                           return ListTile(
                             leading: const Icon(Icons.label),
-                            title: Text(NotesLocalizations.of(context).allTags),
+                            title: Text('notes_allTags'.tr),
                             onTap: () {
                               setState(() {
                                 _selectedTag = null;
@@ -547,7 +547,7 @@ class _NotesMainViewState extends NotesMainViewState
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(NotesLocalizations.of(context).cancel),
+              child: Text('notes_cancel'.tr),
             ),
           ],
         );

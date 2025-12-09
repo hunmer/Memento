@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 
 class EditMessageDialog extends StatelessWidget {
@@ -20,7 +19,7 @@ class EditMessageDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(ChatLocalizations.of(context).editMessageTitle),
+      title: Text('chat_editMessageTitle'.tr),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -29,7 +28,7 @@ class EditMessageDialog extends StatelessWidget {
             autofocus: true,
             maxLines: null,
             decoration: InputDecoration(
-              hintText: ChatLocalizations.of(context).messageHintText,
+              hintText: 'chat_messageHintText'.tr,
             ),
           ),
           const SizedBox(height: 10),

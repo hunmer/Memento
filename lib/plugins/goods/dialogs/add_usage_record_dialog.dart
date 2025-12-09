@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 
 class AddUsageRecordDialog extends StatefulWidget {
   const AddUsageRecordDialog({super.key});
@@ -52,13 +52,13 @@ class _AddUsageRecordDialogState extends State<AddUsageRecordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(GoodsLocalizations.of(context).addUsageRecord),
+      title: Text('goods_addUsageRecord'.tr),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: Text(GoodsLocalizations.of(context).dateTime),
+              title: Text('goods_dateTime'.tr),
               subtitle: Text(DateFormat('yyyy-MM-dd HH:mm').format(_selectedDate)),
               trailing: const Icon(Icons.calendar_today),
               onTap: _pickDate,
@@ -86,7 +86,7 @@ class _AddUsageRecordDialogState extends State<AddUsageRecordDialog> {
             TextField(
               controller: _noteController,
               decoration: InputDecoration(
-                labelText: GoodsLocalizations.of(context).optionalNote,
+                labelText: 'goods_optionalNote'.tr,
                 border: const OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -97,7 +97,7 @@ class _AddUsageRecordDialogState extends State<AddUsageRecordDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(GoodsLocalizations.of(context).cancel),
+          child: Text('goods_cancel'.tr),
         ),
         TextButton(
           onPressed: () {
@@ -109,7 +109,7 @@ class _AddUsageRecordDialogState extends State<AddUsageRecordDialog> {
               'note': _noteController.text.isEmpty ? null : _noteController.text,
             });
           },
-          child: Text(GoodsLocalizations.of(context).confirm),
+          child: Text('goods_confirm'.tr),
         ),
       ],
     );

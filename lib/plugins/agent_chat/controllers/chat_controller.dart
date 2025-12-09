@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:get/get.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';

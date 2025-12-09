@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/todo/l10n/todo_localizations.dart';
 import 'package:Memento/widgets/icon_picker_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -189,7 +189,7 @@ class _TaskFormState extends State<TaskForm> {
 
   Future<void> _saveTask() async {
     if (_titleController.text.isEmpty) {
-      Toast.error(TodoLocalizations.of(context).pleaseEnterTitle);
+      Toast.error('todo_pleaseEnterTitle'.tr);
       return;
     }
 
@@ -260,8 +260,8 @@ class _TaskFormState extends State<TaskForm> {
           Expanded(
             child: Text(
               widget.task == null
-                  ? TodoLocalizations.of(context).newTask
-                  : TodoLocalizations.of(context).editTask,
+                  ? 'todo_newTask'.tr
+                  : 'todo_editTask'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
@@ -332,7 +332,7 @@ class _TaskFormState extends State<TaskForm> {
                 color: isDark ? Colors.white : Colors.grey[900],
               ),
               decoration: InputDecoration(
-                hintText: TodoLocalizations.of(context).title,
+                hintText: 'todo_title'.tr,
                 border: InputBorder.none,
                 hintStyle: TextStyle(
                   color: isDark ? Colors.grey[500] : Colors.grey[400],
@@ -349,7 +349,7 @@ class _TaskFormState extends State<TaskForm> {
   Widget _buildNotesSection() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return _buildSectionContainer(
-      label: TodoLocalizations.of(context).notes,
+      label: 'todo_notes'.tr,
       child: TextField(
         controller: _notesController,
         maxLines: null,
@@ -388,7 +388,7 @@ class _TaskFormState extends State<TaskForm> {
   Widget _buildTagsSection() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return _buildSectionContainer(
-      label: TodoLocalizations.of(context).tags,
+      label: 'todo_tags'.tr,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(12),
@@ -416,7 +416,7 @@ class _TaskFormState extends State<TaskForm> {
                     const Icon(Icons.add_circle_outline, color: _primaryColor, size: 20),
                     const SizedBox(width: 4),
                     Text(
-                      TodoLocalizations.of(context).addTag,
+                      'todo_addTag'.tr,
                       style: const TextStyle(
                         color: _primaryColor,
                         fontWeight: FontWeight.w500,
@@ -473,7 +473,7 @@ class _TaskFormState extends State<TaskForm> {
   Widget _buildSubtasksSection() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
      return _buildSectionContainer(
-      label: TodoLocalizations.of(context).subtasks,
+      label: 'todo_subtasks'.tr,
       child: Container(
         decoration: BoxDecoration(
            color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
@@ -543,7 +543,7 @@ class _TaskFormState extends State<TaskForm> {
                          const Icon(Icons.add_circle_outline, color: _primaryColor, size: 20),
                          const SizedBox(width: 8),
                          Text(
-                            '${TodoLocalizations.of(context).add} ${TodoLocalizations.of(context).subtasks}',
+                            '${'todo_add'.tr} ${'todo_subtasks'.tr}',
                             style: const TextStyle(
                               color: _primaryColor,
                               fontWeight: FontWeight.w500,
@@ -583,7 +583,7 @@ class _TaskFormState extends State<TaskForm> {
         children: [
           Expanded(
             child: _buildInputBox(
-              label: TodoLocalizations.of(context).startDate,
+              label: 'todo_startDate'.tr,
               icon: Icons.calendar_today_outlined,
               value: _startDate != null ? DateFormat.yMMMEd().format(_startDate!) : '',
               placeholder: DateFormat.yMMMEd().format(DateTime.now()),
@@ -593,7 +593,7 @@ class _TaskFormState extends State<TaskForm> {
           const SizedBox(width: 16),
           Expanded(
             child: _buildInputBox(
-              label: TodoLocalizations.of(context).dueDate,
+              label: 'todo_dueDate'.tr,
               icon: Icons.calendar_today_outlined,
               value: _dueDate != null ? DateFormat.yMMMEd().format(_dueDate!) : '',
               placeholder: DateFormat.yMMMEd().format(DateTime.now().add(const Duration(days: 1))),
@@ -625,13 +625,13 @@ class _TaskFormState extends State<TaskForm> {
   Widget _buildPriorityDropdown() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final labels = {
-      TaskPriority.high: TodoLocalizations.of(context).high,
-      TaskPriority.medium: TodoLocalizations.of(context).medium,
-      TaskPriority.low: TodoLocalizations.of(context).low,
+      TaskPriority.high: 'todo_high'.tr,
+      TaskPriority.medium: 'todo_medium'.tr,
+      TaskPriority.low: 'todo_low'.tr,
     };
 
     return _buildSectionContainer(
-      label: TodoLocalizations.of(context).priority.replaceAll(':', ''), // Remove colon if present in loc
+      label: 'todo_priority'.tr.replaceAll(':', ''), // Remove colon if present in loc
       child: Container(
         height: 50,
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -688,7 +688,7 @@ class _TaskFormState extends State<TaskForm> {
      }
 
      return _buildSectionContainer(
-      label: TodoLocalizations.of(context).reminders,
+      label: 'todo_reminders'.tr,
       child: GestureDetector(
         onTap: _showRemindersModal,
         child: Container(
@@ -812,12 +812,12 @@ class _TaskFormState extends State<TaskForm> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(TodoLocalizations.of(context).addTag),
+        title: Text('todo_addTag'.tr),
         content: TextField(
           controller: tagController,
           autofocus: true,
           decoration: InputDecoration(
-             hintText: TodoLocalizations.of(context).tags,
+             hintText: 'todo_tags'.tr,
           ),
         ),
         actions: [
@@ -835,7 +835,7 @@ class _TaskFormState extends State<TaskForm> {
               }
               Navigator.pop(context);
             },
-            child: Text(TodoLocalizations.of(context).add),
+            child: Text('todo_add'.tr),
           ),
         ],
       ),
@@ -859,7 +859,7 @@ class _TaskFormState extends State<TaskForm> {
                  Row(
                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                    children: [
-                     Text(TodoLocalizations.of(context).reminders, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                     Text('todo_reminders'.tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                      IconButton(
                        icon: const Icon(Icons.add),
                        onPressed: () async {
@@ -955,8 +955,8 @@ class _TaskFormState extends State<TaskForm> {
           ),
           child: Text(
             widget.task == null 
-                ? TodoLocalizations.of(context).createTask
-                : TodoLocalizations.of(context).saveTask, 
+                ? 'todo_createTask'.tr
+                : 'todo_saveTask'.tr, 
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),

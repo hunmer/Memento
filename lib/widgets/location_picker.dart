@@ -1,4 +1,4 @@
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -194,7 +194,7 @@ class _LocationPickerState extends State<LocationPicker> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(AppLocalizations.of(context)!.selectLocation),
+      title: Text('app_selectLocation'.tr),
       content: SizedBox(
         width: MediaQuery.of(context).size.width * 0.8,
         height: MediaQuery.of(context).size.height * 0.6,
@@ -264,11 +264,11 @@ class _LocationPickerState extends State<LocationPicker> {
       ),
       actions: [
         TextButton(
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
           onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
-          child: Text(AppLocalizations.of(context)!.ok),
+          child: Text('app_ok'.tr),
           onPressed: () {
             if (_selectedLocation != null) {
               widget.onLocationSelected(_selectedLocation!);

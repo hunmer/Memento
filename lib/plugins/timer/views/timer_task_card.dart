@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'dart:async';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:Memento/plugins/timer/models/timer_task.dart';
@@ -325,7 +325,7 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
               ),
               ListTile(
                 leading: const Icon(Icons.refresh),
-                title: Text(TimerLocalizations.of(context).reset),
+                title: Text('timer_reset'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   widget.onReset(task);

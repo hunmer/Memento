@@ -1,12 +1,13 @@
 import 'dart:io';
 import 'package:Memento/core/app_initializer.dart';
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
 import 'package:Memento/core/utils/file_utils.dart';
 import 'package:Memento/screens/settings_screen/widgets/folder_selection_dialog.dart';
-import 'package:Memento/core/l10n/import_localizations.dart';
+
 import 'package:Memento/core/services/toast_service.dart';
 
 class ImportController {
@@ -36,7 +37,7 @@ class ImportController {
       final filePath = result.files.first.path;
       if (filePath == null) {
         if (_mounted) {
-          Toast.error(ImportLocalizations.of(context).filePathError);
+          Toast.error('import_filePathError'.tr);
         }
         return;
       }
@@ -81,7 +82,7 @@ class ImportController {
 
         if (availablePlugins.isEmpty) {
           if (_mounted) {
-            Toast.error(AppLocalizations.of(context)!.noPluginDataFound);
+            Toast.error('app_noPluginDataFound'.tr);
           }
           return;
         }
@@ -137,17 +138,17 @@ class ImportController {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(ImportLocalizations.of(context).importSuccess),
+                title: Text('import_importSuccess'.tr),
                 content: Text(
-                  ImportLocalizations.of(context).importSuccessContent,
+                  'import_importSuccessContent'.tr,
                 ),
                 actions: [
                   TextButton(
-                    child: Text(ImportLocalizations.of(context).restartLater),
+                    child: Text('import_restartLater'.tr),
                     onPressed: () => Navigator.of(context).pop(false),
                   ),
                   TextButton(
-                    child: Text(ImportLocalizations.of(context).restartNow),
+                    child: Text('import_restartNow'.tr),
                     onPressed: () => Navigator.of(context).pop(true),
                   ),
                 ],
@@ -162,7 +163,7 @@ class ImportController {
         }
       } catch (e) {
         if (_mounted) {
-          Toast.error('${ImportLocalizations.of(context).importFailed}: $e');
+          Toast.error('${'import_importFailed'.tr}: $e');
         }
       } finally {
         // 清理临时目录
@@ -170,7 +171,7 @@ class ImportController {
       }
     } catch (e) {
       if (_mounted) {
-        Toast.error(AppLocalizations.of(context)!.importFailedWithError(e.toString()));
+        Toast.error('app_importFailedWithError'.tr(e.toString()));
       }
     }
   }

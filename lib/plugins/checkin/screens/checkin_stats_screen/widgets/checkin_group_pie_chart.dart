@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
-import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'dart:math' as math;
 
 class CheckinGroupPieChart extends StatefulWidget {
@@ -22,7 +22,7 @@ class _CheckinGroupPieChartState extends State<CheckinGroupPieChart> {
     final groupData = _prepareGroupData();
 
     if (groupData.isEmpty) {
-      return Center(child: Text(CheckinLocalizations.of(context).emptyData, style: theme.textTheme.bodyMedium));
+      return Center(child: Text('checkin_emptyData'.tr, style: theme.textTheme.bodyMedium));
     }
 
     return Row(

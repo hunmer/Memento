@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
 import 'package:Memento/widgets/location_picker.dart';
-import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'entry_editor_controller.dart';
 import 'entry_editor_image_handler.dart';
 import 'entry_editor_tag_handler.dart';

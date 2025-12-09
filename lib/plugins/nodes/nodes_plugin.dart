@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:Memento/core/config_manager.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,6 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'controllers/nodes_controller.dart';
 import 'screens/notebooks_screen.dart';
-import 'l10n/nodes_localizations.dart';
 import 'models/node.dart';
 import 'models/notebook.dart';
 
@@ -115,7 +115,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return NodesLocalizations.of(context).name;
+    return 'nodes_name'.tr;
   }
 
   @override
@@ -146,7 +146,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   @override
   Widget buildSettingsView(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(NodesLocalizations.of(context).nodesSettings)),
+      appBar: AppBar(title: Text('nodes_nodesSettings'.tr)),
       body: super.buildSettingsView(context),
     );
   }
@@ -1000,7 +1000,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    NodesLocalizations.of(context).name,
+                    'nodes_name'.tr,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -1019,7 +1019,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            NodesLocalizations.of(context).notebooksCount,
+                            'nodes_notebooksCount'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -1035,7 +1035,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            NodesLocalizations.of(context).nodesCount,
+                            'nodes_nodesCount'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -1057,7 +1057,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            NodesLocalizations.of(context).pendingNodesCount,
+                            'nodes_pendingNodesCount'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(

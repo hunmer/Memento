@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'add_tag_dialog.dart';
 
@@ -17,7 +17,7 @@ class TagInputField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(GoodsLocalizations.of(context).tag),
+        Text('goods_tag'.tr),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -46,7 +46,7 @@ class TagInputField extends StatelessWidget {
   Widget _buildAddButton(BuildContext context) {
     return ActionChip(
       avatar: const Icon(Icons.add),
-      label: Text(GoodsLocalizations.of(context).addTag),
+      label: Text('goods_addTag'.tr),
       onPressed: () async {
         final newTag = await showDialog<String>(
           context: context,

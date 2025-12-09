@@ -1,6 +1,6 @@
-import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
+import 'package:get/get.dart';
 
 enum GroupSortType {
   upcoming, // 按即将发生排序
@@ -13,12 +13,12 @@ class GroupSortService {
   static String getSortTypeName(GroupSortType type, context) {
     switch (type) {
       case GroupSortType.upcoming:
-        return CheckinLocalizations.of(context).upcoming;
+        return 'checkin_upcoming'.tr;
 
       case GroupSortType.frequency:
-        return CheckinLocalizations.of(context).frequency;
+        return 'checkin_frequency'.tr;
       case GroupSortType.dateAdded:
-        return CheckinLocalizations.of(context).dateAdded;
+        return 'checkin_dateAdded'.tr;
     }
   }
 

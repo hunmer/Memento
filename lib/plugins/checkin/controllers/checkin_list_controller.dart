@@ -1,6 +1,5 @@
 import 'dart:async';
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -251,10 +250,10 @@ class CheckinListController {
       builder:
           (context) => AlertDialog(
             title: Text(
-              CheckinLocalizations.of(context).deleteCheckinItemTitle,
+              'checkin_deleteCheckinItemTitle'.tr,
             ),
             content: Text(
-              '${CheckinLocalizations.of(context).deleteConfirmMessage}"${item.name}"?',
+              '${'checkin_deleteConfirmMessage'.tr}"${item.name}"?',
             ),
             actions: [
               TextButton(
@@ -294,7 +293,7 @@ class CheckinListController {
               children: [
                 ListTile(
                   leading: const Icon(Icons.style),
-                  title: Text(CheckinLocalizations.of(context).modifyCardDisplayStyle),
+                  title: Text('checkin_modifyCardDisplayStyle'.tr),
                   onTap: () {
                     Navigator.pop(context);
                     _showCardStyleDialog(item);
@@ -302,7 +301,7 @@ class CheckinListController {
                 ),
                 ListTile(
                   leading: const Icon(Icons.edit),
-                  title: Text(CheckinLocalizations.of(context).editCheckinItem),
+                  title: Text('checkin_editCheckinItem'.tr),
                   onTap: () {
                     Navigator.pop(context);
                     _editCheckinItem(item);
@@ -311,7 +310,7 @@ class CheckinListController {
                 ListTile(
                   leading: const Icon(Icons.refresh),
                   title: Text(
-                    CheckinLocalizations.of(context).resetCheckinRecords,
+                    'checkin_resetCheckinRecords'.tr,
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -341,28 +340,28 @@ class CheckinListController {
       context: context,
       builder:
           (context) => SimpleDialog(
-            title: Text(CheckinLocalizations.of(context).selectCardStyle),
+            title: Text('checkin_selectCardStyle'.tr),
             children: [
               SimpleDialogOption(
                 onPressed: () {
                   Navigator.pop(context);
                   updateCardStyle(item, CheckinCardStyle.weekly);
                 },
-                child: Text(CheckinLocalizations.of(context).sevenDayDisplay),
+                child: Text('checkin_sevenDayDisplay'.tr),
               ),
               SimpleDialogOption(
                 onPressed: () {
                   Navigator.pop(context);
                   updateCardStyle(item, CheckinCardStyle.small);
                 },
-                child: Text(CheckinLocalizations.of(context).smallCardStyle),
+                child: Text('checkin_smallCardStyle'.tr),
               ),
               SimpleDialogOption(
                 onPressed: () {
                   Navigator.pop(context);
                   updateCardStyle(item, CheckinCardStyle.calendar);
                 },
-                child: Text(CheckinLocalizations.of(context).calendarStyle),
+                child: Text('checkin_calendarStyle'.tr),
               ),
             ],
           ),
@@ -394,10 +393,10 @@ class CheckinListController {
       builder:
           (context) => AlertDialog(
             title: Text(
-              CheckinLocalizations.of(context).resetCheckinRecordsTitle,
+              'checkin_resetCheckinRecordsTitle'.tr,
             ),
             content: Text(
-              '${CheckinLocalizations.of(context).resetCheckinRecordsMessage}"${item.name}"',
+              '${'checkin_resetCheckinRecordsMessage'.tr}"${item.name}"',
             ),
             actions: [
               TextButton(
@@ -416,7 +415,7 @@ class CheckinListController {
                   );
                 },
                 child: Text(
-                  CheckinLocalizations.of(context).confirmReset,
+                  'checkin_confirmReset'.tr,
                   style: TextStyle(color: Colors.red),
                 ),
               ),
@@ -432,10 +431,10 @@ class CheckinListController {
       builder:
           (context) => AlertDialog(
             title: Text(
-              CheckinLocalizations.of(context).deleteCheckinItemTitle,
+              'checkin_deleteCheckinItemTitle'.tr,
             ),
             content: Text(
-              '${CheckinLocalizations.of(context).deleteConfirmMessage}"${item.name}"?',
+              '${'checkin_deleteConfirmMessage'.tr}"${item.name}"?',
             ),
             actions: [
               TextButton(
@@ -457,7 +456,7 @@ class CheckinListController {
                   );
                 },
                 child: Text(
-                  CheckinLocalizations.of(context).confirmDelete,
+                  'checkin_confirmDelete'.tr,
                   style: TextStyle(color: Colors.red),
                 ),
               ),
@@ -479,7 +478,7 @@ class CheckinListController {
               children: [
                 const Icon(Icons.check_circle, color: Colors.green),
                 const SizedBox(width: 8),
-                Text(CheckinLocalizations.of(context).checkinSuccessTitle),
+                Text('checkin_checkinSuccessTitle'.tr),
               ],
             ),
             content: Column(
@@ -487,24 +486,24 @@ class CheckinListController {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${CheckinLocalizations.of(context).checkinSuccessTitle} ${item.name}',
+                  '${'checkin_checkinSuccessTitle'.tr} ${item.name}',
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${CheckinLocalizations.of(context).timeRangeLabel}: ${timeFormat.format(record.startTime)} - ${timeFormat.format(record.endTime)}',
+                  '${'checkin_timeRangeLabel'.tr}: ${timeFormat.format(record.startTime)} - ${timeFormat.format(record.endTime)}',
                   style: const TextStyle(fontSize: 14),
                 ),
                 if (record.note != null) ...[
                   const SizedBox(height: 4),
                   Text(
-                    '${CheckinLocalizations.of(context).noteLabel}: ${record.note}',
+                    '${'checkin_noteLabel'.tr}: ${record.note}',
                     style: const TextStyle(fontSize: 14),
                   ),
                 ],
                 const SizedBox(height: 8),
                 if (streak > 1)
                   Text(
-                    '${CheckinLocalizations.of(context).consecutiveDaysLabel}: $streak',
+                    '${'checkin_consecutiveDaysLabel'.tr}: $streak',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.orange,
@@ -623,12 +622,12 @@ class CheckinListController {
               return getCurrentTagGroups();
             },
             config: TagManagerConfig(
-              title: CheckinLocalizations.of(context).manageGroupsTitle,
-              addGroupHint: CheckinLocalizations.of(context).addGroupHint,
-              addTagHint: CheckinLocalizations.of(context).addTagHint,
-              editGroupHint: CheckinLocalizations.of(context).editGroupHint,
-              allTagsLabel: CheckinLocalizations.of(context).allTagsLabel,
-              newGroupLabel: CheckinLocalizations.of(context).newGroupLabel,
+              title: 'checkin_manageGroupsTitle'.tr,
+              addGroupHint: 'checkin_addGroupHint'.tr,
+              addTagHint: 'checkin_addTagHint'.tr,
+              editGroupHint: 'checkin_editGroupHint'.tr,
+              allTagsLabel: 'checkin_allTagsLabel'.tr,
+              newGroupLabel: 'checkin_newGroupLabel'.tr,
             ),
           ),
     ).then((_) {

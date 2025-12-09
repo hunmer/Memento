@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,7 +8,6 @@ import 'package:provider/provider.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
 import 'package:Memento/plugins/nodes/models/notebook.dart';
-import 'package:Memento/plugins/nodes/l10n/nodes_localizations.dart';
 import 'nodes_screen.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 
@@ -100,7 +100,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
-                          child: Text(NodesLocalizations.of(context).delete),
+                          child: Text('nodes_delete'.tr),
                         ),
                       ],
                     ),
@@ -132,7 +132,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                 ),
                 title: Text(notebook.title),
                 subtitle: Text(
-                  '${notebook.nodes.length} ${NodesLocalizations.of(context).nodes}',
+                  '${notebook.nodes.length} ${'nodes_nodes'.tr}',
                 ),
                 selected: notebook.id == controller.selectedNotebook?.id,
                 trailing: IconButton(

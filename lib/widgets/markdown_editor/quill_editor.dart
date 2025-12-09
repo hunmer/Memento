@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 
@@ -123,7 +124,7 @@ class _QuillEditorWidgetState extends State<QuillEditorWidget> {
             final title = _titleController.text.trim();
             final content = _getContentAsJson();
             if (widget.showTitle && title.isEmpty) {
-              Toast.error(AppLocalizations.of(context)!.pleaseEnterTitle);
+              Toast.error('app_pleaseEnterTitle'.tr);
               return;
             }
             widget.onSave(title, content);

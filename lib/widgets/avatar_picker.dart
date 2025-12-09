@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'image_picker_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:Memento/utils/image_utils.dart';

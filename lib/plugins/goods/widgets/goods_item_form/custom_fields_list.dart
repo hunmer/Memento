@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/goods/models/custom_field.dart';
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 class CustomFieldsList extends StatefulWidget {
@@ -36,12 +36,12 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              GoodsLocalizations.of(context).customFields,
+              'goods_customFields'.tr,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             TextButton.icon(
               icon: const Icon(Icons.add),
-              label: Text(GoodsLocalizations.of(context).addField),
+              label: Text('goods_addField'.tr),
               onPressed: _addNewField,
             ),
           ],
@@ -52,7 +52,7 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                GoodsLocalizations.of(context).noCustomFields,
+                'goods_noCustomFields'.tr,
                 style: const TextStyle(color: Colors.grey),
               ),
             ),
@@ -90,23 +90,23 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(GoodsLocalizations.of(context).addCustomField),
+          title: Text('goods_addCustomField'.tr),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: keyController,
                 decoration: InputDecoration(
-                  labelText: GoodsLocalizations.of(context).fieldName,
-                  hintText: GoodsLocalizations.of(context).enterFieldName,
+                  labelText: 'goods_fieldName'.tr,
+                  hintText: 'goods_enterFieldName'.tr,
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: valueController,
                 decoration: InputDecoration(
-                  labelText: GoodsLocalizations.of(context).fieldValue,
-                  hintText: GoodsLocalizations.of(context).enterFieldValue,
+                  labelText: 'goods_fieldValue'.tr,
+                  hintText: 'goods_enterFieldValue'.tr,
                 ),
                 maxLines: 2,
               ),
@@ -115,7 +115,7 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(GoodsLocalizations.of(context).cancel),
+              child: Text('goods_cancel'.tr),
             ),
             TextButton(
               onPressed: () {
@@ -130,7 +130,7 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
                   );
                 }
               },
-              child: Text(GoodsLocalizations.of(context).confirm),
+              child: Text('goods_confirm'.tr),
             ),
           ],
         );
@@ -160,23 +160,23 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(GoodsLocalizations.of(context).editCustomField),
+          title: Text('goods_editCustomField'.tr),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: keyController,
                 decoration: InputDecoration(
-                  labelText: GoodsLocalizations.of(context).fieldName,
-                  hintText: GoodsLocalizations.of(context).enterFieldName,
+                  labelText: 'goods_fieldName'.tr,
+                  hintText: 'goods_enterFieldName'.tr,
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: valueController,
                 decoration: InputDecoration(
-                  labelText: GoodsLocalizations.of(context).fieldValue,
-                  hintText: GoodsLocalizations.of(context).enterFieldValue,
+                  labelText: 'goods_fieldValue'.tr,
+                  hintText: 'goods_enterFieldValue'.tr,
                 ),
                 maxLines: 2,
               ),
@@ -185,7 +185,7 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(GoodsLocalizations.of(context).cancel),
+              child: Text('goods_cancel'.tr),
             ),
             TextButton(
               onPressed: () {
@@ -200,7 +200,7 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
                   );
                 }
               },
-              child: Text(GoodsLocalizations.of(context).confirm),
+              child: Text('goods_confirm'.tr),
             ),
           ],
         );
@@ -223,18 +223,18 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(GoodsLocalizations.of(context).confirmDelete),
+          title: Text('goods_confirmDelete'.tr),
           content: Text(
-            GoodsLocalizations.of(context).confirmDeleteCustomField,
+            'goods_confirmDeleteCustomField'.tr,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(GoodsLocalizations.of(context).cancel),
+              child: Text('goods_cancel'.tr),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text(GoodsLocalizations.of(context).delete),
+              child: Text('goods_delete'.tr),
             ),
           ],
         );

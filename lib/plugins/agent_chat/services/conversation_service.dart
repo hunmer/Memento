@@ -1,4 +1,5 @@
 import 'package:Memento/plugins/agent_chat/data/sample_data.dart';
+import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';

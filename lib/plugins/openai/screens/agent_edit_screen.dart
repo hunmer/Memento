@@ -1,8 +1,8 @@
+import 'package:get/get.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
@@ -140,7 +140,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     } catch (e) {
       if (mounted) {
         ToastService.instance.showToast(
-          '${OpenAILocalizations.of(context).loadProvidersError}: $e',
+          '${'openai_loadProvidersError'.tr}: $e',
         );
       }
     } finally {
@@ -164,7 +164,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
 
     // 显示确认更新的消息
     if (mounted) {
-      ToastService.instance.showToast(OpenAILocalizations.of(context).configUpdated);
+      ToastService.instance.showToast('openai_configUpdated'.tr);
     }
   }
 
@@ -266,7 +266,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     } catch (e) {
       if (mounted) {
         ToastService.instance.showToast(
-          '${OpenAILocalizations.of(context).errorSavingAgent}: $e',
+          '${'openai_errorSavingAgent'.tr}: $e',
         );
       }
     }
@@ -278,17 +278,17 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(OpenAILocalizations.of(context).deleteAgentConfirm),
-            content: Text(OpenAILocalizations.of(context).deleteAgentMessage),
+            title: Text('openai_deleteAgentConfirm'.tr),
+            content: Text('openai_deleteAgentMessage'.tr),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text(OpenAILocalizations.of(context).cancel),
+                child: Text('openai_cancel'.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 child: Text(
-                  OpenAILocalizations.of(context).delete,
+                  'openai_delete'.tr,
                   style: const TextStyle(color: Colors.red),
                 ),
               ),
@@ -303,14 +303,14 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       final controller = plugin.controller;
       await controller.deleteAgent(widget.agent!.id);
       if (mounted) {
-        ToastService.instance.showToast(OpenAILocalizations.of(context).agentDeleted);
+        ToastService.instance.showToast('openai_agentDeleted'.tr);
         // 返回true表示删除成功
         Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
         ToastService.instance.showToast(
-          '${OpenAILocalizations.of(context).deleteFailed}: $e',
+          '${'openai_deleteFailed'.tr}: $e',
         );
       }
     }
@@ -345,14 +345,14 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       final controller = plugin.controller;
       await controller.addAgent(clonedAgent);
       if (mounted) {
-        ToastService.instance.showToast(OpenAILocalizations.of(context).agentCloned);
+        ToastService.instance.showToast('openai_agentCloned'.tr);
         // 返回克隆的智能体，以便可能的进一步操作
         Navigator.of(context).pop(clonedAgent);
       }
     } catch (e) {
       if (mounted) {
         ToastService.instance.showToast(
-          '${OpenAILocalizations.of(context).cloneFailed}: $e',
+          '${'openai_cloneFailed'.tr}: $e',
         );
       }
     }
@@ -364,8 +364,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       appBar: AppBar(
         title: Text(
           widget.agent == null
-              ? OpenAILocalizations.of(context).createAgent
-              : OpenAILocalizations.of(context).editAgent,
+              ? 'openai_createAgent'.tr
+              : 'openai_editAgent'.tr,
         ),
         actions: [
           // 只有在编辑现有智能体时才显示删除和克隆按钮
@@ -373,12 +373,12 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             IconButton(
               icon: const Icon(Icons.copy),
               onPressed: _cloneAgent,
-              tooltip: OpenAILocalizations.of(context).cloneAgent,
+              tooltip: 'openai_cloneAgent'.tr,
             ),
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _deleteAgent,
-              tooltip: OpenAILocalizations.of(context).deleteAgent,
+              tooltip: 'openai_deleteAgent'.tr,
             ),
           ],
           IconButton(icon: const Icon(Icons.save), onPressed: _saveAgent),
@@ -506,7 +506,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        OpenAILocalizations.of(context).avatar,
+                                        'openai_avatar'.tr,
                                         style: const TextStyle(fontSize: 12),
                                       ),
                                     ],
@@ -522,12 +522,12 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             TextFormField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: OpenAILocalizations.of(context).agentName,
-                hintText: OpenAILocalizations.of(context).enterAgentName,
+                labelText: 'openai_agentName'.tr,
+                hintText: 'openai_enterAgentName'.tr,
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return OpenAILocalizations.of(context).pleaseEnterName;
+                  return 'openai_pleaseEnterName'.tr;
                 }
                 return null;
               },
@@ -535,7 +535,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             const SizedBox(height: 16),
             _isLoadingProviders
                 ? Center(
-                  child: Text(OpenAILocalizations.of(context).loadingProviders),
+                  child: Text('openai_loadingProviders'.tr),
                 )
                 : DropdownButtonFormField<String>(
                   value: _providers.isNotEmpty &&
@@ -543,7 +543,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                       ? _selectedProviderId
                       : (_providers.isNotEmpty ? _providers.first.id : null),
                   decoration: InputDecoration(
-                    labelText: OpenAILocalizations.of(context).serviceProvider,
+                    labelText: 'openai_serviceProvider'.tr,
                   ),
                   items:
                       _providers.map((provider) {
@@ -565,7 +565,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                           builder:
                               (context) => AlertDialog(
                                 title: Text(
-                                  OpenAILocalizations.of(context).updateConfig,
+                                  'openai_updateConfig'.tr,
                                 ),
                                 content: Text(
                                   OpenAILocalizations.of(
@@ -625,13 +625,13 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             TextFormField(
               controller: _descriptionController,
               decoration: InputDecoration(
-                labelText: OpenAILocalizations.of(context).description,
-                hintText: OpenAILocalizations.of(context).enterDescription,
+                labelText: 'openai_description'.tr,
+                hintText: 'openai_enterDescription'.tr,
               ),
               maxLines: 3,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return OpenAILocalizations.of(context).pleaseEnterDescription;
+                  return 'openai_pleaseEnterDescription'.tr;
                 }
                 return null;
               },
@@ -644,13 +644,13 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                   ? _selectedPresetId
                   : null,
               decoration: InputDecoration(
-                labelText: OpenAILocalizations.of(context).promptPreset,
-                hintText: OpenAILocalizations.of(context).selectPromptPreset,
+                labelText: 'openai_promptPreset'.tr,
+                hintText: 'openai_selectPromptPreset'.tr,
               ),
               items: [
                 DropdownMenuItem<String>(
                   value: null,
-                  child: Text(OpenAILocalizations.of(context).noPreset),
+                  child: Text('openai_noPreset'.tr),
                 ),
                 ..._presets.map((preset) {
                   return DropdownMenuItem<String>(
@@ -669,10 +669,10 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             TextFormField(
               controller: _promptController,
               decoration: InputDecoration(
-                labelText: OpenAILocalizations.of(context).systemPrompt,
-                hintText: OpenAILocalizations.of(context).enterSystemPrompt,
+                labelText: 'openai_systemPrompt'.tr,
+                hintText: 'openai_enterSystemPrompt'.tr,
                 helperText: _selectedPresetId != null
-                    ? OpenAILocalizations.of(context).promptPresetActiveHint
+                    ? 'openai_promptPresetActiveHint'.tr
                     : null,
                 helperStyle: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
@@ -697,12 +697,12 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             TextFormField(
               controller: _baseUrlController,
               decoration: InputDecoration(
-                labelText: OpenAILocalizations.of(context).baseUrl,
-                hintText: OpenAILocalizations.of(context).enterBaseUrl,
+                labelText: 'openai_baseUrl'.tr,
+                hintText: 'openai_enterBaseUrl'.tr,
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return OpenAILocalizations.of(context).pleaseEnterBaseUrl;
+                  return 'openai_pleaseEnterBaseUrl'.tr;
                 }
                 return null;
               },
@@ -714,15 +714,15 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                   child: TextFormField(
                     controller: _modelController,
                     decoration: InputDecoration(
-                      labelText: OpenAILocalizations.of(context).model,
-                      hintText: OpenAILocalizations.of(context).enterModel,
+                      labelText: 'openai_model'.tr,
+                      hintText: 'openai_enterModel'.tr,
                     ),
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: _selectModel,
-                  tooltip: OpenAILocalizations.of(context).searchModel,
+                  tooltip: 'openai_searchModel'.tr,
                 ),
               ],
             ),
@@ -730,8 +730,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             TextFormField(
               controller: _headersController,
               decoration: InputDecoration(
-                labelText: OpenAILocalizations.of(context).headers,
-                hintText: OpenAILocalizations.of(context).enterHeaders,
+                labelText: 'openai_headers'.tr,
+                hintText: 'openai_enterHeaders'.tr,
               ),
               maxLines: 3,
             ),
@@ -742,8 +742,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                   child: TextFormField(
                     controller: _tagController,
                     decoration: InputDecoration(
-                      labelText: OpenAILocalizations.of(context).tags,
-                      hintText: OpenAILocalizations.of(context).enterTag,
+                      labelText: 'openai_tags'.tr,
+                      hintText: 'openai_enterTag'.tr,
                     ),
                   ),
                 ),
@@ -765,8 +765,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             ),
             const SizedBox(height: 24),
             SwitchListTile(
-              title: Text(OpenAILocalizations.of(context).enablePluginFunctionCalls),
-              subtitle: Text(OpenAILocalizations.of(context).allowAICallPluginFunctions),
+              title: Text('openai_enablePluginFunctionCalls'.tr),
+              subtitle: Text('openai_allowAICallPluginFunctions'.tr),
               value: _enableFunctionCalling,
               onChanged: (value) {
                 setState(() {
@@ -776,8 +776,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: Text(OpenAILocalizations.of(context).enableGuessWhatYouWantToAsk),
-              subtitle: Text(OpenAILocalizations.of(context).showPresetOpeningQuestions),
+              title: Text('openai_enableGuessWhatYouWantToAsk'.tr),
+              subtitle: Text('openai_showPresetOpeningQuestions'.tr),
               value: _enableOpeningQuestions,
               onChanged: (value) {
                 setState(() {
@@ -877,7 +877,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 48),
               ),
-              child: Text(OpenAILocalizations.of(context).testAgent),
+              child: Text('openai_testAgent'.tr),
             ),
           ],
         ),
@@ -945,8 +945,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     await TestService.showLongTextInputDialog(
       context,
       title:
-          '${OpenAILocalizations.of(context).testAgentTitle}${testAgent.name}',
-      hintText: OpenAILocalizations.of(context).enterTestText,
+          '${'openai_testAgentTitle'.tr}${testAgent.name}',
+      hintText: 'openai_enterTestText'.tr,
       enableImagePicker: true,
       testAgent: testAgent,
       formValues: formValues,

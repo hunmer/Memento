@@ -1,7 +1,7 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 import 'package:Memento/plugins/scripts_center/models/script_input.dart';
-import 'package:Memento/plugins/scripts_center/l10n/scripts_center_localizations.dart';
 
 /// 脚本运行参数输入对话框
 ///
@@ -226,13 +226,13 @@ class _ScriptRunDialogState extends State<ScriptRunDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: Text(ScriptsCenterLocalizations.of(context).cancel),
+                    child: Text('scripts_center_cancel'.tr),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton.icon(
                     onPressed: _submitForm,
                     icon: const Icon(Icons.play_arrow),
-                    label: Text(ScriptsCenterLocalizations.of(context).run),
+                    label: Text('scripts_center_run'.tr),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,
                       foregroundColor: Colors.white,

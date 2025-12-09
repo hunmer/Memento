@@ -1,8 +1,8 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:Memento/plugins/openai/models/prompt_preset.dart';
 import 'package:Memento/plugins/openai/services/prompt_preset_service.dart';
 
@@ -19,8 +19,8 @@ class PromptPresetScreen extends StatelessWidget {
     }
 
     return SuperCupertinoNavigationWrapper(
-      title: Text(OpenAILocalizations.of(context).promptPresetManagement),
-      largeTitle: OpenAILocalizations.of(context).promptPresetManagement,
+      title: Text('openai_promptPresetManagement'.tr),
+      largeTitle: 'openai_promptPresetManagement'.tr,
       enableLargeTitle: false,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
@@ -147,17 +147,17 @@ class PromptPresetScreen extends StatelessWidget {
                         final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: Text(OpenAILocalizations.of(context).deletePreset),
-                            content: Text(OpenAILocalizations.of(context).confirmDeletePreset),
+                            title: Text('openai_deletePreset'.tr),
+                            content: Text('openai_confirmDeletePreset'.tr),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(false),
-                                child: Text(OpenAILocalizations.of(context).cancel),
+                                child: Text('openai_cancel'.tr),
                               ),
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(true),
                                 child: Text(
-                                  OpenAILocalizations.of(context).delete,
+                                  'openai_delete'.tr,
                                   style: const TextStyle(color: Colors.red),
                                 ),
                               ),
@@ -177,7 +177,7 @@ class PromptPresetScreen extends StatelessWidget {
                           children: [
                             const Icon(Icons.edit, size: 20),
                             const SizedBox(width: 8),
-                            Text(OpenAILocalizations.of(context).editPreset),
+                            Text('openai_editPreset'.tr),
                           ],
                         ),
                       ),
@@ -188,7 +188,7 @@ class PromptPresetScreen extends StatelessWidget {
                             const Icon(Icons.delete, size: 20, color: Colors.red),
                             const SizedBox(width: 8),
                             Text(
-                              OpenAILocalizations.of(context).deletePreset,
+                              'openai_deletePreset'.tr,
                               style: const TextStyle(color: Colors.red),
                             ),
                           ],

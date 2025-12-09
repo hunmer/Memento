@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 
 class DeleteChannelDialog extends StatelessWidget {
@@ -16,8 +15,8 @@ class DeleteChannelDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(ChatLocalizations.of(context).deleteChannel),
-      content: Text(ChatLocalizations.of(context).deleteChannelConfirmation),
+      title: Text('chat_deleteChannel'.tr),
+      content: Text('chat_deleteChannelConfirmation'.tr),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),

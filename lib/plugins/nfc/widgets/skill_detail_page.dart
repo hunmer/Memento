@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'package:Memento/plugins/habits/widgets/skill_form.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';

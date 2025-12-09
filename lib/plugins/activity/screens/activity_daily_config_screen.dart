@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
@@ -7,7 +8,6 @@ import 'package:Memento/plugins/activity/models/activity_daily_widget_data.dart'
 import 'package:Memento/plugins/activity/services/activity_widget_service.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 
 /// 日视图活动列表小组件配置界面
 ///
@@ -274,8 +274,8 @@ class _ActivityDailyConfigScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(ActivityLocalizations.of(context).morning, style: TextStyle(fontSize: 10, color: accentColor)),
-                    Text(ActivityLocalizations.of(context).afternoon, style: TextStyle(fontSize: 10, color: accentColor)),
+                    Text('activity_morning'.tr, style: TextStyle(fontSize: 10, color: accentColor)),
+                    Text('activity_afternoon'.tr, style: TextStyle(fontSize: 10, color: accentColor)),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -472,14 +472,14 @@ class _ActivityDailyConfigScreenState
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text(ActivityLocalizations.of(context).configDailyWidget)),
+        appBar: AppBar(title: Text('activity_configDailyWidget'.tr)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(ActivityLocalizations.of(context).configDailyWidget),
+        title: Text('activity_configDailyWidget'.tr),
         actions: [
           if (_isSaving)
             const Center(
@@ -505,7 +505,7 @@ class _ActivityDailyConfigScreenState
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isSaving ? null : _saveConfig,
         icon: const Icon(Icons.check),
-        label: Text(ActivityLocalizations.of(context).save),
+        label: Text('activity_save'.tr),
       ),
     );
   }

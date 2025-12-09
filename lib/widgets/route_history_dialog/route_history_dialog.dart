@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
@@ -6,7 +7,6 @@ import 'package:Memento/core/route/page_visit_record.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
-import 'package:Memento/widgets/l10n/widget_localizations.dart';
 
 /// 路由历史记录对话框
 ///
@@ -114,20 +114,20 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
       context: context,
       builder: (context) => AlertDialog(
             title: Text(
-              WidgetLocalizations.of(context)?.confirmClear ?? '确认清空',
+              'widget_confirmClear'.tr ?? '确认清空',
             ),
             content: Text(
-              WidgetLocalizations.of(context)?.confirmEmptyHistory ??
+              'widget_confirmEmptyHistory'.tr ??
                   '确定要清空所有路由历史记录吗？',
             ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-                child: Text(WidgetLocalizations.of(context)?.cancel ?? '取消'),
+                child: Text('widget_cancel'.tr ?? '取消'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-                child: Text(WidgetLocalizations.of(context)?.confirm ?? '确定'),
+                child: Text('widget_confirm'.tr ?? '确定'),
           ),
         ],
       ),
@@ -173,7 +173,7 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    WidgetLocalizations.of(context)?.routeHistory ?? '路由历史记录',
+                    'widget_routeHistory'.tr ?? '路由历史记录',
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.bold,
@@ -188,7 +188,7 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                       onPressed: _clearHistory,
-                      tooltip: WidgetLocalizations.of(context)!.clearHistory,
+                      tooltip: 'widget_clearHistory'.tr,
                     ),
                   // 关闭按钮
                   IconButton(
@@ -233,14 +233,14 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              WidgetLocalizations.of(context)!.noHistory,
+              'widget_noHistory'.tr,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
-              WidgetLocalizations.of(context)!.visitPageAutoRecord,
+              'widget_visitPageAutoRecord'.tr,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   ),
@@ -307,7 +307,7 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
           ),
           const SizedBox(width: 4),
           Text(
-            WidgetLocalizations.of(context)!.visits(record.visitCount),
+            'widget_visits'.tr(record.visitCount),
             style: TextStyle(
               fontSize: 12,
               color: theme.colorScheme.outline,

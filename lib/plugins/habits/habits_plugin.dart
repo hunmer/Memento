@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -5,7 +6,6 @@ import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
@@ -62,7 +62,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return HabitsLocalizations.of(context).name;
+    return 'habits_name'.tr;
   }
 
   @override
@@ -192,7 +192,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                HabitsLocalizations.of(context).name,
+                'habits_name'.tr,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -214,7 +214,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
                     ),
                   ),
                   Text(
-                    HabitsLocalizations.of(context).habits,
+                    'habits_habits'.tr,
                     style: theme.textTheme.bodyMedium,
                   ),
                 ],
@@ -228,7 +228,7 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
                     ),
                   ),
                   Text(
-                    HabitsLocalizations.of(context).skills,
+                    'habits_skills'.tr,
                     style: theme.textTheme.bodyMedium,
                   ),
                 ],

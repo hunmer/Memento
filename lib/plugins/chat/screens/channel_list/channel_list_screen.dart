@@ -1,9 +1,9 @@
 import 'dart:io' show Platform;
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'controllers/channel_list_controller.dart';
 import 'widgets/channel_tile.dart';
 import 'widgets/empty_channel_view.dart';
@@ -56,7 +56,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
-      title: Text(ChatLocalizations.of(context).channelList),
+      title: Text('chat_channelList'.tr),
       largeTitle: '频道列表',
       enableSearchBar: true,
       searchPlaceholder: '搜索频道名称',

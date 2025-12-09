@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ChannelGroupSelector extends StatelessWidget {
   final String selectedGroup;
@@ -16,9 +16,9 @@ class ChannelGroupSelector extends StatelessWidget {
   getGroupName(String group, BuildContext context) {
     switch (group) {
       case "all":
-        return ChatLocalizations.of(context).all;
+        return 'chat_all'.tr;
       case "ungrouped":
-        return ChatLocalizations.of(context).ungrouped;
+        return 'chat_ungrouped'.tr;
       default:
         return group;
     }

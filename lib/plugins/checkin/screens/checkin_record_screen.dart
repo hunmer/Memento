@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
 import 'package:intl/intl.dart';
@@ -46,7 +45,7 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(CheckinLocalizations.of(context).checkinRecordsTitle),
+        title: Text('checkin_checkinRecordsTitle'.tr),
       ),
       body:
           sortedDates.isEmpty
@@ -155,7 +154,7 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            CheckinLocalizations.of(context).noRecords,
+            'checkin_noRecords'.tr,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -176,10 +175,10 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
       builder:
           (context) => AlertDialog(
             title: Text(
-              CheckinLocalizations.of(context).deleteCheckinRecordTitle,
+              'checkin_deleteCheckinRecordTitle'.tr,
             ),
             content: Text(
-              CheckinLocalizations.of(context).deleteCheckinRecordMessage,
+              'checkin_deleteCheckinRecordMessage'.tr,
             ),
             actions: [
               TextButton(

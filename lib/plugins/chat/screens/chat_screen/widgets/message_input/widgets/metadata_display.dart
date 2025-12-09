@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:io' show Platform, Process;
 
 class MetadataDisplay extends StatelessWidget {
@@ -70,7 +69,7 @@ class MetadataDisplay extends StatelessWidget {
                       size: 18,
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
-                    label: Text(ChatLocalizations.of(context).singleFile),
+                    label: Text('chat_singleFile'.tr),
                     onDeleted: onFileRemove,
                     backgroundColor:
                         Theme.of(context).colorScheme.primaryContainer,
@@ -142,7 +141,7 @@ class MetadataDisplay extends StatelessWidget {
             color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
           label: Text(
-            '${ChatLocalizations.of(context).contextRange}: $contextRange',
+            '${'chat_contextRange'.tr}: $contextRange',
           ),
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
           labelStyle: TextStyle(
@@ -163,12 +162,12 @@ class MetadataDisplay extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text(ChatLocalizations.of(context).setContextRange),
+              title: Text('chat_setContextRange'.tr),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '${ChatLocalizations.of(context).currentRange}: ${currentValue.round()}',
+                    '${'chat_currentRange'.tr}: ${currentValue.round()}',
                   ),
                   Slider(
                     value: currentValue,
@@ -183,7 +182,7 @@ class MetadataDisplay extends StatelessWidget {
                     },
                   ),
                   Text(
-                    ChatLocalizations.of(context).rangeHint,
+                    'chat_rangeHint'.tr,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],

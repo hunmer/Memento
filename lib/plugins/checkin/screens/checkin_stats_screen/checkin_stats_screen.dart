@@ -1,5 +1,5 @@
 import 'package:Memento/widgets/statistics/statistics.dart';
-import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:flutter/material.dart';
 import 'widgets/daily_checkin_chart.dart';
@@ -164,7 +164,7 @@ class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
           // 打卡趋势图（使用原有的图表组件）
           buildStatisticsCard(
             context: context,
-            title: CheckinLocalizations.of(context).checkinTrendTitle,
+            title: 'checkin_checkinTrendTitle'.tr,
             child: SizedBox(
               height: 200,
               child: DailyCheckinChart(
@@ -178,7 +178,7 @@ class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
           // 连续打卡排行榜（使用原有的图表组件）
           buildStatisticsCard(
             context: context,
-            title: CheckinLocalizations.of(context).checkinRankingTitle,
+            title: 'checkin_checkinRankingTitle'.tr,
             child: CheckinStreakRanking(checkinItems: widget.checkinItems),
           ),
           const SizedBox(height: 16),
@@ -186,7 +186,7 @@ class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
           // 打卡分组占比（使用原有的图表组件）
           buildStatisticsCard(
             context: context,
-            title: CheckinLocalizations.of(context).checkinGroupPieTitle,
+            title: 'checkin_checkinGroupPieTitle'.tr,
             child: SizedBox(
               height: 200,
               child: CheckinGroupPieChart(

@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 
 class PromptEditor extends StatefulWidget {
   final List<Prompt> prompts;

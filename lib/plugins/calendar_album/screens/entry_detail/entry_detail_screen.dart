@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
@@ -73,7 +73,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
             const Icon(Icons.note_add, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
-              CalendarAlbumLocalizations.of(context).noEntriesForDate,
+              'calendarAlbum_noEntriesForDate'.tr,
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 16),
@@ -87,7 +87,7 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
                 );
               },
               icon: const Icon(Icons.add),
-              label: Text(CalendarAlbumLocalizations.of(context).createEntry),
+              label: Text('calendarAlbum_createEntry'.tr),
             ),
           ],
         ),

@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/store/widgets/store_view/product_list.dart';
 import 'package:Memento/plugins/store/widgets/store_view/user_items.dart';
 import 'package:Memento/plugins/store/widgets/store_view/points_history.dart';
@@ -76,12 +76,12 @@ class _StoreBottomBarState extends State<StoreBottomBar>
   /// 显示添加积分对话框
   void _showAddPointsDialog() {
     final TextEditingController pointsController = TextEditingController();
-    final TextEditingController reasonController = TextEditingController(text: StoreLocalizations.of(context).pointsAdjustmentDefaultReason);
+    final TextEditingController reasonController = TextEditingController(text: 'store_pointsAdjustmentDefaultReason'.tr);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(StoreLocalizations.of(context).addPointsDialogTitle),
+        title: Text('store_addPointsDialogTitle'.tr),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -89,7 +89,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
               controller: pointsController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: StoreLocalizations.of(context).pointsAmountLabel,
+                labelText: 'store_pointsAmountLabel'.tr,
                 hintText: '请输入积分数量',
                 prefixIcon: const Icon(Icons.add),
               ),
@@ -98,7 +98,7 @@ class _StoreBottomBarState extends State<StoreBottomBar>
             TextField(
               controller: reasonController,
               decoration: InputDecoration(
-                labelText: StoreLocalizations.of(context).reasonLabel,
+                labelText: 'store_reasonLabel'.tr,
                 hintText: '请输入添加原因',
                 prefixIcon: const Icon(Icons.note_alt_outlined),
               ),
@@ -108,28 +108,28 @@ class _StoreBottomBarState extends State<StoreBottomBar>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(StoreLocalizations.of(context).cancel),
+            child: Text('store_cancel'.tr),
           ),
           TextButton(
             onPressed: () async {
               final points = int.tryParse(pointsController.text);
               if (points == null || points <= 0) {
-                Toast.error(StoreLocalizations.of(context).priceInvalid);
+                Toast.error('store_priceInvalid'.tr);
                 return;
               }
 
               final reason = reasonController.text.isEmpty
-                  ? StoreLocalizations.of(context).pointsAdjustmentDefaultReason
+                  ? 'store_pointsAdjustmentDefaultReason'.tr
                   : reasonController.text;
 
               Navigator.pop(context);
               await widget.plugin.controller.addPoints(points, reason);
 
               if (mounted) {
-                Toast.success('${StoreLocalizations.of(context).pointsAdded}: +$points');
+                Toast.success('${'store_pointsAdded'.tr}: +$points');
               }
             },
-            child: Text(StoreLocalizations.of(context).add),
+            child: Text('store_add'.tr),
           ),
         ],
       ),
@@ -266,15 +266,15 @@ class _StoreBottomBarState extends State<StoreBottomBar>
             tabs: [
               Tab(
                 icon: Icon(Icons.shopping_bag),
-                text: StoreLocalizations.of(context).productList,
+                text: 'store_productList'.tr,
               ),
               Tab(
                 icon: Icon(Icons.inventory),
-                text: StoreLocalizations.of(context).myItems,
+                text: 'store_myItems'.tr,
               ),
               Tab(
                 icon: Icon(Icons.history),
-                text: StoreLocalizations.of(context).pointsHistory,
+                text: 'store_pointsHistory'.tr,
               ),
             ],
           ),

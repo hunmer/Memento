@@ -1,5 +1,3 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/database/l10n/database_localizations.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/database/controllers/field_controller.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
@@ -177,7 +175,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
       builder:
           (context) => SimpleDialog(
             title: Text(
-              'Edit ${field.type} ${DatabaseLocalizations.of(context).fieldsTabTitle}',
+              'Edit ${field.type} ${'database_fieldsTabTitle'.tr}',
             ),
             children: [
               Padding(

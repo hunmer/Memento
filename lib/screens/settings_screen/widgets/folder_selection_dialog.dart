@@ -1,5 +1,6 @@
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class FolderSelectionDialog extends StatefulWidget {
   final List<Map<String, String>> items;
@@ -16,7 +17,7 @@ class _FolderSelectionDialogState extends State<FolderSelectionDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(AppLocalizations.of(context)!.selectFolderToImport),
+      title: Text('app_selectFolderToImport'.tr),
       content: SingleChildScrollView(
         child: ListBody(
           children:
@@ -40,11 +41,11 @@ class _FolderSelectionDialogState extends State<FolderSelectionDialog> {
       ),
       actions: <Widget>[
         TextButton(
-          child: Text(AppLocalizations.of(context)!.cancel),
+          child: Text('app_cancel'.tr),
           onPressed: () => Navigator.of(context).pop(),
         ),
         TextButton(
-          child: Text(AppLocalizations.of(context)!.ok),
+          child: Text('app_ok'.tr),
           onPressed: () => Navigator.of(context).pop(_selectedIds.toList()),
         ),
       ],

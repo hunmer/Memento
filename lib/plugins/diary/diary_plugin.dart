@@ -5,7 +5,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
-import 'l10n/diary_localizations.dart';
+import 'package:get/get.dart';
 import 'screens/diary_calendar_screen.dart';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
@@ -85,7 +85,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return DiaryLocalizations.of(context).name;
+    return 'diary_name'.tr;
   }
 
   // 获取今日文字数
@@ -345,7 +345,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    DiaryLocalizations.of(context).name,
+                    'diary_name'.tr,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -364,7 +364,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            DiaryLocalizations.of(context).todayWordCount,
+                            'diary_todayWordCount'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -383,7 +383,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            DiaryLocalizations.of(context).monthWordCount,
+                            'diary_monthWordCount'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -405,7 +405,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            DiaryLocalizations.of(context).monthProgress,
+                            'diary_monthProgress'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(

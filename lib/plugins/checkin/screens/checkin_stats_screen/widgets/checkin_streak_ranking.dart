@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
-import 'package:Memento/plugins/checkin/l10n/checkin_localizations.dart';
 
 class CheckinStreakRanking extends StatelessWidget {
   final List<CheckinItem> checkinItems;
@@ -16,7 +16,7 @@ class CheckinStreakRanking extends StatelessWidget {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Text(CheckinLocalizations.of(context).emptyData, style: theme.textTheme.bodyMedium),
+          child: Text('checkin_emptyData'.tr, style: theme.textTheme.bodyMedium),
         ),
       );
     }

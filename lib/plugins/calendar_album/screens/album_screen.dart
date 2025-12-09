@@ -1,10 +1,10 @@
 import 'package:Memento/plugins/calendar_album/screens/entry_detail_screen.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
-import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';

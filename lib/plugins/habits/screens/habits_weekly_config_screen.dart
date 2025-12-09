@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
@@ -7,7 +8,6 @@ import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/habits_weekly_widget_config.dart';
 import 'package:Memento/plugins/habits/models/habits_weekly_widget_data.dart';
 import 'package:Memento/plugins/habits/services/habits_widget_service.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/widgets/widget_config_editor/index.dart';
 
 /// 习惯周视图小组件配置界面
@@ -147,7 +147,7 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text(HabitsLocalizations.of(context).configureHabitWeeklyWidget)),
+        appBar: AppBar(title: Text('habits_configureHabitWeeklyWidget'.tr)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -156,7 +156,7 @@ class _HabitsWeeklyConfigScreenState extends State<HabitsWeeklyConfigScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(HabitsLocalizations.of(context).configureHabitWeeklyWidget),
+        title: Text('habits_configureHabitWeeklyWidget'.tr),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),

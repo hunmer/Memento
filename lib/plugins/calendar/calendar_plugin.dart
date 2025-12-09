@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
@@ -18,7 +19,6 @@ import './pages/event_list_page.dart';
 import './widgets/event_detail_card.dart';
 import './services/todo_event_service.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
-import './l10n/calendar_localizations.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 
@@ -251,7 +251,7 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return CalendarLocalizations.of(context).name;
+    return 'calendar_name'.tr;
   }
 
   void showEventDetails(BuildContext context, CalendarEvent event) {
@@ -460,7 +460,7 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    CalendarLocalizations.of(context).name,
+                    'calendar_name'.tr,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -480,7 +480,7 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            CalendarLocalizations.of(context).eventCount,
+                            'calendar_eventCount'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -496,7 +496,7 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            CalendarLocalizations.of(context).weekEvents,
+                            'calendar_weekEvents'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -519,7 +519,7 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            CalendarLocalizations.of(context).expiredEvents,
+                            'calendar_expiredEvents'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -1136,10 +1136,10 @@ class _CalendarMainViewState extends State<CalendarMainView> {
 
         return SuperCupertinoNavigationWrapper(
           title: Text(
-            CalendarLocalizations.of(context).calendar,
+            'calendar_calendar'.tr,
             style: TextStyle(color: theme.textTheme.titleLarge?.color),
           ),
-          largeTitle: CalendarLocalizations.of(context).calendar,
+          largeTitle: 'calendar_calendar'.tr,
           automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
           body: Stack(
             children: [
@@ -1223,7 +1223,7 @@ class _CalendarMainViewState extends State<CalendarMainView> {
             // 跳转到今天按钮
             IconButton(
               icon: Icon(Icons.today, color: theme.iconTheme.color),
-              tooltip: CalendarLocalizations.of(context).backToToday,
+              tooltip: 'calendar_backToToday'.tr,
               onPressed: () {
                 plugin.sfController.displayDate = DateTime.now();
               },
@@ -1231,13 +1231,13 @@ class _CalendarMainViewState extends State<CalendarMainView> {
             // 查看所有事件按钮
             IconButton(
               icon: Icon(Icons.list_alt, color: theme.iconTheme.color),
-              tooltip: CalendarLocalizations.of(context).allEvents,
+              tooltip: 'calendar_allEvents'.tr,
               onPressed: () => plugin.showAllEvents(context),
             ),
             // 查看已完成事件按钮
             IconButton(
               icon: Icon(Icons.done_all, color: theme.iconTheme.color),
-              tooltip: CalendarLocalizations.of(context).completedEvents,
+              tooltip: 'calendar_completedEvents'.tr,
               onPressed: () => plugin.showCompletedEvents(context),
             ),
           ],

@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/timer/l10n/timer_localizations.dart';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:flutter/material.dart';
@@ -111,7 +111,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
               const SizedBox(height: 24),
 
               // 计时器名称
-              _buildLabel(context, TimerLocalizations.of(context).timerName),
+              _buildLabel(context, 'timer_timerName'.tr),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _nameController,
@@ -119,7 +119,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                 decoration: _buildInputDecoration(context, isDark: isDark),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入${TimerLocalizations.of(context).timerName}';
+                    return '请输入${'timer_timerName'.tr}';
                   }
                   return null;
                 },
@@ -129,7 +129,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
               // 描述
               _buildLabel(
                 context,
-                TimerLocalizations.of(context).timerDescription,
+                'timer_timerDescription'.tr,
               ),
               const SizedBox(height: 8),
               TextFormField(
@@ -141,7 +141,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
               const SizedBox(height: 16),
 
               // 计时器类型选择
-              _buildLabel(context, TimerLocalizations.of(context).timerType),
+              _buildLabel(context, 'timer_timerType'.tr),
               const SizedBox(height: 8),
               DropdownButtonFormField<TimerType>(
                 value: _selectedType,
@@ -151,15 +151,15 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                 items: [
                   DropdownMenuItem(
                     value: TimerType.countUp,
-                    child: Text(TimerLocalizations.of(context).countUpTimer),
+                    child: Text('timer_countUpTimer'.tr),
                   ),
                   DropdownMenuItem(
                     value: TimerType.countDown,
-                    child: Text(TimerLocalizations.of(context).countDownTimer),
+                    child: Text('timer_countDownTimer'.tr),
                   ),
                   DropdownMenuItem(
                     value: TimerType.pomodoro,
-                    child: Text(TimerLocalizations.of(context).pomodoroTimer),
+                    child: Text('timer_pomodoroTimer'.tr),
                   ),
                 ],
                 onChanged: (value) {
@@ -169,7 +169,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
               const SizedBox(height: 16),
 
               // 重复次数设置
-              _buildLabel(context, TimerLocalizations.of(context).repeatCount),
+              _buildLabel(context, 'timer_repeatCount'.tr),
               const SizedBox(height: 8),
               TextFormField(
                 initialValue: _repeatCount.toString(),
@@ -204,7 +204,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                         children: [
                           _buildLabel(
                             context,
-                            TimerLocalizations.of(context).hours,
+                            'timer_hours'.tr,
                           ),
                           const SizedBox(height: 4),
                           TextFormField(
@@ -230,7 +230,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                         children: [
                           _buildLabel(
                             context,
-                            TimerLocalizations.of(context).minutes,
+                            'timer_minutes'.tr,
                           ),
                           const SizedBox(height: 4),
                           TextFormField(
@@ -256,7 +256,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                         children: [
                           _buildLabel(
                             context,
-                            TimerLocalizations.of(context).seconds,
+                            'timer_seconds'.tr,
                           ),
                           const SizedBox(height: 4),
                           TextFormField(
@@ -281,7 +281,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                 // 番茄钟设置
                 _buildLabel(
                   context,
-                  TimerLocalizations.of(context).workDuration,
+                  'timer_workDuration'.tr,
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -295,7 +295,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                 const SizedBox(height: 16),
                 _buildLabel(
                   context,
-                  TimerLocalizations.of(context).breakDuration,
+                  'timer_breakDuration'.tr,
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -307,7 +307,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                       (value) => _breakMinutes = int.tryParse(value) ?? 5,
                 ),
                 const SizedBox(height: 16),
-                _buildLabel(context, TimerLocalizations.of(context).cycleCount),
+                _buildLabel(context, 'timer_cycleCount'.tr),
                 const SizedBox(height: 8),
                 TextFormField(
                   initialValue: _cycles.toString(),
@@ -323,7 +323,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    TimerLocalizations.of(context).enableNotification,
+                    'timer_enableNotification'.tr,
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
                       color: isDark ? Colors.white : const Color(0xFF1E293B),
@@ -469,11 +469,11 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
   String _getTimerTypeName(TimerType type) {
     switch (type) {
       case TimerType.countUp:
-        return TimerLocalizations.of(context).countUpTimer;
+        return 'timer_countUpTimer'.tr;
       case TimerType.countDown:
-        return TimerLocalizations.of(context).countDownTimer;
+        return 'timer_countDownTimer'.tr;
       case TimerType.pomodoro:
-        return TimerLocalizations.of(context).pomodoroTimer;
+        return 'timer_pomodoroTimer'.tr;
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:Memento/plugins/database/models/database_model.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/database/models/record.dart';
 import 'package:Memento/plugins/database/services/database_service.dart';
 

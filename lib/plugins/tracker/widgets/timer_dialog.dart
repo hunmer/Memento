@@ -1,8 +1,8 @@
+import 'package:get/get.dart';
 import 'dart:async';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/services/timer/events/timer_events.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:Memento/plugins/tracker/utils/tracker_notification_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -148,7 +148,7 @@ class _TimerDialogState extends State<TimerDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        '${TrackerLocalizations.of(context).timer} - ${widget.goal.name}',
+        '${'tracker_timer'.tr} - ${widget.goal.name}',
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -172,7 +172,7 @@ class _TimerDialogState extends State<TimerDialog> {
           TextField(
             controller: _valueController,
             decoration: InputDecoration(
-              labelText: TrackerLocalizations.of(context).recordValueWithUnit
+              labelText: 'tracker_recordValueWithUnit'.tr
                   .replaceFirst('\${unit}', widget.goal.unitType),
               border: const OutlineInputBorder(),
             ),
@@ -183,7 +183,7 @@ class _TimerDialogState extends State<TimerDialog> {
             controller: _noteController,
             decoration: InputDecoration(
               labelText:
-                  '${TrackerLocalizations.of(context).note} (${TrackerLocalizations.of(context).noteHint})',
+                  '${'tracker_note'.tr} (${'tracker_noteHint'.tr})',
               border: OutlineInputBorder(),
             ),
             maxLines: 2,

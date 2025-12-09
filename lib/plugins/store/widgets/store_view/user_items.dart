@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -84,7 +84,7 @@ class _UserItemsState extends State<UserItems> {
         color: Colors.blue.shade600,
         size: 24,
       ),
-      largeTitle: StoreLocalizations.of(context).myItems,
+      largeTitle: 'store_myItems'.tr,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -96,7 +96,7 @@ class _UserItemsState extends State<UserItems> {
             ),
             const SizedBox(height: 16),
             Text(
-              StoreLocalizations.of(context).noItems,
+              'store_noItems'.tr,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Colors.grey[600],
               ),
@@ -131,7 +131,7 @@ class _UserItemsState extends State<UserItems> {
         color: Colors.blue.shade600,
         size: 24,
       ),
-      largeTitle: StoreLocalizations.of(context).myItems,
+      largeTitle: 'store_myItems'.tr,
       body: groupedItems.isEmpty
           ? Center(
               child: Column(
@@ -188,9 +188,9 @@ class _UserItemsState extends State<UserItems> {
 
                       if (await widget.controller.useItem(itemToUse)) {
                         setState(() {});
-                        Toast.success(StoreLocalizations.of(context).useSuccess);
+                        Toast.success('store_useSuccess'.tr);
                       } else {
-                        Toast.error(StoreLocalizations.of(context).itemExpired);
+                        Toast.error('store_itemExpired'.tr);
                       }
                     },
                   ),
@@ -214,9 +214,9 @@ class _UserItemsState extends State<UserItems> {
             });
           },
           itemBuilder: (context) => [
-            PopupMenuItem(value: 0, child: Text(StoreLocalizations.of(context).allItems)),
-            PopupMenuItem(value: 1, child: Text(StoreLocalizations.of(context).usable)),
-            PopupMenuItem(value: 2, child: Text(StoreLocalizations.of(context).expired)),
+            PopupMenuItem(value: 0, child: Text('store_allItems'.tr)),
+            PopupMenuItem(value: 1, child: Text('store_usable'.tr)),
+            PopupMenuItem(value: 2, child: Text('store_expired'.tr)),
           ],
         ),
       ],
@@ -349,9 +349,9 @@ class _UserItemsState extends State<UserItems> {
 
               if (await widget.controller.useItem(itemToUse)) {
                 setState(() {});
-                Toast.success(StoreLocalizations.of(context).useSuccess);
+                Toast.success('store_useSuccess'.tr);
               } else {
-                Toast.error(StoreLocalizations.of(context).itemExpired);
+                Toast.error('store_itemExpired'.tr);
               }
             },
           ),

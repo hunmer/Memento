@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'dart:io';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:Memento/plugins/tracker/widgets/timer_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -277,7 +277,7 @@ class GoalCard extends StatelessWidget {
           key: formKey,
           child: AlertDialog(
             title: Text(
-              '${TrackerLocalizations.of(context).quickRecord} - ${goal.name}',
+              '${'tracker_quickRecord'.tr} - ${goal.name}',
             ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -286,7 +286,7 @@ class GoalCard extends StatelessWidget {
                   controller: recordController,
                   decoration: InputDecoration(
                     labelText:
-                        '${TrackerLocalizations.of(context).recordValue} (${goal.unitType})',
+                        '${'tracker_recordValue'.tr} (${goal.unitType})',
                     hintText: '请输入要增加的数值',
                   ),
                   keyboardType: TextInputType.number,

@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/calendar_album/l10n/calendar_album_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../../widgets/tag_manager_dialog/models/tag_group.dart' as dialog;
 
 class TagManagerDialog extends StatefulWidget {
@@ -34,7 +33,7 @@ class _TagManagerDialogState extends State<TagManagerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(CalendarAlbumLocalizations.of(context).tagManagement),
+      title: Text('calendarAlbum_tagManagement'.tr),
       content: SingleChildScrollView(
         child: Column(
           children: [

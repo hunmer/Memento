@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/contact/models/contact_model.dart';
 import 'package:Memento/plugins/contact/models/interaction_record_model.dart';
 import 'package:Memento/plugins/contact/models/filter_sort_config.dart';

@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/chat/models/file_message.dart';
 import 'package:Memento/plugins/chat/services/file_service.dart';
@@ -24,7 +24,7 @@ Future<void> handleFileSelection({
 
         // 验证文件是否存在
         if (!await file.exists()) {
-          toastService.showToast(ChatLocalizations.of(context).fileNotAccessible);
+          toastService.showToast('chat_fileNotAccessible'.tr);
           return;
         }
 
@@ -46,12 +46,12 @@ Future<void> handleFileSelection({
         onFileSelected?.call(metadata);
 
         // 显示文件选择成功的提示
-        toastService.showToast('${ChatLocalizations.of(context).fileSelected}: ${fileMessage.originalFileName}');
+        toastService.showToast('${'chat_fileSelected'.tr}: ${fileMessage.originalFileName}');
       } catch (processingError) {
-        toastService.showToast('${ChatLocalizations.of(context).fileProcessingFailed}: $processingError');
+        toastService.showToast('${'chat_fileProcessingFailed'.tr}: $processingError');
       }
     }
   } catch (e) {
-    toastService.showToast('${ChatLocalizations.of(context).fileSelectionFailed}: $e');
+    toastService.showToast('${'chat_fileSelectionFailed'.tr}: $e');
   }
 }

@@ -1,10 +1,10 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 
@@ -183,7 +183,7 @@ class _SkillFormState extends State<SkillForm> {
           TextField(
             controller: _titleController,
             decoration: InputDecoration(
-              labelText: HabitsLocalizations.of(context).skillName,
+              labelText: 'habits_skillName'.tr,
               border: const OutlineInputBorder(),
             ),
           ),
@@ -191,7 +191,7 @@ class _SkillFormState extends State<SkillForm> {
           TextField(
             controller: _notesController,
             decoration: InputDecoration(
-              labelText: HabitsLocalizations.of(context).skillDescription,
+              labelText: 'habits_skillDescription'.tr,
               border: const OutlineInputBorder(),
             ),
             maxLines: 3,
@@ -200,7 +200,7 @@ class _SkillFormState extends State<SkillForm> {
           TextField(
             controller: _groupController,
             decoration: InputDecoration(
-              labelText: HabitsLocalizations.of(context).skillGroup,
+              labelText: 'habits_skillGroup'.tr,
               border: const OutlineInputBorder(),
             ),
           ),
@@ -209,8 +209,8 @@ class _SkillFormState extends State<SkillForm> {
             controller: _maxDurationController,
             decoration: InputDecoration(
               labelText:
-                  '${HabitsLocalizations.of(context).maxDuration} (${HabitsLocalizations.of(context).minutes})',
-              hintText: HabitsLocalizations.of(context).noLimitHint,
+                  '${'habits_maxDuration'.tr} (${'habits_minutes'.tr})',
+              hintText: 'habits_noLimitHint'.tr,
               border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,

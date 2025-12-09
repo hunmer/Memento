@@ -7,7 +7,7 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/action/models/action_instance.dart';
 import 'package:Memento/core/action/models/action_group.dart';
 import 'action_selector_dialog.dart';
-import 'package:Memento/core/l10n/core_localizations.dart';
+import 'package:get/get.dart';
 
 /// 动作组编辑器
 class ActionGroupEditor extends StatefulWidget {
@@ -130,7 +130,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
     }
 
     if (_actions.isEmpty) {
-      Toast.show(CoreLocalizations.of(context)!.pleaseAddAtLeastOneAction);
+      Toast.show('core_pleaseAddAtLeastOneAction'.tr);
       return;
     }
 
@@ -177,7 +177,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      widget.group != null ? CoreLocalizations.of(context)!.editActionGroup : CoreLocalizations.of(context)!.createActionGroupTitle,
+                      widget.group != null ? 'core_editActionGroup'.tr : 'core_createActionGroupTitle'.tr,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -204,7 +204,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                     children: [
                       // 基本信息
                       Text(
-                        CoreLocalizations.of(context)!.basicInfo,
+                        'core_basicInfo'.tr,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -213,13 +213,13 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                       TextFormField(
                         controller: _titleController,
                         decoration: InputDecoration(
-                          labelText: CoreLocalizations.of(context)!.groupTitle,
-                          hintText: CoreLocalizations.of(context)!.enterActionGroupTitle,
+                          labelText: 'core_groupTitle'.tr,
+                          hintText: 'core_enterActionGroupTitle'.tr,
                           border: const OutlineInputBorder(),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return CoreLocalizations.of(context)!.pleaseEnterGroupTitle;
+                            return 'core_pleaseEnterGroupTitle'.tr;
                           }
                           return null;
                         },
@@ -228,8 +228,8 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                       TextFormField(
                         controller: _descriptionController,
                         decoration: InputDecoration(
-                          labelText: CoreLocalizations.of(context)!.groupDescription,
-                          hintText: CoreLocalizations.of(context)!.enterActionGroupDescription,
+                          labelText: 'core_groupDescription'.tr,
+                          hintText: 'core_enterActionGroupDescription'.tr,
                           border: const OutlineInputBorder(),
                         ),
                         maxLines: 2,
@@ -239,7 +239,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
 
                       // 执行配置
                       Text(
-                        CoreLocalizations.of(context)!.executionConfig,
+                        'core_executionConfig'.tr,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -248,22 +248,22 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                       DropdownButtonFormField<GroupOperator>(
                         value: _operator,
                         decoration: InputDecoration(
-                          labelText: CoreLocalizations.of(context)!.operator,
-                          hintText: CoreLocalizations.of(context)!.selectExecutionMethod,
+                          labelText: 'core_operator'.tr,
+                          hintText: 'core_selectExecutionMethod'.tr,
                           border: const OutlineInputBorder(),
                         ),
                         items: [
                           DropdownMenuItem(
                             value: GroupOperator.sequence,
-                            child: Text(CoreLocalizations.of(context)!.sequentialExecution),
+                            child: Text('core_sequentialExecution'.tr),
                           ),
                           DropdownMenuItem(
                             value: GroupOperator.parallel,
-                            child: Text(CoreLocalizations.of(context)!.parallelExecution),
+                            child: Text('core_parallelExecution'.tr),
                           ),
                           DropdownMenuItem(
                             value: GroupOperator.condition,
-                            child: Text(CoreLocalizations.of(context)!.conditionalExecution),
+                            child: Text('core_conditionalExecution'.tr),
                           ),
                         ],
                         onChanged: (value) {
@@ -278,26 +278,26 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                       DropdownButtonFormField<GroupExecutionMode>(
                         value: _executionMode,
                         decoration: InputDecoration(
-                          labelText: CoreLocalizations.of(context)!.executionMode,
-                          hintText: CoreLocalizations.of(context)!.selectExecutionMode,
+                          labelText: 'core_executionMode'.tr,
+                          hintText: 'core_selectExecutionMode'.tr,
                           border: const OutlineInputBorder(),
                         ),
                         items: [
                           DropdownMenuItem(
                             value: GroupExecutionMode.all,
-                            child: Text(CoreLocalizations.of(context)!.executeAllActions),
+                            child: Text('core_executeAllActions'.tr),
                           ),
                           DropdownMenuItem(
                             value: GroupExecutionMode.any,
-                            child: Text(CoreLocalizations.of(context)!.executeAnyAction),
+                            child: Text('core_executeAnyAction'.tr),
                           ),
                           DropdownMenuItem(
                             value: GroupExecutionMode.first,
-                            child: Text(CoreLocalizations.of(context)!.executeFirstOnly),
+                            child: Text('core_executeFirstOnly'.tr),
                           ),
                           DropdownMenuItem(
                             value: GroupExecutionMode.last,
-                            child: Text(CoreLocalizations.of(context)!.executeLastOnly),
+                            child: Text('core_executeLastOnly'.tr),
                           ),
                         ],
                         onChanged: (value) {
@@ -312,8 +312,8 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                       TextFormField(
                         initialValue: _priority.toString(),
                         decoration: InputDecoration(
-                          labelText: CoreLocalizations.of(context)!.priority,
-                          hintText: CoreLocalizations.of(context)!.priorityDescription,
+                          labelText: 'core_priority'.tr,
+                          hintText: 'core_priorityDescription'.tr,
                           border: const OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.number,
@@ -331,7 +331,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            CoreLocalizations.of(context)!.actionList,
+                            'core_actionList'.tr,
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -339,7 +339,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                           ElevatedButton.icon(
                             onPressed: _onAddAction,
                             icon: const Icon(Icons.add),
-                            label: Text(CoreLocalizations.of(context)!.addAction),
+                            label: Text('core_addAction'.tr),
                           ),
                         ],
                       ),
@@ -357,7 +357,7 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                               ),
                               child: Center(
                                 child: Text(
-                                  CoreLocalizations.of(context)!.noActionsAdded,
+                                  'core_noActionsAdded'.tr,
                                   style: TextStyle(
                                     color: Colors.grey[600],
                                   ),
@@ -409,21 +409,21 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                                       itemBuilder: (context) => [
                                         PopupMenuItem(
                                           value: 'edit',
-                                          child: Text(CoreLocalizations.of(context)!.edit),
+                                          child: Text('core_edit'.tr),
                                         ),
                                         if (index > 0)
                                           PopupMenuItem(
                                             value: 'moveUp',
-                                            child: Text(CoreLocalizations.of(context)!.moveUp),
+                                            child: Text('core_moveUp'.tr),
                                           ),
                                         if (index < _actions.length - 1)
                                           PopupMenuItem(
                                             value: 'moveDown',
-                                            child: Text(CoreLocalizations.of(context)!.moveDown),
+                                            child: Text('core_moveDown'.tr),
                                           ),
                                         PopupMenuItem(
                                           value: 'remove',
-                                          child: Text(CoreLocalizations.of(context)!.delete),
+                                          child: Text('core_delete'.tr),
                                         ),
                                       ],
                                     ),
@@ -447,13 +447,13 @@ class _ActionGroupEditorState extends State<ActionGroupEditor> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(CoreLocalizations.of(context)!.cancel),
+                    child: Text('core_cancel'.tr),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: _onSave,
                     icon: const Icon(Icons.save),
-                    label: Text(CoreLocalizations.of(context)!.save),
+                    label: Text('core_save'.tr),
                   ),
                 ],
               ),

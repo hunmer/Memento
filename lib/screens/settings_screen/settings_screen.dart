@@ -1,6 +1,6 @@
 import 'package:Memento/core/services/backup_service.dart';
 import 'package:Memento/core/theme_controller.dart';
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
@@ -11,7 +11,6 @@ import 'package:Memento/core/floating_ball/settings_screen.dart';
 import 'package:Memento/core/floating_ball/floating_ball_manager.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_screen.dart';
 import 'package:Memento/screens/about_screen/about_screen.dart';
-import '../l10n/screens_localizations.dart';
 import 'package:get/get.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -351,7 +350,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 8),
           ListTile(
             leading: const Icon(Icons.info),
-            title: Text(AppLocalizations.of(context)!.aboutTitle),
+            title: Text('app_aboutTitle'.tr),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               NavigationHelper.push(context, const AboutScreen());

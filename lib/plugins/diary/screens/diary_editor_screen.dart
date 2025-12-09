@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/widgets/memento_editor/memento_editor.dart';
 import 'package:Memento/plugins/diary/utils/diary_utils.dart';
-import 'package:Memento/plugins/diary/l10n/diary_localizations.dart';
+import 'package:get/get.dart';
 
 class DiaryEditorScreen extends StatefulWidget {
   final DateTime date;
@@ -61,7 +61,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(DiaryLocalizations.of(context).selectMood),
+            title: Text('diary_selectMood'.tr),
             content: Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -95,7 +95,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
                     setState(() => _selectedMood = null);
                     Navigator.pop(context);
                   },
-                  child: Text(DiaryLocalizations.of(context).clearSelection),
+                  child: Text('diary_clearSelection'.tr),
                 ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -111,8 +111,8 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(DiaryLocalizations.of(context).confirmDeleteDiary),
-            content: Text(DiaryLocalizations.of(context).deleteDiaryMessage),
+            title: Text('diary_confirmDeleteDiary'.tr),
+            content: Text('diary_deleteDiaryMessage'.tr),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -132,7 +132,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
                 style: TextButton.styleFrom(
                   foregroundColor: Theme.of(context).colorScheme.error,
                 ),
-                child: Text(DiaryLocalizations.of(context).confirmDeleteDiary),
+                child: Text('diary_confirmDeleteDiary'.tr),
               ),
             ],
           ),
@@ -144,12 +144,12 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
     return MementoEditor(
       initialTitle: widget.initialTitle,
       initialContent: widget.initialContent,
-      pageTitle: DiaryLocalizations.of(context).name,
+      pageTitle: 'diary_name'.tr,
       date: widget.date,
       mood: _selectedMood,
       onMoodTap: _showMoodSelector,
-      titleHint: DiaryLocalizations.of(context).titleHint,
-      contentHint: DiaryLocalizations.of(context).contentHint,
+      titleHint: 'diary_titleHint'.tr,
+      contentHint: 'diary_contentHint'.tr,
       onSave: (title, content) async {
         // 保存前捕获当前上下文
         final currentContext = context;
@@ -169,7 +169,7 @@ class _DiaryEditorScreenState extends State<DiaryEditorScreen> {
         IconButton(
           icon: const Icon(Icons.delete_outline),
           onPressed: _showDeleteConfirmation,
-          tooltip: DiaryLocalizations.of(context).deleteDiary,
+          tooltip: 'diary_deleteDiary'.tr,
         ),
       ],
     );

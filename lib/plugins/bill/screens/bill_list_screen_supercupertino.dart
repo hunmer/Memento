@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:animations/animations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
-import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:Memento/plugins/bill/models/bill_model.dart';
 import 'package:Memento/plugins/bill/models/bill.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
@@ -314,7 +314,7 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
       actions: [
         IconButton(
           icon: const Icon(Icons.account_balance_wallet),
-          tooltip: BillLocalizations.of(context).accountManagement,
+          tooltip: 'bill_accountManagement'.tr,
           onPressed: () {
             Navigator.push(
               context,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'bill.dart';
 import 'package:Memento/core/event/event_manager.dart';

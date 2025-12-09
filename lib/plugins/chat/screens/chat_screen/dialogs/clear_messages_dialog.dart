@@ -1,6 +1,5 @@
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ClearMessagesDialog extends StatelessWidget {
   final Function() onConfirm;
@@ -15,8 +14,8 @@ class ClearMessagesDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(ChatLocalizations.of(context).clearAllMessages),
-      content: Text(ChatLocalizations.of(context).confirmClearAllMessages),
+      title: Text('chat_clearAllMessages'.tr),
+      content: Text('chat_confirmClearAllMessages'.tr),
       actions: [
         TextButton(
           onPressed: onCancel,

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:get/get.dart';
 
 import 'package:Memento/core/app_initializer.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,6 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
-import 'l10n/activity_localizations.dart';
 import 'screens/activity_timeline_screen/activity_timeline_screen.dart';
 import 'screens/activity_timeline_screen/controllers/activity_controller.dart';
 import 'screens/activity_statistics_screen.dart';
@@ -36,7 +36,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return ActivityLocalizations.of(context).name;
+    return 'activity_name'.tr;
   }
 
   late ActivityService _activityService;
@@ -731,7 +731,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                ActivityLocalizations.of(context).name,
+                'activity_name'.tr,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -763,7 +763,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            ActivityLocalizations.of(context).todayActivities,
+                            'activity_todayActivities'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -783,7 +783,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            ActivityLocalizations.of(context).todayDuration,
+                            'activity_todayDuration'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -806,7 +806,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
                       Column(
                         children: [
                           Text(
-                            ActivityLocalizations.of(context).remainingTime,
+                            'activity_remainingTime'.tr,
                             style: theme.textTheme.bodyMedium,
                           ),
                           Text(
@@ -1030,11 +1030,11 @@ class _ActivityMainViewState extends State<ActivityMainView>
             tabs: [
               Tab(
                 icon: const Icon(Icons.timeline),
-                text: ActivityLocalizations.of(context).timeline,
+                text: 'activity_timeline'.tr,
               ),
               Tab(
                 icon: const Icon(Icons.bar_chart),
-                text: ActivityLocalizations.of(context).statistics,
+                text: 'activity_statistics'.tr,
               ),
             ],
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 /// 计算活动持续时间（分钟）
 int calculateDuration(DateTime selectedDate, TimeOfDay startTime, TimeOfDay endTime) {

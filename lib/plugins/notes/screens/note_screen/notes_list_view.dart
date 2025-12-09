@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
@@ -28,7 +28,7 @@ class NotesListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (subFolders.isEmpty && notes.isEmpty) {
-      return Center(child: Text(NotesLocalizations.of(context).emptyFolder));
+      return Center(child: Text('notes_emptyFolder'.tr));
     }
 
     return ReorderableListView.builder(

@@ -1,5 +1,6 @@
 import 'package:Memento/core/app_initializer.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class PluginOrderManager {
   // 存储插件的顺序

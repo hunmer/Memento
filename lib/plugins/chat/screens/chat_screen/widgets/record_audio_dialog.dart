@@ -1,6 +1,5 @@
 import 'dart:io';
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
@@ -78,7 +77,7 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(ChatLocalizations.of(context).recordingFailed),
+                title: Text('chat_recordingFailed'.tr),
                 content: Text(e.toString()),
                 actions: [
                   TextButton(
@@ -120,9 +119,9 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text(ChatLocalizations.of(context).recordingFailed),
+                title: Text('chat_recordingFailed'.tr),
                 content: Text(
-                  ChatLocalizations.of(context).recordingStopError,
+                  'chat_recordingStopError'.tr,
                 ),
                 actions: [
                   TextButton(
@@ -156,7 +155,7 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              ChatLocalizations.of(context).audioRecording,
+              'chat_audioRecording'.tr,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -182,7 +181,7 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
             ),
             const SizedBox(height: 16),
             Text(
-              ChatLocalizations.of(context).stopRecordingHint,
+              'chat_stopRecordingHint'.tr,
               style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
           ],

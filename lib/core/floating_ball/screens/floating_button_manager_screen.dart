@@ -4,7 +4,7 @@ import 'package:floating_ball_plugin/floating_ball_plugin.dart';
 import 'package:Memento/core/floating_ball/floating_widget_controller.dart';
 import 'package:Memento/core/floating_ball/widgets/floating_button_edit_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/core/l10n/core_localizations.dart';
+import 'package:get/get.dart';
 
 /// 悬浮按钮管理界面
 class FloatingButtonManagerScreen extends StatefulWidget {
@@ -71,20 +71,18 @@ class _FloatingButtonManagerScreenState
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(CoreLocalizations.of(context)!.confirmDelete),
+        title: Text('core_confirmDelete'.tr),
             content: Text(
-              CoreLocalizations.of(
-                context,
-              )!.confirmDeleteButton(_buttons[index].title),
+              'core_confirmDeleteButton'.trParams({'title': _buttons[index].title}),
             ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(CoreLocalizations.of(context)!.cancel),
+            child: Text('core_cancel'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(CoreLocalizations.of(context)!.delete, style: TextStyle(color: Colors.red)),
+            child: Text('core_delete'.tr, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -116,7 +114,7 @@ class _FloatingButtonManagerScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(CoreLocalizations.of(context)!.floatingButtonManager),
+        title: Text('core_floatingButtonManager'.tr),
       ),
       body: _buttons.isEmpty
           ? Center(
@@ -141,7 +139,7 @@ class _FloatingButtonManagerScreenState
                     onPressed: _addButton,
                     icon: const Icon(Icons.add),
                       label: Text(
-                        CoreLocalizations.of(context)!.addFirstButton,
+                        'core_addFirstButton'.tr,
                       ),
                   ),
                 ],

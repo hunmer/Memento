@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
@@ -132,16 +132,16 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(OpenAILocalizations.of(context).unsavedChangesTitle),
-        content: Text(OpenAILocalizations.of(context).unsavedHeaderWarning),
+        title: Text('openai_unsavedChangesTitle'.tr),
+        content: Text('openai_unsavedHeaderWarning'.tr),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(OpenAILocalizations.of(context).cancel),
+            child: Text('openai_cancel'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(OpenAILocalizations.of(context).discard),
+            child: Text('openai_discard'.tr),
           ),
         ],
       ),
@@ -172,14 +172,14 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
         appBar: AppBar(
           title: Text(
             widget.provider == null
-                ? OpenAILocalizations.of(context).addProvider
-                : OpenAILocalizations.of(context).editProvider,
+                ? 'openai_addProvider'.tr
+                : 'openai_editProvider'.tr,
           ),
           actions: [
             IconButton(
               icon: const Icon(Icons.save),
               onPressed: _saveProvider,
-              tooltip: OpenAILocalizations.of(context).saveTooltip,
+              tooltip: 'openai_saveTooltip'.tr,
             ),
           ],
         ),
@@ -191,13 +191,13 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
             TextFormField(
               controller: _labelController,
               decoration: InputDecoration(
-                labelText: OpenAILocalizations.of(context).serviceProvider,
-                hintText: OpenAILocalizations.of(context).pleaseSelectProvider,
+                labelText: 'openai_serviceProvider'.tr,
+                hintText: 'openai_pleaseSelectProvider'.tr,
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return OpenAILocalizations.of(context).providerLabelError;
+                  return 'openai_providerLabelError'.tr;
                 }
                 return null;
               },
@@ -206,17 +206,17 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
             TextFormField(
               controller: _baseUrlController,
               decoration: InputDecoration(
-                labelText: OpenAILocalizations.of(context).baseUrl,
-                hintText: OpenAILocalizations.of(context).enterBaseUrl,
+                labelText: 'openai_baseUrl'.tr,
+                hintText: 'openai_enterBaseUrl'.tr,
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return OpenAILocalizations.of(context).pleaseEnterBaseUrl;
+                  return 'openai_pleaseEnterBaseUrl'.tr;
                 }
                 if (!value.startsWith('http://') &&
                     !value.startsWith('https://')) {
-                  return OpenAILocalizations.of(context).baseUrlError;
+                  return 'openai_baseUrlError'.tr;
                 }
                 return null;
               },
@@ -237,7 +237,7 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                 IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: _selectDefaultModel,
-                  tooltip: OpenAILocalizations.of(context).searchModel,
+                  tooltip: 'openai_searchModel'.tr,
                 ),
               ],
             ),
@@ -260,9 +260,9 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                             controller: _headerKeyController,
                             decoration: InputDecoration(
                               labelText:
-                                  OpenAILocalizations.of(context).headerKey,
+                                  'openai_headerKey'.tr,
                               hintText:
-                                  OpenAILocalizations.of(context).enterHeaders,
+                                  'openai_enterHeaders'.tr,
                               border: OutlineInputBorder(),
                             ),
                           ),
@@ -273,9 +273,9 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                             controller: _headerValueController,
                             decoration: InputDecoration(
                               labelText:
-                                  OpenAILocalizations.of(context).headerValue,
+                                  'openai_headerValue'.tr,
                               hintText:
-                                  OpenAILocalizations.of(context).enterHeaders,
+                                  'openai_enterHeaders'.tr,
                               border: OutlineInputBorder(),
                             ),
                           ),
@@ -284,7 +284,7 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                         IconButton(
                           icon: const Icon(Icons.add_circle),
                           onPressed: _addHeader,
-                          tooltip: OpenAILocalizations.of(context).addHeader,
+                          tooltip: 'openai_addHeader'.tr,
                         ),
                       ],
                     ),
@@ -294,7 +294,7 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                           child: Padding(
                             padding: EdgeInsets.all(16.0),
                             child: Text(
-                              OpenAILocalizations.of(context).noHeaders,
+                              'openai_noHeaders'.tr,
                               style: TextStyle(color: Colors.grey),
                             ),
                           ),

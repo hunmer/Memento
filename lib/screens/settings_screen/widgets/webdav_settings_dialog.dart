@@ -1,4 +1,4 @@
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/screens/settings_screen/controllers/webdav_controller.dart';
@@ -334,7 +334,7 @@ class _WebDAVSettingsDialogState extends State<WebDAVSettingsDialog> {
               // 显示提示
               toastService.showToast('webdav_settingsSavedMessage'.tr);
             },
-            child: Text(AppLocalizations.of(context)!.done),
+            child: Text('app_done'.tr),
           ),
         ],
       ],

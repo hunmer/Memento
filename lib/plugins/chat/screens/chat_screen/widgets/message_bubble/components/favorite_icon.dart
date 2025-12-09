@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class FavoriteIcon extends StatelessWidget {
   final bool isFavorite;

@@ -1,5 +1,6 @@
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ColorPickerSection extends StatelessWidget {
   final Color selectedColor;
@@ -34,7 +35,7 @@ class ColorPickerSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          AppLocalizations.of(context)!.nodeColor,
+          'app_nodeColor'.tr,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),

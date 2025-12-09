@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/contact/l10n/contact_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/contact/models/contact_model.dart';
 import 'package:Memento/plugins/contact/models/interaction_record_model.dart';
 import 'package:Memento/plugins/contact/controllers/contact_controller.dart';
@@ -62,7 +61,7 @@ class _ContactRecordsScreenState extends State<ContactRecordsScreen> {
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.confirmDelete),
         content: Text(
-          ContactLocalizations.of(context).deleteConfirmMessage,
+          'contact_deleteConfirmMessage'.tr,
         ),
         actions: [
           TextButton(
@@ -87,7 +86,7 @@ class _ContactRecordsScreenState extends State<ContactRecordsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(ContactLocalizations.of(context).recordsTab),
+        title: Text('contact_recordsTab'.tr),
       ),
       body: Stack(
         children: [

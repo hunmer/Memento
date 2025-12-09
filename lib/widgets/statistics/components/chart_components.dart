@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:Memento/widgets/l10n/widget_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -244,7 +244,7 @@ class RankingList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (data.isEmpty) {
       return emptyWidget ??
-          Center(child: Text(WidgetLocalizations.of(context)!.noDataAvailable));
+          Center(child: Text('widget_noDataAvailable'.tr));
     }
 
     final maxValue = data.first.value;
@@ -357,7 +357,7 @@ class TimeSeriesChart extends StatelessWidget {
       return SizedBox(
         height: height,
         child: Center(
-          child: Text(WidgetLocalizations.of(context)!.noDataAvailable),
+          child: Text('widget_noDataAvailable'.tr),
         ),
       );
     }
@@ -376,7 +376,7 @@ class TimeSeriesChart extends StatelessWidget {
       return SizedBox(
         height: height,
         child: Center(
-          child: Text(WidgetLocalizations.of(context)!.noDataPoints),
+          child: Text('widget_noDataPoints'.tr),
         ),
       );
     }
@@ -466,7 +466,7 @@ class HourlyDistributionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (hourlyData.isEmpty) {
       return Center(
-        child: Text(WidgetLocalizations.of(context)!.noDataAvailable),
+        child: Text('widget_noDataAvailable'.tr),
       );
     }
 
@@ -521,23 +521,23 @@ class HourlyDistributionBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              WidgetLocalizations.of(context)!.time0000,
+              'widget_time0000'.tr,
               style: TextStyle(fontSize: 10, color: Colors.grey),
             ),
             Text(
-              WidgetLocalizations.of(context)!.time0600,
+              'widget_time0600'.tr,
               style: TextStyle(fontSize: 10, color: Colors.grey),
             ),
             Text(
-              WidgetLocalizations.of(context)!.time1200,
+              'widget_time1200'.tr,
               style: TextStyle(fontSize: 10, color: Colors.grey),
             ),
             Text(
-              WidgetLocalizations.of(context)!.time1800,
+              'widget_time1800'.tr,
               style: TextStyle(fontSize: 10, color: Colors.grey),
             ),
             Text(
-              WidgetLocalizations.of(context)!.time2400,
+              'widget_time2400'.tr,
               style: TextStyle(fontSize: 10, color: Colors.grey),
             ),
           ],

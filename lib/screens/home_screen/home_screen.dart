@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:Memento/core/app_initializer.dart';
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
@@ -10,7 +10,7 @@ import 'package:Memento/screens/home_screen/models/layout_config.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -1065,7 +1065,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    ScreensLocalizations.of(context);
     return PopScope(
       canPop: !_isEditMode, // 编辑模式下不允许直接返回
       onPopInvokedWithResult: (didPop, result) {
@@ -1084,7 +1083,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         appBar: AppBar(
         title: Text(
           _currentLayoutName.isEmpty
-              ? AppLocalizations.of(context)!.home
+              ? 'app_home'.tr
               : _currentLayoutName,
         ),
         centerTitle: true,

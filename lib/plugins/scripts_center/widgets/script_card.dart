@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
-import 'package:Memento/plugins/scripts_center/l10n/scripts_center_localizations.dart';
 
 /// 脚本卡片组件
 ///
@@ -171,7 +171,7 @@ class ScriptCard extends StatelessWidget {
                     ElevatedButton.icon(
                       onPressed: onRun,
                       icon: const Icon(Icons.play_arrow, size: 18),
-                      label: Text(ScriptsCenterLocalizations.of(context).run),
+                      label: Text('scripts_center_run'.tr),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,

@@ -1,4 +1,5 @@
 import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 
 /// 负责管理消息相关的功能

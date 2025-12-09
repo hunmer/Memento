@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'package:get/get.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
-import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
@@ -131,13 +131,13 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
         await plugin.enableActivityNotification();
         if (!mounted) return;
         toastService.showToast(
-          ActivityLocalizations.of(context).notificationEnabled,
+          'activity_notificationEnabled'.tr,
         );
       } else {
         await plugin.disableActivityNotification();
         if (!mounted) return;
         toastService.showToast(
-          ActivityLocalizations.of(context).notificationDisabled,
+          'activity_notificationDisabled'.tr,
         );
       }
 
@@ -147,7 +147,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
     } catch (e) {
       if (mounted) {
         toastService.showToast(
-          '${ActivityLocalizations.of(context).operationFailed}: $e',
+          '${'activity_operationFailed'.tr}: $e',
         );
       }
       // 恢复开关状态

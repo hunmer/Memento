@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/models/bill_model.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
-import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 
 class BillStatsScreenSupercupertino extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -181,8 +181,8 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
       ..sort((a, b) => b.amount.compareTo(a.amount));
 
     return SuperCupertinoNavigationWrapper(
-      title: Text(BillLocalizations.of(context).statisticsAnalysis),
-      largeTitle: BillLocalizations.of(context).statisticsAnalysis,
+      title: Text('bill_statisticsAnalysis'.tr),
+      largeTitle: 'bill_statisticsAnalysis'.tr,
       enableSearchBar: false,
       body: SingleChildScrollView(
         child: Column(

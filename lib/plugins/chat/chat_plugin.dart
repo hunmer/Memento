@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
@@ -128,7 +128,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return ChatLocalizations.of(context).name;
+    return 'chat_name'.tr;
   }
 
   /// 根据消息ID获取消息

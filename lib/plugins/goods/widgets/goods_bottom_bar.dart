@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/goods/screens/warehouse_list_screen.dart';
 import 'package:Memento/plugins/goods/screens/goods_list_screen.dart';
 import 'package:Memento/plugins/goods/widgets/warehouse_form.dart';
@@ -263,11 +263,11 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
             tabs: [
               Tab(
                 icon: const Icon(Icons.warehouse),
-                text: GoodsLocalizations.of(context).warehouseTab ?? '仓库',
+                text: 'goods_warehouseTab'.tr ?? '仓库',
               ),
               Tab(
                 icon: const Icon(Icons.inventory_2),
-                text: GoodsLocalizations.of(context).itemsTab ?? '物品',
+                text: 'goods_itemsTab'.tr ?? '物品',
               ),
             ],
           ),

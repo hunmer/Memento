@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/floating_ball/plugin_overlay_manager.dart';
-import 'package:Memento/core/l10n/core_localizations.dart';
+import 'package:get/get.dart';
 
 /// 显示插件覆盖层对话框
 /// 用于选择要在小窗口中打开的插件
@@ -53,7 +53,7 @@ class PluginOverlaySelector extends StatelessWidget {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: Text(CoreLocalizations.of(context)!.cancel),
+                    child: Text('core_cancel'.tr),
                   ),
                 ],
               ),

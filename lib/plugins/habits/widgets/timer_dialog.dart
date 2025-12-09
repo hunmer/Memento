@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:async';
 
 import 'package:Memento/core/plugin_manager.dart';
@@ -7,7 +8,6 @@ import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
-import 'package:Memento/plugins/habits/l10n/habits_localizations.dart';
 
 class TimerDialog extends StatefulWidget {
   final Habit habit;
@@ -436,7 +436,7 @@ class _TimerDialogState extends State<TimerDialog> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(HabitsLocalizations.of(context).cancelTimer),
+        title: Text('habits_cancelTimer'.tr),
         content: Text(
           '确定要取消计时吗？\n'
           '已计时: ${_formatDuration(_elapsed)}\n\n'
@@ -445,14 +445,14 @@ class _TimerDialogState extends State<TimerDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(HabitsLocalizations.of(context).continueTimer),
+            child: Text('habits_continueTimer'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: Text(HabitsLocalizations.of(context).confirmCancel),
+            child: Text('habits_confirmCancel'.tr),
           ),
         ],
       ),
@@ -476,7 +476,7 @@ class _TimerDialogState extends State<TimerDialog> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(HabitsLocalizations.of(context).completeTimer),
+        title: Text('habits_completeTimer'.tr),
         content: Text(
           '确定要完成计时并保存记录吗？\n'
           '已计时: ${_formatDuration(_elapsed)}\n'
@@ -486,14 +486,14 @@ class _TimerDialogState extends State<TimerDialog> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(HabitsLocalizations.of(context).continueAdjust),
+            child: Text('habits_continueAdjust'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(
               foregroundColor: _themeColor,
             ),
-            child: Text(HabitsLocalizations.of(context).confirmComplete),
+            child: Text('habits_confirmComplete'.tr),
           ),
         ],
       ),

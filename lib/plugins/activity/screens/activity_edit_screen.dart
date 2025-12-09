@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/activity/l10n/activity_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/plugins/activity/widgets/activity_form.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
@@ -74,8 +74,8 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
         // 显示保存成功消息
         toastService.showToast(
           widget.activity != null
-              ? ActivityLocalizations.of(context).editActivity
-              : ActivityLocalizations.of(context).addActivity
+              ? 'activity_editActivity'.tr
+              : 'activity_addActivity'.tr
         );
       }
     } catch (e) {
@@ -107,8 +107,8 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
       appBar: AppBar(
         title: Text(
           widget.activity != null
-              ? ActivityLocalizations.of(context).editActivity
-              : ActivityLocalizations.of(context).addActivity,
+              ? 'activity_editActivity'.tr
+              : 'activity_addActivity'.tr,
         ),
         leading: IconButton(
           icon: const Icon(Icons.close),

@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:Memento/plugins/store/widgets/user_item_card.dart';
 import 'package:Memento/plugins/store/widgets/user_item_detail_page.dart';
@@ -51,7 +51,7 @@ class _UserItemsContentState extends State<UserItemsContent> {
   @override
   Widget build(BuildContext context) {
     if (widget.controller.userItems.isEmpty) {
-      return Center(child: Text(StoreLocalizations.of(context).noItems));
+      return Center(child: Text('store_noItems'.tr));
     }
 
     return _buildMyItemsView();
@@ -63,7 +63,7 @@ class _UserItemsContentState extends State<UserItemsContent> {
 
     if (groupedItems.isEmpty) {
       return Center(
-        child: Text(StoreLocalizations.of(context).noItems),
+        child: Text('store_noItems'.tr),
       );
     }
 
@@ -101,9 +101,9 @@ class _UserItemsContentState extends State<UserItemsContent> {
 
               if (await widget.controller.useItem(itemToUse)) {
                 setState(() {});
-                Toast.success(StoreLocalizations.of(context).useSuccess);
+                Toast.success('store_useSuccess'.tr);
               } else {
-                Toast.error(StoreLocalizations.of(context).itemExpired);
+                Toast.error('store_itemExpired'.tr);
               }
             },
           ),

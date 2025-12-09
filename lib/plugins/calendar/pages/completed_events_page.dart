@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/calendar/models/event.dart';
 import 'package:Memento/plugins/calendar/utils/date_utils.dart';
 
@@ -12,13 +12,13 @@ class CompletedEventsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(CalendarLocalizations.of(context).completedEvents),
+        title: Text('calendar_completedEvents'.tr),
       ),
       body:
           completedEvents.isEmpty
               ? Center(
                 child: Text(
-                  CalendarLocalizations.of(context).noCompletedEvents,
+                  'calendar_noCompletedEvents'.tr,
                 ),
               )
               : ListView.builder(

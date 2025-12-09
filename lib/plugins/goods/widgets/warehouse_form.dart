@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'dart:io';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/goods/l10n/goods_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:uuid/uuid.dart';
@@ -160,7 +160,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
   void _save() async {
     final title = _titleController.text.trim();
     if (title.isEmpty) {
-      toastService.showToast(GoodsLocalizations.of(context).warehouseName);
+      toastService.showToast('goods_warehouseName'.tr);
       return;
     }
 

@@ -2,8 +2,9 @@ import 'dart:io';
 import 'dart:async'; // 添加 StreamController 和 TimeoutException 的导入
 import 'dart:typed_data'; // 添加 Uint8List 的导入
 import 'package:Memento/core/storage/storage_manager.dart';
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -48,14 +49,14 @@ class FullBackupController {
             stream: progressStream,
             builder: (builderContext, snapshot) {
               return AlertDialog(
-                title: Text(AppLocalizations.of(context)!.exportingData),
+                title: Text('app_exportingData'.tr),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     LinearProgressIndicator(value: snapshot.data),
                     const SizedBox(height: 16),
                     Text(
-                      AppLocalizations.of(context)!.completed(
+                      'app_completed'.tr(
                         ((snapshot.data ?? 0) * 100).toStringAsFixed(1),
                       ),
                     ),
@@ -102,7 +103,7 @@ class FullBackupController {
       if (Platform.isAndroid || Platform.isIOS) {
         // 在移动平台上使用分享功能来保存文件
         final result = await FilePicker.platform.saveFile(
-          dialogTitle: AppLocalizations.of(context)!.selectBackupMethod,
+          dialogTitle: 'app_selectBackupMethod'.tr,
           fileName: 'full_backup_$timestamp.zip',
           allowedExtensions: ['zip'],
           type: FileType.custom,
@@ -114,7 +115,7 @@ class FullBackupController {
         if (updatedContext == null) return;
 
         if (result == null) {
-          Toast.show(AppLocalizations.of(context)!.exportCancelled);
+          Toast.show('app_exportCancelled'.tr);
           return;
         }
       } else {
@@ -131,7 +132,7 @@ class FullBackupController {
         if (updatedContext == null) return;
 
         if (savedFile == null) {
-          Toast.show(AppLocalizations.of(context)!.exportCancelled);
+          Toast.show('app_exportCancelled'.tr);
           return;
         }
 
@@ -148,7 +149,7 @@ class FullBackupController {
       if (finalContext == null) return;
 
       Navigator.of(finalContext, rootNavigator: true).pop();
-      Toast.success(AppLocalizations.of(context)!.exportSuccess);
+      Toast.success('app_exportSuccess'.tr);
     } catch (e) {
       // 关闭进度对话框并显示错误消息
       if (!_mounted) return;
@@ -156,7 +157,7 @@ class FullBackupController {
       if (errorContext == null) return;
 
       Navigator.of(errorContext, rootNavigator: true).pop();
-      Toast.error(AppLocalizations.of(context)!.exportFailed(e.toString()));
+      Toast.error('app_exportFailed'.tr(e.toString()));
     }
   }
 
@@ -177,11 +178,11 @@ class FullBackupController {
               // 使用 PopScope 代替已弃用的 WillPopScope
               canPop: false, // 防止返回键关闭对话框
               child: AlertDialog(
-                title: Text(AppLocalizations.of(context)!.warning),
-                content: Text(AppLocalizations.of(context)!.importWarning),
+                title: Text('app_warning'.tr),
+                content: Text('app_importWarning'.tr),
                 actions: [
                   TextButton(
-                    child: Text(AppLocalizations.of(context)!.cancel),
+                    child: Text('app_cancel'.tr),
                     onPressed: () {
                       Navigator.of(dialogContext).pop(false);
                     },
@@ -190,7 +191,7 @@ class FullBackupController {
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.red, // 使用红色强调风险
                     ),
-                    child: Text(AppLocalizations.of(context)!.confirm),
+                    child: Text('app_confirm'.tr),
                     onPressed: () {
                       Navigator.of(dialogContext).pop(true);
                     },
@@ -205,7 +206,7 @@ class FullBackupController {
       if (afterDialogContext == null) return;
 
       if (confirmed != true) {
-        Toast.show(AppLocalizations.of(context)!.importCancelled);
+        Toast.show('app_importCancelled'.tr);
         return;
       }
 
@@ -215,7 +216,7 @@ class FullBackupController {
       if (beforePickContext == null) return;
 
       // 显示短暂的提示
-      Toast.show(AppLocalizations.of(context)!.selectBackupFile);
+      Toast.show('app_selectBackupFile'.tr);
 
       // 选择备份文件
       try {
@@ -223,7 +224,7 @@ class FullBackupController {
           type: FileType.custom,
           allowedExtensions: ['zip'],
           allowMultiple: false,
-          dialogTitle: AppLocalizations.of(context)!.selectBackupFile,
+          dialogTitle: 'app_selectBackupFile'.tr,
           withData: true, // 确保可以读取文件数据
         );
 
@@ -232,7 +233,7 @@ class FullBackupController {
         if (afterPickContext == null) return;
 
         if (result == null || result.files.isEmpty) {
-          Toast.show(AppLocalizations.of(context)!.noFileSelected);
+          Toast.show('app_noFileSelected'.tr);
           return;
         }
 
@@ -242,13 +243,13 @@ class FullBackupController {
           barrierDismissible: false,
           builder:
               (dialogContext) => AlertDialog(
-                title: Text(AppLocalizations.of(context)!.importingData),
+                title: Text('app_importingData'.tr),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(height: 16),
-                    Text(AppLocalizations.of(context)!.pleaseWait),
+                    Text('app_pleaseWait'.tr),
                   ],
                 ),
               ),
@@ -293,7 +294,7 @@ class FullBackupController {
         // 关闭导入进度对话框
         Navigator.of(afterImportContext, rootNavigator: true).pop();
 
-        Toast.success(AppLocalizations.of(context)!.importSuccess);
+        Toast.success('app_importSuccess'.tr);
 
         // 提示重启应用
         await showDialog(
@@ -301,8 +302,8 @@ class FullBackupController {
           barrierDismissible: false,
           builder:
               (dialogContext) => AlertDialog(
-                title: Text(AppLocalizations.of(context)!.restartRequired),
-                content: Text(AppLocalizations.of(context)!.restartMessage),
+                title: Text('app_restartRequired'.tr),
+                content: Text('app_restartMessage'.tr),
               ),
         );
       } catch (e) {
@@ -315,7 +316,7 @@ class FullBackupController {
           errorContext,
           rootNavigator: true,
         ).popUntil((route) => route.isFirst);
-        Toast.error(AppLocalizations.of(context)!.fileSelectionFailed(e));
+        Toast.error('app_fileSelectionFailed'.tr(e));
       }
     } catch (e) {
       // 确保关闭所有可能的对话框
@@ -328,16 +329,16 @@ class FullBackupController {
         rootNavigator: true,
       ).popUntil((route) => route.isFirst);
 
-      String errorMessage = AppLocalizations.of(context)!.importFailed;
+      String errorMessage = 'app_importFailed'.tr;
       if (e is TimeoutException) {
-        errorMessage = AppLocalizations.of(context)!.importTimeout;
+        errorMessage = 'app_importTimeout'.tr;
       } else if (e is FileSystemException) {
-        errorMessage = AppLocalizations.of(context)!.filesystemError;
+        errorMessage = 'app_filesystemError'.tr;
       } else if (e.toString().contains('ArchiveException')) {
-        errorMessage = AppLocalizations.of(context)!.invalidBackupFile;
+        errorMessage = 'app_invalidBackupFile'.tr;
       } else {
         errorMessage =
-            '${AppLocalizations.of(context)!.importFailed}: ${e.toString()}';
+            '${'app_importFailed'.tr}: ${e.toString()}';
       }
 
       Toast.error(errorMessage);

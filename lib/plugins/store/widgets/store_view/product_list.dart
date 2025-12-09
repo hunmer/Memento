@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/widgets/add_product_page.dart';
 import 'package:flutter/material.dart';
@@ -89,7 +89,7 @@ class _ProductListState extends State<ProductList> {
                   const SizedBox(height: 16),
                   Text(
                     _searchQuery.isEmpty
-                        ? StoreLocalizations.of(context).noProducts
+                        ? 'store_noProducts'.tr
                         : '未找到匹配的商品',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Colors.grey[600],
@@ -125,11 +125,11 @@ class _ProductListState extends State<ProductList> {
                       if (await widget.controller.exchangeProduct(product)) {
                         if (mounted) setState(() {});
                         Toast.success(
-                          StoreLocalizations.of(context).redeemSuccess,
+                          'store_redeemSuccess'.tr,
                         );
                       } else {
                         Toast.error(
-                          StoreLocalizations.of(context).redeemFailed,
+                          'store_redeemFailed'.tr,
                         );
                       }
                     },
@@ -155,17 +155,17 @@ class _ProductListState extends State<ProductList> {
       actions: [
         PopupMenuButton<int>(
           icon: const Icon(Icons.sort),
-          tooltip: StoreLocalizations.of(context).sortMethod,
+          tooltip: 'store_sortMethod'.tr,
           onSelected: (index) {
             setState(() {
               _sortIndex = index;
             });
           },
           itemBuilder: (context) => [
-            PopupMenuItem(value: 0, child: Text(StoreLocalizations.of(context).defaultSort)),
-            PopupMenuItem(value: 1, child: Text(StoreLocalizations.of(context).sortByStock)),
-            PopupMenuItem(value: 2, child: Text(StoreLocalizations.of(context).sortByPrice)),
-            PopupMenuItem(value: 3, child: Text(StoreLocalizations.of(context).sortByExpiryDate)),
+            PopupMenuItem(value: 0, child: Text('store_defaultSort'.tr)),
+            PopupMenuItem(value: 1, child: Text('store_sortByStock'.tr)),
+            PopupMenuItem(value: 2, child: Text('store_sortByPrice'.tr)),
+            PopupMenuItem(value: 3, child: Text('store_sortByExpiryDate'.tr)),
           ],
         ),
       ],

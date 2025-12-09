@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import '../../../../../../../core/services/toast_service.dart';
 
 class ChannelDialog extends StatefulWidget {
@@ -74,7 +74,7 @@ class _ChannelDialogState extends State<ChannelDialog> {
   @override
   Widget build(BuildContext context) {
     final title =
-        widget.isEditMode ? '编辑频道' : (ChatLocalizations.of(context).newChannel);
+        widget.isEditMode ? '编辑频道' : ('chat_newChannel'.tr);
 
     return AlertDialog(
       title: Text(title),
@@ -103,7 +103,7 @@ class _ChannelDialogState extends State<ChannelDialog> {
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                  labelText: ChatLocalizations.of(context).channelName,
+                  labelText: 'chat_channelName'.tr,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -116,8 +116,8 @@ class _ChannelDialogState extends State<ChannelDialog> {
               TextFormField(
                 controller: _groupController,
                 decoration: InputDecoration(
-                  labelText: ChatLocalizations.of(context).channelGroupLabel,
-                  hintText: ChatLocalizations.of(context).channelGroupHint,
+                  labelText: 'chat_channelGroupLabel'.tr,
+                  hintText: 'chat_channelGroupHint'.tr,
                 ),
               ),
             ],
@@ -194,7 +194,7 @@ class _ChannelDialogState extends State<ChannelDialog> {
                   if (context.mounted) {
                     Navigator.of(context).pop();
                     // 显示错误提示
-                    toastService.showToast('${ChatLocalizations.of(context).channelCreationFailed}: $e');
+                    toastService.showToast('${'chat_channelCreationFailed'.tr}: $e');
                   }
                 }
               }

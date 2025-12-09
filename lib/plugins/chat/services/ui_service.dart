@@ -1,8 +1,8 @@
 import 'dart:io';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/models/user.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/plugins/chat/screens/channel_list/channel_list_screen.dart';
 import 'package:Memento/plugins/chat/screens/timeline/timeline_screen.dart';
 import 'package:Memento/plugins/chat/screens/profile_edit_dialog.dart';
@@ -45,7 +45,7 @@ class UIService {
               ),
               const SizedBox(width: 12),
               Text(
-                ChatLocalizations.of(context).name,
+                'chat_name'.tr,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -64,7 +64,7 @@ class UIService {
                   Column(
                     children: [
                       Text(
-                        ChatLocalizations.of(context).channelCount,
+                        'chat_channelCount'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -79,7 +79,7 @@ class UIService {
                   Column(
                     children: [
                       Text(
-                        ChatLocalizations.of(context).totalMessages,
+                        'chat_totalMessages'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -101,7 +101,7 @@ class UIService {
                   Column(
                     children: [
                       Text(
-                        ChatLocalizations.of(context).totalMessages,
+                        'chat_totalMessages'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -167,7 +167,7 @@ class UIService {
         child: Column(
           children: [
             Text(
-              ChatLocalizations.of(context).profileTitle,
+              'chat_profileTitle'.tr,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -278,12 +278,12 @@ class UIService {
           Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              ChatLocalizations.of(context).chatSettings,
+              'chat_chatSettings'.tr,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           SwitchListTile(
-            title: Text(ChatLocalizations.of(context).showAvatarInChat),
+            title: Text('chat_showAvatarInChat'.tr),
             value: _settingsService.showAvatarInChat,
             onChanged: (bool value) {
               setState(() {
@@ -292,7 +292,7 @@ class UIService {
             },
           ),
           SwitchListTile(
-            title: Text(ChatLocalizations.of(context).playSoundOnSend),
+            title: Text('chat_playSoundOnSend'.tr),
             value: _settingsService.playSoundOnSend,
             onChanged: (bool value) {
               setState(() {
@@ -301,7 +301,7 @@ class UIService {
             },
           ),
           SwitchListTile(
-            title: Text(ChatLocalizations.of(context).showAvatarInTimeline),
+            title: Text('chat_showAvatarInTimeline'.tr),
             value: _settingsService.showAvatarInTimeline,
             onChanged: (bool value) {
               setState(() {

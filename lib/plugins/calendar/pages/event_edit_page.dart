@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/calendar/l10n/calendar_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/calendar/models/event.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
@@ -123,7 +123,7 @@ class _EventEditPageState extends State<EventEditPage> {
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
-          title: Text(CalendarLocalizations.of(context).selectReminderTime),
+          title: Text('calendar_selectReminderTime'.tr),
           children:
               items
                   .map(
@@ -149,7 +149,7 @@ class _EventEditPageState extends State<EventEditPage> {
 
   Future<void> _selectEndTime() async {
     if (_endDate == null) {
-      toastService.showToast(CalendarLocalizations.of(context).selectDateRangeFirst);
+      toastService.showToast('calendar_selectDateRangeFirst'.tr);
       return;
     }
 
@@ -170,7 +170,7 @@ class _EventEditPageState extends State<EventEditPage> {
 
   Future<void> _saveEvent() async {
     if (_titleController.text.isEmpty) {
-      toastService.showToast(CalendarLocalizations.of(context).enterEventTitle);
+      toastService.showToast('calendar_enterEventTitle'.tr);
       return;
     }
 
@@ -188,7 +188,7 @@ class _EventEditPageState extends State<EventEditPage> {
     }
 
     if (endDateTime.isBefore(startDateTime)) {
-      toastService.showToast(CalendarLocalizations.of(context).endTimeCannotBeEarlier);
+      toastService.showToast('calendar_endTimeCannotBeEarlier'.tr);
       return;
     }
 
@@ -249,7 +249,7 @@ class _EventEditPageState extends State<EventEditPage> {
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                labelText: CalendarLocalizations.of(context).eventTitle,
+                labelText: 'calendar_eventTitle'.tr,
                 border: const OutlineInputBorder(),
               ),
             ),
@@ -257,14 +257,14 @@ class _EventEditPageState extends State<EventEditPage> {
             TextField(
               controller: _descriptionController,
               decoration: InputDecoration(
-                labelText: CalendarLocalizations.of(context).eventDescription,
+                labelText: 'calendar_eventDescription'.tr,
                 border: const OutlineInputBorder(),
               ),
               maxLines: 3,
             ),
             const SizedBox(height: 16),
             ListTile(
-              title: Text(CalendarLocalizations.of(context).dateRange),
+              title: Text('calendar_dateRange'.tr),
               subtitle: Text(
                 _endDate != null
                     ? '${_startDate.year}-${_startDate.month}-${_startDate.day} 至 ${_endDate!.year}-${_endDate!.month}-${_endDate!.day}'
@@ -273,7 +273,7 @@ class _EventEditPageState extends State<EventEditPage> {
               onTap: _selectDateRange,
             ),
             ListTile(
-              title: Text(CalendarLocalizations.of(context).reminderSettings),
+              title: Text('calendar_reminderSettings'.tr),
               subtitle: Text(
                 _reminderMinutes != null
                     ? _getReminderText(_reminderMinutes!)
@@ -294,14 +294,14 @@ class _EventEditPageState extends State<EventEditPage> {
               children: [
                 Expanded(
                   child: ListTile(
-                    title: Text(CalendarLocalizations.of(context).startTime),
+                    title: Text('calendar_startTime'.tr),
                     subtitle: Text(_startTime.format(context)),
                     onTap: _selectStartTime,
                   ),
                 ),
                 Expanded(
                   child: ListTile(
-                    title: Text(CalendarLocalizations.of(context).endTime),
+                    title: Text('calendar_endTime'.tr),
                     subtitle: Text(_endTime?.format(context) ?? '无'),
                     onTap: _selectEndTime,
                   ),

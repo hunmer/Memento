@@ -1,9 +1,8 @@
-import 'package:Memento/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 /// 统一管理消息操作的处理器
@@ -22,7 +21,7 @@ class MessageOperations {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(ChatLocalizations.of(context).editMessage),
+            title: Text('chat_editMessage'.tr),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -89,9 +88,9 @@ class MessageOperations {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(ChatLocalizations.of(context).deleteMessage),
+            title: Text('chat_deleteMessage'.tr),
             content: Text(
-              ChatLocalizations.of(context).deleteMessageConfirmation,
+              'chat_deleteMessageConfirmation'.tr,
             ),
             actions: [
               TextButton(
@@ -100,7 +99,7 @@ class MessageOperations {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text(ChatLocalizations.of(context).delete),
+                child: Text('chat_delete'.tr),
               ),
             ],
           ),
@@ -139,7 +138,7 @@ class MessageOperations {
     if (message.type == MessageType.received ||
         message.type == MessageType.sent) {
       Clipboard.setData(ClipboardData(text: message.content));
-      toastService.showToast(ChatLocalizations.of(context).copiedToClipboard);
+      toastService.showToast('chat_copiedToClipboard'.tr);
     }
   }
 

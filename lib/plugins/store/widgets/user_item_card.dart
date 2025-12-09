@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'package:Memento/l10n/app_localizations.dart';
 
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
@@ -51,7 +51,7 @@ class UserItemCard extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: Text(StoreLocalizations.of(context).confirmUse),
+                  title: Text('store_confirmUse'.tr),
                   content: Text(
                     StoreLocalizations.of(context)
                         .confirmUseMessage

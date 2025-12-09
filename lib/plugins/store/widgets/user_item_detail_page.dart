@@ -1,7 +1,7 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
@@ -45,7 +45,7 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(StoreLocalizations.of(context).itemDetailsTitle),
+        title: Text('store_itemDetailsTitle'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.redeem),
@@ -56,10 +56,10 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
                 builder:
                     (context) => AlertDialog(
                       title: Text(
-                        StoreLocalizations.of(context).useConfirmationTitle,
+                        'store_useConfirmationTitle'.tr,
                       ),
                       content: Text(
-                        StoreLocalizations.of(context).useConfirmationMessage
+                        'store_useConfirmationMessage'.tr
                             .replaceFirst('%s', currentItem.productName),
                       ),
                       actions: [
@@ -202,28 +202,28 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
           // 物品信息
           _buildDetailRow(
             icon: Icons.shopping_bag,
-            label: StoreLocalizations.of(context).productNameLabel,
+            label: 'store_productNameLabel'.tr,
             value: item.productName,
           ),
           _buildDetailRow(
             icon: Icons.calendar_today,
-            label: StoreLocalizations.of(context).purchaseDateLabel,
+            label: 'store_purchaseDateLabel'.tr,
             value: _formatDate(item.purchaseDate),
           ),
           _buildDetailRow(
             icon: Icons.calendar_today,
-            label: StoreLocalizations.of(context).expiryDateLabel,
+            label: 'store_expiryDateLabel'.tr,
             value: _formatDate(item.expireDate),
           ),
           _buildDetailRow(
             icon: Icons.attach_money,
-            label: StoreLocalizations.of(context).purchasePriceLabel,
+            label: 'store_purchasePriceLabel'.tr,
             value:
-                '${item.purchasePrice}${StoreLocalizations.of(context).points}',
+                '${item.purchasePrice}${'store_points'.tr}',
           ),
           _buildDetailRow(
             icon: Icons.layers,
-            label: StoreLocalizations.of(context).remainingQuantityLabel,
+            label: 'store_remainingQuantityLabel'.tr,
             value: '${item.remaining}',
           ),
           const SizedBox(height: 20),
@@ -233,7 +233,7 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  StoreLocalizations.of(context).descriptionLabel,
+                  'store_descriptionLabel'.tr,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -259,7 +259,7 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
         children: [
           Icon(icon, size: 20, color: Theme.of(context).primaryColor),
           const SizedBox(width: 12),
-          Text(StoreLocalizations.of(context).labelColon(label), style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text('store_labelColon'.tr(label), style: const TextStyle(fontWeight: FontWeight.bold)),
           Text(value),
         ],
       ),
@@ -270,9 +270,9 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
     final item = widget.items[_currentIndex];
     if (await widget.controller.useItem(item)) {
       Navigator.pop(context);
-      Toast.success(StoreLocalizations.of(context).useSuccessMessage);
+      Toast.success('store_useSuccessMessage'.tr);
     } else {
-      Toast.error(StoreLocalizations.of(context).itemExpiredMessage);
+      Toast.error('store_itemExpiredMessage'.tr);
     }
   }
 

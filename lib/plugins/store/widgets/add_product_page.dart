@@ -1,7 +1,7 @@
+import 'package:get/get.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -61,8 +61,8 @@ class _AddProductPageState extends State<AddProductPage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(StoreLocalizations.of(context).confirmArchiveTitle),
-            content: Text(StoreLocalizations.of(context).confirmArchiveMessage),
+            title: Text('store_confirmArchiveTitle'.tr),
+            content: Text('store_confirmArchiveMessage'.tr),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -70,7 +70,7 @@ class _AddProductPageState extends State<AddProductPage> {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text(StoreLocalizations.of(context).archiveButton),
+                child: Text('store_archiveButton'.tr),
               ),
             ],
           ),
@@ -87,8 +87,8 @@ class _AddProductPageState extends State<AddProductPage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(StoreLocalizations.of(context).confirmDeleteTitle),
-            content: Text(StoreLocalizations.of(context).confirmDeleteMessage),
+            title: Text('store_confirmDeleteTitle'.tr),
+            content: Text('store_confirmDeleteMessage'.tr),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -97,7 +97,7 @@ class _AddProductPageState extends State<AddProductPage> {
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
                 child: Text(
-                  StoreLocalizations.of(context).deleteButton,
+                  'store_deleteButton'.tr,
                   style: TextStyle(color: Colors.red),
                 ),
               ),
@@ -154,24 +154,24 @@ class _AddProductPageState extends State<AddProductPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(StoreLocalizations.of(context).addProductTitle),
+        title: Text('store_addProductTitle'.tr),
         actions: [
           if (widget.product != null) ...[
             IconButton(
               icon: const Icon(Icons.archive),
               onPressed: _confirmArchive,
-              tooltip: StoreLocalizations.of(context).archiveButton,
+              tooltip: 'store_archiveButton'.tr,
             ),
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _confirmDelete,
-              tooltip: StoreLocalizations.of(context).deleteButton,
+              tooltip: 'store_deleteButton'.tr,
             ),
           ],
           IconButton(
             icon: const Icon(Icons.check),
             onPressed: _submit,
-            tooltip: StoreLocalizations.of(context).saveButton,
+            tooltip: 'store_saveButton'.tr,
           ),
         ],
       ),
@@ -199,12 +199,12 @@ class _AddProductPageState extends State<AddProductPage> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: StoreLocalizations.of(context).productNameLabel,
+                  labelText: 'store_productNameLabel'.tr,
                   border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return StoreLocalizations.of(context).productNameRequired;
+                    return 'store_productNameRequired'.tr;
                   }
                   return null;
                 },
@@ -214,16 +214,16 @@ class _AddProductPageState extends State<AddProductPage> {
               TextFormField(
                 controller: _priceController,
                 decoration: InputDecoration(
-                  labelText: StoreLocalizations.of(context).priceLabel,
+                  labelText: 'store_priceLabel'.tr,
                   border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return StoreLocalizations.of(context).priceRequired;
+                    return 'store_priceRequired'.tr;
                   }
                   if (int.tryParse(value) == null) {
-                    return StoreLocalizations.of(context).priceInvalid;
+                    return 'store_priceInvalid'.tr;
                   }
                   return null;
                 },
@@ -233,16 +233,16 @@ class _AddProductPageState extends State<AddProductPage> {
               TextFormField(
                 controller: _stockController,
                 decoration: InputDecoration(
-                  labelText: StoreLocalizations.of(context).stockLabel,
+                  labelText: 'store_stockLabel'.tr,
                   border: const OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return StoreLocalizations.of(context).stockRequired;
+                    return 'store_stockRequired'.tr;
                   }
                   if (int.tryParse(value) == null) {
-                    return StoreLocalizations.of(context).stockInvalid;
+                    return 'store_stockInvalid'.tr;
                   }
                   return null;
                 },
@@ -252,7 +252,7 @@ class _AddProductPageState extends State<AddProductPage> {
               TextFormField(
                 controller: _descController,
                 decoration: InputDecoration(
-                  labelText: StoreLocalizations.of(context).descriptionLabel,
+                  labelText: 'store_descriptionLabel'.tr,
                   border: const OutlineInputBorder(),
                 ),
                 maxLines: 3,

@@ -1,5 +1,5 @@
-import 'package:Memento/plugins/bill/l10n/bill_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:Memento/plugins/bill/models/bill_model.dart';
@@ -588,19 +588,19 @@ class _BillListScreenState extends State<BillListScreen> {
           context: context,
           builder:
               (BuildContext context) => AlertDialog(
-                title: Text(BillLocalizations.of(context).confirmDelete),
+                title: Text('bill_confirmDelete'.tr),
                 content: Text(
-                  BillLocalizations.of(context).deleteBillConfirmation,
+                  'bill_deleteBillConfirmation'.tr,
                 ),
                 actions: <Widget>[
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: Text(BillLocalizations.of(context).cancel),
+                    child: Text('bill_cancel'.tr),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
                     child: Text(
-                      BillLocalizations.of(context).delete,
+                      'bill_delete'.tr,
                       style: const TextStyle(color: Colors.red),
                     ),
                   ),

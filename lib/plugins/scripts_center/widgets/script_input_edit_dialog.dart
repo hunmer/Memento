@@ -1,7 +1,7 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/scripts_center/models/script_input.dart';
-import 'package:Memento/plugins/scripts_center/l10n/scripts_center_localizations.dart';
 
 /// 脚本输入参数编辑对话框
 class ScriptInputEditDialog extends StatefulWidget {
@@ -329,10 +329,10 @@ class _ScriptInputEditDialogState extends State<ScriptInputEditDialog> {
                             _required = value;
                           });
                         },
-                        title: Text(ScriptsCenterLocalizations.of(context).requiredParameter),
+                        title: Text('scripts_center_requiredParameter'.tr),
                         subtitle: Text(_required
-                            ? ScriptsCenterLocalizations.of(context).userMustFillThisParameter
-                            : ScriptsCenterLocalizations.of(context).thisParameterIsOptional),
+                            ? 'scripts_center_userMustFillThisParameter'.tr
+                            : 'scripts_center_thisParameterIsOptional'.tr),
                         secondary: Icon(
                           _required
                               ? Icons.error_outline
@@ -358,7 +358,7 @@ class _ScriptInputEditDialogState extends State<ScriptInputEditDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: Text(ScriptsCenterLocalizations.of(context).cancel),
+                    child: Text('scripts_center_cancel'.tr),
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton.icon(

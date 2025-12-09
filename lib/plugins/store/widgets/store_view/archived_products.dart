@@ -1,5 +1,5 @@
+import 'package:get/get.dart';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/store/l10n/store_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/models/product.dart';
@@ -19,12 +19,12 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(StoreLocalizations.of(context).archivedProductsTitle),
+        title: Text('store_archivedProductsTitle'.tr),
       ),
       body:
           widget.controller.archivedProducts.isEmpty
               ? Center(
-                child: Text(StoreLocalizations.of(context).noArchivedProducts),
+                child: Text('store_noArchivedProducts'.tr),
               )
               : ListView.builder(
                 padding: const EdgeInsets.all(16),
@@ -65,7 +65,7 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
                   Icon(Icons.archive, color: Colors.white, size: 16),
                   SizedBox(width: 4),
                   Text(
-                    StoreLocalizations.of(context).archivedLabel,
+                    'store_archivedLabel'.tr,
                     style: TextStyle(color: Colors.white),
                   ),
                 ],
@@ -91,8 +91,8 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(StoreLocalizations.of(context).confirmRestoreTitle),
-            content: Text(StoreLocalizations.of(context).confirmRestoreMessage),
+            title: Text('store_confirmRestoreTitle'.tr),
+            content: Text('store_confirmRestoreMessage'.tr),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -100,7 +100,7 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: Text(StoreLocalizations.of(context).restore),
+                child: Text('store_restore'.tr),
               ),
             ],
           ),

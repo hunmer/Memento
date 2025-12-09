@@ -1,7 +1,7 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:Memento/core/config_manager.dart';
-import 'package:Memento/plugins/tracker/l10n/tracker_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -50,8 +50,8 @@ class _TrackerMainViewState extends State<TrackerMainView> {
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
-      title: Text(TrackerLocalizations.of(context).goalTracking),
-      largeTitle: TrackerLocalizations.of(context).goalTracking,
+      title: Text('tracker_goalTracking'.tr),
+      largeTitle: 'tracker_goalTracking'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       enableSearchBar: true,
       searchPlaceholder: '搜索目标...',
@@ -163,7 +163,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return TrackerLocalizations.of(context).name;
+    return 'tracker_name'.tr;
   }
 
   @override
@@ -190,7 +190,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                TrackerLocalizations.of(context).name,
+                'tracker_name'.tr,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -210,7 +210,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        TrackerLocalizations.of(context).todayComplete,
+                        'tracker_todayComplete'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(
@@ -227,7 +227,7 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
                   Column(
                     children: [
                       Text(
-                        TrackerLocalizations.of(context).thisMonthComplete,
+                        'tracker_thisMonthComplete'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -70,7 +70,7 @@ class _VideoPreviewState extends State<VideoPreview> {
         });
 
         Toast.error(
-          '${AppLocalizations.of(context)!.videoLoadFailed}: ${e.toString()}',
+          '${'app_videoLoadFailed'.tr}: ${e.toString()}',
         );
       }
     }
@@ -121,7 +121,7 @@ class _VideoPreviewState extends State<VideoPreview> {
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
             Text(
-              AppLocalizations.of(context)!.loadingVideo,
+              'app_loadingVideo'.tr,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],

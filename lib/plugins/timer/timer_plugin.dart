@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:Memento/core/event/event_manager.dart';
@@ -15,7 +16,6 @@ import 'models/timer_item.dart';
 import 'views/timer_main_view.dart';
 import 'services/timer_service.dart';
 import 'storage/timer_controller.dart';
-import 'l10n/timer_localizations.dart';
 
 class TimerPlugin extends BasePlugin with JSBridgePlugin {
   late final TimerController timerController;
@@ -61,7 +61,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   String? getPluginName(context) {
-    return TimerLocalizations.of(context).name;
+    return 'timer_name'.tr;
   }
 
   @override
@@ -191,7 +191,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
               ),
               const SizedBox(width: 12),
               Text(
-                TimerLocalizations.of(context).name,
+                'timer_name'.tr,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -212,7 +212,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
                   child: Column(
                     children: [
                       Text(
-                        TimerLocalizations.of(context).totalTimer,
+                        'timer_totalTimer'.tr,
                         style: theme.textTheme.bodyMedium,
                       ),
                       Text(

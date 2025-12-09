@@ -1,6 +1,7 @@
 import 'package:Memento/core/app_initializer.dart';
-import 'package:Memento/l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/screens/settings_screen/settings_screen.dart';
@@ -46,7 +47,7 @@ class AppDrawer extends StatelessWidget {
                       ),
                       trailing: IconButton(
                         icon: const Icon(Icons.settings),
-                        tooltip: AppLocalizations.of(context)!.settings,
+                        tooltip: 'app_settings'.tr,
                         onPressed: () {
                           if (context.mounted) {
                             Navigator.pop(context); // 关闭抽屉
@@ -74,7 +75,7 @@ class AppDrawer extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: Text(AppLocalizations.of(context)!.settings),
+            title: Text('app_settings'.tr),
             onTap: () {
               Navigator.pop(context); // 先关闭抽屉
               NavigationHelper.push(context, const SettingsScreen(),

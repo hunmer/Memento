@@ -1,7 +1,7 @@
 import 'dart:io' show Platform;
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:Memento/plugins/chat/l10n/chat_localizations.dart';
 import 'package:Memento/plugins/chat/models/user.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'chat_screen/widgets/message_bubble.dart';

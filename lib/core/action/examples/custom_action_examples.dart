@@ -5,7 +5,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:Memento/core/action/action_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/core/l10n/core_localizations.dart';
+import 'package:get/get.dart';
 
 /// 自定义JavaScript动作示例类
 class CustomActionExamples {
@@ -131,7 +131,7 @@ class CustomActionExamples {
     final descriptionController = TextEditingController();
 
     return AlertDialog(
-      title: Text(CoreLocalizations.of(context)!.inputJavaScriptCode),
+      title: Text('core_inputJavaScriptCode'.tr),
       content: SizedBox(
         width: double.maxFinite,
         child: Column(
@@ -176,7 +176,7 @@ class CustomActionExamples {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(CoreLocalizations.of(context)!.cancel),
+          child: Text('core_cancel'.tr),
         ),
         ElevatedButton(
           onPressed: () {
@@ -192,7 +192,7 @@ class CustomActionExamples {
             Navigator.pop(context);
             Toast.success('JavaScript动作已注册');
           },
-          child: Text(CoreLocalizations.of(context)!.save),
+          child: Text('core_save'.tr),
         ),
       ],
     );
@@ -215,22 +215,22 @@ class CustomActionExamples {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(CoreLocalizations.of(context)!.executionResult),
+        title: Text('core_executionResult'.tr),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(CoreLocalizations.of(context)!.executionStatus(result.success)),
+              Text('core_executionStatus'.trParams({'status': '${result.success}'})),
               const SizedBox(height: 8),
               if (result.success) ...[
-                Text(CoreLocalizations.of(context)!.outputData),
+                Text('core_outputData'.tr),
                 SelectableText(
                   result.data?.toString() ?? '无数据',
                   style: const TextStyle(fontFamily: 'monospace'),
                 ),
               ] else ...[
-                Text(CoreLocalizations.of(context)!.errorMessage),
+                Text('core_errorMessage'.tr),
                 SelectableText(
                   result.error ?? '未知错误',
                   style: const TextStyle(color: Colors.red),
@@ -242,7 +242,7 @@ class CustomActionExamples {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(CoreLocalizations.of(context)!.close),
+            child: Text('core_close'.tr),
           ),
         ],
       ),
@@ -254,7 +254,7 @@ class CustomActionExamples {
     showDialog(
       context: navigatorKey.currentContext!,
       builder: (context) => AlertDialog(
-        title: Text(CoreLocalizations.of(context)!.inputFloatingBallJavaScriptCode),
+        title: Text('core_inputFloatingBallJavaScriptCode'.tr),
         content: const TextField(
           decoration: InputDecoration(
             labelText: 'JavaScript代码',
@@ -265,7 +265,7 @@ class CustomActionExamples {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(CoreLocalizations.of(context)!.cancel),
+            child: Text('core_cancel'.tr),
           ),
           ElevatedButton(
             onPressed: () {
@@ -274,7 +274,7 @@ class CustomActionExamples {
               // manager.registerJavaScriptAction(...);
               Navigator.pop(context);
             },
-            child: Text(CoreLocalizations.of(context)!.save),
+            child: Text('core_save'.tr),
           ),
         ],
       ),

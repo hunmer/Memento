@@ -1,6 +1,6 @@
+import 'package:get/get.dart';
 import 'dart:io';
 import 'package:Memento/l10n/app_localizations.dart';
-import 'package:Memento/plugins/openai/l10n/openai_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
@@ -197,7 +197,7 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
                 const Icon(Icons.smart_toy),
                 const SizedBox(width: 8),
                 Text(
-                  OpenAILocalizations.of(context).selectAgent,
+                  'openai_selectAgent'.tr,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
@@ -247,7 +247,7 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
                   return Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Text(
-                      OpenAILocalizations.of(context).errorReadingAgents,
+                      'openai_errorReadingAgents'.tr,
                     ),
                   );
                 }

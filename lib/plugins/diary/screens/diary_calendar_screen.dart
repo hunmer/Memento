@@ -1,6 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:animations/animations.dart';
-import 'package:Memento/plugins/diary/l10n/diary_localizations.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -105,8 +105,8 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
-      title: Text(DiaryLocalizations.of(context).myDiary),
-      largeTitle: DiaryLocalizations.of(context).myDiary,
+      title: Text('diary_myDiary'.tr),
+      largeTitle: 'diary_myDiary'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       enableSearchBar: true,
       searchPlaceholder: '搜索日记内容...',
@@ -546,8 +546,8 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                                         const SizedBox(width: 4),
                                         Text(
                                           selectedEntry != null
-                                              ? DiaryLocalizations.of(context).edit
-                                              : DiaryLocalizations.of(context).create,
+                                              ? 'diary_edit'.tr
+                                              : 'diary_create'.tr,
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 12,
@@ -618,7 +618,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    DiaryLocalizations.of(context).noDiaryForDate,
+                                    'diary_noDiaryForDate'.tr,
                                     style: TextStyle(
                                       color: textColor.withValues(alpha: 0.4),
                                     ),

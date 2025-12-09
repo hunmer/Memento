@@ -1,6 +1,6 @@
 import 'package:Memento/core/app_initializer.dart' show globalConfigManager;
 import 'package:Memento/core/utils/app.dart';
-import 'package:Memento/screens/l10n/screens_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,8 +10,6 @@ class BaseSettingsController extends ChangeNotifier {
 
   // 切换语言
   Future<Locale?> showLanguageSelectionDialog(BuildContext context) async {
-    final localizations = ScreensLocalizations.of(context);
-
     final result = await showDialog<Locale>(
       context: context,
       builder:

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.dart';
-import 'l10n/widget_localizations.dart';
 
 
 /// Super Cupertino Navigation Bar 的封装组件
@@ -161,8 +161,6 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
   };
 
   /// 获取国际化文本
-  WidgetLocalizations? get _localizations => WidgetLocalizations.of(context);
-
   @override
   void dispose() {
     _searchController.dispose();

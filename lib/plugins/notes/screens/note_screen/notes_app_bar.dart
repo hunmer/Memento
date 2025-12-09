@@ -1,4 +1,4 @@
-import 'package:Memento/plugins/notes/l10n/notes_localizations.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
 
@@ -67,14 +67,14 @@ class NotesAppBar extends StatelessWidget implements PreferredSizeWidget {
                   value: 'new_note',
                   child: ListTile(
                     leading: const Icon(Icons.note_add),
-                    title: Text(NotesLocalizations.of(context).newNote),
+                    title: Text('notes_newNote'.tr),
                   ),
                 ),
                 PopupMenuItem(
                   value: 'new_folder',
                   child: ListTile(
                     leading: const Icon(Icons.create_new_folder),
-                    title: Text(NotesLocalizations.of(context).newFolder),
+                    title: Text('notes_newFolder'.tr),
                   ),
                 ),
               ],
