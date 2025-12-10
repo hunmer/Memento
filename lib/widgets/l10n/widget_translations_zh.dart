@@ -90,4 +90,23 @@ const Map<String, String> zhCN = {
   'widget_activity': '活动',
   'widget_tag': '标签',
   'widget_comment': '注释',
+
+  // CalendarStripDatePicker 日历条日期选择器
+  'widget_calendarStrip_monday': '周一',
+  'widget_calendarStrip_tuesday': '周二',
+  'widget_calendarStrip_wednesday': '周三',
+  'widget_calendarStrip_thursday': '周四',
+  'widget_calendarStrip_friday': '周五',
+  'widget_calendarStrip_saturday': '周六',
+  'widget_calendarStrip_sunday': '周日',
+  'widget_calendarStrip_mon': '一',
+  'widget_calendarStrip_tue': '二',
+  'widget_calendarStrip_wed': '三',
+  'widget_calendarStrip_thu': '四',
+  'widget_calendarStrip_fri': '五',
+  'widget_calendarStrip_sat': '六',
+  'widget_calendarStrip_sun': '日',
+  'widget_calendarStrip_today': '今天',
+  'widget_calendarStrip_selectDate': '选择日期',
+  'widget_calendarStrip_loadingMore': '加载更多...',
 };

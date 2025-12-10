@@ -99,4 +99,23 @@ const Map<String, String> enUS = {
   'widget_activity': 'Activity',
   'widget_tag': 'Tag',
   'widget_comment': 'Comment',
+
+  // CalendarStripDatePicker 日历条日期选择器
+  'widget_calendarStrip_monday': 'Mon',
+  'widget_calendarStrip_tuesday': 'Tue',
+  'widget_calendarStrip_wednesday': 'Wed',
+  'widget_calendarStrip_thursday': 'Thu',
+  'widget_calendarStrip_friday': 'Fri',
+  'widget_calendarStrip_saturday': 'Sat',
+  'widget_calendarStrip_sunday': 'Sun',
+  'widget_calendarStrip_mon': 'M',
+  'widget_calendarStrip_tue': 'T',
+  'widget_calendarStrip_wed': 'W',
+  'widget_calendarStrip_thu': 'T',
+  'widget_calendarStrip_fri': 'F',
+  'widget_calendarStrip_sat': 'S',
+  'widget_calendarStrip_sun': 'S',
+  'widget_calendarStrip_today': 'Today',
+  'widget_calendarStrip_selectDate': 'Select Date',
+  'widget_calendarStrip_loadingMore': 'Loading more...',
 };
