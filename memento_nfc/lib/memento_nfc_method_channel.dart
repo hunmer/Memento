@@ -84,4 +84,10 @@ class MethodChannelMementoNfc extends MementoNfcPlatform {
     }
     return NfcWriteResult.fromMap(result);
   }
+
+  @override
+  Future<bool> openNfcSettings() async {
+    final result = await methodChannel.invokeMethod<bool>('openNfcSettings');
+    return result ?? false;
+  }
 }

@@ -58,6 +58,8 @@ import 'package:Memento/core/routing/plugin_route_handler.dart';
 import 'package:Memento/plugins/checkin/checkin_route_handler.dart';
 import 'package:Memento/plugins/todo/todo_route_handler.dart';
 import 'package:Memento/plugins/goods/goods_route_handler.dart';
+import 'package:Memento/plugins/habits/habits_route_handler.dart';
+import 'package:Memento/plugins/tracker/tracker_route_handler.dart';
 
 class AppRoutes extends NavigatorObserver {
   // 插件路由处理器列表
@@ -65,6 +67,8 @@ class AppRoutes extends NavigatorObserver {
     CheckinRouteHandler(),
     TodoRouteHandler(),
     GoodsRouteHandler(),
+    HabitsRouteHandler(),
+    TrackerRouteHandler(),
   ];
 
   // 判断是否可以返回上一级路由

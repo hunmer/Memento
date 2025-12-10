@@ -112,6 +112,25 @@ class MementoNfcPlugin :
                 pendingWriteRecords = listOf(NfcRecordData("TEXT", text))
                 startNfcWriting(result)
             }
+            "openNfcSettings" -> {
+                try {
+                    val intent = Intent(Settings.ACTION_NFC_SETTINGS)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    activity?.startActivity(intent) ?: context?.startActivity(intent)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to open NFC settings", e)
+                    // 如果打开 NFC 设置失败，尝试打开通用设置
+                    try {
+                        val intent = Intent(Settings.ACTION_SETTINGS)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        activity?.startActivity(intent) ?: context?.startActivity(intent)
+                        result.success(true)
+                    } catch (e2: Exception) {
+                        result.success(false)
+                    }
+                }
+            }
             else -> {
                 result.notImplemented()
             }
