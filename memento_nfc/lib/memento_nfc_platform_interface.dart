@@ -58,4 +58,8 @@ abstract class MementoNfcPlatform extends PlatformInterface {
   Future<NfcWriteResult> writeNdefText(String text) {
     throw UnimplementedError('writeNdefText() has not been implemented.');
   }
+
+  Future<bool> openNfcSettings() {
+    throw UnimplementedError('openNfcSettings() has not been implemented.');
+  }
 }

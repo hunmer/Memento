@@ -104,4 +104,9 @@ class MementoNfc {
   Future<NfcWriteResult> writeNdefText(String text) {
     return MementoNfcPlatform.instance.writeNdefText(text);
   }
+
+  /// 打开 NFC 设置
+  Future<bool> openNfcSettings() {
+    return MementoNfcPlatform.instance.openNfcSettings();
+  }
 }

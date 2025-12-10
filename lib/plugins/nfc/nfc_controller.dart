@@ -77,6 +77,19 @@ class NfcController {
   void showSuccess(String message) {
     Toast.success(message);
   }
+
+  /// 打开 NFC 设置
+  Future<void> openNfcSettings() async {
+    try {
+      final success = await _nfc.openNfcSettings();
+      if (!success) {
+        showError('无法打开NFC设置');
+      }
+    } catch (e) {
+      print('Error opening NFC settings: $e');
+      showError('打开设置失败: $e');
+    }
+  }
 }
 
 /// NFC 读取结果

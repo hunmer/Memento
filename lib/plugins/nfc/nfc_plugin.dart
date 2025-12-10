@@ -11,6 +11,8 @@ import 'card_handlers/read_card_handler.dart';
 import 'card_handlers/custom_write_card_handler.dart';
 import 'card_handlers/checkin_card_handler.dart';
 import 'card_handlers/goods_usage_card_handler.dart';
+import 'card_handlers/habit_timer_card_handler.dart';
+import 'card_handlers/tracker_progress_card_handler.dart';
 
 /// NFC控制器插件主视图
 class NfcMainView extends StatefulWidget {
@@ -26,6 +28,8 @@ class _NfcMainViewState extends State<NfcMainView> {
   late final CustomWriteCardHandler _writeCardHandler;
   late final CheckinCardHandler _checkinCardHandler;
   late final GoodsUsageCardHandler _goodsUsageCardHandler;
+  late final HabitTimerCardHandler _habitTimerCardHandler;
+  late final TrackerProgressCardHandler _trackerProgressCardHandler;
 
   bool _isReading = false;
   bool _isWriting = false;
@@ -38,6 +42,8 @@ class _NfcMainViewState extends State<NfcMainView> {
     _writeCardHandler = CustomWriteCardHandler(onWrite: _writeNfcRecords);
     _checkinCardHandler = CheckinCardHandler();
     _goodsUsageCardHandler = GoodsUsageCardHandler();
+    _habitTimerCardHandler = HabitTimerCardHandler();
+    _trackerProgressCardHandler = TrackerProgressCardHandler();
     _checkNfcStatus();
   }
 
@@ -219,12 +225,45 @@ class _NfcMainViewState extends State<NfcMainView> {
     );
   }
 
+  /// 处理 NFC 状态图标点击
+  void _handleNfcStatusTap() {
+    if (!_controller.isNfcSupported) {
+      // 设备不支持 NFC
+      Toast.error('设备不支持NFC功能');
+      return;
+    }
+
+    if (!_controller.isNfcEnabled) {
+      // NFC 未启用，打开设置
+      Toast.info('请先开启NFC功能');
+      _controller.openNfcSettings();
+    } else {
+      // NFC 已启用
+      Toast.success('已开启NFC');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('nfc_nfcController'.tr),
         actions: [
+          // NFC 状态图标
+          IconButton(
+            icon: Icon(
+              _controller.isNfcSupported && _controller.isNfcEnabled
+                  ? Icons.nfc
+                  : Icons.nfc_outlined,
+              color: _controller.isNfcSupported && _controller.isNfcEnabled
+                  ? Colors.green
+                  : Colors.red,
+            ),
+            tooltip: _controller.isNfcSupported
+                ? (_controller.isNfcEnabled ? 'NFC已启用' : 'NFC未启用')
+                : '设备不支持NFC',
+            onPressed: _handleNfcStatusTap,
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _checkNfcStatus,
@@ -236,66 +275,6 @@ class _NfcMainViewState extends State<NfcMainView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // NFC 状态卡片
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'NFC状态',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Icon(
-                          _controller.isNfcSupported ? Icons.check_circle : Icons.cancel,
-                          color: _controller.isNfcSupported ? Colors.green : Colors.red,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _controller.isNfcSupported ? '支持NFC' : '不支持NFC',
-                          style: TextStyle(
-                            color: _controller.isNfcSupported ? Colors.green : Colors.red,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          _controller.isNfcEnabled ? Icons.check_circle : Icons.cancel,
-                          color: _controller.isNfcEnabled ? Colors.green : Colors.red,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _controller.isNfcEnabled ? 'NFC已启用' : 'NFC未启用',
-                          style: TextStyle(
-                            color: _controller.isNfcEnabled ? Colors.green : Colors.red,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (!_controller.isNfcEnabled)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12.0),
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.settings),
-                          label: Text('nfc_enableNFC'.tr),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
             // NFC操作卡片 - 一行两个
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,6 +290,12 @@ class _NfcMainViewState extends State<NfcMainView> {
             const SizedBox(height: 16),
             // 写入物品使用记录卡片
             _goodsUsageCardHandler.buildCard(context, _controller.isNfcEnabled, false),
+            const SizedBox(height: 16),
+            // 写入习惯计时卡片
+            _habitTimerCardHandler.buildCard(context, _controller.isNfcEnabled, false),
+            const SizedBox(height: 16),
+            // 写入目标追踪进度卡片
+            _trackerProgressCardHandler.buildCard(context, _controller.isNfcEnabled, false),
           ],
         ),
       ),
