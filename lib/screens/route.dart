@@ -57,12 +57,14 @@ import 'package:Memento/plugins/tracker/screens/tracker_goal_progress_selector_s
 import 'package:Memento/core/routing/plugin_route_handler.dart';
 import 'package:Memento/plugins/checkin/checkin_route_handler.dart';
 import 'package:Memento/plugins/todo/todo_route_handler.dart';
+import 'package:Memento/plugins/goods/goods_route_handler.dart';
 
 class AppRoutes extends NavigatorObserver {
   // 插件路由处理器列表
   static final List<PluginRouteHandler> _pluginRouteHandlers = [
     CheckinRouteHandler(),
     TodoRouteHandler(),
+    GoodsRouteHandler(),
   ];
 
   // 判断是否可以返回上一级路由
