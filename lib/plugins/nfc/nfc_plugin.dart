@@ -23,6 +23,7 @@ class _NfcMainViewState extends State<NfcMainView> {
   bool _isReading = false;
   bool _isWriting = false;
   bool _isWritingCheckin = false;
+  bool _isWritingGoodsUsage = false;
 
   @override
   void initState() {
@@ -301,6 +302,105 @@ class _NfcMainViewState extends State<NfcMainView> {
       }
       setState(() {
         _isWritingCheckin = false;
+      });
+      _showError('写入错误: $e');
+    }
+  }
+
+  /// 写入物品使用记录到 NFC
+  Future<void> _writeGoodsUsageToNfc() async {
+    if (!_isNfcEnabled) {
+      _showError('请先启用NFC');
+      return;
+    }
+
+    // 打开物品选择器
+    if (!mounted) return;
+
+    final result = await pluginDataSelectorService.showSelector(
+      context,
+      'goods.item',
+    );
+
+    if (result == null || result.cancelled) {
+      return;
+    }
+
+    // 获取选择的物品 ID 和名称
+    final itemId = result.path.isNotEmpty ? result.path.last.selectedItem.id : null;
+    final itemName = result.path.isNotEmpty ? result.path.last.selectedItem.title : null;
+
+    if (itemId == null) {
+      Toast.error('未能获取物品 ID');
+      return;
+    }
+
+    // 构建深度链接 URL
+    final deepLinkUrl = 'memento://goods/usage?itemId=$itemId&action=add_usage';
+
+    // 使用与 _writeCheckinToNfc 相同的方式写入
+    setState(() {
+      _isWritingGoodsUsage = true;
+    });
+
+    // 先显示等待对话框
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (dialogContext) => WillPopScope(
+            onWillPop: () async => false,
+            child: AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text('nfc_pleaseBringPhoneNearNFC'.tr),
+                  const SizedBox(height: 8),
+                  Text(
+                    '正在写入物品使用记录数据...\n物品: $itemName',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
+
+    try {
+      final nfc = MementoNfc();
+      // 同时写入 URI 和 AAR 记录，确保扫描时打开正确的应用
+      // URI 记录包含深度链接，AAR 记录确保打开 Memento 应用
+      final writeResult = await nfc.writeNfcRecords([
+        {'type': 'URI', 'data': deepLinkUrl},
+        {'type': 'AAR', 'data': 'github.hunmer.memento'},
+      ]);
+
+      // 关闭等待对话框
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      setState(() {
+        _isWritingGoodsUsage = false;
+      });
+
+      if (writeResult.success) {
+        _showSuccess('写入成功！扫描此标签即可快速添加「$itemName」的使用记录');
+      } else {
+        _showError(writeResult.error ?? '写入失败');
+      }
+    } catch (e) {
+      // 关闭等待对话框
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+      setState(() {
+        _isWritingGoodsUsage = false;
       });
       _showError('写入错误: $e');
     }
@@ -628,6 +728,76 @@ class _NfcMainViewState extends State<NfcMainView> {
                       Icon(
                         Icons.chevron_right,
                         color: _isNfcEnabled ? Colors.teal[700] : Colors.grey,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // 写入物品使用记录卡片
+            Card(
+              elevation: 2,
+              child: InkWell(
+                onTap: _isWritingGoodsUsage || !_isNfcEnabled
+                    ? null
+                    : _writeGoodsUsageToNfc,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: Colors.orange[50],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: _isWritingGoodsUsage
+                            ? const Center(
+                                child: SizedBox(
+                                  width: 28,
+                                  height: 28,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                  ),
+                                ),
+                              )
+                            : Icon(
+                                Icons.inventory_2,
+                                size: 28,
+                                color: _isNfcEnabled
+                                    ? Colors.orange[700]
+                                    : Colors.grey,
+                              ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _isWritingGoodsUsage ? '写入中...' : '写入物品使用记录',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '选择物品后写入NFC标签，扫描即可添加使用记录',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        color: _isNfcEnabled ? Colors.orange[700] : Colors.grey,
                       ),
                     ],
                   ),

@@ -47,7 +47,7 @@ class MainActivity: FlutterActivity() {
         isInForeground = false
     }
 
-    private fun handleIntent(intent: Intent?) {
+    private fun handleIntent(intent: Intent?, isFromBackground: Boolean = false) {
         // 处理活动通知Intent
         val source = intent?.getStringExtra("source")
         val action = intent?.getStringExtra("action")
@@ -69,6 +69,17 @@ class MainActivity: FlutterActivity() {
             }
         }
 
+        // 检查是否是 NFC intent
+        val isNfcIntent = intent?.action == NfcAdapter.ACTION_NDEF_DISCOVERED ||
+                          intent?.action == NfcAdapter.ACTION_TAG_DISCOVERED ||
+                          intent?.action == NfcAdapter.ACTION_TECH_DISCOVERED
+
+        // 如果应用在前台且是 NFC intent，跳过处理（让应用内的 NFC ReaderMode 处理）
+        if (!isFromBackground && isNfcIntent) {
+            Log.d("MainActivity", "App is in foreground, skipping NFC intent to avoid conflict with ReaderMode")
+            return
+        }
+
         // 优先尝试从 NFC intent 中提取 URI
         var uri: Uri? = extractNfcUri(intent)
 
@@ -78,7 +89,7 @@ class MainActivity: FlutterActivity() {
         }
 
         uri?.let {
-            Log.d("MainActivity", "Received DeepLink: $it")
+            Log.d("MainActivity", "Received DeepLink: $it (isFromBackground=$isFromBackground)")
 
             // 如果 MethodChannel 已经初始化，直接发送；否则保存待发送
             if (widgetMethodChannel != null) {
