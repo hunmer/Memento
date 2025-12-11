@@ -92,6 +92,11 @@ class FileWatchSyncService {
 
       _isInitialized = true;
       debugPrint('FileWatchSyncService: 初始化完成');
+
+      // 启动时后台同步（不阻塞主线程）
+      if (_config!.syncOnStart) {
+        _performStartupSync();
+      }
     } catch (e) {
       debugPrint('FileWatchSyncService: 初始化失败 - $e');
     }
@@ -102,6 +107,49 @@ class FileWatchSyncService {
     await dispose();
     _isInitialized = false;
     await initialize();
+  }
+
+  /// 启动时后台同步（异步执行，不阻塞主线程）
+  void _performStartupSync() {
+    // 使用 Future.delayed 确保 UI 先加载完成
+    Future.delayed(const Duration(seconds: 2), () async {
+      if (_syncService == null || !_syncService!.isLoggedIn) {
+        debugPrint('FileWatchSyncService: 启动同步跳过 - 同步服务未就绪');
+        return;
+      }
+
+      debugPrint('FileWatchSyncService: 开始启动时同步...');
+
+      try {
+        final results = await _syncService!.fullSync();
+
+        int pullCount = 0;
+        int pushCount = 0;
+        int errorCount = 0;
+
+        for (final result in results) {
+          switch (result.type) {
+            case SyncResultType.success:
+              // 判断是拉取还是推送（根据消息内容）
+              pushCount++;
+              break;
+            case SyncResultType.conflictResolved:
+              pullCount++;
+              break;
+            case SyncResultType.error:
+              errorCount++;
+              break;
+            default:
+              break;
+          }
+        }
+
+        debugPrint('FileWatchSyncService: 启动同步完成 - '
+            '同步: ${pullCount + pushCount}, 错误: $errorCount');
+      } catch (e) {
+        debugPrint('FileWatchSyncService: 启动同步失败 - $e');
+      }
+    });
   }
 
   /// 获取数据存储的基础路径
