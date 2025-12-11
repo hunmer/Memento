@@ -626,9 +626,13 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
           _jsBridgeInjector!.initialize();
         }
       },
-      onLoadStart: (controller, url) {
+      onLoadStart: (controller, url) async {
         widget.onLoadingChanged(true);
         if (url != null) {
+          // 如果是新的 URL，重置 JS Bridge 注入状态
+          if (url.toString() != widget.tab.url && _jsBridgeInjector != null) {
+            _jsBridgeInjector!.reset();
+          }
           widget.onUrlChanged(url.toString());
         }
       },
@@ -655,7 +659,14 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
       },
       onUpdateVisitedHistory: (controller, url, androidIsReload) async {
         if (url != null) {
-          widget.onUrlChanged(url.toString());
+          final newUrl = url.toString();
+
+          // 如果 URL 改变，重置 JS Bridge 注入状态
+          if (newUrl != widget.tab.url && _jsBridgeInjector != null) {
+            _jsBridgeInjector!.reset();
+          }
+
+          widget.onUrlChanged(newUrl);
 
           // 更新导航状态
           final canGoBack = await controller.canGoBack() ?? false;

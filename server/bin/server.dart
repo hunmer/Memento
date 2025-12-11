@@ -94,14 +94,14 @@ void main(List<String> args) async {
 
   // 健康检查 (无需认证)
   router.get('/health', (Request request) {
-    return Response.ok('{"status": "healthy", "timestamp": "${DateTime.now().toIso8601String()}"}',
+    return Response.ok(
+        '{"status": "healthy", "timestamp": "${DateTime.now().toIso8601String()}"}',
         headers: {'Content-Type': 'application/json'});
   });
 
   // 版本信息 (无需认证)
   router.get('/version', (Request request) {
-    return Response.ok(
-        '{"version": "1.0.0", "name": "Memento Sync Server"}',
+    return Response.ok('{"version": "1.0.0", "name": "Memento Sync Server"}',
         headers: {'Content-Type': 'application/json'});
   });
 
@@ -143,7 +143,7 @@ void main(List<String> args) async {
   final activityRoutes = ActivityRoutes(pluginDataService);
   router.mount(
     '/api/v1/plugins/activity',
-    pluginPipeline().addHandler(activityRoutes.router.call),
+    pluginPipeline().addHandler(activityRoutes.router.call as Handler),
   );
 
   // Goods 插件路由
@@ -219,9 +219,8 @@ void main(List<String> args) async {
   });
 
   // 4. 构建处理管道
-  var handler = const Pipeline()
-      .addMiddleware(logRequests())
-      .addHandler(router.call);
+  var handler =
+      const Pipeline().addMiddleware(logRequests()).addHandler(router.call);
 
   // 添加 CORS 支持
   if (config.enableCors) {
