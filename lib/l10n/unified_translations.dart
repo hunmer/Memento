@@ -8,7 +8,7 @@ import 'app_translations_en.dart';
 import '../core/l10n/core_translations_zh.dart';
 import '../core/l10n/core_translations_en.dart';
 
-// 插件层 (20个)
+// 插件层 (21个)
 import '../plugins/activity/l10n/activity_translations_zh.dart';
 import '../plugins/activity/l10n/activity_translations_en.dart';
 import '../plugins/bill/l10n/bill_translations_zh.dart';
@@ -53,6 +53,8 @@ import '../plugins/tts/l10n/tts_translations_zh.dart';
 import '../plugins/tts/l10n/tts_translations_en.dart';
 import '../plugins/nfc/l10n/nfc_translations_zh.dart';
 import '../plugins/nfc/l10n/nfc_translations_en.dart';
+import '../plugins/webview/l10n/webview_translations_zh.dart';
+import '../plugins/webview/l10n/webview_translations_en.dart';
 
 // 屏幕层 (5个)
 import '../screens/settings_screen/l10n/settings_screen_translations_zh.dart';
@@ -85,11 +87,11 @@ import '../widgets/l10n/location_picker_translations_en.dart';
 /// 整合了 Memento 应用的所有模块翻译:
 /// - 1 个应用层 (app)
 /// - 1 个核心层 (core)
-/// - 20 个插件
+/// - 21 个插件
 /// - 6 个屏幕
 /// - 7 个组件
 ///
-/// 总计: 35 个模块, 2500+ 翻译键
+/// 总计: 36 个模块, 2600+ 翻译键
 class UnifiedTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys {
@@ -104,7 +106,7 @@ class UnifiedTranslations extends Translations {
     zhDict.addAll(coreTranslationsZh);
     enDict.addAll(coreTranslationsEn);
 
-    // === 插件层 (20个) ===
+    // === 插件层 (21个) ===
     zhDict.addAll(ActivityTranslationsZh.translations);
     enDict.addAll(ActivityTranslationsEn.translations);
 
@@ -167,6 +169,9 @@ class UnifiedTranslations extends Translations {
 
     zhDict.addAll(ttsTranslationsZh);
     enDict.addAll(ttsTranslationsEn);
+
+    zhDict.addAll(webviewTranslationsZh);
+    enDict.addAll(webviewTranslationsEn);
 
     // === 屏幕层 (6个) ===
     zhDict.addAll(settingsScreenTranslationsZh);

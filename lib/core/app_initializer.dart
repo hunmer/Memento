@@ -37,6 +37,7 @@ import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
 import 'package:Memento/plugins/nfc/nfc_plugin.dart';
+import 'package:Memento/plugins/webview/webview_plugin.dart';
 import 'package:Memento/screens/settings_screen/controllers/auto_update_controller.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
 import 'package:Memento/core/event/event.dart';
@@ -435,6 +436,7 @@ Future<void> _registerPlugins() async {
     ScriptsCenterPlugin(),
     TTSPlugin(),
     NfcPlugin(),
+    WebViewPlugin(),
   ];
 
   // 并行注册插件以提高速度

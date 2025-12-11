@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memento JS Bridge 测试</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4facfe;
+        }
+
+        h2 {
+            color: #00f2fe;
+            margin: 20px 0 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #000;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        button.danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        button.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .output {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+            color: #c9d1d9;
+        }
+
+        .output .success { color: #3fb950; }
+        .output .error { color: #f85149; }
+        .output .info { color: #58a6ff; }
+        .output .warn { color: #d29922; }
+
+        .status-bar {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #f85149;
+        }
+
+        .status-dot.connected {
+            background: #3fb950;
+            box-shadow: 0 0 10px #3fb950;
+        }
+
+        input[type="text"] {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 10px 12px;
+            border-radius: 6px;
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .plugin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .plugin-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .plugin-card:hover {
+            background: rgba(79, 172, 254, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .plugin-card .icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .plugin-card .name {
+            font-size: 12px;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Memento JS Bridge 测试</h1>
+
+        <!-- 状态栏 -->
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">检测中...</span>
+            </div>
+            <button onclick="clearOutput()">清空日志</button>
+        </div>
+
+        <!-- 系统 API 测试 -->
+        <div class="section">
+            <h2>系统 API</h2>
+            <div class="btn-group">
+                <button onclick="testGetCurrentTime()">获取当前时间</button>
+                <button onclick="testGetDeviceInfo()">获取设备信息</button>
+                <button onclick="testGetAppInfo()">获取应用信息</button>
+            </div>
+        </div>
+
+        <!-- UI API 测试 -->
+        <div class="section">
+            <h2>UI API</h2>
+            <div class="input-group">
+                <input type="text" id="toastMessage" placeholder="Toast 消息内容" value="Hello from WebView!">
+                <button onclick="testToast()">显示 Toast</button>
+            </div>
+            <div class="btn-group">
+                <button class="secondary" onclick="testAlert()">显示 Alert</button>
+                <button class="secondary" onclick="testConfirm()">显示 Confirm</button>
+            </div>
+        </div>
+
+        <!-- WebView 插件测试 -->
+        <div class="section">
+            <h2>WebView 插件</h2>
+            <div class="btn-group">
+                <button onclick="testGetCards()">获取所有卡片</button>
+                <button onclick="testGetTabs()">获取所有标签页</button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="cardTitle" placeholder="卡片标题" value="测试卡片">
+                <input type="text" id="cardUrl" placeholder="卡片 URL" value="https://example.com">
+            </div>
+            <div class="btn-group">
+                <button class="success" onclick="testAddCard()">添加卡片</button>
+                <button class="danger" onclick="testDeleteLastCard()">删除最后一张卡片</button>
+            </div>
+        </div>
+
+        <!-- 其他插件测试 -->
+        <div class="section">
+            <h2>其他插件</h2>
+            <div class="plugin-grid" id="pluginGrid">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 自定义调用 -->
+        <div class="section">
+            <h2>自定义调用</h2>
+            <div class="input-group">
+                <input type="text" id="customPluginId" placeholder="插件 ID" value="diary">
+                <input type="text" id="customMethod" placeholder="方法名" value="getEntries">
+            </div>
+            <input type="text" id="customParams" placeholder='参数 JSON (可选)' value='{"limit": 10}'>
+            <button onclick="testCustomCall()" style="width: 100%; margin-top: 10px;">执行调用</button>
+        </div>
+
+        <!-- 输出区域 -->
+        <div class="section">
+            <h2>输出日志</h2>
+            <div class="output" id="output"></div>
+        </div>
+    </div>
+
+    <script>
+        // 输出日志
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const time = new Date().toLocaleTimeString();
+            const typeClass = type;
+
+            let formattedMessage = message;
+            if (typeof message === 'object') {
+                formattedMessage = JSON.stringify(message, null, 2);
+            }
+
+            output.innerHTML += `<span class="${typeClass}">[${time}] ${formattedMessage}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+            log('日志已清空', 'info');
+        }
+
+        // 检测 Memento Bridge 是否可用
+        function checkBridge() {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+
+            if (typeof window.Memento !== 'undefined') {
+                statusDot.classList.add('connected');
+                statusText.textContent = 'Memento Bridge 已连接';
+                log('Memento JS Bridge 已连接', 'success');
+                return true;
+            } else if (typeof window.flutter_inappwebview !== 'undefined') {
+                statusDot.classList.add('connected');
+                statusText.textContent = 'Flutter Bridge 已连接 (原生)';
+                log('Flutter InAppWebView Bridge 已连接', 'warn');
+                return true;
+            } else {
+                statusText.textContent = 'Bridge 未连接';
+                log('Memento JS Bridge 未连接，请在 Memento WebView 中打开此页面', 'error');
+                return false;
+            }
+        }
+
+        // 包装调用以处理 Bridge 未注入的情况
+        async function callMemento(callback) {
+            try {
+                if (typeof window.Memento === 'undefined') {
+                    throw new Error('Memento Bridge 未注入');
+                }
+                const result = await callback();
+                return result;
+            } catch (error) {
+                log(`错误: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        // ==================== 系统 API ====================
+
+        async function testGetCurrentTime() {
+            log('调用: Memento.system.getCurrentTime()', 'info');
+            try {
+                const result = await callMemento(() => Memento.system.getCurrentTime());
+                log(`当前时间: ${JSON.stringify(result)}`, 'success');
+            } catch (e) {
+                log(`获取时间失败: ${e.message}`, 'error');
+            }
+        }
+
+        async function testGetDeviceInfo() {
+            log('调用: Memento.system.getDeviceInfo()', 'info');
+            try {
+                const result = await callMemento(() => Memento.system.getDeviceInfo());
+                log(result, 'success');
+            } catch (e) {
+                log(`获取设备信息失败: ${e.message}`, 'error');
+            }
+        }
+
+        async function testGetAppInfo() {
+            log('调用: Memento.system.getAppInfo()', 'info');
+            try {
+                const result = await callMemento(() => Memento.system.getAppInfo());
+                log(result, 'success');
+            } catch (e) {
+                log(`获取应用信息失败: ${e.message}`, 'error');
+            }
+        }
+
+        // ==================== UI API ====================
+
+        async function testToast() {
+            const message = document.getElementById('toastMessage').value || 'Hello!';
+            log(`调用: Memento.ui.toast("${message}")`, 'info');
+            try {
+                await callMemento(() => Memento.ui.toast(message));
+                log('Toast 显示成功', 'success');
+            } catch (e) {
+                log(`Toast 失败: ${e.message}`, 'error');
+            }
+        }
+
+        async function testAlert() {
+            log('调用: Memento.ui.alert(...)', 'info');
+            try {
+                await callMemento(() => Memento.ui.alert({
+                    title: '测试 Alert',
+                    message: '这是一个来自 WebView 的 Alert 对话框',
+                    buttonText: '我知道了'
+                }));
+                log('Alert 已关闭', 'success');
+            } catch (e) {
+                log(`Alert 失败: ${e.message}`, 'error');
+            }
+        }
+
+        async function testConfirm() {
+            log('调用: Memento.ui.confirm(...)', 'info');
+            try {
+                const result = await callMemento(() => Memento.ui.confirm({
+                    title: '确认操作',
+                    message: '你确定要执行这个操作吗？',
+                    confirmText: '确定',
+                    cancelText: '取消'
+                }));
+                log(`用户选择: ${result ? '确定' : '取消'}`, 'success');
+            } catch (e) {
+                log(`Confirm 失败: ${e.message}`, 'error');
+            }
+        }
+
+        // ==================== WebView 插件 ====================
+
+        async function testGetCards() {
+            log('调用: Memento.plugins.webview.getCards()', 'info');
+            try {
+                const result = await callMemento(() => Memento.plugins.webview.getCards());
+                const data = typeof result === 'string' ? JSON.parse(result) : result;
+                log(`获取到 ${Array.isArray(data) ? data.length : 0} 张卡片:`, 'success');
+                log(data, 'info');
+            } catch (e) {
+                log(`获取卡片失败: ${e.message}`, 'error');
+            }
+        }
+
+        async function testGetTabs() {
+            log('调用: Memento.plugins.webview.getTabs()', 'info');
+            try {
+                const result = await callMemento(() => Memento.plugins.webview.getTabs());
+                const data = typeof result === 'string' ? JSON.parse(result) : result;
+                log(`获取到 ${Array.isArray(data) ? data.length : 0} 个标签页:`, 'success');
+                log(data, 'info');
+            } catch (e) {
+                log(`获取标签页失败: ${e.message}`, 'error');
+            }
+        }
+
+        async function testAddCard() {
+            const title = document.getElementById('cardTitle').value || '测试卡片';
+            const url = document.getElementById('cardUrl').value || 'https://example.com';
+
+            log(`调用: Memento.plugins.webview.addCard({title: "${title}", url: "${url}"})`, 'info');
+            try {
+                const result = await callMemento(() => Memento.plugins.webview.addCard({
+                    title: title,
+                    url: url,
+                    type: 'url'
+                }));
+                const data = typeof result === 'string' ? JSON.parse(result) : result;
+                log('卡片添加成功:', 'success');
+                log(data, 'info');
+            } catch (e) {
+                log(`添加卡片失败: ${e.message}`, 'error');
+            }
+        }
+
+        let lastCardId = null;
+
+        async function testDeleteLastCard() {
+            log('调用: Memento.plugins.webview.getCards() 然后删除最后一张', 'info');
+            try {
+                // 先获取所有卡片
+                const cardsResult = await callMemento(() => Memento.plugins.webview.getCards());
+                const cards = typeof cardsResult === 'string' ? JSON.parse(cardsResult) : cardsResult;
+
+                if (!Array.isArray(cards) || cards.length === 0) {
+                    log('没有可删除的卡片', 'warn');
+                    return;
+                }
+
+                const lastCard = cards[cards.length - 1];
+                log(`删除卡片: ${lastCard.title} (${lastCard.id})`, 'info');
+
+                const result = await callMemento(() => Memento.plugins.webview.deleteCard({
+                    cardId: lastCard.id
+                }));
+
+                log('卡片删除成功', 'success');
+            } catch (e) {
+                log(`删除卡片失败: ${e.message}`, 'error');
+            }
+        }
+
+        // ==================== 其他插件 ====================
+
+        const plugins = [
+            { id: 'diary', name: '日记', icon: '📔', method: 'getEntries', params: { limit: 5 } },
+            { id: 'notes', name: '笔记', icon: '📝', method: 'getNotes', params: {} },
+            { id: 'todo', name: '任务', icon: '✅', method: 'getTasks', params: {} },
+            { id: 'activity', name: '活动', icon: '⏱️', method: 'getActivities', params: { limit: 5 } },
+            { id: 'checkin', name: '签到', icon: '📅', method: 'getItems', params: {} },
+            { id: 'bill', name: '账单', icon: '💰', method: 'getRecords', params: { limit: 5 } },
+            { id: 'goods', name: '物品', icon: '📦', method: 'getItems', params: {} },
+            { id: 'habits', name: '习惯', icon: '🎯', method: 'getHabits', params: {} },
+            { id: 'tracker', name: '追踪', icon: '📊', method: 'getGoals', params: {} },
+            { id: 'contact', name: '联系人', icon: '👤', method: 'getContacts', params: {} },
+            { id: 'chat', name: '聊天', icon: '💬', method: 'getChannels', params: {} },
+            { id: 'openai', name: 'AI', icon: '🤖', method: 'getAssistants', params: {} },
+        ];
+
+        function renderPluginGrid() {
+            const grid = document.getElementById('pluginGrid');
+            grid.innerHTML = plugins.map(p => `
+                <div class="plugin-card" onclick="testPlugin('${p.id}', '${p.method}', ${JSON.stringify(JSON.stringify(p.params))})">
+                    <div class="icon">${p.icon}</div>
+                    <div class="name">${p.name}</div>
+                </div>
+            `).join('');
+        }
+
+        async function testPlugin(pluginId, method, paramsStr) {
+            const params = JSON.parse(paramsStr);
+            log(`调用: Memento.plugins.${pluginId}.${method}(${JSON.stringify(params)})`, 'info');
+            try {
+                const result = await callMemento(() => Memento.plugins[pluginId][method](params));
+                const data = typeof result === 'string' ? JSON.parse(result) : result;
+                log(`${pluginId}.${method} 返回:`, 'success');
+                log(data, 'info');
+            } catch (e) {
+                log(`调用失败: ${e.message}`, 'error');
+            }
+        }
+
+        // ==================== 自定义调用 ====================
+
+        async function testCustomCall() {
+            const pluginId = document.getElementById('customPluginId').value;
+            const method = document.getElementById('customMethod').value;
+            const paramsStr = document.getElementById('customParams').value;
+
+            let params = {};
+            try {
+                if (paramsStr.trim()) {
+                    params = JSON.parse(paramsStr);
+                }
+            } catch (e) {
+                log(`参数 JSON 解析失败: ${e.message}`, 'error');
+                return;
+            }
+
+            log(`调用: Memento.plugins.${pluginId}.${method}(${JSON.stringify(params)})`, 'info');
+            try {
+                const result = await callMemento(() => Memento.plugins[pluginId][method](params));
+                const data = typeof result === 'string' ? JSON.parse(result) : result;
+                log('返回结果:', 'success');
+                log(data, 'info');
+            } catch (e) {
+                log(`调用失败: ${e.message}`, 'error');
+            }
+        }
+
+        // ==================== 初始化 ====================
+
+        window.onload = function() {
+            log('测试页面已加载', 'info');
+            renderPluginGrid();
+
+            // 延迟检测 Bridge（等待注入完成）
+            setTimeout(checkBridge, 500);
+        };
+
+        // 监听 Bridge 注入
+        if (typeof window.flutter_inappwebview !== 'undefined') {
+            window.flutter_inappwebview.callHandler('Memento_ready').then(() => {
+                log('收到 Memento Bridge 就绪信号', 'success');
+                checkBridge();
+            }).catch(() => {});
+        }
+    </script>
+</body>
+</html>

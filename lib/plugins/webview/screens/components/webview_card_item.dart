@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/webview_card.dart';
+import '../../models/webview_card.dart';
 
 /// 网址卡片组件
 class WebViewCardItem extends StatelessWidget {

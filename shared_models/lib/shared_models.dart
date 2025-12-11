@@ -35,6 +35,12 @@ export 'repositories/todo/todo_repository.dart';
 // Bill 插件 Repository
 export 'repositories/bill/bill_repository.dart';
 
+// Activity 插件 Repository
+export 'repositories/activity/activity_repository.dart';
+
+// Goods 插件 Repository
+export 'repositories/goods/goods_repository.dart';
+
 // ============ UseCase 层 ============
 
 // Chat 插件 UseCase
@@ -42,6 +48,18 @@ export 'usecases/chat/chat_usecase.dart';
 
 // Notes 插件 UseCase
 export 'usecases/notes/notes_usecase.dart';
+
+// Todo 插件 UseCase
+export 'usecases/todo/todo_usecase.dart';
+
+// Bill 插件 UseCase
+export 'usecases/bill/bill_usecase.dart';
+
+// Activity 插件 UseCase
+export 'usecases/activity/activity_usecase.dart';
+
+// Goods 插件 UseCase
+export 'usecases/goods/goods_usecase.dart';
 
 // ============ 同步相关 ============
 
