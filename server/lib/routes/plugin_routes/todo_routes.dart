@@ -2,14 +2,14 @@ import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'package:uuid/uuid.dart';
+import 'package:shared_models/shared_models.dart';
 
 import '../../services/plugin_data_service.dart';
+import '../../repositories/server_todo_repository.dart';
 
 /// Todo 插件 HTTP 路由
 class TodoRoutes {
   final PluginDataService _dataService;
-  final _uuid = const Uuid();
 
   TodoRoutes(this._dataService);
 
@@ -46,6 +46,16 @@ class TodoRoutes {
     return request.context['userId'] as String?;
   }
 
+  /// 创建 UseCase 实例
+  TodoUseCase _createUseCase(String userId) {
+    final repository = ServerTodoRepository(
+      dataService: _dataService,
+      userId: userId,
+    );
+    return TodoUseCase(repository);
+  }
+
+  /// 成功响应
   Response _successResponse(dynamic data) {
     return Response.ok(
       jsonEncode({
@@ -57,18 +67,36 @@ class TodoRoutes {
     );
   }
 
-  Response _paginatedResponse(List<dynamic> data, {int offset = 0, int count = 100}) {
-    final paginated = _dataService.paginate(data, offset: offset, count: count);
-    return Response.ok(
-      jsonEncode({
-        'success': true,
-        ...paginated,
+  /// 错误响应（从 Result 对象）
+  Response _errorResponseFromResult(Result result) {
+    final error = result.errorOrNull!;
+    int statusCode;
+    switch (error.code) {
+      case ErrorCodes.notFound:
+        statusCode = 404;
+        break;
+      case ErrorCodes.invalidParams:
+        statusCode = 400;
+        break;
+      case ErrorCodes.unauthorized:
+        statusCode = 401;
+        break;
+      default:
+        statusCode = 500;
+    }
+
+    return Response(
+      statusCode,
+      body: jsonEncode({
+        'success': false,
+        'error': error.message,
         'timestamp': DateTime.now().toIso8601String(),
       }),
       headers: {'Content-Type': 'application/json'},
     );
   }
 
+  /// 错误响应（通用）
   Response _errorResponse(int statusCode, String message) {
     return Response(
       statusCode,
@@ -81,56 +109,9 @@ class TodoRoutes {
     );
   }
 
-  /// 读取所有任务
-  Future<List<Map<String, dynamic>>> _readTasks(String userId) async {
-    final data = await _dataService.readPluginData(userId, 'todo', 'tasks.json');
-    if (data == null) return [];
-    final tasks = data['tasks'] as List<dynamic>? ?? [];
-    return tasks.cast<Map<String, dynamic>>();
-  }
-
-  /// 保存所有任务
-  Future<void> _saveTasks(String userId, List<Map<String, dynamic>> tasks) async {
-    await _dataService.writePluginData(userId, 'todo', 'tasks.json', {'tasks': tasks});
-  }
-
-  /// 格式化日期为 YYYY-MM-DD
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
-
-  /// 解析日期字符串
-  DateTime? _parseDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return null;
-    try {
-      return DateTime.parse(dateStr);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// 检查任务是否过期
-  bool _isOverdue(Map<String, dynamic> task) {
-    if (task['completed'] == true) return false;
-    final dueDateStr = task['dueDate'] as String?;
-    if (dueDateStr == null) return false;
-    final dueDate = _parseDate(dueDateStr);
-    if (dueDate == null) return false;
-    final today = DateTime.now();
-    final todayDate = DateTime(today.year, today.month, today.day);
-    return dueDate.isBefore(todayDate);
-  }
-
-  /// 检查任务是否是今日任务
-  bool _isToday(Map<String, dynamic> task) {
-    final dueDateStr = task['dueDate'] as String?;
-    if (dueDateStr == null) return false;
-    final dueDate = _parseDate(dueDateStr);
-    if (dueDate == null) return false;
-    final today = DateTime.now();
-    return dueDate.year == today.year &&
-           dueDate.month == today.month &&
-           dueDate.day == today.day;
+  /// 从 Request 提取查询参数
+  Map<String, dynamic> _extractQueryParams(Request request) {
+    return Map<String, dynamic>.from(request.url.queryParameters);
   }
 
   // ==================== 任务处理方法 ====================
@@ -140,54 +121,29 @@ class TodoRoutes {
     if (userId == null) return _errorResponse(401, '未认证');
 
     try {
-      var tasks = await _readTasks(userId);
+      final useCase = _createUseCase(userId);
+      final params = _extractQueryParams(request);
 
-      // 可选筛选参数
-      final completed = request.url.queryParameters['completed'];
-      final priority = request.url.queryParameters['priority'];
-      final category = request.url.queryParameters['category'];
-
-      if (completed != null) {
-        final isCompleted = completed.toLowerCase() == 'true';
-        tasks = tasks.where((t) => (t['completed'] == true) == isCompleted).toList();
+      // 转换查询参数类型
+      if (params.containsKey('completed')) {
+        params['completed'] = params['completed'] == 'true';
+      }
+      if (params.containsKey('priority')) {
+        params['priority'] = int.tryParse(params['priority'] as String);
+      }
+      if (params.containsKey('offset')) {
+        params['offset'] = int.tryParse(params['offset'] as String);
+      }
+      if (params.containsKey('count')) {
+        params['count'] = int.tryParse(params['count'] as String);
       }
 
-      if (priority != null) {
-        final priorityLevel = int.tryParse(priority);
-        if (priorityLevel != null) {
-          tasks = tasks.where((t) => t['priority'] == priorityLevel).toList();
-        }
+      final result = await useCase.getTasks(params);
+
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
       }
-
-      if (category != null) {
-        tasks = tasks.where((t) => t['category'] == category).toList();
-      }
-
-      // 排序：未完成优先，然后按优先级降序，最后按创建时间降序
-      tasks.sort((a, b) {
-        // 完成状态
-        final aCompleted = a['completed'] == true ? 1 : 0;
-        final bCompleted = b['completed'] == true ? 1 : 0;
-        if (aCompleted != bCompleted) return aCompleted - bCompleted;
-
-        // 优先级（高优先级在前）
-        final aPriority = a['priority'] as int? ?? 0;
-        final bPriority = b['priority'] as int? ?? 0;
-        if (aPriority != bPriority) return bPriority - aPriority;
-
-        // 创建时间（新的在前）
-        final aCreated = a['createdAt'] as String? ?? '';
-        final bCreated = b['createdAt'] as String? ?? '';
-        return bCreated.compareTo(aCreated);
-      });
-
-      final offset = int.tryParse(request.url.queryParameters['offset'] ?? '');
-      final count = int.tryParse(request.url.queryParameters['count'] ?? '');
-
-      if (offset != null || count != null) {
-        return _paginatedResponse(tasks, offset: offset ?? 0, count: count ?? 100);
-      }
-      return _successResponse(tasks);
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '获取任务失败: $e');
     }
@@ -198,10 +154,17 @@ class TodoRoutes {
     if (userId == null) return _errorResponse(401, '未认证');
 
     try {
-      final tasks = await _readTasks(userId);
-      final task = tasks.firstWhere((t) => t['id'] == id, orElse: () => <String, dynamic>{});
-      if (task.isEmpty) return _errorResponse(404, '任务不存在');
-      return _successResponse(task);
+      final useCase = _createUseCase(userId);
+      final result = await useCase.getTaskById({'id': id});
+
+      if (result.isSuccess) {
+        final task = result.dataOrNull;
+        if (task == null) {
+          return _errorResponse(404, '任务不存在');
+        }
+        return _successResponse(task);
+      }
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '获取任务失败: $e');
     }
@@ -215,38 +178,13 @@ class TodoRoutes {
       final body = await request.readAsString();
       final data = jsonDecode(body) as Map<String, dynamic>;
 
-      final title = data['title'] as String?;
-      if (title == null || title.isEmpty) {
-        return _errorResponse(400, '缺少必需参数: title');
+      final useCase = _createUseCase(userId);
+      final result = await useCase.createTask(data);
+
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
       }
-
-      final taskId = data['id'] as String? ?? _uuid.v4();
-      final now = DateTime.now().toIso8601String();
-
-      final task = {
-        'id': taskId,
-        'title': title,
-        'description': data['description'],
-        'completed': data['completed'] ?? false,
-        'completedAt': null,
-        'dueDate': data['dueDate'],
-        'dueTime': data['dueTime'],
-        'priority': data['priority'] ?? 0,  // 0: 无, 1: 低, 2: 中, 3: 高
-        'category': data['category'],
-        'tags': data['tags'] ?? <String>[],
-        'subtasks': data['subtasks'] ?? <Map<String, dynamic>>[],
-        'reminder': data['reminder'],
-        'repeat': data['repeat'],
-        'notes': data['notes'],
-        'createdAt': now,
-        'updatedAt': now,
-      };
-
-      final tasks = await _readTasks(userId);
-      tasks.add(task);
-      await _saveTasks(userId, tasks);
-
-      return _successResponse(task);
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '创建任务失败: $e');
     }
@@ -257,41 +195,17 @@ class TodoRoutes {
     if (userId == null) return _errorResponse(401, '未认证');
 
     try {
-      final tasks = await _readTasks(userId);
-      final index = tasks.indexWhere((t) => t['id'] == id);
-      if (index == -1) return _errorResponse(404, '任务不存在');
-
       final body = await request.readAsString();
-      final updates = jsonDecode(body) as Map<String, dynamic>;
-      final task = Map<String, dynamic>.from(tasks[index]);
+      final data = jsonDecode(body) as Map<String, dynamic>;
+      data['id'] = id;
 
-      // 更新可修改字段
-      if (updates.containsKey('title')) task['title'] = updates['title'];
-      if (updates.containsKey('description')) task['description'] = updates['description'];
-      if (updates.containsKey('completed')) {
-        final wasCompleted = task['completed'] == true;
-        final nowCompleted = updates['completed'] == true;
-        task['completed'] = nowCompleted;
-        if (!wasCompleted && nowCompleted) {
-          task['completedAt'] = DateTime.now().toIso8601String();
-        } else if (wasCompleted && !nowCompleted) {
-          task['completedAt'] = null;
-        }
+      final useCase = _createUseCase(userId);
+      final result = await useCase.updateTask(data);
+
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
       }
-      if (updates.containsKey('dueDate')) task['dueDate'] = updates['dueDate'];
-      if (updates.containsKey('dueTime')) task['dueTime'] = updates['dueTime'];
-      if (updates.containsKey('priority')) task['priority'] = updates['priority'];
-      if (updates.containsKey('category')) task['category'] = updates['category'];
-      if (updates.containsKey('tags')) task['tags'] = updates['tags'];
-      if (updates.containsKey('subtasks')) task['subtasks'] = updates['subtasks'];
-      if (updates.containsKey('reminder')) task['reminder'] = updates['reminder'];
-      if (updates.containsKey('repeat')) task['repeat'] = updates['repeat'];
-      if (updates.containsKey('notes')) task['notes'] = updates['notes'];
-      task['updatedAt'] = DateTime.now().toIso8601String();
-
-      tasks[index] = task;
-      await _saveTasks(userId, tasks);
-      return _successResponse(task);
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '更新任务失败: $e');
     }
@@ -302,13 +216,13 @@ class TodoRoutes {
     if (userId == null) return _errorResponse(401, '未认证');
 
     try {
-      final tasks = await _readTasks(userId);
-      final initialLength = tasks.length;
-      tasks.removeWhere((t) => t['id'] == id);
-      if (tasks.length == initialLength) return _errorResponse(404, '任务不存在');
+      final useCase = _createUseCase(userId);
+      final result = await useCase.deleteTask({'id': id});
 
-      await _saveTasks(userId, tasks);
-      return _successResponse({'deleted': true, 'id': id});
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
+      }
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '删除任务失败: $e');
     }
@@ -321,22 +235,13 @@ class TodoRoutes {
     if (userId == null) return _errorResponse(401, '未认证');
 
     try {
-      final tasks = await _readTasks(userId);
-      final index = tasks.indexWhere((t) => t['id'] == id);
-      if (index == -1) return _errorResponse(404, '任务不存在');
+      final useCase = _createUseCase(userId);
+      final result = await useCase.completeTask({'id': id});
 
-      final task = Map<String, dynamic>.from(tasks[index]);
-      if (task['completed'] == true) {
-        return _errorResponse(400, '任务已完成');
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
       }
-
-      task['completed'] = true;
-      task['completedAt'] = DateTime.now().toIso8601String();
-      task['updatedAt'] = DateTime.now().toIso8601String();
-
-      tasks[index] = task;
-      await _saveTasks(userId, tasks);
-      return _successResponse(task);
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '完成任务失败: $e');
     }
@@ -347,22 +252,13 @@ class TodoRoutes {
     if (userId == null) return _errorResponse(401, '未认证');
 
     try {
-      final tasks = await _readTasks(userId);
-      final index = tasks.indexWhere((t) => t['id'] == id);
-      if (index == -1) return _errorResponse(404, '任务不存在');
+      final useCase = _createUseCase(userId);
+      final result = await useCase.uncompleteTask({'id': id});
 
-      final task = Map<String, dynamic>.from(tasks[index]);
-      if (task['completed'] != true) {
-        return _errorResponse(400, '任务未完成');
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
       }
-
-      task['completed'] = false;
-      task['completedAt'] = null;
-      task['updatedAt'] = DateTime.now().toIso8601String();
-
-      tasks[index] = task;
-      await _saveTasks(userId, tasks);
-      return _successResponse(task);
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '取消完成失败: $e');
     }
@@ -375,16 +271,23 @@ class TodoRoutes {
     if (userId == null) return _errorResponse(401, '未认证');
 
     try {
-      final tasks = await _readTasks(userId);
-      final todayTasks = tasks.where(_isToday).toList();
+      final useCase = _createUseCase(userId);
+      final params = _extractQueryParams(request);
 
-      final offset = int.tryParse(request.url.queryParameters['offset'] ?? '');
-      final count = int.tryParse(request.url.queryParameters['count'] ?? '');
-
-      if (offset != null || count != null) {
-        return _paginatedResponse(todayTasks, offset: offset ?? 0, count: count ?? 100);
+      // 转换分页参数
+      if (params.containsKey('offset')) {
+        params['offset'] = int.tryParse(params['offset'] as String);
       }
-      return _successResponse(todayTasks);
+      if (params.containsKey('count')) {
+        params['count'] = int.tryParse(params['count'] as String);
+      }
+
+      final result = await useCase.getTodayTasks(params);
+
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
+      }
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '获取今日任务失败: $e');
     }
@@ -395,16 +298,23 @@ class TodoRoutes {
     if (userId == null) return _errorResponse(401, '未认证');
 
     try {
-      final tasks = await _readTasks(userId);
-      final overdueTasks = tasks.where(_isOverdue).toList();
+      final useCase = _createUseCase(userId);
+      final params = _extractQueryParams(request);
 
-      final offset = int.tryParse(request.url.queryParameters['offset'] ?? '');
-      final count = int.tryParse(request.url.queryParameters['count'] ?? '');
-
-      if (offset != null || count != null) {
-        return _paginatedResponse(overdueTasks, offset: offset ?? 0, count: count ?? 100);
+      // 转换分页参数
+      if (params.containsKey('offset')) {
+        params['offset'] = int.tryParse(params['offset'] as String);
       }
-      return _successResponse(overdueTasks);
+      if (params.containsKey('count')) {
+        params['count'] = int.tryParse(params['count'] as String);
+      }
+
+      final result = await useCase.getOverdueTasks(params);
+
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
+      }
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '获取过期任务失败: $e');
     }
@@ -415,23 +325,23 @@ class TodoRoutes {
     if (userId == null) return _errorResponse(401, '未认证');
 
     try {
-      final tasks = await _readTasks(userId);
-      final completedTasks = tasks.where((t) => t['completed'] == true).toList();
+      final useCase = _createUseCase(userId);
+      final params = _extractQueryParams(request);
 
-      // 按完成时间降序排序
-      completedTasks.sort((a, b) {
-        final aTime = a['completedAt'] as String? ?? '';
-        final bTime = b['completedAt'] as String? ?? '';
-        return bTime.compareTo(aTime);
-      });
-
-      final offset = int.tryParse(request.url.queryParameters['offset'] ?? '');
-      final count = int.tryParse(request.url.queryParameters['count'] ?? '');
-
-      if (offset != null || count != null) {
-        return _paginatedResponse(completedTasks, offset: offset ?? 0, count: count ?? 100);
+      // 转换分页参数
+      if (params.containsKey('offset')) {
+        params['offset'] = int.tryParse(params['offset'] as String);
       }
-      return _successResponse(completedTasks);
+      if (params.containsKey('count')) {
+        params['count'] = int.tryParse(params['count'] as String);
+      }
+
+      final result = await useCase.getCompletedTasks(params);
+
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
+      }
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '获取已完成任务失败: $e');
     }
@@ -442,16 +352,23 @@ class TodoRoutes {
     if (userId == null) return _errorResponse(401, '未认证');
 
     try {
-      final tasks = await _readTasks(userId);
-      final pendingTasks = tasks.where((t) => t['completed'] != true).toList();
+      final useCase = _createUseCase(userId);
+      final params = _extractQueryParams(request);
 
-      final offset = int.tryParse(request.url.queryParameters['offset'] ?? '');
-      final count = int.tryParse(request.url.queryParameters['count'] ?? '');
-
-      if (offset != null || count != null) {
-        return _paginatedResponse(pendingTasks, offset: offset ?? 0, count: count ?? 100);
+      // 转换分页参数
+      if (params.containsKey('offset')) {
+        params['offset'] = int.tryParse(params['offset'] as String);
       }
-      return _successResponse(pendingTasks);
+      if (params.containsKey('count')) {
+        params['count'] = int.tryParse(params['count'] as String);
+      }
+
+      final result = await useCase.getPendingTasks(params);
+
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
+      }
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '获取待办任务失败: $e');
     }
@@ -461,34 +378,24 @@ class TodoRoutes {
     final userId = _getUserId(request);
     if (userId == null) return _errorResponse(401, '未认证');
 
-    final keyword = request.url.queryParameters['keyword'];
-
     try {
-      var tasks = await _readTasks(userId);
+      final useCase = _createUseCase(userId);
+      final params = _extractQueryParams(request);
 
-      if (keyword != null && keyword.isNotEmpty) {
-        final lowerKeyword = keyword.toLowerCase();
-        tasks = tasks.where((task) {
-          final title = (task['title'] as String? ?? '').toLowerCase();
-          final desc = (task['description'] as String? ?? '').toLowerCase();
-          final notes = (task['notes'] as String? ?? '').toLowerCase();
-          final tags = (task['tags'] as List<dynamic>? ?? [])
-              .map((t) => t.toString().toLowerCase())
-              .toList();
-          return title.contains(lowerKeyword) ||
-              desc.contains(lowerKeyword) ||
-              notes.contains(lowerKeyword) ||
-              tags.any((t) => t.contains(lowerKeyword));
-        }).toList();
+      // 转换分页参数
+      if (params.containsKey('offset')) {
+        params['offset'] = int.tryParse(params['offset'] as String);
+      }
+      if (params.containsKey('count')) {
+        params['count'] = int.tryParse(params['count'] as String);
       }
 
-      final offset = int.tryParse(request.url.queryParameters['offset'] ?? '');
-      final count = int.tryParse(request.url.queryParameters['count'] ?? '');
+      final result = await useCase.searchTasks(params);
 
-      if (offset != null || count != null) {
-        return _paginatedResponse(tasks, offset: offset ?? 0, count: count ?? 100);
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
       }
-      return _successResponse(tasks);
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '搜索任务失败: $e');
     }
@@ -501,45 +408,13 @@ class TodoRoutes {
     if (userId == null) return _errorResponse(401, '未认证');
 
     try {
-      final tasks = await _readTasks(userId);
+      final useCase = _createUseCase(userId);
+      final result = await useCase.getStats({});
 
-      final total = tasks.length;
-      final completed = tasks.where((t) => t['completed'] == true).length;
-      final pending = total - completed;
-      final overdue = tasks.where(_isOverdue).length;
-      final today = tasks.where(_isToday).length;
-      final todayCompleted = tasks.where((t) => _isToday(t) && t['completed'] == true).length;
-
-      // 按优先级统计
-      final byPriority = <int, int>{};
-      for (final task in tasks.where((t) => t['completed'] != true)) {
-        final priority = task['priority'] as int? ?? 0;
-        byPriority[priority] = (byPriority[priority] ?? 0) + 1;
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
       }
-
-      // 按分类统计
-      final byCategory = <String, int>{};
-      for (final task in tasks) {
-        final category = task['category'] as String? ?? '未分类';
-        byCategory[category] = (byCategory[category] ?? 0) + 1;
-      }
-
-      return _successResponse({
-        'total': total,
-        'completed': completed,
-        'pending': pending,
-        'overdue': overdue,
-        'today': today,
-        'todayCompleted': todayCompleted,
-        'completionRate': total > 0 ? (completed / total * 100).toStringAsFixed(1) : '0.0',
-        'byPriority': {
-          'none': byPriority[0] ?? 0,
-          'low': byPriority[1] ?? 0,
-          'medium': byPriority[2] ?? 0,
-          'high': byPriority[3] ?? 0,
-        },
-        'byCategory': byCategory,
-      });
+      return _errorResponseFromResult(result);
     } catch (e) {
       return _errorResponse(500, '获取统计失败: $e');
     }

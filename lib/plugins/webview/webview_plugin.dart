@@ -6,7 +6,6 @@ import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 
 import 'models/webview_card.dart';
-import 'models/webview_tab.dart';
 import 'models/webview_settings.dart';
 import 'services/tab_manager.dart';
 import 'services/card_manager.dart';
@@ -32,7 +31,7 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   // Services
   late final TabManager tabManager;
   late final CardManager cardManager;
-  late WebViewSettings settings;
+  late WebViewSettings webviewSettings;
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -62,7 +61,7 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     await cardManager.initialize();
 
     // 恢复标签页状态
-    if (settings.restoreTabsOnStartup) {
+    if (webviewSettings.restoreTabsOnStartup) {
       await _restoreTabs();
     }
 
@@ -78,18 +77,18 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     try {
       final data = await storage.read('webview/settings.json');
       if (data != null) {
-        settings = WebViewSettings.fromJson(data as Map<String, dynamic>);
+        webviewSettings = WebViewSettings.fromJson(data as Map<String, dynamic>);
       } else {
-        settings = WebViewSettings();
+        webviewSettings = WebViewSettings();
       }
     } catch (e) {
-      settings = WebViewSettings();
+      webviewSettings = WebViewSettings();
     }
   }
 
   /// 保存设置
-  Future<void> saveSettings() async {
-    await storage.write('webview/settings.json', settings.toJson());
+  Future<void> saveWebviewSettings() async {
+    await storage.write('webview/settings.json', webviewSettings.toJson());
     notifyListeners();
   }
 

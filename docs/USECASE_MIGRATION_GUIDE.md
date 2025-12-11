@@ -869,8 +869,10 @@ class ClientRepository implements IRepository {
 |------|------------|---------|-----------|---------|
 | Chat | ✅ | ✅ | ✅ | ✅ |
 | Notes | ✅ | ✅ | ✅ | ✅ |
-| Todo | ✅ | - | - | - |
-| Bill | ✅ | - | - | - |
+| Todo | ✅ | ✅ | ✅ | ✅ |
+| Bill | ✅ | ✅ | ✅ | ✅ |
+| Activity | ✅ | ✅ | ✅ | ✅ |
+| Goods | ✅ | ✅ | ✅ | ✅ |
 
 ---
 

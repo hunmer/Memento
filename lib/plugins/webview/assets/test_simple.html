@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memento 简易测试</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #1e1e2e;
+            color: #cdd6f4;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 { color: #89b4fa; text-align: center; }
+        button {
+            background: #89b4fa;
+            color: #1e1e2e;
+            border: none;
+            padding: 12px 20px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover { background: #b4befe; }
+        #output {
+            background: #11111b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #a6e3a1; }
+        .error { color: #f38ba8; }
+        .info { color: #89dceb; }
+    </style>
+</head>
+<body>
+    <h1>Memento JS Bridge</h1>
+
+    <div style="text-align: center;">
+        <button onclick="testWebviewCards()">WebView 卡片</button>
+        <button onclick="testWebviewTabs()">WebView 标签页</button>
+        <button onclick="testDiary()">日记插件</button>
+        <button onclick="testNotes()">笔记插件</button>
+        <button onclick="testActivity()">活动插件</button>
+        <button onclick="testToast()">显示 Toast</button>
+        <button onclick="testSystemTime()">系统时间</button>
+        <button onclick="clearLog()">清空</button>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+        function log(msg, type = 'info') {
+            const el = document.getElementById('output');
+            const time = new Date().toLocaleTimeString();
+            const text = typeof msg === 'object' ? JSON.stringify(msg, null, 2) : msg;
+            el.innerHTML += `<span class="${type}">[${time}] ${text}</span>\n`;
+            el.scrollTop = el.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('output').innerHTML = '';
+        }
+
+        async function call(fn) {
+            try {
+                if (!window.Memento) throw new Error('Memento Bridge 未注入');
+                return await fn();
+            } catch (e) {
+                log('错误: ' + e.message, 'error');
+                throw e;
+            }
+        }
+
+        async function testWebviewCards() {
+            log('获取 WebView 卡片...');
+            try {
+                const r = await call(() => Memento.plugins.webview.getCards());
+                const data = typeof r === 'string' ? JSON.parse(r) : r;
+                log(`找到 ${data.length || 0} 张卡片`, 'success');
+                log(data);
+            } catch (e) {}
+        }
+
+        async function testWebviewTabs() {
+            log('获取 WebView 标签页...');
+            try {
+                const r = await call(() => Memento.plugins.webview.getTabs());
+                const data = typeof r === 'string' ? JSON.parse(r) : r;
+                log(`找到 ${data.length || 0} 个标签页`, 'success');
+                log(data);
+            } catch (e) {}
+        }
+
+        async function testDiary() {
+            log('获取日记条目...');
+            try {
+                const r = await call(() => Memento.plugins.diary.getEntries({ limit: 5 }));
+                const data = typeof r === 'string' ? JSON.parse(r) : r;
+                log('日记数据:', 'success');
+                log(data);
+            } catch (e) {}
+        }
+
+        async function testNotes() {
+            log('获取笔记...');
+            try {
+                const r = await call(() => Memento.plugins.notes.getNotes({}));
+                const data = typeof r === 'string' ? JSON.parse(r) : r;
+                log('笔记数据:', 'success');
+                log(data);
+            } catch (e) {}
+        }
+
+        async function testActivity() {
+            log('获取活动记录...');
+            try {
+                const r = await call(() => Memento.plugins.activity.getActivities({ limit: 5 }));
+                const data = typeof r === 'string' ? JSON.parse(r) : r;
+                log('活动数据:', 'success');
+                log(data);
+            } catch (e) {}
+        }
+
+        async function testToast() {
+            log('显示 Toast...');
+            try {
+                await call(() => Memento.ui.toast('Hello from WebView! 🎉'));
+                log('Toast 已显示', 'success');
+            } catch (e) {}
+        }
+
+        async function testSystemTime() {
+            log('获取系统时间...');
+            try {
+                const r = await call(() => Memento.system.getCurrentTime());
+                log('系统时间: ' + JSON.stringify(r), 'success');
+            } catch (e) {}
+        }
+
+        // 初始化
+        window.onload = () => {
+            log('测试页面已加载', 'info');
+            setTimeout(() => {
+                if (window.Memento) {
+                    log('Memento Bridge 已连接', 'success');
+                } else {
+                    log('请在 Memento WebView 中打开此页面', 'error');
+                }
+            }, 500);
+        };
+    </script>
+</body>
+</html>
