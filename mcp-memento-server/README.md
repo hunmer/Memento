@@ -23,14 +23,30 @@ npm run build
 
 ## 配置
 
-设置以下环境变量：
+创建 `.env` 文件（已提供 `.env.example` 模板）：
 
 ```bash
-# Memento 服务器地址
-export MEMENTO_SERVER_URL="http://localhost:8080"
+# Memento 后端服务器地址 (默认端口: 8080)
+MEMENTO_SERVER_URL=http://localhost:8080
 
 # JWT 认证令牌 (从 Memento 应用获取)
+MEMENTO_AUTH_TOKEN=your-jwt-token
+```
+
+或者设置环境变量：
+
+```bash
+# Unix/Linux/macOS
+export MEMENTO_SERVER_URL="http://localhost:8080"
 export MEMENTO_AUTH_TOKEN="your-jwt-token"
+
+# Windows PowerShell
+$env:MEMENTO_SERVER_URL="http://localhost:8080"
+$env:MEMENTO_AUTH_TOKEN="your-jwt-token"
+
+# Windows CMD
+set MEMENTO_SERVER_URL=http://localhost:8080
+set MEMENTO_AUTH_TOKEN=your-jwt-token
 ```
 
 ### 获取认证令牌
@@ -127,12 +143,32 @@ export MEMENTO_AUTH_TOKEN="your-jwt-token"
 # 开发模式运行
 npm run dev
 
+# 使用 MCP Inspector 调试（自动加载 .env）
+npm run inspector
+
 # 构建
 npm run build
 
 # 清理构建产物
 npm run clean
 ```
+
+### MCP Inspector 调试
+
+MCP Inspector 是官方的 MCP 服务调试工具，提供图形化界面来测试工具调用。
+
+**使用步骤：**
+
+1. 确保已配置 `.env` 文件
+2. 运行 `npm run inspector`
+3. 浏览器自动打开调试界面
+4. 在界面中测试各个工具
+
+**Inspector 特性：**
+- ✅ 自动加载 `.env` 环境变量
+- ✅ 实时查看工具调用和响应
+- ✅ 测试工具参数和返回值
+- ✅ 验证环境变量配置
 
 ## API 端点
 

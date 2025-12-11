@@ -84,6 +84,23 @@ class BillRoutes {
     return data ?? {'accounts': []};
   }
 
+  /// 解析账户列表，支持两种存储格式
+  /// 1. JSON字符串数组 (Flutter客户端格式)
+  /// 2. Map对象数组 (直接格式)
+  List<Map<String, dynamic>> _parseAccountsList(List<dynamic> accountsList) {
+    return accountsList.map((item) {
+      if (item is String) {
+        // Flutter客户端存储格式：JSON字符串
+        return jsonDecode(item) as Map<String, dynamic>;
+      } else if (item is Map<String, dynamic>) {
+        // 直接Map格式
+        return item;
+      } else {
+        throw Exception('无效的账户数据格式: ${item.runtimeType}');
+      }
+    }).toList();
+  }
+
   /// 保存账户数据
   Future<void> _saveAccountsData(String userId, Map<String, dynamic> data) async {
     await _dataService.writePluginData(userId, 'bill', 'accounts.json', data);
@@ -97,7 +114,8 @@ class BillRoutes {
 
     try {
       final data = await _readAccountsData(userId);
-      final accounts = (data['accounts'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
+      final accountsList = data['accounts'] as List<dynamic>? ?? [];
+      final accounts = _parseAccountsList(accountsList);
 
       // 不返回嵌套的账单，只返回账户概要
       final accountsSummary = accounts.map((account) {
@@ -141,7 +159,9 @@ class BillRoutes {
 
     try {
       final data = await _readAccountsData(userId);
-      final accounts = (data['accounts'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
+      final accountsList = data['accounts'] as List<dynamic>? ?? [];
+      final accounts = _parseAccountsList(accountsList);
+
       final account = accounts.firstWhere((a) => a['id'] == id, orElse: () => <String, dynamic>{});
 
       if (account.isEmpty) return _errorResponse(404, '账户不存在');
@@ -250,7 +270,8 @@ class BillRoutes {
 
     try {
       final data = await _readAccountsData(userId);
-      final accounts = (data['accounts'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
+      final accountsList = data['accounts'] as List<dynamic>? ?? [];
+      final accounts = _parseAccountsList(accountsList);
 
       List<Map<String, dynamic>> allBills = [];
 
@@ -307,7 +328,8 @@ class BillRoutes {
 
     try {
       final data = await _readAccountsData(userId);
-      final accounts = (data['accounts'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
+      final accountsList = data['accounts'] as List<dynamic>? ?? [];
+      final accounts = _parseAccountsList(accountsList);
 
       for (final account in accounts) {
         final bills = (account['bills'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
@@ -477,7 +499,8 @@ class BillRoutes {
 
     try {
       final data = await _readAccountsData(userId);
-      final accounts = (data['accounts'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
+      final accountsList = data['accounts'] as List<dynamic>? ?? [];
+      final accounts = _parseAccountsList(accountsList);
 
       var totalIncome = 0.0;
       var totalExpense = 0.0;
@@ -524,7 +547,8 @@ class BillRoutes {
 
     try {
       final data = await _readAccountsData(userId);
-      final accounts = (data['accounts'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
+      final accountsList = data['accounts'] as List<dynamic>? ?? [];
+      final accounts = _parseAccountsList(accountsList);
 
       final categoryStats = <String, Map<String, dynamic>>{};
 

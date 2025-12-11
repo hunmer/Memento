@@ -70,6 +70,9 @@ class SyncClientService {
   /// 是否已登录
   bool get isLoggedIn => _token != null && _userId != null;
 
+  /// 获取加密服务（用于访问加密密钥等）
+  EncryptionService get encryption => _encryption;
+
   SyncClientService({
     required String serverUrl,
     required StorageManager storage,
