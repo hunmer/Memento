@@ -90,8 +90,8 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 curl -X POST http://localhost:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "user@example.com",
-    "password": "your_password",
+    "username": "admin",
+    "password": "admin123",
     "device_id": "device_123"
   }'
 ```

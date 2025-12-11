@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memento Sync Server - Admin</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js?v=3.4.0"></script>
+    <!-- Vue 3 本地加载 -->
+    <script src="vue.global.prod.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -121,6 +122,15 @@
                                 <div class="stat-label">服务器状态</div>
                             </div>
                         </div>
+                        <div class="stat-card" @click="activeTab = 'settings'">
+                            <div class="stat-icon">{{ apiEnabled ? '🟢' : '🔴' }}</div>
+                            <div class="stat-info">
+                                <div class="stat-value" :class="{ 'text-green': apiEnabled, 'text-red': !apiEnabled }">
+                                    {{ apiEnabled ? '已启用' : '已禁用' }}
+                                </div>
+                                <div class="stat-label">API 访问</div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Recent Activity -->
@@ -172,6 +182,46 @@
 
                 <!-- Settings Tab -->
                 <div v-show="activeTab === 'settings'" class="tab-content">
+                    <!-- API 访问控制 -->
+                    <div class="card">
+                        <h3>API 访问控制</h3>
+                        <div class="api-control-section">
+                            <div class="api-status-info">
+                                <div class="status-indicator" :class="{ 'active': apiEnabled }">
+                                    {{ apiEnabled ? '🟢 已启用' : '🔴 已禁用' }}
+                                </div>
+                                <p class="status-description">
+                                    {{ apiEnabled ? 'API 访问已开放，客户端可以正常进行数据同步。' : 'API 访问已关闭，所有客户端请求将被拒绝。' }}
+                                </p>
+                                <p class="status-description" v-if="!apiEnabled" style="margin-top: 0.5rem; color: #f59e0b;">
+                                    ⚠️ 启用 API 需要提供加密密钥（从 Memento 客户端获取）
+                                </p>
+                            </div>
+                            <div class="action-buttons">
+                                <button
+                                    v-if="!apiEnabled"
+                                    class="btn btn-success"
+                                    @click="enableApi"
+                                    :disabled="loading"
+                                >
+                                    ✅ 启用 API 访问
+                                </button>
+                                <button
+                                    v-if="apiEnabled"
+                                    class="btn btn-danger"
+                                    @click="disableApi"
+                                    :disabled="loading"
+                                >
+                                    🚫 禁用 API 访问
+                                </button>
+                                <button class="btn btn-outline" @click="refreshApiStatus">
+                                    🔄 刷新状态
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 数据操作 -->
                     <div class="card">
                         <h3>数据操作</h3>
                         <div class="action-buttons">
@@ -206,6 +256,29 @@
         </div>
     </div>
 
+    <!-- Final check before loading app.js -->
+    <script>
+        if (typeof Vue === 'undefined') {
+            document.getElementById('app').innerHTML = `
+                <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; text-align: center; padding: 20px;">
+                    <h2 style="color: #e74c3c;">❌ Vue 框架加载失败</h2>
+                    <p style="margin-top: 20px; color: #666;">
+                        无法加载本地 Vue.js 文件。可能原因：<br>
+                        • vue.global.prod.js 文件不存在<br>
+                        • 文件路径不正确<br>
+                        • 服务器未正确提供静态文件
+                    </p>
+                    <p style="margin-top: 20px; color: #888;">
+                        请确保 vue.global.prod.js 在 admin 目录下，然后刷新页面。
+                    </p>
+                    <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        刷新页面
+                    </button>
+                </div>
+            `;
+            throw new Error('Vue is not loaded');
+        }
+    </script>
     <script src="app.js"></script>
 </body>
 </html>

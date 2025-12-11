@@ -1,18 +1,33 @@
-"use strict";
 /**
  * Memento MCP Server 配置管理
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadConfig = loadConfig;
-exports.validateConfig = validateConfig;
 /**
  * 从环境变量加载配置
  */
-function loadConfig() {
-    const serverUrl = process.env.MEMENTO_SERVER_URL;
+export function loadConfig() {
+    let serverUrl = process.env.MEMENTO_SERVER_URL;
+    const serverHost = process.env.MEMENTO_SERVER_HOST;
+    const serverPort = process.env.MEMENTO_SERVER_PORT;
     const authToken = process.env.MEMENTO_AUTH_TOKEN;
+    // 支持分开配置 host 和 port
+    if (serverHost) {
+        const protocol = serverUrl?.startsWith('https') ? 'https' : 'http';
+        const port = serverPort || '8080';
+        serverUrl = `${protocol}://${serverHost}:${port}`;
+    }
+    else if (serverPort && serverUrl) {
+        // 如果只设置了 port，替换 URL 中的端口
+        try {
+            const url = new URL(serverUrl);
+            url.port = serverPort;
+            serverUrl = url.toString();
+        }
+        catch {
+            // 忽略 URL 解析错误
+        }
+    }
     if (!serverUrl) {
-        throw new Error('环境变量 MEMENTO_SERVER_URL 未设置');
+        throw new Error('环境变量 MEMENTO_SERVER_URL 或 MEMENTO_SERVER_HOST 未设置');
     }
     if (!authToken) {
         throw new Error('环境变量 MEMENTO_AUTH_TOKEN 未设置');
@@ -25,7 +40,7 @@ function loadConfig() {
 /**
  * 验证配置
  */
-function validateConfig(config) {
+export function validateConfig(config) {
     try {
         new URL(config.serverUrl);
     }

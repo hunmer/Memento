@@ -1,12 +1,6 @@
 /**
  * MCP 工具定义
  */
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { MementoClient } from '../client/memento-client.js';
-/**
- * 注册所有 MCP 工具
- */
-export declare function registerTools(server: Server, client: MementoClient): void;
 /**
  * 获取工具定义列表
  */

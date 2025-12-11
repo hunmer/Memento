@@ -577,3 +577,67 @@ n.login-tips {
     border-left: 2px solid var(--border-color);
     margin-left: 12px;
 }
+
+/* API Control Section */
+.api-control-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.api-status-info {
+    padding: 1rem;
+    background-color: var(--bg-color);
+    border-radius: var(--radius);
+    border-left: 4px solid var(--primary-color);
+}
+
+.status-indicator {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-indicator.active {
+    color: var(--success-color);
+}
+
+.status-description {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background-color: #16a34a;
+}
+
+.text-red {
+    color: var(--danger-color);
+}
+
+.stat-card:hover {
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    transition: all 0.2s;
+}
+
+/* Responsive adjustments for API control */
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-buttons .btn {
+        width: 100%;
+    }
+}
