@@ -33,6 +33,9 @@ dependencies:
   # UUID
   uuid: ^4.3.3
 
+  # ZIP 压缩
+  archive: ^3.4.10
+
   # 共享模型
   shared_models:
     path: ../shared_models

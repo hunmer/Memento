@@ -1,8 +1,37 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_models/shared_models.dart';
+
+/// 文件夹节点
+class FolderNode {
+  final String name;
+  final String path;
+  final bool isFolder;
+  final List<FolderNode>? children;
+  final int? size;
+  final DateTime? updatedAt;
+
+  FolderNode({
+    required this.name,
+    required this.path,
+    required this.isFolder,
+    this.children,
+    this.size,
+    this.updatedAt,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    'path': path,
+    'is_folder': isFolder,
+    'children': children?.map((c) => c.toJson()).toList(),
+    'size': size,
+    'updated_at': updatedAt?.toIso8601String(),
+  };
+}
 
 /// 文件存储服务 - 纯文件系统存储
 ///
@@ -51,6 +80,9 @@ class FileStorageService {
 
   /// 获取用户数据目录
   String getUserDir(String userId) => path.join(_baseDir, 'users', userId);
+
+  /// 获取导出目录
+  String getExportDir() => path.join(_baseDir, 'exports');
 
   /// 读取加密文件
   Future<Map<String, dynamic>?> readEncryptedFile(
@@ -118,8 +150,10 @@ class FileStorageService {
           // 计算相对路径
           final relativePath = path.relative(entity.path, from: userDir.path);
 
+          final file = File(entity.path);
           files.add(FileInfo(
             path: relativePath.replaceAll('\\', '/'), // 统一使用正斜杠
+            size: await file.length(),
             md5: data['md5'] as String,
             updatedAt: DateTime.parse(data['updated_at'] as String),
           ));
@@ -239,5 +273,167 @@ class FileStorageService {
     ].join('\t');
 
     await logFile.writeAsString('$logEntry\n', mode: FileMode.append);
+  }
+
+  // ========== 目录树结构操作 ==========
+
+  /// 获取目录树结构
+  Future<FolderNode> getDirectoryTree(String userId) async {
+    final userDir = Directory(getUserDir(userId));
+    if (!await userDir.exists()) {
+      return FolderNode(
+        name: 'root',
+        path: '',
+        isFolder: true,
+        children: [],
+      );
+    }
+
+    return await _buildTree(userDir, '');
+  }
+
+  /// 递归构建目录树
+  Future<FolderNode> _buildTree(Directory dir, String relativePath) async {
+    final node = FolderNode(
+      name: path.basename(dir.path),
+      path: relativePath,
+      isFolder: true,
+      children: [],
+    );
+
+    final children = <FolderNode>[];
+
+    try {
+      await for (final entity in dir.list()) {
+        final entityName = path.basename(entity.path);
+        final entityRelativePath = relativePath.isEmpty
+            ? entityName
+            : '$relativePath/$entityName';
+
+        if (entity is File && entity.path.endsWith('.json')) {
+          try {
+            final content = await entity.readAsString();
+            final data = jsonDecode(content) as Map<String, dynamic>;
+
+            children.add(FolderNode(
+              name: entityName,
+              path: entityRelativePath,
+              isFolder: false,
+              size: entity.lengthSync(),
+              updatedAt: DateTime.parse(data['updated_at'] as String),
+            ));
+          } catch (e) {
+            print('读取文件信息失败: ${entity.path} - $e');
+          }
+        } else if (entity is Directory) {
+          // 递归处理子目录
+          final subNode = await _buildTree(entity, entityRelativePath);
+          children.add(subNode);
+        }
+      }
+    } catch (e) {
+      print('读取目录失败: ${dir.path} - $e');
+    }
+
+    // 按名称排序：文件夹在前，文件在后
+    children.sort((a, b) {
+      if (a.isFolder && !b.isFolder) return -1;
+      if (!a.isFolder && b.isFolder) return 1;
+      return a.name.compareTo(b.name);
+    });
+
+    return FolderNode(
+      name: node.name,
+      path: node.path,
+      isFolder: true,
+      children: children,
+    );
+  }
+
+  // ========== ZIP导出功能 ==========
+
+  /// 导出用户数据为ZIP文件
+  Future<Map<String, dynamic>> exportUserDataAsZip(String userId) async {
+    final userDir = Directory(getUserDir(userId));
+    if (!await userDir.exists()) {
+      throw Exception('用户数据目录不存在');
+    }
+
+    final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').replaceAll('.', '-');
+    final exportDir = getExportDir();
+    final exportFileName = 'memento_export_$timestamp.zip';
+    final exportFilePath = path.join(exportDir, exportFileName);
+
+    // 确保导出目录存在
+    final exportDirectory = Directory(exportDir);
+    if (!await exportDirectory.exists()) {
+      await exportDirectory.create(recursive: true);
+    }
+
+    // 创建ZIP归档
+    final archive = Archive();
+
+    // 收集所有文件并添加到ZIP
+    final files = <String>[];
+    int totalSize = 0;
+
+    await for (final entity in userDir.list(recursive: true)) {
+      if (entity is File && entity.path.endsWith('.json')) {
+        final filePath = entity.path;
+        final relativePath = path.relative(filePath, from: userDir.path);
+
+        try {
+          final content = await entity.readAsBytes();
+          final archiveFile = ArchiveFile(
+            relativePath.replaceAll('\\', '/'), // 统一使用正斜杠
+            content.length,
+            content,
+          );
+          archive.addFile(archiveFile);
+
+          files.add(relativePath);
+          totalSize += content.length;
+        } catch (e) {
+          print('添加文件到ZIP失败: $filePath - $e');
+        }
+      }
+    }
+
+    // 添加元数据文件
+    final metadata = {
+      'exported_at': DateTime.now().toIso8601String(),
+      'user_id': userId,
+      'file_count': files.length,
+      'total_size_bytes': totalSize,
+      'total_size_mb': (totalSize / 1024 / 1024).toStringAsFixed(2),
+      'files': files,
+    };
+
+    final metadataContent = utf8.encode(JsonEncoder.withIndent('  ').convert(metadata));
+    final metadataFile = ArchiveFile(
+      'metadata.json',
+      metadataContent.length,
+      metadataContent,
+    );
+    archive.addFile(metadataFile);
+
+    // 编码ZIP文件
+    final zipData = ZipEncoder().encode(archive);
+
+    if (zipData == null) {
+      throw Exception('ZIP编码失败');
+    }
+
+    // 写入ZIP文件
+    final exportFile = File(exportFilePath);
+    await exportFile.writeAsBytes(zipData);
+
+    return {
+      'success': true,
+      'file_path': exportFilePath,
+      'file_name': exportFileName,
+      'file_size': await exportFile.length(),
+      'metadata': metadata,
+    };
   }
 }

@@ -14,7 +14,7 @@ class AuthService {
   AuthService({
     required FileStorageService storageService,
     required String jwtSecret,
-    int tokenExpiryDays = 7,
+    int tokenExpiryDays = 36500, // 100年 = 永久有效
   })  : _storageService = storageService,
         _jwtSecret = jwtSecret,
         _tokenExpiryDays = tokenExpiryDays;

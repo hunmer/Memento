@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shared_models/shared_models.dart';
@@ -31,6 +33,15 @@ class SyncRoutes {
 
     // GET /status - 同步状态
     router.get('/status', _handleStatus);
+
+    // GET /tree - 获取目录树结构
+    router.get('/tree', _handleTree);
+
+    // POST /export - 导出ZIP文件
+    router.post('/export', _handleExport);
+
+    // GET /download/<fileName> - 下载导出文件
+    router.get('/download/<fileName|.*>', _handleDownload);
 
     return router;
   }
@@ -283,5 +294,97 @@ class SyncRoutes {
       }),
       headers: {'Content-Type': 'application/json'},
     );
+  }
+
+  /// 处理目录树结构
+  Future<Response> _handleTree(Request request) async {
+    final userId = getUserIdFromContext(request);
+    if (userId == null) {
+      return _errorResponse(401, '未授权');
+    }
+
+    try {
+      final tree = await _storageService.getDirectoryTree(userId);
+
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'tree': tree.toJson(),
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return _errorResponse(500, '服务器错误: $e');
+    }
+  }
+
+  /// 处理ZIP导出
+  Future<Response> _handleExport(Request request) async {
+    final userId = getUserIdFromContext(request);
+    if (userId == null) {
+      return _errorResponse(401, '未授权');
+    }
+
+    try {
+      final result = await _storageService.exportUserDataAsZip(userId);
+
+      // 记录导出日志
+      await _storageService.logSync(
+        userId: userId,
+        action: 'export',
+        filePath: result['file_name'] as String,
+        details: 'file_count: ${result['metadata']['file_count']}, total_size: ${result['metadata']['total_size']}',
+      );
+
+      return Response.ok(
+        jsonEncode(result),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return _errorResponse(500, '导出失败: $e');
+    }
+  }
+
+  /// 处理下载导出文件
+  Future<Response> _handleDownload(Request request, String fileName) async {
+    final userId = getUserIdFromContext(request);
+    if (userId == null) {
+      return _errorResponse(401, '未授权');
+    }
+
+    try {
+      // 验证文件名安全性
+      if (fileName.contains('..') || fileName.contains('/')) {
+        return _errorResponse(400, '无效的文件名');
+      }
+
+      final exportDir = _storageService.getExportDir();
+      final filePath = path.join(exportDir, fileName);
+
+      final file = File(filePath);
+      if (!await file.exists()) {
+        return _errorResponse(404, '文件不存在');
+      }
+
+      // 记录下载日志
+      await _storageService.logSync(
+        userId: userId,
+        action: 'download',
+        filePath: fileName,
+      );
+
+      return Response(
+        200,
+        body: file.openRead(),
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'Content-Disposition': 'attachment; filename="$fileName"',
+          'Content-Length': (await file.length()).toString(),
+        },
+      );
+    } catch (e) {
+      return _errorResponse(500, '下载失败: $e');
+    }
   }
 }

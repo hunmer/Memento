@@ -136,35 +136,6 @@ class SyncResponse {
       );
 }
 
-/// 文件信息 - 用于列表同步
-class FileInfo {
-  /// 文件路径 (相对路径)
-  final String path;
-
-  /// 文件 MD5
-  final String md5;
-
-  /// 最后更新时间
-  final DateTime updatedAt;
-
-  FileInfo({
-    required this.path,
-    required this.md5,
-    required this.updatedAt,
-  });
-
-  Map<String, dynamic> toJson() => {
-        'path': path,
-        'md5': md5,
-        'updated_at': updatedAt.toIso8601String(),
-      };
-
-  factory FileInfo.fromJson(Map<String, dynamic> json) => FileInfo(
-        path: json['path'] as String,
-        md5: json['md5'] as String,
-        updatedAt: DateTime.parse(json['updated_at'] as String),
-      );
-}
 
 /// 文件列表响应
 class FileListResponse {
@@ -218,6 +189,41 @@ class PullResponse {
 
   factory PullResponse.fromJson(Map<String, dynamic> json) => PullResponse(
         encryptedData: json['encrypted_data'] as String,
+        md5: json['md5'] as String,
+        updatedAt: DateTime.parse(json['updated_at'] as String),
+      );
+}
+/// 文件信息 - 用于列表同步
+class FileInfo {
+  /// 文件路径 (相对路径)
+  final String path;
+
+  /// 文件大小 (字节)
+  final int size;
+
+  /// 文件 MD5
+  final String md5;
+
+  /// 最后更新时间
+  final DateTime updatedAt;
+
+  FileInfo({
+    required this.path,
+    required this.size,
+    required this.md5,
+    required this.updatedAt,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'path': path,
+        'size': size,
+        'md5': md5,
+        'updated_at': updatedAt.toIso8601String(),
+      };
+
+  factory FileInfo.fromJson(Map<String, dynamic> json) => FileInfo(
+        path: json['path'] as String,
+        size: json['size'] as int,
         md5: json['md5'] as String,
         updatedAt: DateTime.parse(json['updated_at'] as String),
       );

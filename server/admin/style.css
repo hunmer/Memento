@@ -82,6 +82,15 @@ body {
 
 .login-card h2 {
     text-align: center;
+n.login-tips {
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: #f0f9ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 4px;
+    color: #1e40af;
+}
     margin-bottom: 1.5rem;
     color: var(--primary-color);
 }
@@ -482,4 +491,89 @@ body {
     .stats-grid {
         grid-template-columns: 1fr 1fr;
     }
+}
+
+/* View Switcher */
+.view-switcher {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.view-switcher .btn {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.view-switcher .btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.view-switcher .btn:hover:not(.active) {
+    background-color: rgba(79, 70, 229, 0.1);
+}
+
+/* Directory Tree */
+.directory-tree {
+    max-height: 600px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+}
+
+.tree-item {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tree-item:last-child {
+    border-bottom: none;
+}
+
+.folder-node,
+.file-node {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.folder-node:hover,
+.file-node:hover {
+    background-color: var(--bg-color);
+}
+
+.tree-icon {
+    font-size: 1.25rem;
+    width: 24px;
+    text-align: center;
+}
+
+.tree-name {
+    flex: 1;
+    font-family: monospace;
+    word-break: break-all;
+}
+
+.tree-info {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-right: 0.5rem;
+}
+
+.tree-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.tree-children {
+    border-left: 2px solid var(--border-color);
+    margin-left: 12px;
 }
