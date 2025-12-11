@@ -1,0 +1,22 @@
+name: shared_models
+description: Memento 共享数据模型包 - 客户端与服务器共用
+version: 1.0.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  # JSON 序列化支持
+  json_annotation: ^4.9.0
+
+  # 加密工具 (MD5 等)
+  crypto: ^3.0.3
+
+  # UUID 生成
+  uuid: ^4.3.3
+
+dev_dependencies:
+  # JSON 代码生成器
+  json_serializable: ^6.8.0
+  build_runner: ^2.4.12
+  lints: ^4.0.0

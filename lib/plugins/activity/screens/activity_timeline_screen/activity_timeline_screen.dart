@@ -398,7 +398,6 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
               CalendarStripDatePicker(
                 selectedDate: _selectedDate,
                 onDateChanged: _onDateChanged,
-                displayDaysCount: 7,
                 height: 70,
                 itemWidth: 54,
                 itemSpacing: 12,
