@@ -1,0 +1,199 @@
+#!/usr/bin/env node
+"use strict";
+/**
+ * Memento MCP Server
+ *
+ * 提供 AI 工具用于管理 Memento 应用中的个人数据
+ *
+ * 环境变量:
+ * - MEMENTO_SERVER_URL: Memento 服务器地址 (如 http://localhost:8080)
+ * - MEMENTO_AUTH_TOKEN: JWT 认证令牌
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+const index_js_1 = require("@modelcontextprotocol/sdk/server/index.js");
+const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
+const types_js_1 = require("@modelcontextprotocol/sdk/types.js");
+const config_js_1 = require("./config.js");
+const memento_client_js_1 = require("./client/memento-client.js");
+const index_js_2 = require("./tools/index.js");
+async function main() {
+    // 加载配置
+    let config;
+    try {
+        config = (0, config_js_1.loadConfig)();
+        (0, config_js_1.validateConfig)(config);
+    }
+    catch (error) {
+        console.error('配置错误:', error instanceof Error ? error.message : error);
+        console.error('');
+        console.error('请设置以下环境变量:');
+        console.error('  MEMENTO_SERVER_URL - Memento 服务器地址');
+        console.error('  MEMENTO_AUTH_TOKEN - JWT 认证令牌');
+        process.exit(1);
+    }
+    // 创建 HTTP 客户端
+    const client = new memento_client_js_1.MementoClient(config);
+    // 创建 MCP 服务器
+    const server = new index_js_1.Server({
+        name: 'mcp-memento-server',
+        version: '1.0.0',
+    }, {
+        capabilities: {
+            tools: {},
+        },
+    });
+    // 注册工具列表处理器
+    server.setRequestHandler(types_js_1.ListToolsRequestSchema, async () => {
+        return {
+            tools: (0, index_js_2.getToolDefinitions)(),
+        };
+    });
+    // 注册工具调用处理器
+    server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
+        const { name, arguments: args } = request.params;
+        try {
+            switch (name) {
+                // ==================== Chat 工具 ====================
+                case 'memento_chat_getChannels': {
+                    const result = await client.getChannels(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_chat_createChannel': {
+                    const result = await client.createChannel(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_chat_getMessages': {
+                    const { channelId, ...params } = args;
+                    const result = await client.getMessages(channelId, params);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_chat_sendMessage': {
+                    const { channelId, ...data } = args;
+                    const result = await client.sendMessage(channelId, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                // ==================== Notes 工具 ====================
+                case 'memento_notes_getNotes': {
+                    const result = await client.getNotes(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_notes_createNote': {
+                    const result = await client.createNote(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_notes_updateNote': {
+                    const { id, ...data } = args;
+                    const result = await client.updateNote(id, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_notes_searchNotes': {
+                    const { keyword, ...params } = args;
+                    const result = await client.searchNotes(keyword, params);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                // ==================== Activity 工具 ====================
+                case 'memento_activity_getActivities': {
+                    const result = await client.getActivities(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_activity_createActivity': {
+                    const result = await client.createActivity(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_activity_getTodayStats': {
+                    const result = await client.getTodayStats();
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                // ==================== Goods 工具 ====================
+                case 'memento_goods_getWarehouses': {
+                    const result = await client.getWarehouses(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_goods_getItems': {
+                    const result = await client.getItems(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_goods_createItem': {
+                    const result = await client.createItem(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_goods_searchItems': {
+                    const { keyword, ...params } = args;
+                    const result = await client.searchItems(keyword, params);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                // ==================== Bill 工具 ====================
+                case 'memento_bill_getAccounts': {
+                    const result = await client.getAccounts(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_bill_getBills': {
+                    const { accountId, ...params } = args;
+                    const result = await client.getBills(accountId, params);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_bill_createBill': {
+                    const { accountId, ...data } = args;
+                    const result = await client.createBill(accountId, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_bill_getStats': {
+                    const result = await client.getBillStats(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                // ==================== Todo 工具 ====================
+                case 'memento_todo_getTasks': {
+                    const result = await client.getTasks(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_todo_createTask': {
+                    const result = await client.createTask(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_todo_updateTask': {
+                    const { id, ...data } = args;
+                    const result = await client.updateTask(id, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_todo_completeTask': {
+                    const { id } = args;
+                    const result = await client.completeTask(id);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_todo_getTodayTasks': {
+                    const result = await client.getTodayTasks();
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_todo_getOverdueTasks': {
+                    const result = await client.getOverdueTasks();
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_todo_searchTasks': {
+                    const { keyword } = args;
+                    const result = await client.searchTasks(keyword);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_todo_getStats': {
+                    const result = await client.getTodoStats();
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                default:
+                    throw new Error(`未知工具: ${name}`);
+            }
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            return { content: [{ type: 'text', text: `错误: ${message}` }], isError: true };
+        }
+    });
+    // 启动服务器
+    const transport = new stdio_js_1.StdioServerTransport();
+    await server.connect(transport);
+    console.error('Memento MCP Server 已启动');
+    console.error(`服务器地址: ${config.serverUrl}`);
+}
+main().catch((error) => {
+    console.error('启动失败:', error);
+    process.exit(1);
+});
+//# sourceMappingURL=index.js.map

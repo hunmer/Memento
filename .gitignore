@@ -75,3 +75,4 @@ nul
 png/
 import_changes.csv
 server/data/*
+mcp-memento-server/node_modules/*

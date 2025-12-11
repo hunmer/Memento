@@ -10,9 +10,17 @@ import 'package:path/path.dart' as path;
 import 'package:memento_server/config/server_config.dart';
 import 'package:memento_server/services/file_storage_service.dart';
 import 'package:memento_server/services/auth_service.dart';
+import 'package:memento_server/services/plugin_data_service.dart';
 import 'package:memento_server/routes/auth_routes.dart';
 import 'package:memento_server/routes/sync_routes.dart';
+import 'package:memento_server/routes/plugin_routes/chat_routes.dart';
+import 'package:memento_server/routes/plugin_routes/notes_routes.dart';
+import 'package:memento_server/routes/plugin_routes/activity_routes.dart';
+import 'package:memento_server/routes/plugin_routes/goods_routes.dart';
+import 'package:memento_server/routes/plugin_routes/bill_routes.dart';
+import 'package:memento_server/routes/plugin_routes/todo_routes.dart';
 import 'package:memento_server/middleware/auth_middleware.dart';
+import 'package:memento_server/middleware/api_enabled_middleware.dart';
 
 /// 根据文件扩展名获取 MIME 类型
 String _getMimeType(String fileName) {
@@ -76,6 +84,11 @@ void main(List<String> args) async {
   );
   logger.info('认证服务初始化完成');
 
+  // 初始化加密服务和插件数据服务
+  final pluginDataService = PluginDataService(storageService, config.dataDir);
+  await pluginDataService.initialize();
+  logger.info('插件数据服务初始化完成');
+
   // 3. 创建路由
   final router = Router();
 
@@ -93,7 +106,7 @@ void main(List<String> args) async {
   });
 
   // 认证路由 (无需认证)
-  final authRoutes = AuthRoutes(authService);
+  final authRoutes = AuthRoutes(authService, pluginDataService);
   router.mount('/api/v1/auth', authRoutes.router);
 
   // 同步路由 (需要认证)
@@ -104,6 +117,57 @@ void main(List<String> args) async {
         .addMiddleware(authMiddleware(authService))
         .addHandler(syncRoutes.router.call),
   );
+
+  // ==================== 插件路由 (需要认证 + API 启用) ====================
+
+  // 创建带认证和 API 检查的中间件管道
+  Pipeline pluginPipeline() => Pipeline()
+      .addMiddleware(authMiddleware(authService))
+      .addMiddleware(apiEnabledMiddleware(pluginDataService));
+
+  // Chat 插件路由
+  final chatRoutes = ChatRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/chat',
+    pluginPipeline().addHandler(chatRoutes.router.call),
+  );
+
+  // Notes 插件路由
+  final notesRoutes = NotesRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/notes',
+    pluginPipeline().addHandler(notesRoutes.router.call),
+  );
+
+  // Activity 插件路由
+  final activityRoutes = ActivityRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/activity',
+    pluginPipeline().addHandler(activityRoutes.router.call),
+  );
+
+  // Goods 插件路由
+  final goodsRoutes = GoodsRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/goods',
+    pluginPipeline().addHandler(goodsRoutes.router.call),
+  );
+
+  // Bill 插件路由
+  final billRoutes = BillRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/bill',
+    pluginPipeline().addHandler(billRoutes.router.call),
+  );
+
+  // Todo 插件路由
+  final todoRoutes = TodoRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/todo',
+    pluginPipeline().addHandler(todoRoutes.router.call),
+  );
+
+  logger.info('已挂载 6 个插件路由: chat, notes, activity, goods, bill, todo');
 
   // 管理界面静态文件服务
   final scriptDir = path.dirname(Platform.script.toFilePath());
@@ -194,9 +258,20 @@ void main(List<String> args) async {
   print('  GET  /version             - 版本信息');
   print('  POST /api/v1/auth/register - 用户注册');
   print('  POST /api/v1/auth/login    - 用户登录');
+  print('  POST /api/v1/auth/enable-api  - 启用 API 访问');
+  print('  POST /api/v1/auth/disable-api - 禁用 API 访问');
+  print('  GET  /api/v1/auth/api-status  - API 状态查询');
   print('  POST /api/v1/sync/push     - 推送文件 (需认证)');
   print('  GET  /api/v1/sync/pull/*   - 拉取文件 (需认证)');
   print('  GET  /api/v1/sync/list     - 文件列表 (需认证)');
+  print('');
+  print('插件 API (需认证 + API 启用):');
+  print('  /api/v1/plugins/chat     - 聊天插件');
+  print('  /api/v1/plugins/notes    - 笔记插件');
+  print('  /api/v1/plugins/activity - 活动记录插件');
+  print('  /api/v1/plugins/goods    - 物品管理插件');
+  print('  /api/v1/plugins/bill     - 账单插件');
+  print('  /api/v1/plugins/todo     - 任务插件');
   print('');
 
   // 优雅关闭

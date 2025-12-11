@@ -14,6 +14,7 @@ dependencies:
 
   # 加密工具
   crypto: ^3.0.3
+  encrypt: ^5.0.3
 
   # JWT 认证
   dart_jsonwebtoken: ^2.14.0
