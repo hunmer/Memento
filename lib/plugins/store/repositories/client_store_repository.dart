@@ -525,13 +525,3 @@ class ClientStoreRepository implements IStoreRepository {
   }
 }
 
-/// 扩展方法：获取列表中的第一个匹配元素或返回 null
-extension<T> on Iterable<T> {
-  T? get firstOrNull {
-    try {
-      return first;
-    } catch (e) {
-      return null;
-    }
-  }
-}

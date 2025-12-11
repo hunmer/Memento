@@ -692,7 +692,7 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
 
         // 注入 JS Bridge（传递当前 URL 防止重复注入）
         if (_jsBridgeInjector != null) {
-          await _jsBridgeInjector!.inject();
+          await _jsBridgeInjector!.inject(url.toString());
         }
       },
       onProgressChanged: (controller, progress) {

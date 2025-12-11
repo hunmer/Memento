@@ -67,7 +67,8 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
 
     final groups = data['tagGroups'] as List<dynamic>? ?? [];
     return groups
-        .map((e) => CalendarAlbumTagGroupDto.fromJson(e as Map<String, dynamic>))
+        .map(
+            (e) => CalendarAlbumTagGroupDto.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
@@ -85,7 +86,8 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
       const CalendarAlbumTagGroupDto(name: '最近使用', tags: []),
       const CalendarAlbumTagGroupDto(name: '地点', tags: ['家', '工作', '旅行']),
       const CalendarAlbumTagGroupDto(name: '活动', tags: ['生日', '聚会', '会议']),
-      const CalendarAlbumTagGroupDto(name: '心情', tags: ['开心', '平静', '兴奋', '思考']),
+      const CalendarAlbumTagGroupDto(
+          name: '心情', tags: ['开心', '平静', '兴奋', '思考']),
     ];
   }
 
@@ -115,8 +117,7 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
 
       return Result.success(entries);
     } catch (e) {
-      return Result.failure('获取日记列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取日记列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -124,7 +125,8 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
   Future<Result<CalendarAlbumEntryDto?>> getEntryById(String id) async {
     try {
       final entries = await _readAllEntries();
-      final entry = entries.where((e) => e.id == id).firstOrNull;
+      final entry =
+          FirstOrNullExtension(entries.where((e) => e.id == id)).firstOrNull;
       return Result.success(entry);
     } catch (e) {
       return Result.failure('获取日记失败: $e', code: ErrorCodes.serverError);
@@ -140,8 +142,7 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
       final normalizedDate = _normalizeDate(date);
       final entries = await _readAllEntries();
       var dateEntries = entries
-          .where((e) =>
-              _normalizeDate(e.createdAt) == normalizedDate)
+          .where((e) => _normalizeDate(e.createdAt) == normalizedDate)
           .toList();
 
       // 按创建时间倒序排列
@@ -158,8 +159,7 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
 
       return Result.success(dateEntries);
     } catch (e) {
-      return Result.failure('根据日期获取日记失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('根据日期获取日记失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -170,9 +170,7 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
   }) async {
     try {
       final entries = await _readAllEntries();
-      var taggedEntries = entries
-          .where((e) => e.tags.contains(tag))
-          .toList();
+      var taggedEntries = entries.where((e) => e.tags.contains(tag)).toList();
 
       // 按创建时间倒序排列
       taggedEntries.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -188,8 +186,7 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
 
       return Result.success(taggedEntries);
     } catch (e) {
-      return Result.failure('根据标签获取日记失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('根据标签获取日记失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -222,8 +219,7 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
 
       return Result.success(taggedEntries);
     } catch (e) {
-      return Result.failure('根据多标签获取日记失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('根据多标签获取日记失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -319,7 +315,8 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
       data.forEach((dateKey, dateEntries) {
         if (dateEntries is List) {
           final entries = dateEntries
-              .map((e) => CalendarAlbumEntryDto.fromJson(e as Map<String, dynamic>))
+              .map((e) =>
+                  CalendarAlbumEntryDto.fromJson(e as Map<String, dynamic>))
               .toList();
 
           final index = entries.indexWhere((e) => e.id == id);
@@ -351,7 +348,8 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
       data.forEach((dateKey, dateEntries) {
         if (dateEntries is List) {
           final entries = dateEntries
-              .map((e) => CalendarAlbumEntryDto.fromJson(e as Map<String, dynamic>))
+              .map((e) =>
+                  CalendarAlbumEntryDto.fromJson(e as Map<String, dynamic>))
               .toList();
 
           final initialLength = entries.length;
@@ -481,7 +479,8 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
       // 搜索
       if (query.keyword != null && query.keyword!.isNotEmpty) {
         final keyword = query.keyword!.toLowerCase();
-        tags = tags.where((tag) => tag.toLowerCase().contains(keyword)).toList();
+        tags =
+            tags.where((tag) => tag.toLowerCase().contains(keyword)).toList();
       }
 
       if (query.pagination != null && query.pagination!.hasPagination) {
@@ -511,7 +510,8 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
       // 搜索
       if (query.keyword != null && query.keyword!.isNotEmpty) {
         final keyword = query.keyword!.toLowerCase();
-        tags = tags.where((tag) => tag.toLowerCase().contains(keyword)).toList();
+        tags =
+            tags.where((tag) => tag.toLowerCase().contains(keyword)).toList();
       }
 
       if (query.pagination != null && query.pagination!.hasPagination) {
@@ -546,8 +546,7 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
 
       return Result.success(images.toList());
     } catch (e) {
-      return Result.failure('获取图片列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取图片列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -591,14 +590,14 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
 
       // 统计今日日记数
       final today = _normalizeDate(DateTime.now());
-      final todayEntries = entries
-          .where((e) => _normalizeDate(e.createdAt) == today)
-          .length;
+      final todayEntries =
+          entries.where((e) => _normalizeDate(e.createdAt) == today).length;
 
       // 统计最近7天日记数
       final sevenDaysAgo = today.subtract(const Duration(days: 7));
       final last7DaysEntries = entries
-          .where((e) => e.createdAt.isAfter(sevenDaysAgo) ||
+          .where((e) =>
+              e.createdAt.isAfter(sevenDaysAgo) ||
               e.createdAt.isAtSameMomentAs(sevenDaysAgo))
           .length;
 
@@ -617,8 +616,7 @@ class ServerCalendarAlbumRepository implements ICalendarAlbumRepository {
 
       return Result.success(stats);
     } catch (e) {
-      return Result.failure('获取统计信息失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取统计信息失败: $e', code: ErrorCodes.serverError);
     }
   }
 }

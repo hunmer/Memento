@@ -2,7 +2,10 @@
 ///
 /// 通过适配现有的 ContactController 来实现 IContactRepository 接口
 
-import 'package:shared_models/repositories/contact/contact_repository.dart' as shared_models;
+import 'package:shared_models/repositories/contact/contact_repository.dart'
+    as shared_models;
+import 'package:shared_models/repositories/contact/contact_repository.dart'
+    show IContactRepository, ContactDto, InteractionRecordDto, ContactQuery, InteractionRecordQuery, FilterConfigDto, SortConfigDto;
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
 import 'package:flutter/material.dart';
@@ -99,8 +102,7 @@ class ClientContactRepository implements IContactRepository {
         bool isMatch = true;
 
         // 姓名关键词筛选
-        if (query.nameKeyword != null &&
-            query.nameKeyword!.isNotEmpty) {
+        if (query.nameKeyword != null && query.nameKeyword!.isNotEmpty) {
           isMatch = contact.name.toLowerCase().contains(
             query.nameKeyword!.toLowerCase(),
           );
@@ -113,7 +115,8 @@ class ClientContactRepository implements IContactRepository {
 
         // 创建日期范围筛选
         if (isMatch && query.startDate != null) {
-          isMatch = contact.createdTime.isAfter(query.startDate!) ||
+          isMatch =
+              contact.createdTime.isAfter(query.startDate!) ||
               contact.createdTime.isAtSameMomentAs(query.startDate!);
         }
         if (isMatch && query.endDate != null) {
@@ -172,14 +175,14 @@ class ClientContactRepository implements IContactRepository {
 
       return Result.success(dtos);
     } catch (e) {
-      return Result.failure('获取交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
   @override
   Future<Result<InteractionRecordDto?>> getInteractionRecordById(
-      String id) async {
+    String id,
+  ) async {
     try {
       final interactions = await controller.getAllInteractions();
       final interaction = interactions.where((i) => i.id == id).firstOrNull;
@@ -188,8 +191,7 @@ class ClientContactRepository implements IContactRepository {
       }
       return Result.success(_interactionToDto(interaction));
     } catch (e) {
-      return Result.failure('获取交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -202,8 +204,7 @@ class ClientContactRepository implements IContactRepository {
       final result = await controller.addInteraction(record);
       return Result.success(_interactionToDto(result));
     } catch (e) {
-      return Result.failure('创建交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('创建交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -238,8 +239,7 @@ class ClientContactRepository implements IContactRepository {
 
       return Result.success(_interactionToDto(updated));
     } catch (e) {
-      return Result.failure('更新交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('更新交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -249,20 +249,19 @@ class ClientContactRepository implements IContactRepository {
       await controller.deleteInteraction(id);
       return Result.success(true);
     } catch (e) {
-      return Result.failure('删除交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('删除交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
   @override
   Future<Result<bool>> deleteInteractionRecordsByContactId(
-      String contactId) async {
+    String contactId,
+  ) async {
     try {
       await controller.deleteInteractionsByContactId(contactId);
       return Result.success(true);
     } catch (e) {
-      return Result.failure('删除交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('删除交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -271,7 +270,9 @@ class ClientContactRepository implements IContactRepository {
     InteractionRecordQuery query,
   ) async {
     try {
-      final records = await controller.getInteractionsByContactId(query.contactId);
+      final records = await controller.getInteractionsByContactId(
+        query.contactId,
+      );
       final matches = <InteractionRecord>[];
 
       // 应用筛选条件
@@ -280,7 +281,8 @@ class ClientContactRepository implements IContactRepository {
 
         // 日期范围筛选
         if (isMatch && query.startDate != null) {
-          isMatch = record.date.isAfter(query.startDate!) ||
+          isMatch =
+              record.date.isAfter(query.startDate!) ||
               record.date.isAtSameMomentAs(query.startDate!);
         }
         if (isMatch && query.endDate != null) {
@@ -306,8 +308,7 @@ class ClientContactRepository implements IContactRepository {
 
       return Result.success(dtos);
     } catch (e) {
-      return Result.failure('搜索交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('搜索交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -319,21 +320,20 @@ class ClientContactRepository implements IContactRepository {
       final config = await controller.getFilterConfig();
       return Result.success(_filterConfigToDto(config));
     } catch (e) {
-      return Result.failure('获取筛选配置失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取筛选配置失败: $e', code: ErrorCodes.serverError);
     }
   }
 
   @override
   Future<Result<FilterConfigDto>> saveFilterConfig(
-      FilterConfigDto config) async {
+    FilterConfigDto config,
+  ) async {
     try {
       final filterConfig = _dtoToFilterConfig(config);
       await controller.saveFilterConfig(filterConfig);
       return Result.success(config);
     } catch (e) {
-      return Result.failure('保存筛选配置失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('保存筛选配置失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -343,8 +343,7 @@ class ClientContactRepository implements IContactRepository {
       final config = await controller.getSortConfig();
       return Result.success(_sortConfigToDto(config));
     } catch (e) {
-      return Result.failure('获取排序配置失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取排序配置失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -355,8 +354,7 @@ class ClientContactRepository implements IContactRepository {
       await controller.saveSortConfig(sortConfig);
       return Result.success(config);
     } catch (e) {
-      return Result.failure('保存排序配置失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('保存排序配置失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -368,8 +366,7 @@ class ClientContactRepository implements IContactRepository {
       final tags = await controller.getAllTags();
       return Result.success(tags);
     } catch (e) {
-      return Result.failure('获取标签列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取标签列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -381,8 +378,7 @@ class ClientContactRepository implements IContactRepository {
       final count = await controller.getRecentlyContactedCount();
       return Result.success(count);
     } catch (e) {
-      return Result.failure('获取最近联系人数量失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取最近联系人数量失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -392,8 +388,7 @@ class ClientContactRepository implements IContactRepository {
       final count = await controller.getContactInteractionsCount(contactId);
       return Result.success(count);
     } catch (e) {
-      return Result.failure('获取交互记录数量失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取交互记录数量失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -403,8 +398,7 @@ class ClientContactRepository implements IContactRepository {
       final contacts = await controller.getAllContacts();
       return Result.success(contacts.length);
     } catch (e) {
-      return Result.failure('获取总联系人数失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取总联系人数失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -426,7 +420,8 @@ class ClientContactRepository implements IContactRepository {
       gender: contact.gender?.name,
       tags: List<String>.from(contact.tags),
       customFields: Map<String, String>.from(contact.customFields),
-      customActivityEvents: [], // CustomActivityEvent 与 InteractionRecordDto 不兼容，暂不转换
+      customActivityEvents:
+          [], // CustomActivityEvent 与 InteractionRecordDto 不兼容，暂不转换
       createdTime: contact.createdTime,
       lastContactTime: contact.lastContactTime,
     );
@@ -445,15 +440,17 @@ class ClientContactRepository implements IContactRepository {
       website: dto.website,
       address: dto.address,
       notes: dto.notes,
-      gender: dto.gender != null
-          ? ContactGender.values.firstWhere(
-              (e) => e.name == dto.gender,
-              orElse: () => ContactGender.other,
-            )
-          : null,
+      gender:
+          dto.gender != null
+              ? ContactGender.values.firstWhere(
+                (e) => e.name == dto.gender,
+                orElse: () => ContactGender.other,
+              )
+              : null,
       tags: List<String>.from(dto.tags),
       customFields: Map<String, String>.from(dto.customFields),
-      customActivityEvents: [], // InteractionRecordDto 与 CustomActivityEvent 不兼容，暂不转换
+      customActivityEvents:
+          [], // InteractionRecordDto 与 CustomActivityEvent 不兼容，暂不转换
       createdTime: dto.createdTime,
       lastContactTime: dto.lastContactTime,
     );

@@ -118,7 +118,7 @@ class OpenAIRoutes {
     );
   }
 
-  Map<String, dynamic>? _parseRequestBody(Request request) {
+  Future<Map<String, dynamic>?> _parseRequestBody(Request request) {
     return request.readAsString().then((body) {
       if (body.isEmpty) return <String, dynamic>{};
       try {
