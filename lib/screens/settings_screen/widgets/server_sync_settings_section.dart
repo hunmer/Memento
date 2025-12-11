@@ -224,7 +224,7 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
         final data = jsonDecode(response.body);
         final token = data['token'] as String;
         final userId = data['user_id'] as String;
-        final salt = data['salt'] as String;
+        final salt = data['user_salt'] as String;
 
         // 保存配置和认证信息
         final config = ServerSyncConfig(
@@ -300,7 +300,7 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
         final data = jsonDecode(response.body);
         final token = data['token'] as String;
         final userId = data['user_id'] as String;
-        final salt = data['salt'] as String;
+        final salt = data['user_salt'] as String;
 
         // 保存配置和认证信息
         final config = ServerSyncConfig(

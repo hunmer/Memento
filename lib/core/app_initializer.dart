@@ -47,6 +47,7 @@ import 'app_widgets/floating_ball_service.dart';
 import 'package:Memento/screens/route.dart';
 import 'global_flags.dart';
 import 'services/toast_service.dart';
+import 'services/file_watch_sync_service.dart';
 
 /// 应用启动状态管理
 class AppStartupState extends ChangeNotifier {
@@ -229,6 +230,9 @@ Future<void> _initializeBackgroundServices() async {
 
     // 恢复悬浮球状态
     unawaited(restoreFloatingBallState());
+
+    // 初始化文件监听同步服务（用于自动同步文件变更到服务器）
+    unawaited(fileWatchSyncService.initialize());
 
     // 延迟执行权限检查和小组件同步
     WidgetsBinding.instance.addPostFrameCallback((_) async {
