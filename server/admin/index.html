@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memento Sync Server - Admin</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js?v=3.4.0"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -26,6 +26,9 @@
             <div v-if="!isLoggedIn" class="login-container">
                 <div class="card login-card">
                     <h2>管理员登录</h2>
+                    <div class="login-tips">
+                        <small>默认凭据: admin / admin123</small>
+                    </div>
                     <form @submit.prevent="login">
                         <div class="form-group">
                             <label for="username">用户名</label>
@@ -88,7 +91,7 @@
                         :class="{ active: activeTab === 'settings' }"
                         @click="activeTab = 'settings'"
                     >
-                        同步设置
+                        操作
                     </button>
                 </div>
 
@@ -107,13 +110,6 @@
                             <div class="stat-info">
                                 <div class="stat-value">{{ formatSize(stats.totalSize) }}</div>
                                 <div class="stat-label">总存储大小</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">🔄</div>
-                            <div class="stat-info">
-                                <div class="stat-value">{{ stats.lastSync || '从未同步' }}</div>
-                                <div class="stat-label">最后同步时间</div>
                             </div>
                         </div>
                         <div class="stat-card">
@@ -147,30 +143,29 @@
                 <div v-show="activeTab === 'files'" class="tab-content">
                     <div class="card">
                         <div class="card-header">
-                            <h3>同步文件列表</h3>
+                            <h3>文件管理</h3>
                             <button class="btn btn-primary" @click="refreshFiles">
                                 🔄 刷新
                             </button>
                         </div>
-                        <div class="file-list">
-                            <div class="file-header">
-                                <span class="file-name">文件路径</span>
-                                <span class="file-size">大小</span>
-                                <span class="file-time">修改时间</span>
-                                <span class="file-actions">操作</span>
-                            </div>
-                            <div v-for="file in files" :key="file.path" class="file-item">
-                                <span class="file-name">{{ file.path }}</span>
-                                <span class="file-size">{{ formatSize(file.size) }}</span>
-                                <span class="file-time">{{ formatTime(file.updatedAt) }}</span>
-                                <span class="file-actions">
-                                    <button class="btn btn-sm" @click="downloadFile(file.path)">下载</button>
-                                    <button class="btn btn-sm btn-danger" @click="deleteFile(file.path)">删除</button>
-                                </span>
-                            </div>
-                            <div v-if="files.length === 0" class="empty-message">
-                                暂无同步文件
-                            </div>
+
+                        <!-- 树形视图 -->
+                        <div class="directory-tree">
+                            <template v-if="directoryTree">
+                                <tree-node
+                                    :node="directoryTree"
+                                    :level="0"
+                                    :expanded-folders="expandedFolders"
+                                    @toggle="toggleFolder"
+                                    @download="downloadFile"
+                                    @delete="deleteFile"
+                                />
+                            </template>
+                            <template v-else>
+                                <div class="empty-message">
+                                    暂无同步文件
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -178,61 +173,8 @@
                 <!-- Settings Tab -->
                 <div v-show="activeTab === 'settings'" class="tab-content">
                     <div class="card">
-                        <h3>同步设置</h3>
-                        <form @submit.prevent="saveSettings">
-                            <div class="form-group">
-                                <label>
-                                    <input type="checkbox" v-model="settings.autoSync">
-                                    启用自动同步
-                                </label>
-                            </div>
-                            <div class="form-group" v-if="settings.autoSync">
-                                <label for="syncInterval">同步间隔 (分钟)</label>
-                                <input
-                                    type="number"
-                                    id="syncInterval"
-                                    v-model.number="settings.syncInterval"
-                                    min="1"
-                                    max="1440"
-                                >
-                            </div>
-                            <div class="form-group">
-                                <label>
-                                    <input type="checkbox" v-model="settings.syncOnChange">
-                                    文件修改时自动同步
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <label for="conflictStrategy">冲突解决策略</label>
-                                <select id="conflictStrategy" v-model="settings.conflictStrategy">
-                                    <option value="server">服务器优先</option>
-                                    <option value="client">客户端优先</option>
-                                    <option value="manual">手动解决</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>同步的插件目录</label>
-                                <div class="checkbox-group">
-                                    <label v-for="dir in availableDirs" :key="dir">
-                                        <input
-                                            type="checkbox"
-                                            :value="dir"
-                                            v-model="settings.syncDirs"
-                                        >
-                                        {{ dir }}
-                                    </label>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary">保存设置</button>
-                        </form>
-                    </div>
-
-                    <div class="card">
-                        <h3>手动操作</h3>
+                        <h3>数据操作</h3>
                         <div class="action-buttons">
-                            <button class="btn btn-primary" @click="triggerFullSync">
-                                🔄 全量同步
-                            </button>
                             <button class="btn btn-outline" @click="exportData">
                                 📤 导出数据
                             </button>

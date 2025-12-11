@@ -1,6 +1,113 @@
-const { createApp, ref, reactive, computed, onMounted, watch } = Vue;
+const { createApp, ref, reactive, computed, onMounted, watch, h } = Vue;
 
+// TreeNode 组件定义
+const TreeNode = Vue.defineComponent({
+    props: {
+        node: Object,
+        level: Number,
+        expandedFolders: Object
+    },
+    emits: ['toggle', 'download', 'delete'],
+    setup(props, { emit }) {
+        const isExpanded = computed(() => {
+            return props.expandedFolders.has(props.node.path);
+        });
+
+        const toggle = () => {
+            if (props.node.is_folder) {
+                emit('toggle', props.node.path);
+            }
+        };
+
+        const download = () => {
+            if (!props.node.is_folder) {
+                emit('download', props.node.path);
+            }
+        };
+
+        const deleteNode = () => {
+            if (!props.node.is_folder) {
+                emit('delete', props.node.path);
+            }
+        };
+
+        const formatSize = (bytes) => {
+            if (!bytes) return '-';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let unitIndex = 0;
+            let size = bytes;
+            while (size >= 1024 && unitIndex < units.length - 1) {
+                size /= 1024;
+                unitIndex++;
+            }
+            return `${size.toFixed(1)} ${units[unitIndex]}`;
+        };
+
+        const formatTime = (isoString) => {
+            if (!isoString) return '-';
+            const date = new Date(isoString);
+            return date.toLocaleString('zh-CN');
+        };
+
+        return () => {
+            const paddingStyle = { paddingLeft: (props.level * 20) + 'px' };
+
+            if (props.node.is_folder) {
+                const children = [];
+
+                // 文件夹头部
+                children.push(
+                    h('div', { class: 'folder-node', onClick: toggle }, [
+                        h('span', { class: 'tree-icon' }, isExpanded.value ? '📂' : '📁'),
+                        h('span', { class: 'tree-name' }, props.node.name),
+                        h('span', { class: 'tree-info' }, `${props.node.children ? props.node.children.length : 0} 项`)
+                    ])
+                );
+
+                // 子节点
+                if (props.node.is_folder && isExpanded.value && props.node.children) {
+                    children.push(
+                        h('div', { class: 'tree-children' },
+                            props.node.children.map(child =>
+                                h(TreeNode, {
+                                    key: child.path,
+                                    node: child,
+                                    level: props.level + 1,
+                                    expandedFolders: props.expandedFolders,
+                                    onToggle: (path) => emit('toggle', path),
+                                    onDownload: (path) => emit('download', path),
+                                    onDelete: (path) => emit('delete', path)
+                                })
+                            )
+                        )
+                    );
+                }
+
+                return h('div', { class: 'tree-item', style: paddingStyle }, children);
+            } else {
+                return h('div', { class: 'tree-item', style: paddingStyle }, [
+                    h('div', { class: 'file-node' }, [
+                        h('span', { class: 'tree-icon' }, '📄'),
+                        h('span', { class: 'tree-name' }, props.node.name),
+                        h('span', { class: 'tree-info' }, formatSize(props.node.size)),
+                        h('span', { class: 'tree-info' }, formatTime(props.node.updated_at)),
+                        h('div', { class: 'tree-actions' }, [
+                            h('button', { class: 'btn btn-sm', onClick: download }, '下载'),
+                            h('button', { class: 'btn btn-sm btn-danger', onClick: deleteNode }, '删除')
+                        ])
+                    ])
+                ]);
+            }
+        };
+    }
+});
+
+// 主应用
 createApp({
+    components: {
+        TreeNode,
+        'tree-node': TreeNode
+    },
     setup() {
         // State
         const isLoggedIn = ref(false);
@@ -24,20 +131,10 @@ createApp({
             lastSync: null
         });
 
-        const settings = reactive({
-            autoSync: false,
-            syncInterval: 30,
-            syncOnChange: true,
-            conflictStrategy: 'server',
-            syncDirs: ['diary', 'chat', 'notes', 'activity']
-        });
-
-        const availableDirs = ref([
-            'diary', 'chat', 'notes', 'todo', 'activity',
-            'bill', 'tracker', 'goods', 'contact', 'habits', 'checkin'
-        ]);
-
         const files = ref([]);
+        const directoryTree = ref(null);
+        const currentPath = ref('');
+        const expandedFolders = ref(new Set());
         const recentActivities = ref([]);
         const toasts = ref([]);
 
@@ -66,17 +163,44 @@ createApp({
                 headers['Authorization'] = `Bearer ${token.value}`;
             }
 
-            const response = await fetch(url, {
-                ...options,
-                headers
-            });
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers
+                });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `HTTP Error: ${response.status}`);
+                // 处理认证错误 (401/403)
+                if (response.status === 401 || response.status === 403) {
+                    console.warn('Token expired, clearing credentials');
+                    // 清除过期的认证信息
+                    token.value = '';
+                    currentUser.value = '';
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('username');
+                    isLoggedIn.value = false;
+
+                    showToast('登录已过期，请重新登录', 'error');
+                    throw new Error('登录已过期，请重新登录');
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP Error: ${response.status}`);
+                }
+
+                return response.json();
+            } catch (err) {
+                // 如果是网络错误或服务器未启动，也清除token避免死循环
+                if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+                    console.warn('Network error, clearing token to prevent retry loop');
+                    token.value = '';
+                    currentUser.value = '';
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('username');
+                    isLoggedIn.value = false;
+                }
+                throw err;
             }
-
-            return response.json();
         };
 
         const login = async () => {
@@ -138,11 +262,22 @@ createApp({
         };
 
         const loadDashboardData = async () => {
-            await Promise.all([
-                checkServerHealth(),
-                loadFiles(),
-                loadStats()
-            ]);
+            // 检查是否仍有有效token
+            if (!token.value) {
+                console.log('No valid token, skipping dashboard data load');
+                return;
+            }
+
+            try {
+                await Promise.all([
+                    checkServerHealth(),
+                    loadFiles(),  // loadFiles will call buildDirectoryTree internally
+                    loadStats()
+                ]);
+            } catch (err) {
+                // 如果加载失败，可能是token问题，apiRequest已经处理了清理
+                console.error('Failed to load dashboard data:', err);
+            }
         };
 
         const loadFiles = async () => {
@@ -153,8 +288,119 @@ createApp({
                 // Update stats
                 stats.totalFiles = files.value.length;
                 stats.totalSize = files.value.reduce((sum, f) => sum + (f.size || 0), 0);
+
+                // Build directory tree from files list (纯前端处理)
+                buildDirectoryTree();
             } catch (err) {
                 console.error('Failed to load files:', err);
+            }
+        };
+
+        // 前端构建树状结构 (纯前端处理，无需API)
+        const buildDirectoryTree = () => {
+            if (!files.value || files.value.length === 0) {
+                directoryTree.value = {
+                    name: '根目录',
+                    path: '',
+                    is_folder: true,
+                    children: []
+                };
+                return;
+            }
+
+            // 步骤1: 收集所有唯一的文件夹路径
+            const folders = new Set();
+            const fileNodes = [];
+
+            files.value.forEach(file => {
+                const parts = file.path.split('/').filter(p => p); // 过滤空字符串
+                fileNodes.push({
+                    name: parts[parts.length - 1] || file.path,
+                    path: file.path,
+                    is_folder: false,
+                    size: file.size,
+                    updated_at: file.updated_at
+                });
+
+                // 构建所有父文件夹路径
+                for (let i = 1; i < parts.length; i++) {
+                    const folderPath = parts.slice(0, i).join('/');
+                    folders.add(folderPath);
+                }
+            });
+
+            // 步骤2: 创建所有节点（文件夹和文件）
+            const allNodes = {};
+
+            // 添加文件夹节点
+            folders.forEach(folderPath => {
+                const parts = folderPath.split('/');
+                const name = parts[parts.length - 1];
+                allNodes[folderPath] = {
+                    name: name,
+                    path: folderPath,
+                    is_folder: true,
+                    children: []
+                };
+            });
+
+            // 添加文件节点
+            fileNodes.forEach(file => {
+                allNodes[file.path] = file;
+            });
+
+            // 步骤3: 构建父子关系
+            const root = { name: '根目录', path: '', is_folder: true, children: [] };
+            const pathMap = { '': root };
+
+            // 按路径长度排序，确保父节点在子节点之前处理
+            const sortedPaths = Object.keys(allNodes).sort((a, b) => a.length - b.length);
+
+            sortedPaths.forEach(path => {
+                const node = allNodes[path];
+                const parentPath = path.substring(0, path.lastIndexOf('/'));
+
+                // 如果父路径为空，说明是根级节点
+                const parentKey = parentPath || '';
+
+                // 确保父节点存在
+                if (!pathMap[parentKey]) {
+                    pathMap[parentKey] = {
+                        name: parentKey.split('/').pop() || '根目录',
+                        path: parentKey,
+                        is_folder: true,
+                        children: []
+                    };
+                }
+
+                pathMap[parentKey].children.push(node);
+                pathMap[path] = node;
+            });
+
+            // 步骤4: 排序子节点（文件夹优先，按名称排序）
+            const sortChildren = (node) => {
+                if (node.children && node.children.length > 0) {
+                    node.children.sort((a, b) => {
+                        if (a.is_folder && !b.is_folder) return -1;
+                        if (!a.is_folder && b.is_folder) return 1;
+                        return a.name.localeCompare(b.name);
+                    });
+                    node.children.forEach(sortChildren);
+                }
+            };
+
+            sortChildren(root);
+            directoryTree.value = root;
+
+            // 默认展开根目录下的第一级文件夹
+            if (root.children) {
+                root.children.forEach(child => {
+                    if (child.is_folder) {
+                        expandedFolders.value.add(child.path);
+                    }
+                });
+                // 触发响应式更新
+                expandedFolders.value = new Set(expandedFolders.value);
             }
         };
 
@@ -172,13 +418,27 @@ createApp({
         const refreshFiles = async () => {
             setLoading(true, '刷新文件列表...');
             try {
-                await loadFiles();
+                await loadFiles();  // buildDirectoryTree is called inside loadFiles
                 showToast('文件列表已刷新');
             } catch (err) {
                 showToast(err.message, 'error');
             } finally {
                 setLoading(false);
             }
+        };
+
+        const toggleFolder = (folderPath) => {
+            if (expandedFolders.value.has(folderPath)) {
+                expandedFolders.value.delete(folderPath);
+            } else {
+                expandedFolders.value.add(folderPath);
+            }
+            // 触发响应式更新
+            expandedFolders.value = new Set(expandedFolders.value);
+        };
+
+        const isFolderExpanded = (folderPath) => {
+            return expandedFolders.value.has(folderPath);
         };
 
         const downloadFile = async (filePath) => {
@@ -222,61 +482,39 @@ createApp({
             }
         };
 
-        const saveSettings = async () => {
-            setLoading(true, '保存设置...');
-            try {
-                // Save settings to localStorage (client-side settings)
-                localStorage.setItem('syncSettings', JSON.stringify(settings));
-                showToast('设置已保存');
-
-                // Add activity
-                addActivity('settings', '同步设置已更新');
-            } catch (err) {
-                showToast(err.message, 'error');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const triggerFullSync = async () => {
-            if (!confirm('确定要执行全量同步吗？这可能需要一些时间。')) {
-                return;
-            }
-
-            setLoading(true, '执行全量同步...');
-            try {
-                // This would trigger sync on the client side
-                // For now, just refresh the file list
-                await loadFiles();
-                showToast('全量同步完成');
-                addActivity('sync', '执行了全量同步');
-            } catch (err) {
-                showToast(err.message, 'error');
-            } finally {
-                setLoading(false);
-            }
-        };
-
         const exportData = async () => {
-            setLoading(true, '导出数据...');
+            setLoading(true, '导出ZIP文件...');
             try {
-                const data = await apiRequest('/api/v1/sync/list');
+                const data = await apiRequest('/api/v1/sync/export', {
+                    method: 'POST'
+                });
 
-                const exportData = {
-                    exportedAt: new Date().toISOString(),
-                    files: data.files
-                };
+                if (data.success) {
+                    // 下载ZIP文件
+                    const downloadUrl = `${serverUrl.value}/api/v1/sync/download/${data.file_name}`;
+                    const response = await fetch(downloadUrl, {
+                        headers: {
+                            'Authorization': `Bearer ${token.value}`
+                        }
+                    });
 
-                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `memento_export_${Date.now()}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
+                    if (!response.ok) {
+                        throw new Error('下载失败');
+                    }
 
-                showToast('数据导出成功');
-                addActivity('export', '导出了同步数据');
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = data.file_name;
+                    a.click();
+                    URL.revokeObjectURL(url);
+
+                    showToast(`数据导出成功 (${data.metadata.file_count} 个文件, ${data.metadata.total_size_mb} MB)`);
+                    addActivity('export', `导出了 ${data.metadata.file_count} 个文件`);
+                } else {
+                    throw new Error(data.error || '导出失败');
+                }
             } catch (err) {
                 showToast(err.message, 'error');
             } finally {
@@ -358,20 +596,21 @@ createApp({
 
         // Lifecycle
         onMounted(async () => {
-            // Load saved settings
-            const savedSettings = localStorage.getItem('syncSettings');
-            if (savedSettings) {
-                Object.assign(settings, JSON.parse(savedSettings));
-            }
-
             // Check for saved login
             const savedToken = localStorage.getItem('token');
             const savedUsername = localStorage.getItem('username');
+
             if (savedToken && savedUsername) {
                 token.value = savedToken;
                 currentUser.value = savedUsername;
                 isLoggedIn.value = true;
-                await loadDashboardData();
+
+                try {
+                    // 尝试加载数据，如果token无效会自动清理
+                    await loadDashboardData();
+                } catch (err) {
+                    console.log('Initial load failed, user may need to re-login');
+                }
             }
 
             // Check server status periodically
@@ -390,9 +629,10 @@ createApp({
             serverStatus,
             loginForm,
             stats,
-            settings,
-            availableDirs,
             files,
+            directoryTree,
+            currentPath,
+            expandedFolders,
             recentActivities,
             toasts,
 
@@ -400,10 +640,10 @@ createApp({
             login,
             logout,
             refreshFiles,
+            toggleFolder,
+            isFolderExpanded,
             downloadFile,
             deleteFile,
-            saveSettings,
-            triggerFullSync,
             exportData,
             clearServerData,
 
