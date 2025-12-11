@@ -38,8 +38,6 @@ class PluginDataSelectorService {
     if (!_pluginSelectors[definition.pluginId]!.contains(definition.id)) {
       _pluginSelectors[definition.pluginId]!.add(definition.id);
     }
-
-    debugPrint('已注册选择器: ${definition.id}');
     return true;
   }
 

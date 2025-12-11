@@ -35,6 +35,7 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
   bool _isLoggedIn = false;
   bool _autoSync = false;
   bool _syncOnChange = true;
+  bool _syncOnStart = true;
   int _syncInterval = 30;
   List<String> _selectedSyncDirs = [];
 
@@ -102,6 +103,7 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
         _isLoggedIn = config.isLoggedIn;
         _autoSync = config.autoSync;
         _syncOnChange = config.syncOnChange;
+        _syncOnStart = config.syncOnStart;
         _syncInterval = config.syncInterval;
         _selectedSyncDirs = List.from(config.syncDirs);
       });
@@ -170,6 +172,7 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
         autoSync: _autoSync,
         syncInterval: _syncInterval,
         syncOnChange: _syncOnChange,
+        syncOnStart: _syncOnStart,
         token: _config?.token,
         userId: _config?.userId,
         salt: _config?.salt,
@@ -236,6 +239,7 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
           autoSync: _autoSync,
           syncInterval: _syncInterval,
           syncOnChange: _syncOnChange,
+          syncOnStart: _syncOnStart,
           token: token,
           userId: userId,
           salt: salt,
@@ -312,6 +316,7 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
           autoSync: _autoSync,
           syncInterval: _syncInterval,
           syncOnChange: _syncOnChange,
+          syncOnStart: _syncOnStart,
           token: token,
           userId: userId,
           salt: salt,
@@ -677,6 +682,18 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
                 onChanged: (value) {
                   setState(() {
                     _syncOnChange = value;
+                  });
+                },
+              ),
+
+              // 启动时同步
+              SwitchListTile(
+                title: Text('server_sync_syncOnStart'.tr),
+                subtitle: Text('server_sync_syncOnStartSubtitle'.tr),
+                value: _syncOnStart,
+                onChanged: (value) {
+                  setState(() {
+                    _syncOnStart = value;
                   });
                 },
               ),

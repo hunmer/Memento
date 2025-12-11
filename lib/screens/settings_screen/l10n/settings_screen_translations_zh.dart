@@ -95,6 +95,8 @@ const Map<String, String> settingsScreenTranslationsZh = {
   'server_sync_minutes': '分钟',
   'server_sync_syncOnChange': '文件修改时同步',
   'server_sync_syncOnChangeSubtitle': '当本地文件发生变化时自动触发同步',
+  'server_sync_syncOnStart': '启动时同步',
+  'server_sync_syncOnStartSubtitle': '应用启动时自动从服务器拉取最新数据',
   'server_sync_syncDirs': '同步目录',
   'server_sync_selected': '已选择',
   'server_sync_syncNow': '立即同步',

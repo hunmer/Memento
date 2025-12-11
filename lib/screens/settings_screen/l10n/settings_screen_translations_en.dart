@@ -95,6 +95,8 @@ const Map<String, String> settingsScreenTranslationsEn = {
   'server_sync_minutes': 'minutes',
   'server_sync_syncOnChange': 'Sync on File Change',
   'server_sync_syncOnChangeSubtitle': 'Automatically trigger sync when local files change',
+  'server_sync_syncOnStart': 'Sync on Startup',
+  'server_sync_syncOnStartSubtitle': 'Automatically pull latest data from server when app starts',
   'server_sync_syncDirs': 'Sync Directories',
   'server_sync_selected': 'Selected',
   'server_sync_syncNow': 'Sync Now',

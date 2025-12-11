@@ -10,6 +10,7 @@ class ServerSyncConfig {
   static const String _keyAutoSync = 'sync_auto_enabled';
   static const String _keySyncInterval = 'sync_interval';
   static const String _keySyncOnChange = 'sync_on_change';
+  static const String _keySyncOnStart = 'sync_on_start';
   static const String _keyToken = 'sync_token';
   static const String _keyUserId = 'sync_user_id';
   static const String _keySalt = 'sync_salt';
@@ -23,6 +24,7 @@ class ServerSyncConfig {
   bool autoSync;
   int syncInterval; // 分钟
   bool syncOnChange;
+  bool syncOnStart;
   String? token;
   String? userId;
   String? salt;
@@ -37,6 +39,7 @@ class ServerSyncConfig {
     this.autoSync = false,
     this.syncInterval = 30,
     this.syncOnChange = true,
+    this.syncOnStart = true,
     this.token,
     this.userId,
     this.salt,
@@ -68,6 +71,7 @@ class ServerSyncConfig {
       autoSync: prefs.getBool(_keyAutoSync) ?? false,
       syncInterval: prefs.getInt(_keySyncInterval) ?? 30,
       syncOnChange: prefs.getBool(_keySyncOnChange) ?? true,
+      syncOnStart: prefs.getBool(_keySyncOnStart) ?? true,
       token: prefs.getString(_keyToken),
       userId: prefs.getString(_keyUserId),
       salt: prefs.getString(_keySalt),
@@ -86,6 +90,7 @@ class ServerSyncConfig {
     await prefs.setBool(_keyAutoSync, autoSync);
     await prefs.setInt(_keySyncInterval, syncInterval);
     await prefs.setBool(_keySyncOnChange, syncOnChange);
+    await prefs.setBool(_keySyncOnStart, syncOnStart);
     await prefs.setStringList(_keySyncDirs, syncDirs);
     if (token != null) {
       await prefs.setString(_keyToken, token!);
@@ -135,6 +140,7 @@ class ServerSyncConfig {
     await prefs.remove(_keyAutoSync);
     await prefs.remove(_keySyncInterval);
     await prefs.remove(_keySyncOnChange);
+    await prefs.remove(_keySyncOnStart);
     await prefs.remove(_keyToken);
     await prefs.remove(_keyUserId);
     await prefs.remove(_keySalt);
@@ -161,6 +167,7 @@ class ServerSyncConfig {
     bool? autoSync,
     int? syncInterval,
     bool? syncOnChange,
+    bool? syncOnStart,
     String? token,
     String? userId,
     String? salt,
@@ -175,6 +182,7 @@ class ServerSyncConfig {
       autoSync: autoSync ?? this.autoSync,
       syncInterval: syncInterval ?? this.syncInterval,
       syncOnChange: syncOnChange ?? this.syncOnChange,
+      syncOnStart: syncOnStart ?? this.syncOnStart,
       token: token ?? this.token,
       userId: userId ?? this.userId,
       salt: salt ?? this.salt,
@@ -192,6 +200,7 @@ class ServerSyncConfig {
       'auto_sync': autoSync,
       'sync_interval': syncInterval,
       'sync_on_change': syncOnChange,
+      'sync_on_start': syncOnStart,
       'is_logged_in': isLoggedIn,
       'sync_dirs': syncDirs,
     };
