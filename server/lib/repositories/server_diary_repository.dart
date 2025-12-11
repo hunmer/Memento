@@ -7,7 +7,7 @@ import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
 
 /// 服务端 Diary Repository 实现
-class ServerDiaryRepository implements IDiaryRepository {
+class ServerDiaryRepository extends IDiaryRepository {
   final PluginDataService dataService;
   final String userId;
 

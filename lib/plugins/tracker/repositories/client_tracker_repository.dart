@@ -5,7 +5,7 @@
 import 'package:shared_models/shared_models.dart';
 
 /// 客户端 Tracker Repository 实现
-class ClientTrackerRepository implements ITrackerRepository {
+class ClientTrackerRepository extends ITrackerRepository {
   final dynamic storage; // StorageManager 实例
   final String pluginId;
 

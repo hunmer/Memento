@@ -7,7 +7,7 @@ import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
 
 /// 服务端 Todo Repository 实现
-class ServerTodoRepository implements ITodoRepository {
+class ServerTodoRepository extends ITodoRepository {
   final PluginDataService dataService;
   final String userId;
 

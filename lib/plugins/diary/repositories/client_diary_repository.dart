@@ -7,7 +7,7 @@ import 'package:Memento/plugins/diary/models/diary_entry.dart';
 import 'package:Memento/plugins/diary/utils/diary_utils.dart';
 
 /// 客户端 Diary Repository 实现
-class ClientDiaryRepository implements IDiaryRepository {
+class ClientDiaryRepository extends IDiaryRepository {
   final DiaryUtils diaryUtils;
 
   ClientDiaryRepository({

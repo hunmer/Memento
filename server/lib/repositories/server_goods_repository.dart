@@ -7,7 +7,7 @@ import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
 
 /// 服务端 Goods Repository 实现
-class ServerGoodsRepository implements IGoodsRepository {
+class ServerGoodsRepository extends IGoodsRepository {
   final PluginDataService dataService;
   final String userId;
 

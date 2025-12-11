@@ -7,7 +7,7 @@ import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
 
 /// 服务端 Notes Repository 实现
-class ServerNotesRepository implements INotesRepository {
+class ServerNotesRepository extends INotesRepository {
   final PluginDataService dataService;
   final String userId;
 

@@ -2,6 +2,7 @@
 ///
 /// 通过适配现有的存储系统来实现 IDayRepository 接口
 
+import 'package:shared_models/repositories/day/day_repository.dart';
 import 'package:shared_models/shared_models.dart';
 
 /// 客户端 Day Repository 实现
@@ -9,10 +10,7 @@ class ClientDayRepository implements IDayRepository {
   final dynamic storage; // StorageManager 实例
   final String pluginId;
 
-  ClientDayRepository({
-    required this.storage,
-    this.pluginId = 'day',
-  });
+  ClientDayRepository({required this.storage, this.pluginId = 'day'});
 
   // ============ 内部辅助方法 ============
 
@@ -27,7 +25,9 @@ class ClientDayRepository implements IDayRepository {
   List<MemorialDayDto> _parseDaysList(Map<String, dynamic>? data) {
     if (data == null) return [];
     final days = data['days'] as List<dynamic>? ?? [];
-    return days.map((d) => MemorialDayDto.fromJson(d as Map<String, dynamic>)).toList();
+    return days
+        .map((d) => MemorialDayDto.fromJson(d as Map<String, dynamic>))
+        .toList();
   }
 
   // ============ Repository 实现 ============
@@ -85,7 +85,9 @@ class ClientDayRepository implements IDayRepository {
   }
 
   @override
-  Future<Result<MemorialDayDto>> createMemorialDay(MemorialDayDto memorialDay) async {
+  Future<Result<MemorialDayDto>> createMemorialDay(
+    MemorialDayDto memorialDay,
+  ) async {
     try {
       final data = await _readDaysData();
       final days = _parseDaysList(data);
@@ -98,7 +100,10 @@ class ClientDayRepository implements IDayRepository {
   }
 
   @override
-  Future<Result<MemorialDayDto>> updateMemorialDay(String id, MemorialDayDto memorialDay) async {
+  Future<Result<MemorialDayDto>> updateMemorialDay(
+    String id,
+    MemorialDayDto memorialDay,
+  ) async {
     try {
       final data = await _readDaysData();
       final days = _parseDaysList(data);
@@ -154,7 +159,9 @@ class ClientDayRepository implements IDayRepository {
         }
       }
 
-      await _writeDaysData({'days': reorderedDays.map((d) => d.toJson()).toList()});
+      await _writeDaysData({
+        'days': reorderedDays.map((d) => d.toJson()).toList(),
+      });
       return Result.success(true);
     } catch (e) {
       return Result.failure('重新排序纪念日失败: $e', code: ErrorCodes.serverError);
@@ -162,17 +169,21 @@ class ClientDayRepository implements IDayRepository {
   }
 
   @override
-  Future<Result<List<MemorialDayDto>>> searchMemorialDays(MemorialDayQuery query) async {
+  Future<Result<List<MemorialDayDto>>> searchMemorialDays(
+    MemorialDayQuery query,
+  ) async {
     try {
       final data = await _readDaysData();
       var days = _parseDaysList(data);
 
       // 按日期范围过滤
       if (query.startDate != null) {
-        days = days.where((d) => d.targetDate.isAfter(query.startDate!)).toList();
+        days =
+            days.where((d) => d.targetDate.isAfter(query.startDate!)).toList();
       }
       if (query.endDate != null) {
-        days = days.where((d) => d.targetDate.isBefore(query.endDate!)).toList();
+        days =
+            days.where((d) => d.targetDate.isBefore(query.endDate!)).toList();
       }
 
       // 按是否包含过期过滤
@@ -218,21 +229,24 @@ class ClientDayRepository implements IDayRepository {
       final days = _parseDaysList(data);
       final total = days.length;
 
-      final upcoming = days.where((d) {
-        final daysRemaining = d.daysRemaining;
-        return daysRemaining >= 0 && daysRemaining <= 7;
-      }).length;
+      final upcoming =
+          days.where((d) {
+            final daysRemaining = d.daysRemaining;
+            return daysRemaining >= 0 && daysRemaining <= 7;
+          }).length;
 
       final todayCount = days.where((d) => d.isToday).length;
 
       final expired = days.where((d) => d.isExpired).length;
 
-      return Result.success(MemorialDayStatsDto(
-        total: total,
-        upcoming: upcoming,
-        today: todayCount,
-        expired: expired,
-      ));
+      return Result.success(
+        MemorialDayStatsDto(
+          total: total,
+          upcoming: upcoming,
+          today: todayCount,
+          expired: expired,
+        ),
+      );
     } catch (e) {
       return Result.failure('获取统计信息失败: $e', code: ErrorCodes.serverError);
     }

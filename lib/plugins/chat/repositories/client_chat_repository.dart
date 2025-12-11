@@ -11,7 +11,7 @@ import 'package:Memento/plugins/chat/models/user.dart';
 import 'package:flutter/material.dart';
 
 /// 客户端 Chat Repository 实现
-class ClientChatRepository implements IChatRepository {
+class ClientChatRepository extends IChatRepository {
   final ChannelService channelService;
   final UserService userService;
   final Color pluginColor;
