@@ -65,7 +65,6 @@ class SyncClientService {
 
   String? _token;
   String? _userId;
-  String? _deviceId;
 
   /// 是否已登录
   bool get isLoggedIn => _token != null && _userId != null;
@@ -92,7 +91,6 @@ class SyncClientService {
   }) {
     _token = token;
     _userId = userId;
-    _deviceId = deviceId;
   }
 
   /// 登出

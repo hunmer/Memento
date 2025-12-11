@@ -1,8 +1,8 @@
 /// Todo 插件 - 客户端 Repository 实现
 ///
 /// 通过适配现有的 TaskController 来实现 ITodoRepository 接口
+library;
 
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 import 'package:shared_models/utils/result.dart';
@@ -20,9 +20,7 @@ class ClientTodoRepository implements ITodoRepository {
   // ============ 任务操作 ============
 
   @override
-  Future<Result<List<TaskDto>>> getTasks({
-    PaginationParams? pagination,
-  }) async {
+  Future<Result<List<TaskDto>>> getTasks({PaginationParams? pagination}) async {
     try {
       final tasks = _taskController.tasks;
       final dtos = tasks.map(_taskToDto).toList();
@@ -165,8 +163,9 @@ class ClientTodoRepository implements ITodoRepository {
           final taskJson = _taskToDto(task).toJson();
           final fieldValue = taskJson[query.field!]?.toString() ?? '';
           if (query.fuzzy) {
-            isMatch =
-                fieldValue.toLowerCase().contains(query.value!.toLowerCase());
+            isMatch = fieldValue.toLowerCase().contains(
+              query.value!.toLowerCase(),
+            );
           } else {
             isMatch = fieldValue == query.value;
           }
@@ -203,44 +202,47 @@ class ClientTodoRepository implements ITodoRepository {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
 
-      final todayTasks = _taskController.tasks.where((task) {
-        // 如果任务既没有开始日期也没有截止日期,不算今日任务
-        if (task.startDate == null && task.dueDate == null) {
-          return false;
-        }
+      final todayTasks =
+          _taskController.tasks.where((task) {
+            // 如果任务既没有开始日期也没有截止日期,不算今日任务
+            if (task.startDate == null && task.dueDate == null) {
+              return false;
+            }
 
-        // 标准化日期(去掉时间部分)
-        final startDay = task.startDate != null
-            ? DateTime(
-                task.startDate!.year,
-                task.startDate!.month,
-                task.startDate!.day,
-              )
-            : null;
+            // 标准化日期(去掉时间部分)
+            final startDay =
+                task.startDate != null
+                    ? DateTime(
+                      task.startDate!.year,
+                      task.startDate!.month,
+                      task.startDate!.day,
+                    )
+                    : null;
 
-        final dueDay = task.dueDate != null
-            ? DateTime(
-                task.dueDate!.year,
-                task.dueDate!.month,
-                task.dueDate!.day,
-              )
-            : null;
+            final dueDay =
+                task.dueDate != null
+                    ? DateTime(
+                      task.dueDate!.year,
+                      task.dueDate!.month,
+                      task.dueDate!.day,
+                    )
+                    : null;
 
-        // 检查任务的日期范围是否包含今天
-        // 条件:startDate <= today 且 dueDate >= today
-        if (startDay != null && dueDay != null) {
-          // 两个日期都存在:检查今天是否在范围内
-          return !startDay.isAfter(today) && !dueDay.isBefore(today);
-        } else if (startDay != null) {
-          // 只有开始日期:检查是否已开始(开始日期 <= 今天)
-          return !startDay.isAfter(today);
-        } else if (dueDay != null) {
-          // 只有截止日期:检查是否未过期(截止日期 >= 今天)
-          return !dueDay.isBefore(today);
-        }
+            // 检查任务的日期范围是否包含今天
+            // 条件:startDate <= today 且 dueDate >= today
+            if (startDay != null && dueDay != null) {
+              // 两个日期都存在:检查今天是否在范围内
+              return !startDay.isAfter(today) && !dueDay.isBefore(today);
+            } else if (startDay != null) {
+              // 只有开始日期:检查是否已开始(开始日期 <= 今天)
+              return !startDay.isAfter(today);
+            } else if (dueDay != null) {
+              // 只有截止日期:检查是否未过期(截止日期 >= 今天)
+              return !dueDay.isBefore(today);
+            }
 
-        return false;
-      }).toList();
+            return false;
+          }).toList();
 
       final dtos = todayTasks.map(_taskToDto).toList();
 
@@ -266,17 +268,18 @@ class ClientTodoRepository implements ITodoRepository {
     try {
       final now = DateTime.now();
 
-      final overdueTasks = _taskController.tasks.where((task) {
-        // 必须未完成
-        if (task.status == TaskStatus.done) return false;
+      final overdueTasks =
+          _taskController.tasks.where((task) {
+            // 必须未完成
+            if (task.status == TaskStatus.done) return false;
 
-        // 必须有截止日期且已过期
-        if (task.dueDate != null && task.dueDate!.isBefore(now)) {
-          return true;
-        }
+            // 必须有截止日期且已过期
+            if (task.dueDate != null && task.dueDate!.isBefore(now)) {
+              return true;
+            }
 
-        return false;
-      }).toList();
+            return false;
+          }).toList();
 
       final dtos = overdueTasks.map(_taskToDto).toList();
 
@@ -301,7 +304,9 @@ class ClientTodoRepository implements ITodoRepository {
   }) async {
     try {
       final completedTasks =
-          _taskController.tasks.where((t) => t.status == TaskStatus.done).toList();
+          _taskController.tasks
+              .where((t) => t.status == TaskStatus.done)
+              .toList();
 
       // 按完成时间降序排序
       completedTasks.sort((a, b) {
@@ -332,9 +337,10 @@ class ClientTodoRepository implements ITodoRepository {
     PaginationParams? pagination,
   }) async {
     try {
-      final pendingTasks = _taskController.tasks
-          .where((t) => t.status != TaskStatus.done)
-          .toList();
+      final pendingTasks =
+          _taskController.tasks
+              .where((t) => t.status != TaskStatus.done)
+              .toList();
 
       final dtos = pendingTasks.map(_taskToDto).toList();
 
@@ -363,29 +369,37 @@ class ClientTodoRepository implements ITodoRepository {
       final pending = tasks.where((t) => t.status != TaskStatus.done).length;
 
       final now = DateTime.now();
-      final overdue = tasks
-          .where((t) =>
-              t.status != TaskStatus.done &&
-              t.dueDate != null &&
-              t.dueDate!.isBefore(now))
-          .length;
+      final overdue =
+          tasks
+              .where(
+                (t) =>
+                    t.status != TaskStatus.done &&
+                    t.dueDate != null &&
+                    t.dueDate!.isBefore(now),
+              )
+              .length;
 
       final today = DateTime(now.year, now.month, now.day);
-      final dueToday = tasks
-          .where((t) =>
-              t.dueDate != null &&
-              t.dueDate!.year == today.year &&
-              t.dueDate!.month == today.month &&
-              t.dueDate!.day == today.day)
-          .length;
+      final dueToday =
+          tasks
+              .where(
+                (t) =>
+                    t.dueDate != null &&
+                    t.dueDate!.year == today.year &&
+                    t.dueDate!.month == today.month &&
+                    t.dueDate!.day == today.day,
+              )
+              .length;
 
-      return Result.success(TaskStatsDto(
-        total: total,
-        completed: completed,
-        pending: pending,
-        overdue: overdue,
-        dueToday: dueToday,
-      ));
+      return Result.success(
+        TaskStatsDto(
+          total: total,
+          completed: completed,
+          pending: pending,
+          overdue: overdue,
+          dueToday: dueToday,
+        ),
+      );
     } catch (e) {
       return Result.failure('获取统计数据失败: $e', code: ErrorCodes.serverError);
     }
@@ -401,7 +415,8 @@ class ClientTodoRepository implements ITodoRepository {
       metadata['subtasks'] = task.subtasks.map((s) => s.toJson()).toList();
     }
     if (task.reminders.isNotEmpty) {
-      metadata['reminders'] = task.reminders.map((r) => r.toIso8601String()).toList();
+      metadata['reminders'] =
+          task.reminders.map((r) => r.toIso8601String()).toList();
     }
     if (task.icon != null) {
       metadata['icon'] = {
@@ -462,9 +477,11 @@ class ClientTodoRepository implements ITodoRepository {
       }
 
       // 提取图标
-      if (metadata.containsKey('icon') && metadata['icon'] is Map<String, dynamic>) {
+      if (metadata.containsKey('icon') &&
+          metadata['icon'] is Map<String, dynamic>) {
         final iconData = metadata['icon'] as Map<String, dynamic>;
-        if (iconData.containsKey('codePoint') && iconData.containsKey('fontFamily')) {
+        if (iconData.containsKey('codePoint') &&
+            iconData.containsKey('fontFamily')) {
           icon = IconData(
             iconData['codePoint'] as int,
             fontFamily: iconData['fontFamily'] as String,
@@ -473,7 +490,8 @@ class ClientTodoRepository implements ITodoRepository {
       }
 
       // 提取开始时间
-      if (metadata.containsKey('startTime') && metadata['startTime'] is String) {
+      if (metadata.containsKey('startTime') &&
+          metadata['startTime'] is String) {
         startTime = DateTime.parse(metadata['startTime'] as String);
       }
 
@@ -502,4 +520,3 @@ class ClientTodoRepository implements ITodoRepository {
     );
   }
 }
-

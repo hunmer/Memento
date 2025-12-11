@@ -1,4 +1,5 @@
 /// Agent Chat 插件 - Repository 接口定义
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -428,10 +429,9 @@ class AgentChatToolTemplateDto {
               ?.map((e) => Map<String, String>.from(e as Map))
               .toList() ??
           const [],
-      tags: (json['tags'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
+      tags:
+          (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const [],
     );
   }
 
@@ -590,7 +590,8 @@ abstract class IAgentChatRepository {
   Future<Result<AgentChatMessageDto?>> getMessageById(String id);
 
   /// 创建消息
-  Future<Result<AgentChatMessageDto>> createMessage(AgentChatMessageDto message);
+  Future<Result<AgentChatMessageDto>> createMessage(
+      AgentChatMessageDto message);
 
   /// 更新消息
   Future<Result<AgentChatMessageDto>> updateMessage(

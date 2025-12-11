@@ -1,8 +1,8 @@
 /// Nodes 插件 - 客户端 Repository 实现
 ///
 /// 通过适配现有的 NodesController 来实现 INodesRepository 接口
+library;
 
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
 import 'package:shared_models/repositories/nodes/nodes_repository.dart';
@@ -60,17 +60,13 @@ class ClientNodesRepository extends INodesRepository {
   Future<Result<NotebookDto>> createNotebook(NotebookDto dto) async {
     try {
       // 将 DTO 转换为 Notebook
-      final icon = dto.icon != null
-          ? IconData(dto.icon!, fontFamily: 'MaterialIcons')
-          : Icons.book;
-      final color = dto.color != null ? Color(dto.color!) : Colors.blue;
+      final icon =
+          dto.icon != null
+              ? IconData(dto.icon, fontFamily: 'MaterialIcons')
+              : Icons.book;
+      final color = dto.color != null ? Color(dto.color) : Colors.blue;
 
-      await controller.addNotebook(
-        dto.title,
-        icon,
-        id: dto.id,
-        color: color,
-      );
+      await controller.addNotebook(dto.title, icon, id: dto.id, color: color);
 
       // 返回创建后的 DTO
       final createdNotebook = controller.getNotebook(dto.id);
@@ -94,19 +90,22 @@ class ClientNodesRepository extends INodesRepository {
       }
 
       // 将 DTO 转换为 Notebook
-      final icon = dto.icon != null
-          ? IconData(dto.icon!, fontFamily: 'MaterialIcons')
-          : existingNotebook.icon;
-      final color = dto.color != null ? Color(dto.color!) : existingNotebook.color;
+      final icon =
+          dto.icon != null
+              ? IconData(dto.icon, fontFamily: 'MaterialIcons')
+              : existingNotebook.icon;
+      final color =
+          dto.color != null ? Color(dto.color) : existingNotebook.color;
 
       final updatedNotebook = Notebook(
         id: existingNotebook.id,
         title: dto.title,
         icon: icon,
         color: color,
-        nodes: (dto.nodes.isNotEmpty)
-            ? dto.nodes.map((nodeDto) => _dtoToNode(nodeDto)).toList()
-            : existingNotebook.nodes,
+        nodes:
+            (dto.nodes.isNotEmpty)
+                ? dto.nodes.map((nodeDto) => _dtoToNode(nodeDto)).toList()
+                : existingNotebook.nodes,
       );
 
       await controller.updateNotebook(updatedNotebook);
@@ -358,7 +357,10 @@ class ClientNodesRepository extends INodesRepository {
   // ============ 树形结构操作 ============
 
   @override
-  Future<Result<NodeDto>> toggleNodeExpansion(String id, bool isExpanded) async {
+  Future<Result<NodeDto>> toggleNodeExpansion(
+    String id,
+    bool isExpanded,
+  ) async {
     try {
       // 找到节点所在的笔记本
       String? notebookId;
@@ -379,10 +381,8 @@ class ClientNodesRepository extends INodesRepository {
       await controller.toggleNodeExpansion(notebookId, id);
 
       // 返回更新后的节点
-      final updatedNode = _findNodeById(
-        controller.getNotebook(notebookId)!.nodes,
-        id,
-      )!;
+      final updatedNode =
+          _findNodeById(controller.getNotebook(notebookId)!.nodes, id)!;
 
       return Result.success(_nodeToDto(updatedNode));
     } catch (e) {
@@ -391,7 +391,10 @@ class ClientNodesRepository extends INodesRepository {
   }
 
   @override
-  Future<Result<List<String>>> getNodePath(String notebookId, String nodeId) async {
+  Future<Result<List<String>>> getNodePath(
+    String notebookId,
+    String nodeId,
+  ) async {
     try {
       final pathTitles = controller.getNodePath(notebookId, nodeId);
       return Result.success(pathTitles);
@@ -401,7 +404,10 @@ class ClientNodesRepository extends INodesRepository {
   }
 
   @override
-  Future<Result<List<NodeDto>>> getSiblingNodes(String notebookId, String nodeId) async {
+  Future<Result<List<NodeDto>>> getSiblingNodes(
+    String notebookId,
+    String nodeId,
+  ) async {
     try {
       final siblings = controller.getSiblingNodes(notebookId, nodeId);
       return Result.success(siblings.map(_nodeToDto).toList());
@@ -431,9 +437,12 @@ class ClientNodesRepository extends INodesRepository {
       status: _convertNodeStatus(node.status),
       startDate: node.startDate,
       endDate: node.endDate,
-      customFields: node.customFields
-          .map((field) => CustomFieldDto(key: field.key, value: field.value))
-          .toList(),
+      customFields:
+          node.customFields
+              .map(
+                (field) => CustomFieldDto(key: field.key, value: field.value),
+              )
+              .toList(),
       notes: node.notes,
       parentId: node.parentId,
       children: node.children.map(_nodeToDto).toList(),
@@ -452,9 +461,13 @@ class ClientNodesRepository extends INodesRepository {
       status: _convertNodeStatusFromDto(dto.status),
       startDate: dto.startDate,
       endDate: dto.endDate,
-      customFields: dto.customFields
-          .map((field) => local.CustomField(key: field.key, value: field.value))
-          .toList(),
+      customFields:
+          dto.customFields
+              .map(
+                (field) =>
+                    local.CustomField(key: field.key, value: field.value),
+              )
+              .toList(),
       notes: dto.notes,
       parentId: dto.parentId,
       color: Color(dto.color),

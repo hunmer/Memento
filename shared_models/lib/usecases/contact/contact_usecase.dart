@@ -1,4 +1,5 @@
 /// Contact 插件 - UseCase 业务逻辑层
+library;
 
 import 'package:uuid/uuid.dart';
 import 'package:shared_models/repositories/contact/contact_repository.dart';
@@ -34,8 +35,7 @@ class ContactUseCase {
         return jsonList;
       });
     } catch (e) {
-      return Result.failure('获取联系人列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取联系人列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -100,7 +100,8 @@ class ContactUseCase {
             ? Map<String, String>.from(params['customFields'] as Map)
             : const {},
         customActivityEvents: (params['customActivityEvents'] as List<dynamic>?)
-                ?.map((e) => InteractionRecordDto.fromJson(e as Map<String, dynamic>))
+                ?.map((e) =>
+                    InteractionRecordDto.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const [],
         createdTime: now,
@@ -159,7 +160,8 @@ class ContactUseCase {
             : existing.customFields,
         customActivityEvents: params.containsKey('customActivityEvents')
             ? (params['customActivityEvents'] as List<dynamic>?)
-                    ?.map((e) => InteractionRecordDto.fromJson(e as Map<String, dynamic>))
+                    ?.map((e) => InteractionRecordDto.fromJson(
+                        e as Map<String, dynamic>))
                     .toList() ??
                 existing.customActivityEvents
             : existing.customActivityEvents,
@@ -244,8 +246,8 @@ class ContactUseCase {
 
     try {
       final pagination = _extractPagination(params);
-      final result =
-          await repository.getInteractionRecords(contactId, pagination: pagination);
+      final result = await repository.getInteractionRecords(contactId,
+          pagination: pagination);
 
       return result.map((records) {
         final jsonList = records.map((r) => r.toJson()).toList();
@@ -260,8 +262,7 @@ class ContactUseCase {
         return jsonList;
       });
     } catch (e) {
-      return Result.failure('获取交互记录列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取交互记录列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -278,8 +279,7 @@ class ContactUseCase {
       final result = await repository.getInteractionRecordById(id);
       return result.map((record) => record?.toJson());
     } catch (e) {
-      return Result.failure('获取交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -322,8 +322,7 @@ class ContactUseCase {
       final result = await repository.createInteractionRecord(record);
       return result.map((r) => r.toJson());
     } catch (e) {
-      return Result.failure('创建交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('创建交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -366,8 +365,7 @@ class ContactUseCase {
       final result = await repository.updateInteractionRecord(id, updated);
       return result.map((r) => r.toJson());
     } catch (e) {
-      return Result.failure('更新交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('更新交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -383,8 +381,7 @@ class ContactUseCase {
     try {
       return repository.deleteInteractionRecord(id);
     } catch (e) {
-      return Result.failure('删除交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('删除交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -403,8 +400,7 @@ class ContactUseCase {
     try {
       return repository.deleteInteractionRecordsByContactId(contactId);
     } catch (e) {
-      return Result.failure('删除交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('删除交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -446,8 +442,7 @@ class ContactUseCase {
         return jsonList;
       });
     } catch (e) {
-      return Result.failure('搜索交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('搜索交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -461,8 +456,7 @@ class ContactUseCase {
       final result = await repository.getFilterConfig();
       return result.map((config) => config.toJson());
     } catch (e) {
-      return Result.failure('获取筛选配置失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取筛选配置失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -489,8 +483,7 @@ class ContactUseCase {
       final result = await repository.saveFilterConfig(config);
       return result.map((c) => c.toJson());
     } catch (e) {
-      return Result.failure('保存筛选配置失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('保存筛选配置失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -502,8 +495,7 @@ class ContactUseCase {
       final result = await repository.getSortConfig();
       return result.map((config) => config.toJson());
     } catch (e) {
-      return Result.failure('获取排序配置失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取排序配置失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -523,8 +515,7 @@ class ContactUseCase {
       final result = await repository.saveSortConfig(config);
       return result.map((c) => c.toJson());
     } catch (e) {
-      return Result.failure('保存排序配置失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('保存排序配置失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -535,8 +526,7 @@ class ContactUseCase {
     try {
       return repository.getAllTags();
     } catch (e) {
-      return Result.failure('获取标签列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取标签列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -549,8 +539,7 @@ class ContactUseCase {
     try {
       return repository.getRecentlyContactedCount();
     } catch (e) {
-      return Result.failure('获取最近联系人数量失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取最近联系人数量失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -569,8 +558,7 @@ class ContactUseCase {
     try {
       return repository.getContactInteractionCount(contactId);
     } catch (e) {
-      return Result.failure('获取交互记录数量失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取交互记录数量失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -581,8 +569,7 @@ class ContactUseCase {
     try {
       return repository.getTotalContactCount();
     } catch (e) {
-      return Result.failure('获取总联系人数失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取总联系人数失败: $e', code: ErrorCodes.serverError);
     }
   }
 

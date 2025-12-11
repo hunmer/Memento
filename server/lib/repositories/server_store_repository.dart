@@ -1,4 +1,5 @@
 /// Store 插件 - 服务端 Repository 实现
+library;
 
 import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
@@ -149,8 +150,7 @@ class ServerStoreRepository implements IStoreRepository {
 
       return Result.success(products);
     } catch (e) {
-      return Result.failure('获取商品列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取商品列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -243,8 +243,7 @@ class ServerStoreRepository implements IStoreRepository {
       final products = await _readAllProducts();
       final archivedProducts = await _readAllArchivedProducts();
 
-      final product =
-          archivedProducts.where((p) => p.id == id).firstOrNull;
+      final product = archivedProducts.where((p) => p.id == id).firstOrNull;
       if (product == null) {
         return Result.failure('归档商品不存在', code: ErrorCodes.notFound);
       }
@@ -278,8 +277,7 @@ class ServerStoreRepository implements IStoreRepository {
 
       return Result.success(products);
     } catch (e) {
-      return Result.failure('获取归档商品失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取归档商品失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -291,8 +289,8 @@ class ServerStoreRepository implements IStoreRepository {
       if (query.nameKeyword != null) {
         products = products.where((product) {
           return product.name.toLowerCase().contains(
-            query.nameKeyword!.toLowerCase(),
-          );
+                query.nameKeyword!.toLowerCase(),
+              );
         }).toList();
       }
 
@@ -340,8 +338,7 @@ class ServerStoreRepository implements IStoreRepository {
 
       return Result.success(info);
     } catch (e) {
-      return Result.failure('获取积分信息失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取积分信息失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -403,8 +400,7 @@ class ServerStoreRepository implements IStoreRepository {
 
       return Result.success(logs);
     } catch (e) {
-      return Result.failure('搜索积分记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('搜索积分记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -427,8 +423,7 @@ class ServerStoreRepository implements IStoreRepository {
 
       return Result.success(items);
     } catch (e) {
-      return Result.failure('获取用户物品失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取用户物品失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -570,13 +565,13 @@ class ServerStoreRepository implements IStoreRepository {
   }
 
   @override
-  Future<Result<List<UserItemDto>>> searchUserItems(
-      UserItemQuery query) async {
+  Future<Result<List<UserItemDto>>> searchUserItems(UserItemQuery query) async {
     try {
       var items = await _readAllUserItems();
 
       if (query.productId != null) {
-        items = items.where((item) => item.productId == query.productId!).toList();
+        items =
+            items.where((item) => item.productId == query.productId!).toList();
       }
 
       if (query.includeExpired == false) {
@@ -595,8 +590,7 @@ class ServerStoreRepository implements IStoreRepository {
 
       return Result.success(items);
     } catch (e) {
-      return Result.failure('搜索用户物品失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('搜索用户物品失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -619,8 +613,7 @@ class ServerStoreRepository implements IStoreRepository {
 
       return Result.success(items);
     } catch (e) {
-      return Result.failure('获取已使用物品失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取已使用物品失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -642,8 +635,7 @@ class ServerStoreRepository implements IStoreRepository {
       final items = await _readAllUserItems();
       return Result.success(items.length);
     } catch (e) {
-      return Result.failure('获取用户物品总数失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取用户物品总数失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -662,8 +654,7 @@ class ServerStoreRepository implements IStoreRepository {
 
       return Result.success(count);
     } catch (e) {
-      return Result.failure('获取到期物品数量失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取到期物品数量失败: $e', code: ErrorCodes.serverError);
     }
   }
 }

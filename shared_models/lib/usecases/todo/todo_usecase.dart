@@ -1,6 +1,7 @@
 /// Todo 插件 - UseCase 业务逻辑层
 ///
 /// 此文件包含共享的业务逻辑，客户端和服务端都使用此层
+library;
 
 import 'package:uuid/uuid.dart';
 
@@ -37,13 +38,15 @@ class TodoUseCase {
         // 按完成状态过滤
         if (params.containsKey('completed')) {
           final isCompleted = params['completed'] as bool;
-          filteredTasks = filteredTasks.where((t) => t.isCompleted == isCompleted).toList();
+          filteredTasks =
+              filteredTasks.where((t) => t.isCompleted == isCompleted).toList();
         }
 
         // 按优先级过滤
         if (params.containsKey('priority')) {
           final priority = params['priority'] as int;
-          filteredTasks = filteredTasks.where((t) => t.priority == priority).toList();
+          filteredTasks =
+              filteredTasks.where((t) => t.priority == priority).toList();
         }
 
         // 按分类过滤
@@ -72,7 +75,8 @@ class TodoUseCase {
         final jsonList = filteredTasks.map((t) => t.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -82,7 +86,8 @@ class TodoUseCase {
   }
 
   /// 根据 ID 获取任务
-  Future<Result<Map<String, dynamic>?>> getTaskById(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>?>> getTaskById(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -106,10 +111,12 @@ class TodoUseCase {
   /// - `dueDate`: 截止日期
   /// - `tags`: 标签列表
   /// - `metadata`: 元数据 (包括 category, subtasks, reminder, repeat, notes, dueTime)
-  Future<Result<Map<String, dynamic>>> createTask(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> createTask(
+      Map<String, dynamic> params) async {
     final titleValidation = ParamValidator.requireString(params, 'title');
     if (!titleValidation.isValid) {
-      return Result.failure(titleValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(titleValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -154,7 +161,8 @@ class TodoUseCase {
   }
 
   /// 更新任务
-  Future<Result<Map<String, dynamic>>> updateTask(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> updateTask(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -200,10 +208,14 @@ class TodoUseCase {
           ? Map<String, dynamic>.from(existing.metadata!)
           : {};
 
-      if (params.containsKey('category')) metadata['category'] = params['category'];
-      if (params.containsKey('dueTime')) metadata['dueTime'] = params['dueTime'];
-      if (params.containsKey('subtasks')) metadata['subtasks'] = params['subtasks'];
-      if (params.containsKey('reminder')) metadata['reminder'] = params['reminder'];
+      if (params.containsKey('category'))
+        metadata['category'] = params['category'];
+      if (params.containsKey('dueTime'))
+        metadata['dueTime'] = params['dueTime'];
+      if (params.containsKey('subtasks'))
+        metadata['subtasks'] = params['subtasks'];
+      if (params.containsKey('reminder'))
+        metadata['reminder'] = params['reminder'];
       if (params.containsKey('repeat')) metadata['repeat'] = params['repeat'];
       if (params.containsKey('notes')) metadata['notes'] = params['notes'];
 
@@ -232,7 +244,8 @@ class TodoUseCase {
   }
 
   /// 删除任务
-  Future<Result<Map<String, dynamic>>> deleteTask(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> deleteTask(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -247,7 +260,8 @@ class TodoUseCase {
   }
 
   /// 完成任务
-  Future<Result<Map<String, dynamic>>> completeTask(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> completeTask(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -272,7 +286,8 @@ class TodoUseCase {
   }
 
   /// 取消完成任务
-  Future<Result<Map<String, dynamic>>> uncompleteTask(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> uncompleteTask(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -319,7 +334,8 @@ class TodoUseCase {
         final jsonList = tasks.map((t) => t.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -338,7 +354,8 @@ class TodoUseCase {
         final jsonList = tasks.map((t) => t.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -357,7 +374,8 @@ class TodoUseCase {
         final jsonList = tasks.map((t) => t.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -384,7 +402,8 @@ class TodoUseCase {
         final jsonList = sortedTasks.map((t) => t.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -403,7 +422,8 @@ class TodoUseCase {
         final jsonList = tasks.map((t) => t.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -413,7 +433,8 @@ class TodoUseCase {
   }
 
   /// 获取统计数据
-  Future<Result<Map<String, dynamic>>> getStats(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> getStats(
+      Map<String, dynamic> params) async {
     try {
       final statsResult = await repository.getStats();
       if (statsResult.isFailure) {

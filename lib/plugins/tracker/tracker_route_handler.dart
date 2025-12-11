@@ -3,8 +3,6 @@ import 'package:Memento/core/routing/plugin_route_handler.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/plugins/tracker/models/goal.dart';
-import 'package:Memento/plugins/tracker/models/record.dart';
 import 'package:uuid/uuid.dart';
 
 /// 目标追踪插件路由处理器
@@ -83,10 +81,7 @@ class _AddProgressScreen extends StatefulWidget {
   final String goalId;
   final double value;
 
-  const _AddProgressScreen({
-    required this.goalId,
-    required this.value,
-  });
+  const _AddProgressScreen({required this.goalId, required this.value});
 
   @override
   State<_AddProgressScreen> createState() => _AddProgressScreenState();
@@ -188,29 +183,31 @@ class _AddProgressScreenState extends State<_AddProgressScreen> {
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: _isProcessing
-                      ? Colors.red.withOpacity(0.1)
-                      : (_success
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.red.withOpacity(0.1)),
+                  color:
+                      _isProcessing
+                          ? Colors.red.withOpacity(0.1)
+                          : (_success
+                              ? Colors.green.withOpacity(0.1)
+                              : Colors.red.withOpacity(0.1)),
                   shape: BoxShape.circle,
                 ),
-                child: _isProcessing
-                    ? const Center(
-                        child: SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 4,
-                            color: Colors.red,
+                child:
+                    _isProcessing
+                        ? const Center(
+                          child: SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 4,
+                              color: Colors.red,
+                            ),
                           ),
+                        )
+                        : Icon(
+                          _success ? Icons.check_circle : Icons.error,
+                          size: 64,
+                          color: _success ? Colors.green : Colors.red,
                         ),
-                      )
-                    : Icon(
-                        _success ? Icons.check_circle : Icons.error,
-                        size: 64,
-                        color: _success ? Colors.green : Colors.red,
-                      ),
               ),
               const SizedBox(height: 32),
 
@@ -259,10 +256,7 @@ class _AddProgressScreenState extends State<_AddProgressScreen> {
                 const SizedBox(height: 8),
                 Text(
                   '当前进度: ${_goal!.currentValue} / ${_goal!.targetValue} ${_goal!.unitType}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
               ],
 
@@ -273,9 +267,10 @@ class _AddProgressScreenState extends State<_AddProgressScreen> {
                 _message,
                 style: TextStyle(
                   fontSize: 18,
-                  color: _isProcessing
-                      ? Colors.grey[700]
-                      : (_success ? Colors.green[700] : Colors.red[700]),
+                  color:
+                      _isProcessing
+                          ? Colors.grey[700]
+                          : (_success ? Colors.green[700] : Colors.red[700]),
                 ),
                 textAlign: TextAlign.center,
               ),

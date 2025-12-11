@@ -1,4 +1,5 @@
 /// Agent Chat 插件 - 服务端 Repository 实现
+library;
 
 import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
@@ -26,11 +27,13 @@ class ServerAgentChatRepository implements IAgentChatRepository {
 
     final conversations = data['conversations'] as List<dynamic>? ?? [];
     return conversations
-        .map((e) => AgentChatConversationDto.fromJson(e as Map<String, dynamic>))
+        .map(
+            (e) => AgentChatConversationDto.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
-  Future<void> _saveAllConversations(List<AgentChatConversationDto> conversations) async {
+  Future<void> _saveAllConversations(
+      List<AgentChatConversationDto> conversations) async {
     await dataService.writePluginData(
       userId,
       _pluginId,
@@ -62,7 +65,8 @@ class ServerAgentChatRepository implements IAgentChatRepository {
     );
   }
 
-  Future<List<AgentChatMessageDto>> _readConversationMessages(String conversationId) async {
+  Future<List<AgentChatMessageDto>> _readConversationMessages(
+      String conversationId) async {
     final data = await dataService.readPluginData(
       userId,
       _pluginId,
@@ -98,11 +102,13 @@ class ServerAgentChatRepository implements IAgentChatRepository {
 
     final templates = data['templates'] as List<dynamic>? ?? [];
     return templates
-        .map((e) => AgentChatToolTemplateDto.fromJson(e as Map<String, dynamic>))
+        .map(
+            (e) => AgentChatToolTemplateDto.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
-  Future<void> _saveAllToolTemplates(List<AgentChatToolTemplateDto> templates) async {
+  Future<void> _saveAllToolTemplates(
+      List<AgentChatToolTemplateDto> templates) async {
     await dataService.writePluginData(
       userId,
       _pluginId,
@@ -143,7 +149,8 @@ class ServerAgentChatRepository implements IAgentChatRepository {
   }
 
   @override
-  Future<Result<AgentChatConversationDto?>> getConversationById(String id) async {
+  Future<Result<AgentChatConversationDto?>> getConversationById(
+      String id) async {
     try {
       final conversations = await _readAllConversations();
       final conversation = conversations.where((c) => c.id == id).firstOrNull;
@@ -214,15 +221,19 @@ class ServerAgentChatRepository implements IAgentChatRepository {
       var conversations = await _readAllConversations();
 
       if (query.agentId != null) {
-        conversations = conversations.where((c) => c.agentId == query.agentId).toList();
+        conversations =
+            conversations.where((c) => c.agentId == query.agentId).toList();
       }
 
       if (query.groupId != null) {
-        conversations = conversations.where((c) => c.groups.contains(query.groupId)).toList();
+        conversations = conversations
+            .where((c) => c.groups.contains(query.groupId))
+            .toList();
       }
 
       if (query.isPinned != null) {
-        conversations = conversations.where((c) => c.isPinned == query.isPinned).toList();
+        conversations =
+            conversations.where((c) => c.isPinned == query.isPinned).toList();
       }
 
       if (query.keyword != null) {
@@ -292,7 +303,8 @@ class ServerAgentChatRepository implements IAgentChatRepository {
   }
 
   @override
-  Future<Result<AgentChatGroupDto>> updateGroup(String id, AgentChatGroupDto group) async {
+  Future<Result<AgentChatGroupDto>> updateGroup(
+      String id, AgentChatGroupDto group) async {
     try {
       final groups = await _readAllGroups();
       final index = groups.indexWhere((g) => g.id == id);
@@ -374,7 +386,8 @@ class ServerAgentChatRepository implements IAgentChatRepository {
   }
 
   @override
-  Future<Result<AgentChatMessageDto>> createMessage(AgentChatMessageDto message) async {
+  Future<Result<AgentChatMessageDto>> createMessage(
+      AgentChatMessageDto message) async {
     try {
       final messages = await _readConversationMessages(message.conversationId);
       messages.add(message);
@@ -436,11 +449,15 @@ class ServerAgentChatRepository implements IAgentChatRepository {
       var messages = await _readConversationMessages(query.conversationId);
 
       if (query.startTime != null) {
-        messages = messages.where((m) => m.timestamp.isAfter(query.startTime!)).toList();
+        messages = messages
+            .where((m) => m.timestamp.isAfter(query.startTime!))
+            .toList();
       }
 
       if (query.endTime != null) {
-        messages = messages.where((m) => m.timestamp.isBefore(query.endTime!)).toList();
+        messages = messages
+            .where((m) => m.timestamp.isBefore(query.endTime!))
+            .toList();
       }
 
       if (query.isUser != null) {
@@ -473,7 +490,8 @@ class ServerAgentChatRepository implements IAgentChatRepository {
   }
 
   @override
-  Future<Result<bool>> deleteMessagesByConversation(String conversationId) async {
+  Future<Result<bool>> deleteMessagesByConversation(
+      String conversationId) async {
     try {
       await _saveConversationMessages(conversationId, []);
       return Result.success(true);
@@ -510,7 +528,8 @@ class ServerAgentChatRepository implements IAgentChatRepository {
   }
 
   @override
-  Future<Result<AgentChatToolTemplateDto?>> getToolTemplateById(String id) async {
+  Future<Result<AgentChatToolTemplateDto?>> getToolTemplateById(
+      String id) async {
     try {
       final templates = await _readAllToolTemplates();
       final template = templates.where((t) => t.id == id).firstOrNull;

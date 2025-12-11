@@ -1,6 +1,7 @@
 /// 参数验证工具类 - 客户端和服务端共享
 ///
 /// 此文件提供统一的参数验证逻辑，确保两端规则一致
+library;
 
 /// 验证结果
 class ValidationResult {
@@ -210,6 +211,7 @@ extension ValidationExtensions on Map<String, dynamic> {
 
   /// 获取可选布尔值
   bool getOptionalBool(String fieldName, {bool defaultValue = false}) {
-    return ParamValidator.optionalBool(this, fieldName, defaultValue: defaultValue);
+    return ParamValidator.optionalBool(this, fieldName,
+        defaultValue: defaultValue);
   }
 }

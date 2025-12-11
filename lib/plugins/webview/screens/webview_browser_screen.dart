@@ -25,7 +25,6 @@ class WebViewBrowserScreen extends StatefulWidget {
 
 class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
   final TextEditingController _urlController = TextEditingController();
-  final List<GlobalKey<_WebViewTabContentState>> _tabKeys = [];
 
   WebViewTab? _currentTab;
   bool _isUrlBarFocused = false;
@@ -157,9 +156,6 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
   }
 
   Widget _buildAddressBar(BuildContext context) {
-    final plugin = WebViewPlugin.instance;
-    final tabManager = plugin.tabManager;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
@@ -297,8 +293,6 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
   }
 
   Widget _buildBottomBar(BuildContext context) {
-    final plugin = WebViewPlugin.instance;
-
     return Container(
       height: 50,
       decoration: BoxDecoration(
@@ -615,7 +609,6 @@ class _WebViewTabContent extends StatefulWidget {
 }
 
 class _WebViewTabContentState extends State<_WebViewTabContent> {
-  InAppWebViewController? _controller;
   JSBridgeInjector? _jsBridgeInjector;
 
   @override
@@ -663,7 +656,6 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
         return NavigationActionPolicy.ALLOW;
       },
       onWebViewCreated: (controller) {
-        _controller = controller;
         plugin.tabManager.setController(widget.tab.id, controller);
 
         // 初始化 JS Bridge
@@ -686,8 +678,8 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
         widget.onLoadingChanged(false);
 
         // 更新导航状态
-        final canGoBack = await controller.canGoBack() ?? false;
-        final canGoForward = await controller.canGoForward() ?? false;
+        final canGoBack = await controller.canGoBack();
+        final canGoForward = await controller.canGoForward();
         widget.onNavigationStateChanged(canGoBack, canGoForward);
 
         // 注入 JS Bridge（传递当前 URL 防止重复注入）
@@ -708,8 +700,8 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
           widget.onUrlChanged(url.toString());
 
           // 更新导航状态
-          final canGoBack = await controller.canGoBack() ?? false;
-          final canGoForward = await controller.canGoForward() ?? false;
+          final canGoBack = await controller.canGoBack();
+          final canGoForward = await controller.canGoForward();
           widget.onNavigationStateChanged(canGoBack, canGoForward);
         }
       },

@@ -1,4 +1,5 @@
 /// Database 插件 - 服务端 Repository 实现
+library;
 
 import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
@@ -53,7 +54,8 @@ class ServerDatabaseRepository implements IDatabaseRepository {
         .toList();
   }
 
-  Future<void> _saveAllRecords(String tableId, List<DatabaseRecordDto> records) async {
+  Future<void> _saveAllRecords(
+      String tableId, List<DatabaseRecordDto> records) async {
     await dataService.writePluginData(
       userId,
       _pluginId,
@@ -81,8 +83,7 @@ class ServerDatabaseRepository implements IDatabaseRepository {
 
       return Result.success(databases);
     } catch (e) {
-      return Result.failure('获取数据库列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取数据库列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -98,7 +99,8 @@ class ServerDatabaseRepository implements IDatabaseRepository {
   }
 
   @override
-  Future<Result<DatabaseModelDto>> createDatabase(DatabaseModelDto database) async {
+  Future<Result<DatabaseModelDto>> createDatabase(
+      DatabaseModelDto database) async {
     try {
       final databases = await _readAllDatabases();
       databases.add(database);
@@ -164,8 +166,8 @@ class ServerDatabaseRepository implements IDatabaseRepository {
       if (query.nameKeyword != null) {
         databases = databases.where((database) {
           return database.name.toLowerCase().contains(
-            query.nameKeyword!.toLowerCase(),
-          );
+                query.nameKeyword!.toLowerCase(),
+              );
         }).toList();
       }
 
@@ -203,8 +205,7 @@ class ServerDatabaseRepository implements IDatabaseRepository {
 
       return Result.success(records);
     } catch (e) {
-      return Result.failure('获取记录列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取记录列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -227,7 +228,8 @@ class ServerDatabaseRepository implements IDatabaseRepository {
   }
 
   @override
-  Future<Result<DatabaseRecordDto>> createRecord(DatabaseRecordDto record) async {
+  Future<Result<DatabaseRecordDto>> createRecord(
+      DatabaseRecordDto record) async {
     try {
       final records = await _readAllRecords(record.tableId);
       records.add(record);
@@ -239,7 +241,8 @@ class ServerDatabaseRepository implements IDatabaseRepository {
   }
 
   @override
-  Future<Result<DatabaseRecordDto>> updateRecord(String id, DatabaseRecordDto record) async {
+  Future<Result<DatabaseRecordDto>> updateRecord(
+      String id, DatabaseRecordDto record) async {
     try {
       final records = await _readAllRecords(record.tableId);
       final index = records.indexWhere((r) => r.id == id);
@@ -279,7 +282,8 @@ class ServerDatabaseRepository implements IDatabaseRepository {
   }
 
   @override
-  Future<Result<List<DatabaseRecordDto>>> searchRecords(DatabaseRecordQuery query) async {
+  Future<Result<List<DatabaseRecordDto>>> searchRecords(
+      DatabaseRecordQuery query) async {
     try {
       var records = await _readAllRecords(query.tableId);
 
@@ -287,16 +291,16 @@ class ServerDatabaseRepository implements IDatabaseRepository {
         records = records.where((record) {
           final fieldValue = record.fields[query.fieldName!]?.toString() ?? '';
           return fieldValue.toLowerCase().contains(
-            query.fieldKeyword!.toLowerCase(),
-          );
+                query.fieldKeyword!.toLowerCase(),
+              );
         }).toList();
       } else if (query.fieldKeyword != null) {
         // 在所有字段中搜索
         records = records.where((record) {
           return record.fields.values.any((value) {
             return value.toString().toLowerCase().contains(
-              query.fieldKeyword!.toLowerCase(),
-            );
+                  query.fieldKeyword!.toLowerCase(),
+                );
           });
         }).toList();
       }

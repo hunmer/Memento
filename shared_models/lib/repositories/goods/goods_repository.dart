@@ -1,6 +1,7 @@
 /// Goods 插件 - Repository 接口定义
 ///
 /// 定义仓库和物品的数据访问抽象接口
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -213,7 +214,8 @@ abstract class IGoodsRepository {
   Future<Result<WarehouseDto>> createWarehouse(WarehouseDto warehouse);
 
   /// 更新仓库
-  Future<Result<WarehouseDto>> updateWarehouse(String id, WarehouseDto warehouse);
+  Future<Result<WarehouseDto>> updateWarehouse(
+      String id, WarehouseDto warehouse);
 
   /// 删除仓库
   Future<Result<bool>> deleteWarehouse(String id);
@@ -230,10 +232,12 @@ abstract class IGoodsRepository {
   Future<Result<GoodsItemDto?>> getItemById(String id);
 
   /// 创建物品
-  Future<Result<GoodsItemDto>> createItem(String warehouseId, GoodsItemDto item);
+  Future<Result<GoodsItemDto>> createItem(
+      String warehouseId, GoodsItemDto item);
 
   /// 更新物品
-  Future<Result<GoodsItemDto>> updateItem(String warehouseId, String id, GoodsItemDto item);
+  Future<Result<GoodsItemDto>> updateItem(
+      String warehouseId, String id, GoodsItemDto item);
 
   /// 删除物品
   Future<Result<bool>> deleteItem(String warehouseId, String id);

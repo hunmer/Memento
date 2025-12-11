@@ -1,4 +1,5 @@
 /// OpenAI 插件 - 服务端 Repository 实现
+library;
 
 import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
@@ -49,11 +50,13 @@ class ServerOpenAIRepository implements IOpenAIRepository {
 
     final providers = data['service_providers'] as List<dynamic>? ?? [];
     return providers
-        .map((e) => OpenAIServiceProviderDto.fromJson(e as Map<String, dynamic>))
+        .map(
+            (e) => OpenAIServiceProviderDto.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
-  Future<void> _saveAllServiceProviders(List<OpenAIServiceProviderDto> providers) async {
+  Future<void> _saveAllServiceProviders(
+      List<OpenAIServiceProviderDto> providers) async {
     await dataService.writePluginData(
       userId,
       _pluginId,
@@ -92,7 +95,8 @@ class ServerOpenAIRepository implements IOpenAIRepository {
       OpenAIModelDto(
         id: 'deepseek-v3.1',
         name: 'DeepSeek-V3.1',
-        description: 'Hybrid architecture model with thinking and non-thinking modes',
+        description:
+            'Hybrid architecture model with thinking and non-thinking modes',
         url: 'https://huggingface.co/deepseek-ai/DeepSeek-V3.1',
         group: 'deepseek',
       ),
@@ -170,8 +174,7 @@ class ServerOpenAIRepository implements IOpenAIRepository {
 
       return Result.success(agents);
     } catch (e) {
-      return Result.failure('获取 AI 助手列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取 AI 助手列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -244,17 +247,24 @@ class ServerOpenAIRepository implements IOpenAIRepository {
       // 按名称关键词过滤
       if (query.nameKeyword != null && query.nameKeyword!.isNotEmpty) {
         final keyword = query.nameKeyword!.toLowerCase();
-        agents = agents.where((a) => a.name.toLowerCase().contains(keyword)).toList();
+        agents = agents
+            .where((a) => a.name.toLowerCase().contains(keyword))
+            .toList();
       }
 
       // 按服务商 ID 过滤
-      if (query.serviceProviderId != null && query.serviceProviderId!.isNotEmpty) {
-        agents = agents.where((a) => a.serviceProviderId == query.serviceProviderId).toList();
+      if (query.serviceProviderId != null &&
+          query.serviceProviderId!.isNotEmpty) {
+        agents = agents
+            .where((a) => a.serviceProviderId == query.serviceProviderId)
+            .toList();
       }
 
       // 按标签过滤
       if (query.tags != null && query.tags!.isNotEmpty) {
-        agents = agents.where((a) => a.tags.any((tag) => query.tags!.contains(tag))).toList();
+        agents = agents
+            .where((a) => a.tags.any((tag) => query.tags!.contains(tag)))
+            .toList();
       }
 
       if (query.pagination != null && query.pagination!.hasPagination) {
@@ -291,8 +301,7 @@ class ServerOpenAIRepository implements IOpenAIRepository {
 
       return Result.success(providers);
     } catch (e) {
-      return Result.failure('获取服务商列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取服务商列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -367,7 +376,9 @@ class ServerOpenAIRepository implements IOpenAIRepository {
       // 按标签关键词过滤
       if (query.nameKeyword != null && query.nameKeyword!.isNotEmpty) {
         final keyword = query.nameKeyword!.toLowerCase();
-        providers = providers.where((p) => p.label.toLowerCase().contains(keyword)).toList();
+        providers = providers
+            .where((p) => p.label.toLowerCase().contains(keyword))
+            .toList();
       }
 
       if (query.pagination != null && query.pagination!.hasPagination) {
@@ -404,8 +415,7 @@ class ServerOpenAIRepository implements IOpenAIRepository {
 
       return Result.success(toolApps);
     } catch (e) {
-      return Result.failure('获取工具应用列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取工具应用列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -421,7 +431,8 @@ class ServerOpenAIRepository implements IOpenAIRepository {
   }
 
   @override
-  Future<Result<OpenAIToolAppDto>> createToolApp(OpenAIToolAppDto toolApp) async {
+  Future<Result<OpenAIToolAppDto>> createToolApp(
+      OpenAIToolAppDto toolApp) async {
     try {
       final toolApps = await _readAllToolApps();
       toolApps.add(toolApp);
@@ -478,7 +489,9 @@ class ServerOpenAIRepository implements IOpenAIRepository {
       // 按标题关键词过滤
       if (query.titleKeyword != null && query.titleKeyword!.isNotEmpty) {
         final keyword = query.titleKeyword!.toLowerCase();
-        toolApps = toolApps.where((t) => t.title.toLowerCase().contains(keyword)).toList();
+        toolApps = toolApps
+            .where((t) => t.title.toLowerCase().contains(keyword))
+            .toList();
       }
 
       if (query.pagination != null && query.pagination!.hasPagination) {

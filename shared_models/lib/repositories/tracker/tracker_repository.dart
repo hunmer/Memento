@@ -1,6 +1,7 @@
 /// Tracker 插件 - Repository 接口定义
 ///
 /// 定义目标和记录的数据访问抽象接口
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -104,7 +105,8 @@ class GoalDto {
   bool get isCompleted => currentValue >= targetValue;
 
   /// 计算进度百分比（0.0 - 1.0）
-  double get progress => targetValue > 0 ? (currentValue / targetValue).clamp(0.0, 1.0) : 0.0;
+  double get progress =>
+      targetValue > 0 ? (currentValue / targetValue).clamp(0.0, 1.0) : 0.0;
 
   factory GoalDto.fromJson(Map<String, dynamic> json) {
     return GoalDto(
@@ -118,7 +120,8 @@ class GoalDto {
       progressColor: json['progressColor'] as int?,
       targetValue: (json['targetValue'] as num).toDouble(),
       currentValue: (json['currentValue'] as num).toDouble(),
-      dateSettings: DateSettingsDto.fromJson(json['dateSettings'] as Map<String, dynamic>),
+      dateSettings: DateSettingsDto.fromJson(
+          json['dateSettings'] as Map<String, dynamic>),
       reminderTime: json['reminderTime'] as String?,
       isLoopReset: json['isLoopReset'] as bool,
       createdAt: DateTime.parse(json['createdAt'] as String),

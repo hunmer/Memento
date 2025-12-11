@@ -1,4 +1,5 @@
 /// OpenAI 插件 - Repository 接口定义
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -79,7 +80,9 @@ class OpenAIAgentDto {
       enableFunctionCalling: json['enableFunctionCalling'] as bool? ?? false,
       promptPresetId: json['promptPresetId'] as String?,
       enableOpeningQuestions: json['enableOpeningQuestions'] as bool? ?? false,
-      openingQuestions: (json['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? const [],
+      openingQuestions:
+          (json['openingQuestions'] as List<dynamic>?)?.cast<String>() ??
+              const [],
     );
   }
 
@@ -155,9 +158,11 @@ class OpenAIAgentDto {
       presencePenalty: presencePenalty ?? this.presencePenalty,
       stop: stop ?? this.stop,
       avatarUrl: avatarUrl ?? this.avatarUrl,
-      enableFunctionCalling: enableFunctionCalling ?? this.enableFunctionCalling,
+      enableFunctionCalling:
+          enableFunctionCalling ?? this.enableFunctionCalling,
       promptPresetId: promptPresetId ?? this.promptPresetId,
-      enableOpeningQuestions: enableOpeningQuestions ?? this.enableOpeningQuestions,
+      enableOpeningQuestions:
+          enableOpeningQuestions ?? this.enableOpeningQuestions,
       openingQuestions: openingQuestions ?? this.openingQuestions,
     );
   }
@@ -336,7 +341,8 @@ abstract class IOpenAIRepository {
   // ============ AI 助手操作 ============
 
   /// 获取所有 AI 助手
-  Future<Result<List<OpenAIAgentDto>>> getAgents({PaginationParams? pagination});
+  Future<Result<List<OpenAIAgentDto>>> getAgents(
+      {PaginationParams? pagination});
 
   /// 根据 ID 获取 AI 助手
   Future<Result<OpenAIAgentDto?>> getAgentById(String id);

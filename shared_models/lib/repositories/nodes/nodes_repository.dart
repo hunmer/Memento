@@ -1,4 +1,5 @@
 /// Nodes 插件 - Repository 接口定义
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -84,16 +85,14 @@ class NodeDto {
   factory NodeDto.fromJson(Map<String, dynamic> json) {
     final tagsList =
         (json['tags'] as List<dynamic>).map((e) => e as String).toList();
-    final customFieldsList =
-        (json['customFields'] as List<dynamic>?)
-                ?.map((e) => CustomFieldDto.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [];
-    final childrenList =
-        (json['children'] as List<dynamic>?)
-                ?.map((e) => NodeDto.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [];
+    final customFieldsList = (json['customFields'] as List<dynamic>?)
+            ?.map((e) => CustomFieldDto.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+    final childrenList = (json['children'] as List<dynamic>?)
+            ?.map((e) => NodeDto.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
 
     return NodeDto(
       id: json['id'] as String,
@@ -191,11 +190,10 @@ class NotebookDto {
 
   /// 从 JSON 构造
   factory NotebookDto.fromJson(Map<String, dynamic> json) {
-    final nodesList =
-        (json['nodes'] as List<dynamic>?)
-                ?.map((e) => NodeDto.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const [];
+    final nodesList = (json['nodes'] as List<dynamic>?)
+            ?.map((e) => NodeDto.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
 
     return NotebookDto(
       id: json['id'] as String,
@@ -272,7 +270,8 @@ abstract class INodesRepository {
   // ============ 笔记本 CRUD 操作 ============
 
   /// 获取所有笔记本
-  Future<Result<List<NotebookDto>>> getNotebooks({PaginationParams? pagination});
+  Future<Result<List<NotebookDto>>> getNotebooks(
+      {PaginationParams? pagination});
 
   /// 根据 ID 获取笔记本
   Future<Result<NotebookDto?>> getNotebookById(String id);
@@ -319,5 +318,6 @@ abstract class INodesRepository {
   Future<Result<List<String>>> getNodePath(String notebookId, String nodeId);
 
   /// 获取节点的所有同级节点
-  Future<Result<List<NodeDto>>> getSiblingNodes(String notebookId, String nodeId);
+  Future<Result<List<NodeDto>>> getSiblingNodes(
+      String notebookId, String nodeId);
 }

@@ -1,6 +1,7 @@
 /// Day 插件 - 服务端 Repository 实现
 ///
 /// 通过 PluginDataService 访问用户的加密数据文件
+library;
 
 import 'package:shared_models/shared_models.dart';
 
@@ -30,7 +31,9 @@ class ServerDayRepository extends IDayRepository {
     if (daysData == null) return [];
 
     final days = daysData['days'] as List<dynamic>? ?? [];
-    return days.map((d) => MemorialDayDto.fromJson(d as Map<String, dynamic>)).toList();
+    return days
+        .map((d) => MemorialDayDto.fromJson(d as Map<String, dynamic>))
+        .toList();
   }
 
   /// 保存所有纪念日
@@ -96,7 +99,8 @@ class ServerDayRepository extends IDayRepository {
   }
 
   @override
-  Future<Result<MemorialDayDto>> createMemorialDay(MemorialDayDto memorialDay) async {
+  Future<Result<MemorialDayDto>> createMemorialDay(
+      MemorialDayDto memorialDay) async {
     try {
       final days = await _readAllMemorialDays();
       days.add(memorialDay);
@@ -108,7 +112,8 @@ class ServerDayRepository extends IDayRepository {
   }
 
   @override
-  Future<Result<MemorialDayDto>> updateMemorialDay(String id, MemorialDayDto memorialDay) async {
+  Future<Result<MemorialDayDto>> updateMemorialDay(
+      String id, MemorialDayDto memorialDay) async {
     try {
       final days = await _readAllMemorialDays();
       final index = days.indexWhere((d) => d.id == id);
@@ -169,16 +174,19 @@ class ServerDayRepository extends IDayRepository {
   }
 
   @override
-  Future<Result<List<MemorialDayDto>>> searchMemorialDays(MemorialDayQuery query) async {
+  Future<Result<List<MemorialDayDto>>> searchMemorialDays(
+      MemorialDayQuery query) async {
     try {
       var days = await _readAllMemorialDays();
 
       // 按日期范围过滤
       if (query.startDate != null) {
-        days = days.where((d) => d.targetDate.isAfter(query.startDate!)).toList();
+        days =
+            days.where((d) => d.targetDate.isAfter(query.startDate!)).toList();
       }
       if (query.endDate != null) {
-        days = days.where((d) => d.targetDate.isBefore(query.endDate!)).toList();
+        days =
+            days.where((d) => d.targetDate.isBefore(query.endDate!)).toList();
       }
 
       // 按是否包含过期过滤
@@ -222,7 +230,6 @@ class ServerDayRepository extends IDayRepository {
     try {
       final days = await _readAllMemorialDays();
       final total = days.length;
-      final today = DateTime.now();
 
       final upcoming = days.where((d) {
         final daysRemaining = d.daysRemaining;

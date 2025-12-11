@@ -3,6 +3,7 @@
 /// 此文件定义数据访问的抽象层，客户端和服务端各自实现
 /// - 客户端：通过内存中的 Service 访问数据
 /// - 服务端：通过 PluginDataService 访问加密文件
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';

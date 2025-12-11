@@ -1,6 +1,7 @@
 /// Checkin 插件 - 客户端 Repository 实现
 ///
 /// 通过适配现有的存储系统来实现 ICheckinRepository 接口
+library;
 
 import 'package:shared_models/repositories/checkin/checkin_repository.dart';
 import 'package:shared_models/shared_models.dart';
@@ -15,11 +16,11 @@ class ClientCheckinRepository extends ICheckinRepository {
   // ============ 内部辅助方法 ============
 
   Future<Map<String, dynamic>?> _readItemsData() async {
-    return await storage.read('${pluginId}/items.json');
+    return await storage.read('$pluginId/items.json');
   }
 
   Future<void> _writeItemsData(Map<String, dynamic> data) async {
-    await storage.write('${pluginId}/items.json', data);
+    await storage.write('$pluginId/items.json', data);
   }
 
   List<CheckinItemDto> _parseItemsList(Map<String, dynamic>? data) {

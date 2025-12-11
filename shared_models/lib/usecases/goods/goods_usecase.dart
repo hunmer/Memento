@@ -1,6 +1,7 @@
 /// Goods 插件 - UseCase 业务逻辑层
 ///
 /// 此文件包含共享的业务逻辑，客户端和服务端都使用此层
+library;
 
 import 'package:uuid/uuid.dart';
 
@@ -34,7 +35,8 @@ class GoodsUseCase {
         final jsonList = warehouses.map((w) => w.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -44,7 +46,8 @@ class GoodsUseCase {
   }
 
   /// 根据 ID 获取仓库
-  Future<Result<Map<String, dynamic>?>> getWarehouseById(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>?>> getWarehouseById(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -66,10 +69,12 @@ class GoodsUseCase {
   /// - `description`: 描述
   /// - `icon`: 图标
   /// - `color`: 颜色
-  Future<Result<Map<String, dynamic>>> createWarehouse(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> createWarehouse(
+      Map<String, dynamic> params) async {
     final nameValidation = ParamValidator.requireString(params, 'name');
     if (!nameValidation.isValid) {
-      return Result.failure(nameValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(nameValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -92,7 +97,8 @@ class GoodsUseCase {
   }
 
   /// 更新仓库
-  Future<Result<Map<String, dynamic>>> updateWarehouse(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> updateWarehouse(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -113,9 +119,15 @@ class GoodsUseCase {
       // 合并更新
       final updated = existing.copyWith(
         name: params['name'] as String? ?? existing.name,
-        description: params.containsKey('description') ? params['description'] as String? : existing.description,
-        icon: params.containsKey('icon') ? params['icon'] as String? : existing.icon,
-        color: params.containsKey('color') ? params['color'] as String? : existing.color,
+        description: params.containsKey('description')
+            ? params['description'] as String?
+            : existing.description,
+        icon: params.containsKey('icon')
+            ? params['icon'] as String?
+            : existing.icon,
+        color: params.containsKey('color')
+            ? params['color'] as String?
+            : existing.color,
         updatedAt: DateTime.now(),
       );
 
@@ -161,7 +173,8 @@ class GoodsUseCase {
         final jsonList = items.map((i) => i.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -171,7 +184,8 @@ class GoodsUseCase {
   }
 
   /// 根据 ID 获取物品
-  Future<Result<Map<String, dynamic>?>> getItemById(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>?>> getItemById(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -196,15 +210,19 @@ class GoodsUseCase {
   /// - `category`: 分类
   /// - `tags`: 标签列表
   /// - `customFields`: 自定义字段
-  Future<Result<Map<String, dynamic>>> createItem(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> createItem(
+      Map<String, dynamic> params) async {
     final nameValidation = ParamValidator.requireString(params, 'name');
     if (!nameValidation.isValid) {
-      return Result.failure(nameValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(nameValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
-    final warehouseIdValidation = ParamValidator.requireString(params, 'warehouseId');
+    final warehouseIdValidation =
+        ParamValidator.requireString(params, 'warehouseId');
     if (!warehouseIdValidation.isValid) {
-      return Result.failure(warehouseIdValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(warehouseIdValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -230,7 +248,8 @@ class GoodsUseCase {
   }
 
   /// 更新物品
-  Future<Result<Map<String, dynamic>>> updateItem(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> updateItem(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -238,7 +257,8 @@ class GoodsUseCase {
 
     final warehouseId = params['warehouseId'] as String?;
     if (warehouseId == null || warehouseId.isEmpty) {
-      return Result.failure('缺少必需参数: warehouseId', code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: warehouseId',
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -256,11 +276,19 @@ class GoodsUseCase {
       // 合并更新
       final updated = existing.copyWith(
         name: params['name'] as String? ?? existing.name,
-        description: params.containsKey('description') ? params['description'] as String? : existing.description,
+        description: params.containsKey('description')
+            ? params['description'] as String?
+            : existing.description,
         quantity: params['quantity'] as int? ?? existing.quantity,
-        category: params.containsKey('category') ? params['category'] as String? : existing.category,
-        tags: params['tags'] != null ? (params['tags'] as List<dynamic>).cast<String>() : existing.tags,
-        customFields: params.containsKey('customFields') ? params['customFields'] as Map<String, dynamic>? : existing.customFields,
+        category: params.containsKey('category')
+            ? params['category'] as String?
+            : existing.category,
+        tags: params['tags'] != null
+            ? (params['tags'] as List<dynamic>).cast<String>()
+            : existing.tags,
+        customFields: params.containsKey('customFields')
+            ? params['customFields'] as Map<String, dynamic>?
+            : existing.customFields,
         updatedAt: DateTime.now(),
       );
 
@@ -280,7 +308,8 @@ class GoodsUseCase {
 
     final warehouseId = params['warehouseId'] as String?;
     if (warehouseId == null || warehouseId.isEmpty) {
-      return Result.failure('缺少必需参数: warehouseId', code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: warehouseId',
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -322,7 +351,8 @@ class GoodsUseCase {
         final jsonList = items.map((i) => i.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -334,7 +364,8 @@ class GoodsUseCase {
   // ============ 统计操作 ============
 
   /// 获取统计信息
-  Future<Result<Map<String, dynamic>>> getStats(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> getStats(
+      Map<String, dynamic> params) async {
     try {
       return repository.getStats();
     } catch (e) {

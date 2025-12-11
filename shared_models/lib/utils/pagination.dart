@@ -1,6 +1,7 @@
 /// 分页工具类 - 客户端和服务端共享
 ///
 /// 此文件提供统一的分页逻辑，确保两端行为一致
+library;
 
 /// 分页响应结构
 class PaginatedResult<T> {
@@ -132,9 +133,8 @@ class PaginationUtils {
     Object? Function(T)? toJson,
   }) {
     final result = paginate(list, offset: offset, count: count);
-    final data = toJson != null
-        ? result.data.map(toJson).toList()
-        : result.data;
+    final data =
+        toJson != null ? result.data.map(toJson).toList() : result.data;
 
     return {
       'data': data,

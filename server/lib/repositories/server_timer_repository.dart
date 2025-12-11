@@ -1,4 +1,5 @@
 /// Timer 插件 - 服务端 Repository 实现
+library;
 
 import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
@@ -81,8 +82,7 @@ class ServerTimerRepository implements ITimerRepository {
 
       return Result.success(tasks);
     } catch (e) {
-      return Result.failure('获取任务列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取任务列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -163,7 +163,8 @@ class ServerTimerRepository implements ITimerRepository {
       }
 
       if (query.isRunning != null) {
-        tasks = tasks.where((task) => task.isRunning == query.isRunning).toList();
+        tasks =
+            tasks.where((task) => task.isRunning == query.isRunning).toList();
       }
 
       if (query.pagination != null && query.pagination!.hasPagination) {
@@ -202,8 +203,7 @@ class ServerTimerRepository implements ITimerRepository {
 
       return Result.success(items);
     } catch (e) {
-      return Result.failure('获取计时器项列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取计时器项列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 

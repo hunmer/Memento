@@ -1,6 +1,7 @@
 /// Calendar 插件 - 客户端 Repository 实现
 ///
 /// 通过适配现有的 CalendarController 来实现 ICalendarRepository 接口
+library;
 
 import 'package:flutter/material.dart';
 import 'package:shared_models/repositories/calendar/calendar_repository.dart';
@@ -69,9 +70,13 @@ class ClientCalendarRepository extends ICalendarRepository {
   }
 
   @override
-  Future<Result<CalendarEventDto>> updateEvent(String id, CalendarEventDto dto) async {
+  Future<Result<CalendarEventDto>> updateEvent(
+    String id,
+    CalendarEventDto dto,
+  ) async {
     try {
-      final existingEvent = controller.events.where((e) => e.id == id).firstOrNull;
+      final existingEvent =
+          controller.events.where((e) => e.id == id).firstOrNull;
       if (existingEvent == null) {
         return Result.failure('事件不存在', code: ErrorCodes.notFound);
       }
@@ -100,7 +105,10 @@ class ClientCalendarRepository extends ICalendarRepository {
   }
 
   @override
-  Future<Result<CalendarEventDto>> completeEvent(String id, DateTime completedTime) async {
+  Future<Result<CalendarEventDto>> completeEvent(
+    String id,
+    DateTime completedTime,
+  ) async {
     try {
       final event = controller.events.firstOrNull((e) => e.id == id);
       if (event == null) {
@@ -116,7 +124,9 @@ class ClientCalendarRepository extends ICalendarRepository {
   }
 
   @override
-  Future<Result<List<CalendarEventDto>>> searchEvents(CalendarEventQuery query) async {
+  Future<Result<List<CalendarEventDto>>> searchEvents(
+    CalendarEventQuery query,
+  ) async {
     try {
       final events = controller.events;
       final matches = <CalendarEvent>[];
@@ -129,8 +139,7 @@ class ClientCalendarRepository extends ICalendarRepository {
             event.startTime.isBefore(query.startDate!)) {
           isMatch = false;
         }
-        if (query.endDate != null &&
-            event.startTime.isAfter(query.endDate!)) {
+        if (query.endDate != null && event.startTime.isAfter(query.endDate!)) {
           isMatch = false;
         }
 
@@ -141,7 +150,9 @@ class ClientCalendarRepository extends ICalendarRepository {
 
         // 按标题关键词过滤
         if (query.titleKeyword != null &&
-            !event.title.toLowerCase().contains(query.titleKeyword!.toLowerCase())) {
+            !event.title.toLowerCase().contains(
+              query.titleKeyword!.toLowerCase(),
+            )) {
           isMatch = false;
         }
 
@@ -237,7 +248,9 @@ class ClientCalendarRepository extends ICalendarRepository {
   @override
   Future<Result<bool>> deleteCompletedEvent(String id) async {
     try {
-      final completedEvents = List<CalendarEvent>.from(controller.completedEvents);
+      final completedEvents = List<CalendarEvent>.from(
+        controller.completedEvents,
+      );
       final event = completedEvents.firstOrNull((e) => e.id == id);
       if (event == null) {
         return Result.failure('已完成事件不存在', code: ErrorCodes.notFound);
@@ -246,7 +259,8 @@ class ClientCalendarRepository extends ICalendarRepository {
       // 直接从已完成列表中删除（需要通过私有方法或修改控制器）
       // 这里我们使用变通方法：创建新列表排除该事件
       // 注意：这可能需要修改 CalendarController 来提供更直接的删除方法
-      final updatedCompletedEvents = completedEvents.where((e) => e.id != id).toList();
+      final updatedCompletedEvents =
+          completedEvents.where((e) => e.id != id).toList();
 
       // 由于 CalendarController 没有直接的删除已完成事件的方法，
       // 我们需要重新保存整个事件列表

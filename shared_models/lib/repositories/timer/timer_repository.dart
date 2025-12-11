@@ -1,4 +1,5 @@
 /// Timer 插件 - Repository 接口定义
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -198,7 +199,8 @@ class TimerItemDto {
       currentCycle: currentCycle ?? this.currentCycle,
       isWorkPhase: isWorkPhase ?? this.isWorkPhase,
       repeatCount: repeatCount ?? this.repeatCount,
-      intervalAlertDuration: intervalAlertDuration ?? this.intervalAlertDuration,
+      intervalAlertDuration:
+          intervalAlertDuration ?? this.intervalAlertDuration,
       enableNotification: enableNotification ?? this.enableNotification,
     );
   }
@@ -226,7 +228,8 @@ abstract class ITimerRepository {
   // ============ 任务操作 ============
 
   /// 获取所有计时任务
-  Future<Result<List<TimerTaskDto>>> getTimerTasks({PaginationParams? pagination});
+  Future<Result<List<TimerTaskDto>>> getTimerTasks(
+      {PaginationParams? pagination});
 
   /// 根据 ID 获取任务
   Future<Result<TimerTaskDto?>> getTimerTaskById(String id);

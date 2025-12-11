@@ -129,7 +129,6 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
   @override
   Future<void> registerToApp(
-    
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
@@ -212,24 +211,27 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
     // 如果是分页结果，需要添加 nodeCount 字段
     if (data is Map && data.containsKey('items')) {
       final items = data['items'] as List;
-      final enrichedItems = items.map((item) {
-        final notebookJson = Map<String, dynamic>.from(item);
-        notebookJson['nodeCount'] = _countAllNodesFromJson(notebookJson['nodes'] ?? []);
-        return notebookJson;
-      }).toList();
+      final enrichedItems =
+          items.map((item) {
+            final notebookJson = Map<String, dynamic>.from(item);
+            notebookJson['nodeCount'] = _countAllNodesFromJson(
+              notebookJson['nodes'] ?? [],
+            );
+            return notebookJson;
+          }).toList();
 
-      return jsonEncode({
-        ...data,
-        'items': enrichedItems,
-      });
+      return jsonEncode({...data, 'items': enrichedItems});
     }
 
     // 如果是普通列表
-    final enrichedList = (data as List).map((item) {
-      final notebookJson = Map<String, dynamic>.from(item);
-      notebookJson['nodeCount'] = _countAllNodesFromJson(notebookJson['nodes'] ?? []);
-      return notebookJson;
-    }).toList();
+    final enrichedList =
+        (data as List).map((item) {
+          final notebookJson = Map<String, dynamic>.from(item);
+          notebookJson['nodeCount'] = _countAllNodesFromJson(
+            notebookJson['nodes'] ?? [],
+          );
+          return notebookJson;
+        }).toList();
 
     return jsonEncode(enrichedList);
   }
@@ -367,10 +369,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
         items = items.where((node) => node['parentId'] == parentId).toList();
       }
 
-      return jsonEncode({
-        ...data,
-        'items': items,
-      });
+      return jsonEncode({...data, 'items': items});
     }
 
     // 如果是普通列表
@@ -454,10 +453,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: updates'});
     }
 
-    final result = await _useCase.updateNode({
-      'id': nodeId,
-      ...updates,
-    });
+    final result = await _useCase.updateNode({'id': nodeId, ...updates});
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -531,7 +527,9 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
     final notebookResult = await _useCase.getNotebookById({'id': notebookId});
     if (notebookResult.isFailure) {
-      return jsonEncode({'error': notebookResult.errorOrNull?.message ?? '未知错误'});
+      return jsonEncode({
+        'error': notebookResult.errorOrNull?.message ?? '未知错误',
+      });
     }
 
     final notebook = notebookResult.dataOrNull;
@@ -620,11 +618,14 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
       // 返回所有匹配的笔记本
       if (notebooks is List) {
-        final enrichedList = notebooks.map((nb) {
-          final notebookJson = Map<String, dynamic>.from(nb);
-          notebookJson['nodeCount'] = _countAllNodesFromJson(nb['nodes'] ?? []);
-          return notebookJson;
-        }).toList();
+        final enrichedList =
+            notebooks.map((nb) {
+              final notebookJson = Map<String, dynamic>.from(nb);
+              notebookJson['nodeCount'] = _countAllNodesFromJson(
+                nb['nodes'] ?? [],
+              );
+              return notebookJson;
+            }).toList();
         return jsonEncode(enrichedList);
       }
     }
@@ -690,9 +691,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
     final bool findAll = params['findAll'] ?? false;
 
-    final result = await _useCase.searchNotebooks({
-      'titleKeyword': title,
-    });
+    final result = await _useCase.searchNotebooks({'titleKeyword': title});
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -712,11 +711,14 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
     }
 
     if (notebooks is List) {
-      final enrichedList = notebooks.map((nb) {
-        final notebookJson = Map<String, dynamic>.from(nb);
-        notebookJson['nodeCount'] = _countAllNodesFromJson(nb['nodes'] ?? []);
-        return notebookJson;
-      }).toList();
+      final enrichedList =
+          notebooks.map((nb) {
+            final notebookJson = Map<String, dynamic>.from(nb);
+            notebookJson['nodeCount'] = _countAllNodesFromJson(
+              nb['nodes'] ?? [],
+            );
+            return notebookJson;
+          }).toList();
       return jsonEncode(enrichedList);
     }
 
@@ -744,9 +746,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
     // 使用搜索功能
     if (field.toLowerCase() == 'title' || field.toLowerCase() == 'status') {
-      final searchParams = <String, dynamic>{
-        'notebookId': notebookId,
-      };
+      final searchParams = <String, dynamic>{'notebookId': notebookId};
 
       if (field.toLowerCase() == 'title') {
         searchParams['titleKeyword'] = value.toString();
@@ -846,6 +846,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   // ==================== 辅助方法 ====================
 
   /// 将节点转换为 JSON（可选包含子节点）
+  // ignore: unused_element
   Map<String, dynamic> _nodeToJson(Node node, {bool includeChildren = false}) {
     final json = {
       'id': node.id,
@@ -855,10 +856,10 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       'status': node.status.toString().split('.').last,
       'startDate': node.startDate?.toIso8601String(),
       'endDate': node.endDate?.toIso8601String(),
-      'customFields': node.customFields.map((f) => {
-        'key': f.key,
-        'value': f.value,
-      }).toList(),
+      'customFields':
+          node.customFields
+              .map((f) => {'key': f.key, 'value': f.value})
+              .toList(),
       'notes': node.notes,
       'parentId': node.parentId,
       'color': node.color.value,
@@ -867,13 +868,17 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
     };
 
     if (includeChildren && node.children.isNotEmpty) {
-      json['children'] = node.children.map((c) => _nodeToJson(c, includeChildren: true)).toList();
+      json['children'] =
+          node.children
+              .map((c) => _nodeToJson(c, includeChildren: true))
+              .toList();
     }
 
     return json;
   }
 
   /// 解析节点状态
+  // ignore: unused_element
   NodeStatus _parseNodeStatus(dynamic status) {
     if (status is String) {
       switch (status.toLowerCase()) {
@@ -886,7 +891,9 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
         default:
           return NodeStatus.none;
       }
-    } else if (status is int && status >= 0 && status < NodeStatus.values.length) {
+    } else if (status is int &&
+        status >= 0 &&
+        status < NodeStatus.values.length) {
       return NodeStatus.values[status];
     }
     return NodeStatus.none;
@@ -897,6 +904,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   /// 根据 offset 和 count 参数对列表进行分页
   /// - 如果 offset 和 count 都为 null,返回原格式(列表)
   /// - 如果提供了分页参数,返回包含 items、total、offset、count 的对象
+  // ignore: unused_element
   dynamic _paginate(List<dynamic> items, Map<String, dynamic> params) {
     final int? offset = params['offset'];
     final int? count = params['count'];
@@ -909,7 +917,8 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
     // 有分页参数:返回分页对象
     final int actualOffset = offset ?? 0;
     final int actualCount = count ?? items.length;
-    final List<dynamic> paginatedItems = items.skip(actualOffset).take(actualCount).toList();
+    final List<dynamic> paginatedItems =
+        items.skip(actualOffset).take(actualCount).toList();
 
     return {
       'items': paginatedItems,
@@ -1076,68 +1085,85 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   // ========== 数据选择器 ==========
 
   void _registerDataSelectors() {
-    pluginDataSelectorService.registerSelector(SelectorDefinition(
-      id: 'nodes.node',
-      pluginId: id,
-      name: '选择节点',
-      icon: icon,
-      color: color,
-      searchable: true,
-      selectionMode: SelectionMode.single,
-      steps: [
-        SelectorStep(
-          id: 'node',
-          title: '选择节点',
-          viewType: SelectorViewType.list,
-          isFinalStep: true,
-          dataLoader: (_) async {
-            // 获取所有笔记本的所有节点（扁平列表）
-            final List<SelectableItem> items = [];
+    pluginDataSelectorService.registerSelector(
+      SelectorDefinition(
+        id: 'nodes.node',
+        pluginId: id,
+        name: '选择节点',
+        icon: icon,
+        color: color,
+        searchable: true,
+        selectionMode: SelectionMode.single,
+        steps: [
+          SelectorStep(
+            id: 'node',
+            title: '选择节点',
+            viewType: SelectorViewType.list,
+            isFinalStep: true,
+            dataLoader: (_) async {
+              // 获取所有笔记本的所有节点（扁平列表）
+              final List<SelectableItem> items = [];
 
-            for (var notebook in _controller.notebooks) {
-              // 递归获取所有节点
-              void addNodesRecursively(List<Node> nodes, String notebookTitle, String parentPath) {
-                for (var node in nodes) {
-                  // 构建节点路径
-                  final nodePath = parentPath.isEmpty
-                      ? node.title
-                      : '$parentPath / ${node.title}';
+              for (var notebook in _controller.notebooks) {
+                // 递归获取所有节点
+                void addNodesRecursively(
+                  List<Node> nodes,
+                  String notebookTitle,
+                  String parentPath,
+                ) {
+                  for (var node in nodes) {
+                    // 构建节点路径
+                    final nodePath =
+                        parentPath.isEmpty
+                            ? node.title
+                            : '$parentPath / ${node.title}';
 
-                  items.add(SelectableItem(
-                    id: '${notebook.id}:${node.id}',
-                    title: node.title,
-                    subtitle: '$notebookTitle · $nodePath',
-                    icon: Icons.subdirectory_arrow_right,
-                    rawData: {
-                      'notebookId': notebook.id,
-                      'notebookTitle': notebook.title,
-                      'nodeId': node.id,
-                      'node': node,
-                    },
-                  ));
+                    items.add(
+                      SelectableItem(
+                        id: '${notebook.id}:${node.id}',
+                        title: node.title,
+                        subtitle: '$notebookTitle · $nodePath',
+                        icon: Icons.subdirectory_arrow_right,
+                        rawData: {
+                          'notebookId': notebook.id,
+                          'notebookTitle': notebook.title,
+                          'nodeId': node.id,
+                          'node': node,
+                        },
+                      ),
+                    );
 
-                  // 递归添加子节点
-                  if (node.children.isNotEmpty) {
-                    addNodesRecursively(node.children, notebookTitle, nodePath);
+                    // 递归添加子节点
+                    if (node.children.isNotEmpty) {
+                      addNodesRecursively(
+                        node.children,
+                        notebookTitle,
+                        nodePath,
+                      );
+                    }
                   }
                 }
+
+                addNodesRecursively(notebook.nodes, notebook.title, '');
               }
 
-              addNodesRecursively(notebook.nodes, notebook.title, '');
-            }
-
-            return items;
-          },
-          searchFilter: (items, query) {
-            if (query.isEmpty) return items;
-            final lowerQuery = query.toLowerCase();
-            return items.where((item) =>
-              item.title.toLowerCase().contains(lowerQuery) ||
-              (item.subtitle?.toLowerCase().contains(lowerQuery) ?? false)
-            ).toList();
-          },
-        ),
-      ],
-    ));
+              return items;
+            },
+            searchFilter: (items, query) {
+              if (query.isEmpty) return items;
+              final lowerQuery = query.toLowerCase();
+              return items
+                  .where(
+                    (item) =>
+                        item.title.toLowerCase().contains(lowerQuery) ||
+                        (item.subtitle?.toLowerCase().contains(lowerQuery) ??
+                            false),
+                  )
+                  .toList();
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

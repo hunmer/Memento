@@ -1,8 +1,7 @@
 /// Diary 插件 - UseCase 业务逻辑层
 ///
 /// 此文件包含共享的业务逻辑，客户端和服务端都使用此层
-
-import 'package:uuid/uuid.dart';
+library;
 
 import 'package:shared_models/repositories/diary/diary_repository.dart';
 import 'package:shared_models/utils/result.dart';
@@ -12,16 +11,10 @@ import 'package:shared_models/utils/validation.dart';
 /// Diary UseCase - 封装所有业务逻辑
 class DiaryUseCase {
   final IDiaryRepository repository;
-  final Uuid _uuid = const Uuid();
 
   DiaryUseCase(this.repository);
 
   // ============ 辅助方法 ============
-
-  /// 格式化日期为文件名格式 (YYYY-MM-DD)
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
 
   /// 从参数提取分页配置
   PaginationParams? _extractPagination(Map<String, dynamic> params) {
@@ -61,7 +54,8 @@ class DiaryUseCase {
         final jsonList = entries.map((e) => e.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -74,7 +68,8 @@ class DiaryUseCase {
   ///
   /// [params] 必需参数:
   /// - `date`: 日期字符串 (YYYY-MM-DD)
-  Future<Result<Map<String, dynamic>?>> getEntryByDate(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>?>> getEntryByDate(
+      Map<String, dynamic> params) async {
     final date = params['date'] as String?;
 
     if (date == null || date.isEmpty) {
@@ -97,16 +92,19 @@ class DiaryUseCase {
   /// 可选参数:
   /// - `title`: 标题
   /// - `mood`: 心情
-  Future<Result<Map<String, dynamic>>> createEntry(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> createEntry(
+      Map<String, dynamic> params) async {
     // 验证必需参数
     final dateValidation = ParamValidator.requireString(params, 'date');
     if (!dateValidation.isValid) {
-      return Result.failure(dateValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(dateValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final contentValidation = ParamValidator.requireString(params, 'content');
     if (!contentValidation.isValid) {
-      return Result.failure(contentValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(contentValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -136,7 +134,8 @@ class DiaryUseCase {
   /// - `title`: 标题
   /// - `content`: 内容
   /// - `mood`: 心情
-  Future<Result<Map<String, dynamic>>> updateEntry(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> updateEntry(
+      Map<String, dynamic> params) async {
     final date = params['date'] as String?;
     if (date == null || date.isEmpty) {
       return Result.failure('缺少必需参数: date', code: ErrorCodes.invalidParams);
@@ -173,7 +172,8 @@ class DiaryUseCase {
   ///
   /// [params] 必需参数:
   /// - `date`: 日期字符串 (YYYY-MM-DD)
-  Future<Result<Map<String, dynamic>>> deleteEntry(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> deleteEntry(
+      Map<String, dynamic> params) async {
     final date = params['date'] as String?;
     if (date == null || date.isEmpty) {
       return Result.failure('缺少必需参数: date', code: ErrorCodes.invalidParams);
@@ -197,7 +197,8 @@ class DiaryUseCase {
   /// - `endDate`: 结束日期
   /// - `keyword`: 关键词
   /// - `mood`: 心情过滤
-  Future<Result<List<dynamic>>> searchEntries(Map<String, dynamic> params) async {
+  Future<Result<List<dynamic>>> searchEntries(
+      Map<String, dynamic> params) async {
     try {
       final query = DiaryQuery(
         startDate: params['startDate'] as String?,
@@ -217,7 +218,8 @@ class DiaryUseCase {
   // ============ 统计操作 ============
 
   /// 获取统计信息
-  Future<Result<Map<String, dynamic>>> getStats(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> getStats(
+      Map<String, dynamic> params) async {
     try {
       final result = await repository.getStats();
       return result.map((stats) => stats.toJson());
@@ -245,7 +247,8 @@ class DiaryUseCase {
   }
 
   /// 获取本月进度
-  Future<Result<Map<String, int>>> getMonthProgress(Map<String, dynamic> params) async {
+  Future<Result<Map<String, int>>> getMonthProgress(
+      Map<String, dynamic> params) async {
     try {
       return repository.getMonthProgress();
     } catch (e) {

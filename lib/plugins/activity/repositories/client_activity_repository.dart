@@ -1,10 +1,13 @@
 /// Activity 插件 - 客户端 Repository 实现
 ///
 /// 通过适配现有的 ActivityService 来实现 IActivityRepository 接口
+library;
 
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/activity/models/activity_record.dart' as activity_models;
-import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart' as widgets_models;
+import 'package:Memento/plugins/activity/models/activity_record.dart'
+    as activity_models;
+import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart'
+    as widgets_models;
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:shared_models/repositories/activity/activity_repository.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -14,9 +17,7 @@ import 'package:shared_models/utils/result.dart';
 class ClientActivityRepository implements IActivityRepository {
   final ActivityService activityService;
 
-  ClientActivityRepository({
-    required this.activityService,
-  });
+  ClientActivityRepository({required this.activityService});
 
   // ============ 活动操作 ============
 
@@ -140,14 +141,16 @@ class ClientActivityRepository implements IActivityRepository {
       // 计算总时长（分钟）
       int totalMinutes = 0;
       for (final activity in activities) {
-        totalMinutes += activity.endTime.difference(activity.startTime).inMinutes;
+        totalMinutes +=
+            activity.endTime.difference(activity.startTime).inMinutes;
       }
 
       final durationHours = (totalMinutes / 60).floor();
       final remainingMinutes = _calculateRemainingMinutes(now);
 
       final stats = ActivityStatsDto(
-        date: '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}',
+        date:
+            '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}',
         activityCount: activityCount,
         durationMinutes: totalMinutes,
         durationHours: durationHours,
@@ -177,14 +180,17 @@ class ClientActivityRepository implements IActivityRepository {
       var current = DateTime(start.year, start.month, start.day);
       final endDateTime = DateTime(end.year, end.month, end.day);
 
-      while (current.isBefore(endDateTime) || current.isAtSameMomentAs(endDateTime)) {
-        final dateStr = '${current.year}-${current.month.toString().padLeft(2, '0')}-${current.day.toString().padLeft(2, '0')}';
+      while (current.isBefore(endDateTime) ||
+          current.isAtSameMomentAs(endDateTime)) {
+        final dateStr =
+            '${current.year}-${current.month.toString().padLeft(2, '0')}-${current.day.toString().padLeft(2, '0')}';
         final activities = await activityService.getActivitiesForDate(current);
 
         final dayActivityCount = activities.length;
         int dayTotalMinutes = 0;
         for (final activity in activities) {
-          dayTotalMinutes += activity.endTime.difference(activity.startTime).inMinutes;
+          dayTotalMinutes +=
+              activity.endTime.difference(activity.startTime).inMinutes;
         }
 
         totalActivities += dayActivityCount;
@@ -251,9 +257,10 @@ class ClientActivityRepository implements IActivityRepository {
       tags: activity.tags,
       description: activity.description,
       mood: activity.mood != null ? int.parse(activity.mood!) : null,
-      metadata: activity.color != null
-          ? {'color': activity.color!.value.toString()}
-          : null,
+      metadata:
+          activity.color != null
+              ? {'color': activity.color!.value.toString()}
+              : null,
     );
   }
 
@@ -276,10 +283,7 @@ class ClientActivityRepository implements IActivityRepository {
   }
 
   TagGroupDto _tagGroupToDto(widgets_models.TagGroup tagGroup) {
-    return TagGroupDto(
-      name: tagGroup.name,
-      tags: tagGroup.tags,
-    );
+    return TagGroupDto(name: tagGroup.name, tags: tagGroup.tags);
   }
 
   /// 计算今日剩余时间（分钟）

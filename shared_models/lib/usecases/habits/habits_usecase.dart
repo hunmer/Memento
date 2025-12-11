@@ -1,4 +1,5 @@
 /// Habits 插件 - UseCase 业务逻辑层
+library;
 
 import 'package:uuid/uuid.dart';
 import 'package:shared_models/repositories/habits/habits_repository.dart';
@@ -68,7 +69,8 @@ class HabitsUseCase {
       );
     }
 
-    final durationValidation = ParamValidator.requireInt(params, 'durationMinutes');
+    final durationValidation =
+        ParamValidator.requireInt(params, 'durationMinutes');
     if (!durationValidation.isValid) {
       return Result.failure(
         durationValidation.errorMessage!,
@@ -139,7 +141,8 @@ class HabitsUseCase {
                 existing.reminderDays
             : existing.reminderDays,
         intervalDays: params['intervalDays'] as int? ?? existing.intervalDays,
-        durationMinutes: params['durationMinutes'] as int? ?? existing.durationMinutes,
+        durationMinutes:
+            params['durationMinutes'] as int? ?? existing.durationMinutes,
         tags: params.containsKey('tags')
             ? (params['tags'] as List<dynamic>?)
                     ?.map((e) => e as String)
@@ -301,8 +304,10 @@ class HabitsUseCase {
         group: params['group'] as String?,
         icon: params['icon'] as String?,
         image: params['image'] as String?,
-        targetMinutes: params['targetMinutes'] as int? ?? existing.targetMinutes,
-        maxDurationMinutes: params['maxDurationMinutes'] as int? ?? existing.maxDurationMinutes,
+        targetMinutes:
+            params['targetMinutes'] as int? ?? existing.targetMinutes,
+        maxDurationMinutes:
+            params['maxDurationMinutes'] as int? ?? existing.maxDurationMinutes,
       );
 
       final result = await repository.updateSkill(id, updated);
@@ -356,7 +361,8 @@ class HabitsUseCase {
   // ============ 完成记录 CRUD 操作 ============
 
   /// 获取完成记录列表
-  Future<Result<dynamic>> getCompletionRecords(Map<String, dynamic> params) async {
+  Future<Result<dynamic>> getCompletionRecords(
+      Map<String, dynamic> params) async {
     final parentId = params['parentId'] as String?;
     if (parentId == null || parentId.isEmpty) {
       return Result.failure(
@@ -367,7 +373,8 @@ class HabitsUseCase {
 
     try {
       final pagination = _extractPagination(params);
-      final result = await repository.getCompletionRecords(parentId, pagination: pagination);
+      final result = await repository.getCompletionRecords(parentId,
+          pagination: pagination);
 
       return result.map((records) {
         final jsonList = records.map((r) => r.toJson()).toList();
@@ -424,7 +431,8 @@ class HabitsUseCase {
       );
     }
 
-    final durationValidation = ParamValidator.requireInt(params, 'durationSeconds');
+    final durationValidation =
+        ParamValidator.requireInt(params, 'durationSeconds');
     if (!durationValidation.isValid) {
       return Result.failure(
         durationValidation.errorMessage!,
@@ -449,7 +457,8 @@ class HabitsUseCase {
   }
 
   /// 删除完成记录
-  Future<Result<bool>> deleteCompletionRecord(Map<String, dynamic> params) async {
+  Future<Result<bool>> deleteCompletionRecord(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -463,7 +472,8 @@ class HabitsUseCase {
   }
 
   /// 搜索完成记录
-  Future<Result<dynamic>> searchCompletionRecords(Map<String, dynamic> params) async {
+  Future<Result<dynamic>> searchCompletionRecords(
+      Map<String, dynamic> params) async {
     final parentId = params['parentId'] as String?;
     if (parentId == null || parentId.isEmpty) {
       return Result.failure(
@@ -522,7 +532,8 @@ class HabitsUseCase {
   }
 
   /// 获取习惯的完成次数
-  Future<Result<int>> getHabitCompletionCount(Map<String, dynamic> params) async {
+  Future<Result<int>> getHabitCompletionCount(
+      Map<String, dynamic> params) async {
     final habitId = params['habitId'] as String?;
     if (habitId == null || habitId.isEmpty) {
       return Result.failure(
@@ -556,7 +567,8 @@ class HabitsUseCase {
   }
 
   /// 获取技能的完成次数
-  Future<Result<int>> getSkillCompletionCount(Map<String, dynamic> params) async {
+  Future<Result<int>> getSkillCompletionCount(
+      Map<String, dynamic> params) async {
     final skillId = params['skillId'] as String?;
     if (skillId == null || skillId.isEmpty) {
       return Result.failure(

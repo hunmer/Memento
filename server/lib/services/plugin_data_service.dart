@@ -47,24 +47,6 @@ class PluginDataService {
     }
   }
 
-  /// 保存 API 密钥
-  Future<void> _saveApiKeys() async {
-    final file = File(_apiKeysPath);
-    if (!await file.parent.exists()) {
-      await file.parent.create(recursive: true);
-    }
-
-    final keys = <String, String>{};
-    // 收集所有用户的密钥
-    // 注意：这里需要遍历已知用户，实际实现中需要维护用户列表
-    // 暂时通过 encryptionService 的内部状态来保存
-
-    await file.writeAsString(jsonEncode({
-      'keys': keys,
-      'updated_at': DateTime.now().toIso8601String(),
-    }));
-  }
-
   // ==================== API 密钥管理 ====================
 
   /// 启用用户的 API 访问
@@ -210,7 +192,8 @@ class PluginDataService {
     final md5Hash = encryptionService.computeMd5(data);
     final filePath = '$pluginId/$fileName';
 
-    await storageService.writeEncryptedFile(userId, filePath, encryptedData, md5Hash);
+    await storageService.writeEncryptedFile(
+        userId, filePath, encryptedData, md5Hash);
   }
 
   /// 删除插件数据文件

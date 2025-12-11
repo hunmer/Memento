@@ -1,4 +1,5 @@
 /// Agent Chat 插件 - UseCase 业务逻辑层
+library;
 
 import 'package:uuid/uuid.dart';
 import 'package:shared_models/repositories/agent_chat/agent_chat_repository.dart';
@@ -820,12 +821,12 @@ class AgentChatUseCase {
     String content,
   ) async {
     try {
-      final existingResult = await repository.getConversationById(conversationId);
+      final existingResult =
+          await repository.getConversationById(conversationId);
       if (existingResult.isSuccess && existingResult.dataOrNull != null) {
         final existing = existingResult.dataOrNull!;
-        final preview = content.length > 50
-            ? '${content.substring(0, 50)}...'
-            : content;
+        final preview =
+            content.length > 50 ? '${content.substring(0, 50)}...' : content;
 
         final updated = existing.copyWith(
           lastMessageAt: DateTime.now(),

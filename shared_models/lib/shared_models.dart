@@ -5,7 +5,7 @@
 /// - Repository 抽象接口
 /// - UseCase 业务逻辑层
 /// - 通用工具类
-library shared_models;
+library;
 
 // ============ 核心工具 ============
 

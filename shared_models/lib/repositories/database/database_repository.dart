@@ -1,4 +1,5 @@
 /// Database 插件 - Repository 接口定义
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -211,7 +212,8 @@ abstract class IDatabaseRepository {
   // ============ 数据库操作 ============
 
   /// 获取所有数据库
-  Future<Result<List<DatabaseModelDto>>> getDatabases({PaginationParams? pagination});
+  Future<Result<List<DatabaseModelDto>>> getDatabases(
+      {PaginationParams? pagination});
 
   /// 根据 ID 获取
   Future<Result<DatabaseModelDto?>> getDatabaseById(String id);
@@ -220,7 +222,8 @@ abstract class IDatabaseRepository {
   Future<Result<DatabaseModelDto>> createDatabase(DatabaseModelDto database);
 
   /// 更新数据库
-  Future<Result<DatabaseModelDto>> updateDatabase(String id, DatabaseModelDto database);
+  Future<Result<DatabaseModelDto>> updateDatabase(
+      String id, DatabaseModelDto database);
 
   /// 删除数据库
   Future<Result<bool>> deleteDatabase(String id);
@@ -241,11 +244,13 @@ abstract class IDatabaseRepository {
   Future<Result<DatabaseRecordDto>> createRecord(DatabaseRecordDto record);
 
   /// 更新记录
-  Future<Result<DatabaseRecordDto>> updateRecord(String id, DatabaseRecordDto record);
+  Future<Result<DatabaseRecordDto>> updateRecord(
+      String id, DatabaseRecordDto record);
 
   /// 删除记录
   Future<Result<bool>> deleteRecord(String id);
 
   /// 搜索记录
-  Future<Result<List<DatabaseRecordDto>>> searchRecords(DatabaseRecordQuery query);
+  Future<Result<List<DatabaseRecordDto>>> searchRecords(
+      DatabaseRecordQuery query);
 }

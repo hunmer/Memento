@@ -1,4 +1,5 @@
 /// Todo 插件 - Repository 接口定义
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -40,10 +41,14 @@ class TaskDto {
       description: json['description'] as String?,
       isCompleted: json['isCompleted'] as bool? ?? false,
       priority: json['priority'] as int? ?? 0,
-      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate'] as String) : null,
+      dueDate: json['dueDate'] != null
+          ? DateTime.parse(json['dueDate'] as String)
+          : null,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
-      completedAt: json['completedAt'] != null ? DateTime.parse(json['completedAt'] as String) : null,
+      completedAt: json['completedAt'] != null
+          ? DateTime.parse(json['completedAt'] as String)
+          : null,
       tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
@@ -187,7 +192,8 @@ abstract class ITodoRepository {
   Future<Result<List<TaskDto>>> getOverdueTasks({PaginationParams? pagination});
 
   /// 获取已完成任务
-  Future<Result<List<TaskDto>>> getCompletedTasks({PaginationParams? pagination});
+  Future<Result<List<TaskDto>>> getCompletedTasks(
+      {PaginationParams? pagination});
 
   /// 获取未完成任务
   Future<Result<List<TaskDto>>> getPendingTasks({PaginationParams? pagination});

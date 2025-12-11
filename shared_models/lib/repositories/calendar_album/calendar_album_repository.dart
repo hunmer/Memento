@@ -1,4 +1,5 @@
 /// Calendar Album 插件 - Repository 接口定义
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -41,10 +42,9 @@ class CalendarAlbumEntryDto {
       content: json['content'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
-      tags: (json['tags'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
+      tags:
+          (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const [],
       location: json['location'] as String?,
       mood: json['mood'] as String?,
       weather: json['weather'] as String?,
@@ -119,10 +119,9 @@ class CalendarAlbumTagGroupDto {
   factory CalendarAlbumTagGroupDto.fromJson(Map<String, dynamic> json) {
     return CalendarAlbumTagGroupDto(
       name: json['name'] as String,
-      tags: (json['tags'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
+      tags:
+          (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const [],
     );
   }
 

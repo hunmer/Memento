@@ -1,6 +1,7 @@
 /// 统一的操作结果类型 - 客户端和服务端共享
 ///
 /// 此文件提供类型安全的操作结果封装
+library;
 
 import 'dart:convert';
 
@@ -33,7 +34,8 @@ sealed class Result<T> {
       return Result.success(transform((this as Success<T>).data));
     }
     final failure = this as Failure<T>;
-    return Failure<R>(failure.message, code: failure.code, details: failure.details);
+    return Failure<R>(failure.message,
+        code: failure.code, details: failure.details);
   }
 
   /// 链式操作
@@ -42,7 +44,8 @@ sealed class Result<T> {
       return transform((this as Success<T>).data);
     }
     final failure = this as Failure<T>;
-    return Failure<R>(failure.message, code: failure.code, details: failure.details);
+    return Failure<R>(failure.message,
+        code: failure.code, details: failure.details);
   }
 
   /// 转换为 JSON 字符串（用于 JSAPI 响应）

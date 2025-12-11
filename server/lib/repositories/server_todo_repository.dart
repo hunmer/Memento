@@ -1,6 +1,7 @@
 /// Todo 插件 - 服务端 Repository 实现
 ///
 /// 通过 PluginDataService 访问用户的加密数据文件
+library;
 
 import 'package:shared_models/shared_models.dart';
 
@@ -30,7 +31,9 @@ class ServerTodoRepository extends ITodoRepository {
     if (tasksData == null) return [];
 
     final tasks = tasksData['tasks'] as List<dynamic>? ?? [];
-    return tasks.map((t) => TaskDto.fromJson(t as Map<String, dynamic>)).toList();
+    return tasks
+        .map((t) => TaskDto.fromJson(t as Map<String, dynamic>))
+        .toList();
   }
 
   /// 保存所有任务
@@ -50,7 +53,8 @@ class ServerTodoRepository extends ITodoRepository {
 
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
-    final dueDate = DateTime(task.dueDate!.year, task.dueDate!.month, task.dueDate!.day);
+    final dueDate =
+        DateTime(task.dueDate!.year, task.dueDate!.month, task.dueDate!.day);
 
     return dueDate.isBefore(todayDate);
   }
@@ -259,7 +263,9 @@ class ServerTodoRepository extends ITodoRepository {
           final json = task.toJson();
           final fieldValue = json[query.field]?.toString() ?? '';
           if (query.fuzzy) {
-            return fieldValue.toLowerCase().contains(query.value!.toLowerCase());
+            return fieldValue
+                .toLowerCase()
+                .contains(query.value!.toLowerCase());
           }
           return fieldValue == query.value;
         }).toList();
@@ -282,7 +288,8 @@ class ServerTodoRepository extends ITodoRepository {
   }
 
   @override
-  Future<Result<List<TaskDto>>> getTodayTasks({PaginationParams? pagination}) async {
+  Future<Result<List<TaskDto>>> getTodayTasks(
+      {PaginationParams? pagination}) async {
     try {
       var tasks = await _readAllTasks();
       tasks = tasks.where(_isToday).toList();
@@ -304,7 +311,8 @@ class ServerTodoRepository extends ITodoRepository {
   }
 
   @override
-  Future<Result<List<TaskDto>>> getOverdueTasks({PaginationParams? pagination}) async {
+  Future<Result<List<TaskDto>>> getOverdueTasks(
+      {PaginationParams? pagination}) async {
     try {
       var tasks = await _readAllTasks();
       tasks = tasks.where(_isOverdue).toList();
@@ -326,7 +334,8 @@ class ServerTodoRepository extends ITodoRepository {
   }
 
   @override
-  Future<Result<List<TaskDto>>> getCompletedTasks({PaginationParams? pagination}) async {
+  Future<Result<List<TaskDto>>> getCompletedTasks(
+      {PaginationParams? pagination}) async {
     try {
       var tasks = await _readAllTasks();
       tasks = tasks.where((t) => t.isCompleted).toList();
@@ -348,7 +357,8 @@ class ServerTodoRepository extends ITodoRepository {
   }
 
   @override
-  Future<Result<List<TaskDto>>> getPendingTasks({PaginationParams? pagination}) async {
+  Future<Result<List<TaskDto>>> getPendingTasks(
+      {PaginationParams? pagination}) async {
     try {
       var tasks = await _readAllTasks();
       tasks = tasks.where((t) => !t.isCompleted).toList();

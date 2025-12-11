@@ -1,6 +1,7 @@
 /// Notes 插件 - 客户端 Repository 实现
 ///
 /// 通过适配现有的 NotesController 来实现 INotesRepository 接口
+library;
 
 import 'package:shared_models/shared_models.dart';
 import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
@@ -11,9 +12,7 @@ import 'package:Memento/plugins/notes/models/folder.dart';
 class ClientNotesRepository implements INotesRepository {
   final NotesController controller;
 
-  ClientNotesRepository({
-    required this.controller,
-  });
+  ClientNotesRepository({required this.controller});
 
   // ============ 笔记操作 ============
 
@@ -73,7 +72,10 @@ class ClientNotesRepository implements INotesRepository {
 
       // 如果有标签，更新笔记
       if (dto.tags.isNotEmpty) {
-        final updatedNote = note.copyWith(tags: dto.tags, updatedAt: DateTime.now());
+        final updatedNote = note.copyWith(
+          tags: dto.tags,
+          updatedAt: DateTime.now(),
+        );
         await controller.updateNote(updatedNote);
       }
 
