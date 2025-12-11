@@ -74,3 +74,4 @@ flutter-js/
 nul
 png/
 import_changes.csv
+server/data/*

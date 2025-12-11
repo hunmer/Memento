@@ -40,6 +40,7 @@ dependencies:
   universal_platform: ^1.0.0+1
   animations: ^2.1.1
   uuid: ^4.3.3
+  device_info_plus: ^12.3.0
   shared_preferences: ^2.5.3
   collection: ^1.17.0
   audioplayers: 6.5.0

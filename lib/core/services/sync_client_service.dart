@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
@@ -324,11 +323,9 @@ class SyncClientService {
 
   /// 列出本地数据文件
   Future<List<Map<String, String>>> _listLocalDataFiles() async {
-    // 实现根据实际存储结构调整
-    // 这里返回一个示例结构
     final files = <Map<String, String>>[];
 
-    // 遍历需要同步的插件目录
+    // 需要同步的插件目录
     final syncDirs = [
       'diary',
       'chat',
@@ -345,24 +342,23 @@ class SyncClientService {
 
     for (final dir in syncDirs) {
       try {
-        final dirPath = await _storage.getPluginPath(dir);
-        final directory = Directory(dirPath);
+        // 使用 StorageManager 的 getKeysWithPrefix 获取文件列表
+        final keys = await _storage.getKeysWithPrefix(dir);
 
-        if (await directory.exists()) {
-          await for (final entity in directory.list(recursive: true)) {
-            if (entity is File && entity.path.endsWith('.json')) {
-              final content = await entity.readAsString();
-              final json = jsonDecode(content) as Map<String, dynamic>;
+        for (final key in keys) {
+          // 只处理 JSON 文件
+          if (!key.endsWith('.json')) continue;
+
+          try {
+            final json = await _storage.readJson(key);
+            if (json is Map<String, dynamic>) {
               final md5 = _encryption.computeMd5(json);
-
-              // 计算相对路径
-              final relativePath = entity.path
-                  .substring(dirPath.length)
-                  .replaceAll('\\', '/')
-                  .replaceFirst(RegExp(r'^/'), '');
-
-              files.add({'path': '$dir/$relativePath', 'md5': md5});
+              // 统一使用正斜杠作为路径分隔符
+              final normalizedPath = key.replaceAll('\\', '/');
+              files.add({'path': normalizedPath, 'md5': md5});
             }
+          } catch (e) {
+            // 忽略读取失败的文件
           }
         }
       } catch (e) {
