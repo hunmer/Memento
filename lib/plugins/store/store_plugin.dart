@@ -1,9 +1,8 @@
-import 'package:get/get.dart';
 import 'dart:convert';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/store/widgets/store_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import 'package:uuid/uuid.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/base_plugin.dart';
@@ -14,7 +13,11 @@ import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/events/point_award_event.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
 
-/// 物品兑换插件
+// UseCase 架构相关导入
+import 'package:shared_models/usecases/store/store_usecase.dart';
+import 'package:Memento/plugins/store/repositories/client_store_repository.dart';
+
+/// 物品兑换插件 - UseCase 架构
 class StorePlugin extends BasePlugin with JSBridgePlugin {
   static StorePlugin? _instance;
   static StorePlugin get instance {
@@ -38,7 +41,6 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Future<void> registerToApp(
-    
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
@@ -50,7 +52,10 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   PointAwardEvent? _pointAwardEvent;
   bool _isInitialized = false;
 
-  /// 获取商店控制器
+  /// UseCase 实例（UseCase 架构）
+  late final StoreUseCase _useCase;
+
+  /// 获取商店控制器（保留向后兼容）
   StoreController get controller {
     assert(
       _isInitialized,
@@ -58,6 +63,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     );
     return _controller!;
   }
+
+  /// 获取 UseCase 实例
+  StoreUseCase get useCase => _useCase;
 
   /// 默认积分配置
   static const Map<String, dynamic> defaultPointSettings = {
@@ -86,6 +94,10 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       await loadSettings(defaultPointSettings);
       _controller = StoreController(this);
       await _controller!.loadFromStorage();
+
+      // 初始化 UseCase（通过 ClientRepository 适配 StoreController）
+      final repository = ClientStoreRepository(controller: _controller!);
+      _useCase = StoreUseCase(repository);
 
       // 初始化积分奖励事件处理器
       _pointAwardEvent = PointAwardEvent(this);
@@ -327,623 +339,483 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     };
   }
 
-  // ==================== 分页控制器 ====================
-
-  /// 分页控制器 - 对列表进行分页处理
-  /// @param list 原始数据列表
-  /// @param offset 起始位置（默认 0）
-  /// @param count 返回数量（默认 100）
-  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
-  Map<String, dynamic> _paginate<T>(
-    List<T> list, {
-    int offset = 0,
-    int count = 100,
-  }) {
-    final total = list.length;
-    final start = offset.clamp(0, total);
-    final end = (start + count).clamp(start, total);
-    final data = list.sublist(start, end);
-
-    return {
-      'data': data,
-      'total': total,
-      'offset': start,
-      'count': data.length,
-      'hasMore': end < total,
-    };
-  }
-
   // ==================== JS API 实现 ====================
 
-  /// 获取所有商品列表
+  /// 获取所有商品列表（UseCase 版本）
   /// 支持分页参数: offset, count
   Future<String> _jsGetProducts(Map<String, dynamic> params) async {
-    final products = controller.products;
-    final productsJson = products.map((p) => p.toJson()).toList();
+    try {
+      final result = await useCase.getProducts(params);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
 
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        productsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+      return jsonEncode(result.dataOrNull ?? []);
+    } catch (e) {
+      return jsonEncode({'error': '获取商品列表失败: $e'});
     }
-
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(productsJson);
   }
 
-  /// 获取商品详情
+  /// 获取商品详情（UseCase 版本）
   Future<String> _jsGetProduct(Map<String, dynamic> params) async {
-    final String? productId = params['productId'];
-    if (productId == null || productId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: productId'});
-    }
+    try {
+      // 支持 productId 或 id 参数
+      final productId = params['productId'] as String? ?? params['id'] as String?;
+      if (productId == null || productId.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: productId 或 id'});
+      }
 
-    final product = controller.products.firstWhere(
-      (p) => p.id == productId,
-      orElse: () => throw Exception('商品不存在: $productId'),
-    );
-    return jsonEncode(product.toJson());
+      final result = await useCase.getProductById({'id': productId});
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
+      final product = result.dataOrNull;
+      if (product == null) {
+        return jsonEncode({'error': '商品不存在'});
+      }
+
+      return jsonEncode(product);
+    } catch (e) {
+      return jsonEncode({'error': '获取商品失败: $e'});
+    }
   }
 
-  /// 创建商品
+  /// 创建商品（UseCase 版本）
   Future<String> _jsCreateProduct(Map<String, dynamic> params) async {
-    // 提取必需参数
-    final String? name = params['name'];
-    if (name == null || name.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: name'});
+    try {
+      final result = await useCase.createProduct(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
+      return jsonEncode(result.dataOrNull ?? {});
+    } catch (e) {
+      return jsonEncode({'error': '创建商品失败: $e'});
     }
-
-    final String? description = params['description'];
-    if (description == null || description.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: description'});
-    }
-
-    final int? price = params['price'];
-    if (price == null) {
-      return jsonEncode({'error': '缺少必需参数: price'});
-    }
-
-    final int? stock = params['stock'];
-    if (stock == null) {
-      return jsonEncode({'error': '缺少必需参数: stock'});
-    }
-
-    final String? exchangeStart = params['exchangeStart'];
-    if (exchangeStart == null || exchangeStart.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: exchangeStart'});
-    }
-
-    final String? exchangeEnd = params['exchangeEnd'];
-    if (exchangeEnd == null || exchangeEnd.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: exchangeEnd'});
-    }
-
-    final int? useDuration = params['useDuration'];
-    if (useDuration == null) {
-      return jsonEncode({'error': '缺少必需参数: useDuration'});
-    }
-
-    // 提取可选参数
-    final String? image = params['image'];
-    final String? customId = params['id'];
-
-    // 使用自定义ID或生成新ID
-    final String productId = customId != null && customId.isNotEmpty
-        ? customId
-        : const Uuid().v4();
-
-    final product = Product(
-      id: productId,
-      name: name,
-      description: description,
-      image: image ?? '',
-      stock: stock,
-      price: price,
-      exchangeStart: DateTime.parse(exchangeStart),
-      exchangeEnd: DateTime.parse(exchangeEnd),
-      useDuration: useDuration,
-    );
-
-    await controller.addProduct(product);
-    await controller.saveProducts();
-    return jsonEncode(product.toJson());
   }
 
-  /// 更新商品
+  /// 更新商品（UseCase 版本）
   Future<String> _jsUpdateProduct(Map<String, dynamic> params) async {
-    // 提取必需参数
-    final String? productId = params['productId'];
-    if (productId == null || productId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: productId'});
+    try {
+      final result = await useCase.updateProduct(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
+      return jsonEncode(result.dataOrNull ?? {});
+    } catch (e) {
+      return jsonEncode({'error': '更新商品失败: $e'});
     }
-
-    final String? name = params['name'];
-    if (name == null || name.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: name'});
-    }
-
-    final String? description = params['description'];
-    if (description == null || description.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: description'});
-    }
-
-    final int? price = params['price'];
-    if (price == null) {
-      return jsonEncode({'error': '缺少必需参数: price'});
-    }
-
-    final int? stock = params['stock'];
-    if (stock == null) {
-      return jsonEncode({'error': '缺少必需参数: stock'});
-    }
-
-    final String? exchangeStart = params['exchangeStart'];
-    if (exchangeStart == null || exchangeStart.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: exchangeStart'});
-    }
-
-    final String? exchangeEnd = params['exchangeEnd'];
-    if (exchangeEnd == null || exchangeEnd.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: exchangeEnd'});
-    }
-
-    final int? useDuration = params['useDuration'];
-    if (useDuration == null) {
-      return jsonEncode({'error': '缺少必需参数: useDuration'});
-    }
-
-    // 提取可选参数
-    final String? image = params['image'];
-
-    final products = controller.products;
-    final index = products.indexWhere((p) => p.id == productId);
-    if (index == -1) {
-      throw Exception('商品不存在: $productId');
-    }
-
-    final updatedProduct = Product(
-      id: productId,
-      name: name,
-      description: description,
-      image: image ?? products[index].image,
-      stock: stock,
-      price: price,
-      exchangeStart: DateTime.parse(exchangeStart),
-      exchangeEnd: DateTime.parse(exchangeEnd),
-      useDuration: useDuration,
-    );
-
-    products[index] = updatedProduct;
-    await controller.saveProducts();
-    return jsonEncode(updatedProduct.toJson());
   }
 
-  /// 删除商品（归档）
+  /// 删除商品（归档，UseCase 版本）
   Future<String> _jsDeleteProduct(Map<String, dynamic> params) async {
     try {
-      final String? productId = params['productId'];
+      final String? productId = params['productId'] ?? params['id'];
       if (productId == null || productId.isEmpty) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: productId'});
+        return jsonEncode({'success': false, 'error': '缺少必需参数: productId 或 id'});
       }
 
-      final product = controller.products.firstWhere(
-        (p) => p.id == productId,
-        orElse: () => throw Exception('商品不存在: $productId'),
-      );
+      final result = await useCase.deleteProduct({'id': productId});
 
-      await controller.archiveProduct(product);
+      if (result.isFailure) {
+        return jsonEncode({'success': false, 'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
       return jsonEncode({'success': true, 'productId': productId});
     } catch (e) {
-      return jsonEncode({'success': false, 'error': e.toString()});
+      return jsonEncode({'success': false, 'error': '删除商品失败: $e'});
     }
   }
 
-  /// 兑换商品
+  /// 兑换商品（UseCase 版本）
   Future<String> _jsRedeem(Map<String, dynamic> params) async {
-    final String? productId = params['productId'];
-    if (productId == null || productId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: productId'});
+    try {
+      final String? productId = params['productId'] ?? params['id'];
+      if (productId == null || productId.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: productId 或 id'});
+      }
+
+      final result = await useCase.exchangeProduct({'productId': productId});
+
+      if (result.isFailure) {
+        return jsonEncode({'success': false, 'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
+      return jsonEncode({
+        'success': true,
+        'message': '兑换成功',
+        'currentPoints': controller.currentPoints,
+      });
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '兑换失败: $e'});
     }
-
-    final product = controller.products.firstWhere(
-      (p) => p.id == productId,
-      orElse: () => throw Exception('商品不存在: $productId'),
-    );
-
-    final success = await controller.exchangeProduct(product);
-    return jsonEncode({
-      'success': success,
-      'message': success ? '兑换成功' : '兑换失败（积分不足或库存不足）',
-      'currentPoints': controller.currentPoints,
-    });
   }
 
-  /// 获取当前积分
-  Future<int> _jsGetPoints(Map<String, dynamic> params) async {
-    return controller.currentPoints;
+  /// 获取当前积分（UseCase 版本）
+  Future<String> _jsGetPoints(Map<String, dynamic> params) async {
+    try {
+      // UseCase 中没有单独的获取积分方法，使用 getPointsInfo
+      final result = await useCase.getPointsInfo(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
+      final pointsInfo = result.dataOrNull;
+      return jsonEncode(pointsInfo != null ? pointsInfo['currentPoints'] : controller.currentPoints);
+    } catch (e) {
+      return jsonEncode(controller.currentPoints);
+    }
   }
 
-  /// 添加积分
+  /// 添加积分（UseCase 版本）
   Future<String> _jsAddPoints(Map<String, dynamic> params) async {
-    final int? points = params['points'];
-    if (points == null) {
-      return jsonEncode({'error': '缺少必需参数: points'});
-    }
+    try {
+      final int? points = params['points'] ?? params['value'];
+      if (points == null) {
+        return jsonEncode({'error': '缺少必需参数: points 或 value'});
+      }
 
-    final String? reason = params['reason'];
-    if (reason == null || reason.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: reason'});
-    }
+      final String? reason = params['reason'];
+      if (reason == null || reason.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: reason'});
+      }
 
-    await controller.addPoints(points, reason);
-    return jsonEncode({
-      'success': true,
-      'currentPoints': controller.currentPoints,
-      'message': '积分已${points > 0 ? "增加" : "减少"}: $points',
-    });
+      final result = await useCase.addPoints({
+        'value': points,
+        'reason': reason,
+      });
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
+      final pointsInfo = result.dataOrNull;
+      return jsonEncode({
+        'success': true,
+        'currentPoints': pointsInfo != null ? pointsInfo['currentPoints'] : controller.currentPoints,
+        'message': '积分已${points > 0 ? "增加" : "减少"}: $points',
+      });
+    } catch (e) {
+      return jsonEncode({'error': '添加积分失败: $e'});
+    }
   }
 
-  /// 获取兑换历史（用户物品）
+  /// 获取兑换历史（用户物品，UseCase 版本）
   /// 支持分页参数: offset, count
   Future<String> _jsGetRedeemHistory(Map<String, dynamic> params) async {
-    final items = controller.userItems;
-    final itemsJson = items.map((item) => item.toJson()).toList();
+    try {
+      final result = await useCase.getUserItems(params);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
 
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        itemsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+      return jsonEncode(result.dataOrNull ?? []);
+    } catch (e) {
+      return jsonEncode({'error': '获取兑换历史失败: $e'});
     }
-
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(itemsJson);
   }
 
-  /// 获取积分历史
+  /// 获取积分历史（UseCase 版本）
   /// 支持分页参数: offset, count
   Future<String> _jsGetPointsHistory(Map<String, dynamic> params) async {
-    final logs = controller.pointsLogs;
-    final logsJson = logs.map((log) => log.toJson()).toList();
+    try {
+      final result = await useCase.searchPointsLogs(params);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
 
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        logsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+      return jsonEncode(result.dataOrNull ?? []);
+    } catch (e) {
+      return jsonEncode({'error': '获取积分历史失败: $e'});
     }
-
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(logsJson);
   }
 
-  /// 获取用户物品
+  /// 获取用户物品（UseCase 版本）
   /// 支持分页参数: offset, count
   Future<String> _jsGetUserItems(Map<String, dynamic> params) async {
-    final items = controller.userItems;
-    final itemsJson = items.map((item) => item.toJson()).toList();
+    try {
+      final result = await useCase.getUserItems(params);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
 
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        itemsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+      return jsonEncode(result.dataOrNull ?? []);
+    } catch (e) {
+      return jsonEncode({'error': '获取用户物品失败: $e'});
     }
-
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(itemsJson);
   }
 
-  /// 使用物品
+  /// 使用物品（UseCase 版本）
   Future<String> _jsUseItem(Map<String, dynamic> params) async {
-    final String? itemId = params['itemId'];
-    if (itemId == null || itemId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: itemId'});
+    try {
+      final String? itemId = params['itemId'] ?? params['id'];
+      if (itemId == null || itemId.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: itemId 或 id'});
+      }
+
+      final result = await useCase.useItem({'itemId': itemId});
+
+      if (result.isFailure) {
+        return jsonEncode({'success': false, 'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
+      return jsonEncode({
+        'success': true,
+        'message': '使用成功',
+      });
+    } catch (e) {
+      return jsonEncode({'success': false, 'error': '使用物品失败: $e'});
     }
-
-    final item = controller.userItems.firstWhere(
-      (i) => i.id == itemId,
-      orElse: () => throw Exception('物品不存在: $itemId'),
-    );
-
-    final success = await controller.useItem(item);
-    return jsonEncode({
-      'success': success,
-      'message': success ? '使用成功' : '使用失败（物品已过期）',
-    });
   }
 
-  /// 归档商品
+  /// 归档商品（UseCase 版本）
   Future<String> _jsArchiveProduct(Map<String, dynamic> params) async {
     try {
-      final String? productId = params['productId'];
+      final String? productId = params['productId'] ?? params['id'];
       if (productId == null || productId.isEmpty) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: productId'});
+        return jsonEncode({'success': false, 'error': '缺少必需参数: productId 或 id'});
       }
 
-      final product = controller.products.firstWhere(
-        (p) => p.id == productId,
-        orElse: () => throw Exception('商品不存在: $productId'),
-      );
+      final result = await useCase.archiveProduct({'id': productId});
 
-      await controller.archiveProduct(product);
+      if (result.isFailure) {
+        return jsonEncode({'success': false, 'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
       return jsonEncode({'success': true, 'productId': productId});
     } catch (e) {
-      return jsonEncode({'success': false, 'error': e.toString()});
+      return jsonEncode({'success': false, 'error': '归档商品失败: $e'});
     }
   }
 
-  /// 恢复归档商品
+  /// 恢复归档商品（UseCase 版本）
   Future<String> _jsRestoreProduct(Map<String, dynamic> params) async {
     try {
-      final String? productId = params['productId'];
+      final String? productId = params['productId'] ?? params['id'];
       if (productId == null || productId.isEmpty) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: productId'});
+        return jsonEncode({'success': false, 'error': '缺少必需参数: productId 或 id'});
       }
 
-      final product = controller.archivedProducts.firstWhere(
-        (p) => p.id == productId,
-        orElse: () => throw Exception('归档商品不存在: $productId'),
-      );
+      final result = await useCase.restoreProduct({'id': productId});
 
-      await controller.restoreProduct(product);
+      if (result.isFailure) {
+        return jsonEncode({'success': false, 'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
       return jsonEncode({'success': true, 'productId': productId});
     } catch (e) {
-      return jsonEncode({'success': false, 'error': e.toString()});
+      return jsonEncode({'success': false, 'error': '恢复商品失败: $e'});
     }
   }
 
-  /// 获取归档商品列表
+  /// 获取归档商品列表（UseCase 版本）
   /// 支持分页参数: offset, count
   Future<String> _jsGetArchivedProducts(Map<String, dynamic> params) async {
-    final products = controller.archivedProducts;
-    final productsJson = products.map((p) => p.toJson()).toList();
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        productsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(productsJson);
-  }
-
-  // ==================== 查找方法 ====================
-
-  /// 通用商品查找
-  /// 支持分页参数: offset, count（仅 findAll=true 时有效）
-  Future<String> _jsFindProductBy(Map<String, dynamic> params) async {
-    final String? field = params['field'];
-    if (field == null || field.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: field'});
-    }
-
-    final dynamic value = params['value'];
-    if (value == null) {
-      return jsonEncode({'error': '缺少必需参数: value'});
-    }
-
-    final bool findAll = params['findAll'] ?? false;
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    final products = controller.products;
-    final matches = <Product>[];
-
-    for (var product in products) {
-      bool isMatch = false;
-
-      switch (field.toLowerCase()) {
-        case 'id':
-          isMatch = product.id == value;
-          break;
-        case 'name':
-          isMatch = product.name == value;
-          break;
-        default:
-          isMatch = false;
-      }
-
-      if (isMatch) {
-        if (!findAll) {
-          return jsonEncode(product.toJson());
-        }
-        matches.add(product);
-      }
-    }
-
-    if (findAll) {
-      final matchesJson = matches.map((p) => p.toJson()).toList();
-
-      // 检查是否需要分页
-      if (offset != null || count != null) {
-        final paginated = _paginate(
-          matchesJson,
-          offset: offset ?? 0,
-          count: count ?? 100,
-        );
-        return jsonEncode(paginated);
-      }
-
-      return jsonEncode(matchesJson);
-    }
-
-    return jsonEncode(null);
-  }
-
-  /// 根据ID查找商品
-  Future<String> _jsFindProductById(Map<String, dynamic> params) async {
-    final String? id = params['id'];
-    if (id == null || id.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: id'});
-    }
-
     try {
-      final product = controller.products.firstWhere(
-        (p) => p.id == id,
-        orElse: () => throw Exception('商品不存在'),
-      );
-      return jsonEncode(product.toJson());
+      final result = await useCase.getArchivedProducts(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
+      return jsonEncode(result.dataOrNull ?? []);
+    } catch (e) {
+      return jsonEncode({'error': '获取归档商品失败: $e'});
+    }
+  }
+
+  // ==================== 查找方法（UseCase 版本） ====================
+
+  /// 通用商品查找（使用 UseCase 搜索功能）
+  Future<String> _jsFindProductBy(Map<String, dynamic> params) async {
+    try {
+      final String? field = params['field'];
+      if (field == null || field.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: field'});
+      }
+
+      final dynamic value = params['value'];
+      if (value == null) {
+        return jsonEncode({'error': '缺少必需参数: value'});
+      }
+
+      final bool findAll = params['findAll'] ?? false;
+
+      // 根据字段类型选择搜索方法
+      if (field.toLowerCase() == 'name') {
+        final result = await useCase.searchProducts({
+          'nameKeyword': value.toString(),
+          'includeArchived': false,
+          if (!findAll) 'offset': 0,
+          if (!findAll) 'count': 1,
+        });
+
+        if (result.isFailure) {
+          return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        }
+
+        final products = result.dataOrNull as List? ?? [];
+        if (products.isEmpty) {
+          return jsonEncode(findAll ? [] : null);
+        }
+
+        return jsonEncode(findAll ? products : products.first);
+      } else if (field.toLowerCase() == 'id') {
+        // ID 精确查找
+        final result = await useCase.getProductById({'id': value.toString()});
+
+        if (result.isFailure) {
+          return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        }
+
+        final product = result.dataOrNull;
+        return jsonEncode(findAll ? (product != null ? [product] : []) : product);
+      }
+
+      return jsonEncode(findAll ? [] : null);
+    } catch (e) {
+      return jsonEncode({'error': '查找商品失败: $e'});
+    }
+  }
+
+  /// 根据ID查找商品（UseCase 版本）
+  Future<String> _jsFindProductById(Map<String, dynamic> params) async {
+    try {
+      final String? id = params['id'];
+      if (id == null || id.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: id'});
+      }
+
+      final result = await useCase.getProductById({'id': id});
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
+      return jsonEncode(result.dataOrNull);
     } catch (e) {
       return jsonEncode(null);
     }
   }
 
-  /// 根据名称查找商品
-  /// 支持分页参数: offset, count（仅 findAll=true 时有效）
+  /// 根据名称查找商品（UseCase 版本）
   Future<String> _jsFindProductByName(Map<String, dynamic> params) async {
-    final String? name = params['name'];
-    if (name == null || name.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: name'});
-    }
-
-    final bool fuzzy = params['fuzzy'] ?? false;
-    final bool findAll = params['findAll'] ?? false;
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    final products = controller.products;
-    final matches = <Product>[];
-
-    for (var product in products) {
-      final isMatch = fuzzy
-          ? product.name.toLowerCase().contains(name.toLowerCase())
-          : product.name == name;
-
-      if (isMatch) {
-        if (!findAll) {
-          return jsonEncode(product.toJson());
-        }
-        matches.add(product);
-      }
-    }
-
-    if (findAll) {
-      final matchesJson = matches.map((p) => p.toJson()).toList();
-
-      // 检查是否需要分页
-      if (offset != null || count != null) {
-        final paginated = _paginate(
-          matchesJson,
-          offset: offset ?? 0,
-          count: count ?? 100,
-        );
-        return jsonEncode(paginated);
-      }
-
-      return jsonEncode(matchesJson);
-    }
-
-    return jsonEncode(null);
-  }
-
-  /// 通用用户物品查找
-  /// 支持分页参数: offset, count（仅 findAll=true 时有效）
-  Future<String> _jsFindUserItemBy(Map<String, dynamic> params) async {
-    final String? field = params['field'];
-    if (field == null || field.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: field'});
-    }
-
-    final dynamic value = params['value'];
-    if (value == null) {
-      return jsonEncode({'error': '缺少必需参数: value'});
-    }
-
-    final bool findAll = params['findAll'] ?? false;
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    final items = controller.userItems;
-    final matches = [];
-
-    for (var item in items) {
-      bool isMatch = false;
-
-      switch (field.toLowerCase()) {
-        case 'id':
-          isMatch = item.id == value;
-          break;
-        case 'productid':
-          isMatch = item.productId == value;
-          break;
-        default:
-          isMatch = false;
-      }
-
-      if (isMatch) {
-        if (!findAll) {
-          return jsonEncode(item.toJson());
-        }
-        matches.add(item);
-      }
-    }
-
-    if (findAll) {
-      final matchesJson = matches.map((i) => i.toJson()).toList();
-
-      // 检查是否需要分页
-      if (offset != null || count != null) {
-        final paginated = _paginate(
-          matchesJson,
-          offset: offset ?? 0,
-          count: count ?? 100,
-        );
-        return jsonEncode(paginated);
-      }
-
-      return jsonEncode(matchesJson);
-    }
-
-    return jsonEncode(null);
-  }
-
-  /// 根据ID查找用户物品
-  Future<String> _jsFindUserItemById(Map<String, dynamic> params) async {
-    final String? id = params['id'];
-    if (id == null || id.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: id'});
-    }
-
     try {
-      final item = controller.userItems.firstWhere(
-        (i) => i.id == id,
-        orElse: () => throw Exception('物品不存在'),
-      );
-      return jsonEncode(item.toJson());
+      final String? name = params['name'];
+      if (name == null || name.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: name'});
+      }
+
+      final bool fuzzy = params['fuzzy'] ?? false;
+      final bool findAll = params['findAll'] ?? false;
+
+      // 模糊搜索和精确搜索都使用 nameKeyword，UseCase 内部处理模糊匹配
+      final result = await useCase.searchProducts({
+        'nameKeyword': name,
+        'includeArchived': false,
+        if (!findAll) 'offset': 0,
+        if (!findAll) 'count': 1,
+      });
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
+      final products = result.dataOrNull as List? ?? [];
+      if (products.isEmpty) {
+        return jsonEncode(findAll ? [] : null);
+      }
+
+      // 如果不是查找全部且需要精确匹配，检查第一个结果是否精确匹配
+      if (!findAll && !fuzzy) {
+        final firstProduct = products.first;
+        if (firstProduct['name'] != name) {
+          return jsonEncode(null);
+        }
+      }
+
+      return jsonEncode(findAll ? products : products.first);
+    } catch (e) {
+      return jsonEncode({'error': '查找商品失败: $e'});
+    }
+  }
+
+  /// 通用用户物品查找（使用 UseCase 搜索功能）
+  Future<String> _jsFindUserItemBy(Map<String, dynamic> params) async {
+    try {
+      final String? field = params['field'];
+      if (field == null || field.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: field'});
+      }
+
+      final dynamic value = params['value'];
+      if (value == null) {
+        return jsonEncode({'error': '缺少必需参数: value'});
+      }
+
+      final bool findAll = params['findAll'] ?? false;
+
+      if (field.toLowerCase() == 'productid') {
+        final result = await useCase.searchUserItems({
+          'productId': value.toString(),
+          'includeExpired': true,
+          if (!findAll) 'offset': 0,
+          if (!findAll) 'count': 1,
+        });
+
+        if (result.isFailure) {
+          return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        }
+
+        final items = result.dataOrNull as List? ?? [];
+        if (items.isEmpty) {
+          return jsonEncode(findAll ? [] : null);
+        }
+
+        return jsonEncode(findAll ? items : items.first);
+      } else if (field.toLowerCase() == 'id') {
+        // ID 精确查找
+        final result = await useCase.getUserItemById({'id': value.toString()});
+
+        if (result.isFailure) {
+          return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        }
+
+        final item = result.dataOrNull;
+        return jsonEncode(findAll ? (item != null ? [item] : []) : item);
+      }
+
+      return jsonEncode(findAll ? [] : null);
+    } catch (e) {
+      return jsonEncode({'error': '查找用户物品失败: $e'});
+    }
+  }
+
+  /// 根据ID查找用户物品（UseCase 版本）
+  Future<String> _jsFindUserItemById(Map<String, dynamic> params) async {
+    try {
+      final String? id = params['id'];
+      if (id == null || id.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: id'});
+      }
+
+      final result = await useCase.getUserItemById({'id': id});
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+      }
+
+      return jsonEncode(result.dataOrNull);
     } catch (e) {
       return jsonEncode(null);
     }

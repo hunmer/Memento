@@ -17,11 +17,7 @@ class WebViewBrowserScreen extends StatefulWidget {
   final String? initialUrl;
   final String? initialTitle;
 
-  const WebViewBrowserScreen({
-    super.key,
-    this.initialUrl,
-    this.initialTitle,
-  });
+  const WebViewBrowserScreen({super.key, this.initialUrl, this.initialTitle});
 
   @override
   State<WebViewBrowserScreen> createState() => _WebViewBrowserScreenState();
@@ -100,43 +96,52 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
                 child: Consumer<TabManager>(
                   builder: (context, tabManager, child) {
                     if (tabManager.tabs.isEmpty) {
-                      return Center(
-                        child: Text('webview_no_tabs'.tr),
-                      );
+                      return Center(child: Text('webview_no_tabs'.tr));
                     }
 
                     // 使用 IndexedStack 保持标签页状态
                     return IndexedStack(
-                      index: tabManager.activeTab != null
-                          ? tabManager.getTabIndex(tabManager.activeTabId!)
-                          : 0,
-                      children: tabManager.tabs.map((tab) {
-                        return _WebViewTabContent(
-                          key: ValueKey(tab.id),
-                          tab: tab,
-                          onUrlChanged: (url) {
-                            if (tab.id == tabManager.activeTabId) {
-                              _urlController.text = url;
-                            }
-                          },
-                          onTitleChanged: (title) {
-                            tabManager.updateTab(tab.id, title: title);
-                          },
-                          onProgressChanged: (progress) {
-                            tabManager.updateTab(tab.id, progress: progress);
-                          },
-                          onLoadingChanged: (isLoading) {
-                            tabManager.updateTab(tab.id, isLoading: isLoading);
-                          },
-                          onNavigationStateChanged: (canGoBack, canGoForward) {
-                            tabManager.updateTab(
-                              tab.id,
-                              canGoBack: canGoBack,
-                              canGoForward: canGoForward,
+                      index:
+                          tabManager.activeTab != null
+                              ? tabManager.getTabIndex(tabManager.activeTabId!)
+                              : 0,
+                      children:
+                          tabManager.tabs.map((tab) {
+                            return _WebViewTabContent(
+                              key: ValueKey(tab.id),
+                              tab: tab,
+                              onUrlChanged: (url) {
+                                if (tab.id == tabManager.activeTabId) {
+                                  _urlController.text = url;
+                                }
+                              },
+                              onTitleChanged: (title) {
+                                tabManager.updateTab(tab.id, title: title);
+                              },
+                              onProgressChanged: (progress) {
+                                tabManager.updateTab(
+                                  tab.id,
+                                  progress: progress,
+                                );
+                              },
+                              onLoadingChanged: (isLoading) {
+                                tabManager.updateTab(
+                                  tab.id,
+                                  isLoading: isLoading,
+                                );
+                              },
+                              onNavigationStateChanged: (
+                                canGoBack,
+                                canGoForward,
+                              ) {
+                                tabManager.updateTab(
+                                  tab.id,
+                                  canGoBack: canGoBack,
+                                  canGoForward: canGoForward,
+                                );
+                              },
                             );
-                          },
-                        );
-                      }).toList(),
+                          }).toList(),
                     );
                   },
                 ),
@@ -183,7 +188,8 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
                 child: Container(
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: TextField(
@@ -204,21 +210,24 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
                               child: SizedBox(
                                 width: 16,
                                 height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                             );
                           }
                           return const Icon(Icons.lock_outline, size: 18);
                         },
                       ),
-                      suffixIcon: _isUrlBarFocused
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, size: 18),
-                              onPressed: () {
-                                _urlController.clear();
-                              },
-                            )
-                          : null,
+                      suffixIcon:
+                          _isUrlBarFocused
+                              ? IconButton(
+                                icon: const Icon(Icons.clear, size: 18),
+                                onPressed: () {
+                                  _urlController.clear();
+                                },
+                              )
+                              : null,
                     ),
                     onTap: () {
                       setState(() {
@@ -259,9 +268,10 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
                         tm.reload(tab.id);
                       }
                     },
-                    tooltip: tab?.isLoading ?? false
-                        ? 'webview_stop'.tr
-                        : 'webview_reload'.tr,
+                    tooltip:
+                        tab?.isLoading ?? false
+                            ? 'webview_stop'.tr
+                            : 'webview_reload'.tr,
                   );
                 },
               ),
@@ -311,18 +321,20 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
               // 后退
               IconButton(
                 icon: const Icon(Icons.arrow_back_ios),
-                onPressed: tab?.canGoBack ?? false
-                    ? () => tabManager.goBack(tab!.id)
-                    : null,
+                onPressed:
+                    tab?.canGoBack ?? false
+                        ? () => tabManager.goBack(tab!.id)
+                        : null,
                 tooltip: 'webview_go_back'.tr,
               ),
 
               // 前进
               IconButton(
                 icon: const Icon(Icons.arrow_forward_ios),
-                onPressed: tab?.canGoForward ?? false
-                    ? () => tabManager.goForward(tab!.id)
-                    : null,
+                onPressed:
+                    tab?.canGoForward ?? false
+                        ? () => tabManager.goForward(tab!.id)
+                        : null,
                 tooltip: 'webview_go_forward'.tr,
               ),
 
@@ -368,60 +380,64 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert),
                 onSelected: (value) => _handleMenuAction(value, tab),
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'new_tab',
-                    child: ListTile(
-                      leading: const Icon(Icons.add),
-                      title: Text('webview_new_tab'.tr),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'share',
-                    child: ListTile(
-                      leading: const Icon(Icons.share),
-                      title: Text('webview_share'.tr),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'copy_url',
-                    child: ListTile(
-                      leading: const Icon(Icons.copy),
-                      title: Text('webview_copy_url'.tr),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'open_in_browser',
-                    child: ListTile(
-                      leading: const Icon(Icons.open_in_browser),
-                      title: Text('webview_open_in_browser'.tr),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem(
-                    value: 'close_tab',
-                    child: ListTile(
-                      leading: const Icon(Icons.close),
-                      title: Text('webview_close_tab'.tr),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'close_all',
-                    child: ListTile(
-                      leading: const Icon(Icons.close_fullscreen, color: Colors.red),
-                      title: Text(
-                        'webview_close_all_tabs'.tr,
-                        style: const TextStyle(color: Colors.red),
+                itemBuilder:
+                    (context) => [
+                      PopupMenuItem(
+                        value: 'new_tab',
+                        child: ListTile(
+                          leading: const Icon(Icons.add),
+                          title: Text('webview_new_tab'.tr),
+                          contentPadding: EdgeInsets.zero,
+                        ),
                       ),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                ],
+                      PopupMenuItem(
+                        value: 'share',
+                        child: ListTile(
+                          leading: const Icon(Icons.share),
+                          title: Text('webview_share'.tr),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'copy_url',
+                        child: ListTile(
+                          leading: const Icon(Icons.copy),
+                          title: Text('webview_copy_url'.tr),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'open_in_browser',
+                        child: ListTile(
+                          leading: const Icon(Icons.open_in_browser),
+                          title: Text('webview_open_in_browser'.tr),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem(
+                        value: 'close_tab',
+                        child: ListTile(
+                          leading: const Icon(Icons.close),
+                          title: Text('webview_close_tab'.tr),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'close_all',
+                        child: ListTile(
+                          leading: const Icon(
+                            Icons.close_fullscreen,
+                            color: Colors.red,
+                          ),
+                          title: Text(
+                            'webview_close_all_tabs'.tr,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ],
               ),
             ],
           );
@@ -436,7 +452,8 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
     // 处理搜索或 URL
     if (!url.contains('.') && !url.startsWith('http')) {
       // 使用搜索引擎
-      final searchEngine = WebViewPlugin.instance.webviewSettings.defaultSearchEngine;
+      final searchEngine =
+          WebViewPlugin.instance.webviewSettings.defaultSearchEngine;
       url = '$searchEngine${Uri.encodeComponent(url)}';
     } else if (!url.startsWith('http')) {
       url = 'https://$url';
@@ -452,9 +469,9 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
   void _addToCards(WebViewTab tab) async {
     final exists = WebViewPlugin.instance.cardManager.getCardByUrl(tab.url);
     if (exists != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('该网址已在卡片中')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('该网址已在卡片中')));
       return;
     }
 
@@ -466,18 +483,16 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
     );
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('webview_card_added'.tr)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('webview_card_added'.tr)));
     }
   }
 
   void _showTabManager() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const TabManagerScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const TabManagerScreen()),
     ).then((_) {
       // 返回时更新 URL 栏
       final tab = WebViewPlugin.instance.tabManager.activeTab;
@@ -509,9 +524,9 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
       case 'copy_url':
         if (tab != null) {
           Clipboard.setData(ClipboardData(text: tab.url));
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('webview_url_copied'.tr)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('webview_url_copied'.tr)));
         }
         break;
 
@@ -541,24 +556,29 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
       case 'close_all':
         final confirm = await showDialog<bool>(
           context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text('webview_close_all_tabs'.tr),
-            content: Text('webview_confirm_close_all'.tr),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+          builder:
+              (ctx) => AlertDialog(
+                title: Text('webview_close_all_tabs'.tr),
+                content: Text('webview_confirm_close_all'.tr),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: Text(
+                      MaterialLocalizations.of(context).cancelButtonLabel,
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: Text(
+                      MaterialLocalizations.of(context).okButtonLabel,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(
-                  MaterialLocalizations.of(context).okButtonLabel,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
         );
 
         if (confirm == true) {
@@ -577,7 +597,8 @@ class _WebViewTabContent extends StatefulWidget {
   final ValueChanged<String> onTitleChanged;
   final ValueChanged<double> onProgressChanged;
   final ValueChanged<bool> onLoadingChanged;
-  final void Function(bool canGoBack, bool canGoForward) onNavigationStateChanged;
+  final void Function(bool canGoBack, bool canGoForward)
+  onNavigationStateChanged;
 
   const _WebViewTabContent({
     super.key,
@@ -608,7 +629,10 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
         javaScriptEnabled: webviewSettings.enableJavaScript,
         javaScriptCanOpenWindowsAutomatically: !webviewSettings.blockPopups,
         supportZoom: webviewSettings.enableZoom,
-        userAgent: webviewSettings.userAgent.isNotEmpty ? webviewSettings.userAgent : null,
+        userAgent:
+            webviewSettings.userAgent.isNotEmpty
+                ? webviewSettings.userAgent
+                : null,
         mediaPlaybackRequiresUserGesture: false,
         allowsInlineMediaPlayback: true,
       ),
@@ -619,8 +643,10 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
         // 如果是 HTTP 重定向到 HTTPS，允许加载
         // 如果是 HTTPS 重定向到 HTTP，允许加载
         // 但防止同一页面的重复加载
-        final isHttpToHttps = currentUrl.startsWith('http://') && url.startsWith('https://');
-        final isHttpsToHttp = currentUrl.startsWith('https://') && url.startsWith('http://');
+        final isHttpToHttps =
+            currentUrl.startsWith('http://') && url.startsWith('https://');
+        final isHttpsToHttp =
+            currentUrl.startsWith('https://') && url.startsWith('http://');
 
         if (isHttpToHttps || isHttpsToHttp) {
           return NavigationActionPolicy.ALLOW;
@@ -666,7 +692,7 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
 
         // 注入 JS Bridge（传递当前 URL 防止重复注入）
         if (_jsBridgeInjector != null) {
-          await _jsBridgeInjector!.inject(url?.toString());
+          await _jsBridgeInjector!.inject();
         }
       },
       onProgressChanged: (controller, progress) {

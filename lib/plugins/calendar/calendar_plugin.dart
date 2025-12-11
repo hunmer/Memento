@@ -6,7 +6,6 @@ import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart' as syncfusion;
-import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
@@ -22,6 +21,10 @@ import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
+
+// UseCase 架构导入
+import 'package:shared_models/usecases/calendar/calendar_usecase.dart';
+import './repositories/client_calendar_repository.dart';
 
 class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   static CalendarPlugin? _instance;
@@ -39,6 +42,8 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   late final app.CalendarController controller;
   // SyncFusion日历控制器
   late final syncfusion.CalendarController sfController;
+  // UseCase 实例，用于业务逻辑
+  late final CalendarUseCase calendarUseCase;
 
   final List<syncfusion.CalendarView> allowedViews = <syncfusion.CalendarView>[
     syncfusion.CalendarView.day,
@@ -65,6 +70,13 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     // 初始化总控制器
     controller = app.CalendarController(storageManager);
     sfController = syncfusion.CalendarController();
+
+    // 初始化 UseCase
+    final repository = ClientCalendarRepository(
+      controller: controller,
+      pluginColor: color,
+    );
+    calendarUseCase = CalendarUseCase(repository);
 
     // 从存储中读取上次使用的视图
     final viewData = await storageManager.read('calendar/calendar_last_view');
@@ -649,24 +661,13 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取所有事件（包括 Todo 任务事件）
   /// 支持分页参数: offset, count
   Future<String> _jsGetEvents(Map<String, dynamic> params) async {
-    final events = controller.getAllEvents();
-    final eventsJson = events.map((e) => e.toJson()).toList();
+    final result = await calendarUseCase.getEvents(params);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        eventsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(eventsJson);
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 获取今日事件
@@ -676,31 +677,18 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
 
-    final events =
-        controller.getAllEvents().where((event) {
-          return event.startTime.isAfter(
-                today.subtract(const Duration(seconds: 1)),
-              ) &&
-              event.startTime.isBefore(tomorrow);
-        }).toList();
+    // 添加日期过滤参数
+    final filteredParams = Map<String, dynamic>.from(params);
+    filteredParams['startDate'] = today.subtract(const Duration(seconds: 1));
+    filteredParams['endDate'] = tomorrow;
 
-    final eventsJson = events.map((e) => e.toJson()).toList();
+    final result = await calendarUseCase.searchEvents(filteredParams);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        eventsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(eventsJson);
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 根据日期范围获取事件
@@ -720,184 +708,74 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     final startDate = DateTime.parse(startDateStr);
     final endDate = DateTime.parse(endDateStr);
 
-    final events =
-        controller.getAllEvents().where((event) {
-          return event.startTime.isAfter(
-                startDate.subtract(const Duration(seconds: 1)),
-              ) &&
-              event.startTime.isBefore(endDate.add(const Duration(seconds: 1)));
-        }).toList();
+    // 添加日期过滤参数
+    final filteredParams = Map<String, dynamic>.from(params);
+    filteredParams['startDate'] = startDate;
+    filteredParams['endDate'] = endDate;
 
-    final eventsJson = events.map((e) => e.toJson()).toList();
+    final result = await calendarUseCase.searchEvents(filteredParams);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        eventsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(eventsJson);
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 创建事件
   Future<String> _jsCreateEvent(Map<String, dynamic> params) async {
-    // 提取必需参数并验证
-    final String? title = params['title'];
-    if (title == null || title.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: title'});
+    final result = await calendarUseCase.createEvent(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    final String? description = params['description'];
-    if (description == null) {
-      return jsonEncode({'error': '缺少必需参数: description'});
-    }
-
-    final String? startTimeStr = params['startTime'];
-    if (startTimeStr == null || startTimeStr.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: startTime'});
-    }
-
-    // 提取可选参数
-    final String? endTimeStr = params['endTime'];
-    final int? iconCodePoint = params['iconCodePoint'];
-    final int? colorValue = params['colorValue'];
-    final int? reminderMinutes = params['reminderMinutes'];
-
-    final startTime = DateTime.parse(startTimeStr);
-    final endTime = endTimeStr != null ? DateTime.parse(endTimeStr) : null;
-
-    final event = CalendarEvent(
-      id: const Uuid().v4(),
-      title: title,
-      description: description,
-      startTime: startTime,
-      endTime: endTime,
-      icon:
-          iconCodePoint != null
-              ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
-              : Icons.event,
-      color: colorValue != null ? Color(colorValue) : color,
-      source: 'default',
-      reminderMinutes: reminderMinutes,
-    );
-
-    controller.addEvent(event);
-    return jsonEncode(event.toJson());
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 更新事件
   Future<String> _jsUpdateEvent(Map<String, dynamic> params) async {
-    // 提取必需参数并验证
-    final String? eventId = params['eventId'];
-    if (eventId == null || eventId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: eventId'});
+    final result = await calendarUseCase.updateEvent(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    // 提取可选参数
-    final String? title = params['title'];
-    final String? description = params['description'];
-    final String? startTimeStr = params['startTime'];
-    final String? endTimeStr = params['endTime'];
-    final int? iconCodePoint = params['iconCodePoint'];
-    final int? colorValue = params['colorValue'];
-    final int? reminderMinutes = params['reminderMinutes'];
-
-    // 查找事件
-    final existingEvent = controller.events.firstWhere(
-      (e) => e.id == eventId,
-      orElse: () => throw Exception('Event not found: $eventId'),
-    );
-
-    // 构建更新后的事件
-    final updatedEvent = existingEvent.copyWith(
-      title: title,
-      description: description,
-      startTime: startTimeStr != null ? DateTime.parse(startTimeStr) : null,
-      endTime: endTimeStr != null ? DateTime.parse(endTimeStr) : null,
-      icon:
-          iconCodePoint != null
-              ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
-              : null,
-      color: colorValue != null ? Color(colorValue) : null,
-      reminderMinutes: reminderMinutes,
-    );
-
-    controller.updateEvent(updatedEvent);
-    return jsonEncode(updatedEvent.toJson());
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 删除事件
   Future<String> _jsDeleteEvent(Map<String, dynamic> params) async {
-    try {
-      // 提取必需参数并验证
-      final String? eventId = params['eventId'];
-      if (eventId == null || eventId.isEmpty) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: eventId'});
-      }
+    final result = await calendarUseCase.deleteEvent(params);
 
-      final event = controller.events.firstWhere(
-        (e) => e.id == eventId,
-        orElse: () => throw Exception('Event not found: $eventId'),
-      );
-
-      controller.deleteEvent(event);
-      return jsonEncode({'success': true, 'eventId': eventId});
-    } catch (e) {
-      return jsonEncode({'success': false, 'error': e.toString()});
+    if (result.isFailure) {
+      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
     }
+
+    return jsonEncode({'success': true});
   }
 
   /// 完成事件
   Future<String> _jsCompleteEvent(Map<String, dynamic> params) async {
-    // 提取必需参数并验证
-    final String? eventId = params['eventId'];
-    if (eventId == null || eventId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: eventId'});
+    final result = await calendarUseCase.completeEvent(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    final event = controller.events.firstWhere(
-      (e) => e.id == eventId,
-      orElse: () => throw Exception('Event not found: $eventId'),
-    );
-
-    controller.completeEvent(event);
-
-    // 返回完成后的事件（包含 completedTime）
-    final completedEvent = controller.completedEvents.firstWhere(
-      (e) => e.id == eventId,
-    );
-    return jsonEncode(completedEvent.toJson());
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 获取已完成事件
   /// 支持分页参数: offset, count
   Future<String> _jsGetCompletedEvents(Map<String, dynamic> params) async {
-    final events = controller.completedEvents;
-    final eventsJson = events.map((e) => e.toJson()).toList();
+    final result = await calendarUseCase.getCompletedEvents(params);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        eventsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(eventsJson);
+    return jsonEncode(result.dataOrNull);
   }
 
   // ==================== 事件查找方法 ====================
@@ -919,6 +797,8 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: value'});
     }
 
+    // 这里需要特殊处理，因为 UseCase 的 searchEvents 主要用于日期范围搜索
+    // 对于字段查找，我们仍然使用原有的逻辑
     final bool findAll = params['findAll'] ?? false;
     final int? offset = params['offset'];
     final int? count = params['count'];
@@ -961,19 +841,13 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   /// 根据ID查找事件
   /// @param params.id 事件ID (必需)
   Future<String> _jsFindEventById(Map<String, dynamic> params) async {
-    final String? id = params['id'];
-    if (id == null || id.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: id'});
+    final result = await calendarUseCase.getEventById(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    final events = controller.getAllEvents();
-
-    try {
-      final event = events.firstWhere((e) => e.id == id);
-      return jsonEncode(event.toJson());
-    } catch (e) {
-      return jsonEncode(null);
-    }
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 根据标题查找事件
@@ -988,6 +862,8 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: title'});
     }
 
+    // 这里需要特殊处理，因为 UseCase 的 searchEvents 主要用于日期范围搜索
+    // 对于标题查找，我们仍然使用原有的逻辑
     final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
     final int? offset = params['offset'];

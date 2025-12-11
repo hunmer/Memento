@@ -7,10 +7,11 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/base_plugin.dart';
+import 'package:shared_models/usecases/calendar_album/calendar_album_usecase.dart';
 import 'widgets/calendar_album_bottom_bar.dart';
 import 'controllers/calendar_controller.dart';
-
 import 'controllers/tag_controller.dart';
+import 'repositories/client_calendar_album_repository.dart';
 import 'models/calendar_entry.dart';
 
 /// 日历相册插件主视图
@@ -43,6 +44,14 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   TagController? _tagController;
   TagController? get tagController => _tagController;
 
+  CalendarAlbumUseCase? _useCase;
+  CalendarAlbumUseCase get useCase {
+    if (_useCase == null) {
+      throw StateError('CalendarAlbumUseCase has not been initialized');
+    }
+    return _useCase!;
+  }
+
   @override
   String get id => 'calendar_album';
 
@@ -56,6 +65,14 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   Future<void> initialize() async {
     _calendarController = CalendarController();
     _tagController = TagController(onTagsChanged: () {});
+
+    // 初始化 UseCase
+    _useCase = CalendarAlbumUseCase(
+      ClientCalendarAlbumRepository(
+        calendarController: _calendarController!,
+        tagController: _tagController!,
+      ),
+    );
 
     await initializeDefaultData();
 
@@ -397,35 +414,17 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取所有日记条目
   /// 支持分页参数: offset, count
   Future<String> _jsGetEntries(Map<String, dynamic> params) async {
-    final controller = calendarController;
-    if (controller == null) {
-      return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+    try {
+      final result = await useCase.getEntries(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message, 'items': []});
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '获取日记列表失败: $e', 'items': []});
     }
-
-    final allEntries = <CalendarEntry>[];
-    controller.entries.forEach((date, entries) {
-      allEntries.addAll(entries);
-    });
-    // 按创建时间倒序排序
-    allEntries.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-    final entriesJson = allEntries.map((e) => e.toJson()).toList();
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        entriesJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(entriesJson);
   }
 
   /// 获取指定日期的日记条目
@@ -438,14 +437,13 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     try {
-      final controller = calendarController;
-      if (controller == null) {
-        return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+      final result = await useCase.getEntriesByDate(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message, 'items': []});
       }
 
-      final date = DateTime.parse(dateStr);
-      final entries = controller.getEntriesForDate(date);
-      return jsonEncode(entries.map((e) => e.toJson()).toList());
+      return jsonEncode(result.dataOrNull);
     } catch (e) {
       return jsonEncode({
         'error': '日期格式错误: $dateStr',
@@ -457,7 +455,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// 添加日记条目
   /// @param params.title - 标题
   /// @param params.content - 内容
-  /// @param params.dateStr - 日期 (可选, 默认今天)
+  /// @param params.createdAt - 创建时间 (可选, 默认今天)
   /// @param params.tags - 标签数组 (可选)
   /// @param params.location - 位置 (可选)
   /// @param params.mood - 心情 (可选)
@@ -465,41 +463,21 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// @param params.imageUrls - 图片URL数组 (可选)
   Future<String> _jsAddEntry(Map<String, dynamic> params) async {
     final String? title = params['title'];
-    final String? content = params['content'];
     if (title == null || title.isEmpty) {
       return jsonEncode({'error': '缺少必需参数: title'});
     }
-    if (content == null) {
+    if (params['content'] == null) {
       return jsonEncode({'error': '缺少必需参数: content'});
     }
 
     try {
-      final String? dateStr = params['dateStr'];
-      final List<String> tags = params['tags'] != null ? List<String>.from(params['tags']) : [];
-      final String? location = params['location'];
-      final String? mood = params['mood'];
-      final String? weather = params['weather'];
-      final List<String> imageUrls = params['imageUrls'] != null ? List<String>.from(params['imageUrls']) : [];
+      final result = await useCase.createEntry(params);
 
-      final createdAt = dateStr != null ? DateTime.parse(dateStr) : DateTime.now();
-
-      final entry = CalendarEntry.create(
-        title: title,
-        content: content,
-        createdAt: createdAt,
-        tags: tags,
-        location: location,
-        mood: mood,
-        weather: weather,
-        imageUrls: imageUrls,
-      );
-
-      final controller = calendarController;
-      if (controller == null) {
-        return jsonEncode({'error': 'calendarController 未初始化'});
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
       }
-      await controller.addEntry(entry);
-      return jsonEncode(entry.toJson());
+
+      return jsonEncode(result.dataOrNull);
     } catch (e) {
       return jsonEncode({
         'error': '添加日记失败',
@@ -509,7 +487,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 更新日记条目
-  /// @param params.entryId - 日记ID
+  /// @param params.id - 日记ID
   /// @param params.title - 新标题 (可选)
   /// @param params.content - 新内容 (可选)
   /// @param params.tags - 新标签数组 (可选)
@@ -518,46 +496,19 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   /// @param params.weather - 新天气 (可选)
   /// @param params.imageUrls - 新图片URL数组 (可选)
   Future<String> _jsUpdateEntry(Map<String, dynamic> params) async {
-    final String? entryId = params['entryId'];
-    if (entryId == null || entryId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: entryId'});
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
     }
 
     try {
-      final controller = calendarController;
-      if (controller == null) {
-        return jsonEncode({'error': 'calendarController 未初始化'});
+      final result = await useCase.updateEntry(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
       }
 
-      final entry = controller.getEntryById(entryId);
-      if (entry == null) {
-        return jsonEncode({
-          'error': '日记不存在',
-          'entryId': entryId,
-        });
-      }
-
-      final String? title = params['title'];
-      final String? content = params['content'];
-      final List<String>? tags = params['tags'] != null ? List<String>.from(params['tags']) : null;
-      final String? location = params['location'];
-      final String? mood = params['mood'];
-      final String? weather = params['weather'];
-      final List<String>? imageUrls = params['imageUrls'] != null ? List<String>.from(params['imageUrls']) : null;
-
-      final updatedEntry = entry.copyWith(
-        title: title,
-        content: content,
-        tags: tags,
-        location: location,
-        mood: mood,
-        weather: weather,
-        imageUrls: imageUrls,
-        updatedAt: DateTime.now(),
-      );
-
-      await controller.updateEntry(updatedEntry);
-      return jsonEncode(updatedEntry.toJson());
+      return jsonEncode(result.dataOrNull);
     } catch (e) {
       return jsonEncode({
         'error': '更新日记失败',
@@ -567,38 +518,29 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 删除日记条目
-  /// @param params.entryId - 日记ID
+  /// @param params.id - 日记ID
   Future<String> _jsDeleteEntry(Map<String, dynamic> params) async {
-    final String? entryId = params['entryId'];
-    if (entryId == null || entryId.isEmpty) {
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
       return jsonEncode({
         'success': false,
-        'error': '缺少必需参数: entryId',
+        'error': '缺少必需参数: id',
       });
     }
 
     try {
-      final controller = calendarController;
-      if (controller == null) {
+      final result = await useCase.deleteEntry(params);
+
+      if (result.isFailure) {
         return jsonEncode({
           'success': false,
-          'error': 'calendarController 未初始化',
+          'error': result.errorOrNull?.message,
         });
       }
 
-      final entry = controller.getEntryById(entryId);
-      if (entry == null) {
-        return jsonEncode({
-          'success': false,
-          'error': '日记不存在',
-          'entryId': entryId,
-        });
-      }
-
-      await controller.deleteEntry(entry);
       return jsonEncode({
         'success': true,
-        'entryId': entryId,
+        'id': id,
       });
     } catch (e) {
       return jsonEncode({
@@ -610,39 +552,48 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 根据ID获取日记条目
-  /// @param params.entryId - 日记ID
+  /// @param params.id - 日记ID
   Future<String> _jsGetEntryById(Map<String, dynamic> params) async {
-    final String? entryId = params['entryId'];
-    if (entryId == null || entryId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: entryId'});
+    final String? id = params['id'];
+    if (id == null || id.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: id'});
     }
 
-    final controller = calendarController;
-    if (controller == null) {
-      return jsonEncode({'error': 'calendarController 未初始化'});
-    }
+    try {
+      final result = await useCase.getEntryById(params);
 
-    final entry = controller.getEntryById(entryId);
-    if (entry == null) {
-      return jsonEncode({
-        'error': '日记不存在',
-        'entryId': entryId,
-      });
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      if (result.dataOrNull == null) {
+        return jsonEncode({
+          'error': '日记不存在',
+          'id': id,
+        });
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '获取日记失败: $e'});
     }
-    return jsonEncode(entry.toJson());
   }
 
   /// 获取所有标签
-  /// @param params - 参数对象（无参数）
+  /// @param params - 参数对象（可选）
   /// 返回: List<String> (JSON数组)
   Future<String> _jsGetTags(Map<String, dynamic> params) async {
-    final controller = tagController;
-    if (controller == null) {
-      return jsonEncode({'error': 'tagController 未初始化', 'tags': []});
-    }
+    try {
+      final result = await useCase.getTags(params);
 
-    final tags = controller.tags;
-    return jsonEncode(tags);
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message, 'tags': []});
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '获取标签列表失败: $e', 'tags': []});
+    }
   }
 
   /// 根据单个标签获取日记
@@ -653,27 +604,17 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: tag'});
     }
 
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+    try {
+      final result = await useCase.getEntriesByTag(params);
 
-    final controller = calendarController;
-    if (controller == null) {
-      return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message, 'items': []});
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '根据标签获取日记失败: $e', 'items': []});
     }
-    final entries = controller.getEntriesByTag(tag);
-    final entriesJson = entries.map((e) => e.toJson()).toList();
-
-    // 检查是否需要分页
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        entriesJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    return jsonEncode(entriesJson);
   }
 
   /// 根据多个标签获取日记 (AND逻辑)
@@ -684,52 +625,33 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode([]);
     }
 
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+    try {
+      final result = await useCase.getEntriesByTags(params);
 
-    final controller = calendarController;
-    if (controller == null) {
-      return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message, 'items': []});
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '根据多标签获取日记失败: $e', 'items': []});
     }
-    final entries = controller.getEntriesByTags(tags);
-    final entriesJson = entries.map((e) => e.toJson()).toList();
-
-    // 检查是否需要分页
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        entriesJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    return jsonEncode(entriesJson);
   }
 
   /// 获取所有照片URL
   /// 支持分页参数: offset, count
   Future<String> _jsGetPhotos(Map<String, dynamic> params) async {
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+    try {
+      final result = await useCase.getAllImages(params);
 
-    final controller = calendarController;
-    if (controller == null) {
-      return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message, 'items': []});
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '获取图片列表失败: $e', 'items': []});
     }
-    final photos = controller.getAllImages();
-
-    // 检查是否需要分页
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        photos,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    return jsonEncode(photos);
   }
 
   /// 根据日期范围获取照片
@@ -795,29 +717,33 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
 
   /// 获取统计信息
   /// @param params - 参数对象（无参数）
-  /// 返回: {todayCount, last7DaysCount, totalCount, tagCount, photoCount}
+  /// 返回: {todayEntries, last7DaysEntries, allEntries, tagsCount, photoCount}
   Future<String> _jsGetStatistics(Map<String, dynamic> params) async {
-    final calendarCtrl = calendarController;
-    final tagCtrl = tagController;
-    if (calendarCtrl == null || tagCtrl == null) {
+    try {
+      final result = await useCase.getStats(params);
+
+      if (result.isFailure) {
+        return jsonEncode({
+          'error': result.errorOrNull?.message,
+          'todayEntries': 0,
+          'last7DaysEntries': 0,
+          'allEntries': 0,
+          'tagsCount': 0,
+          'photoCount': 0,
+        });
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
       return jsonEncode({
-        'error': '控制器未初始化',
-        'todayCount': 0,
-        'last7DaysCount': 0,
-        'totalCount': 0,
-        'tagCount': 0,
+        'error': '获取统计信息失败: $e',
+        'todayEntries': 0,
+        'last7DaysEntries': 0,
+        'allEntries': 0,
+        'tagsCount': 0,
         'photoCount': 0,
       });
     }
-
-    final stats = {
-      'todayCount': calendarCtrl.getTodayEntriesCount(),
-      'last7DaysCount': calendarCtrl.getLast7DaysEntriesCount(),
-      'totalCount': calendarCtrl.getAllEntriesCount(),
-      'tagCount': tagCtrl.tags.length,
-      'photoCount': calendarCtrl.getAllImages().length,
-    };
-    return jsonEncode(stats);
   }
 
   // ==================== 日记查找方法 ====================
@@ -839,52 +765,18 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: value'});
     }
 
-    final bool findAll = params['findAll'] ?? false;
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+    try {
+      // 使用 searchEntries 方法进行查找
+      final searchParams = Map<String, dynamic>.from(params);
+      final result = await useCase.searchEntries(searchParams);
 
-    // 获取所有日记
-    final controller = calendarController;
-    if (controller == null) {
-      return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
-    }
-
-    final allEntries = <CalendarEntry>[];
-    controller.entries.forEach((date, entries) {
-      allEntries.addAll(entries);
-    });
-
-    final List<CalendarEntry> matchedEntries = [];
-
-    for (final entry in allEntries) {
-      final entryJson = entry.toJson();
-
-      // 检查字段是否匹配
-      if (entryJson.containsKey(field) && entryJson[field] == value) {
-        matchedEntries.add(entry);
-        if (!findAll) break; // 只找第一个
-      }
-    }
-
-    if (findAll) {
-      final entriesJson = matchedEntries.map((e) => e.toJson()).toList();
-
-      // 检查是否需要分页
-      if (offset != null || count != null) {
-        final paginated = _paginate(
-          entriesJson,
-          offset: offset ?? 0,
-          count: count ?? 100,
-        );
-        return jsonEncode(paginated);
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message, 'items': []});
       }
 
-      return jsonEncode(entriesJson);
-    } else {
-      if (matchedEntries.isEmpty) {
-        return jsonEncode(null);
-      }
-      return jsonEncode(matchedEntries.first.toJson());
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '查找日记失败: $e', 'items': []});
     }
   }
 
@@ -896,15 +788,21 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: id'});
     }
 
-    final controller = calendarController;
-    if (controller == null) {
-      return jsonEncode({'error': 'calendarController 未初始化'});
+    try {
+      final result = await useCase.getEntryById(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      if (result.dataOrNull == null) {
+        return jsonEncode(null);
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '查找日记失败: $e'});
     }
-    final entry = controller.getEntryById(id);
-    if (entry == null) {
-      return jsonEncode(null);
-    }
-    return jsonEncode(entry.toJson());
   }
 
   /// 根据标题查找日记
@@ -919,54 +817,28 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: title'});
     }
 
-    final bool fuzzy = params['fuzzy'] ?? false;
-    final bool findAll = params['findAll'] ?? false;
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+    try {
+      // 使用 searchEntries 方法进行查找
+      final searchParams = Map<String, dynamic>.from(params);
+      final result = await useCase.searchEntries(searchParams);
 
-    // 获取所有日记
-    final controller = calendarController;
-    if (controller == null) {
-      return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
-    }
-
-    final allEntries = <CalendarEntry>[];
-    controller.entries.forEach((date, entries) {
-      allEntries.addAll(entries);
-    });
-
-    final List<CalendarEntry> matchedEntries = [];
-
-    for (final entry in allEntries) {
-      bool matches = false;
-      if (fuzzy) {
-        matches = entry.title.contains(title);
-      } else {
-        matches = entry.title == title;
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message, 'items': []});
       }
 
-      if (matches) {
-        matchedEntries.add(entry);
-        if (!findAll) break;
+      // 如果不查找所有项，只返回第一个结果
+      final bool findAll = params['findAll'] ?? false;
+      if (!findAll && result.dataOrNull is List) {
+        final List<dynamic> entries = result.dataOrNull;
+        if (entries.isEmpty) {
+          return jsonEncode(null);
+        }
+        return jsonEncode(entries.first);
       }
-    }
 
-    if (findAll) {
-      final entriesJson = matchedEntries.map((e) => e.toJson()).toList();
-      if (offset != null || count != null) {
-        final paginated = _paginate(
-          entriesJson,
-          offset: offset ?? 0,
-          count: count ?? 100,
-        );
-        return jsonEncode(paginated);
-      }
-      return jsonEncode(entriesJson);
-    } else {
-      if (matchedEntries.isEmpty) {
-        return jsonEncode(null);
-      }
-      return jsonEncode(matchedEntries.first.toJson());
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '查找日记失败: $e', 'items': []});
     }
   }
 }

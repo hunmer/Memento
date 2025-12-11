@@ -21,6 +21,9 @@ export 'utils/result.dart';
 // MD5 工具
 export 'utils/md5_utils.dart';
 
+// Iterable 扩展
+export 'utils/iterable_extensions.dart';
+
 // ============ Repository 层 ============
 
 // Chat 插件 Repository

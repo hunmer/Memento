@@ -9,10 +9,12 @@ import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
+import 'package:shared_models/shared_models.dart';
 import 'widgets/goods_bottom_bar.dart';
 import 'models/warehouse.dart';
 import 'models/goods_item.dart';
 import 'models/find_item_result.dart';
+import 'repositories/client_goods_repository.dart';
 import 'sample_data.dart';
 
 /// 物品相关事件的基类
@@ -67,6 +69,9 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
     }
     return _instance!;
   }
+
+  late final GoodsUseCase _useCase;
+  GoodsUseCase get useCase => _useCase;
 
   final List<Warehouse> _warehouses = [];
   final List<Function()> _listeners = [];
@@ -182,6 +187,15 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   Future<void> initialize() async {
     // 确保物品管理数据目录存在
     await storage.createDirectory('goods');
+
+    // 创建客户端 Repository
+    final repository = ClientGoodsRepository(
+      plugin: this,
+      pluginColor: color,
+    );
+
+    // 初始化 UseCase
+    _useCase = GoodsUseCase(repository);
 
     // 加载仓库数据
     await _loadWarehouses();
@@ -656,116 +670,53 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
     };
   }
 
-  // ==================== 分页控制器 ====================
-
-  /// 分页控制器 - 对列表进行分页处理
-  /// @param list 原始数据列表
-  /// @param offset 起始位置（默认 0）
-  /// @param count 返回数量（默认 100）
-  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
-  Map<String, dynamic> _paginate<T>(
-    List<T> list, {
-    int offset = 0,
-    int count = 100,
-  }) {
-    final total = list.length;
-    final start = offset.clamp(0, total);
-    final end = (start + count).clamp(start, total);
-    final data = list.sublist(start, end);
-
-    return {
-      'data': data,
-      'total': total,
-      'offset': start,
-      'count': data.length,
-      'hasMore': end < total,
-    };
-  }
-
   // ==================== JS API 实现 ====================
   /// 获取所有仓库列表
   /// 支持分页参数: offset, count
   /// 返回: JSON数组，包含所有仓库信息（不含物品）
   Future<String> _jsGetWarehouses(Map<String, dynamic> params) async {
-    final warehousesJson =
-        _warehouses.map((w) {
-          final json = w.toJson();
-          // 不返回物品列表，减少数据量
-          json.remove('items');
-          return json;
-        }).toList();
+    try {
+      final result = await _useCase.getWarehouses(params);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
 
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        warehousesJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '获取仓库失败: ${e.toString()}'});
     }
-
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(warehousesJson);
   }
 
   /// 获取指定仓库的详细信息（包含物品）
   Future<String> _jsGetWarehouse(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? warehouseId = params['warehouseId'];
-    if (warehouseId == null || warehouseId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: warehouseId'});
-    }
+    try {
+      final result = await _useCase.getWarehouseById(params);
 
-    final warehouse = getWarehouse(warehouseId);
-    if (warehouse == null) {
-      return jsonEncode({'error': '仓库不存在', 'warehouseId': warehouseId});
-    }
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
 
-    return jsonEncode(warehouse.toJson());
+      if (result.dataOrNull == null) {
+        return jsonEncode({'error': '仓库不存在'});
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '获取仓库失败: ${e.toString()}'});
+    }
   }
 
   /// 创建新仓库
   Future<String> _jsCreateWarehouse(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? title = params['title'];
-    if (title == null || title.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: title'});
-    }
-
     try {
-      // 可选参数
-      final String? id = params['id'];
-      final int? iconCode = params['iconCode'];
-      final int? colorValue = params['colorValue'];
+      final result = await _useCase.createWarehouse(params);
 
-      // 生成ID（如果没有提供）
-      String warehouseId =
-          id ?? const Uuid().v4();
-
-      // 检查ID是否已存在
-      if (getWarehouse(warehouseId) != null) {
-        return jsonEncode({'error': '仓库ID已存在: $warehouseId'});
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
       }
 
-      final warehouse = Warehouse(
-        id: warehouseId,
-        title: title,
-        icon:
-            iconCode != null
-                ? IconData(iconCode, fontFamily: 'MaterialIcons')
-                : Icons.inventory_2,
-        iconColor: colorValue != null ? Color(colorValue) : color,
-      );
-
-      await saveWarehouse(warehouse);
-
-      final json = warehouse.toJson();
-      json.remove('items'); // 新建仓库没有物品
-      return jsonEncode(json);
+      return jsonEncode(result.dataOrNull);
     } catch (e) {
       return jsonEncode({'error': '创建仓库失败: ${e.toString()}'});
     }
@@ -773,46 +724,29 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
   /// 更新仓库信息
   Future<String> _jsUpdateWarehouse(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? warehouseId = params['warehouseId'];
-    if (warehouseId == null || warehouseId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: warehouseId'});
+    try {
+      final result = await _useCase.updateWarehouse(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '更新仓库失败: ${e.toString()}'});
     }
-
-    final warehouse = getWarehouse(warehouseId);
-    if (warehouse == null) {
-      return jsonEncode({'error': '仓库不存在', 'warehouseId': warehouseId});
-    }
-
-    // 可选参数
-    final String? title = params['title'];
-    final int? iconCode = params['iconCode'];
-    final int? colorValue = params['colorValue'];
-
-    final updatedWarehouse = warehouse.copyWith(
-      title: title,
-      icon:
-          iconCode != null
-              ? IconData(iconCode, fontFamily: 'MaterialIcons')
-              : null,
-      iconColor: colorValue != null ? Color(colorValue) : null,
-    );
-
-    await saveWarehouse(updatedWarehouse);
-    return jsonEncode(updatedWarehouse.toJson());
   }
 
   /// 删除仓库
   Future<String> _jsDeleteWarehouse(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? warehouseId = params['warehouseId'];
-    if (warehouseId == null || warehouseId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: warehouseId'});
-    }
-
     try {
-      await deleteWarehouse(warehouseId);
-      return jsonEncode({'success': true, 'warehouseId': warehouseId});
+      final result = await _useCase.deleteWarehouse(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
+      }
+
+      return jsonEncode({'success': true, 'warehouseId': params['id']});
     } catch (e) {
       return jsonEncode({'success': false, 'error': e.toString()});
     }
@@ -820,13 +754,12 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
   /// 清空仓库（删除所有物品）
   Future<String> _jsClearWarehouse(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? warehouseId = params['warehouseId'];
-    if (warehouseId == null || warehouseId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: warehouseId'});
-    }
-
     try {
+      final String? warehouseId = params['warehouseId'] ?? params['id'];
+      if (warehouseId == null || warehouseId.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: warehouseId'});
+      }
+
       await clearWarehouse(warehouseId);
       return jsonEncode({'success': true, 'warehouseId': warehouseId});
     } catch (e) {
@@ -837,73 +770,47 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取物品列表
   /// 支持分页参数: offset, count
   Future<String> _jsGetGoods(Map<String, dynamic> params) async {
-    // 可选参数
-    final String? warehouseId = params['warehouseId'];
+    try {
+      final result = await _useCase.getItems(params);
 
-    List<Map<String, dynamic>> goodsJsonList = [];
-
-    if (warehouseId != null && warehouseId.isNotEmpty) {
-      // 获取指定仓库的物品
-      final warehouse = getWarehouse(warehouseId);
-      if (warehouse != null) {
-        goodsJsonList = warehouse.items.map((item) => item.toJson()).toList();
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
       }
-    } else {
-      // 获取所有仓库的所有物品
-      for (var warehouse in _warehouses) {
-        goodsJsonList.addAll(warehouse.items.map((item) => item.toJson()));
-      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '获取物品失败: ${e.toString()}'});
     }
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        goodsJsonList,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(goodsJsonList);
   }
 
   /// 获取指定物品的详细信息
   Future<String> _jsGetGoodsItem(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? itemId = params['itemId'];
-    if (itemId == null || itemId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: itemId'});
-    }
+    try {
+      final result = await _useCase.getItemById(params);
 
-    final result = findGoodsItemById(itemId);
-    if (result == null) {
-      return jsonEncode({'error': '物品不存在', 'itemId': itemId});
-    }
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
 
-    final itemJson = result.item.toJson();
-    itemJson['warehouseId'] = result.warehouseId; // 添加仓库ID信息
-    return jsonEncode(itemJson);
+      if (result.dataOrNull == null) {
+        return jsonEncode({'error': '物品不存在'});
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '获取物品失败: ${e.toString()}'});
+    }
   }
 
   /// 创建新物品
   Future<String> _jsCreateGoodsItem(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? warehouseId = params['warehouseId'];
-    final String? itemDataStr = params['itemData'];
-
-    if (warehouseId == null || warehouseId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: warehouseId'});
-    }
-    if (itemDataStr == null || itemDataStr.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: itemData'});
-    }
-
     try {
+      // 转换参数格式
+      final String? itemDataStr = params['itemData'];
+      if (itemDataStr == null || itemDataStr.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: itemData'});
+      }
+
       final data = jsonDecode(itemDataStr) as Map<String, dynamic>;
 
       // 确保有ID和标题
@@ -912,20 +819,27 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       }
 
       // 生成ID（如果没有提供）
-      data['id'] =
-          data['id'] ?? const Uuid().v4();
+      data['id'] = data['id'] ?? const Uuid().v4();
 
-      // 检查ID是否已存在（跨所有仓库）
-      final existingItem = findGoodsItemById(data['id']);
-      if (existingItem != null) {
-        return jsonEncode({'error': '物品ID已存在: ${data['id']}'});
+      // 构建 UseCase 需要的参数
+      final useCaseParams = {
+        'id': data['id'],
+        'name': data['title'],
+        'description': data['notes'] ?? data['description'],
+        'quantity': data['quantity'] ?? 1,
+        'category': data['category'],
+        'tags': data['tags'] ?? [],
+        'customFields': data['customFields'],
+        'warehouseId': params['warehouseId'],
+      };
+
+      final result = await _useCase.createItem(useCaseParams);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
       }
 
-      // 创建物品
-      final item = GoodsItem.fromJson(data);
-      await saveGoodsItem(warehouseId, item);
-
-      return jsonEncode(item.toJson());
+      return jsonEncode(result.dataOrNull);
     } catch (e) {
       return jsonEncode({'error': '创建物品失败: ${e.toString()}'});
     }
@@ -933,37 +847,46 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
   /// 更新物品
   Future<String> _jsUpdateGoodsItem(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? itemId = params['itemId'];
-    final String? itemDataStr = params['itemData'];
-
-    if (itemId == null || itemId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: itemId'});
-    }
-    if (itemDataStr == null || itemDataStr.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: itemData'});
-    }
-
     try {
-      // 查找物品
-      final result = findGoodsItemById(itemId);
-      if (result == null) {
+      // 必需参数验证
+      final String? itemId = params['itemId'];
+      final String? itemDataStr = params['itemData'];
+
+      if (itemId == null || itemId.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: itemId'});
+      }
+      if (itemDataStr == null || itemDataStr.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: itemData'});
+      }
+
+      // 查找物品所在的仓库
+      final existingItem = findGoodsItemById(itemId);
+      if (existingItem == null) {
         return jsonEncode({'error': '物品不存在', 'itemId': itemId});
       }
 
       // 解析更新数据
       final updateData = jsonDecode(itemDataStr) as Map<String, dynamic>;
 
-      // 合并现有数据和更新数据
-      final currentJson = result.item.toJson();
-      currentJson.addAll(updateData);
-      currentJson['id'] = itemId; // 确保ID不被修改
+      // 构建 UseCase 需要的参数
+      final useCaseParams = {
+        'id': itemId,
+        'name': updateData['title'],
+        'description': updateData['notes'] ?? updateData['description'],
+        'quantity': updateData['quantity'],
+        'category': updateData['category'],
+        'tags': updateData['tags'],
+        'customFields': updateData['customFields'],
+        'warehouseId': existingItem.warehouseId,
+      };
 
-      // 创建更新后的物品
-      final updatedItem = GoodsItem.fromJson(currentJson);
-      await saveGoodsItem(result.warehouseId, updatedItem);
+      final result = await _useCase.updateItem(useCaseParams);
 
-      return jsonEncode(updatedItem.toJson());
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      return jsonEncode(result.dataOrNull);
     } catch (e) {
       return jsonEncode({'error': '更新物品失败: ${e.toString()}'});
     }
@@ -971,24 +894,34 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
   /// 删除物品
   Future<String> _jsDeleteGoodsItem(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? itemId = params['itemId'];
-    if (itemId == null || itemId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: itemId'});
-    }
-
     try {
       // 查找物品所在的仓库
-      final result = findGoodsItemById(itemId);
-      if (result == null) {
+      final String? itemId = params['itemId'];
+      if (itemId == null || itemId.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: itemId'});
+      }
+
+      final existingItem = findGoodsItemById(itemId);
+      if (existingItem == null) {
         return jsonEncode({'error': '物品不存在', 'itemId': itemId});
       }
 
-      await deleteGoodsItem(result.warehouseId, itemId);
+      // 构建 UseCase 需要的参数
+      final useCaseParams = {
+        'id': itemId,
+        'warehouseId': existingItem.warehouseId,
+      };
+
+      final result = await _useCase.deleteItem(useCaseParams);
+
+      if (result.isFailure) {
+        return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
+      }
+
       return jsonEncode({
         'success': true,
         'itemId': itemId,
-        'warehouseId': result.warehouseId,
+        'warehouseId': existingItem.warehouseId,
       });
     } catch (e) {
       return jsonEncode({'success': false, 'error': e.toString()});
@@ -997,17 +930,17 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
   /// 添加使用记录
   Future<String> _jsAddUsageRecord(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? itemId = params['itemId'];
-    if (itemId == null || itemId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: itemId'});
-    }
-
-    // 可选参数
-    final String? dateStr = params['dateStr'];
-    final String? note = params['note'];
-
     try {
+      // 必需参数验证
+      final String? itemId = params['itemId'];
+      if (itemId == null || itemId.isEmpty) {
+        return jsonEncode({'error': '缺少必需参数: itemId'});
+      }
+
+      // 可选参数
+      final String? dateStr = params['dateStr'];
+      final String? note = params['note'];
+
       // 查找物品
       final result = findGoodsItemById(itemId);
       if (result == null) {
@@ -1030,13 +963,17 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取统计信息
   /// 返回: 包含总数量、总价值、未使用物品数的统计数据
   Future<String> _jsGetStatistics(Map<String, dynamic> params) async {
-    return jsonEncode({
-      'totalCount': getTotalItemsCount(),
-      'totalValue': getTotalItemsValue(),
-      'unusedCount': getUnusedItemsCount(),
-      'warehouseCount': _warehouses.length,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    try {
+      final result = await _useCase.getStats(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '获取统计失败: ${e.toString()}'});
+    }
   }
 
   // 同步小组件数据

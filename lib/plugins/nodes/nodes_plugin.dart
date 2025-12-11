@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:Memento/core/config_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
@@ -11,7 +10,8 @@ import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'controllers/nodes_controller.dart';
 import 'screens/notebooks_screen.dart';
 import 'models/node.dart';
-import 'models/notebook.dart';
+import 'repositories/client_nodes_repository.dart';
+import 'package:shared_models/usecases/nodes/nodes_usecase.dart';
 
 class NodesMainView extends StatefulWidget {
   const NodesMainView({super.key});
@@ -51,11 +51,13 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   late NodesController _controller;
+  late NodesUseCase _useCase;
   bool _isInitialized = false;
 
   NodesPlugin();
 
   NodesController get controller => _controller;
+  NodesUseCase get useCase => _useCase;
 
   // ========== 小组件统计方法 ==========
 
@@ -106,6 +108,10 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   @override
   Future<void> initialize() async {
     _controller = NodesController(storage);
+
+    // 创建并初始化 UseCase
+    final repository = ClientNodesRepository(controller: _controller);
+    _useCase = NodesUseCase(repository);
 
     _isInitialized = true;
 
@@ -195,18 +201,37 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
   /// 获取所有笔记本列表
   Future<String> _jsGetNotebooks(Map<String, dynamic> params) async {
-    final notebooks = _controller.notebooks;
-    final notebookList = notebooks.map((nb) => {
-      'id': nb.id,
-      'title': nb.title,
-      'icon': nb.icon.codePoint,
-      'color': nb.color.value,
-      'nodeCount': _countAllNodes(nb.nodes),
+    final result = await _useCase.getNotebooks(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+    }
+
+    final data = result.dataOrNull ?? [];
+
+    // 如果是分页结果，需要添加 nodeCount 字段
+    if (data is Map && data.containsKey('items')) {
+      final items = data['items'] as List;
+      final enrichedItems = items.map((item) {
+        final notebookJson = Map<String, dynamic>.from(item);
+        notebookJson['nodeCount'] = _countAllNodesFromJson(notebookJson['nodes'] ?? []);
+        return notebookJson;
+      }).toList();
+
+      return jsonEncode({
+        ...data,
+        'items': enrichedItems,
+      });
+    }
+
+    // 如果是普通列表
+    final enrichedList = (data as List).map((item) {
+      final notebookJson = Map<String, dynamic>.from(item);
+      notebookJson['nodeCount'] = _countAllNodesFromJson(notebookJson['nodes'] ?? []);
+      return notebookJson;
     }).toList();
 
-    // 应用分页
-    final result = _paginate(notebookList, params);
-    return jsonEncode(result);
+    return jsonEncode(enrichedList);
   }
 
   /// 获取指定笔记本详情
@@ -217,18 +242,24 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: notebookId'});
     }
 
-    final notebook = _controller.getNotebook(notebookId);
-    if (notebook == null || notebook.id.isEmpty) {
+    final result = await _useCase.getNotebookById({'id': notebookId});
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+    }
+
+    final notebook = result.dataOrNull;
+    if (notebook == null) {
       return jsonEncode({'error': '笔记本不存在'});
     }
 
     return jsonEncode({
-      'id': notebook.id,
-      'title': notebook.title,
-      'icon': notebook.icon.codePoint,
-      'color': notebook.color.value,
-      'nodeCount': _countAllNodes(notebook.nodes),
-      'nodes': notebook.nodes.map((n) => _nodeToJson(n)).toList(),
+      'id': notebook['id'],
+      'title': notebook['title'],
+      'icon': notebook['icon'],
+      'color': notebook['color'],
+      'nodeCount': _countAllNodesFromJson(notebook['nodes'] ?? []),
+      'nodes': notebook['nodes'] ?? [],
     });
   }
 
@@ -245,30 +276,23 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
     final int? iconCodePoint = params['iconCodePoint'];
     final int? colorValue = params['colorValue'];
 
-    final icon = iconCodePoint != null
-        ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
-        : Icons.book;
-    final color = colorValue != null ? Color(colorValue) : Colors.blue;
+    final result = await _useCase.createNotebook({
+      'title': title,
+      'id': id,
+      'icon': iconCodePoint,
+      'color': colorValue,
+    });
 
-    await _controller.addNotebook(title, icon, id: id, color: color);
-
-    // 查找刚创建的笔记本（如果提供了ID则用ID查找，否则用标题查找）
-    final notebook = id != null
-        ? _controller.getNotebook(id)
-        : _controller.notebooks.firstWhere(
-            (nb) => nb.title == title,
-            orElse: () => Notebook(id: '', title: ''),
-          );
-
-    if (notebook == null || notebook.id.isEmpty) {
-      return jsonEncode({'error': '创建笔记本失败'});
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
     }
 
+    final notebook = result.dataOrNull ?? {};
     return jsonEncode({
-      'id': notebook.id,
-      'title': notebook.title,
-      'icon': notebook.icon.codePoint,
-      'color': notebook.color.value,
+      'id': notebook['id'],
+      'title': notebook['title'],
+      'icon': notebook['icon'],
+      'color': notebook['color'],
     });
   }
 
@@ -280,29 +304,21 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: notebookId'});
     }
 
-    final notebook = _controller.getNotebook(notebookId);
-    if (notebook == null || notebook.id.isEmpty) {
-      return jsonEncode({'error': '笔记本不存在'});
-    }
-
     // 可选参数（从 updates 子对象获取）
     final Map<String, dynamic>? updates = params['updates'];
     if (updates == null) {
       return jsonEncode({'error': '缺少必需参数: updates'});
     }
 
-    // 应用更新
-    final updatedNotebook = Notebook(
-      id: notebook.id,
-      title: updates['title'] ?? notebook.title,
-      icon: updates['icon'] != null
-          ? IconData(updates['icon'] as int, fontFamily: 'MaterialIcons')
-          : notebook.icon,
-      color: updates['color'] != null ? Color(updates['color'] as int) : notebook.color,
-      nodes: notebook.nodes,
-    );
+    final result = await _useCase.updateNotebook({
+      'id': notebookId,
+      ...updates,
+    });
 
-    await _controller.updateNotebook(updatedNotebook);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+    }
+
     return jsonEncode({'success': true});
   }
 
@@ -314,7 +330,12 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: notebookId'});
     }
 
-    await _controller.deleteNotebook(notebookId);
+    final result = await _useCase.deleteNotebook({'id': notebookId});
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+    }
+
     return jsonEncode({'success': true});
   }
 
@@ -329,50 +350,61 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
     // 可选参数
     final String? parentId = params['parentId'];
 
-    final notebook = _controller.getNotebook(notebookId);
-    if (notebook == null || notebook.id.isEmpty) {
-      return jsonEncode({'error': '笔记本不存在'});
+    final result = await _useCase.getNodes({'notebookId': notebookId});
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
     }
 
-    List<Node> nodes;
-    if (parentId == null || parentId.isEmpty) {
-      // 获取根节点
-      nodes = notebook.nodes;
-    } else {
-      // 获取指定父节点的子节点
-      final parentNode = _controller.findNodeById(notebookId, parentId);
-      if (parentNode == null) {
-        return jsonEncode({'error': '父节点不存在'});
+    final data = result.dataOrNull ?? [];
+
+    // 如果是分页结果
+    if (data is Map && data.containsKey('items')) {
+      var items = data['items'] as List;
+
+      // 如果指定了 parentId，需要过滤子节点
+      if (parentId != null && parentId.isNotEmpty) {
+        items = items.where((node) => node['parentId'] == parentId).toList();
       }
-      nodes = parentNode.children;
+
+      return jsonEncode({
+        ...data,
+        'items': items,
+      });
     }
 
-    final nodeList = nodes.map((n) => _nodeToJson(n, includeChildren: false)).toList();
+    // 如果是普通列表
+    var nodes = data as List;
 
-    // 应用分页
-    final result = _paginate(nodeList, params);
-    return jsonEncode(result);
+    // 如果指定了 parentId，需要过滤子节点
+    if (parentId != null && parentId.isNotEmpty) {
+      nodes = nodes.where((node) => node['parentId'] == parentId).toList();
+    }
+
+    return jsonEncode(nodes);
   }
 
   /// 获取节点详情
   Future<String> _jsGetNode(Map<String, dynamic> params) async {
     // 必需参数验证
-    final String? notebookId = params['notebookId'];
     final String? nodeId = params['nodeId'];
 
-    if (notebookId == null || notebookId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: notebookId'});
-    }
     if (nodeId == null || nodeId.isEmpty) {
       return jsonEncode({'error': '缺少必需参数: nodeId'});
     }
 
-    final node = _controller.findNodeById(notebookId, nodeId);
+    final result = await _useCase.getNodeById({'id': nodeId});
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+    }
+
+    final node = result.dataOrNull;
     if (node == null) {
       return jsonEncode({'error': '节点不存在'});
     }
 
-    return jsonEncode(_nodeToJson(node, includeChildren: true));
+    return jsonEncode(node);
   }
 
   /// 创建节点
@@ -389,58 +421,31 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: nodeData'});
     }
 
-    // 可选的自定义 ID，未提供则自动生成
-    final String nodeId = nodeData['id'] ?? const Uuid().v4();
+    // 转换 nodeData 格式以适配 UseCase
+    final useCaseParams = Map<String, dynamic>.from(nodeData);
+    useCaseParams['notebookId'] = notebookId;
 
-    final newNode = Node(
-      id: nodeId,
-      title: nodeData['title'] ?? '新节点',
-      createdAt: DateTime.now(),
-      tags: (nodeData['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      status: _parseNodeStatus(nodeData['status']),
-      startDate: nodeData['startDate'] != null
-          ? DateTime.parse(nodeData['startDate'])
-          : null,
-      endDate: nodeData['endDate'] != null
-          ? DateTime.parse(nodeData['endDate'])
-          : null,
-      customFields: (nodeData['customFields'] as List<dynamic>?)
-          ?.map((f) => CustomField(
-                key: f['key'] ?? '',
-                value: f['value'] ?? '',
-              ))
-          .toList() ?? [],
-      notes: nodeData['notes'] ?? '',
-      parentId: nodeData['parentId'] ?? '',
-      color: nodeData['color'] != null ? Color(nodeData['color'] as int) : Colors.grey,
-      pathValue: nodeData['title'] ?? '新节点',
-    );
+    final result = await _useCase.createNode(useCaseParams);
 
-    await _controller.addNode(notebookId, newNode, parentId: newNode.parentId.isNotEmpty ? newNode.parentId : null);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+    }
 
+    final node = result.dataOrNull ?? {};
     return jsonEncode({
-      'id': newNode.id,
-      'title': newNode.title,
-      'status': newNode.status.toString().split('.').last,
+      'id': node['id'],
+      'title': node['title'],
+      'status': node['status'],
     });
   }
 
   /// 更新节点
   Future<String> _jsUpdateNode(Map<String, dynamic> params) async {
     // 必需参数验证
-    final String? notebookId = params['notebookId'];
     final String? nodeId = params['nodeId'];
 
-    if (notebookId == null || notebookId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: notebookId'});
-    }
     if (nodeId == null || nodeId.isEmpty) {
       return jsonEncode({'error': '缺少必需参数: nodeId'});
-    }
-
-    final node = _controller.findNodeById(notebookId, nodeId);
-    if (node == null) {
-      return jsonEncode({'error': '节点不存在'});
     }
 
     // 可选参数（从 updates 子对象获取）
@@ -449,68 +454,42 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: updates'});
     }
 
-    // 应用更新
-    final updatedNode = Node(
-      id: node.id,
-      title: updates['title'] ?? node.title,
-      createdAt: node.createdAt,
-      tags: updates['tags'] != null
-          ? (updates['tags'] as List<dynamic>).map((e) => e.toString()).toList()
-          : node.tags,
-      status: updates['status'] != null ? _parseNodeStatus(updates['status']) : node.status,
-      startDate: updates['startDate'] != null
-          ? DateTime.parse(updates['startDate'])
-          : node.startDate,
-      endDate: updates['endDate'] != null
-          ? DateTime.parse(updates['endDate'])
-          : node.endDate,
-      customFields: updates['customFields'] != null
-          ? (updates['customFields'] as List<dynamic>)
-              .map((f) => CustomField(
-                    key: f['key'] ?? '',
-                    value: f['value'] ?? '',
-                  ))
-              .toList()
-          : node.customFields,
-      notes: updates['notes'] ?? node.notes,
-      parentId: node.parentId,
-      color: updates['color'] != null ? Color(updates['color'] as int) : node.color,
-      pathValue: node.pathValue,
-      children: node.children,
-      isExpanded: node.isExpanded,
-    );
+    final result = await _useCase.updateNode({
+      'id': nodeId,
+      ...updates,
+    });
 
-    await _controller.updateNode(notebookId, updatedNode);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+    }
+
     return jsonEncode({'success': true});
   }
 
   /// 删除节点
   Future<String> _jsDeleteNode(Map<String, dynamic> params) async {
     // 必需参数验证
-    final String? notebookId = params['notebookId'];
     final String? nodeId = params['nodeId'];
 
-    if (notebookId == null || notebookId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: notebookId'});
-    }
     if (nodeId == null || nodeId.isEmpty) {
       return jsonEncode({'error': '缺少必需参数: nodeId'});
     }
 
-    await _controller.deleteNode(notebookId, nodeId);
+    final result = await _useCase.deleteNode({'id': nodeId});
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+    }
+
     return jsonEncode({'success': true});
   }
 
   /// 移动节点到新的父节点下
   Future<String> _jsMoveNode(Map<String, dynamic> params) async {
     // 必需参数验证
-    final String? notebookId = params['notebookId'];
     final String? nodeId = params['nodeId'];
     final String? newParentId = params['newParentId'];
 
-    if (notebookId == null || notebookId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: notebookId'});
-    }
     if (nodeId == null || nodeId.isEmpty) {
       return jsonEncode({'error': '缺少必需参数: nodeId'});
     }
@@ -518,38 +497,26 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: newParentId'});
     }
 
-    final node = _controller.findNodeById(notebookId, nodeId);
+    // 获取节点详情
+    final getResult = await _useCase.getNodeById({'id': nodeId});
+    if (getResult.isFailure) {
+      return jsonEncode({'error': getResult.errorOrNull?.message ?? '未知错误'});
+    }
+
+    final node = getResult.dataOrNull;
     if (node == null) {
       return jsonEncode({'error': '节点不存在'});
     }
 
-    // 创建更新后的节点（更改 parentId）
-    final movedNode = Node(
-      id: node.id,
-      title: node.title,
-      createdAt: node.createdAt,
-      tags: node.tags,
-      status: node.status,
-      startDate: node.startDate,
-      endDate: node.endDate,
-      customFields: node.customFields,
-      notes: node.notes,
-      parentId: newParentId,
-      color: node.color,
-      pathValue: node.pathValue,
-      children: node.children,
-      isExpanded: node.isExpanded,
-    );
+    // 更新节点的 parentId
+    final updateResult = await _useCase.updateNode({
+      'id': nodeId,
+      'parentId': newParentId,
+    });
 
-    // 先删除原位置的节点
-    await _controller.deleteNode(notebookId, nodeId);
-
-    // 在新位置添加节点
-    await _controller.addNode(
-      notebookId,
-      movedNode,
-      parentId: newParentId.isNotEmpty ? newParentId : null,
-    );
+    if (updateResult.isFailure) {
+      return jsonEncode({'error': updateResult.errorOrNull?.message ?? '未知错误'});
+    }
 
     return jsonEncode({'success': true});
   }
@@ -562,15 +529,20 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: notebookId'});
     }
 
-    final notebook = _controller.getNotebook(notebookId);
-    if (notebook == null || notebook.id.isEmpty) {
+    final notebookResult = await _useCase.getNotebookById({'id': notebookId});
+    if (notebookResult.isFailure) {
+      return jsonEncode({'error': notebookResult.errorOrNull?.message ?? '未知错误'});
+    }
+
+    final notebook = notebookResult.dataOrNull;
+    if (notebook == null) {
       return jsonEncode({'error': '笔记本不存在'});
     }
 
     return jsonEncode({
-      'notebookId': notebook.id,
-      'notebookTitle': notebook.title,
-      'tree': notebook.nodes.map((n) => _nodeToJson(n, includeChildren: true)).toList(),
+      'notebookId': notebook['id'],
+      'notebookTitle': notebook['title'],
+      'tree': notebook['nodes'] ?? [],
     });
   }
 
@@ -587,8 +559,17 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: nodeId'});
     }
 
-    final pathTitles = _controller.getNodePath(notebookId, nodeId);
-    final pathIds = _controller.getNodePathIds(notebookId, nodeId);
+    final result = await _useCase.getNodePath({
+      'notebookId': notebookId,
+      'nodeId': nodeId,
+    });
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+    }
+
+    final pathTitles = result.dataOrNull ?? [];
+    final pathIds = <String>[]; // UseCase 中只返回标题，ID 需要额外获取
 
     return jsonEncode({
       'titles': pathTitles,
@@ -613,46 +594,61 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
     final bool findAll = params['findAll'] ?? false;
 
-    final notebooks = _controller.notebooks;
-    final matches = <Notebook>[];
+    // 使用搜索功能
+    if (field.toLowerCase() == 'title') {
+      final result = await _useCase.searchNotebooks({
+        'titleKeyword': value.toString(),
+      });
 
-    for (var notebook in notebooks) {
-      bool isMatch = false;
-
-      switch (field.toLowerCase()) {
-        case 'id':
-          isMatch = notebook.id == value;
-          break;
-        case 'title':
-          isMatch = notebook.title == value;
-          break;
-        default:
-          // 尝试通过反射或直接比较
-          isMatch = false;
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
       }
 
-      if (isMatch) {
-        if (!findAll) {
-          return jsonEncode({
-            'id': notebook.id,
-            'title': notebook.title,
-            'icon': notebook.icon.codePoint,
-            'color': notebook.color.value,
-            'nodeCount': _countAllNodes(notebook.nodes),
-          });
-        }
-        matches.add(notebook);
+      final notebooks = result.dataOrNull ?? [];
+
+      // 如果不是查找所有，只返回第一个
+      if (!findAll && notebooks is List && notebooks.isNotEmpty) {
+        final notebook = notebooks.first;
+        return jsonEncode({
+          'id': notebook['id'],
+          'title': notebook['title'],
+          'icon': notebook['icon'],
+          'color': notebook['color'],
+          'nodeCount': _countAllNodesFromJson(notebook['nodes'] ?? []),
+        });
+      }
+
+      // 返回所有匹配的笔记本
+      if (notebooks is List) {
+        final enrichedList = notebooks.map((nb) {
+          final notebookJson = Map<String, dynamic>.from(nb);
+          notebookJson['nodeCount'] = _countAllNodesFromJson(nb['nodes'] ?? []);
+          return notebookJson;
+        }).toList();
+        return jsonEncode(enrichedList);
       }
     }
 
-    if (findAll) {
-      return jsonEncode(matches.map((nb) => {
-        'id': nb.id,
-        'title': nb.title,
-        'icon': nb.icon.codePoint,
-        'color': nb.color.value,
-        'nodeCount': _countAllNodes(nb.nodes),
-      }).toList());
+    // 对于 ID 查找，直接获取笔记本
+    if (field.toLowerCase() == 'id') {
+      final result = await _useCase.getNotebookById({'id': value.toString()});
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+      }
+
+      final notebook = result.dataOrNull;
+      if (notebook == null) {
+        return jsonEncode(null);
+      }
+
+      return jsonEncode({
+        'id': notebook['id'],
+        'title': notebook['title'],
+        'icon': notebook['icon'],
+        'color': notebook['color'],
+        'nodeCount': _countAllNodesFromJson(notebook['nodes'] ?? []),
+      });
     }
 
     return jsonEncode(null);
@@ -665,17 +661,23 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: id'});
     }
 
-    final notebook = _controller.getNotebook(id);
-    if (notebook == null || notebook.id.isEmpty) {
+    final result = await _useCase.getNotebookById({'id': id});
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+    }
+
+    final notebook = result.dataOrNull;
+    if (notebook == null) {
       return jsonEncode(null);
     }
 
     return jsonEncode({
-      'id': notebook.id,
-      'title': notebook.title,
-      'icon': notebook.icon.codePoint,
-      'color': notebook.color.value,
-      'nodeCount': _countAllNodes(notebook.nodes),
+      'id': notebook['id'],
+      'title': notebook['title'],
+      'icon': notebook['icon'],
+      'color': notebook['color'],
+      'nodeCount': _countAllNodesFromJson(notebook['nodes'] ?? []),
     });
   }
 
@@ -686,39 +688,36 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: title'});
     }
 
-    final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
 
-    final notebooks = _controller.notebooks;
-    final matches = <Notebook>[];
+    final result = await _useCase.searchNotebooks({
+      'titleKeyword': title,
+    });
 
-    for (var notebook in notebooks) {
-      final isMatch = fuzzy
-          ? notebook.title.toLowerCase().contains(title.toLowerCase())
-          : notebook.title == title;
-
-      if (isMatch) {
-        if (!findAll) {
-          return jsonEncode({
-            'id': notebook.id,
-            'title': notebook.title,
-            'icon': notebook.icon.codePoint,
-            'color': notebook.color.value,
-            'nodeCount': _countAllNodes(notebook.nodes),
-          });
-        }
-        matches.add(notebook);
-      }
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
     }
 
-    if (findAll) {
-      return jsonEncode(matches.map((nb) => {
-        'id': nb.id,
-        'title': nb.title,
-        'icon': nb.icon.codePoint,
-        'color': nb.color.value,
-        'nodeCount': _countAllNodes(nb.nodes),
-      }).toList());
+    final notebooks = result.dataOrNull ?? [];
+
+    if (!findAll && notebooks is List && notebooks.isNotEmpty) {
+      final notebook = notebooks.first;
+      return jsonEncode({
+        'id': notebook['id'],
+        'title': notebook['title'],
+        'icon': notebook['icon'],
+        'color': notebook['color'],
+        'nodeCount': _countAllNodesFromJson(notebook['nodes'] ?? []),
+      });
+    }
+
+    if (notebooks is List) {
+      final enrichedList = notebooks.map((nb) {
+        final notebookJson = Map<String, dynamic>.from(nb);
+        notebookJson['nodeCount'] = _countAllNodesFromJson(nb['nodes'] ?? []);
+        return notebookJson;
+      }).toList();
+      return jsonEncode(enrichedList);
     }
 
     return jsonEncode(null);
@@ -743,50 +742,49 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
     final bool findAll = params['findAll'] ?? false;
 
-    final notebook = _controller.getNotebook(notebookId);
-    if (notebook == null || notebook.id.isEmpty) {
-      return jsonEncode({'error': '���记本不存在'});
-    }
+    // 使用搜索功能
+    if (field.toLowerCase() == 'title' || field.toLowerCase() == 'status') {
+      final searchParams = <String, dynamic>{
+        'notebookId': notebookId,
+      };
 
-    final matches = <Node>[];
-
-    void searchNodes(List<Node> nodes) {
-      for (var node in nodes) {
-        bool isMatch = false;
-
-        switch (field.toLowerCase()) {
-          case 'id':
-            isMatch = node.id == value;
-            break;
-          case 'title':
-            isMatch = node.title == value;
-            break;
-          case 'status':
-            isMatch = node.status.toString().split('.').last == value;
-            break;
-          default:
-            isMatch = false;
-        }
-
-        if (isMatch) {
-          if (!findAll) {
-            return;
-          }
-          matches.add(node);
-        }
-
-        searchNodes(node.children);
+      if (field.toLowerCase() == 'title') {
+        searchParams['titleKeyword'] = value.toString();
+      } else if (field.toLowerCase() == 'status') {
+        // 转换状态字符串为索引
+        final statusMap = {'todo': 0, 'doing': 1, 'done': 2, 'none': 3};
+        searchParams['status'] = statusMap[value.toString().toLowerCase()] ?? 0;
       }
+
+      final result = await _useCase.searchNodes(searchParams);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+      }
+
+      final nodes = result.dataOrNull ?? [];
+
+      if (!findAll && nodes is List && nodes.isNotEmpty) {
+        return jsonEncode(nodes.first);
+      }
+
+      return jsonEncode(nodes);
     }
 
-    searchNodes(notebook.nodes);
+    // 对于 ID 查找，直接获取节点
+    if (field.toLowerCase() == 'id') {
+      final result = await _useCase.getNodeById({'id': value.toString()});
 
-    if (!findAll && matches.isNotEmpty) {
-      return jsonEncode(_nodeToJson(matches.first, includeChildren: false));
-    }
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+      }
 
-    if (findAll) {
-      return jsonEncode(matches.map((n) => _nodeToJson(n, includeChildren: false)).toList());
+      final node = result.dataOrNull;
+      if (node == null) {
+        return jsonEncode(null);
+      }
+
+      return jsonEncode(node);
     }
 
     return jsonEncode(null);
@@ -794,22 +792,23 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
 
   /// 根据ID查找节点
   Future<String> _jsFindNodeById(Map<String, dynamic> params) async {
-    final String? notebookId = params['notebookId'];
-    if (notebookId == null || notebookId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: notebookId'});
-    }
-
     final String? nodeId = params['nodeId'];
     if (nodeId == null || nodeId.isEmpty) {
       return jsonEncode({'error': '缺少必需参数: nodeId'});
     }
 
-    final node = _controller.findNodeById(notebookId, nodeId);
+    final result = await _useCase.getNodeById({'id': nodeId});
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+    }
+
+    final node = result.dataOrNull;
     if (node == null) {
       return jsonEncode(null);
     }
 
-    return jsonEncode(_nodeToJson(node, includeChildren: false));
+    return jsonEncode(node);
   }
 
   /// 根据标题查找节点
@@ -824,44 +823,24 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: title'});
     }
 
-    final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
 
-    final notebook = _controller.getNotebook(notebookId);
-    if (notebook == null || notebook.id.isEmpty) {
-      return jsonEncode({'error': '笔记本不存在'});
+    final result = await _useCase.searchNodes({
+      'notebookId': notebookId,
+      'titleKeyword': title,
+    });
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
     }
 
-    final matches = <Node>[];
+    final nodes = result.dataOrNull ?? [];
 
-    void searchNodes(List<Node> nodes) {
-      for (var node in nodes) {
-        final isMatch = fuzzy
-            ? node.title.toLowerCase().contains(title.toLowerCase())
-            : node.title == title;
-
-        if (isMatch) {
-          matches.add(node);
-          if (!findAll) {
-            return;
-          }
-        }
-
-        searchNodes(node.children);
-      }
+    if (!findAll && nodes is List && nodes.isNotEmpty) {
+      return jsonEncode(nodes.first);
     }
 
-    searchNodes(notebook.nodes);
-
-    if (!findAll && matches.isNotEmpty) {
-      return jsonEncode(_nodeToJson(matches.first, includeChildren: false));
-    }
-
-    if (findAll) {
-      return jsonEncode(matches.map((n) => _nodeToJson(n, includeChildren: false)).toList());
-    }
-
-    return jsonEncode(null);
+    return jsonEncode(nodes);
   }
 
   // ==================== 辅助方法 ====================
@@ -945,6 +924,18 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
     int count = nodes.length;
     for (var node in nodes) {
       count += _countAllNodes(node.children);
+    }
+    return count;
+  }
+
+  // 从 JSON 中计算节点总数
+  int _countAllNodesFromJson(List<dynamic> nodesJson) {
+    int count = nodesJson.length;
+    for (var nodeJson in nodesJson) {
+      final children = nodeJson['children'] as List?;
+      if (children != null && children.isNotEmpty) {
+        count += _countAllNodesFromJson(children);
+      }
     }
     return count;
   }

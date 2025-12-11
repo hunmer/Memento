@@ -12,6 +12,8 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'models/diary_entry.dart';
 import 'utils/diary_utils.dart';
+import 'repositories/client_diary_repository.dart';
+import 'package:shared_models/usecases/diary/diary_usecase.dart';
 
 /// 日记创建事件参数
 class DiaryEntryCreatedEventArgs extends EventArgs {
@@ -67,6 +69,9 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     }
     return _instance!;
   }
+
+  // UseCase 实例
+  late final DiaryUseCase _diaryUseCase;
 
   // 缓存统计数据（用于同步访问）
   int _cachedTodayWordCount = 0;
@@ -285,6 +290,10 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   Future<void> initialize() async {
     // 确保日记数据目录存在
     await storage.createDirectory('diary');
+
+    // 初始化 UseCase
+    final repository = ClientDiaryRepository();
+    _diaryUseCase = DiaryUseCase(repository);
 
     // 注册数据选择器
     _registerDataSelectors();
@@ -519,37 +528,6 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
 
   // ==================== JS API 实现 ====================
 
-  /// 分页辅助方法
-  /// @param items 要分页的列表
-  /// @param offset 偏移量(起始索引)
-  /// @param count 每页数量
-  /// @returns 分页结果对象或原始列表(向后兼容)
-  Map<String, dynamic> _paginate(
-    List<Map<String, dynamic>> items,
-    int? offset,
-    int? count,
-  ) {
-    // 如果没有提供分页参数,返回原始格式(向后兼容)
-    if (offset == null && count == null) {
-      return {'items': items};
-    }
-
-    final int actualOffset = offset ?? 0;
-    final int actualCount = count ?? 20; // 默认每页20条
-
-    final int total = items.length;
-    final int start = actualOffset.clamp(0, total);
-    final int end = (start + actualCount).clamp(0, total);
-
-    return {
-      'items': items.sublist(start, end),
-      'total': total,
-      'offset': actualOffset,
-      'count': actualCount,
-      'hasMore': end < total,
-    };
-  }
-
   /// 获取指定日期范围的日记
   /// 参数: {"startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD", "offset": number, "count": number}
   /// 返回: JSON 字符串，包含日记列表
@@ -565,59 +543,34 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         return {'error': '缺少必需参数: endDate', 'total': 0, 'diaries': []};
       }
 
-      final startDate = params['startDate'] as String;
-      final endDate = params['endDate'] as String;
+      // 使用 UseCase 获取日记列表
+      final result = await _diaryUseCase.getEntries(params);
 
-      final start = DateTime.parse(startDate);
-      final end = DateTime.parse(endDate);
+      if (result.isFailure) {
+        return {'error': result.errorOrNull?.message ?? '未知错误', 'total': 0, 'diaries': []};
+      }
 
-      final allEntries = await DiaryUtils.loadDiaryEntries();
+      final diaries = result.dataOrNull ?? [];
 
-      // 过滤日期范围
-      final filteredEntries =
-          allEntries.entries
-              .where(
-                (entry) =>
-                    !entry.key.isBefore(start) && !entry.key.isAfter(end),
-              )
-              .toList()
-            ..sort((a, b) => a.key.compareTo(b.key)); // 按日期排序
-
-      final diariesList = filteredEntries
-          .map(
-            (entry) => {
-              'date': entry.key.toIso8601String().split('T')[0],
-              'title': entry.value.title,
-              'content': entry.value.content,
-              'mood': entry.value.mood,
-              'wordCount': entry.value.content.length,
-              'createdAt': entry.value.createdAt.toIso8601String(),
-              'updatedAt': entry.value.updatedAt.toIso8601String(),
-            },
-          )
-          .toList();
-
-      // 支持分页参数
+      // 检查是否需要分页格式
       final int? offset = params['offset'];
       final int? count = params['count'];
 
-      final paginationResult = _paginate(diariesList, offset, count);
-
-      // 向后兼容:如果没有分页参数,返回原格式
+      // 如果没有分页参数，返回原格式（向后兼容）
       if (offset == null && count == null) {
         return {
-          'total': diariesList.length,
-          'diaries': diariesList,
+          'total': diaries.length,
+          'diaries': diaries,
         };
       }
 
-      // 有分页参数时,返回分页格式
+      // 有分页参数时，返回分页格式
       return {
-        'total': paginationResult['total'],
-        'offset': paginationResult['offset'],
-        'count': paginationResult['count'],
-        'hasMore': paginationResult['hasMore'],
-        'diaries': paginationResult['items'],
+        'total': diaries.length,
+        'offset': offset ?? 0,
+        'count': count ?? 20,
+        'hasMore': (offset ?? 0) + (count ?? 20) < diaries.length,
+        'diaries': diaries,
       };
     } catch (e) {
       return {'error': '获取日记失败: $e', 'total': 0, 'diaries': []};
@@ -634,9 +587,14 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         return {'exists': false, 'error': '缺少必需参数: date'};
       }
 
-      final date = params['date'] as String;
-      final dateTime = DateTime.parse(date);
-      final entry = await DiaryUtils.loadDiaryEntry(dateTime);
+      // 使用 UseCase 获取日记
+      final result = await _diaryUseCase.getEntryByDate(params);
+
+      if (result.isFailure) {
+        return {'exists': false, 'error': result.errorOrNull?.message ?? '未知错误'};
+      }
+
+      final entry = result.dataOrNull;
 
       if (entry == null) {
         return {'exists': false, 'error': '该日期没有日记'};
@@ -644,13 +602,13 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
 
       return {
         'exists': true,
-        'date': dateTime.toIso8601String().split('T')[0],
-        'title': entry.title,
-        'content': entry.content,
-        'mood': entry.mood,
-        'wordCount': entry.content.length,
-        'createdAt': entry.createdAt.toIso8601String(),
-        'updatedAt': entry.updatedAt.toIso8601String(),
+        'date': entry['date'],
+        'title': entry['title'],
+        'content': entry['content'],
+        'mood': entry['mood'],
+        'wordCount': (entry['content'] as String).length,
+        'createdAt': entry['createdAt'],
+        'updatedAt': entry['updatedAt'],
       };
     } catch (e) {
       return {'exists': false, 'error': '获取日记失败: $e'};
@@ -670,21 +628,20 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         return {'success': false, 'error': '缺少必需参数: content'};
       }
 
-      final date = params['date'] as String;
-      final content = params['content'] as String;
-      final title = params['title'] as String? ?? ''; // 可选，默认为空字符串
-      final mood = params['mood'] as String?; // 可选，默认为 null
+      // 先检查是否已存在
+      final checkResult = await _diaryUseCase.getEntryByDate({'date': params['date']});
+      final exists = checkResult.dataOrNull != null;
 
-      final dateTime = DateTime.parse(date);
+      // 使用 UseCase 保存日记
+      final result = exists
+          ? await _diaryUseCase.updateEntry(params)
+          : await _diaryUseCase.createEntry(params);
 
-      await DiaryUtils.saveDiaryEntry(
-        dateTime,
-        content,
-        title: title,
-        mood: mood,
-      );
+      if (result.isFailure) {
+        return {'success': false, 'error': result.errorOrNull?.message ?? '未知错误'};
+      }
 
-      return {'success': true, 'message': '日记保存成功', 'date': date};
+      return {'success': true, 'message': '日记保存成功', 'date': params['date']};
     } catch (e) {
       return {'success': false, 'error': '保存日记失败: $e'};
     }
@@ -702,14 +659,20 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         return {'success': false, 'error': '缺少必需参数: date'};
       }
 
-      final date = params['date'] as String;
-      final dateTime = DateTime.parse(date);
-      final success = await DiaryUtils.deleteDiaryEntry(dateTime);
+      // 使用 UseCase 删除日记
+      final result = await _diaryUseCase.deleteEntry(params);
+
+      if (result.isFailure) {
+        return {'success': false, 'error': result.errorOrNull?.message ?? '未知错误'};
+      }
+
+      final data = result.dataOrNull;
+      final deleted = data?['deleted'] ?? false;
 
       return {
-        'success': success,
-        'message': success ? '日记删除成功' : '该日期没有日记',
-        'date': date,
+        'success': deleted,
+        'message': deleted ? '日记删除成功' : '该日期没有日记',
+        'date': params['date'],
       };
     } catch (e) {
       return {'success': false, 'error': '删除日记失败: $e'};
@@ -723,7 +686,14 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     Map<String, dynamic> params,
   ) async {
     try {
-      final wordCount = await getTodayWordCount();
+      // 使用 UseCase 获取今日字数
+      final result = await _diaryUseCase.getTodayWordCount(params);
+
+      if (result.isFailure) {
+        return {'error': result.errorOrNull?.message ?? '未知错误', 'wordCount': 0};
+      }
+
+      final wordCount = result.dataOrNull ?? 0;
       final today = DateTime.now();
 
       return {
@@ -742,20 +712,35 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     Map<String, dynamic> params,
   ) async {
     try {
-      final monthWordCount = await getMonthWordCount();
-      final progress = await getMonthProgress();
+      // 使用 UseCase 获取本月字数和进度
+      final wordCountResult = await _diaryUseCase.getMonthWordCount(params);
+      final progressResult = await _diaryUseCase.getMonthProgress(params);
+
+      if (wordCountResult.isFailure || progressResult.isFailure) {
+        return {
+          'error': '获取本月统计失败',
+          'wordCount': 0,
+          'completedDays': 0,
+          'totalDays': 0,
+          'progress': '0.0',
+        };
+      }
+
+      final wordCount = wordCountResult.dataOrNull ?? 0;
+      final progress = progressResult.dataOrNull ?? {};
+      final completedDays = progress['completedDays'] ?? 0;
+      final totalDays = progress['totalDays'] ?? 0;
       final now = DateTime.now();
 
       return {
         'year': now.year,
         'month': now.month,
-        'wordCount': monthWordCount,
-        'completedDays': progress.$1,
-        'totalDays': progress.$2,
-        'progress':
-            progress.$2 > 0
-                ? (progress.$1 / progress.$2 * 100).toStringAsFixed(1)
-                : '0.0',
+        'wordCount': wordCount,
+        'completedDays': completedDays,
+        'totalDays': totalDays,
+        'progress': totalDays > 0
+            ? (completedDays / totalDays * 100).toStringAsFixed(1)
+            : '0.0',
       };
     } catch (e) {
       return {
@@ -774,14 +759,16 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   /// 参数: {} (空对象，保持接口一致性)
   /// 返回: 数字，今日字数
   Future<int> _jsGetTodayWordCount(Map<String, dynamic> params) async {
-    return await getTodayWordCount();
+    final result = await _diaryUseCase.getTodayWordCount(params);
+    return result.dataOrNull ?? 0;
   }
 
   /// 获取本月字数（直接返回数字）
   /// 参数: {} (空对象，保持接口一致性)
   /// 返回: 数字，本月总字数
   Future<int> _jsGetMonthWordCount(Map<String, dynamic> params) async {
-    return await getMonthWordCount();
+    final result = await _diaryUseCase.getMonthWordCount(params);
+    return result.dataOrNull ?? 0;
   }
 
   /// 获取本月进度（直接返回对象）
@@ -790,8 +777,12 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   Future<Map<String, int>> _jsGetMonthProgress(
     Map<String, dynamic> params,
   ) async {
-    final progress = await getMonthProgress();
-    return {'completedDays': progress.$1, 'totalDays': progress.$2};
+    final result = await _diaryUseCase.getMonthProgress(params);
+    final progress = result.dataOrNull ?? {};
+    return {
+      'completedDays': progress['completedDays'] ?? 0,
+      'totalDays': progress['totalDays'] ?? 0,
+    };
   }
 
   /// 加载日记条目（直接操作方法）
@@ -805,15 +796,14 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         return {'error': '缺少必需参数: dateStr'};
       }
 
-      final dateStr = params['dateStr'] as String;
-      final date = DateTime.parse(dateStr);
-      final entry = await DiaryUtils.loadDiaryEntry(date);
+      // 使用 UseCase 获取日记
+      final result = await _diaryUseCase.getEntryByDate({'date': params['dateStr']});
 
-      if (entry == null) {
-        return null;
+      if (result.isFailure) {
+        return {'error': result.errorOrNull?.message ?? '未知错误'};
       }
 
-      return entry.toJson();
+      return result.dataOrNull;
     } catch (e) {
       return {'error': '加载日记失败: $e'};
     }
@@ -830,16 +820,28 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         return {'error': '缺少必需参数: dateStr 或 content'};
       }
 
-      final dateStr = params['dateStr'] as String;
-      final content = params['content'] as String;
-      final title = params['title'] as String? ?? '';
-      final mood = params['mood'] as String?;
+      // 转换参数格式
+      final saveParams = {
+        'date': params['dateStr'],
+        'content': params['content'],
+        'title': params['title'] ?? '',
+        'mood': params['mood'],
+      };
 
-      final date = DateTime.parse(dateStr);
-      await DiaryUtils.saveDiaryEntry(date, content, title: title, mood: mood);
+      // 先检查是否已存在
+      final checkResult = await _diaryUseCase.getEntryByDate({'date': params['dateStr']});
+      final exists = checkResult.dataOrNull != null;
 
-      final entry = await DiaryUtils.loadDiaryEntry(date);
-      return entry?.toJson() ?? {'error': '保存后无法读取日记'};
+      // 使用 UseCase 保存
+      final result = exists
+          ? await _diaryUseCase.updateEntry(saveParams)
+          : await _diaryUseCase.createEntry(saveParams);
+
+      if (result.isFailure) {
+        return {'error': result.errorOrNull?.message ?? '未知错误'};
+      }
+
+      return result.dataOrNull ?? {};
     } catch (e) {
       return {'error': '保存日记失败: $e'};
     }
@@ -854,9 +856,16 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         return false;
       }
 
-      final dateStr = params['dateStr'] as String;
-      final date = DateTime.parse(dateStr);
-      return await DiaryUtils.deleteDiaryEntry(date);
+      // 使用 UseCase 删除
+      final result = await _diaryUseCase.deleteEntry({'date': params['dateStr']});
+
+      if (result.isFailure) {
+        debugPrint('Delete diary entry error: ${result.errorOrNull?.message ?? '未知错误'}');
+        return false;
+      }
+
+      final data = result.dataOrNull;
+      return data?['deleted'] ?? false;
     } catch (e) {
       debugPrint('Delete diary entry error: $e');
       return false;
@@ -872,9 +881,9 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
         return false;
       }
 
-      final dateStr = params['dateStr'] as String;
-      final date = DateTime.parse(dateStr);
-      return await DiaryUtils.hasEntryForDate(date);
+      // 使用 UseCase 获取日记
+      final result = await _diaryUseCase.getEntryByDate({'date': params['dateStr']});
+      return result.dataOrNull != null;
     } catch (e) {
       debugPrint('Check diary entry error: $e');
       return false;
@@ -887,6 +896,7 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   Future<Map<String, dynamic>> _jsGetDiaryStats(
     Map<String, dynamic> params,
   ) async {
-    return await DiaryUtils.getDiaryStats();
+    final result = await _diaryUseCase.getStats(params);
+    return result.dataOrNull ?? {};
   }
 }

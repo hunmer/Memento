@@ -7,16 +7,15 @@ import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
-import 'package:Memento/plugins/habits/models/skill.dart';
-import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
 import 'package:Memento/plugins/habits/widgets/habits_bottom_bar.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
+import 'package:Memento/plugins/habits/repositories/client_habits_repository.dart';
+import 'package:shared_models/usecases/habits/habits_usecase.dart';
 
 /// 习惯追踪插件主视图
 class HabitsMainView extends StatelessWidget {
@@ -36,6 +35,8 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   late final SkillController _skillController;
   late final CompletionRecordController _recordController;
   late final TimerController _timerController;
+  late final ClientHabitsRepository _repository;
+  late final HabitsUseCase _useCase;
   static HabitsPlugin? _instance;
   static HabitsPlugin get instance {
     if (_instance == null) {
@@ -80,6 +81,14 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
       habitController: _habitController,
       skillControlle: _skillController,
     );
+
+    // 创建 Repository 和 UseCase 实例
+    _repository = ClientHabitsRepository(
+      habitController: _habitController,
+      skillController: _skillController,
+      recordController: _recordController,
+    );
+    _useCase = HabitsUseCase(_repository);
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
@@ -330,7 +339,284 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     };
   }
 
-  // ==================== 分页控制器 ====================
+  // ==================== JS API 实现 ====================
+
+  /// 获取所有习惯
+  /// 支持分页参数: offset, count
+  Future<String> _jsGetHabits(Map<String, dynamic> params) async {
+    final result = await _useCase.getHabits(params);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull);
+    } else {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 根据ID获取习惯
+  Future<String> _jsGetHabitById(Map<String, dynamic> params) async {
+    // 将 habitId 转换为 id 格式（UseCase 期望的参数名）
+    final useCaseParams = Map<String, dynamic>.from(params);
+    if (params.containsKey('habitId')) {
+      useCaseParams['id'] = params['habitId'];
+    }
+
+    final result = await _useCase.getHabitById(useCaseParams);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull ?? {'error': 'Habit not found'});
+    } else {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 创建习惯
+  Future<String> _jsCreateHabit(Map<String, dynamic> params) async {
+    final result = await _useCase.createHabit(params);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull);
+    } else {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 更新习惯
+  Future<String> _jsUpdateHabit(Map<String, dynamic> params) async {
+    // 将 habitId 转换为 id 格式（UseCase 期望的参数名）
+    final useCaseParams = Map<String, dynamic>.from(params);
+    if (params.containsKey('habitId')) {
+      useCaseParams['id'] = params['habitId'];
+    }
+
+    final result = await _useCase.updateHabit(useCaseParams);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull);
+    } else {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 删除习惯
+  Future<String> _jsDeleteHabit(Map<String, dynamic> params) async {
+    // 将 habitId 转换为 id 格式（UseCase 期望的参数名）
+    final useCaseParams = Map<String, dynamic>.from(params);
+    if (params.containsKey('habitId')) {
+      useCaseParams['id'] = params['habitId'];
+    }
+
+    final result = await _useCase.deleteHabit(useCaseParams);
+
+    if (result.isSuccess) {
+      return jsonEncode({'success': true});
+    } else {
+      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 获取所有技能
+  /// 支持分页参数: offset, count
+  Future<String> _jsGetSkills(Map<String, dynamic> params) async {
+    final result = await _useCase.getSkills(params);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull);
+    } else {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 根据ID获取技能
+  Future<String> _jsGetSkillById(Map<String, dynamic> params) async {
+    // 将 skillId 转换为 id 格式（UseCase 期望的参数名）
+    final useCaseParams = Map<String, dynamic>.from(params);
+    if (params.containsKey('skillId')) {
+      useCaseParams['id'] = params['skillId'];
+    }
+
+    final result = await _useCase.getSkillById(useCaseParams);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull ?? {'error': 'Skill not found'});
+    } else {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 创建技能
+  Future<String> _jsCreateSkill(Map<String, dynamic> params) async {
+    final result = await _useCase.createSkill(params);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull);
+    } else {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 更新技能
+  Future<String> _jsUpdateSkill(Map<String, dynamic> params) async {
+    // 将 skillId 转换为 id 格式（UseCase 期望的参数名）
+    final useCaseParams = Map<String, dynamic>.from(params);
+    if (params.containsKey('skillId')) {
+      useCaseParams['id'] = params['skillId'];
+    }
+
+    final result = await _useCase.updateSkill(useCaseParams);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull);
+    } else {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 删除技能
+  Future<String> _jsDeleteSkill(Map<String, dynamic> params) async {
+    // 将 skillId 转换为 id 格式（UseCase 期望的参数名）
+    final useCaseParams = Map<String, dynamic>.from(params);
+    if (params.containsKey('skillId')) {
+      useCaseParams['id'] = params['skillId'];
+    }
+
+    final result = await _useCase.deleteSkill(useCaseParams);
+
+    if (result.isSuccess) {
+      return jsonEncode({'success': true});
+    } else {
+      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 打卡（创建完成记录）
+  Future<String> _jsCheckIn(Map<String, dynamic> params) async {
+    // 转换参数格式
+    final useCaseParams = Map<String, dynamic>.from(params);
+    if (params.containsKey('habitId')) {
+      useCaseParams['parentId'] = params['habitId'];
+    }
+    if (params.containsKey('durationSeconds')) {
+      useCaseParams['durationSeconds'] = params['durationSeconds'];
+    } else if (params.containsKey('durationMinutes')) {
+      // 如果传入的是分钟，转换为秒
+      useCaseParams['durationSeconds'] = (params['durationMinutes'] as int) * 60;
+    }
+    if (!useCaseParams.containsKey('date')) {
+      useCaseParams['date'] = DateTime.now().toIso8601String();
+    }
+
+    final result = await _useCase.createCompletionRecord(useCaseParams);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull);
+    } else {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 获取完成记录
+  /// 支持分页参数: offset, count
+  Future<String> _jsGetCompletionRecords(Map<String, dynamic> params) async {
+    // 转换参数格式
+    final useCaseParams = Map<String, dynamic>.from(params);
+    if (params.containsKey('habitId')) {
+      useCaseParams['parentId'] = params['habitId'];
+    }
+
+    final result = await _useCase.getCompletionRecords(useCaseParams);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull);
+    } else {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 删除完成记录
+  Future<String> _jsDeleteCompletionRecord(Map<String, dynamic> params) async {
+    // 转换参数格式
+    final useCaseParams = Map<String, dynamic>.from(params);
+    if (params.containsKey('recordId')) {
+      useCaseParams['id'] = params['recordId'];
+    }
+
+    final result = await _useCase.deleteCompletionRecord(useCaseParams);
+
+    if (result.isSuccess) {
+      return jsonEncode({'success': true});
+    } else {
+      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
+    }
+  }
+
+  /// 获取统计信息
+  Future<String> _jsGetStats(Map<String, dynamic> params) async {
+    // 必需参数
+    final String? habitId = params['habitId'];
+    if (habitId == null) {
+      return jsonEncode({'error': '缺少必需参数: habitId'});
+    }
+
+    // 获取总时长
+    final durationParams = {'habitId': habitId};
+    final durationResult = await _useCase.getHabitTotalDuration(durationParams);
+
+    // 获取完成次数
+    final countParams = {'habitId': habitId};
+    final countResult = await _useCase.getHabitCompletionCount(countParams);
+
+    if (durationResult.isSuccess && countResult.isSuccess) {
+      return jsonEncode({
+        'habitId': habitId,
+        'totalDurationMinutes': durationResult.dataOrNull,
+        'completionCount': countResult.dataOrNull,
+      });
+    } else {
+      return jsonEncode({
+        'error': durationResult.errorOrNull?.message ?? countResult.errorOrNull?.message,
+      });
+    }
+  }
+
+  /// 获取今日需要打卡的习惯
+  /// 支持分页参数: offset, count
+  Future<String> _jsGetTodayHabits(Map<String, dynamic> params) async {
+    // 首先获取所有习惯
+    final allHabitsResult = await _useCase.getHabits({});
+
+    if (allHabitsResult.isFailure) {
+      return jsonEncode({'error': allHabitsResult.errorOrNull?.message});
+    }
+
+    final allHabits = allHabitsResult.dataOrNull as List;
+    final today = DateTime.now().weekday % 7; // 转换为 0-6 (周日-周六)
+
+    // 过滤出今日需要打卡的习惯
+    final todayHabits = allHabits.where((habitJson) {
+      final intervalDays = habitJson['intervalDays'] as int? ?? 0;
+      final reminderDays = List<int>.from(habitJson['reminderDays'] ?? []);
+
+      // 如果是每日习惯（intervalDays == 0）或包含今日的提醒日期
+      return intervalDays == 0 || reminderDays.contains(today);
+    }).toList();
+
+    // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
+
+    if (offset != null || count != null) {
+      final paginated = _paginate(
+        todayHabits,
+        offset: offset ?? 0,
+        count: count ?? 100,
+      );
+      return jsonEncode(paginated);
+    }
+
+    // 兼容旧版本：无分页参数时返回全部数据
+    return jsonEncode(todayHabits);
+  }
 
   /// 分页控制器 - 对列表进行分页处理
   /// @param list 原始数据列表
@@ -354,436 +640,6 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
       'count': data.length,
       'hasMore': end < total,
     };
-  }
-
-  // ==================== JS API 实现 ====================
-
-  /// 获取所有习惯
-  /// 支持分页参数: offset, count
-  Future<String> _jsGetHabits(Map<String, dynamic> params) async {
-    // 确保习惯数据已加载完成
-    final habits = await _habitController.loadHabits();
-    final habitsJson = habits.map((h) => h.toMap()).toList();
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        habitsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(habitsJson);
-  }
-
-  /// 根据ID获取习惯
-  Future<String> _jsGetHabitById(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? habitId = params['habitId'];
-    if (habitId == null) {
-      return jsonEncode({'error': '缺少必需参数: habitId'});
-    }
-
-    // 确保习惯数据已加载完成
-    final habits = await _habitController.loadHabits();
-    try {
-      final habit = habits.firstWhere((h) => h.id == habitId);
-      return jsonEncode(habit.toMap());
-    } catch (e) {
-      return jsonEncode({'error': 'Habit not found: $habitId'});
-    }
-  }
-
-  /// 创建习惯
-  Future<String> _jsCreateHabit(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? title = params['title'];
-    final int? durationMinutes = params['durationMinutes'];
-
-    if (title == null) {
-      return jsonEncode({'error': '缺少必需参数: title'});
-    }
-    if (durationMinutes == null) {
-      return jsonEncode({'error': '缺少必需参数: durationMinutes'});
-    }
-
-    // 可选参数
-    final String? habitId = params['id']; // 支持自定义ID，方便调试
-    String? skillId = params['skillId'];
-    final String? notes = params['notes'];
-    final String? group = params['group'];
-    final String? icon = params['icon'];
-    final String? image = params['image'];
-    final List<int>? reminderDays =
-        params['reminderDays'] != null
-            ? List<int>.from(params['reminderDays'])
-            : null;
-    final int? intervalDays = params['intervalDays'];
-    final List<String>? tags =
-        params['tags'] != null ? List<String>.from(params['tags']) : null;
-
-    // 如果提供了skillId，检查技能是否存在，不存在则自动创建
-    if (skillId != null && skillId.isNotEmpty) {
-      try {
-        _skillController.getSkillById(skillId);
-        // 技能存在，不做任何操作
-      } catch (e) {
-        // 技能不存在，自动创建一个新技能
-        final newSkill = Skill(
-          id: skillId,
-          title: skillId, // 使用skillId作为标题
-          description: '自动创建的技能，关联习惯：$title',
-          targetMinutes: 0,
-          maxDurationMinutes: 0,
-        );
-        await _skillController.saveSkill(newSkill);
-      }
-    }
-
-    // 如果没有提供自定义ID，则生成新的习惯ID
-    final finalHabitId =
-        habitId ?? const Uuid().v4();
-
-    final habit = Habit(
-      id: finalHabitId,
-      title: title,
-      durationMinutes: durationMinutes,
-      skillId: skillId,
-      notes: notes,
-      group: group,
-      icon: icon,
-      image: image,
-      reminderDays: reminderDays ?? [],
-      intervalDays: intervalDays ?? 0,
-      tags: tags ?? [],
-    );
-
-    await _habitController.saveHabit(habit);
-    return jsonEncode(habit.toMap());
-  }
-
-  /// 更新习惯
-  Future<String> _jsUpdateHabit(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? habitId = params['habitId'];
-    if (habitId == null) {
-      return jsonEncode({'error': '缺少必需参数: habitId'});
-    }
-
-    // 确保习惯数据已加载完成
-    final habits = await _habitController.loadHabits();
-    try {
-      final existingHabit = habits.firstWhere((h) => h.id == habitId);
-
-      // 合并现有数据和更新数据
-      final habitMap = existingHabit.toMap();
-      // 移除 habitId，其他都是可更新的字段
-      final updates = Map<String, dynamic>.from(params);
-      updates.remove('habitId');
-      habitMap.addAll(updates);
-
-      final updatedHabit = Habit.fromMap(habitMap);
-      await _habitController.saveHabit(updatedHabit);
-      return jsonEncode(updatedHabit.toMap());
-    } catch (e) {
-      return jsonEncode({'error': 'Habit not found: $habitId'});
-    }
-  }
-
-  /// 删除习惯
-  Future<String> _jsDeleteHabit(Map<String, dynamic> params) async {
-    try {
-      // 必需参数
-      final String? habitId = params['habitId'];
-      if (habitId == null) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: habitId'});
-      }
-
-      await _habitController.deleteHabit(habitId);
-      // 同时删除该习惯的所有完成记录
-      await _recordController.clearAllCompletionRecords(habitId);
-      return jsonEncode({'success': true, 'habitId': habitId});
-    } catch (e) {
-      return jsonEncode({'success': false, 'error': e.toString()});
-    }
-  }
-
-  /// 获取所有技能
-  /// 支持分页参数: offset, count
-  Future<String> _jsGetSkills(Map<String, dynamic> params) async {
-    // 确保技能数据已加载完成
-    final skills = await _skillController.loadSkills();
-    final skillsJson = skills.map((s) => s.toMap()).toList();
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        skillsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(skillsJson);
-  }
-
-  /// 根据ID获取技能
-  Future<String> _jsGetSkillById(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? skillId = params['skillId'];
-    if (skillId == null) {
-      return jsonEncode({'error': '缺少必需参数: skillId'});
-    }
-
-    try {
-      final skill = _skillController.getSkillById(skillId);
-      return jsonEncode(skill!.toMap());
-    } catch (e) {
-      return jsonEncode({'error': 'Skill not found: $skillId'});
-    }
-  }
-
-  /// 创建技能
-  Future<String> _jsCreateSkill(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? title = params['title'];
-    if (title == null) {
-      return jsonEncode({'error': '缺少必需参数: title'});
-    }
-
-    // 可选参数
-    final String? skillId = params['id']; // 支持自定义ID，方便调试
-    final String? description = params['description'];
-    final String? notes = params['notes'];
-    final String? group = params['group'];
-    final String? icon = params['icon'];
-    final String? image = params['image'];
-    final int? targetMinutes = params['targetMinutes'];
-    final int? maxDurationMinutes = params['maxDurationMinutes'];
-
-    // 如果没有提供自定义ID，则生成新的技能ID
-    final finalSkillId =
-        skillId ?? const Uuid().v4();
-
-    final skill = Skill(
-      id: finalSkillId,
-      title: title,
-      description: description,
-      notes: notes,
-      group: group,
-      icon: icon,
-      image: image,
-      targetMinutes: targetMinutes ?? 0,
-      maxDurationMinutes: maxDurationMinutes ?? 0,
-    );
-
-    await _skillController.saveSkill(skill);
-    return jsonEncode(skill.toMap());
-  }
-
-  /// 更新技能
-  Future<String> _jsUpdateSkill(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? skillId = params['skillId'];
-    if (skillId == null) {
-      return jsonEncode({'error': '缺少必需参数: skillId'});
-    }
-
-    try {
-      final existingSkill = _skillController.getSkillById(skillId);
-
-      // 合并现有数据和更新数据
-      final skillMap = existingSkill!.toMap();
-      final updates = Map<String, dynamic>.from(params);
-      updates.remove('skillId');
-      skillMap.addAll(updates);
-
-      final updatedSkill = Skill.fromMap(skillMap);
-      await _skillController.saveSkill(updatedSkill);
-      return jsonEncode(updatedSkill.toMap());
-    } catch (e) {
-      return jsonEncode({'error': 'Skill not found: $skillId'});
-    }
-  }
-
-  /// 删除技能
-  Future<String> _jsDeleteSkill(Map<String, dynamic> params) async {
-    try {
-      // 必需参数
-      final String? skillId = params['skillId'];
-      if (skillId == null) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: skillId'});
-      }
-
-      // 先检查技能是否存在
-      try {
-        _skillController.getSkillById(skillId);
-      } catch (e) {
-        return jsonEncode({
-          'success': false,
-          'error': 'Skill not found: $skillId',
-        });
-      }
-
-      await _skillController.deleteSkill(skillId);
-      return jsonEncode({'success': true, 'skillId': skillId});
-    } catch (e) {
-      return jsonEncode({'success': false, 'error': e.toString()});
-    }
-  }
-
-  /// 打卡（创建完成记录）
-  Future<String> _jsCheckIn(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? habitId = params['habitId'];
-    if (habitId == null) {
-      return jsonEncode({'error': '缺少必需参数: habitId'});
-    }
-
-    // 可选参数
-    final int? durationSeconds = params['durationSeconds'];
-    final String? notes = params['notes'];
-
-    // 确保习惯数据已加载完成
-    final habits = await _habitController.loadHabits();
-    try {
-      final habit = habits.firstWhere((h) => h.id == habitId);
-
-      final recordId = const Uuid().v4();
-      final duration =
-          durationSeconds != null
-              ? Duration(seconds: durationSeconds)
-              : Duration(minutes: habit.durationMinutes);
-
-      final record = CompletionRecord(
-        id: recordId,
-        parentId: habitId,
-        date: DateTime.now(),
-        duration: duration,
-        notes: notes ?? '',
-      );
-
-      await _recordController.saveCompletionRecord(habitId, record);
-      return jsonEncode(record.toMap());
-    } catch (e) {
-      return jsonEncode({'error': 'Habit not found: $habitId. Details: $e'});
-    }
-  }
-
-  /// 获取完成记录
-  /// 支持分页参数: offset, count
-  Future<String> _jsGetCompletionRecords(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? habitId = params['habitId'];
-    if (habitId == null) {
-      return jsonEncode({'error': '缺少必需参数: habitId'});
-    }
-
-    // 可选参数
-    final int? limit = params['limit'];
-
-    final records = await _recordController.getHabitCompletionRecords(habitId);
-
-    // 如果指定了 limit，只返回最新的 N 条记录
-    final List<CompletionRecord> resultRecords =
-        limit != null && limit < records.length
-            ? records.sublist(records.length - limit)
-            : records;
-
-    final recordsJson = resultRecords.map((r) => r.toMap()).toList();
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        recordsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(recordsJson);
-  }
-
-  /// 删除完成记录
-  Future<String> _jsDeleteCompletionRecord(Map<String, dynamic> params) async {
-    try {
-      // 必需参数
-      final String? recordId = params['recordId'];
-      if (recordId == null) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: recordId'});
-      }
-
-      await _recordController.deleteCompletionRecord(recordId);
-      return jsonEncode({'success': true, 'recordId': recordId});
-    } catch (e) {
-      return jsonEncode({'success': false, 'error': e.toString()});
-    }
-  }
-
-  /// 获取统计信息
-  Future<String> _jsGetStats(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? habitId = params['habitId'];
-    if (habitId == null) {
-      return jsonEncode({'error': '缺少必需参数: habitId'});
-    }
-
-    final totalDuration = await _recordController.getTotalDuration(habitId);
-    final completionCount = await _recordController.getCompletionCount(habitId);
-
-    return jsonEncode({
-      'habitId': habitId,
-      'totalDurationMinutes': totalDuration,
-      'completionCount': completionCount,
-    });
-  }
-
-  /// 获取今日需要打卡的习惯
-  /// 支持分页参数: offset, count
-  Future<String> _jsGetTodayHabits(Map<String, dynamic> params) async {
-    // 确保习惯数据已加载完成
-    final habits = await _habitController.loadHabits();
-    final today = DateTime.now().weekday % 7; // 转换为 0-6 (周日-周六)
-
-    final todayHabits =
-        habits.where((habit) {
-          // 如果是每日习惯（intervalDays == 0）或包含今日的提醒日期
-          return habit.intervalDays == 0 || habit.reminderDays.contains(today);
-        }).toList();
-
-    final todayHabitsJson = todayHabits.map((h) => h.toMap()).toList();
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        todayHabitsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(todayHabitsJson);
   }
 
   /// 启动计时器

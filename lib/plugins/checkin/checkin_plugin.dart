@@ -10,11 +10,13 @@ import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'package:Memento/plugins/base_plugin.dart';
+import 'package:shared_models/shared_models.dart';
 import 'models/checkin_item.dart';
 import 'screens/checkin_list_screen/checkin_list_screen.dart';
 import 'screens/checkin_stats_screen/checkin_stats_screen.dart';
 import 'screens/checkin_form_screen.dart';
 import 'controllers/checkin_list_controller.dart';
+import 'repositories/client_checkin_repository.dart';
 
 class CheckinMainView extends StatefulWidget {
   /// 可选的打卡项目ID，用于从小组件跳转时自动打开打卡记录对话框
@@ -289,7 +291,10 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   IconData get icon => Icons.checklist;
 
   List<CheckinItem> _checkinItems = [];
-  static const String _storageKey = 'checkin_items';
+
+  // UseCase 实例
+  late final CheckinUseCase _checkinUseCase;
+  CheckinUseCase get checkinUseCase => _checkinUseCase;
 
   // 获取实例的公共方法
   static CheckinPlugin get shared => instance;
@@ -317,55 +322,57 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Future<void> initialize() async {
-    // 初始化prompt控制器
+    // 初始化 Repository 和 UseCase
+    final repository = ClientCheckinRepository(storage: storage, pluginId: id);
+    _checkinUseCase = CheckinUseCase(repository);
 
-    // 从存储中加载保存的打卡项目
-    final pluginPath = 'checkin/$_storageKey';
-    if (await storage.fileExists(pluginPath)) {
-      final Map<String, dynamic>? storedData = await storage.readJson(
-        pluginPath,
-      );
-      if (storedData != null && storedData.containsKey('items')) {
-        _checkinItems = List.from(
-          (storedData['items'] as List).map(
-            (item) => CheckinItem.fromJson(item as Map<String, dynamic>),
-          ),
-        );
-      }
-    } else {
-      // 文件不存在时，创建默认的四个打卡项目
-      _checkinItems = [
-        CheckinItem(
-          name: '早起',
-          icon: Icons.wb_sunny,
-          color: Colors.orange,
-          group: '健康习惯',
-          description: '每天早起，开启美好一天',
-        ),
-        CheckinItem(
-          name: '运动',
-          icon: Icons.directions_run,
-          color: Colors.green,
-          group: '健康习惯',
-          description: '坚持运动，保持健康',
-        ),
-        CheckinItem(
-          name: '阅读',
-          icon: Icons.menu_book,
-          color: Colors.blue,
-          group: '学习成长',
-          description: '每天阅读，丰富知识',
-        ),
-        CheckinItem(
-          name: '喝水',
-          icon: Icons.local_drink,
-          color: Colors.cyan,
-          group: '健康习惯',
-          description: '每天喝足够的水，保持健康',
-        ),
+    // 从 UseCase 加载保存的打卡项目
+    final itemsResult = await _checkinUseCase.getItems({});
+    if (itemsResult.isSuccess) {
+      final items = itemsResult.dataOrNull as List<CheckinItemDto>;
+      _checkinItems = items
+          .map((dto) => _dtoToCheckinItem(dto))
+          .toList();
+    }
+
+    // 如果没有数据，创建默认的四个打卡项目
+    if (_checkinItems.isEmpty) {
+      final defaultItems = [
+        {
+          'name': '早起',
+          'icon': Icons.wb_sunny.codePoint,
+          'color': Colors.orange.value,
+          'group': '健康习惯',
+          'description': '每天早起，开启美好一天',
+        },
+        {
+          'name': '运动',
+          'icon': Icons.directions_run.codePoint,
+          'color': Colors.green.value,
+          'group': '健康习惯',
+          'description': '坚持运动，保持健康',
+        },
+        {
+          'name': '阅读',
+          'icon': Icons.menu_book.codePoint,
+          'color': Colors.blue.value,
+          'group': '学习成长',
+          'description': '每天阅读，丰富知识',
+        },
+        {
+          'name': '喝水',
+          'icon': Icons.local_drink.codePoint,
+          'color': Colors.cyan.value,
+          'group': '健康习惯',
+          'description': '每天喝足够的水，保持健康',
+        },
       ];
-      // 保存默认打卡项目
-      await _saveCheckinItems();
+
+      for (final item in defaultItems) {
+        await _checkinUseCase.createItem(item);
+        final dto = _paramsToDto(item);
+        _checkinItems.add(_dtoToCheckinItem(dto));
+      }
     }
 
     // 注册 JS API（最后一步）
@@ -443,11 +450,14 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
     }
   }
 
-  // 保存打卡项目到存储
+  // 保存打卡项目到存储（同步 UseCase 和本地列表）
   Future<void> _saveCheckinItems() async {
-    final itemsJson = _checkinItems.map((item) => item.toJson()).toList();
-    final pluginPath = 'checkin/$_storageKey';
-    await storage.writeJson(pluginPath, {'items': itemsJson});
+    // 重新从 UseCase 加载数据
+    final itemsResult = await _checkinUseCase.getItems({});
+    if (itemsResult.isSuccess) {
+      final items = itemsResult.dataOrNull as List<CheckinItemDto>;
+      _checkinItems = items.map((dto) => _dtoToCheckinItem(dto)).toList();
+    }
     // 同步到小组件
     await _syncWidget();
   }
@@ -459,6 +469,96 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
     await PluginWidgetSyncHelper.instance.syncCheckinItemWidget();
     // 同步打卡周视图小组件
     await PluginWidgetSyncHelper.instance.syncCheckinWeeklyWidget();
+  }
+
+  // ============ 辅助转换方法 ============
+
+  /// 将 Map 参数转换为 CheckinItemDto
+  CheckinItemDto _paramsToDto(Map<String, dynamic> params) {
+    return CheckinItemDto(
+      id: params['id'] as String? ?? '',
+      name: params['name'] as String,
+      icon: params['icon'] as int,
+      color: params['color'] as int,
+      group: params['group'] as String? ?? '默认分组',
+      description: params['description'] as String? ?? '',
+      cardStyle: params['cardStyle'] as int? ?? 0,
+      reminderSettings: params['reminderSettings'] != null
+          ? ReminderSettingsDto.fromJson(params['reminderSettings'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+
+  /// 将 CheckinItemDto 转换为 CheckinItem
+  CheckinItem _dtoToCheckinItem(CheckinItemDto dto) {
+    // 将 icon codePoint 转换为 IconData
+    final icon = IconData(dto.icon, fontFamily: 'MaterialIcons');
+    // 将 color int 转换为 Color
+    final color = Color(dto.color);
+
+    // 将 checkInRecords 转换
+    final records = <String, List<CheckinRecord>>{};
+    dto.checkInRecords.forEach((date, recordDtos) {
+      records[date] = recordDtos.map((r) => CheckinRecord(
+        startTime: r.startTime,
+        endTime: r.endTime,
+        checkinTime: r.checkinTime,
+        note: r.note,
+      )).toList();
+    });
+
+    // 转换提醒设置
+    ReminderSettings? reminderSettings;
+    if (dto.reminderSettings != null) {
+      final rs = dto.reminderSettings!;
+      reminderSettings = ReminderSettings(
+        type: _dtoReminderTypeToLocal(rs.type),
+        weekdays: rs.weekdays,
+        dayOfMonth: rs.dayOfMonth,
+        specificDate: rs.specificDate,
+        timeOfDay: TimeOfDay(hour: rs.hour, minute: rs.minute),
+      );
+    }
+
+    return CheckinItem(
+      id: dto.id,
+      name: dto.name,
+      icon: icon,
+      color: color,
+      group: dto.group,
+      description: dto.description,
+      cardStyle: _dtoCardStyleToLocal(dto.cardStyle),
+      reminderSettings: reminderSettings,
+      checkInRecords: records,
+    );
+  }
+
+  /// 转换提醒类型
+  ReminderType _dtoReminderTypeToLocal(int dtoType) {
+    switch (dtoType) {
+      case 0:
+        return ReminderType.weekly;
+      case 1:
+        return ReminderType.monthly;
+      case 2:
+        return ReminderType.specific;
+      default:
+        return ReminderType.weekly;
+    }
+  }
+
+  /// 转换卡片样式
+  CheckinCardStyle _dtoCardStyleToLocal(int dtoStyle) {
+    switch (dtoStyle) {
+      case 0:
+        return CheckinCardStyle.weekly;
+      case 1:
+        return CheckinCardStyle.small;
+      case 2:
+        return CheckinCardStyle.calendar;
+      default:
+        return CheckinCardStyle.weekly;
+    }
   }
 
   @override
@@ -603,243 +703,273 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取签到项目列表
   /// 支持分页参数: offset, count
   Future<String> _jsGetCheckinItems(Map<String, dynamic> params) async {
-    final items =
-        _checkinItems
-            .map(
-              (item) => {
-                'id': item.id,
-                'name': item.name,
-                'group': item.group,
-                'description': item.description,
-                'icon': item.icon.codePoint,
-                // ignore: deprecated_member_use
-                'color':
-                    '0x${item.color.value.toRadixString(16).padLeft(8, '0')}',
-                'frequency': item.frequency,
-                'consecutiveDays': item.getConsecutiveDays(),
-                'isCheckedToday': item.isCheckedToday(),
-                'lastCheckinDate': item.lastCheckinDate?.toIso8601String(),
-              },
-            )
-            .toList();
+    try {
+      // 使用 UseCase 获取数据
+      final result = await _checkinUseCase.getItems(params);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+      }
 
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        items,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+      final items = result.dataOrNull as List<CheckinItemDto>;
+
+      // 转换为前端需要的格式
+      final jsonList = items.map((dto) {
+        final item = _dtoToCheckinItem(dto);
+        return {
+          'id': item.id,
+          'name': item.name,
+          'group': item.group,
+          'description': item.description,
+          'icon': item.icon.codePoint,
+          'color': '0x${item.color.value.toRadixString(16).padLeft(8, '0')}',
+          'frequency': item.frequency,
+          'consecutiveDays': item.getConsecutiveDays(),
+          'isCheckedToday': item.isCheckedToday(),
+          'lastCheckinDate': item.lastCheckinDate?.toIso8601String(),
+        };
+      }).toList();
+
+      // UseCase 已经处理了分页，直接返回
+      return jsonEncode(jsonList);
+    } catch (e) {
+      return jsonEncode({'error': '获取签到项目失败: $e'});
     }
-
-    return jsonEncode(items);
   }
 
   /// 执行签到
   Future<String> _jsCheckin(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? itemId = params['itemId'];
-    if (itemId == null) {
-      return jsonEncode({'error': '缺少必需参数: itemId'});
+    try {
+      // 必需参数验证
+      final String? itemId = params['itemId'];
+      if (itemId == null) {
+        return jsonEncode({'error': '缺少必需参数: itemId'});
+      }
+
+      // 可选参数
+      final String? note = params['note'];
+
+      // 创建签到记录
+      final now = DateTime.now();
+      final record = {
+        'startTime': now.toIso8601String(),
+        'endTime': now.toIso8601String(),
+        'checkinTime': now.toIso8601String(),
+        'note': note,
+      };
+
+      // 使用 UseCase 添加打卡记录
+      final result = await _checkinUseCase.addCheckinRecord({
+        'itemId': itemId,
+        ...record,
+      });
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+      }
+
+      // 更新本地列表
+      await _saveCheckinItems();
+
+      // 查找对应的项目以获取连续天数
+      final item = _checkinItems.firstWhere(
+        (item) => item.id == itemId,
+        orElse: () => throw Exception('签到项目不存在'),
+      );
+
+      return jsonEncode({
+        'success': true,
+        'message': '签到成功',
+        'consecutiveDays': item.getConsecutiveDays(),
+        'checkinTime': now.toIso8601String(),
+      });
+    } catch (e) {
+      return jsonEncode({'error': '签到失败: $e'});
     }
-
-    final item = _checkinItems.firstWhere(
-      (item) => item.id == itemId,
-      orElse: () => throw Exception('签到项目不存在: $itemId'),
-    );
-
-    // 检查今天是否已签到
-    if (item.isCheckedToday()) {
-      return jsonEncode({'success': false, 'message': '今天已经签到过了'});
-    }
-
-    // 可选参数
-    final String? note = params['note'];
-
-    // 创建签到记录
-    final now = DateTime.now();
-    final record = CheckinRecord(
-      startTime: now,
-      endTime: now,
-      checkinTime: now,
-      note: note,
-    );
-
-    await item.addCheckinRecord(record);
-    await _saveCheckinItems();
-
-    return jsonEncode({
-      'success': true,
-      'message': '签到成功',
-      'consecutiveDays': item.getConsecutiveDays(),
-      'checkinTime': now.toIso8601String(),
-    });
   }
 
   /// 获取签到历史
   Future<String> _jsGetCheckinHistory(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? itemId = params['itemId'];
-    if (itemId == null) {
-      return jsonEncode({'error': '缺少必需参数: itemId'});
-    }
+    try {
+      // 必需参数验证
+      final String? itemId = params['itemId'];
+      if (itemId == null) {
+        return jsonEncode({'error': '缺少必需参数: itemId'});
+      }
 
-    final item = _checkinItems.firstWhere(
-      (item) => item.id == itemId,
-      orElse: () => throw Exception('签到项目不存在: $itemId'),
-    );
+      // 获取项目信息
+      final itemResult = await _checkinUseCase.getItemById({'id': itemId});
+      if (itemResult.isFailure || itemResult.dataOrNull == null) {
+        return jsonEncode({'error': '签到项目不存在: $itemId'});
+      }
 
-    // 可选参数
-    final String? startDate = params['startDate'];
-    final String? endDate = params['endDate'];
+      final itemDto = itemResult.dataOrNull as CheckinItemDto;
+      final item = _dtoToCheckinItem(itemDto);
 
-    // 解析日期范围
-    DateTime? start;
-    DateTime? end;
-    if (startDate != null) {
-      start = DateTime.parse(startDate);
-    }
-    if (endDate != null) {
-      end = DateTime.parse(endDate);
-    }
+      // 可选参数
+      final String? startDate = params['startDate'];
+      final String? endDate = params['endDate'];
 
-    // 收集符合日期范围的记录
-    final List<Map<String, dynamic>> history = [];
+      // 解析日期范围
+      DateTime? start;
+      DateTime? end;
+      if (startDate != null) {
+        start = DateTime.parse(startDate);
+      }
+      if (endDate != null) {
+        end = DateTime.parse(endDate);
+      }
 
-    item.checkInRecords.forEach((dateStr, records) {
-      final date = DateTime.parse(dateStr);
+      // 收集符合日期范围的记录
+      final List<Map<String, dynamic>> history = [];
 
-      // 检查是否在日期范围内
-      if (start != null && date.isBefore(start)) return;
-      if (end != null && date.isAfter(end)) return;
+      item.checkInRecords.forEach((dateStr, records) {
+        final date = DateTime.parse(dateStr);
 
-      for (final record in records) {
-        history.add({
-          'date': dateStr,
-          'checkinTime': record.checkinTime.toIso8601String(),
-          'startTime': record.startTime.toIso8601String(),
-          'endTime': record.endTime.toIso8601String(),
-          'note': record.note,
+        // 检查是否在日期范围内
+        if (start != null && date.isBefore(start)) return;
+        if (end != null && date.isAfter(end)) return;
+
+        for (final record in records) {
+          history.add({
+            'date': dateStr,
+            'checkinTime': record.checkinTime.toIso8601String(),
+            'startTime': record.startTime.toIso8601String(),
+            'endTime': record.endTime.toIso8601String(),
+            'note': record.note,
+          });
+        }
+      });
+
+      // 按签到时间倒序排序
+      history.sort((a, b) => b['checkinTime'].compareTo(a['checkinTime']));
+
+      // 检查是否需要分页
+      final int? offset = params['offset'];
+      final int? count = params['count'];
+
+      if (offset != null || count != null) {
+        final paginated = _paginate(
+          history,
+          offset: offset ?? 0,
+          count: count ?? 100,
+        );
+        return jsonEncode({
+          'itemId': itemId,
+          'itemName': item.name,
+          'history': paginated['data'],
+          'total': paginated['total'],
+          'offset': paginated['offset'],
+          'count': paginated['count'],
+          'hasMore': paginated['hasMore'],
         });
       }
-    });
 
-    // 按签到时间倒序排序
-    history.sort((a, b) => b['checkinTime'].compareTo(a['checkinTime']));
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        history,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
       return jsonEncode({
         'itemId': itemId,
         'itemName': item.name,
-        'history': paginated['data'],
-        'total': paginated['total'],
-        'offset': paginated['offset'],
-        'count': paginated['count'],
-        'hasMore': paginated['hasMore'],
+        'history': history,
+        'totalCount': history.length,
       });
+    } catch (e) {
+      return jsonEncode({'error': '获取签到历史失败: $e'});
     }
-
-    return jsonEncode({
-      'itemId': itemId,
-      'itemName': item.name,
-      'history': history,
-      'totalCount': history.length,
-    });
   }
 
   /// 获取统计信息
   Future<String> _jsGetStats(Map<String, dynamic> params) async {
-    // 可选参数
-    final String? itemId = params['itemId'];
+    try {
+      // 可选参数
+      final String? itemId = params['itemId'];
 
-    if (itemId != null) {
-      // 获取单个项目的统计信息
-      final item = _checkinItems.firstWhere(
-        (item) => item.id == itemId,
-        orElse: () => throw Exception('签到项目不存在: $itemId'),
-      );
+      if (itemId != null) {
+        // 获取单个项目的统计信息
+        final itemResult = await _checkinUseCase.getItemById({'id': itemId});
+        if (itemResult.isFailure || itemResult.dataOrNull == null) {
+          return jsonEncode({'error': '签到项目不存在: $itemId'});
+        }
 
-      return jsonEncode({
-        'itemId': itemId,
-        'itemName': item.name,
-        'totalCheckins': item.checkInRecords.values.fold<int>(
-          0,
-          (sum, records) => sum + records.length,
-        ),
-        'consecutiveDays': item.getConsecutiveDays(),
-        'isCheckedToday': item.isCheckedToday(),
-        'lastCheckinDate': item.lastCheckinDate?.toIso8601String(),
-      });
-    } else {
-      // 获取全局统计信息
-      return jsonEncode({
-        'totalItems': _checkinItems.length,
-        'todayCheckins': getTodayCheckins(),
-        'totalCheckins': getTotalCheckins(),
-        'completionRate':
-            _checkinItems.isEmpty
-                ? 0.0
-                : getTodayCheckins() / _checkinItems.length,
-      });
+        final item = _dtoToCheckinItem(itemResult.dataOrNull as CheckinItemDto);
+
+        return jsonEncode({
+          'itemId': itemId,
+          'itemName': item.name,
+          'totalCheckins': item.checkInRecords.values.fold<int>(
+            0,
+            (sum, records) => sum + records.length,
+          ),
+          'consecutiveDays': item.getConsecutiveDays(),
+          'isCheckedToday': item.isCheckedToday(),
+          'lastCheckinDate': item.lastCheckinDate?.toIso8601String(),
+        });
+      } else {
+        // 使用 UseCase 获取全局统计信息
+        final statsResult = await _checkinUseCase.getStats({});
+        if (statsResult.isFailure) {
+          return jsonEncode({'error': statsResult.errorOrNull?.message ?? '未知错误'});
+        }
+
+        final stats = statsResult.dataOrNull as CheckinStatsDto;
+
+        return jsonEncode({
+          'totalItems': stats.totalItems,
+          'todayCheckins': stats.todayCheckins,
+          'totalCheckins': stats.totalCheckins,
+          'completionRate': stats.completionRate,
+        });
+      }
+    } catch (e) {
+      return jsonEncode({'error': '获取统计信息失败: $e'});
     }
   }
 
   /// 创建签到项目
   Future<String> _jsCreateCheckinItem(Map<String, dynamic> params) async {
-    // 必需参数验证
-    final String? name = params['name'];
-    if (name == null) {
-      return jsonEncode({'error': '缺少必需参数: name'});
+    try {
+      // 必需参数验证
+      final String? name = params['name'];
+      if (name == null) {
+        return jsonEncode({'error': '缺少必需参数: name'});
+      }
+
+      // 可选参数
+      final String? id = params['id'];
+      final String? group = params['group'];
+      final String? description = params['description'];
+      final int? icon = params['icon'] ?? Icons.check_circle.codePoint;
+      final int? color = params['color'] ?? Colors.blue.value;
+
+      // 使用 UseCase 创建项目
+      final result = await _checkinUseCase.createItem({
+        'id': id,
+        'name': name,
+        'icon': icon,
+        'color': color,
+        'group': group ?? '默认分组',
+        'description': description ?? '',
+      });
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
+      }
+
+      // 更新本地列表
+      await _saveCheckinItems();
+
+      final item = _dtoToCheckinItem(result.dataOrNull as CheckinItemDto);
+
+      return jsonEncode({
+        'success': true,
+        'message': '创建成功',
+        'item': {
+          'id': item.id,
+          'name': item.name,
+          'group': item.group,
+          'description': item.description,
+        },
+      });
+    } catch (e) {
+      return jsonEncode({'error': '创建签到项目失败: $e'});
     }
-
-    // 检查名称是否重复
-    if (_checkinItems.any((item) => item.name == name)) {
-      return jsonEncode({'success': false, 'message': '签到项目名称已存在: $name'});
-    }
-
-    // 可选参数
-    final String? id = params['id'];
-    final String? group = params['group'];
-    final String? description = params['description'];
-
-    // 检查自定义ID是否已存在
-    if (id != null && _checkinItems.any((item) => item.id == id)) {
-      return jsonEncode({'success': false, 'message': '签到项目ID已存在: $id'});
-    }
-
-    // 创建新项目
-    final item = CheckinItem(
-      id: id, // 如果传入null，会自动使用时间戳作为ID
-      name: name,
-      icon: Icons.check_circle,
-      group: group ?? '默认分组',
-      description: description ?? '',
-    );
-
-    await addCheckinItem(item);
-
-    return jsonEncode({
-      'success': true,
-      'message': '创建成功',
-      'item': {
-        'id': item.id,
-        'name': item.name,
-        'group': item.group,
-        'description': item.description,
-      },
-    });
   }
 }

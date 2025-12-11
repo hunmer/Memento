@@ -5,20 +5,20 @@ import 'package:Memento/core/config_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
-import 'package:Memento/plugins/tracker/models/record.dart';
 import 'package:Memento/plugins/tracker/screens/goal_detail_screen.dart';
 import 'package:Memento/plugins/tracker/screens/search_results_screen.dart';
 import 'package:Memento/plugins/tracker/widgets/goal_edit_page.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
+import 'package:shared_models/shared_models.dart';
 import 'controllers/tracker_controller.dart';
 import 'screens/home_screen.dart';
+import 'repositories/client_tracker_repository.dart';
 
 export 'models/goal.dart';
 export 'models/record.dart';
@@ -101,6 +101,10 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   late final TrackerController _controller = TrackerController();
   TrackerController get controller => _controller;
+
+  // UseCase 实例
+  late final TrackerUseCase _trackerUseCase;
+  TrackerUseCase get trackerUseCase => _trackerUseCase;
   @override
   String get id => 'tracker';
 
@@ -112,6 +116,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   @override
   Future<void> initialize() async {
+    // 初始化 UseCase（需要 storage）
+    _trackerUseCase = TrackerUseCase(
+      ClientTrackerRepository(storage: storage, pluginId: id),
+    );
+
     // 不再在插件初始化时初始化通知系统,改为在开始计时时才初始化
     await _controller.loadInitialData();
 
@@ -272,7 +281,17 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     };
   }
 
-  // ==================== 分页控制器 ====================
+  // ==================== 辅助方法 ====================
+
+  /// 将 Result 转换为适合 JS API 的格式
+  /// 成功时返回数据，失败时返回 {'error': message}
+  dynamic _convertResult<T>(Result<T> result) {
+    if (result.isFailure) {
+      final failure = result.errorOrNull;
+      return {'error': failure?.message ?? 'Unknown error'};
+    }
+    return result.dataOrNull;
+  }
 
   /// 分页控制器 - 对列表进行分页处理
   /// @param list 原始数据列表
@@ -307,31 +326,29 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     final String? status = params['status'];
     final String? group = params['group'];
 
-    List<Goal> goals;
+    // 构建参数（UseCase 不直接支持 group 筛选，需要在结果后处理）
+    final useCaseParams = <String, dynamic>{
+      if (status != null && status.isNotEmpty) 'status': status,
+      if (params['offset'] != null) 'offset': params['offset'],
+      if (params['count'] != null) 'count': params['count'],
+    };
 
-    // 根据状态筛选
-    if (status != null && status.isNotEmpty) {
-      goals = await _controller.getGoalsByStatus(status);
-    } else {
-      goals = await _controller.getAllGoals();
+    final result = await _trackerUseCase.getGoals(useCaseParams);
+
+    if (result.isFailure) {
+      final failure = result.errorOrNull;
+      return {'error': failure?.message ?? 'Unknown error'};
     }
 
-    // 根据分组筛选
-    if (group != null && group.isNotEmpty) {
-      goals = goals.where((g) => g.group == group).toList();
+    var goalsJson = result.dataOrNull;
+
+    // 如果需要按分组筛选，在结果上处理
+    if (group != null && group.isNotEmpty && goalsJson is List) {
+      goalsJson = goalsJson.where((g) => g['group'] == group).toList();
     }
 
-    final goalsJson = goals.map((g) => g.toJson()).toList();
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      return _paginate(goalsJson, offset: offset ?? 0, count: count ?? 100);
-    }
-
-    // 兼容旧版本：无分页参数时返回全部数据
+    // 如果有分页参数，UseCase 已经处理了分页
+    // 如果没有分页参数，直接返回数据
     return goalsJson;
   }
 
@@ -343,70 +360,54 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       return {'error': '缺少必需参数: goalId'};
     }
 
-    final goals = await _controller.getAllGoals();
-    final goal = goals.firstWhere(
-      (g) => g.id == goalId,
-      orElse: () => throw ArgumentError('Goal not found: $goalId'),
-    );
-    return goal.toJson();
+    final result = await _trackerUseCase.getGoalById({'id': goalId});
+
+    if (result.isFailure) {
+      final failure = result.errorOrNull;
+      return {'error': failure?.message ?? 'Unknown error'};
+    }
+
+    return result.dataOrNull;
   }
 
   /// 创建目标
   Future<dynamic> _jsCreateGoal(Map<String, dynamic> params) async {
-    // 提取必需参数并验证
-    final String? name = params['name'];
-    if (name == null || name.isEmpty) {
-      return {'error': '缺少必需参数: name'};
-    }
+    // 转换参数格式以适配 UseCase
+    final useCaseParams = <String, dynamic>{};
 
-    final String? unitType = params['unitType'];
-    if (unitType == null || unitType.isEmpty) {
-      return {'error': '缺少必需参数: unitType'};
-    }
-
-    // 支持 int 和 double 类型
-    final targetValueRaw = params['targetValue'];
-    if (targetValueRaw == null) {
-      return {'error': '缺少必需参数: targetValue'};
-    }
-    final double targetValue =
-        targetValueRaw is int
-            ? targetValueRaw.toDouble()
-            : targetValueRaw as double;
+    // 提取必需参数
+    if (params['name'] != null) useCaseParams['name'] = params['name'];
+    if (params['icon'] != null) useCaseParams['icon'] = params['icon'];
+    if (params['unitType'] != null) useCaseParams['unitType'] = params['unitType'];
+    if (params['targetValue'] != null) useCaseParams['targetValue'] = params['targetValue'];
 
     // 提取可选参数
-    final String? customId = params['id']; // 支持自定义ID
-    final String? group = params['group'];
-    final String? icon = params['icon'];
-    final String? dateType = params['dateType'];
+    if (params['id'] != null) useCaseParams['id'] = params['id'];
+    if (params['group'] != null) useCaseParams['group'] = params['group'];
+    if (params['iconColor'] != null) useCaseParams['iconColor'] = params['iconColor'];
+    if (params['imagePath'] != null) useCaseParams['imagePath'] = params['imagePath'];
+    if (params['progressColor'] != null) useCaseParams['progressColor'] = params['progressColor'];
+    if (params['reminderTime'] != null) useCaseParams['reminderTime'] = params['reminderTime'];
+    if (params['isLoopReset'] != null) useCaseParams['isLoopReset'] = params['isLoopReset'];
 
-    // 如果提供了自定义ID，使用自定义ID；否则使用UUID生成
-    final goalId =
-        customId?.isNotEmpty == true
-            ? customId!
-            : const Uuid().v4();
+    // 处理日期设置
+    final dateType = params['dateType'] ?? 'daily';
+    useCaseParams['dateSettings'] = {
+      'type': dateType,
+      'startDate': params['startDate'],
+      'endDate': params['endDate'],
+      'selectedDays': params['selectedDays'],
+      'monthDay': params['monthDay'],
+    };
 
-    // 检查ID是否已存在
-    final existingGoals = await _controller.getAllGoals();
-    if (existingGoals.any((g) => g.id == goalId)) {
-      return {'error': '目标ID已存在: $goalId'};
+    final result = await _trackerUseCase.createGoal(useCaseParams);
+
+    if (result.isFailure) {
+      final failure = result.errorOrNull;
+      return {'error': failure?.message ?? 'Unknown error'};
     }
 
-    final goal = Goal(
-      id: goalId,
-      name: name,
-      icon: icon ?? '57455', // 默认图标代码点
-      unitType: unitType,
-      targetValue: targetValue,
-      currentValue: 0,
-      dateSettings: DateSettings(type: dateType ?? 'daily'),
-      isLoopReset: true,
-      createdAt: DateTime.now(),
-      group: group ?? '默认',
-    );
-
-    await _controller.addGoal(goal);
-    return goal.toJson();
+    return result.dataOrNull;
   }
 
   /// 更新目标
@@ -417,49 +418,37 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       return {'error': '缺少必需参数: goalId'};
     }
 
-    final Map<String, dynamic>? updateJson = params['updateJson'];
-    if (updateJson == null) {
-      return {'error': '缺少必需参数: updateJson'};
+    // 转换参数格式以适配 UseCase
+    final useCaseParams = <String, dynamic>{'id': goalId};
+
+    // 从 updateJson 中提取所有可更新字段
+    final updateJson = params['updateJson'] as Map<String, dynamic>? ?? {};
+
+    // 添加所有可能的更新字段
+    if (updateJson['name'] != null) useCaseParams['name'] = updateJson['name'];
+    if (updateJson['icon'] != null) useCaseParams['icon'] = updateJson['icon'];
+    if (updateJson['iconColor'] != null) useCaseParams['iconColor'] = updateJson['iconColor'];
+    if (updateJson['unitType'] != null) useCaseParams['unitType'] = updateJson['unitType'];
+    if (updateJson['targetValue'] != null) useCaseParams['targetValue'] = updateJson['targetValue'];
+    if (updateJson['group'] != null) useCaseParams['group'] = updateJson['group'];
+    if (updateJson['imagePath'] != null) useCaseParams['imagePath'] = updateJson['imagePath'];
+    if (updateJson['progressColor'] != null) useCaseParams['progressColor'] = updateJson['progressColor'];
+    if (updateJson['reminderTime'] != null) useCaseParams['reminderTime'] = updateJson['reminderTime'];
+    if (updateJson['isLoopReset'] != null) useCaseParams['isLoopReset'] = updateJson['isLoopReset'];
+
+    // 处理日期设置
+    if (updateJson['dateSettings'] != null) {
+      useCaseParams['dateSettings'] = updateJson['dateSettings'];
     }
 
-    final goals = await _controller.getAllGoals();
-    final oldGoal = goals.firstWhere(
-      (g) => g.id == goalId,
-      orElse: () => throw ArgumentError('Goal not found: $goalId'),
-    );
+    final result = await _trackerUseCase.updateGoal(useCaseParams);
 
-    // 处理数值类型转换（支持 int 和 double）
-    double getDoubleValue(String key, double defaultValue) {
-      final value = updateJson[key];
-      if (value == null) return defaultValue;
-      if (value is int) return value.toDouble();
-      if (value is double) return value;
-      return defaultValue;
+    if (result.isFailure) {
+      final failure = result.errorOrNull;
+      return {'error': failure?.message ?? 'Unknown error'};
     }
 
-    // 合并更新
-    final newGoal = Goal(
-      id: oldGoal.id,
-      name: updateJson['name'] ?? oldGoal.name,
-      icon: updateJson['icon'] ?? oldGoal.icon,
-      iconColor: updateJson['iconColor'] ?? oldGoal.iconColor,
-      unitType: updateJson['unitType'] ?? oldGoal.unitType,
-      targetValue: getDoubleValue('targetValue', oldGoal.targetValue),
-      currentValue: getDoubleValue('currentValue', oldGoal.currentValue),
-      dateSettings:
-          updateJson['dateSettings'] != null
-              ? DateSettings.fromJson(updateJson['dateSettings'])
-              : oldGoal.dateSettings,
-      reminderTime: updateJson['reminderTime'] ?? oldGoal.reminderTime,
-      isLoopReset: updateJson['isLoopReset'] ?? oldGoal.isLoopReset,
-      createdAt: oldGoal.createdAt,
-      group: updateJson['group'] ?? oldGoal.group,
-      imagePath: updateJson['imagePath'] ?? oldGoal.imagePath,
-      progressColor: updateJson['progressColor'] ?? oldGoal.progressColor,
-    );
-
-    await _controller.updateGoal(goalId, newGoal);
-    return newGoal.toJson();
+    return result.dataOrNull;
   }
 
   /// 删除目标
@@ -470,63 +459,47 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       return {'success': false, 'error': '缺少必需参数: goalId'};
     }
 
-    try {
-      await _controller.deleteGoal(goalId);
-      return {'success': true, 'goalId': goalId};
-    } catch (e) {
-      return {'success': false, 'error': '删除失败: ${e.toString()}'};
+    final result = await _trackerUseCase.deleteGoal({'id': goalId});
+
+    if (result.isFailure) {
+      final failure = result.errorOrNull;
+      return {'success': false, 'error': failure?.message ?? 'Unknown error'};
     }
+
+    final data = result.dataOrNull;
+    return {'success': true, if (data != null) ...data};
   }
 
   /// 记录数据
   Future<dynamic> _jsRecordData(Map<String, dynamic> params) async {
-    // 提取必需参数并验证
-    final String? goalId = params['goalId'];
-    if (goalId == null || goalId.isEmpty) {
-      return {'error': '缺少必需参数: goalId'};
-    }
+    // 转换参数格式以适配 UseCase
+    final useCaseParams = <String, dynamic>{};
 
-    // 支持 int 和 double 类型
-    final valueRaw = params['value'];
-    if (valueRaw == null) {
-      return {'error': '缺少必需参数: value'};
-    }
-    final double value =
-        valueRaw is int ? valueRaw.toDouble() : valueRaw as double;
+    // 提取必需参数
+    if (params['goalId'] != null) useCaseParams['goalId'] = params['goalId'];
+    if (params['value'] != null) useCaseParams['value'] = params['value'];
 
     // 提取可选参数
-    final String? customId = params['id']; // 支持自定义ID
-    final String? note = params['note'];
-    final String? dateTime = params['dateTime'];
+    if (params['id'] != null) useCaseParams['id'] = params['id'];
+    if (params['note'] != null) useCaseParams['note'] = params['note'];
+    if (params['durationSeconds'] != null) useCaseParams['durationSeconds'] = params['durationSeconds'];
 
-    final goals = await _controller.getAllGoals();
-    final goal = goals.firstWhere(
-      (g) => g.id == goalId,
-      orElse: () => throw ArgumentError('Goal not found: $goalId'),
-    );
-
-    // 如果提供了自定义ID，使用自定义ID；否则使用UUID生成
-    final recordId =
-        customId?.isNotEmpty == true
-            ? customId!
-            : const Uuid().v4();
-
-    // 检查ID是否已存在
-    final existingRecords = await _controller.getRecordsForGoal(goalId);
-    if (existingRecords.any((r) => r.id == recordId)) {
-      return {'error': '记录ID已存在: $recordId'};
+    // 处理记录时间
+    final dateTime = params['dateTime'];
+    if (dateTime != null) {
+      useCaseParams['recordedAt'] = dateTime;
+    } else {
+      useCaseParams['recordedAt'] = DateTime.now().toIso8601String();
     }
 
-    final record = Record(
-      id: recordId,
-      goalId: goalId,
-      value: value,
-      note: note,
-      recordedAt: dateTime != null ? DateTime.parse(dateTime) : DateTime.now(),
-    );
+    final result = await _trackerUseCase.addRecord(useCaseParams);
 
-    await _controller.addRecord(record, goal);
-    return record.toJson();
+    if (result.isFailure) {
+      final failure = result.errorOrNull;
+      return {'error': failure?.message ?? 'Unknown error'};
+    }
+
+    return result.dataOrNull;
   }
 
   /// 获取目标的记录列表
@@ -538,30 +511,28 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       return {'error': '缺少必需参数: goalId'};
     }
 
-    // 提取可选参数
-    final int? limit = params['limit'];
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+    // 构建参数（limit 参数不直接支持，需要在结果后处理）
+    final useCaseParams = <String, dynamic>{
+      'goalId': goalId,
+      if (params['offset'] != null) 'offset': params['offset'],
+      if (params['count'] != null) 'count': params['count'],
+    };
 
-    final records = await _controller.getRecordsForGoal(goalId);
+    final result = await _trackerUseCase.getRecordsForGoal(useCaseParams);
 
-    // 按时间倒序排列
-    records.sort((a, b) => b.recordedAt.compareTo(a.recordedAt));
-
-    // 如果指定了 limit，只返回最新的 N 条记录（向后兼容）
-    final List<Record> resultRecords =
-        limit != null && limit < records.length
-            ? records.sublist(0, limit)
-            : records;
-
-    final recordsJson = resultRecords.map((r) => r.toJson()).toList();
-
-    // 检查是否需要分页
-    if (offset != null || count != null) {
-      return _paginate(recordsJson, offset: offset ?? 0, count: count ?? 100);
+    if (result.isFailure) {
+      final failure = result.errorOrNull;
+      return {'error': failure?.message ?? 'Unknown error'};
     }
 
-    // 兼容旧版本：无分页参数时返回全部数据
+    var recordsJson = result.dataOrNull;
+
+    // 处理 limit 参数（向后兼容）
+    final limit = params['limit'] as int?;
+    if (limit != null && recordsJson is List && recordsJson.length > limit) {
+      recordsJson = recordsJson.sublist(0, limit);
+    }
+
     return recordsJson;
   }
 
@@ -573,12 +544,15 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       return {'success': false, 'error': '缺少必需参数: recordId'};
     }
 
-    try {
-      await _controller.deleteRecord(recordId);
-      return {'success': true, 'recordId': recordId};
-    } catch (e) {
-      return {'success': false, 'error': '删除失败: ${e.toString()}'};
+    final result = await _trackerUseCase.deleteRecord({'recordId': recordId});
+
+    if (result.isFailure) {
+      final failure = result.errorOrNull;
+      return {'success': false, 'error': failure?.message ?? 'Unknown error'};
     }
+
+    final data = result.dataOrNull;
+    return {'success': true, if (data != null) ...data};
   }
 
   /// 获取目标进度
@@ -589,21 +563,28 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       return {'error': '缺少必需参数: goalId'};
     }
 
-    final goals = await _controller.getAllGoals();
-    final goal = goals.firstWhere(
-      (g) => g.id == goalId,
-      orElse: () => throw ArgumentError('Goal not found: $goalId'),
-    );
+    // 先获取目标详情
+    final goalResult = await _trackerUseCase.getGoalById({'id': goalId});
 
-    final progress = _controller.calculateProgress(goal);
+    if (goalResult.isFailure) {
+      final failure = goalResult.errorOrNull;
+      return {'error': failure?.message ?? 'Unknown error'};
+    }
+
+    final goalJson = goalResult.dataOrNull as Map<String, dynamic>;
+    final currentValue = (goalJson['currentValue'] as num).toDouble();
+    final targetValue = (goalJson['targetValue'] as num).toDouble();
+
+    // 计算进度
+    final progress = targetValue > 0 ? (currentValue / targetValue).clamp(0.0, 1.0) : 0.0;
 
     return {
       'goalId': goalId,
-      'currentValue': goal.currentValue,
-      'targetValue': goal.targetValue,
+      'currentValue': currentValue,
+      'targetValue': targetValue,
       'progress': progress,
       'percentage': (progress * 100).toStringAsFixed(1),
-      'isCompleted': goal.isCompleted,
+      'isCompleted': currentValue >= targetValue,
     };
   }
 
@@ -614,35 +595,51 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
     if (goalId != null && goalId.isNotEmpty) {
       // 返回单个目标的统计信息
-      final goals = await _controller.getAllGoals();
-      final goal = goals.firstWhere(
-        (g) => g.id == goalId,
-        orElse: () => throw ArgumentError('Goal not found: $goalId'),
-      );
+      // 先获取目标详情
+      final goalResult = await _trackerUseCase.getGoalById({'id': goalId});
 
-      final records = await _controller.getRecordsForGoal(goalId);
+      if (goalResult.isFailure) {
+        final failure = goalResult.errorOrNull;
+        return {'error': failure?.message ?? 'Unknown error'};
+      }
+
+      final goalJson = goalResult.dataOrNull as Map<String, dynamic>;
+
+      // 获取记录列表
+      final recordsResult = await _trackerUseCase.getRecordsForGoal({'goalId': goalId});
+
+      if (recordsResult.isFailure) {
+        final failure = recordsResult.errorOrNull;
+        return {'error': failure?.message ?? 'Unknown error'};
+      }
+
+      final records = recordsResult.dataOrNull as List;
+      final totalValue = records.fold<double>(0.0, (sum, r) => sum + ((r as Map<String, dynamic>)['value'] as num).toDouble());
+      final currentValue = (goalJson['currentValue'] as num).toDouble();
+      final targetValue = (goalJson['targetValue'] as num).toDouble();
+      final progress = targetValue > 0 ? (currentValue / targetValue).clamp(0.0, 1.0) : 0.0;
 
       return {
         'goalId': goalId,
-        'goalName': goal.name,
+        'goalName': goalJson['name'],
         'totalRecords': records.length,
-        'totalValue': records.fold(0.0, (sum, r) => sum + r.value),
-        'currentValue': goal.currentValue,
-        'targetValue': goal.targetValue,
-        'progress': _controller.calculateProgress(goal),
-        'isCompleted': goal.isCompleted,
+        'totalValue': totalValue,
+        'currentValue': currentValue,
+        'targetValue': targetValue,
+        'progress': progress,
+        'isCompleted': currentValue >= targetValue,
       };
     } else {
       // 返回全局统计信息
-      return {
-        'totalGoals': _controller.getGoalCount(),
-        'todayCompleted': _controller.getTodayCompletedGoals(),
-        'monthCompleted': _controller.getMonthCompletedGoals(),
-        'monthAdded': _controller.getMonthAddedGoals(),
-        'todayRecords': _controller.getTodayRecordCount(),
-        'overallProgress': _controller.calculateOverallProgress(),
-        'groups': _controller.getAllGroups(),
-      };
+      final result = await _trackerUseCase.getStats({});
+
+      if (result.isFailure) {
+        final failure = result.errorOrNull;
+        return {'error': failure?.message ?? 'Unknown error'};
+      }
+
+      final stats = result.dataOrNull as Map<String, dynamic>;
+      return stats;
     }
   }
 

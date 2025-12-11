@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
@@ -18,8 +17,16 @@ import 'views/timer_main_view.dart';
 import 'services/timer_service.dart';
 import 'storage/timer_controller.dart';
 
+// UseCase 架构相关导入
+import 'package:shared_models/usecases/timer/timer_usecase.dart';
+import 'repositories/client_timer_repository.dart';
+
 class TimerPlugin extends BasePlugin with JSBridgePlugin {
   late final TimerController timerController;
+
+  // UseCase 架构
+  late final TimerUseCase timerUseCase;
+  late final ClientTimerRepository timerRepository;
 
   List<TimerTask> _tasks = [];
   static TimerPlugin? _instance;
@@ -47,19 +54,29 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     // 1. 初始化统一计时器控制器
     await unifiedTimerController.initialize();
 
+    // 2. 初始化存储控制器
     timerController = TimerController(storage);
+
+    // 3. 初始化 UseCase 架构
+    timerRepository = ClientTimerRepository(
+      timerController: timerController,
+      pluginColor: color,
+    );
+    timerUseCase = TimerUseCase(timerRepository);
+
+    // 4. 加载任务数据
     await _loadTasks();
 
-    // 2. 订阅统一计时器事件，转发给 TimerTask 事件系统
+    // 5. 订阅统一计时器事件，转发给 TimerTask 事件系统
     _setupEventListeners();
 
-    // 3. 恢复活动计时器状态
+    // 6. 恢复活动计时器状态
     await _restoreActiveTimers();
 
-    // 4. 注册数据选择器
+    // 7. 注册数据选择器
     _registerDataSelectors();
 
-    // 注册 JS API（最后一步）
+    // 8. 注册 JS API（最后一步）
     await registerJSAPI();
   }
 
@@ -368,156 +385,63 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取计时器列表
   /// 支持分页参数: offset, count
   Future<dynamic> _jsGetTimers(Map<String, dynamic> params) async {
-    final timers =
-        _tasks
-            .map(
-              (task) => {
-                'id': task.id,
-                'name': task.name,
-                'color': task.color.toARGB32(),
-                'icon': task.icon.codePoint,
-                'group': task.group,
-                'isRunning': task.isRunning,
-                'repeatCount': task.repeatCount,
-                'remainingRepeatCount': task.remainingRepeatCount,
-                'enableNotification': task.enableNotification,
-                'createdAt': task.createdAt.toIso8601String(),
-                'timerItems':
-                    task.timerItems
-                        .map(
-                          (item) => {
-                            'id': item.id,
-                            'name': item.name,
-                            'description': item.description,
-                            'type': item.type.name,
-                            'duration': item.duration.inSeconds,
-                            'completedDuration':
-                                item.completedDuration.inSeconds,
-                            'isRunning': item.isRunning,
-                            'isCompleted': item.isCompleted,
-                            'remainingDuration':
-                                item.remainingDuration.inSeconds,
-                            'repeatCount': item.repeatCount,
-                            'enableNotification': item.enableNotification,
-                          },
-                        )
-                        .toList(),
-              },
-            )
-            .toList();
+    final result = await timerUseCase.getTimerTasks(params);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        timers,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return paginated;
+    if (result.isFailure) {
+      return {'error': result.errorOrNull?.message};
     }
 
-    // 兼容旧版本：无分页参数时返回全部数据
-    return timers;
+    final data = result.dataOrNull;
+    if (data == null) {
+      return [];
+    }
+
+    // 如果是分页结果，转换格式
+    if (data is Map<String, dynamic> && data.containsKey('data')) {
+      final paginatedData = data as Map<String, dynamic>;
+      final timerList = paginatedData['data'] as List<dynamic>;
+      return {
+        'data': timerList,
+        'total': paginatedData['total'],
+        'offset': paginatedData['offset'],
+        'count': paginatedData['count'],
+        'hasMore': paginatedData['hasMore'],
+      };
+    }
+
+    // 非分页结果，直接返回列表
+    return data;
   }
 
   /// 创建计时器
   Future<dynamic> _jsCreateTimer(Map<String, dynamic> params) async {
-    // 提取必需参数
-    final String? name = params['name'];
-    if (name == null || name.isEmpty) {
-      return {'error': '缺少必需参数: name'};
+    final result = await timerUseCase.createTimerTask(params);
+
+    if (result.isFailure) {
+      return {'error': result.errorOrNull?.message};
     }
 
-    final int? durationSeconds = params['duration'];
-    if (durationSeconds == null) {
-      return {'error': '缺少必需参数: duration'};
+    final data = result.dataOrNull;
+    if (data == null) {
+      return {'error': '创建失败'};
     }
 
-    final String? type = params['type'];
-    if (type == null || type.isEmpty) {
-      return {'error': '缺少必需参数: type'};
-    }
-
-    // 提取可选参数
-    final String? group = params['group'];
-    final String? customId = params['id'];
-
-    // 如果提供了自定义ID，检查是否已存在
-    String id;
-    if (customId != null && customId.isNotEmpty) {
-      // 检查ID是否已存在
-      final existingTask = _tasks.firstWhere(
-        (t) => t.id == customId,
-        orElse:
-            () => TimerTask.create(
-              id: '',
-              name: '',
-              color: Colors.transparent,
-              icon: Icons.error,
-              timerItems: [],
-            ),
-      );
-
-      if (existingTask.id.isNotEmpty) {
-        return {'error': '计时器ID已存在: $customId'};
-      }
-
-      id = customId;
-    } else {
-      // 使用UUID生成
-      id = const Uuid().v4();
-    }
-
-    // 解析计时器类型
-    TimerType timerType;
-    try {
-      timerType = TimerType.values.firstWhere(
-        (t) => t.name == type.toLowerCase(),
-        orElse: () => TimerType.countUp,
-      );
-    } catch (e) {
-      timerType = TimerType.countUp;
-    }
-
-    // 创建计时器项
-    final timerItem = TimerItem(
-      id: const Uuid().v4(),
-      name: name,
-      type: timerType,
-      duration: Duration(seconds: durationSeconds),
-      completedDuration: Duration.zero,
-      repeatCount: 1,
-      enableNotification: false,
-    );
-
-    // 创建任务
-    final task = TimerTask.create(
-      id: id,
-      name: name,
-      color: Colors.blueGrey,
-      icon: Icons.timer,
-      timerItems: [timerItem],
-      group: group ?? '默认',
-      repeatCount: 1,
-      enableNotification: false,
-    );
-
-    await addTask(task);
-
-    return {'success': true, 'id': task.id, 'message': '计时器创建成功'};
+    return {
+      'success': true,
+      'id': data['id'],
+      'message': '计时器创建成功',
+    };
   }
 
   /// 删除计时器
   Future<dynamic> _jsDeleteTimer(Map<String, dynamic> params) async {
-    final String? timerId = params['timerId'];
-    if (timerId == null || timerId.isEmpty) {
-      return {'error': '缺少必需参数: timerId'};
-    }
+    // 转换参数名：timerId -> id
+    final useCaseParams = {'id': params['timerId']};
+    final result = await timerUseCase.deleteTimerTask(useCaseParams);
 
-    await removeTask(timerId);
+    if (result.isFailure) {
+      return {'error': result.errorOrNull?.message};
+    }
 
     return {'success': true, 'message': '计时器已删除'};
   }
@@ -529,6 +453,8 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       return {'error': '缺少必需参数: timerId'};
     }
 
+    // 查找任务并调用原始逻辑（这些操作涉及 UI 更新，不能简单通过 UseCase 处理）
+    await timerController.loadTasks();
     final task = _tasks.firstWhere(
       (t) => t.id == timerId,
       orElse: () => throw Exception('计时器不存在'),
@@ -552,6 +478,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       return {'error': '缺少必需参数: timerId'};
     }
 
+    await timerController.loadTasks();
     final task = _tasks.firstWhere(
       (t) => t.id == timerId,
       orElse: () => throw Exception('计时器不存在'),
@@ -575,6 +502,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       return {'error': '缺少必需参数: timerId'};
     }
 
+    await timerController.loadTasks();
     final task = _tasks.firstWhere(
       (t) => t.id == timerId,
       orElse: () => throw Exception('计时器不存在'),
@@ -599,6 +527,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       return {'error': '缺少必需参数: timerId'};
     }
 
+    await timerController.loadTasks();
     final task = _tasks.firstWhere(
       (t) => t.id == timerId,
       orElse: () => throw Exception('计时器不存在'),
@@ -617,105 +546,146 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       return {'error': '缺少必需参数: timerId'};
     }
 
-    final task = _tasks.firstWhere(
-      (t) => t.id == timerId,
-      orElse: () => throw Exception('计时器不存在'),
-    );
+    // 转换参数名：timerId -> id
+    final useCaseParams = {'id': timerId};
+    final result = await timerUseCase.getTimerTaskById(useCaseParams);
 
-    final activeTimer = task.activeTimer;
-    final currentIndex = task.getCurrentIndex();
+    if (result.isFailure) {
+      return {'error': result.errorOrNull?.message};
+    }
+
+    final data = result.dataOrNull;
+    if (data == null) {
+      return {'error': '计时器不存在'};
+    }
+
+    // 将 DTO 转换为原始格式返回
+    final taskJson = data as Map<String, dynamic>;
+    final timerItems = taskJson['timerItems'] as List<dynamic>;
+
+    // 查找当前活动的计时器
+    final activeTimerIndex = timerItems.indexWhere(
+      (item) => item['isRunning'] == true,
+    );
+    final activeTimer = activeTimerIndex != -1 ? timerItems[activeTimerIndex] : null;
 
     return {
-      'id': task.id,
-      'name': task.name,
-      'isRunning': task.isRunning,
-      'isCompleted': task.isCompleted,
-      'elapsedDuration': task.elapsedDuration.inSeconds,
-      'repeatCount': task.repeatCount,
-      'remainingRepeatCount': task.remainingRepeatCount,
-      'currentTimerIndex': currentIndex,
-      'activeTimer':
-          activeTimer != null
-              ? {
-                'id': activeTimer.id,
-                'name': activeTimer.name,
-                'type': activeTimer.type.name,
-                'duration': activeTimer.duration.inSeconds,
-                'completedDuration': activeTimer.completedDuration.inSeconds,
-                'remainingDuration': activeTimer.remainingDuration.inSeconds,
-                'isRunning': activeTimer.isRunning,
-                'isCompleted': activeTimer.isCompleted,
-                'formattedRemainingTime': activeTimer.formattedRemainingTime,
-              }
-              : null,
-      'timerItems':
-          task.timerItems
-              .map(
-                (item) => {
-                  'id': item.id,
-                  'name': item.name,
-                  'type': item.type.name,
-                  'duration': item.duration.inSeconds,
-                  'completedDuration': item.completedDuration.inSeconds,
-                  'remainingDuration': item.remainingDuration.inSeconds,
-                  'isCompleted': item.isCompleted,
-                },
-              )
-              .toList(),
+      'id': taskJson['id'],
+      'name': taskJson['name'],
+      'isRunning': taskJson['isRunning'],
+      'repeatCount': taskJson['repeatCount'],
+      'remainingRepeatCount': taskJson['repeatCount'], // DTO 中没有此字段，使用配置值
+      'currentTimerIndex': activeTimerIndex,
+      'activeTimer': activeTimer,
+      'timerItems': timerItems,
     };
   }
 
   /// 获取计时历史
   /// 支持分页参数: offset, count
   Future<dynamic> _jsGetHistory(Map<String, dynamic> params) async {
-    final completedTasks =
-        _tasks
-            .where((task) => task.isCompleted)
-            .map(
-              (task) => {
-                'id': task.id,
-                'name': task.name,
-                'group': task.group,
-                'createdAt': task.createdAt.toIso8601String(),
-                'totalDuration': task.timerItems
-                    .map((item) => item.completedDuration.inSeconds)
-                    .fold<int>(0, (sum, duration) => sum + duration),
-                'timerItems':
-                    task.timerItems
-                        .map(
-                          (item) => {
-                            'name': item.name,
-                            'type': item.type.name,
-                            'completedDuration':
-                                item.completedDuration.inSeconds,
-                          },
-                        )
-                        .toList(),
-              },
-            )
-            .toList();
+    // UseCase 没有直接的获取历史方法，使用搜索功能查找已完成的任务
+    final searchParams = {
+      ...params,
+      'isRunning': false, // 查找非运行状态的任务
+    };
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+    final result = await timerUseCase.searchTimerTasks(searchParams);
 
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        completedTasks,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
+    if (result.isFailure) {
+      return {'error': result.errorOrNull?.message};
+    }
+
+    final data = result.dataOrNull;
+    if (data == null) {
+      return {'total': 0, 'tasks': []};
+    }
+
+    // 如果是分页结果，转换格式
+    if (data is Map<String, dynamic> && data.containsKey('data')) {
+      final paginatedData = data as Map<String, dynamic>;
+      final taskList = paginatedData['data'] as List<dynamic>;
+
+      // 过滤已完成的任务（这里简化处理，假设非运行状态就是已完成）
+      final completedTasks = taskList.where((task) {
+        final taskJson = task as Map<String, dynamic>;
+        final timerItems = taskJson['timerItems'] as List<dynamic>;
+        // 如果所有计时器都完成了，认为任务已完成
+        return timerItems.every((item) => item['duration'] == item['completedDuration']);
+      }).map((task) {
+        final taskJson = task as Map<String, dynamic>;
+        final timerItems = taskJson['timerItems'] as List<dynamic>;
+        final totalDuration = timerItems.fold<int>(
+          0,
+          (sum, item) => sum + (item['completedDuration'] as int),
+        );
+
+        return {
+          'id': taskJson['id'],
+          'name': taskJson['name'],
+          'group': taskJson['group'],
+          'createdAt': taskJson['createdAt'],
+          'totalDuration': totalDuration,
+          'timerItems': timerItems.map((item) => {
+            'name': item['name'],
+            'type': _getTimerTypeName(item['type'] as int),
+            'completedDuration': item['completedDuration'],
+          }).toList(),
+        };
+      }).toList();
+
       return {
-        'data': paginated['data'],
-        'total': paginated['total'],
-        'offset': paginated['offset'],
-        'count': paginated['count'],
-        'hasMore': paginated['hasMore'],
+        'data': completedTasks,
+        'total': paginatedData['total'],
+        'offset': paginatedData['offset'],
+        'count': paginatedData['count'],
+        'hasMore': paginatedData['hasMore'],
       };
     }
 
-    // 兼容旧版本：无分页参数时返回原格式
+    // 非分页结果
+    final taskList = data as List<dynamic>;
+    final completedTasks = taskList.where((task) {
+      final taskJson = task as Map<String, dynamic>;
+      final timerItems = taskJson['timerItems'] as List<dynamic>;
+      return timerItems.every((item) => item['duration'] == item['completedDuration']);
+    }).map((task) {
+      final taskJson = task as Map<String, dynamic>;
+      final timerItems = taskJson['timerItems'] as List<dynamic>;
+      final totalDuration = timerItems.fold<int>(
+        0,
+        (sum, item) => sum + (item['completedDuration'] as int),
+      );
+
+      return {
+        'id': taskJson['id'],
+        'name': taskJson['name'],
+        'group': taskJson['group'],
+        'createdAt': taskJson['createdAt'],
+        'totalDuration': totalDuration,
+        'timerItems': timerItems.map((item) => {
+          'name': item['name'],
+          'type': _getTimerTypeName(item['type'] as int),
+          'completedDuration': item['completedDuration'],
+        }).toList(),
+      };
+    }).toList();
+
     return {'total': completedTasks.length, 'tasks': completedTasks};
+  }
+
+  /// 获取计时器类型名称
+  String _getTimerTypeName(int typeIndex) {
+    switch (typeIndex) {
+      case 0:
+        return 'countUp';
+      case 1:
+        return 'countDown';
+      case 2:
+        return 'pomodoro';
+      default:
+        return 'countUp';
+    }
   }
 
   // ==================== 查找方法 ====================
@@ -738,48 +708,60 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     final bool findAll = params['findAll'] ?? false;
-    final int? offset = params['offset'];
-    final int? count = params['count'];
 
-    final matches = <Map<String, dynamic>>[];
-
-    for (var task in _tasks) {
-      bool isMatch = false;
-
-      switch (field.toLowerCase()) {
-        case 'id':
-          isMatch = task.id == value;
-          break;
-        case 'name':
-          isMatch = task.name == value;
-          break;
-        case 'group':
-          isMatch = task.group == value;
-          break;
-        default:
-          isMatch = false;
-      }
-
-      if (isMatch) {
-        final taskData = {
-          'id': task.id,
-          'name': task.name,
-          'color': task.color.toARGB32(),
-          'icon': task.icon.codePoint,
-          'group': task.group,
-          'isRunning': task.isRunning,
-          'repeatCount': task.repeatCount,
-        };
-
-        if (!findAll) {
-          return taskData;
-        }
-        matches.add(taskData);
-      }
+    // 根据字段构建搜索参数
+    Map<String, dynamic> searchParams = {};
+    if (field.toLowerCase() == 'group') {
+      searchParams['group'] = value;
+    } else if (field.toLowerCase() == 'isRunning') {
+      searchParams['isRunning'] = value;
     }
 
-    if (findAll) {
-      // 检查是否需要分页
+    final result = await timerUseCase.searchTimerTasks(searchParams);
+
+    if (result.isFailure) {
+      return {'error': result.errorOrNull?.message};
+    }
+
+    final data = result.dataOrNull;
+    if (data == null) {
+      return findAll ? [] : null;
+    }
+
+    // 如果不是查找所有，只返回第一个匹配项
+    if (!findAll && data is List && data.isNotEmpty) {
+      final task = data.first as Map<String, dynamic>;
+      return {
+        'id': task['id'],
+        'name': task['name'],
+        'color': task['color'],
+        'icon': task['iconCodePoint'],
+        'group': task['group'],
+        'isRunning': task['isRunning'],
+        'repeatCount': task['repeatCount'],
+      };
+    }
+
+    // 查找所有
+    if (data is Map<String, dynamic> && data.containsKey('data')) {
+      final paginatedData = data as Map<String, dynamic>;
+      final taskList = paginatedData['data'] as List<dynamic>;
+      final matches = taskList.map((task) {
+        final taskJson = task as Map<String, dynamic>;
+        return {
+          'id': taskJson['id'],
+          'name': taskJson['name'],
+          'color': taskJson['color'],
+          'icon': taskJson['iconCodePoint'],
+          'group': taskJson['group'],
+          'isRunning': taskJson['isRunning'],
+          'repeatCount': taskJson['repeatCount'],
+        };
+      }).toList();
+
+      // 如果有分页参数，返回分页格式
+      final int? offset = params['offset'];
+      final int? count = params['count'];
       if (offset != null || count != null) {
         final paginated = _paginate(
           matches,
@@ -792,7 +774,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       return matches;
     }
 
-    return null;
+    return data;
   }
 
   /// 根据ID查找计时器
@@ -802,26 +784,30 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       return {'error': '缺少必需参数: id'};
     }
 
-    try {
-      final task = _tasks.firstWhere(
-        (t) => t.id == id,
-        orElse: () => throw Exception('计时器不存在'),
-      );
+    final useCaseParams = {'id': id};
+    final result = await timerUseCase.getTimerTaskById(useCaseParams);
 
-      return {
-        'id': task.id,
-        'name': task.name,
-        'color': task.color.toARGB32(),
-        'icon': task.icon.codePoint,
-        'group': task.group,
-        'isRunning': task.isRunning,
-        'repeatCount': task.repeatCount,
-        'remainingRepeatCount': task.remainingRepeatCount,
-        'createdAt': task.createdAt.toIso8601String(),
-      };
-    } catch (e) {
+    if (result.isFailure) {
       return null;
     }
+
+    final data = result.dataOrNull;
+    if (data == null) {
+      return null;
+    }
+
+    final taskJson = data as Map<String, dynamic>;
+    return {
+      'id': taskJson['id'],
+      'name': taskJson['name'],
+      'color': taskJson['color'],
+      'icon': taskJson['iconCodePoint'],
+      'group': taskJson['group'],
+      'isRunning': taskJson['isRunning'],
+      'repeatCount': taskJson['repeatCount'],
+      'remainingRepeatCount': taskJson['repeatCount'],
+      'createdAt': taskJson['createdAt'],
+    };
   }
 
   /// 根据名称查找计时器
@@ -838,25 +824,39 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
     final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+
+    // UseCase 没有按名称搜索的方法，我们先获取所有任务，然后在前端过滤
+    final result = await timerUseCase.getTimerTasks({});
+
+    if (result.isFailure) {
+      return {'error': result.errorOrNull?.message};
+    }
+
+    final data = result.dataOrNull;
+    if (data == null) {
+      return findAll ? [] : null;
+    }
+
+    final taskList = data is List ? data : (data as Map<String, dynamic>)['data'] as List<dynamic>? ?? [];
 
     final matches = <Map<String, dynamic>>[];
 
-    for (var task in _tasks) {
-      final isMatch =
-          fuzzy
-              ? task.name.toLowerCase().contains(name.toLowerCase())
-              : task.name == name;
+    for (final task in taskList) {
+      final taskJson = task as Map<String, dynamic>;
+      final taskName = taskJson['name'] as String;
+
+      final isMatch = fuzzy
+          ? taskName.toLowerCase().contains(name.toLowerCase())
+          : taskName == name;
 
       if (isMatch) {
         final taskData = {
-          'id': task.id,
-          'name': task.name,
-          'color': task.color.toARGB32(),
-          'icon': task.icon.codePoint,
-          'group': task.group,
-          'isRunning': task.isRunning,
+          'id': taskJson['id'],
+          'name': taskJson['name'],
+          'color': taskJson['color'],
+          'icon': taskJson['iconCodePoint'],
+          'group': taskJson['group'],
+          'isRunning': taskJson['isRunning'],
         };
 
         if (!findAll) {
@@ -868,6 +868,8 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
     if (findAll) {
       // 检查是否需要分页
+      final int? offset = params['offset'];
+      final int? count = params['count'];
       if (offset != null || count != null) {
         final paginated = _paginate(
           matches,
@@ -893,25 +895,39 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       return {'error': '缺少必需参数: group'};
     }
 
-    final int? offset = params['offset'];
-    final int? count = params['count'];
+    // 使用 UseCase 的搜索功能
+    final searchParams = {'group': group};
+    final result = await timerUseCase.searchTimerTasks(searchParams);
 
-    final matches =
-        _tasks
-            .where((task) => task.group == group)
-            .map(
-              (task) => {
-                'id': task.id,
-                'name': task.name,
-                'color': task.color.toARGB32(),
-                'icon': task.icon.codePoint,
-                'group': task.group,
-                'isRunning': task.isRunning,
-              },
-            )
-            .toList();
+    if (result.isFailure) {
+      return {'error': result.errorOrNull?.message};
+    }
+
+    final data = result.dataOrNull;
+    if (data == null) {
+      return [];
+    }
+
+    final matches = <Map<String, dynamic>>[];
+
+    // 转换格式
+    final taskList = data is List ? data : (data as Map<String, dynamic>)['data'] as List<dynamic>? ?? [];
+
+    for (final task in taskList) {
+      final taskJson = task as Map<String, dynamic>;
+      matches.add({
+        'id': taskJson['id'],
+        'name': taskJson['name'],
+        'color': taskJson['color'],
+        'icon': taskJson['iconCodePoint'],
+        'group': taskJson['group'],
+        'isRunning': taskJson['isRunning'],
+      });
+    }
 
     // 检查是否需要分页
+    final int? offset = params['offset'];
+    final int? count = params['count'];
     if (offset != null || count != null) {
       final paginated = _paginate(
         matches,
