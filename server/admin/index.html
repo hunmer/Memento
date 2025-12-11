@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memento Sync Server - Admin</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>Memento Sync Server</h1>
+                <div class="header-actions" v-if="isLoggedIn">
+                    <span class="user-info">{{ currentUser }}</span>
+                    <button class="btn btn-outline" @click="logout">退出登录</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Login Form -->
+            <div v-if="!isLoggedIn" class="login-container">
+                <div class="card login-card">
+                    <h2>管理员登录</h2>
+                    <form @submit.prevent="login">
+                        <div class="form-group">
+                            <label for="username">用户名</label>
+                            <input
+                                type="text"
+                                id="username"
+                                v-model="loginForm.username"
+                                required
+                                placeholder="请输入用户名"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="password">密码</label>
+                            <input
+                                type="password"
+                                id="password"
+                                v-model="loginForm.password"
+                                required
+                                placeholder="请输入密码"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="server">服务器地址</label>
+                            <input
+                                type="url"
+                                id="server"
+                                v-model="serverUrl"
+                                required
+                                placeholder="http://localhost:8080"
+                            >
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block" :disabled="loading">
+                            {{ loading ? '登录中...' : '登录' }}
+                        </button>
+                        <p v-if="error" class="error-message">{{ error }}</p>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Dashboard -->
+            <div v-else class="dashboard">
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button
+                        class="tab"
+                        :class="{ active: activeTab === 'overview' }"
+                        @click="activeTab = 'overview'"
+                    >
+                        概览
+                    </button>
+                    <button
+                        class="tab"
+                        :class="{ active: activeTab === 'files' }"
+                        @click="activeTab = 'files'"
+                    >
+                        文件管理
+                    </button>
+                    <button
+                        class="tab"
+                        :class="{ active: activeTab === 'settings' }"
+                        @click="activeTab = 'settings'"
+                    >
+                        同步设置
+                    </button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div v-show="activeTab === 'overview'" class="tab-content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📁</div>
+                            <div class="stat-info">
+                                <div class="stat-value">{{ stats.totalFiles }}</div>
+                                <div class="stat-label">同步文件数</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💾</div>
+                            <div class="stat-info">
+                                <div class="stat-value">{{ formatSize(stats.totalSize) }}</div>
+                                <div class="stat-label">总存储大小</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🔄</div>
+                            <div class="stat-info">
+                                <div class="stat-value">{{ stats.lastSync || '从未同步' }}</div>
+                                <div class="stat-label">最后同步时间</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-info">
+                                <div class="stat-value" :class="{ 'text-green': serverStatus === 'online' }">
+                                    {{ serverStatus === 'online' ? '在线' : '离线' }}
+                                </div>
+                                <div class="stat-label">服务器状态</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="card">
+                        <h3>最近活动</h3>
+                        <div class="activity-list">
+                            <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
+                                <span class="activity-icon">{{ getActivityIcon(activity.type) }}</span>
+                                <span class="activity-text">{{ activity.message }}</span>
+                                <span class="activity-time">{{ formatTime(activity.time) }}</span>
+                            </div>
+                            <div v-if="recentActivities.length === 0" class="empty-message">
+                                暂无活动记录
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Files Tab -->
+                <div v-show="activeTab === 'files'" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>同步文件列表</h3>
+                            <button class="btn btn-primary" @click="refreshFiles">
+                                🔄 刷新
+                            </button>
+                        </div>
+                        <div class="file-list">
+                            <div class="file-header">
+                                <span class="file-name">文件路径</span>
+                                <span class="file-size">大小</span>
+                                <span class="file-time">修改时间</span>
+                                <span class="file-actions">操作</span>
+                            </div>
+                            <div v-for="file in files" :key="file.path" class="file-item">
+                                <span class="file-name">{{ file.path }}</span>
+                                <span class="file-size">{{ formatSize(file.size) }}</span>
+                                <span class="file-time">{{ formatTime(file.updatedAt) }}</span>
+                                <span class="file-actions">
+                                    <button class="btn btn-sm" @click="downloadFile(file.path)">下载</button>
+                                    <button class="btn btn-sm btn-danger" @click="deleteFile(file.path)">删除</button>
+                                </span>
+                            </div>
+                            <div v-if="files.length === 0" class="empty-message">
+                                暂无同步文件
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div v-show="activeTab === 'settings'" class="tab-content">
+                    <div class="card">
+                        <h3>同步设置</h3>
+                        <form @submit.prevent="saveSettings">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" v-model="settings.autoSync">
+                                    启用自动同步
+                                </label>
+                            </div>
+                            <div class="form-group" v-if="settings.autoSync">
+                                <label for="syncInterval">同步间隔 (分钟)</label>
+                                <input
+                                    type="number"
+                                    id="syncInterval"
+                                    v-model.number="settings.syncInterval"
+                                    min="1"
+                                    max="1440"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" v-model="settings.syncOnChange">
+                                    文件修改时自动同步
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="conflictStrategy">冲突解决策略</label>
+                                <select id="conflictStrategy" v-model="settings.conflictStrategy">
+                                    <option value="server">服务器优先</option>
+                                    <option value="client">客户端优先</option>
+                                    <option value="manual">手动解决</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>同步的插件目录</label>
+                                <div class="checkbox-group">
+                                    <label v-for="dir in availableDirs" :key="dir">
+                                        <input
+                                            type="checkbox"
+                                            :value="dir"
+                                            v-model="settings.syncDirs"
+                                        >
+                                        {{ dir }}
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">保存设置</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h3>手动操作</h3>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" @click="triggerFullSync">
+                                🔄 全量同步
+                            </button>
+                            <button class="btn btn-outline" @click="exportData">
+                                📤 导出数据
+                            </button>
+                            <button class="btn btn-danger" @click="clearServerData">
+                                🗑️ 清空服务器数据
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container">
+            <div
+                v-for="toast in toasts"
+                :key="toast.id"
+                class="toast"
+                :class="toast.type"
+            >
+                {{ toast.message }}
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div v-if="loading" class="loading-overlay">
+            <div class="spinner"></div>
+            <span>{{ loadingMessage }}</span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
