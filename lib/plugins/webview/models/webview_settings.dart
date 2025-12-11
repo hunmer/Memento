@@ -10,6 +10,7 @@ class WebViewSettings {
   bool restoreTabsOnStartup;
   String defaultSearchEngine;
   String homePage;
+  bool blockDeepLinks;
 
   WebViewSettings({
     this.enableJavaScript = true,
@@ -22,6 +23,7 @@ class WebViewSettings {
     this.restoreTabsOnStartup = true,
     this.defaultSearchEngine = 'https://www.google.com/search?q=',
     this.homePage = 'about:blank',
+    this.blockDeepLinks = true,
   });
 
   Map<String, dynamic> toJson() {
