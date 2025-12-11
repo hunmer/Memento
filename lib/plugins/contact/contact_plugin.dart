@@ -10,6 +10,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:shared_models/repositories/contact/contact_repository.dart';
 import 'controllers/contact_controller.dart';
 import 'models/contact_model.dart';
 import 'models/interaction_record_model.dart';
@@ -49,7 +50,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
     final repository = ClientContactRepository(controller: _controller);
 
     // 3. 创建 UseCase
-    _useCase = ContactUseCase(repository);
+    _useCase = ContactUseCase(repository as IContactRepository);
 
     // 4. 初始化默认数据
     await _controller.createDefaultContacts();
@@ -63,7 +64,6 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Future<void> registerToApp(
-    
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
@@ -315,7 +315,10 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
     final result = await _useCase.deleteContact({'id': contactId});
 
     if (result.isFailure) {
-      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
+      return jsonEncode({
+        'success': false,
+        'error': result.errorOrNull?.message,
+      });
     }
 
     return jsonEncode({'success': true, 'contactId': contactId});
@@ -351,10 +354,15 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'success': false, 'error': '缺少必需参数: interactionId'});
     }
 
-    final result = await _useCase.deleteInteractionRecord({'id': interactionId});
+    final result = await _useCase.deleteInteractionRecord({
+      'id': interactionId,
+    });
 
     if (result.isFailure) {
-      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
+      return jsonEncode({
+        'success': false,
+        'error': result.errorOrNull?.message,
+      });
     }
 
     return jsonEncode({'success': true, 'interactionId': interactionId});
@@ -403,10 +411,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       final int? count = params['count'];
 
       // 使用 searchContacts 进行搜索
-      final searchParams = <String, dynamic>{
-        'offset': offset,
-        'count': count,
-      };
+      final searchParams = <String, dynamic>{'offset': offset, 'count': count};
 
       // 根据字段类型设置搜索参数
       if (field == 'name' && value is String) {
@@ -528,7 +533,9 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
         if (findAll) {
           return jsonEncode(interactions);
         } else {
-          return interactions.isEmpty ? jsonEncode(null) : jsonEncode(interactions.first);
+          return interactions.isEmpty
+              ? jsonEncode(null)
+              : jsonEncode(interactions.first);
         }
       }
 
@@ -593,66 +600,71 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== 数据选择器注册 ====================
 
   void _registerDataSelectors() {
-    pluginDataSelectorService.registerSelector(SelectorDefinition(
-      id: 'contact.person',
-      pluginId: id,
-      name: '选择联系人',
-      icon: icon,
-      color: color,
-      searchable: true,
-      selectionMode: SelectionMode.single,
-      steps: [
-        SelectorStep(
-          id: 'person',
-          title: '选择联系人',
-          viewType: SelectorViewType.list,
-          isFinalStep: true,
-          dataLoader: (_) async {
-            final contacts = await _controller.getAllContacts();
-            return contacts.map((contact) {
-              return SelectableItem(
-                id: contact.id,
-                title: contact.name,
-                subtitle: contact.phone,
-                icon: Icons.person,
-                avatarPath: contact.avatar,
-                metadata: {
-                  'organization': contact.organization,
-                  'email': contact.email,
-                  'tags': contact.tags.join(', '),
-                },
-                rawData: contact,
-              );
-            }).toList();
-          },
-          searchFilter: (items, query) {
-            if (query.isEmpty) return items;
-            final lowerQuery = query.toLowerCase();
-            return items.where((item) {
-              // 搜索姓名
-              if (item.title.toLowerCase().contains(lowerQuery)) return true;
+    pluginDataSelectorService.registerSelector(
+      SelectorDefinition(
+        id: 'contact.person',
+        pluginId: id,
+        name: '选择联系人',
+        icon: icon,
+        color: color,
+        searchable: true,
+        selectionMode: SelectionMode.single,
+        steps: [
+          SelectorStep(
+            id: 'person',
+            title: '选择联系人',
+            viewType: SelectorViewType.list,
+            isFinalStep: true,
+            dataLoader: (_) async {
+              final contacts = await _controller.getAllContacts();
+              return contacts.map((contact) {
+                return SelectableItem(
+                  id: contact.id,
+                  title: contact.name,
+                  subtitle: contact.phone,
+                  icon: Icons.person,
+                  avatarPath: contact.avatar,
+                  metadata: {
+                    'organization': contact.organization,
+                    'email': contact.email,
+                    'tags': contact.tags.join(', '),
+                  },
+                  rawData: contact,
+                );
+              }).toList();
+            },
+            searchFilter: (items, query) {
+              if (query.isEmpty) return items;
+              final lowerQuery = query.toLowerCase();
+              return items.where((item) {
+                // 搜索姓名
+                if (item.title.toLowerCase().contains(lowerQuery)) return true;
 
-              // 搜索电话
-              if (item.subtitle?.contains(query) ?? false) return true;
+                // 搜索电话
+                if (item.subtitle?.contains(query) ?? false) return true;
 
-              // 搜索组织/公司
-              final org = item.metadata?['organization'] as String?;
-              if (org != null && org.toLowerCase().contains(lowerQuery)) return true;
+                // 搜索组织/公司
+                final org = item.metadata?['organization'] as String?;
+                if (org != null && org.toLowerCase().contains(lowerQuery))
+                  return true;
 
-              // 搜索邮箱
-              final email = item.metadata?['email'] as String?;
-              if (email != null && email.toLowerCase().contains(lowerQuery)) return true;
+                // 搜索邮箱
+                final email = item.metadata?['email'] as String?;
+                if (email != null && email.toLowerCase().contains(lowerQuery))
+                  return true;
 
-              // 搜索标签
-              final tags = item.metadata?['tags'] as String?;
-              if (tags != null && tags.toLowerCase().contains(lowerQuery)) return true;
+                // 搜索标签
+                final tags = item.metadata?['tags'] as String?;
+                if (tags != null && tags.toLowerCase().contains(lowerQuery))
+                  return true;
 
-              return false;
-            }).toList();
-          },
-        ),
-      ],
-    ));
+                return false;
+              }).toList();
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -732,42 +744,49 @@ class ContactMainViewState extends State<ContactMainView> {
       final allContacts = await _controller.getAllContacts();
       final normalizedQuery = query.toLowerCase();
 
-      final results = allContacts.where((contact) {
-        // 搜索姓名
-        final nameMatch = contact.name.toLowerCase().contains(normalizedQuery);
+      final results =
+          allContacts.where((contact) {
+            // 搜索姓名
+            final nameMatch = contact.name.toLowerCase().contains(
+              normalizedQuery,
+            );
 
-        // 搜索备注
-        final notesMatch = contact.notes != null &&
-            contact.notes!.toLowerCase().contains(normalizedQuery);
+            // 搜索备注
+            final notesMatch =
+                contact.notes != null &&
+                contact.notes!.toLowerCase().contains(normalizedQuery);
 
-        // 搜索电话（精确匹配和模糊匹配）
-        final phoneMatch = contact.phone.contains(query);
+            // 搜索电话（精确匹配和模糊匹配）
+            final phoneMatch = contact.phone.contains(query);
 
-        // 搜索组织/公司
-        final orgMatch = contact.organization != null &&
-            contact.organization!.toLowerCase().contains(normalizedQuery);
+            // 搜索组织/公司
+            final orgMatch =
+                contact.organization != null &&
+                contact.organization!.toLowerCase().contains(normalizedQuery);
 
-        // 搜索邮箱
-        final emailMatch = contact.email != null &&
-            contact.email!.toLowerCase().contains(normalizedQuery);
+            // 搜索邮箱
+            final emailMatch =
+                contact.email != null &&
+                contact.email!.toLowerCase().contains(normalizedQuery);
 
-        // 搜索地址
-        final addressMatch = contact.address != null &&
-            contact.address!.toLowerCase().contains(normalizedQuery);
+            // 搜索地址
+            final addressMatch =
+                contact.address != null &&
+                contact.address!.toLowerCase().contains(normalizedQuery);
 
-        // 搜索标签
-        final tagsMatch = contact.tags.any(
-          (tag) => tag.toLowerCase().contains(normalizedQuery),
-        );
+            // 搜索标签
+            final tagsMatch = contact.tags.any(
+              (tag) => tag.toLowerCase().contains(normalizedQuery),
+            );
 
-        return nameMatch ||
-            notesMatch ||
-            phoneMatch ||
-            orgMatch ||
-            emailMatch ||
-            addressMatch ||
-            tagsMatch;
-      }).toList();
+            return nameMatch ||
+                notesMatch ||
+                phoneMatch ||
+                orgMatch ||
+                emailMatch ||
+                addressMatch ||
+                tagsMatch;
+          }).toList();
 
       if (mounted && _currentSearchQuery == query) {
         setState(() {
@@ -796,17 +815,13 @@ class ContactMainViewState extends State<ContactMainView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.search,
-              size: 64,
-              color: Colors.grey,
-            ),
+            const Icon(Icons.search, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
               '输入关键词搜索联系人',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.grey,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(color: Colors.grey),
             ),
           ],
         ),
@@ -818,17 +833,13 @@ class ContactMainViewState extends State<ContactMainView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.search_off,
-              size: 64,
-              color: Colors.grey,
-            ),
+            const Icon(Icons.search_off, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
               '没有找到匹配的联系人',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.grey,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(color: Colors.grey),
             ),
           ],
         ),
@@ -955,9 +966,7 @@ class ContactMainViewState extends State<ContactMainView> {
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Text('contact_errorMessage'.tr),
-            );
+            return Center(child: Text('contact_errorMessage'.tr));
           }
 
           final contacts = snapshot.data ?? [];

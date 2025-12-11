@@ -416,7 +416,7 @@ class ServerTrackerRepository extends ITrackerRepository {
       }).length;
 
       final monthCompletedGoals = goals.where((g) {
-        return g.isCompleted && g.updatedAt.isAfter(startOfMonth);
+        return g.isCompleted && g.createdAt.isAfter(startOfMonth);
       }).length;
 
       return Result.success(TrackerStatsDto(

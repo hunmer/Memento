@@ -503,7 +503,3 @@ class ClientTodoRepository implements ITodoRepository {
   }
 }
 
-/// 扩展方法：获取列表中的第一个元素或返回 null
-extension<E> on Iterable<E> {
-  E? get firstOrNull => isEmpty ? null : first;
-}
