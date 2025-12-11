@@ -173,12 +173,33 @@ class TabManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 导航到新 URL
+  /// 导航到新 URL（带防抖机制）
   Future<void> navigateTo(String tabId, String url) async {
+    final tab = getTabById(tabId);
     final controller = _controllers[tabId];
-    if (controller != null) {
-      await controller.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
+
+    if (tab == null || controller == null) return;
+
+    // 防抖：避免在短时间内重复导航到相同 URL
+    final currentUrl = tab.url;
+    final normalizedCurrent = _normalizeUrl(currentUrl);
+    final normalizedNew = _normalizeUrl(url);
+
+    // 如果是相同的 URL，跳过
+    if (normalizedCurrent == normalizedNew) {
+      return;
     }
+
+    await controller.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
+  }
+
+  /// 规范化 URL（去除尾部斜杠等差异）
+  String _normalizeUrl(String url) {
+    // 去除尾部斜杠（除了根路径）
+    if (url.length > 1 && url.endsWith('/')) {
+      return url.substring(0, url.length - 1);
+    }
+    return url;
   }
 
   /// 后退
