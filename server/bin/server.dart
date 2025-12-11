@@ -5,6 +5,7 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as path;
 
 import 'package:memento_server/config/server_config.dart';
 import 'package:memento_server/services/file_storage_service.dart';
@@ -12,6 +13,43 @@ import 'package:memento_server/services/auth_service.dart';
 import 'package:memento_server/routes/auth_routes.dart';
 import 'package:memento_server/routes/sync_routes.dart';
 import 'package:memento_server/middleware/auth_middleware.dart';
+
+/// 根据文件扩展名获取 MIME 类型
+String _getMimeType(String fileName) {
+  final ext = path.extension(fileName).toLowerCase();
+  switch (ext) {
+    case '.html':
+    case '.htm':
+      return 'text/html; charset=utf-8';
+    case '.css':
+      return 'text/css; charset=utf-8';
+    case '.js':
+      return 'application/javascript; charset=utf-8';
+    case '.json':
+      return 'application/json; charset=utf-8';
+    case '.png':
+      return 'image/png';
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.gif':
+      return 'image/gif';
+    case '.svg':
+      return 'image/svg+xml';
+    case '.ico':
+      return 'image/x-icon';
+    case '.woff':
+      return 'font/woff';
+    case '.woff2':
+      return 'font/woff2';
+    case '.ttf':
+      return 'font/ttf';
+    case '.eot':
+      return 'application/vnd.ms-fontobject';
+    default:
+      return 'application/octet-stream';
+  }
+}
 
 void main(List<String> args) async {
   // 设置日志
@@ -67,6 +105,55 @@ void main(List<String> args) async {
         .addHandler(syncRoutes.router.call),
   );
 
+  // 管理界面静态文件服务
+  final scriptDir = path.dirname(Platform.script.toFilePath());
+  final adminDir = path.normalize(path.join(scriptDir, '..', 'admin'));
+  logger.info('管理界面目录: $adminDir');
+
+  // 检查管理界面目录是否存在
+  if (!Directory(adminDir).existsSync()) {
+    logger.warning('管理界面目录不存在: $adminDir');
+  }
+
+  // 根路径重定向到管理界面
+  router.get('/', (Request request) {
+    return Response.found('/admin/');
+  });
+
+  // 管理界面主页
+  router.get('/admin/', (Request request) async {
+    final indexFile = File(path.join(adminDir, 'index.html'));
+    if (await indexFile.exists()) {
+      return Response.ok(
+        await indexFile.readAsString(),
+        headers: {'Content-Type': 'text/html; charset=utf-8'},
+      );
+    }
+    return Response.notFound('Admin page not found');
+  });
+
+  // 管理界面静态资源
+  router.get('/admin/<file|.*>', (Request request, String file) async {
+    // 安全检查：防止路径遍历攻击
+    if (file.contains('..')) {
+      return Response.forbidden('Invalid path');
+    }
+
+    final filePath = path.join(adminDir, file);
+    final targetFile = File(filePath);
+
+    if (await targetFile.exists()) {
+      final content = await targetFile.readAsBytes();
+      final mimeType = _getMimeType(file);
+      return Response.ok(
+        content,
+        headers: {'Content-Type': mimeType},
+      );
+    }
+
+    return Response.notFound('File not found: $file');
+  });
+
   // 4. 构建处理管道
   var handler = const Pipeline()
       .addMiddleware(logRequests())
@@ -101,6 +188,8 @@ void main(List<String> args) async {
   print('====================================');
   print('');
   print('可用端点:');
+  print('  GET  /                    - 重定向到管理界面');
+  print('  GET  /admin               - 管理界面');
   print('  GET  /health              - 健康检查');
   print('  GET  /version             - 版本信息');
   print('  POST /api/v1/auth/register - 用户注册');

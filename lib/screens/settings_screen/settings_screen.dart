@@ -6,11 +6,13 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import './controllers/settings_screen_controller.dart';
 import './widgets/webdav_settings_dialog.dart';
+import './widgets/server_sync_settings_section.dart';
 import './controllers/webdav_controller.dart';
 import 'package:Memento/core/floating_ball/settings_screen.dart';
 import 'package:Memento/core/floating_ball/floating_ball_manager.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_screen.dart';
 import 'package:Memento/screens/about_screen/about_screen.dart';
+import 'package:Memento/screens/settings_screen/models/server_sync_config.dart';
 import 'package:get/get.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -24,6 +26,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late SettingsScreenController _controller;
   late WebDAVController _webdavController;
   bool _isWebDAVConnected = false;
+  bool _isServerSyncLoggedIn = false;
 
   @override
   void initState() {
@@ -39,6 +42,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     // 检查WebDAV配置
     _checkWebDAVConfig();
+    // 检查服务器同步配置
+    _checkServerSyncConfig();
   }
 
   @override
@@ -64,6 +69,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  // 检查服务器同步配置
+  Future<void> _checkServerSyncConfig() async {
+    final config = await ServerSyncConfig.load();
+    if (mounted) {
+      setState(() {
+        _isServerSyncLoggedIn = config.isLoggedIn;
+      });
+    }
+  }
+
   late BackupService _backupService;
 
   // 显示WebDAV设置对话框
@@ -84,6 +99,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
       // 重新检查WebDAV状态
       await _checkWebDAVConfig();
     }
+  }
+
+  // 显示服务器同步设置对话框
+  Future<void> _showServerSyncSettings() async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) => SingleChildScrollView(
+          controller: scrollController,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: const ServerSyncSettingsSection(),
+          ),
+        ),
+      ),
+    );
+
+    // 重新检查服务器同步状态
+    await _checkServerSyncConfig();
   }
 
   @override
@@ -192,6 +233,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () {
               if (mounted) {
                 _showWebDAVSettings();
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.sync),
+            title: Text('settings_screen_serverSyncTitle'.tr),
+            subtitle: Text(
+              _isServerSyncLoggedIn
+                  ? 'settings_screen_serverSyncConnected'.tr
+                  : 'settings_screen_serverSyncDisconnected'.tr,
+            ),
+            trailing:
+                _isServerSyncLoggedIn
+                    ? const Icon(Icons.check_circle, color: Colors.green)
+                    : null,
+            onTap: () {
+              if (mounted) {
+                _showServerSyncSettings();
               }
             },
           ),
