@@ -638,7 +638,7 @@ extension ChatUseCaseJsApiAdapter on ChatUseCase {
         result = await findMessageByContent(params);
         break;
       case 'getCurrentUser':
-        result = await getCurrentUser();
+        result = await getCurrentUser(params);
         break;
       case 'getAIUser':
         result = await getAIUser();

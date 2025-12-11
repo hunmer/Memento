@@ -41,6 +41,18 @@ export 'repositories/activity/activity_repository.dart';
 // Goods 插件 Repository
 export 'repositories/goods/goods_repository.dart';
 
+// Diary 插件 Repository
+export 'repositories/diary/diary_repository.dart';
+
+// Checkin 插件 Repository
+export 'repositories/checkin/checkin_repository.dart';
+
+// Day 插件 Repository
+export 'repositories/day/day_repository.dart';
+
+// Tracker 插件 Repository
+export 'repositories/tracker/tracker_repository.dart';
+
 // ============ UseCase 层 ============
 
 // Chat 插件 UseCase
@@ -60,6 +72,18 @@ export 'usecases/activity/activity_usecase.dart';
 
 // Goods 插件 UseCase
 export 'usecases/goods/goods_usecase.dart';
+
+// Diary 插件 UseCase
+export 'usecases/diary/diary_usecase.dart';
+
+// Checkin 插件 UseCase
+export 'usecases/checkin/checkin_usecase.dart';
+
+// Day 插件 UseCase
+export 'usecases/day/day_usecase.dart';
+
+// Tracker 插件 UseCase
+export 'usecases/tracker/tracker_usecase.dart';
 
 // ============ 同步相关 ============
 

@@ -13,6 +13,7 @@ class JSBridgeInjector {
   final InAppWebViewController controller;
   final bool enabled;
   BuildContext? _context;
+  bool _isInjected = false;
 
   JSBridgeInjector({
     required this.controller,
@@ -22,6 +23,11 @@ class JSBridgeInjector {
   /// 设置 BuildContext（用于 UI 操作）
   void setContext(BuildContext context) {
     _context = context;
+  }
+
+  /// 重置注入状态（在新页面加载时调用）
+  void reset() {
+    _isInjected = false;
   }
 
   /// 初始化 JS Bridge（在 onWebViewCreated 中调用）
@@ -36,6 +42,9 @@ class JSBridgeInjector {
   Future<void> inject() async {
     if (!enabled) return;
 
+    // 防止重复注入
+    if (_isInjected) return;
+
     // 1. 注入基础命名空间
     await _injectBaseNamespace();
 
@@ -47,6 +56,9 @@ class JSBridgeInjector {
 
     // 4. 注入 UI API 代理
     await _injectUIAPIs();
+
+    // 标记为已注入
+    _isInjected = true;
   }
 
   /// 注册核心 JavaScript Handlers
