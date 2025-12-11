@@ -7,7 +7,7 @@ import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
 
 /// 服务端 Chat Repository 实现
-class ServerChatRepository implements IChatRepository {
+class ServerChatRepository extends IChatRepository {
   final PluginDataService dataService;
   final String userId;
 

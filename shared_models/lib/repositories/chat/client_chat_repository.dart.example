@@ -16,7 +16,7 @@ import '../models/user.dart';
 /// 客户端 Chat Repository 实现
 ///
 /// 委托给现有的 Service 层，作为 JSAPI 和 UseCase 之间的桥梁
-class ClientChatRepository implements IChatRepository {
+class ClientChatRepository extends IChatRepository {
   final ChannelService channelService;
   final UserService userService;
 

@@ -7,7 +7,7 @@ import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
 
 /// 服务端 Activity Repository 实现
-class ServerActivityRepository implements IActivityRepository {
+class ServerActivityRepository extends IActivityRepository {
   final PluginDataService dataService;
   final String userId;
 

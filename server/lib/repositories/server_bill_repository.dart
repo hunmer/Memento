@@ -8,7 +8,7 @@ import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
 
 /// 服务端 Bill Repository 实现
-class ServerBillRepository implements IBillRepository {
+class ServerBillRepository extends IBillRepository {
   final PluginDataService dataService;
   final String userId;
 

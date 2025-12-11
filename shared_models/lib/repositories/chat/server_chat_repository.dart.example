@@ -14,7 +14,7 @@ import 'package:uuid/uuid.dart';
 /// 服务端 Chat Repository 实现
 ///
 /// 通过 PluginDataService 访问用户的加密数据文件
-class ServerChatRepository implements IChatRepository {
+class ServerChatRepository extends IChatRepository {
   // final PluginDataService dataService;
   final String userId;
   final Uuid _uuid = const Uuid();

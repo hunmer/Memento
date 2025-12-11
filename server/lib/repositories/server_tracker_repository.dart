@@ -7,7 +7,7 @@ import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
 
 /// 服务端 Tracker Repository 实现
-class ServerTrackerRepository implements ITrackerRepository {
+class ServerTrackerRepository extends ITrackerRepository {
   final PluginDataService dataService;
   final String userId;
 

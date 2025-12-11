@@ -7,7 +7,7 @@ import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
 
 /// 服务端 Checkin Repository 实现
-class ServerCheckinRepository implements ICheckinRepository {
+class ServerCheckinRepository extends ICheckinRepository {
   final PluginDataService dataService;
   final String userId;
 

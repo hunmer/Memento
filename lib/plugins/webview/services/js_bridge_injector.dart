@@ -13,7 +13,7 @@ class JSBridgeInjector {
   final InAppWebViewController controller;
   final bool enabled;
   BuildContext? _context;
-  bool _isInjected = false;
+  final Set<String> _injectedPages = {};
 
   JSBridgeInjector({
     required this.controller,
@@ -27,7 +27,7 @@ class JSBridgeInjector {
 
   /// 重置注入状态（在新页面加载时调用）
   void reset() {
-    _isInjected = false;
+    _injectedPages.clear();
   }
 
   /// 初始化 JS Bridge（在 onWebViewCreated 中调用）
@@ -39,11 +39,13 @@ class JSBridgeInjector {
   }
 
   /// 注入 JS Bridge（在 onLoadStop 中调用）
-  Future<void> inject() async {
+  Future<void> inject(String? currentUrl) async {
     if (!enabled) return;
 
-    // 防止重复注入
-    if (_isInjected) return;
+    // 防止重复注入同一页面
+    if (currentUrl != null && _injectedPages.contains(currentUrl)) {
+      return;
+    }
 
     // 1. 注入基础命名空间
     await _injectBaseNamespace();
@@ -57,8 +59,10 @@ class JSBridgeInjector {
     // 4. 注入 UI API 代理
     await _injectUIAPIs();
 
-    // 标记为已注入
-    _isInjected = true;
+    // 标记该页面已注入
+    if (currentUrl != null) {
+      _injectedPages.add(currentUrl);
+    }
   }
 
   /// 注册核心 JavaScript Handlers
