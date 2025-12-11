@@ -53,6 +53,36 @@ export 'repositories/day/day_repository.dart';
 // Tracker 插件 Repository
 export 'repositories/tracker/tracker_repository.dart';
 
+// Database 插件 Repository
+export 'repositories/database/database_repository.dart';
+
+// Habits 插件 Repository
+export 'repositories/habits/habits_repository.dart';
+
+// Nodes 插件 Repository
+export 'repositories/nodes/nodes_repository.dart';
+
+// Calendar Album 插件 Repository
+export 'repositories/calendar_album/calendar_album_repository.dart';
+
+// Store 插件 Repository
+export 'repositories/store/store_repository.dart';
+
+// Contact 插件 Repository
+export 'repositories/contact/contact_repository.dart';
+
+// Timer 插件 Repository
+export 'repositories/timer/timer_repository.dart';
+
+// OpenAI 插件 Repository
+export 'repositories/openai/openai_repository.dart';
+
+// Agent Chat 插件 Repository
+export 'repositories/agent_chat/agent_chat_repository.dart';
+
+// Calendar 插件 Repository
+export 'repositories/calendar/calendar_repository.dart';
+
 // ============ UseCase 层 ============
 
 // Chat 插件 UseCase
@@ -84,6 +114,36 @@ export 'usecases/day/day_usecase.dart';
 
 // Tracker 插件 UseCase
 export 'usecases/tracker/tracker_usecase.dart';
+
+// Database 插件 UseCase
+export 'usecases/database/database_usecase.dart';
+
+// Habits 插件 UseCase
+export 'usecases/habits/habits_usecase.dart';
+
+// Nodes 插件 UseCase
+export 'usecases/nodes/nodes_usecase.dart';
+
+// Calendar Album 插件 UseCase
+export 'usecases/calendar_album/calendar_album_usecase.dart';
+
+// Store 插件 UseCase
+export 'usecases/store/store_usecase.dart';
+
+// Contact 插件 UseCase
+export 'usecases/contact/contact_usecase.dart';
+
+// Timer 插件 UseCase
+export 'usecases/timer/timer_usecase.dart';
+
+// OpenAI 插件 UseCase
+export 'usecases/openai/openai_usecase.dart';
+
+// Agent Chat 插件 UseCase
+export 'usecases/agent_chat/agent_chat_usecase.dart';
+
+// Calendar 插件 UseCase
+export 'usecases/calendar/calendar_usecase.dart';
 
 // ============ 同步相关 ============
 
