@@ -76,6 +76,7 @@ dependencies:
   crypto: ^3.0.3
   encrypt: ^5.0.3  # AES-256-GCM encryption for sync service
   event: ^3.1.0
+  flutter_inappwebview: ^6.1.5
   syncfusion_flutter_calendar: ^29.1.41
   syncfusion_localizations: ^29.1.41
   device_calendar: ^4.3.2
@@ -110,6 +111,8 @@ dependencies:
     path: ./memento_intent
   memento_nfc:
     path: ./memento_nfc
+  shared_models:
+    path: ./shared_models
 
   flutter_localizations:
     sdk: flutter

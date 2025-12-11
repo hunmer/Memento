@@ -1,0 +1,352 @@
+/// Chat 插件 - 客户端 Repository 实现
+///
+/// 此文件展示如何在 Flutter 客户端实现 IChatRepository 接口
+/// 通过适配现有的 ChannelService 和 UserService 来提供数据
+
+import 'package:shared_models/repositories/chat/chat_repository.dart';
+import 'package:shared_models/utils/result.dart';
+import 'package:shared_models/utils/pagination.dart';
+
+import '../services/channel_service.dart';
+import '../services/user_service.dart';
+import '../models/channel.dart';
+import '../models/message.dart';
+import '../models/user.dart';
+
+/// 客户端 Chat Repository 实现
+///
+/// 委托给现有的 Service 层，作为 JSAPI 和 UseCase 之间的桥梁
+class ClientChatRepository implements IChatRepository {
+  final ChannelService channelService;
+  final UserService userService;
+
+  ClientChatRepository({
+    required this.channelService,
+    required this.userService,
+  });
+
+  // ============ 频道操作 ============
+
+  @override
+  Future<Result<List<ChannelDto>>> getChannels({
+    PaginationParams? pagination,
+  }) async {
+    try {
+      final channels = channelService.channels;
+      final dtos = channels.map(_channelToDto).toList();
+
+      if (pagination != null) {
+        final paginated = PaginationUtils.paginate(
+          dtos,
+          offset: pagination.offset,
+          count: pagination.count,
+        );
+        return Result.success(paginated.data);
+      }
+
+      return Result.success(dtos);
+    } catch (e) {
+      return Result.failure('获取频道失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  @override
+  Future<Result<ChannelDto?>> getChannelById(String id) async {
+    try {
+      final channel = channelService.channels.firstWhere(
+        (c) => c.id == id,
+        orElse: () => throw StateError('Channel not found'),
+      );
+      return Result.success(_channelToDto(channel));
+    } catch (e) {
+      if (e is StateError) {
+        return const Result.success(null);
+      }
+      return Result.failure('获取频道失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  @override
+  Future<Result<ChannelDto>> createChannel(ChannelDto dto) async {
+    try {
+      final channel = _dtoToChannel(dto);
+      await channelService.createChannel(channel);
+      return Result.success(dto);
+    } catch (e) {
+      return Result.failure('创建频道失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  @override
+  Future<Result<ChannelDto>> updateChannel(String id, ChannelDto dto) async {
+    try {
+      final channel = _dtoToChannel(dto);
+      await channelService.updateChannel(id, channel);
+      return Result.success(dto);
+    } catch (e) {
+      return Result.failure('更新频道失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  @override
+  Future<Result<bool>> deleteChannel(String id) async {
+    try {
+      await channelService.deleteChannel(id);
+      return const Result.success(true);
+    } catch (e) {
+      return Result.failure('删除频道失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  @override
+  Future<Result<List<ChannelDto>>> findChannels(ChannelQuery query) async {
+    try {
+      final channels = channelService.channels;
+      final matches = <Channel>[];
+
+      for (final channel in channels) {
+        bool isMatch = false;
+
+        switch (query.field) {
+          case 'id':
+            isMatch = channel.id == query.value;
+            break;
+          case 'title':
+            if (query.fuzzy) {
+              isMatch = channel.title.contains(query.value ?? '');
+            } else {
+              isMatch = channel.title == query.value;
+            }
+            break;
+          default:
+            // 通用字段查找
+            final json = channel.toJson();
+            final fieldValue = json[query.field]?.toString() ?? '';
+            if (query.fuzzy) {
+              isMatch = fieldValue.contains(query.value ?? '');
+            } else {
+              isMatch = fieldValue == query.value;
+            }
+        }
+
+        if (isMatch) {
+          matches.add(channel);
+          if (!query.findAll) break;
+        }
+      }
+
+      final dtos = matches.map(_channelToDto).toList();
+
+      if (query.pagination != null) {
+        final paginated = PaginationUtils.paginate(
+          dtos,
+          offset: query.pagination!.offset,
+          count: query.pagination!.count,
+        );
+        return Result.success(paginated.data);
+      }
+
+      return Result.success(dtos);
+    } catch (e) {
+      return Result.failure('查找频道失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  // ============ 消息操作 ============
+
+  @override
+  Future<Result<List<MessageDto>>> getMessages(
+    String channelId, {
+    PaginationParams? pagination,
+  }) async {
+    try {
+      final channel = channelService.channels.firstWhere(
+        (c) => c.id == channelId,
+        orElse: () => throw StateError('Channel not found'),
+      );
+
+      final dtos = channel.messages.map((m) => _messageToDto(m, channelId)).toList();
+
+      if (pagination != null) {
+        final paginated = PaginationUtils.paginate(
+          dtos,
+          offset: pagination.offset,
+          count: pagination.count,
+        );
+        return Result.success(paginated.data);
+      }
+
+      return Result.success(dtos);
+    } catch (e) {
+      return Result.failure('获取消息失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  @override
+  Future<Result<MessageDto>> sendMessage(
+    String channelId,
+    MessageDto dto,
+  ) async {
+    try {
+      final message = _dtoToMessage(dto);
+      await channelService.addMessage(channelId, message);
+      return Result.success(dto);
+    } catch (e) {
+      return Result.failure('发送消息失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  @override
+  Future<Result<bool>> deleteMessage(String channelId, String messageId) async {
+    try {
+      await channelService.deleteMessage(channelId, messageId);
+      return const Result.success(true);
+    } catch (e) {
+      return Result.failure('删除消息失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  @override
+  Future<Result<List<MessageDto>>> findMessages(MessageQuery query) async {
+    try {
+      final channel = channelService.channels.firstWhere(
+        (c) => c.id == query.channelId,
+        orElse: () => throw StateError('Channel not found'),
+      );
+
+      final matches = <Message>[];
+
+      for (final message in channel.messages) {
+        bool isMatch = false;
+
+        switch (query.field) {
+          case 'id':
+            isMatch = message.id == query.value;
+            break;
+          case 'content':
+            if (query.fuzzy) {
+              isMatch = message.content.contains(query.value ?? '');
+            } else {
+              isMatch = message.content == query.value;
+            }
+            break;
+          default:
+            // 通用字段查找
+            final json = message.toJson();
+            final fieldValue = json[query.field]?.toString() ?? '';
+            if (query.fuzzy) {
+              isMatch = fieldValue.contains(query.value ?? '');
+            } else {
+              isMatch = fieldValue == query.value;
+            }
+        }
+
+        if (isMatch) {
+          matches.add(message);
+          if (!query.findAll) break;
+        }
+      }
+
+      final dtos = matches.map((m) => _messageToDto(m, query.channelId)).toList();
+
+      if (query.pagination != null) {
+        final paginated = PaginationUtils.paginate(
+          dtos,
+          offset: query.pagination!.offset,
+          count: query.pagination!.count,
+        );
+        return Result.success(paginated.data);
+      }
+
+      return Result.success(dtos);
+    } catch (e) {
+      return Result.failure('查找消息失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  // ============ 用户操作 ============
+
+  @override
+  Future<Result<UserDto>> getCurrentUser() async {
+    try {
+      final user = userService.currentUser;
+      return Result.success(_userToDto(user));
+    } catch (e) {
+      return Result.failure('获取当前用户失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  @override
+  Future<Result<UserDto?>> getAIUser() async {
+    try {
+      final user = userService.aiUser;
+      if (user == null) return const Result.success(null);
+      return Result.success(_userToDto(user));
+    } catch (e) {
+      return Result.failure('获取 AI 用户失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  @override
+  Future<Result<List<UserDto>>> getUsers() async {
+    try {
+      final users = [userService.currentUser];
+      if (userService.aiUser != null) {
+        users.add(userService.aiUser!);
+      }
+      return Result.success(users.map(_userToDto).toList());
+    } catch (e) {
+      return Result.failure('获取用户列表失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  // ============ 转换方法 ============
+
+  ChannelDto _channelToDto(Channel channel) {
+    return ChannelDto(
+      id: channel.id,
+      title: channel.title,
+      iconCodePoint: channel.icon.codePoint,
+      iconFontFamily: channel.icon.fontFamily,
+      backgroundColor: channel.backgroundColor.value.toRadixString(16),
+      priority: channel.priority,
+      groups: channel.groups,
+      lastMessageTime: channel.lastMessageTime,
+      metadata: channel.metadata,
+    );
+  }
+
+  Channel _dtoToChannel(ChannelDto dto) {
+    // 这里需要根据实际的 Channel 构造函数来实现
+    // 此处是示例代码
+    throw UnimplementedError('需要根据实际 Channel 模型实现');
+  }
+
+  MessageDto _messageToDto(Message message, String channelId) {
+    return MessageDto(
+      id: message.id,
+      content: message.content,
+      channelId: channelId,
+      user: _userToDto(message.user),
+      type: message.type.name,
+      date: message.date,
+      replyToId: message.replyToId,
+      metadata: message.metadata,
+    );
+  }
+
+  Message _dtoToMessage(MessageDto dto) {
+    // 这里需要根据实际的 Message 构造函数来实现
+    throw UnimplementedError('需要根据实际 Message 模型实现');
+  }
+
+  UserDto _userToDto(User user) {
+    return UserDto(
+      id: user.id,
+      name: user.name,
+      avatarPath: user.avatarPath,
+      isAI: user.isAI,
+      metadata: user.metadata,
+    );
+  }
+}
