@@ -26,10 +26,22 @@ export 'utils/md5_utils.dart';
 // Chat 插件 Repository
 export 'repositories/chat/chat_repository.dart';
 
+// Notes 插件 Repository
+export 'repositories/notes/notes_repository.dart';
+
+// Todo 插件 Repository
+export 'repositories/todo/todo_repository.dart';
+
+// Bill 插件 Repository
+export 'repositories/bill/bill_repository.dart';
+
 // ============ UseCase 层 ============
 
 // Chat 插件 UseCase
 export 'usecases/chat/chat_usecase.dart';
+
+// Notes 插件 UseCase
+export 'usecases/notes/notes_usecase.dart';
 
 // ============ 同步相关 ============
 
