@@ -119,6 +119,7 @@ createApp({
         const token = ref('');
         const serverUrl = ref(localStorage.getItem('serverUrl') || 'http://localhost:8080');
         const serverStatus = ref('offline');
+        const apiEnabled = ref(false);
 
         const loginForm = reactive({
             username: '',
@@ -272,7 +273,8 @@ createApp({
                 await Promise.all([
                     checkServerHealth(),
                     loadFiles(),  // loadFiles will call buildDirectoryTree internally
-                    loadStats()
+                    loadStats(),
+                    loadApiStatus()
                 ]);
             } catch (err) {
                 // 如果加载失败，可能是token问题，apiRequest已经处理了清理
@@ -562,6 +564,103 @@ createApp({
             }
         };
 
+        // API Access Control
+        const loadApiStatus = async () => {
+            try {
+                const data = await apiRequest('/api/v1/auth/api-status');
+                apiEnabled.value = data.api_enabled || false;
+            } catch (err) {
+                console.error('Failed to load API status:', err);
+                // 默认假设 API 已启用
+                apiEnabled.value = true;
+            }
+        };
+
+        const enableApi = async () => {
+            // 提示用户输入加密密钥
+            const encryptionKey = prompt(
+                '请输入加密密钥 (Base64 编码):\n\n' +
+                '⚠️ 重要说明：\n' +
+                '1. 加密密钥由 Memento 客户端生成\n' +
+                '2. 可以在客户端"设置 > 开发者选项"中查看\n' +
+                '3. 密钥长度应为 44 个字符（32字节 Base64）\n' +
+                '4. 如果不确定，请先在客户端启用同步功能'
+            );
+
+            if (!encryptionKey) {
+                return;
+            }
+
+            // 基本验证：检查是否为 Base64 格式
+            if (!/^[A-Za-z0-9+/]+=*$/.test(encryptionKey)) {
+                showToast('加密密钥格式无效，应为 Base64 编码', 'error');
+                return;
+            }
+
+            if (encryptionKey.length < 40) {
+                showToast('加密密钥长度不足，标准长度为 44 个字符', 'error');
+                return;
+            }
+
+            if (!confirm('确定要使用此密钥启用 API 访问吗？\n\n启用后，所有客户端将可以使用此密钥访问同步服务。')) {
+                return;
+            }
+
+            setLoading(true, '启用 API 访问...');
+            try {
+                await apiRequest('/api/v1/auth/enable-api', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        encryption_key: encryptionKey
+                    })
+                });
+                apiEnabled.value = true;
+                showToast('API 访问已启用');
+                addActivity('settings', '启用了 API 访问');
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const disableApi = async () => {
+            if (!confirm('警告：禁用 API 访问将导致所有客户端无法同步数据！\n\n确定要继续吗？')) {
+                return;
+            }
+
+            if (!confirm('再次确认：这将阻止所有客户端的同步请求！')) {
+                return;
+            }
+
+            setLoading(true, '禁用 API 访问...');
+            try {
+                await apiRequest('/api/v1/auth/disable-api', {
+                    method: 'POST',
+                    body: JSON.stringify({})
+                });
+                apiEnabled.value = false;
+                showToast('API 访问已禁用', 'warning');
+                addActivity('settings', '禁用了 API 访问');
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const refreshApiStatus = async () => {
+            setLoading(true, '刷新 API 状态...');
+            try {
+                await loadApiStatus();
+                showToast('API 状态已刷新');
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
         // Utilities
         const formatSize = (bytes) => {
             if (!bytes) return '0 B';
@@ -627,6 +726,7 @@ createApp({
             currentUser,
             serverUrl,
             serverStatus,
+            apiEnabled,
             loginForm,
             stats,
             files,
@@ -646,6 +746,9 @@ createApp({
             deleteFile,
             exportData,
             clearServerData,
+            enableApi,
+            disableApi,
+            refreshApiStatus,
 
             // Utilities
             formatSize,

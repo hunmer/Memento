@@ -2,6 +2,7 @@
   "name": "mcp-memento-server",
   "version": "1.0.0",
   "description": "MCP server for Memento app - provides AI tools for managing personal data",
+  "type": "module",
   "main": "dist/index.js",
   "bin": {
     "mcp-memento-server": "./dist/index.js"
@@ -9,7 +10,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "dev": "tsx src/index.ts",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run build"
   },
@@ -23,12 +24,13 @@
   "author": "hunmer",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0"
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "dotenv": "^17.2.3"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "ts-node": "^10.9.0"
+    "tsx": "^4.7.0",
+    "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0"

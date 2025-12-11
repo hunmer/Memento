@@ -8,5 +8,5 @@
  * - MEMENTO_SERVER_URL: Memento 服务器地址 (如 http://localhost:8080)
  * - MEMENTO_AUTH_TOKEN: JWT 认证令牌
  */
-export {};
+import 'dotenv/config';
 //# sourceMappingURL=index.d.ts.map

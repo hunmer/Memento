@@ -1,10 +1,7 @@
-"use strict";
 /**
  * Memento HTTP 客户端
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.MementoClient = void 0;
-class MementoClient {
+export class MementoClient {
     config;
     constructor(config) {
         this.config = config;
@@ -128,7 +125,12 @@ class MementoClient {
      * 搜索笔记
      */
     async searchNotes(keyword, params) {
-        return this.get('/api/v1/plugins/notes/search', { keyword, ...params });
+        const queryParams = { keyword };
+        if (params?.offset !== undefined)
+            queryParams.offset = String(params.offset);
+        if (params?.count !== undefined)
+            queryParams.count = String(params.count);
+        return this.get('/api/v1/plugins/notes/search', queryParams);
     }
     // ==================== Activity API ====================
     /**
@@ -249,5 +251,4 @@ class MementoClient {
         return this.get('/api/v1/plugins/todo/stats');
     }
 }
-exports.MementoClient = MementoClient;
 //# sourceMappingURL=memento-client.js.map

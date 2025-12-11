@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-"use strict";
 /**
  * Memento MCP Server
  *
@@ -9,19 +8,19 @@
  * - MEMENTO_SERVER_URL: Memento 服务器地址 (如 http://localhost:8080)
  * - MEMENTO_AUTH_TOKEN: JWT 认证令牌
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const index_js_1 = require("@modelcontextprotocol/sdk/server/index.js");
-const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
-const types_js_1 = require("@modelcontextprotocol/sdk/types.js");
-const config_js_1 = require("./config.js");
-const memento_client_js_1 = require("./client/memento-client.js");
-const index_js_2 = require("./tools/index.js");
+import 'dotenv/config';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { CallToolRequestSchema, ListToolsRequestSchema, } from '@modelcontextprotocol/sdk/types.js';
+import { loadConfig, validateConfig } from './config.js';
+import { MementoClient } from './client/memento-client.js';
+import { getToolDefinitions } from './tools/index.js';
 async function main() {
     // 加载配置
     let config;
     try {
-        config = (0, config_js_1.loadConfig)();
-        (0, config_js_1.validateConfig)(config);
+        config = loadConfig();
+        validateConfig(config);
     }
     catch (error) {
         console.error('配置错误:', error instanceof Error ? error.message : error);
@@ -32,9 +31,9 @@ async function main() {
         process.exit(1);
     }
     // 创建 HTTP 客户端
-    const client = new memento_client_js_1.MementoClient(config);
+    const client = new MementoClient(config);
     // 创建 MCP 服务器
-    const server = new index_js_1.Server({
+    const server = new Server({
         name: 'mcp-memento-server',
         version: '1.0.0',
     }, {
@@ -43,13 +42,13 @@ async function main() {
         },
     });
     // 注册工具列表处理器
-    server.setRequestHandler(types_js_1.ListToolsRequestSchema, async () => {
+    server.setRequestHandler(ListToolsRequestSchema, async () => {
         return {
-            tools: (0, index_js_2.getToolDefinitions)(),
+            tools: getToolDefinitions(),
         };
     });
     // 注册工具调用处理器
-    server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
+    server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const { name, arguments: args } = request.params;
         try {
             switch (name) {
@@ -187,7 +186,7 @@ async function main() {
         }
     });
     // 启动服务器
-    const transport = new stdio_js_1.StdioServerTransport();
+    const transport = new StdioServerTransport();
     await server.connect(transport);
     console.error('Memento MCP Server 已启动');
     console.error(`服务器地址: ${config.serverUrl}`);

@@ -9,6 +9,8 @@
  * - MEMENTO_AUTH_TOKEN: JWT 认证令牌
  */
 
+import 'dotenv/config';
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -18,7 +20,7 @@ import {
 
 import { loadConfig, validateConfig } from './config.js';
 import { MementoClient } from './client/memento-client.js';
-import { registerTools, getToolDefinitions } from './tools/index.js';
+import { getToolDefinitions } from './tools/index.js';
 
 async function main() {
   // 加载配置
