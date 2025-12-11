@@ -24,6 +24,17 @@ class EncryptionService {
   /// 是否已初始化
   bool get isInitialized => _initialized;
 
+  /// 获取加密密钥的 Base64 编码
+  ///
+  /// 用于管理后台配置 API 访问
+  /// ⚠️ 警告: 密钥是保护用户数据的唯一凭证，请妥善保管
+  String? get encryptionKeyBase64 {
+    if (!_initialized || _key == null) {
+      return null;
+    }
+    return _key!.base64;
+  }
+
   /// 从用户密码和 Salt 派生加密密钥 (PBKDF2)
   ///
   /// [password] 用户密码

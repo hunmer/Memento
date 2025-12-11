@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:device_info_plus/device_info_plus.dart';
@@ -629,6 +630,73 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
 
             // 同步设置（仅已登录时显示）
             if (_isLoggedIn) ...[
+              const Divider(height: 32),
+
+              // 加密密钥展示
+              Card(
+                color: Colors.orange.withOpacity(0.1),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.vpn_key, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'server_sync_encryptionKey'.tr,
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'server_sync_encryptionKeyHint'.tr,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.orange.shade700,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: SelectableText(
+                                _syncService?.encryption.encryptionKeyBase64 ?? 'N/A',
+                                style: const TextStyle(
+                                  fontFamily: 'monospace',
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.copy, size: 20),
+                              tooltip: 'server_sync_copyKey'.tr,
+                              onPressed: () {
+                                final key = _syncService?.encryption.encryptionKeyBase64;
+                                if (key != null) {
+                                  Clipboard.setData(ClipboardData(text: key));
+                                  toastService.showToast('server_sync_keyCopied'.tr);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
               const Divider(height: 32),
               Text(
                 'server_sync_syncSettings'.tr,

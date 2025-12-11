@@ -102,4 +102,8 @@ const Map<String, String> settingsScreenTranslationsZh = {
   'server_sync_syncNow': '立即同步',
   'server_sync_syncComplete': '同步完成: 成功 @success, 冲突 @conflict, 错误 @error',
   'server_sync_syncFailed': '同步失败',
+  'server_sync_encryptionKey': '加密密钥',
+  'server_sync_encryptionKeyHint': '⚠️ 此密钥用于管理后台启用 API 访问，请妥善保管，切勿泄露',
+  'server_sync_copyKey': '复制密钥',
+  'server_sync_keyCopied': '密钥已复制到剪贴板',
 };

@@ -11,6 +11,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
+    "inspector": "node scripts/start-inspector.js",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run build"
   },
