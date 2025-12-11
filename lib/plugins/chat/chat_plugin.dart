@@ -13,6 +13,8 @@ import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:shared_models/shared_models.dart';
+import 'repositories/client_chat_repository.dart';
 import 'services/channel_service.dart';
 import 'services/message_service.dart';
 import 'services/settings_service.dart';
