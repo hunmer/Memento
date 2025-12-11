@@ -16,15 +16,20 @@ import 'models/interaction_record_model.dart';
 import 'widgets/contact_card.dart';
 import 'widgets/contact_form.dart';
 import 'widgets/filter_dialog.dart';
-import 'package:uuid/uuid.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
 
+// UseCase 架构相关导入
+import 'package:shared_models/usecases/contact/contact_usecase.dart';
+import 'repositories/client_contact_repository.dart';
+
 class ContactPlugin extends BasePlugin with JSBridgePlugin {
   late ContactController _controller;
+  late ContactUseCase _useCase;
 
-  // 暴露控制器供外部访问
+  // 暴露控制器和 UseCase 供外部访问
   ContactController get controller => _controller;
+  ContactUseCase get useCase => _useCase;
 
   @override
   String get id => 'contact';
@@ -37,14 +42,22 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Future<void> initialize() async {
+    // 1. 初始化控制器
     _controller = ContactController(this);
-    // 初始化默认数据
+
+    // 2. 创建 Repository
+    final repository = ClientContactRepository(controller: _controller);
+
+    // 3. 创建 UseCase
+    _useCase = ContactUseCase(repository);
+
+    // 4. 初始化默认数据
     await _controller.createDefaultContacts();
 
-    // 注册 JS API（最后一步）
+    // 5. 注册 JS API（最后一步）
     await registerJSAPI();
 
-    // 注册数据选择器
+    // 6. 注册数据选择器
     _registerDataSelectors();
   }
 
@@ -160,9 +173,14 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   Future<Map<String, dynamic>> _getCardStats() async {
-    final contacts = await _controller.getAllContacts();
-    final recentContacts = await _controller.getRecentlyContactedCount();
-    return {'totalContacts': contacts.length, 'recentContacts': recentContacts};
+    // 使用 UseCase 获取统计数据
+    final totalContactsResult = await _useCase.getTotalContactCount({});
+    final recentContactsResult = await _useCase.getRecentlyContactedCount({});
+
+    return {
+      'totalContacts': totalContactsResult.dataOrNull ?? 0,
+      'recentContacts': recentContactsResult.dataOrNull ?? 0,
+    };
   }
 
   @override
@@ -226,23 +244,13 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取所有联系人
   /// 支持分页参数: offset, count
   Future<String> _jsGetContacts(Map<String, dynamic> params) async {
-    final contacts = await _controller.getAllContacts();
-    final contactsJson = contacts.map((c) => c.toJson()).toList();
+    final result = await _useCase.getContacts(params);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        contactsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    return jsonEncode(contactsJson);
+    return jsonEncode(result.dataOrNull ?? []);
   }
 
   /// 获取联系人详情
@@ -252,207 +260,126 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: contactId'});
     }
 
-    final contact = await _controller.getContact(contactId);
+    final result = await _useCase.getContactById({'id': contactId});
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+
+    final contact = result.dataOrNull;
     if (contact == null) {
       return jsonEncode({'error': 'Contact not found'});
     }
-    return jsonEncode(contact.toJson());
+
+    return jsonEncode(contact);
   }
 
   /// 创建联系人
   Future<String> _jsCreateContact(Map<String, dynamic> params) async {
-    // 提取必需参数
-    final String? name = params['name'];
-    if (name == null || name.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: name'});
+    final result = await _useCase.createContact(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    final String? phone = params['phone'];
-    if (phone == null || phone.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: phone'});
-    }
-
-    // 提取可选参数
-    final String? id = params['id'];
-    final String? avatar = params['avatar'];
-    final String? address = params['address'];
-    final String? notes = params['notes'];
-    final List<String>? tags =
-        params['tags'] != null ? List<String>.from(params['tags']) : null;
-    final Map<String, String>? customFields =
-        params['customFields'] != null
-            ? Map<String, String>.from(params['customFields'])
-            : null;
-
-    // 检查自定义ID是否已存在
-    if (id != null && id.isNotEmpty) {
-      final existingContact = await _controller.getContact(id);
-      if (existingContact != null) {
-        return jsonEncode({'error': '联系人ID已存在: $id'});
-      }
-    }
-
-    final uuid = const Uuid();
-    final contact = Contact(
-      id: (id != null && id.isNotEmpty) ? id : uuid.v4(), // 如果传入自定义ID则使用，否则自动生成
-      name: name,
-      phone: phone,
-      avatar: avatar,
-      address: address,
-      notes: notes,
-      icon: Icons.person,
-      iconColor: color,
-      tags: tags ?? [],
-      customFields: customFields ?? {},
-    );
-
-    await _controller.addContact(contact);
-    return jsonEncode(contact.toJson());
+    return jsonEncode(result.dataOrNull ?? {});
   }
 
   /// 更新联系人
   Future<String> _jsUpdateContact(Map<String, dynamic> params) async {
-    // 提取必需参数
     final String? contactId = params['contactId'];
     if (contactId == null || contactId.isEmpty) {
       return jsonEncode({'error': '缺少必需参数: contactId'});
     }
 
-    final contact = await _controller.getContact(contactId);
-    if (contact == null) {
-      return jsonEncode({'error': 'Contact not found'});
+    // 将 contactId 作为 id 传递给 UseCase
+    final useCaseParams = Map<String, dynamic>.from(params);
+    useCaseParams['id'] = contactId;
+
+    final result = await _useCase.updateContact(useCaseParams);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    // 提取可选参数
-    final String? name = params['name'];
-    final String? phone = params['phone'];
-    final String? avatar = params['avatar'];
-    final String? address = params['address'];
-    final String? notes = params['notes'];
-    final List<String>? tags =
-        params['tags'] != null ? List<String>.from(params['tags']) : null;
-    final Map<String, String>? customFields =
-        params['customFields'] != null
-            ? Map<String, String>.from(params['customFields'])
-            : null;
-
-    final updatedContact = contact.copyWith(
-      name: name,
-      phone: phone,
-      avatar: avatar,
-      address: address,
-      notes: notes,
-      tags: tags,
-      customFields: customFields,
-    );
-
-    await _controller.updateContact(updatedContact);
-    return jsonEncode(updatedContact.toJson());
+    return jsonEncode(result.dataOrNull ?? {});
   }
 
   /// 删除联系人
   Future<String> _jsDeleteContact(Map<String, dynamic> params) async {
-    try {
-      final String? contactId = params['contactId'];
-      if (contactId == null || contactId.isEmpty) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: contactId'});
-      }
-
-      await _controller.deleteContact(contactId);
-      return jsonEncode({'success': true, 'contactId': contactId});
-    } catch (e) {
-      return jsonEncode({'success': false, 'error': e.toString()});
+    final String? contactId = params['contactId'];
+    if (contactId == null || contactId.isEmpty) {
+      return jsonEncode({'success': false, 'error': '缺少必需参数: contactId'});
     }
+
+    final result = await _useCase.deleteContact({'id': contactId});
+
+    if (result.isFailure) {
+      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
+    }
+
+    return jsonEncode({'success': true, 'contactId': contactId});
   }
 
   /// 添加交互记录
   Future<String> _jsAddInteraction(Map<String, dynamic> params) async {
-    // 提取必需参数
-    final String? contactId = params['contactId'];
-    if (contactId == null || contactId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: contactId'});
+    final result = await _useCase.createInteractionRecord(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    final String? notes = params['notes'];
-    if (notes == null || notes.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: notes'});
-    }
-
-    // 提取可选参数
-    final String? dateStr = params['dateStr'];
-    final List<String>? participants =
-        params['participants'] != null
-            ? List<String>.from(params['participants'])
-            : null;
-
-    final uuid = const Uuid();
-    final date = dateStr != null ? DateTime.parse(dateStr) : DateTime.now();
-
-    final interaction = InteractionRecord(
-      id: uuid.v4(),
-      contactId: contactId,
-      date: date,
-      notes: notes,
-      participants: participants ?? [],
-    );
-
-    await _controller.addInteraction(interaction);
-    return jsonEncode(interaction.toJson());
+    return jsonEncode(result.dataOrNull ?? {});
   }
 
   /// 获取交互记录
   /// 支持分页参数: offset, count
   Future<String> _jsGetInteractions(Map<String, dynamic> params) async {
-    final String? contactId = params['contactId'];
-    if (contactId == null || contactId.isEmpty) {
-      return jsonEncode({'error': '缺少必需参数: contactId'});
+    final result = await _useCase.getInteractionRecords(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    final interactions = await _controller.getInteractionsByContactId(
-      contactId,
-    );
-    final interactionsJson = interactions.map((i) => i.toJson()).toList();
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        interactionsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    return jsonEncode(interactionsJson);
+    return jsonEncode(result.dataOrNull ?? []);
   }
 
   /// 删除交互记录
   Future<String> _jsDeleteInteraction(Map<String, dynamic> params) async {
-    try {
-      final String? interactionId = params['interactionId'];
-      if (interactionId == null || interactionId.isEmpty) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: interactionId'});
-      }
-
-      await _controller.deleteInteraction(interactionId);
-      return jsonEncode({'success': true, 'interactionId': interactionId});
-    } catch (e) {
-      return jsonEncode({'success': false, 'error': e.toString()});
+    final String? interactionId = params['interactionId'];
+    if (interactionId == null || interactionId.isEmpty) {
+      return jsonEncode({'success': false, 'error': '缺少必需参数: interactionId'});
     }
+
+    final result = await _useCase.deleteInteractionRecord({'id': interactionId});
+
+    if (result.isFailure) {
+      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
+    }
+
+    return jsonEncode({'success': true, 'interactionId': interactionId});
   }
 
   /// 获取最近联系的联系人数量
-  Future<int> _jsGetRecentContacts(Map<String, dynamic> params) async {
-    return await _controller.getRecentlyContactedCount();
+  Future<String> _jsGetRecentContacts(Map<String, dynamic> params) async {
+    final result = await _useCase.getRecentlyContactedCount(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+
+    return jsonEncode(result.dataOrNull ?? 0);
   }
 
   /// 获取所有标签
   Future<String> _jsGetAllTags(Map<String, dynamic> params) async {
-    final tags = await _controller.getAllTags();
-    return jsonEncode(tags);
+    final result = await _useCase.getAllTags(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+
+    return jsonEncode(result.dataOrNull ?? []);
   }
 
   // ==================== 联系人查找方法 ====================
@@ -475,35 +402,29 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       final int? offset = params['offset'];
       final int? count = params['count'];
 
-      final contacts = await _controller.getAllContacts();
-      final List<Contact> matchedContacts = [];
+      // 使用 searchContacts 进行搜索
+      final searchParams = <String, dynamic>{
+        'offset': offset,
+        'count': count,
+      };
 
-      for (final contact in contacts) {
-        final contactJson = contact.toJson();
-        if (contactJson.containsKey(field) && contactJson[field] == value) {
-          matchedContacts.add(contact);
-          if (!findAll) break;
-        }
+      // 根据字段类型设置搜索参数
+      if (field == 'name' && value is String) {
+        searchParams['nameKeyword'] = value;
       }
 
+      final result = await _useCase.searchContacts(searchParams);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      final contacts = result.dataOrNull as List<dynamic>? ?? [];
+
       if (findAll) {
-        final contactsJson = matchedContacts.map((c) => c.toJson()).toList();
-
-        // 检查是否需要分页
-        if (offset != null || count != null) {
-          final paginated = _paginate(
-            contactsJson,
-            offset: offset ?? 0,
-            count: count ?? 100,
-          );
-          return jsonEncode(paginated);
-        }
-
-        return jsonEncode(contactsJson);
+        return jsonEncode(contacts);
       } else {
-        return matchedContacts.isEmpty
-            ? jsonEncode(null)
-            : jsonEncode(matchedContacts.first.toJson());
+        return contacts.isEmpty ? jsonEncode(null) : jsonEncode(contacts.first);
       }
     } catch (e) {
       return jsonEncode({'error': '查找联系人失败: $e'});
@@ -518,8 +439,13 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
         return jsonEncode({'error': '缺少必需参数: id'});
       }
 
-      final contact = await _controller.getContact(id);
-      return jsonEncode(contact?.toJson());
+      final result = await _useCase.getContactById({'id': id});
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      return jsonEncode(result.dataOrNull);
     } catch (e) {
       return jsonEncode({'error': '查找联系人失败: $e'});
     }
@@ -534,44 +460,29 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
         return jsonEncode({'error': '缺少必需参数: name'});
       }
 
-      final bool fuzzy = params['fuzzy'] ?? false;
       final bool findAll = params['findAll'] ?? false;
       final int? offset = params['offset'];
       final int? count = params['count'];
 
-      final contacts = await _controller.getAllContacts();
-      final List<Contact> matchedContacts = [];
+      // 使用 searchContacts 进行搜索
+      final searchParams = <String, dynamic>{
+        'nameKeyword': name,
+        'offset': offset,
+        'count': count,
+      };
 
-      for (final contact in contacts) {
-        final bool matches =
-            fuzzy
-                ? contact.name.toLowerCase().contains(name.toLowerCase())
-                : contact.name == name;
+      final result = await _useCase.searchContacts(searchParams);
 
-        if (matches) {
-          matchedContacts.add(contact);
-          if (!findAll) break;
-        }
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
       }
 
+      final contacts = result.dataOrNull as List<dynamic>? ?? [];
+
       if (findAll) {
-        final contactsJson = matchedContacts.map((c) => c.toJson()).toList();
-
-        // 检查是否需要分页
-        if (offset != null || count != null) {
-          final paginated = _paginate(
-            contactsJson,
-            offset: offset ?? 0,
-            count: count ?? 100,
-          );
-          return jsonEncode(paginated);
-        }
-
-        return jsonEncode(contactsJson);
+        return jsonEncode(contacts);
       } else {
-        return matchedContacts.isEmpty
-            ? jsonEncode(null)
-            : jsonEncode(matchedContacts.first.toJson());
+        return contacts.isEmpty ? jsonEncode(null) : jsonEncode(contacts.first);
       }
     } catch (e) {
       return jsonEncode({'error': '查找联系人失败: $e'});
@@ -598,6 +509,30 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       final int? offset = params['offset'];
       final int? count = params['count'];
 
+      // 如果是按 contactId 查找，使用 searchInteractionRecords
+      if (field == 'contactId' && value is String) {
+        final searchParams = <String, dynamic>{
+          'contactId': value,
+          'offset': offset,
+          'count': count,
+        };
+
+        final result = await _useCase.searchInteractionRecords(searchParams);
+
+        if (result.isFailure) {
+          return jsonEncode({'error': result.errorOrNull?.message});
+        }
+
+        final interactions = result.dataOrNull as List<dynamic>? ?? [];
+
+        if (findAll) {
+          return jsonEncode(interactions);
+        } else {
+          return interactions.isEmpty ? jsonEncode(null) : jsonEncode(interactions.first);
+        }
+      }
+
+      // 其他字段查找需要先获取所有记录再筛选
       final interactions = await _controller.getAllInteractions();
       final List<InteractionRecord> matchedInteractions = [];
 
@@ -643,10 +578,13 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
         return jsonEncode({'error': '缺少必需参数: id'});
       }
 
-      final interactions = await _controller.getAllInteractions();
-      final interaction = interactions.where((i) => i.id == id).firstOrNull;
+      final result = await _useCase.getInteractionRecordById({'id': id});
 
-      return jsonEncode(interaction?.toJson());
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      return jsonEncode(result.dataOrNull);
     } catch (e) {
       return jsonEncode({'error': '查找交互记录失败: $e'});
     }

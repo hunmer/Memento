@@ -8,6 +8,10 @@ import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'controllers/notes_controller.dart';
 import 'screens/notes_screen.dart';
 
+// UseCase 相关导入
+import 'package:shared_models/shared_models.dart';
+import 'repositories/client_notes_repository.dart';
+
 class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   static NotesPlugin? _instance;
   static NotesPlugin get instance {
@@ -26,6 +30,8 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   late NotesController controller;
+  late ClientNotesRepository _repository;
+  late NotesUseCase _useCase;
   bool _isInitialized = false;
 
   @override
@@ -41,6 +47,10 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   Future<void> initialize() async {
     controller = NotesController(storage);
     await controller.initialize();
+
+    // 创建 UseCase 实例
+    _repository = ClientNotesRepository(controller: controller);
+    _useCase = NotesUseCase(_repository);
 
     _isInitialized = true;
 
@@ -233,33 +243,6 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
   // ==================== JS API 实现 ====================
 
-  /// 分页辅助方法
-  ///
-  /// 根据 offset 和 count 参数对列表进行分页
-  /// - 如果 offset 和 count 都为 null,返回原格式(列表)
-  /// - 如果提供了分页参数,返回包含 items、total、offset、count 的对象
-  dynamic _paginate(List<dynamic> items, Map<String, dynamic> params) {
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    // 无分页参数:返回原格式(列表)
-    if (offset == null && count == null) {
-      return items;
-    }
-
-    // 有分页参数:返回分页对象
-    final int actualOffset = offset ?? 0;
-    final int actualCount = count ?? items.length;
-    final List<dynamic> paginatedItems = items.skip(actualOffset).take(actualCount).toList();
-
-    return {
-      'items': paginatedItems,
-      'total': items.length,
-      'offset': actualOffset,
-      'count': paginatedItems.length,
-    };
-  }
-
   /// 获取笔记列表
   Future<String> _jsGetNotes(Map<String, dynamic> params) async {
     if (!_isInitialized) {
@@ -269,20 +252,17 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     // 提取可选参数
     final String? folderId = params['folderId'];
 
-    List<dynamic> notesJson;
-    if (folderId != null) {
-      // 获取指定文件夹的笔记
-      final notes = controller.getFolderNotes(folderId);
-      notesJson = notes.map((n) => n.toJson()).toList();
-    } else {
-      // 获取所有笔记
-      final allNotes = controller.searchNotes(query: '');
-      notesJson = allNotes.map((n) => n.toJson()).toList();
+    final result = await _useCase.getNotes({
+      'folderId': folderId,
+      'offset': params['offset'],
+      'count': params['count'],
+    });
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    // 应用分页
-    final result = _paginate(notesJson, params);
-    return jsonEncode(result);
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 获取单个笔记详情
@@ -297,14 +277,17 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: noteId'});
     }
 
-    // 在所有笔记中查找
-    final allNotes = controller.searchNotes(query: '');
-    final note = allNotes.firstWhere(
-      (n) => n.id == noteId,
-      orElse: () => throw Exception('笔记不存在'),
-    );
+    final result = await _useCase.getNoteById({'id': noteId});
 
-    return jsonEncode(note.toJson());
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+
+    if (result.dataOrNull == null) {
+      return jsonEncode({'error': '笔记不存在'});
+    }
+
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 创建新笔记
@@ -334,21 +317,19 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     // 如果没有指定文件夹，使用根文件夹
     final targetFolderId = folderId ?? 'root';
 
-    // 创建笔记
-    var note = await controller.createNote(
-      title,
-      content,
-      targetFolderId,
-      customId: customId,
-    );
+    final result = await _useCase.createNote({
+      'id': customId,
+      'title': title,
+      'content': content,
+      'folderId': targetFolderId,
+      'tags': tags ?? [],
+    });
 
-    // 如果有标签，更新笔记
-    if (tags != null && tags.isNotEmpty) {
-      note = note.copyWith(tags: tags, updatedAt: DateTime.now());
-      await controller.updateNote(note);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    return jsonEncode(note.toJson());
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 更新笔记
@@ -378,23 +359,18 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
         ? (params['tags'] as List<dynamic>).map((e) => e.toString()).toList()
         : null;
 
-    // 查找笔记
-    final allNotes = controller.searchNotes(query: '');
-    final note = allNotes.firstWhere(
-      (n) => n.id == noteId,
-      orElse: () => throw Exception('笔记不存在'),
-    );
+    final result = await _useCase.updateNote({
+      'id': noteId,
+      'title': title,
+      'content': content,
+      'tags': tags,
+    });
 
-    // 更新笔记
-    final updatedNote = note.copyWith(
-      title: title,
-      content: content,
-      tags: tags,
-      updatedAt: DateTime.now(),
-    );
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
 
-    await controller.updateNote(updatedNote);
-    return jsonEncode(updatedNote.toJson());
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 删除笔记
@@ -409,12 +385,13 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'success': false, 'error': '缺少必需参数: noteId'});
     }
 
-    try {
-      await controller.deleteNote(noteId);
-      return jsonEncode({'success': true, 'noteId': noteId});
-    } catch (e) {
-      return jsonEncode({'success': false, 'error': '删除失败: ${e.toString()}'});
+    final result = await _useCase.deleteNote({'id': noteId});
+
+    if (result.isFailure) {
+      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
     }
+
+    return jsonEncode({'success': true, 'noteId': noteId});
   }
 
   /// 搜索笔记
@@ -433,32 +410,19 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     final List<String>? tags = params['tags'] != null
         ? (params['tags'] as List<dynamic>).map((e) => e.toString()).toList()
         : null;
-    final String? startDate = params['startDate'];
-    final String? endDate = params['endDate'];
 
-    // 解析日期
-    DateTime? start;
-    DateTime? end;
-    if (startDate != null) {
-      start = DateTime.tryParse(startDate);
+    final result = await _useCase.searchNotes({
+      'keyword': keyword,
+      'tags': tags?.join(','),
+      'offset': params['offset'],
+      'count': params['count'],
+    });
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
-    if (endDate != null) {
-      end = DateTime.tryParse(endDate);
-    }
 
-    // 搜索笔记
-    final notes = controller.searchNotes(
-      query: keyword,
-      tags: tags,
-      startDate: start,
-      endDate: end,
-    );
-
-    final notesJson = notes.map((n) => n.toJson()).toList();
-
-    // 应用分页
-    final result = _paginate(notesJson, params);
-    return jsonEncode(result);
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 获取所有文件夹
@@ -467,12 +431,17 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '插件未初始化'});
     }
 
-    final folders = controller.getAllFolders();
-    final foldersJson = folders.map((f) => f.toJson()).toList();
+    final result = await _useCase.getFolders({
+      'parentId': params['parentId'],
+      'offset': params['offset'],
+      'count': params['count'],
+    });
 
-    // 应用分页
-    final result = _paginate(foldersJson, params);
-    return jsonEncode(result);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 获取单个文件夹详情
@@ -487,12 +456,17 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: folderId'});
     }
 
-    final folder = controller.getFolder(folderId);
-    if (folder == null) {
-      throw Exception('文件夹不存在');
+    final result = await _useCase.getFolderById({'id': folderId});
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    return jsonEncode(folder.toJson());
+    if (result.dataOrNull == null) {
+      return jsonEncode({'error': '文件夹不存在'});
+    }
+
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 创建文件夹
@@ -511,12 +485,17 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     final String? customId = params['id'];
     final String? parentId = params['parentId'];
 
-    final folder = await controller.createFolder(
-      name,
-      parentId,
-      customId: customId,
-    );
-    return jsonEncode(folder.toJson());
+    final result = await _useCase.createFolder({
+      'id': customId,
+      'name': name,
+      'parentId': parentId,
+    });
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 重命名文件夹
@@ -536,12 +515,16 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'success': false, 'error': '缺少必需参数: newName'});
     }
 
-    try {
-      await controller.renameFolder(folderId, newName);
-      return jsonEncode({'success': true, 'folderId': folderId, 'newName': newName});
-    } catch (e) {
-      return jsonEncode({'success': false, 'error': '重命名失败: ${e.toString()}'});
+    final result = await _useCase.updateFolder({
+      'id': folderId,
+      'name': newName,
+    });
+
+    if (result.isFailure) {
+      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
     }
+
+    return jsonEncode({'success': true, 'folderId': folderId, 'newName': newName});
   }
 
   /// 删除文件夹（递归删除子文件夹和笔记）
@@ -556,12 +539,13 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'success': false, 'error': '缺少必需参数: folderId'});
     }
 
-    try {
-      await controller.deleteFolder(folderId);
-      return jsonEncode({'success': true, 'folderId': folderId});
-    } catch (e) {
-      return jsonEncode({'success': false, 'error': '删除失败: ${e.toString()}'});
+    final result = await _useCase.deleteFolder({'id': folderId});
+
+    if (result.isFailure) {
+      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
     }
+
+    return jsonEncode({'success': true, 'folderId': folderId});
   }
 
   /// 获取文件夹中的笔记
@@ -576,12 +560,17 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: folderId'});
     }
 
-    final notes = controller.getFolderNotes(folderId);
-    final notesJson = notes.map((n) => n.toJson()).toList();
+    final result = await _useCase.getFolderNotes({
+      'id': folderId,
+      'offset': params['offset'],
+      'count': params['count'],
+    });
 
-    // 应用分页
-    final result = _paginate(notesJson, params);
-    return jsonEncode(result);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
+
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 移动笔记到其他文件夹
@@ -601,12 +590,16 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'success': false, 'error': '缺少必需参数: targetFolderId'});
     }
 
-    try {
-      await controller.moveNote(noteId, targetFolderId);
-      return jsonEncode({'success': true, 'noteId': noteId, 'targetFolderId': targetFolderId});
-    } catch (e) {
-      return jsonEncode({'success': false, 'error': '移动失败: ${e.toString()}'});
+    final result = await _useCase.moveNote({
+      'id': noteId,
+      'targetFolderId': targetFolderId,
+    });
+
+    if (result.isFailure) {
+      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
     }
+
+    return jsonEncode({'success': true, 'noteId': noteId, 'targetFolderId': targetFolderId});
   }
 
   // ==================== 笔记查找方法 ====================
@@ -633,26 +626,31 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     final bool findAll = params['findAll'] ?? false;
 
     // 获取所有笔记
-    final allNotes = controller.searchNotes(query: '');
-    final matchedNotes = [];
+    final result = await _useCase.getNotes({});
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
 
-    for (final note in allNotes) {
-      final noteJson = note.toJson();
+    final allNotes = result.dataOrNull as List<dynamic>;
+    final matchedNotes = <dynamic>[];
+
+    for (final noteJson in allNotes) {
+      final noteMap = noteJson as Map<String, dynamic>;
 
       // 检查字段是否匹配
-      if (noteJson.containsKey(field) && noteJson[field] == value) {
-        matchedNotes.add(note);
+      if (noteMap.containsKey(field) && noteMap[field] == value) {
+        matchedNotes.add(noteJson);
         if (!findAll) break; // 只找第一个
       }
     }
 
     if (findAll) {
-      return jsonEncode(matchedNotes.map((n) => n.toJson()).toList());
+      return jsonEncode(matchedNotes);
     } else {
       if (matchedNotes.isEmpty) {
         return jsonEncode(null);
       }
-      return jsonEncode(matchedNotes.first.toJson());
+      return jsonEncode(matchedNotes.first);
     }
   }
 
@@ -668,17 +666,13 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: id'});
     }
 
-    final allNotes = controller.searchNotes(query: '');
-    final note = allNotes.firstWhere(
-      (n) => n.id == id,
-      orElse: () => null as dynamic,
-    );
+    final result = await _useCase.getNoteById({'id': id});
 
-    if (note == null) {
-      return jsonEncode(null);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    return jsonEncode(note.toJson());
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 根据标题查找笔记
@@ -698,30 +692,39 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
 
-    final allNotes = controller.searchNotes(query: '');
-    final matchedNotes = [];
+    // 获取所有笔记
+    final result = await _useCase.getNotes({});
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
 
-    for (final note in allNotes) {
+    final allNotes = result.dataOrNull as List<dynamic>;
+    final matchedNotes = <dynamic>[];
+
+    for (final noteJson in allNotes) {
+      final noteMap = noteJson as Map<String, dynamic>;
+      final noteTitle = noteMap['title'] as String;
+
       bool matches = false;
       if (fuzzy) {
-        matches = note.title.contains(title);
+        matches = noteTitle.contains(title);
       } else {
-        matches = note.title == title;
+        matches = noteTitle == title;
       }
 
       if (matches) {
-        matchedNotes.add(note);
+        matchedNotes.add(noteJson);
         if (!findAll) break;
       }
     }
 
     if (findAll) {
-      return jsonEncode(matchedNotes.map((n) => n.toJson()).toList());
+      return jsonEncode(matchedNotes);
     } else {
       if (matchedNotes.isEmpty) {
         return jsonEncode(null);
       }
-      return jsonEncode(matchedNotes.first.toJson());
+      return jsonEncode(matchedNotes.first);
     }
   }
 
@@ -748,26 +751,32 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     final bool findAll = params['findAll'] ?? false;
 
-    final folders = controller.getAllFolders();
-    final matchedFolders = [];
+    // 获取所有文件夹
+    final result = await _useCase.getFolders({});
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
 
-    for (final folder in folders) {
-      final folderJson = folder.toJson();
+    final allFolders = result.dataOrNull as List<dynamic>;
+    final matchedFolders = <dynamic>[];
+
+    for (final folderJson in allFolders) {
+      final folderMap = folderJson as Map<String, dynamic>;
 
       // 检查字段是否匹配
-      if (folderJson.containsKey(field) && folderJson[field] == value) {
-        matchedFolders.add(folder);
+      if (folderMap.containsKey(field) && folderMap[field] == value) {
+        matchedFolders.add(folderJson);
         if (!findAll) break;
       }
     }
 
     if (findAll) {
-      return jsonEncode(matchedFolders.map((f) => f.toJson()).toList());
+      return jsonEncode(matchedFolders);
     } else {
       if (matchedFolders.isEmpty) {
         return jsonEncode(null);
       }
-      return jsonEncode(matchedFolders.first.toJson());
+      return jsonEncode(matchedFolders.first);
     }
   }
 
@@ -783,13 +792,13 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: id'});
     }
 
-    final folder = controller.getFolder(id);
+    final result = await _useCase.getFolderById({'id': id});
 
-    if (folder == null) {
-      return jsonEncode(null);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    return jsonEncode(folder.toJson());
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 根据名称查找文件夹
@@ -809,30 +818,39 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     final bool fuzzy = params['fuzzy'] ?? false;
     final bool findAll = params['findAll'] ?? false;
 
-    final folders = controller.getAllFolders();
-    final matchedFolders = [];
+    // 获取所有文件夹
+    final result = await _useCase.getFolders({});
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
+    }
 
-    for (final folder in folders) {
+    final allFolders = result.dataOrNull as List<dynamic>;
+    final matchedFolders = <dynamic>[];
+
+    for (final folderJson in allFolders) {
+      final folderMap = folderJson as Map<String, dynamic>;
+      final folderName = folderMap['name'] as String;
+
       bool matches = false;
       if (fuzzy) {
-        matches = folder.name.contains(name);
+        matches = folderName.contains(name);
       } else {
-        matches = folder.name == name;
+        matches = folderName == name;
       }
 
       if (matches) {
-        matchedFolders.add(folder);
+        matchedFolders.add(folderJson);
         if (!findAll) break;
       }
     }
 
     if (findAll) {
-      return jsonEncode(matchedFolders.map((f) => f.toJson()).toList());
+      return jsonEncode(matchedFolders);
     } else {
       if (matchedFolders.isEmpty) {
         return jsonEncode(null);
       }
-      return jsonEncode(matchedFolders.first.toJson());
+      return jsonEncode(matchedFolders.first);
     }
   }
 

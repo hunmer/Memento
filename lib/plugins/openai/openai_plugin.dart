@@ -12,6 +12,8 @@ import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:shared_models/usecases/openai/openai_usecase.dart';
+import 'repositories/client_openai_repository.dart';
 import 'screens/agent_list_screen.dart';
 import 'screens/plugin_settings_screen.dart';
 import 'screens/prompt_preset_screen.dart';
@@ -39,6 +41,12 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
 
   final ChatEventHandler _chatEventHandler = ChatEventHandler();
 
+  // UseCase 实例
+  late final OpenAIUseCase _useCase;
+
+  /// 获取 UseCase 实例
+  OpenAIUseCase get useCase => _useCase;
+
   @override
   String get id => 'openai';
 
@@ -53,11 +61,32 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
     // 初始化聊天事件处理器
     _chatEventHandler.initialize();
 
+    // 初始化 UseCase
+    _initializeUseCase();
+
     // 注册数据选择器
     _registerDataSelectors();
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
+  }
+
+  /// 初始化 UseCase
+  void _initializeUseCase() {
+    // 创建控制器实例
+    final agentController = AgentController();
+    final serviceProviderController = ServiceProviderController();
+    final modelController = ModelController();
+
+    // 创建 Repository 实例
+    final repository = ClientOpenAIRepository(
+      agentController: agentController,
+      serviceProviderController: serviceProviderController,
+      modelController: modelController,
+    );
+
+    // 创建 UseCase 实例
+    _useCase = OpenAIUseCase(repository);
   }
 
   /// 注册数据选择器
@@ -307,57 +336,24 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
     };
   }
 
-  // ==================== 分页控制器 ====================
-
-  /// 分页控制器 - 对列表进行分页处理
-  /// @param list 原始数据列表
-  /// @param offset 起始位置（默认 0）
-  /// @param count 返回数量（默认 100）
-  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
-  Map<String, dynamic> _paginate<T>(
-    List<T> list, {
-    int offset = 0,
-    int count = 100,
-  }) {
-    final total = list.length;
-    final start = offset.clamp(0, total);
-    final end = (start + count).clamp(start, total);
-    final data = list.sublist(start, end);
-
-    return {
-      'data': data,
-      'total': total,
-      'offset': start,
-      'count': data.length,
-      'hasMore': end < total,
-    };
-  }
-
   // ==================== JS API 实现 ====================
 
   /// 获取所有 AI 助手列表
   /// 支持分页参数: offset, count
   Future<String> _jsGetAgents(Map<String, dynamic> params) async {
     try {
-      final controller = AgentController();
-      final agents = await controller.loadAgents();
-      final agentsJson = agents.map((a) => a.toJson()).toList();
+      final result = await _useCase.getAgents(params);
 
-      // 检查是否需要分页
-      final int? offset = params['offset'];
-      final int? count = params['count'];
-
-      if (offset != null || count != null) {
-        final paginated = _paginate(
-          agentsJson,
-          offset: offset ?? 0,
-          count: count ?? 100,
-        );
-        return jsonEncode(paginated);
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
       }
 
-      // 兼容旧版本：无分页参数时返回全部数据
-      return jsonEncode(agentsJson);
+      final data = result.dataOrNull;
+      if (data == null) {
+        return jsonEncode([]);
+      }
+
+      return jsonEncode(data);
     } catch (e) {
       return jsonEncode({'error': e.toString()});
     }
@@ -372,12 +368,18 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     try {
-      final controller = AgentController();
-      final agent = await controller.getAgent(agentId);
+      final result = await _useCase.getAgentById({'id': agentId});
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      final agent = result.dataOrNull;
       if (agent == null) {
         return jsonEncode({'error': 'Agent not found: $agentId'});
       }
-      return jsonEncode(agent.toJson());
+
+      return jsonEncode(agent);
     } catch (e) {
       return jsonEncode({'error': e.toString()});
     }
@@ -399,7 +401,13 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
     // 可选参数
 
     try {
-      // 获取助手信息
+      // 验证 agent 是否存在（使用 UseCase）
+      final agentResult = await _useCase.getAgentById({'id': agentId});
+      if (agentResult.isFailure) {
+        return jsonEncode({'error': 'Agent not found: $agentId'});
+      }
+
+      // 获取助手信息（使用现有控制器，因为 RequestService 需要 AIAgent 类型）
       final controller = AgentController();
       final agent = await controller.getAgent(agentId);
       if (agent == null) {
@@ -458,25 +466,18 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   /// 支持分页参数: offset, count
   Future<String> _jsGetProviders(Map<String, dynamic> params) async {
     try {
-      final controller = ServiceProviderController();
-      final providers = await controller.loadProviders();
-      final providersJson = providers.map((p) => p.toJson()).toList();
+      final result = await _useCase.getServiceProviders(params);
 
-      // 检查是否需要分页
-      final int? offset = params['offset'];
-      final int? count = params['count'];
-
-      if (offset != null || count != null) {
-        final paginated = _paginate(
-          providersJson,
-          offset: offset ?? 0,
-          count: count ?? 100,
-        );
-        return jsonEncode(paginated);
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
       }
 
-      // 兼容旧版本：无分页参数时返回全部数据
-      return jsonEncode(providersJson);
+      final data = result.dataOrNull;
+      if (data == null) {
+        return jsonEncode([]);
+      }
+
+      return jsonEncode(data);
     } catch (e) {
       return jsonEncode({'error': e.toString()});
     }
@@ -491,12 +492,18 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     try {
-      final controller = ServiceProviderController();
-      await controller.loadProviders();
+      // 使用 UseCase 获取服务商列表
+      final result = await _useCase.getServiceProviders({});
 
-      // 根据 ID/label 查找服务商
-      final provider = controller.providers.firstWhere(
-        (p) => p.id == providerId || p.label == providerId,
+      if (result.isFailure) {
+        return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
+      }
+
+      final providers = result.dataOrNull ?? [];
+
+      // 查找匹配的服务商（支持 ID 或 label 匹配）
+      final providerJson = providers.firstWhere(
+        (p) => p['id'] == providerId || p['label'] == providerId,
         orElse: () => throw Exception('Provider not found: $providerId'),
       );
 
@@ -505,11 +512,11 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
       await agentController.loadAgents();
 
       final testAgent = agentController.agents.firstWhere(
-        (a) => a.serviceProviderId == provider.id,
+        (a) => a.serviceProviderId == providerJson['id'],
         orElse:
             () =>
                 throw Exception(
-                  'No agent configured for provider: ${provider.label}',
+                  'No agent configured for provider: ${providerJson['label']}',
                 ),
       );
 
@@ -522,7 +529,7 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
       final success = !response.startsWith('Error:');
       return jsonEncode({
         'success': success,
-        'provider': provider.label,
+        'provider': providerJson['label'],
         'response': response.substring(
           0,
           response.length > 100 ? 100 : response.length,

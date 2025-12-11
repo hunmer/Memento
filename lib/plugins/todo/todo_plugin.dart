@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
@@ -11,9 +10,18 @@ import 'controllers/controllers.dart';
 import 'models/models.dart';
 import 'views/todo_bottombar_view.dart';
 
+// 导入 UseCase 相关
+import 'package:shared_models/shared_models.dart';
+import 'repositories/client_todo_repository.dart';
+
 class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   late TaskController taskController;
   late ReminderController reminderController;
+
+  // UseCase 相关
+  late ClientTodoRepository _repository;
+  late TodoUseCase _todoUseCase;
+
   static TodoPlugin? _instance;
   static TodoPlugin get instance {
     if (_instance == null) {
@@ -43,6 +51,10 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   Future<void> initialize() async {
     taskController = TaskController(storageManager, storageDir);
     reminderController = ReminderController();
+
+    // 创建 Repository 和 UseCase 实例
+    _repository = ClientTodoRepository(taskController);
+    _todoUseCase = TodoUseCase(_repository);
 
     // 加载默认设置
     await loadSettings({
@@ -259,53 +271,47 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   ///   count: number (可选, 返回数量)
   /// }
   Future<String> _jsGetTasks(Map<String, dynamic> params) async {
-    List<Task> tasks = taskController.tasks;
-
-    final String? statusStr = params['status'];
-    final String? priorityStr = params['priority'];
+    // 转换参数格式
+    final useCaseParams = <String, dynamic>{};
 
     // 状态过滤
-    final status = _normalizeStatus(statusStr);
-    if (status != null) {
-      tasks = tasks.where((t) => t.status == status).toList();
+    if (params.containsKey('status')) {
+      final statusStr = params['status'] as String;
+      useCaseParams['completed'] = statusStr == 'done';
     }
 
     // 优先级过滤
-    if (priorityStr != null && priorityStr.isNotEmpty) {
-      TaskPriority? priority;
+    if (params.containsKey('priority')) {
+      final priorityStr = params['priority'] as String;
       switch (priorityStr.toLowerCase()) {
         case 'low':
-          priority = TaskPriority.low;
+          useCaseParams['priority'] = 0;
           break;
         case 'medium':
-          priority = TaskPriority.medium;
+          useCaseParams['priority'] = 1;
           break;
         case 'high':
-          priority = TaskPriority.high;
+          useCaseParams['priority'] = 2;
           break;
       }
-      if (priority != null) {
-        tasks = tasks.where((t) => t.priority == priority).toList();
-      }
     }
 
-    final tasksJson = tasks.map((t) => t.toJson()).toList();
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        tasksJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+    // 分页参数
+    if (params.containsKey('offset')) {
+      useCaseParams['offset'] = params['offset'] as int;
+    }
+    if (params.containsKey('count')) {
+      useCaseParams['count'] = params['count'] as int;
     }
 
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(tasksJson);
+    // 调用 UseCase
+    final result = await _todoUseCase.getTasks(useCaseParams);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull);
+    } else {
+      return jsonEncode({'error': result.errorOrNull!.message});
+    }
   }
 
   /// 获取任务详情
@@ -317,112 +323,62 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: taskId'});
     }
 
-    try {
-      final task = taskController.tasks.firstWhere((t) => t.id == taskId);
-      return jsonEncode(task.toJson());
-    } catch (e) {
-      return jsonEncode({'error': '未找到任务: $taskId'});
+    // 调用 UseCase
+    final result = await _todoUseCase.getTaskById({'id': taskId});
+
+    if (result.isSuccess) {
+      final taskData = result.dataOrNull;
+      if (taskData == null) {
+        return jsonEncode({'error': '未找到任务: $taskId'});
+      }
+      return jsonEncode(taskData);
+    } else {
+      return jsonEncode({'error': result.errorOrNull!.message});
     }
   }
 
   /// 获取今日任务（任务日期范围包含今天的任务）
   /// 参数对象: { offset: number (可选), count: number (可选) }
   Future<String> _jsGetTodayTasks(Map<String, dynamic> params) async {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    final todayTasks = taskController.tasks.where((task) {
-      // 如果任务既没有开始日期也没有截止日期,不算今日任务
-      if (task.startDate == null && task.dueDate == null) {
-        return false;
-      }
-
-      // 标准化日期(去掉时间部分)
-      final startDay = task.startDate != null
-          ? DateTime(
-              task.startDate!.year,
-              task.startDate!.month,
-              task.startDate!.day,
-            )
-          : null;
-
-      final dueDay = task.dueDate != null
-          ? DateTime(
-              task.dueDate!.year,
-              task.dueDate!.month,
-              task.dueDate!.day,
-            )
-          : null;
-
-      // 检查任务的日期范围是否包含今天
-      // 条件:startDate <= today 且 dueDate >= today
-      if (startDay != null && dueDay != null) {
-        // 两个日期都存在:检查今天是否在范围内
-        return !startDay.isAfter(today) && !dueDay.isBefore(today);
-      } else if (startDay != null) {
-        // 只有开始日期:检查是否已开始(开始日期 <= 今天)
-        return !startDay.isAfter(today);
-      } else if (dueDay != null) {
-        // 只有截止日期:检查是否未过期(截止日期 >= 今天)
-        return !dueDay.isBefore(today);
-      }
-
-      return false;
-    }).toList();
-
-    final tasksJson = todayTasks.map((t) => t.toJson()).toList();
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        tasksJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+    // 转换分页参数
+    final useCaseParams = <String, dynamic>{};
+    if (params.containsKey('offset')) {
+      useCaseParams['offset'] = params['offset'] as int;
+    }
+    if (params.containsKey('count')) {
+      useCaseParams['count'] = params['count'] as int;
     }
 
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(tasksJson);
+    // 调用 UseCase
+    final result = await _todoUseCase.getTodayTasks(useCaseParams);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull);
+    } else {
+      return jsonEncode({'error': result.errorOrNull!.message});
+    }
   }
 
   /// 获取过期任务（截止日期已过且未完成）
   /// 参数对象: { offset: number (可选), count: number (可选) }
   Future<String> _jsGetOverdueTasks(Map<String, dynamic> params) async {
-    final now = DateTime.now();
-
-    final overdueTasks = taskController.tasks.where((task) {
-      // 必须未完成
-      if (task.status == TaskStatus.done) return false;
-
-      // 必须有截止日期且已过期
-      if (task.dueDate != null && task.dueDate!.isBefore(now)) {
-        return true;
-      }
-
-      return false;
-    }).toList();
-
-    final tasksJson = overdueTasks.map((t) => t.toJson()).toList();
-
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        tasksJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+    // 转换分页参数
+    final useCaseParams = <String, dynamic>{};
+    if (params.containsKey('offset')) {
+      useCaseParams['offset'] = params['offset'] as int;
+    }
+    if (params.containsKey('count')) {
+      useCaseParams['count'] = params['count'] as int;
     }
 
-    // 兼容旧版本：无分页参数时返回全部数据
-    return jsonEncode(tasksJson);
+    // 调用 UseCase
+    final result = await _todoUseCase.getOverdueTasks(useCaseParams);
+
+    if (result.isSuccess) {
+      return jsonEncode(result.dataOrNull);
+    } else {
+      return jsonEncode({'error': result.errorOrNull!.message});
+    }
   }
 
   /// 创建任务
@@ -437,80 +393,66 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   /// }
   Future<String> _jsCreateTask(Map<String, dynamic> params) async {
     try {
-      final String? title = params['title'];
+      // 转换参数格式
+      final useCaseParams = <String, dynamic>{};
 
-      // 验证必需参数
-      if (title == null || title.isEmpty) {
-        return jsonEncode({'error': '缺少必需参数: title'});
+      // 必需参数
+      if (params.containsKey('title')) {
+        useCaseParams['title'] = params['title'];
       }
 
-      final String? id = params['id'];
-      final String? description = params['description'];
-      final String? startDateStr = params['startDate'];
-      final String? dueDateStr = params['dueDate'];
-      final String priorityStr = params['priority'] ?? 'medium';
-      final String? tagsJsonStr = params['tags'];
+      // 可选参数
+      if (params.containsKey('id')) {
+        useCaseParams['id'] = params['id'];
+      }
+      if (params.containsKey('description')) {
+        useCaseParams['description'] = params['description'];
+      }
+      if (params.containsKey('startDate')) {
+        useCaseParams['startDate'] = params['startDate'];
+      }
+      if (params.containsKey('dueDate')) {
+        useCaseParams['dueDate'] = params['dueDate'];
+      }
 
-      // 检查自定义ID是否已存在
-      if (id != null && id.isNotEmpty) {
-        final existingTask = taskController.tasks.where((t) => t.id == id).firstOrNull;
-        if (existingTask != null) {
-          return jsonEncode({'error': '任务ID已存在: $id'});
+      // 优先级转换
+      if (params.containsKey('priority')) {
+        final priorityStr = params['priority'] as String;
+        int priority = 1; // 默认 medium
+        switch (priorityStr.toLowerCase()) {
+          case 'low':
+            priority = 0;
+            break;
+          case 'high':
+            priority = 2;
+            break;
         }
+        useCaseParams['priority'] = priority;
       }
 
-      // 解析优先级
-      TaskPriority priority = TaskPriority.medium;
-      switch (priorityStr.toLowerCase()) {
-        case 'low':
-          priority = TaskPriority.low;
-          break;
-        case 'medium':
-          priority = TaskPriority.medium;
-          break;
-        case 'high':
-          priority = TaskPriority.high;
-          break;
-      }
-
-      // 解析日期
-      DateTime? startDate;
-      if (startDateStr != null && startDateStr.isNotEmpty) {
-        startDate = DateTime.tryParse(startDateStr);
-      }
-
-      DateTime? dueDate;
-      if (dueDateStr != null && dueDateStr.isNotEmpty) {
-        dueDate = DateTime.tryParse(dueDateStr);
-      }
-
-      // 解析标签
-      List<String> tags = [];
-      if (tagsJsonStr != null && tagsJsonStr.isNotEmpty) {
-        try {
-          final decoded = jsonDecode(tagsJsonStr);
-          if (decoded is List) {
-            tags = decoded.map((e) => e.toString()).toList();
+      // 标签解析
+      if (params.containsKey('tags')) {
+        final tagsJsonStr = params['tags'] as String;
+        if (tagsJsonStr.isNotEmpty) {
+          try {
+            final decoded = jsonDecode(tagsJsonStr);
+            if (decoded is List) {
+              useCaseParams['tags'] = decoded;
+            }
+          } catch (e) {
+            // 如果解析失败，忽略标签
           }
-        } catch (e) {
-          // 如果解析失败，忽略标签
         }
       }
 
-      // 创建任务
-      final task = Task(
-        id: (id != null && id.isNotEmpty) ? id : const Uuid().v4(),
-        title: title,
-        description: description,
-        createdAt: DateTime.now(),
-        startDate: startDate,
-        dueDate: dueDate,
-        priority: priority,
-        tags: tags,
-      );
+      // 调用 UseCase
+      final result = await _todoUseCase.createTask(useCaseParams);
 
-      await taskController.addTask(task);
-      return jsonEncode(task.toJson());
+      if (result.isSuccess) {
+        return jsonEncode(result.dataOrNull);
+      } else {
+        return jsonEncode({'error': result.errorOrNull!.message});
+      }
     } catch (e) {
       return jsonEncode({'error': '创建任务失败: $e'});
     }
@@ -553,55 +495,56 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
         return jsonEncode({'error': 'updates 参数格式错误,必须是对象或 JSON 字符串'});
       }
 
-      final task = taskController.tasks.firstWhere((t) => t.id == taskId);
+      // 转换参数格式
+      final useCaseParams = <String, dynamic>{};
+      useCaseParams['id'] = taskId;
 
-      // 更新字段
+      // 转换更新字段
       if (updateData.containsKey('title')) {
-        task.title = updateData['title'] as String;
+        useCaseParams['title'] = updateData['title'];
       }
-
       if (updateData.containsKey('description')) {
-        task.description = updateData['description'] as String?;
+        useCaseParams['description'] = updateData['description'];
+      }
+      if (updateData.containsKey('startDate')) {
+        useCaseParams['startDate'] = updateData['startDate'];
+      }
+      if (updateData.containsKey('dueDate')) {
+        useCaseParams['dueDate'] = updateData['dueDate'];
+      }
+      if (updateData.containsKey('tags') && updateData['tags'] is List) {
+        useCaseParams['tags'] = updateData['tags'];
       }
 
+      // 优先级转换
       if (updateData.containsKey('priority')) {
         final priorityStr = updateData['priority'] as String;
+        int priority = 1; // 默认 medium
         switch (priorityStr.toLowerCase()) {
           case 'low':
-            task.priority = TaskPriority.low;
-            break;
-          case 'medium':
-            task.priority = TaskPriority.medium;
+            priority = 0;
             break;
           case 'high':
-            task.priority = TaskPriority.high;
+            priority = 2;
             break;
         }
+        useCaseParams['priority'] = priority;
       }
 
+      // 状态转换
       if (updateData.containsKey('status')) {
         final statusStr = updateData['status'] as String;
-        final newStatus = _normalizeStatus(statusStr);
-        if (newStatus != null) {
-          task.status = newStatus;
-        }
+        useCaseParams['completed'] = statusStr == 'done';
       }
 
-      if (updateData.containsKey('startDate')) {
-        task.startDate = DateTime.tryParse(updateData['startDate'] as String);
-      }
+      // 调用 UseCase
+      final result = await _todoUseCase.updateTask(useCaseParams);
 
-      if (updateData.containsKey('dueDate')) {
-        task.dueDate = DateTime.tryParse(updateData['dueDate'] as String);
+      if (result.isSuccess) {
+        return jsonEncode(result.dataOrNull);
+      } else {
+        return jsonEncode({'error': result.errorOrNull!.message});
       }
-
-      if (updateData.containsKey('tags') && updateData['tags'] is List) {
-        task.tags =
-            (updateData['tags'] as List).map((e) => e.toString()).toList();
-      }
-
-      await taskController.updateTask(task);
-      return jsonEncode(task.toJson());
     } catch (e) {
       return jsonEncode({'error': '更新任务失败: $e'});
     }
@@ -618,8 +561,14 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
         return jsonEncode({'error': '缺少必需参数: taskId'});
       }
 
-      await taskController.deleteTask(taskId);
-      return jsonEncode({'success': true, 'taskId': taskId});
+      // 调用 UseCase
+      final result = await _todoUseCase.deleteTask({'id': taskId});
+
+      if (result.isSuccess) {
+        return jsonEncode({'success': true, 'taskId': taskId});
+      } else {
+        return jsonEncode({'error': result.errorOrNull!.message});
+      }
     } catch (e) {
       return jsonEncode({'error': '删除任务失败: $e'});
     }
@@ -636,9 +585,14 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
         return jsonEncode({'error': '缺少必需参数: taskId'});
       }
 
-      await taskController.updateTaskStatus(taskId, TaskStatus.done);
-      final task = taskController.tasks.firstWhere((t) => t.id == taskId);
-      return jsonEncode(task.toJson());
+      // 调用 UseCase
+      final result = await _todoUseCase.completeTask({'id': taskId});
+
+      if (result.isSuccess) {
+        return jsonEncode(result.dataOrNull);
+      } else {
+        return jsonEncode({'error': result.errorOrNull!.message});
+      }
     } catch (e) {
       return jsonEncode({'error': '完成任务失败: $e'});
     }

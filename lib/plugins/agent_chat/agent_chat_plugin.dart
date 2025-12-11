@@ -13,6 +13,8 @@ import 'services/tool_service.dart';
 import 'services/tool_template_service.dart';
 import 'services/widget_service.dart';
 import 'models/chat_message.dart';
+import 'repositories/client_agent_chat_repository.dart';
+import 'package:shared_models/shared_models.dart';
 
 /// Agent Chat 插件
 ///
@@ -36,6 +38,9 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
 
   ToolTemplateService? _templateService;
   ToolTemplateService? get templateService => _templateService;
+
+  /// UseCase 业务逻辑层
+  late final AgentChatUseCase agentChatUseCase;
 
   /// 检查是否已初始化
   bool get isInitialized =>
@@ -62,6 +67,16 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
     // 初始化控制器
     _conversationController = ConversationController(storage: storage);
     await _conversationController!.initialize();
+
+    // 创建 Repository 实例
+    final repository = ClientAgentChatRepository(
+      conversationService: _conversationController!.conversationService,
+      messageService: _conversationController!.messageService,
+      pluginColor: color ?? Colors.blue,
+    );
+
+    // 初始化 UseCase
+    agentChatUseCase = AgentChatUseCase(repository);
 
     // 初始化工具模板服务
     _templateService = ToolTemplateService(storage);

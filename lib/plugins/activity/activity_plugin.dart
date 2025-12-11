@@ -20,6 +20,8 @@ import 'screens/activity_settings_screen.dart';
 import 'services/activity_service.dart';
 import 'services/activity_notification_service.dart';
 import 'models/activity_record.dart';
+import 'repositories/client_activity_repository.dart';
+import 'package:shared_models/usecases/activity/activity_usecase.dart';
 import 'dart:io';
 
 class ActivityPlugin extends BasePlugin with JSBridgePlugin {
@@ -42,6 +44,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
 
   late ActivityService _activityService;
   late ActivityNotificationService _notificationService;
+  late ActivityUseCase _activityUseCase;
   bool _isInitialized = false;
 
   // 缓存今日统计数据（用于同步访问）
@@ -116,6 +119,10 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     await storage.createDirectory('activity');
     _activityService = ActivityService(storage, 'activity');
 
+    // 创建 Repository 和 UseCase 实例
+    final repository = ClientActivityRepository(activityService: _activityService);
+    _activityUseCase = ActivityUseCase(repository);
+
     // 初始化通知服务
     _notificationService = ActivityNotificationService(_activityService);
     await _notificationService.initialize();
@@ -167,32 +174,6 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     };
   }
 
-  // ==================== 分页控制器 ====================
-
-  /// 分页控制器 - 对列表进行分页处理
-  /// @param list 原始数据列表
-  /// @param offset 起始位置（默认 0）
-  /// @param count 返回数量（默认 100）
-  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
-  Map<String, dynamic> _paginate<T>(
-    List<T> list, {
-    int offset = 0,
-    int count = 100,
-  }) {
-    final total = list.length;
-    final start = offset.clamp(0, total);
-    final end = (start + count).clamp(start, total);
-    final data = list.sublist(start, end);
-
-    return {
-      'data': data,
-      'total': total,
-      'offset': start,
-      'count': data.length,
-      'hasMore': end < total,
-    };
-  }
-
   // ==================== JS API 实现 ====================
 
   /// 获取指定日期的活动列表
@@ -200,26 +181,13 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// 支持分页参数: offset, count
   Future<String> _jsGetActivities(Map<String, dynamic> params) async {
     try {
-      final dateStr = params['date'] as String?;
-      final date = dateStr != null ? DateTime.parse(dateStr) : DateTime.now();
-      final activities = await _activityService.getActivitiesForDate(date);
-      final activitiesJson = activities.map((a) => a.toJson()).toList();
+      final result = await _activityUseCase.getActivities(params);
 
-      // 检查是否需要分页
-      final int? offset = params['offset'];
-      final int? count = params['count'];
-
-      if (offset != null || count != null) {
-        final paginated = _paginate(
-          activitiesJson,
-          offset: offset ?? 0,
-          count: count ?? 100,
-        );
-        return jsonEncode(paginated);
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
       }
 
-      // 兼容旧版本：无分页参数时返回全部数据
-      return jsonEncode(activitiesJson);
+      return jsonEncode(result.dataOrNull);
     } catch (e) {
       return jsonEncode({'error': '获取活动失败: $e'});
     }
@@ -237,55 +205,19 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// }
   Future<String> _jsCreateActivity(Map<String, dynamic> params) async {
     try {
-      // 验证必需参数
-      if (!params.containsKey('startTime') ||
-          !params.containsKey('endTime') ||
-          !params.containsKey('title')) {
+      final result = await _activityUseCase.createActivity(params);
+
+      if (result.isFailure) {
         return jsonEncode({
           'success': false,
-          'error': '缺少必需参数: startTime, endTime, title',
+          'error': result.errorOrNull?.message,
         });
       }
 
-      final startTimeStr = params['startTime'] as String;
-      final endTimeStr = params['endTime'] as String;
-      final title = params['title'] as String;
-      final String? id = params['id'] as String?;
-
-      final startTime = DateTime.parse(startTimeStr);
-      final endTime = DateTime.parse(endTimeStr);
-
-      // 检查自定义ID是否已存在
-      if (id != null && id.isNotEmpty) {
-        final activities = await _activityService.getActivitiesForDate(
-          startTime,
-        );
-        final existingActivity =
-            activities.where((a) => a.id == id).firstOrNull;
-        if (existingActivity != null) {
-          return jsonEncode({'success': false, 'error': '活动ID已存在: $id'});
-        }
-      }
-
-      // 解析标签
-      final List<String> tags =
-          params['tags'] != null ? List<String>.from(params['tags']) : [];
-
-      final description = params['description'] as String?;
-      final mood = params['mood'] as String?;
-
-      final activity = ActivityRecord(
-        id: (id != null && id.isNotEmpty) ? id : null,
-        startTime: startTime,
-        endTime: endTime,
-        title: title,
-        tags: tags,
-        description: description,
-        mood: mood,
-      );
-
-      await _activityService.saveActivity(activity);
-      return jsonEncode({'success': true, 'activity': activity.toJson()});
+      return jsonEncode({
+        'success': true,
+        'activity': result.dataOrNull,
+      });
     } catch (e) {
       return jsonEncode({'success': false, 'error': '创建活动失败: $e'});
     }
@@ -294,6 +226,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// 更新活动
   /// 参数: params - {
   ///   activityId: string (必需),
+  ///   date: string (必需, YYYY-MM-DD 格式),
   ///   startTime: string (必需, ISO 8601 格式),
   ///   endTime: string (必需, ISO 8601 格式),
   ///   title: string (必需),
@@ -303,52 +236,33 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// }
   Future<String> _jsUpdateActivity(Map<String, dynamic> params) async {
     try {
-      // 验证必需参数
-      if (!params.containsKey('activityId') ||
-          !params.containsKey('startTime') ||
-          !params.containsKey('endTime') ||
-          !params.containsKey('title')) {
+      // 转换参数格式：activityId -> id
+      final updatedParams = Map<String, dynamic>.from(params);
+      if (updatedParams.containsKey('activityId')) {
+        updatedParams['id'] = updatedParams.remove('activityId');
+      }
+
+      // 如果没有 date，从 startTime 推断
+      if (!updatedParams.containsKey('date') && updatedParams.containsKey('startTime')) {
+        final startTimeStr = updatedParams['startTime'] as String;
+        final startTime = DateTime.parse(startTimeStr);
+        updatedParams['date'] =
+            '${startTime.year}-${startTime.month.toString().padLeft(2, '0')}-${startTime.day.toString().padLeft(2, '0')}';
+      }
+
+      final result = await _activityUseCase.updateActivity(updatedParams);
+
+      if (result.isFailure) {
         return jsonEncode({
           'success': false,
-          'error': '缺少必需参数: activityId, startTime, endTime, title',
+          'error': result.errorOrNull?.message,
         });
       }
 
-      final activityId = params['activityId'] as String;
-      final startTimeStr = params['startTime'] as String;
-      final endTimeStr = params['endTime'] as String;
-      final title = params['title'] as String;
-
-      final startTime = DateTime.parse(startTimeStr);
-      final endTime = DateTime.parse(endTimeStr);
-
-      // 解析标签
-      final List<String> tags =
-          params['tags'] != null ? List<String>.from(params['tags']) : [];
-
-      final description = params['description'] as String?;
-      final mood = params['mood'] as String?;
-
-      // 查找旧活动
-      final activities = await _activityService.getActivitiesForDate(startTime);
-      final oldActivity = activities.firstWhere(
-        (a) => a.id == activityId,
-        orElse: () => throw Exception('未找到活动 ID: $activityId'),
-      );
-
-      // 创建新活动
-      final newActivity = ActivityRecord(
-        id: activityId,
-        startTime: startTime,
-        endTime: endTime,
-        title: title,
-        tags: tags,
-        description: description,
-        mood: mood,
-      );
-
-      await _activityService.updateActivity(oldActivity, newActivity);
-      return jsonEncode({'success': true, 'activity': newActivity.toJson()});
+      return jsonEncode({
+        'success': true,
+        'activity': result.dataOrNull,
+      });
     } catch (e) {
       return jsonEncode({'success': false, 'error': '更新活动失败: $e'});
     }
@@ -361,26 +275,21 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// }
   Future<String> _jsDeleteActivity(Map<String, dynamic> params) async {
     try {
-      // 验证必需参数
-      if (!params.containsKey('activityId') || !params.containsKey('date')) {
+      // 转换参数格式：activityId -> id
+      final updatedParams = Map<String, dynamic>.from(params);
+      if (updatedParams.containsKey('activityId')) {
+        updatedParams['id'] = updatedParams.remove('activityId');
+      }
+
+      final result = await _activityUseCase.deleteActivity(updatedParams);
+
+      if (result.isFailure) {
         return jsonEncode({
           'success': false,
-          'error': '缺少必需参数: activityId, date',
+          'error': result.errorOrNull?.message,
         });
       }
 
-      final activityId = params['activityId'] as String;
-      final dateStr = params['date'] as String;
-
-      final date = DateTime.parse(dateStr);
-      final activities = await _activityService.getActivitiesForDate(date);
-
-      final activity = activities.firstWhere(
-        (a) => a.id == activityId,
-        orElse: () => throw Exception('未找到活动 ID: $activityId'),
-      );
-
-      await _activityService.deleteActivity(activity);
       return jsonEncode({'success': true});
     } catch (e) {
       return jsonEncode({'success': false, 'error': '删除活动失败: $e'});
@@ -392,16 +301,19 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// 返回: { activityCount, durationMinutes, durationHours, remainingMinutes, remainingHours }
   Future<String> _jsGetTodayStats(Map<String, dynamic> params) async {
     try {
-      final activityCount = await getTodayActivityCount();
-      final durationMinutes = await getTodayActivityDuration();
-      final remainingMinutes = getTodayRemainingTime();
+      final result = await _activityUseCase.getTodayStats(params);
 
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      final statsMap = result.dataOrNull as Map<String, dynamic>;
       return jsonEncode({
-        'activityCount': activityCount,
-        'durationMinutes': durationMinutes,
-        'durationHours': (durationMinutes / 60).toStringAsFixed(1),
-        'remainingMinutes': remainingMinutes,
-        'remainingHours': (remainingMinutes / 60).toStringAsFixed(1),
+        'activityCount': statsMap['activityCount'],
+        'durationMinutes': statsMap['durationMinutes'],
+        'durationHours': statsMap['durationHours'].toString(),
+        'remainingMinutes': statsMap['remainingMinutes'],
+        'remainingHours': (statsMap['remainingMinutes'] / 60).toStringAsFixed(1),
       });
     } catch (e) {
       return jsonEncode({'error': '获取统计失败: $e'});
@@ -412,9 +324,15 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// 参数: params - {} (无需参数)
   Future<String> _jsGetTagGroups(Map<String, dynamic> params) async {
     try {
-      final tagGroups = await _activityService.getTagGroups();
+      final result = await _activityUseCase.getTagGroups(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      final tagGroups = result.dataOrNull as List<dynamic>;
       return jsonEncode(
-        tagGroups.map((g) => {'name': g.name, 'tags': g.tags}).toList(),
+        tagGroups.map((g) => {'name': g['name'], 'tags': g['tags']}).toList(),
       );
     } catch (e) {
       return jsonEncode({'error': '获取标签分组失败: $e'});
@@ -425,8 +343,13 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// 参数: params - {} (无需参数)
   Future<String> _jsGetRecentTags(Map<String, dynamic> params) async {
     try {
-      final recentTags = await _activityService.getRecentTags();
-      return jsonEncode(recentTags);
+      final result = await _activityUseCase.getRecentTags(params);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      return jsonEncode(result.dataOrNull);
     } catch (e) {
       return jsonEncode({'error': '获取最近标签失败: $e'});
     }

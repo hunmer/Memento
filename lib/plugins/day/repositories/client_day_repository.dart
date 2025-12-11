@@ -1,34 +1,18 @@
 /// Day 插件 - 客户端 Repository 实现
-///
-/// 通过适配现有的存储系统来实现 IDayRepository 接口
+/// 通过适配现有的 DayController 来实现 IDayRepository 接口
 
 import 'package:shared_models/repositories/day/day_repository.dart';
 import 'package:shared_models/shared_models.dart';
+import 'package:flutter/material.dart';
+import 'package:Memento/plugins/day/controllers/day_controller.dart';
+import 'package:Memento/plugins/day/models/memorial_day.dart';
 
 /// 客户端 Day Repository 实现
 class ClientDayRepository implements IDayRepository {
-  final dynamic storage; // StorageManager 实例
-  final String pluginId;
+  final DayController _controller;
 
-  ClientDayRepository({required this.storage, this.pluginId = 'day'});
-
-  // ============ 内部辅助方法 ============
-
-  Future<Map<String, dynamic>?> _readDaysData() async {
-    return await storage.read('${pluginId}/days.json');
-  }
-
-  Future<void> _writeDaysData(Map<String, dynamic> data) async {
-    await storage.write('${pluginId}/days.json', data);
-  }
-
-  List<MemorialDayDto> _parseDaysList(Map<String, dynamic>? data) {
-    if (data == null) return [];
-    final days = data['days'] as List<dynamic>? ?? [];
-    return days
-        .map((d) => MemorialDayDto.fromJson(d as Map<String, dynamic>))
-        .toList();
-  }
+  ClientDayRepository({required DayController controller})
+    : _controller = controller;
 
   // ============ Repository 实现 ============
 
@@ -38,20 +22,20 @@ class ClientDayRepository implements IDayRepository {
     PaginationParams? pagination,
   }) async {
     try {
-      final data = await _readDaysData();
-      var days = _parseDaysList(data);
+      final days = _controller.memorialDays;
+      final dtos = days.map(_memorialDayToDto).toList();
 
       // 排序
       if (sortMode != null) {
         switch (sortMode) {
           case 'upcoming':
-            days.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
+            dtos.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
             break;
           case 'recent':
-            days.sort((a, b) => b.targetDate.compareTo(a.targetDate));
+            dtos.sort((a, b) => b.targetDate.compareTo(a.targetDate));
             break;
           case 'manual':
-            days.sort((a, b) => a.sortIndex.compareTo(b.sortIndex));
+            dtos.sort((a, b) => a.sortIndex.compareTo(b.sortIndex));
             break;
         }
       }
@@ -59,14 +43,14 @@ class ClientDayRepository implements IDayRepository {
       // 应用分页
       if (pagination != null && pagination.hasPagination) {
         final paginated = PaginationUtils.paginate(
-          days,
+          dtos,
           offset: pagination.offset,
           count: pagination.count,
         );
         return Result.success(paginated.data);
       }
 
-      return Result.success(days);
+      return Result.success(dtos);
     } catch (e) {
       return Result.failure('获取纪念日列表失败: $e', code: ErrorCodes.serverError);
     }
@@ -75,25 +59,23 @@ class ClientDayRepository implements IDayRepository {
   @override
   Future<Result<MemorialDayDto?>> getMemorialDayById(String id) async {
     try {
-      final data = await _readDaysData();
-      final days = _parseDaysList(data);
-      final day = days.where((d) => d.id == id).firstOrNull;
-      return Result.success(day);
+      try {
+        final day = _controller.memorialDays.firstWhere((d) => d.id == id);
+        return Result.success(_memorialDayToDto(day));
+      } catch (e) {
+        return Result.success(null);
+      }
     } catch (e) {
       return Result.failure('获取纪念日失败: $e', code: ErrorCodes.serverError);
     }
   }
 
   @override
-  Future<Result<MemorialDayDto>> createMemorialDay(
-    MemorialDayDto memorialDay,
-  ) async {
+  Future<Result<MemorialDayDto>> createMemorialDay(MemorialDayDto dto) async {
     try {
-      final data = await _readDaysData();
-      final days = _parseDaysList(data);
-      days.add(memorialDay);
-      await _writeDaysData({'days': days.map((d) => d.toJson()).toList()});
-      return Result.success(memorialDay);
+      final memorialDay = _dtoToMemorialDay(dto);
+      await _controller.addMemorialDay(memorialDay);
+      return Result.success(_memorialDayToDto(memorialDay));
     } catch (e) {
       return Result.failure('创建纪念日失败: $e', code: ErrorCodes.serverError);
     }
@@ -102,20 +84,12 @@ class ClientDayRepository implements IDayRepository {
   @override
   Future<Result<MemorialDayDto>> updateMemorialDay(
     String id,
-    MemorialDayDto memorialDay,
+    MemorialDayDto dto,
   ) async {
     try {
-      final data = await _readDaysData();
-      final days = _parseDaysList(data);
-      final index = days.indexWhere((d) => d.id == id);
-
-      if (index == -1) {
-        return Result.failure('纪念日不存在', code: ErrorCodes.notFound);
-      }
-
-      days[index] = memorialDay;
-      await _writeDaysData({'days': days.map((d) => d.toJson()).toList()});
-      return Result.success(memorialDay);
+      final memorialDay = _dtoToMemorialDay(dto);
+      await _controller.updateMemorialDay(memorialDay);
+      return Result.success(_memorialDayToDto(memorialDay));
     } catch (e) {
       return Result.failure('更新纪念日失败: $e', code: ErrorCodes.serverError);
     }
@@ -124,16 +98,7 @@ class ClientDayRepository implements IDayRepository {
   @override
   Future<Result<bool>> deleteMemorialDay(String id) async {
     try {
-      final data = await _readDaysData();
-      final days = _parseDaysList(data);
-      final initialLength = days.length;
-      days.removeWhere((d) => d.id == id);
-
-      if (days.length == initialLength) {
-        return Result.failure('纪念日不存在', code: ErrorCodes.notFound);
-      }
-
-      await _writeDaysData({'days': days.map((d) => d.toJson()).toList()});
+      await _controller.deleteMemorialDay(id);
       return Result.success(true);
     } catch (e) {
       return Result.failure('删除纪念日失败: $e', code: ErrorCodes.serverError);
@@ -143,25 +108,32 @@ class ClientDayRepository implements IDayRepository {
   @override
   Future<Result<bool>> reorderMemorialDays(List<String> orderedIds) async {
     try {
-      final data = await _readDaysData();
-      final days = _parseDaysList(data);
-      final idToDay = <String, MemorialDayDto>{};
-      for (final day in days) {
-        idToDay[day.id] = day;
+      // 使用 DayController 的 reorderMemorialDays 方法
+      // 通过比较新旧顺序找出需要移动的项目
+      final currentDays = _controller.memorialDays;
+      final idToIndex = <String, int>{};
+      for (int i = 0; i < currentDays.length; i++) {
+        idToIndex[currentDays[i].id] = i;
       }
 
-      final reorderedDays = <MemorialDayDto>[];
-      for (int i = 0; i < orderedIds.length; i++) {
-        final id = orderedIds[i];
-        if (idToDay.containsKey(id)) {
-          final day = idToDay[id]!;
-          reorderedDays.add(day.copyWith(sortIndex: i));
+      // 重新排序内存中的列表
+      final sortedDays =
+          currentDays.map((day) {
+            final newIndex = orderedIds.indexOf(day.id);
+            if (newIndex >= 0) {
+              return day.copyWith(sortIndex: newIndex);
+            }
+            return day;
+          }).toList();
+
+      // 使用现有的排序逻辑
+      for (int i = 0; i < sortedDays.length; i++) {
+        final oldIndex = idToIndex[sortedDays[i].id] ?? i;
+        if (oldIndex != i) {
+          await _controller.reorderMemorialDays(oldIndex, i);
         }
       }
 
-      await _writeDaysData({
-        'days': reorderedDays.map((d) => d.toJson()).toList(),
-      });
       return Result.success(true);
     } catch (e) {
       return Result.failure('重新排序纪念日失败: $e', code: ErrorCodes.serverError);
@@ -173,10 +145,9 @@ class ClientDayRepository implements IDayRepository {
     MemorialDayQuery query,
   ) async {
     try {
-      final data = await _readDaysData();
-      var days = _parseDaysList(data);
+      var days = _controller.memorialDays;
 
-      // 按日期范围过滤
+      // 日期范围过滤
       if (query.startDate != null) {
         days =
             days.where((d) => d.targetDate.isAfter(query.startDate!)).toList();
@@ -186,7 +157,7 @@ class ClientDayRepository implements IDayRepository {
             days.where((d) => d.targetDate.isBefore(query.endDate!)).toList();
       }
 
-      // 按是否包含过期过滤
+      // 是否包含过期的
       if (query.includeExpired == false) {
         days = days.where((d) => !d.isExpired).toList();
       }
@@ -198,25 +169,28 @@ class ClientDayRepository implements IDayRepository {
             days.sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
             break;
           case 'recent':
-            days.sort((a, b) => b.targetDate.compareTo(a.targetDate));
+            days.sort((a, b) => b.creationDate.compareTo(a.creationDate));
             break;
           case 'manual':
             days.sort((a, b) => a.sortIndex.compareTo(b.sortIndex));
             break;
+          default:
+            break;
         }
       }
 
-      // 应用分页
+      final dtos = days.map(_memorialDayToDto).toList();
+
       if (query.pagination != null && query.pagination!.hasPagination) {
         final paginated = PaginationUtils.paginate(
-          days,
+          dtos,
           offset: query.pagination!.offset,
           count: query.pagination!.count,
         );
         return Result.success(paginated.data);
       }
 
-      return Result.success(days);
+      return Result.success(dtos);
     } catch (e) {
       return Result.failure('搜索纪念日失败: $e', code: ErrorCodes.serverError);
     }
@@ -225,30 +199,63 @@ class ClientDayRepository implements IDayRepository {
   @override
   Future<Result<MemorialDayStatsDto>> getStats() async {
     try {
-      final data = await _readDaysData();
-      final days = _parseDaysList(data);
-      final total = days.length;
+      final days = _controller.memorialDays;
 
-      final upcoming =
-          days.where((d) {
-            final daysRemaining = d.daysRemaining;
-            return daysRemaining >= 0 && daysRemaining <= 7;
-          }).length;
+      int total = days.length;
+      int upcoming = 0;
+      int today = 0;
+      int expired = 0;
 
-      final todayCount = days.where((d) => d.isToday).length;
+      for (final day in days) {
+        if (day.isToday) {
+          today++;
+        } else if (day.daysRemaining > 0 && day.daysRemaining <= 7) {
+          upcoming++;
+        } else if (day.isExpired) {
+          expired++;
+        }
+      }
 
-      final expired = days.where((d) => d.isExpired).length;
-
-      return Result.success(
-        MemorialDayStatsDto(
-          total: total,
-          upcoming: upcoming,
-          today: todayCount,
-          expired: expired,
-        ),
+      final stats = MemorialDayStatsDto(
+        total: total,
+        upcoming: upcoming,
+        today: today,
+        expired: expired,
       );
+
+      return Result.success(stats);
     } catch (e) {
       return Result.failure('获取统计信息失败: $e', code: ErrorCodes.serverError);
     }
+  }
+
+  // ============ 转换方法 ============
+
+  /// 将 MemorialDay 转换为 MemorialDayDto
+  MemorialDayDto _memorialDayToDto(MemorialDay memorialDay) {
+    return MemorialDayDto(
+      id: memorialDay.id,
+      title: memorialDay.title,
+      creationDate: memorialDay.creationDate,
+      targetDate: memorialDay.targetDate,
+      notes: memorialDay.notes,
+      backgroundColor: memorialDay.backgroundColor.value,
+      backgroundImageUrl: memorialDay.backgroundImageUrl,
+      sortIndex: memorialDay.sortIndex,
+    );
+  }
+
+  /// 将 MemorialDayDto 转换为 MemorialDay
+  MemorialDay _dtoToMemorialDay(MemorialDayDto dto) {
+    return MemorialDay(
+      id: dto.id,
+      title: dto.title,
+      creationDate: dto.creationDate,
+      targetDate: dto.targetDate,
+      notes: dto.notes,
+      backgroundColor: Color(dto.backgroundColor),
+      backgroundImageUrl: dto.backgroundImageUrl,
+      sortIndex: dto.sortIndex,
+    );
   }
 }

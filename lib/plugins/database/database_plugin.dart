@@ -4,15 +4,14 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:get/get.dart';
 import './models/database_model.dart';
-import './models/database_field.dart';
-import './models/record.dart';
 import './services/database_service.dart';
 import './widgets/database_list_widget.dart';
 import './controllers/database_controller.dart';
+import './repositories/client_database_repository.dart';
+import 'package:shared_models/shared_models.dart';
 
 /// 数据库插件主视图
 class DatabaseMainView extends StatefulWidget {
@@ -33,6 +32,8 @@ class _DatabaseMainViewState extends State<DatabaseMainView> {
 class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   late final DatabaseService service = DatabaseService(this);
   late final DatabaseController controller = DatabaseController(service);
+  late final ClientDatabaseRepository repository;
+  late final DatabaseUseCase useCase;
 
   @override
   String get id => 'database';
@@ -58,6 +59,14 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   @override
   Future<void> initialize() async {
     await service.initializeDefaultData();
+
+    // 初始化 UseCase 架构
+    repository = ClientDatabaseRepository(
+      service: service,
+      controller: controller,
+    );
+    useCase = DatabaseUseCase(repository);
+
     // 注册数据选择器
     _registerDataSelectors();
     // 注册 JS API（最后一步）
@@ -191,352 +200,108 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
     };
   }
 
-  // ==================== 分页控制器 ====================
-
-  /// 分页控制器 - 对列表进行分页处理
-  /// @param list 原始数据列表
-  /// @param offset 起始位置（默认 0）
-  /// @param count 返回数量（默认 100）
-  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
-  Map<String, dynamic> _paginate<T>(
-    List<T> list, {
-    int offset = 0,
-    int count = 100,
-  }) {
-    final total = list.length;
-    final start = offset.clamp(0, total);
-    final end = (start + count).clamp(start, total);
-    final data = list.sublist(start, end);
-
-    return {
-      'data': data,
-      'total': total,
-      'offset': start,
-      'count': data.length,
-      'hasMore': end < total,
-    };
-  }
-
   // ==================== JS API 实现 ====================
 
   /// 获取所有数据库
   /// 支持分页参数: offset, count
   Future<String> _jsGetDatabases(Map<String, dynamic> params) async {
-    final databases = await service.getAllDatabases();
-    final databasesJson = databases.map((db) => db.toMap()).toList();
+    final result = await useCase.getDatabases(params);
 
-    // 检查是否需要分页
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        databasesJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    return jsonEncode(databasesJson);
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 创建数据库
   Future<String> _jsCreateDatabase(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? name = params['name'];
-    if (name == null) {
-      return jsonEncode({'error': '缺少必需参数: name'});
+    final result = await useCase.createDatabase(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    // 可选参数
-    final String? description = params['description'];
-    final String? fieldsJson = params['fieldsJson'];
-
-    // 解析字段
-    List<DatabaseField> fields = [];
-    if (fieldsJson != null && fieldsJson.isNotEmpty) {
-      try {
-        final fieldsList = jsonDecode(fieldsJson) as List;
-        fields = fieldsList
-            .map((f) => DatabaseField.fromMap(f as Map<String, dynamic>))
-            .toList();
-      } catch (e) {
-        // 字段解析失败，使用空列表
-      }
-    }
-
-    final database = DatabaseModel(
-      id: const Uuid().v4(),
-      name: name,
-      description: description,
-      fields: fields,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    await service.createDatabase(database);
-    return jsonEncode(database.toMap());
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 更新数据库
   Future<String> _jsUpdateDatabase(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? databaseId = params['databaseId'];
-    if (databaseId == null) {
-      return jsonEncode({'error': '缺少必需参数: databaseId'});
+    final result = await useCase.updateDatabase(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    // 可选参数
-    final String? name = params['name'];
-    final String? description = params['description'];
-    final String? fieldsJson = params['fieldsJson'];
-
-    final databases = await service.getAllDatabases();
-    final database = databases.firstWhere((db) => db.id == databaseId);
-
-    // 解析字段（如果提供）
-    List<DatabaseField>? fields;
-    if (fieldsJson != null && fieldsJson.isNotEmpty) {
-      try {
-        final fieldsList = jsonDecode(fieldsJson) as List;
-        fields = fieldsList
-            .map((f) => DatabaseField.fromMap(f as Map<String, dynamic>))
-            .toList();
-      } catch (e) {
-        // 字段解析失败，保持原字段
-      }
-    }
-
-    final updatedDatabase = database.copyWith(
-      name: name,
-      description: description,
-      fields: fields,
-      updatedAt: DateTime.now(),
-    );
-
-    await service.updateDatabase(updatedDatabase);
-    return jsonEncode(updatedDatabase.toMap());
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 删除数据库
   Future<String> _jsDeleteDatabase(Map<String, dynamic> params) async {
-    try {
-      // 必需参数
-      final String? databaseId = params['databaseId'];
-      if (databaseId == null) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: databaseId'});
-      }
+    final result = await useCase.deleteDatabase(params);
 
-      await service.deleteDatabase(databaseId);
-      return jsonEncode({'success': true, 'databaseId': databaseId});
-    } catch (e) {
-      return jsonEncode({'success': false, 'error': e.toString()});
+    if (result.isFailure) {
+      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
     }
+
+    return jsonEncode({'success': true});
   }
 
   /// 获取数据库的所有记录
   /// 支持分页参数: offset, count
   Future<String> _jsGetRecords(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? databaseId = params['databaseId'];
-    if (databaseId == null) {
-      return jsonEncode({'error': '缺少必需参数: databaseId'});
+    final result = await useCase.getRecords(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    // 可选参数
-    final int? limit = params['limit'];
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    var records = await controller.getRecords(databaseId);
-
-    // 如果指定了 limit，只返回最新的 N 条记录
-    if (limit != null && limit < records.length) {
-      records = records.sublist(records.length - limit);
-    }
-
-    final recordsJson = records.map((r) => r.toMap()).toList();
-
-    // 检查是否需要分页
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        recordsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    return jsonEncode(recordsJson);
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 创建记录
   Future<String> _jsCreateRecord(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? databaseId = params['databaseId'];
-    final String? fieldsJson = params['fieldsJson'];
+    final result = await useCase.createRecord(params);
 
-    if (databaseId == null) {
-      return jsonEncode({'error': '缺少必需参数: databaseId'});
-    }
-    if (fieldsJson == null) {
-      return jsonEncode({'error': '缺少必需参数: fieldsJson'});
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    // 可选参数 - 自定义ID
-    final String? id = params['id'];
-
-    // 解析字段数据
-    Map<String, dynamic> fields;
-    try {
-      fields = jsonDecode(fieldsJson) as Map<String, dynamic>;
-    } catch (e) {
-      return jsonEncode({'error': 'Invalid fields JSON: $fieldsJson'});
-    }
-
-    // 检查自定义ID是否已存在
-    if (id != null && id.isNotEmpty) {
-      try {
-        final existingRecords = await controller.getRecords(databaseId);
-        final existingRecord = existingRecords.where((r) => r.id == id).firstOrNull;
-        if (existingRecord != null) {
-          return jsonEncode({'success': false, 'error': '记录ID已存在: $id'});
-        }
-      } catch (e) {
-        // 如果获取记录失败，继续创建
-      }
-    }
-
-    final record = Record(
-      id: (id != null && id.isNotEmpty) ? id : const Uuid().v4(),
-      tableId: databaseId,
-      fields: fields,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    await controller.createRecord(record);
-    return jsonEncode(record.toMap());
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 更新记录
   Future<String> _jsUpdateRecord(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? databaseId = params['databaseId'];
-    final String? recordId = params['recordId'];
-    final String? fieldsJson = params['fieldsJson'];
+    final result = await useCase.updateRecord(params);
 
-    if (databaseId == null) {
-      return jsonEncode({'error': '缺少必需参数: databaseId'});
-    }
-    if (recordId == null) {
-      return jsonEncode({'error': '缺少必需参数: recordId'});
-    }
-    if (fieldsJson == null) {
-      return jsonEncode({'error': '缺少必需参数: fieldsJson'});
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    final records = await controller.getRecords(databaseId);
-    final record = records.firstWhere((r) => r.id == recordId);
-
-    // 解析更新的字段
-    Map<String, dynamic> updatedFields;
-    try {
-      updatedFields = jsonDecode(fieldsJson) as Map<String, dynamic>;
-    } catch (e) {
-      return jsonEncode({'error': 'Invalid fields JSON: $fieldsJson'});
-    }
-
-    // 合并现有字段和更新字段
-    final mergedFields = Map<String, dynamic>.from(record.fields);
-    mergedFields.addAll(updatedFields);
-
-    final updatedRecord = record.copyWith(
-      fields: mergedFields,
-      updatedAt: DateTime.now(),
-    );
-
-    await controller.updateRecord(updatedRecord);
-    return jsonEncode(updatedRecord.toMap());
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 删除记录
   Future<String> _jsDeleteRecord(Map<String, dynamic> params) async {
-    try {
-      // 必需参数
-      final String? databaseId = params['databaseId'];
-      final String? recordId = params['recordId'];
+    final result = await useCase.deleteRecord(params);
 
-      if (databaseId == null) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: databaseId'});
-      }
-      if (recordId == null) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: recordId'});
-      }
-
-      // 先加载数据库到 controller
-      await controller.loadDatabase(databaseId);
-      await controller.deleteRecord(recordId);
-      return jsonEncode({'success': true, 'databaseId': databaseId, 'recordId': recordId});
-    } catch (e) {
-      return jsonEncode({'success': false, 'error': e.toString()});
+    if (result.isFailure) {
+      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
     }
+
+    return jsonEncode({'success': true});
   }
 
   /// 查询记录
   /// 支持分页参数: offset, count
   Future<String> _jsQuery(Map<String, dynamic> params) async {
-    // 必需参数
-    final String? databaseId = params['databaseId'];
-    if (databaseId == null) {
-      return jsonEncode({'error': '缺少必需参数: databaseId'});
+    final result = await useCase.searchRecords(params);
+
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    // 可选参数
-    final String? filtersJson = params['filtersJson'];
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
-    var records = await controller.getRecords(databaseId);
-
-    // 如果提供了过滤条件，应用过滤
-    if (filtersJson != null && filtersJson.isNotEmpty) {
-      try {
-        final filters = jsonDecode(filtersJson) as Map<String, dynamic>;
-
-        records = records.where((record) {
-          // 检查所有过滤条件是否匹配
-          for (var entry in filters.entries) {
-            final fieldName = entry.key;
-            final expectedValue = entry.value;
-
-            // 如果记录没有该字段，或字段值不匹配，则排除
-            if (!record.fields.containsKey(fieldName) ||
-                record.fields[fieldName] != expectedValue) {
-              return false;
-            }
-          }
-          return true;
-        }).toList();
-      } catch (e) {
-        // 过滤条件解析失败，返回所有记录
-      }
-    }
-
-    final recordsJson = records.map((r) => r.toMap()).toList();
-
-    // 检查是否需要分页
-    if (offset != null || count != null) {
-      final paginated = _paginate(
-        recordsJson,
-        offset: offset ?? 0,
-        count: count ?? 100,
-      );
-      return jsonEncode(paginated);
-    }
-
-    return jsonEncode(recordsJson);
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 获取数据库或记录数量
@@ -576,38 +341,32 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
       }
 
       final bool findAll = params['findAll'] ?? false;
-      final int? offset = params['offset'];
-      final int? count = params['count'];
 
-      final databases = await service.getAllDatabases();
-      final List<DatabaseModel> matchedDatabases = [];
-
-      for (final database in databases) {
-        final databaseMap = database.toMap();
-        if (databaseMap.containsKey(field) && databaseMap[field] == value) {
-          matchedDatabases.add(database);
-          if (!findAll) break;
-        }
+      // 使用 UseCase 搜索数据库
+      final searchParams = <String, dynamic>{};
+      if (field == 'name') {
+        searchParams['nameKeyword'] = value.toString();
       }
 
+      final result = await useCase.searchDatabases(searchParams);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      var databases = result.dataOrNull as List;
+      // 过滤匹配字段
+      databases = databases.where((db) {
+        final dbMap = db as Map<String, dynamic>;
+        return dbMap.containsKey(field) && dbMap[field] == value;
+      }).toList();
+
       if (findAll) {
-        final databasesJson = matchedDatabases.map((db) => db.toMap()).toList();
-
-        // 检查是否需要分页
-        if (offset != null || count != null) {
-          final paginated = _paginate(
-            databasesJson,
-            offset: offset ?? 0,
-            count: count ?? 100,
-          );
-          return jsonEncode(paginated);
-        }
-
-        return jsonEncode(databasesJson);
+        return jsonEncode(databases);
       } else {
-        return matchedDatabases.isEmpty
+        return databases.isEmpty
             ? jsonEncode(null)
-            : jsonEncode(matchedDatabases.first.toMap());
+            : jsonEncode(databases.first);
       }
     } catch (e) {
       return jsonEncode({'error': '查找数据库失败: $e'});
@@ -616,19 +375,13 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
 
   /// 根据 ID 查找数据库
   Future<String> _jsFindDatabaseById(Map<String, dynamic> params) async {
-    try {
-      final String? id = params['id'];
-      if (id == null || id.isEmpty) {
-        return jsonEncode({'error': '缺少必需参数: id'});
-      }
+    final result = await useCase.getDatabaseById(params);
 
-      final databases = await service.getAllDatabases();
-      final database = databases.where((db) => db.id == id).firstOrNull;
-
-      return jsonEncode(database?.toMap());
-    } catch (e) {
-      return jsonEncode({'error': '查找数据库失败: $e'});
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
+
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 根据名称查找数据库
@@ -642,41 +395,31 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
 
       final bool fuzzy = params['fuzzy'] ?? false;
       final bool findAll = params['findAll'] ?? false;
-      final int? offset = params['offset'];
-      final int? count = params['count'];
 
-      final databases = await service.getAllDatabases();
-      final List<DatabaseModel> matchedDatabases = [];
+      // 使用 UseCase 搜索数据库
+      final searchParams = <String, dynamic>{'nameKeyword': name};
 
-      for (final database in databases) {
-        final bool matches = fuzzy
-            ? database.name.toLowerCase().contains(name.toLowerCase())
-            : database.name == name;
+      final result = await useCase.searchDatabases(searchParams);
 
-        if (matches) {
-          matchedDatabases.add(database);
-          if (!findAll) break;
-        }
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      var databases = result.dataOrNull as List;
+      // 如果不是模糊搜索，进一步过滤精确匹配
+      if (!fuzzy) {
+        databases = databases.where((db) {
+          final dbMap = db as Map<String, dynamic>;
+          return dbMap['name'] == name;
+        }).toList();
       }
 
       if (findAll) {
-        final databasesJson = matchedDatabases.map((db) => db.toMap()).toList();
-
-        // 检查是否需要分页
-        if (offset != null || count != null) {
-          final paginated = _paginate(
-            databasesJson,
-            offset: offset ?? 0,
-            count: count ?? 100,
-          );
-          return jsonEncode(paginated);
-        }
-
-        return jsonEncode(databasesJson);
+        return jsonEncode(databases);
       } else {
-        return matchedDatabases.isEmpty
+        return databases.isEmpty
             ? jsonEncode(null)
-            : jsonEncode(matchedDatabases.first.toMap());
+            : jsonEncode(databases.first);
       }
     } catch (e) {
       return jsonEncode({'error': '查找数据库失败: $e'});
@@ -705,47 +448,38 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
       }
 
       final bool findAll = params['findAll'] ?? false;
-      final int? offset = params['offset'];
-      final int? count = params['count'];
 
-      final records = await controller.getRecords(databaseId);
-      final List<Record> matchedRecords = [];
+      // 使用 UseCase 搜索记录
+      final searchParams = <String, dynamic>{
+        'tableId': databaseId,
+        'fieldKeyword': value.toString(),
+      };
 
-      for (final record in records) {
-        // 检查内置字段 (id, tableId)
-        final recordMap = record.toMap();
-        if (recordMap.containsKey(field) && recordMap[field] == value) {
-          matchedRecords.add(record);
-          if (!findAll) break;
-          continue;
-        }
+      final result = await useCase.searchRecords(searchParams);
 
-        // 检查自定义字段 (存储在 fields 对象中)
-        if (record.fields.containsKey(field) &&
-            record.fields[field] == value) {
-          matchedRecords.add(record);
-          if (!findAll) break;
-        }
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
       }
 
-      if (findAll) {
-        final recordsJson = matchedRecords.map((r) => r.toMap()).toList();
-
-        // 检查是否需要分页
-        if (offset != null || count != null) {
-          final paginated = _paginate(
-            recordsJson,
-            offset: offset ?? 0,
-            count: count ?? 100,
-          );
-          return jsonEncode(paginated);
+      var records = result.dataOrNull as List;
+      // 进一步过滤匹配字段
+      records = records.where((record) {
+        final recordMap = record as Map<String, dynamic>;
+        // 检查内置字段
+        if (recordMap.containsKey(field) && recordMap[field] == value) {
+          return true;
         }
+        // 检查自定义字段
+        final fields = recordMap['fields'] as Map<String, dynamic>?;
+        return fields?.containsKey(field) == true && fields![field] == value;
+      }).toList();
 
-        return jsonEncode(recordsJson);
+      if (findAll) {
+        return jsonEncode(records);
       } else {
-        return matchedRecords.isEmpty
+        return records.isEmpty
             ? jsonEncode(null)
-            : jsonEncode(matchedRecords.first.toMap());
+            : jsonEncode(records.first);
       }
     } catch (e) {
       return jsonEncode({'error': '查找记录失败: $e'});
@@ -754,24 +488,13 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
 
   /// 根据 ID 查找记录
   Future<String> _jsFindRecordById(Map<String, dynamic> params) async {
-    try {
-      final String? databaseId = params['databaseId'];
-      if (databaseId == null || databaseId.isEmpty) {
-        return jsonEncode({'error': '缺少必需参数: databaseId'});
-      }
+    final result = await useCase.getRecordById(params);
 
-      final String? id = params['id'];
-      if (id == null || id.isEmpty) {
-        return jsonEncode({'error': '缺少必需参数: id'});
-      }
-
-      final records = await controller.getRecords(databaseId);
-      final record = records.where((r) => r.id == id).firstOrNull;
-
-      return jsonEncode(record?.toMap());
-    } catch (e) {
-      return jsonEncode({'error': '查找记录失败: $e'});
+    if (result.isFailure) {
+      return jsonEncode({'error': result.errorOrNull?.message});
     }
+
+    return jsonEncode(result.dataOrNull);
   }
 
   /// 注册数据选择器
