@@ -1,6 +1,7 @@
 /// Bill 插件 - UseCase 业务逻辑层
 ///
 /// 此文件包含共享的业务逻辑，客户端和服务端都使用此层
+library;
 
 import 'package:uuid/uuid.dart';
 
@@ -32,7 +33,8 @@ class BillUseCase {
         final jsonList = accounts.map((a) => a.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -42,7 +44,8 @@ class BillUseCase {
   }
 
   /// 根据 ID 获取账户
-  Future<Result<Map<String, dynamic>?>> getAccountById(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>?>> getAccountById(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -65,10 +68,12 @@ class BillUseCase {
   /// - `icon`: 图标
   /// - `color`: 颜色
   /// - `metadata`: 元数据
-  Future<Result<Map<String, dynamic>>> createAccount(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> createAccount(
+      Map<String, dynamic> params) async {
     final nameValidation = ParamValidator.requireString(params, 'name');
     if (!nameValidation.isValid) {
-      return Result.failure(nameValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(nameValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -92,7 +97,8 @@ class BillUseCase {
   }
 
   /// 更新账户
-  Future<Result<Map<String, dynamic>>> updateAccount(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> updateAccount(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -113,10 +119,13 @@ class BillUseCase {
       // 合并更新
       final updated = existing.copyWith(
         name: params['name'] as String? ?? existing.name,
-        balance: params.containsKey('balance') ? (params['balance'] as num?)?.toDouble() : existing.balance,
+        balance: params.containsKey('balance')
+            ? (params['balance'] as num?)?.toDouble()
+            : existing.balance,
         icon: params['icon'] as String? ?? existing.icon,
         color: params['color'] as String? ?? existing.color,
-        metadata: params['metadata'] as Map<String, dynamic>? ?? existing.metadata,
+        metadata:
+            params['metadata'] as Map<String, dynamic>? ?? existing.metadata,
         updatedAt: DateTime.now(),
       );
 
@@ -164,7 +173,8 @@ class BillUseCase {
         final jsonList = bills.map((b) => b.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -174,7 +184,8 @@ class BillUseCase {
   }
 
   /// 根据 ID 获取账单
-  Future<Result<Map<String, dynamic>?>> getBillById(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>?>> getBillById(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -200,10 +211,13 @@ class BillUseCase {
   /// - `date`: 日期（ISO8601 格式，默认当前日期）
   /// - `tags`: 标签列表
   /// - `metadata`: 元数据
-  Future<Result<Map<String, dynamic>>> createBill(Map<String, dynamic> params) async {
-    final accountIdValidation = ParamValidator.requireString(params, 'accountId');
+  Future<Result<Map<String, dynamic>>> createBill(
+      Map<String, dynamic> params) async {
+    final accountIdValidation =
+        ParamValidator.requireString(params, 'accountId');
     if (!accountIdValidation.isValid) {
-      return Result.failure(accountIdValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(accountIdValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     if (!params.containsKey('amount') || params['amount'] == null) {
@@ -212,12 +226,14 @@ class BillUseCase {
 
     final typeValidation = ParamValidator.requireString(params, 'type');
     if (!typeValidation.isValid) {
-      return Result.failure(typeValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(typeValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final categoryValidation = ParamValidator.requireString(params, 'category');
     if (!categoryValidation.isValid) {
-      return Result.failure(categoryValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(categoryValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -247,7 +263,8 @@ class BillUseCase {
   }
 
   /// 更新账单
-  Future<Result<Map<String, dynamic>>> updateBill(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> updateBill(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -269,13 +286,20 @@ class BillUseCase {
       final dateStr = params['date'] as String?;
       final updated = existing.copyWith(
         accountId: params['accountId'] as String? ?? existing.accountId,
-        amount: params.containsKey('amount') ? (params['amount'] as num?)?.toDouble() : existing.amount,
+        amount: params.containsKey('amount')
+            ? (params['amount'] as num?)?.toDouble()
+            : existing.amount,
         type: params['type'] as String? ?? existing.type,
         category: params['category'] as String? ?? existing.category,
-        description: params.containsKey('description') ? params['description'] as String? : existing.description,
+        description: params.containsKey('description')
+            ? params['description'] as String?
+            : existing.description,
         date: dateStr != null ? DateTime.parse(dateStr) : existing.date,
-        tags: params['tags'] != null ? (params['tags'] as List<dynamic>).cast<String>() : existing.tags,
-        metadata: params['metadata'] as Map<String, dynamic>? ?? existing.metadata,
+        tags: params['tags'] != null
+            ? (params['tags'] as List<dynamic>).cast<String>()
+            : existing.tags,
+        metadata:
+            params['metadata'] as Map<String, dynamic>? ?? existing.metadata,
         updatedAt: DateTime.now(),
       );
 
@@ -333,7 +357,8 @@ class BillUseCase {
         final jsonList = bills.map((b) => b.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -349,7 +374,8 @@ class BillUseCase {
   /// [params] 可选参数:
   /// - `startDate`: 起始日期（ISO8601 格式）
   /// - `endDate`: 结束日期（ISO8601 格式）
-  Future<Result<Map<String, dynamic>>> getStats(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> getStats(
+      Map<String, dynamic> params) async {
     try {
       final startDateStr = params['startDate'] as String?;
       final endDateStr = params['endDate'] as String?;
@@ -371,7 +397,8 @@ class BillUseCase {
   /// - `type`: 按类型过滤（'income' or 'expense'）
   /// - `startDate`: 起始日期（ISO8601 格式）
   /// - `endDate`: 结束日期（ISO8601 格式）
-  Future<Result<List<Map<String, dynamic>>>> getCategoryStats(Map<String, dynamic> params) async {
+  Future<Result<List<Map<String, dynamic>>>> getCategoryStats(
+      Map<String, dynamic> params) async {
     try {
       final startDateStr = params['startDate'] as String?;
       final endDateStr = params['endDate'] as String?;
@@ -382,7 +409,8 @@ class BillUseCase {
         endDate: endDateStr != null ? DateTime.parse(endDateStr) : null,
       );
 
-      return result.map((statsList) => statsList.map((s) => s.toJson()).toList());
+      return result
+          .map((statsList) => statsList.map((s) => s.toJson()).toList());
     } catch (e) {
       return Result.failure('获取分类统计失败: $e', code: ErrorCodes.serverError);
     }

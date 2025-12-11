@@ -1,4 +1,5 @@
 /// Calendar 插件 - UseCase 业务逻辑层
+library;
 
 import 'package:uuid/uuid.dart';
 import 'package:shared_models/repositories/calendar/calendar_repository.dart';
@@ -189,7 +190,8 @@ class CalendarUseCase {
     }
 
     try {
-      final completedTime = params['completedTime'] as DateTime? ?? DateTime.now();
+      final completedTime =
+          params['completedTime'] as DateTime? ?? DateTime.now();
       final result = await repository.completeEvent(id, completedTime);
       return result.map((e) => e.toJson());
     } catch (e) {
@@ -230,10 +232,12 @@ class CalendarUseCase {
   // ============ 已完成事件操作 ============
 
   /// 获取已完成事件列表
-  Future<Result<dynamic>> getCompletedEvents(Map<String, dynamic> params) async {
+  Future<Result<dynamic>> getCompletedEvents(
+      Map<String, dynamic> params) async {
     try {
       final pagination = _extractPagination(params);
-      final result = await repository.getCompletedEvents(pagination: pagination);
+      final result =
+          await repository.getCompletedEvents(pagination: pagination);
 
       return result.map((events) {
         final jsonList = events.map((e) => e.toJson()).toList();

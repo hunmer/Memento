@@ -1,6 +1,7 @@
 /// Goods 插件 - 服务端 Repository 实现
 ///
 /// 通过 PluginDataService 访问用户的加密数据文件
+library;
 
 import 'package:shared_models/shared_models.dart';
 
@@ -30,7 +31,9 @@ class ServerGoodsRepository extends IGoodsRepository {
     if (warehousesData == null) return [];
 
     final warehouses = warehousesData['warehouses'] as List<dynamic>? ?? [];
-    return warehouses.map((w) => WarehouseDto.fromJson(w as Map<String, dynamic>)).toList();
+    return warehouses
+        .map((w) => WarehouseDto.fromJson(w as Map<String, dynamic>))
+        .toList();
   }
 
   /// 保存所有仓库
@@ -53,11 +56,14 @@ class ServerGoodsRepository extends IGoodsRepository {
     if (itemsData == null) return [];
 
     final items = itemsData['items'] as List<dynamic>? ?? [];
-    return items.map((i) => GoodsItemDto.fromJson(i as Map<String, dynamic>)).toList();
+    return items
+        .map((i) => GoodsItemDto.fromJson(i as Map<String, dynamic>))
+        .toList();
   }
 
   /// 保存仓库物品
-  Future<void> _saveWarehouseItems(String warehouseId, List<GoodsItemDto> items) async {
+  Future<void> _saveWarehouseItems(
+      String warehouseId, List<GoodsItemDto> items) async {
     await dataService.writePluginData(
       userId,
       _pluginId,
@@ -119,7 +125,8 @@ class ServerGoodsRepository extends IGoodsRepository {
   }
 
   @override
-  Future<Result<WarehouseDto>> updateWarehouse(String id, WarehouseDto warehouse) async {
+  Future<Result<WarehouseDto>> updateWarehouse(
+      String id, WarehouseDto warehouse) async {
     try {
       final warehouses = await _readAllWarehouses();
       final index = warehouses.indexWhere((w) => w.id == id);
@@ -150,7 +157,8 @@ class ServerGoodsRepository extends IGoodsRepository {
       await _saveAllWarehouses(warehouses);
 
       // 删除仓库物品文件
-      await dataService.deletePluginFile(userId, _pluginId, 'warehouse_$id.json');
+      await dataService.deletePluginFile(
+          userId, _pluginId, 'warehouse_$id.json');
 
       return Result.success(true);
     } catch (e) {
@@ -214,7 +222,8 @@ class ServerGoodsRepository extends IGoodsRepository {
   }
 
   @override
-  Future<Result<GoodsItemDto>> createItem(String warehouseId, GoodsItemDto item) async {
+  Future<Result<GoodsItemDto>> createItem(
+      String warehouseId, GoodsItemDto item) async {
     try {
       final items = await _readWarehouseItems(warehouseId);
       items.add(item);
@@ -226,7 +235,8 @@ class ServerGoodsRepository extends IGoodsRepository {
   }
 
   @override
-  Future<Result<GoodsItemDto>> updateItem(String warehouseId, String id, GoodsItemDto item) async {
+  Future<Result<GoodsItemDto>> updateItem(
+      String warehouseId, String id, GoodsItemDto item) async {
     try {
       final items = await _readWarehouseItems(warehouseId);
       final index = items.indexWhere((i) => i.id == id);
@@ -306,7 +316,9 @@ class ServerGoodsRepository extends IGoodsRepository {
           final json = item.toJson();
           final fieldValue = json[query.field]?.toString() ?? '';
           if (query.fuzzy) {
-            return fieldValue.toLowerCase().contains(query.value!.toLowerCase());
+            return fieldValue
+                .toLowerCase()
+                .contains(query.value!.toLowerCase());
           }
           return fieldValue == query.value;
         }).toList();

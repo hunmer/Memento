@@ -1,6 +1,7 @@
 /// Checkin 插件 - Repository 接口定义
 ///
 /// 定义打卡项目的数据访问抽象接口
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -151,9 +152,11 @@ class CheckinItemDto {
       description: json['description'] as String? ?? '',
       cardStyle: json['cardStyle'] as int? ?? 0,
       reminderSettings: json['reminderSettings'] != null
-          ? ReminderSettingsDto.fromJson(json['reminderSettings'] as Map<String, dynamic>)
+          ? ReminderSettingsDto.fromJson(
+              json['reminderSettings'] as Map<String, dynamic>)
           : null,
-      checkInRecords: (json['checkInRecords'] as Map<String, dynamic>? ?? {}).map(
+      checkInRecords:
+          (json['checkInRecords'] as Map<String, dynamic>? ?? {}).map(
         (key, value) => MapEntry(
           key,
           (value as List<dynamic>)

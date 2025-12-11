@@ -2,6 +2,7 @@
 ///
 /// 通过 PluginDataService 访问用户的加密数据文件
 /// 账单嵌套在账户的 bills 数组中存储
+library;
 
 import 'package:shared_models/shared_models.dart';
 
@@ -31,7 +32,9 @@ class ServerBillRepository extends IBillRepository {
     if (accountsData == null) return [];
 
     final accounts = accountsData['accounts'] as List<dynamic>? ?? [];
-    return accounts.map((a) => _AccountWithBills.fromJson(a as Map<String, dynamic>)).toList();
+    return accounts
+        .map((a) => _AccountWithBills.fromJson(a as Map<String, dynamic>))
+        .toList();
   }
 
   /// 保存所有账户（包含嵌套的账单）
@@ -47,7 +50,8 @@ class ServerBillRepository extends IBillRepository {
   // ============ 账户操作 ============
 
   @override
-  Future<Result<List<AccountDto>>> getAccounts({PaginationParams? pagination}) async {
+  Future<Result<List<AccountDto>>> getAccounts(
+      {PaginationParams? pagination}) async {
     try {
       var accounts = await _readAllAccounts();
 
@@ -95,7 +99,8 @@ class ServerBillRepository extends IBillRepository {
   }
 
   @override
-  Future<Result<AccountDto>> updateAccount(String id, AccountDto account) async {
+  Future<Result<AccountDto>> updateAccount(
+      String id, AccountDto account) async {
     try {
       final accounts = await _readAllAccounts();
       final index = accounts.indexWhere((a) => a.id == id);
@@ -106,7 +111,8 @@ class ServerBillRepository extends IBillRepository {
 
       // 保留现有的账单列表
       final existingBills = accounts[index].bills;
-      final updated = _AccountWithBills.fromAccountDto(account, bills: existingBills);
+      final updated =
+          _AccountWithBills.fromAccountDto(account, bills: existingBills);
       accounts[index] = updated;
       await _saveAllAccounts(accounts);
       return Result.success(account);
@@ -241,7 +247,8 @@ class ServerBillRepository extends IBillRepository {
         account.updatedAt = DateTime.now();
 
         // 添加到新账户
-        final newAccountIndex = accounts.indexWhere((a) => a.id == bill.accountId);
+        final newAccountIndex =
+            accounts.indexWhere((a) => a.id == bill.accountId);
         if (newAccountIndex == -1) {
           return Result.failure('目标账户不存在', code: ErrorCodes.notFound);
         }
@@ -326,10 +333,12 @@ class ServerBillRepository extends IBillRepository {
 
       // 按日期范围过滤
       if (query.startDate != null) {
-        allBills = allBills.where((b) => !b.date.isBefore(query.startDate!)).toList();
+        allBills =
+            allBills.where((b) => !b.date.isBefore(query.startDate!)).toList();
       }
       if (query.endDate != null) {
-        allBills = allBills.where((b) => !b.date.isAfter(query.endDate!)).toList();
+        allBills =
+            allBills.where((b) => !b.date.isAfter(query.endDate!)).toList();
       }
 
       // 按关键词过滤
@@ -430,7 +439,8 @@ class ServerBillRepository extends IBillRepository {
       }
 
       // 计算百分比
-      final totalAmount = categoryMap.values.fold<double>(0, (sum, s) => sum + s.amount);
+      final totalAmount =
+          categoryMap.values.fold<double>(0, (sum, s) => sum + s.amount);
       final result = categoryMap.values.map((s) {
         return CategoryStatsDto(
           category: s.category,
@@ -487,7 +497,9 @@ class _AccountWithBills {
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       metadata: json['metadata'] as Map<String, dynamic>?,
-      bills: billsList.map((b) => BillDto.fromJson(b as Map<String, dynamic>)).toList(),
+      bills: billsList
+          .map((b) => BillDto.fromJson(b as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -505,7 +517,8 @@ class _AccountWithBills {
     };
   }
 
-  factory _AccountWithBills.fromAccountDto(AccountDto dto, {List<BillDto>? bills}) {
+  factory _AccountWithBills.fromAccountDto(AccountDto dto,
+      {List<BillDto>? bills}) {
     return _AccountWithBills(
       id: dto.id,
       name: dto.name,

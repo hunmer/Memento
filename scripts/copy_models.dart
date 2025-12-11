@@ -8,6 +8,7 @@
 /// 2. 复制源文件到目标位置
 /// 3. 自动替换 import 路径
 /// 4. 移除 Flutter 特定依赖
+library;
 
 import 'dart:io';
 
@@ -177,13 +178,14 @@ void _generateExportFile(String projectRoot) {
   final modelsDir = Directory('$projectRoot/shared_models/lib/models');
   if (!modelsDir.existsSync()) return;
 
-  final files = modelsDir
-      .listSync()
-      .whereType<File>()
-      .where((f) => f.path.endsWith('.dart'))
-      .map((f) => f.path.split(Platform.pathSeparator).last)
-      .toList()
-    ..sort();
+  final files =
+      modelsDir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'))
+          .map((f) => f.path.split(Platform.pathSeparator).last)
+          .toList()
+        ..sort();
 
   if (files.isEmpty) {
     print('\n没有找到模型文件，跳过生成导出文件');

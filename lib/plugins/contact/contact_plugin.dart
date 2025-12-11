@@ -645,18 +645,21 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
 
                 // 搜索组织/公司
                 final org = item.metadata?['organization'] as String?;
-                if (org != null && org.toLowerCase().contains(lowerQuery))
+                if (org != null && org.toLowerCase().contains(lowerQuery)) {
                   return true;
+                }
 
                 // 搜索邮箱
                 final email = item.metadata?['email'] as String?;
-                if (email != null && email.toLowerCase().contains(lowerQuery))
+                if (email != null && email.toLowerCase().contains(lowerQuery)) {
                   return true;
+                }
 
                 // 搜索标签
                 final tags = item.metadata?['tags'] as String?;
-                if (tags != null && tags.toLowerCase().contains(lowerQuery))
+                if (tags != null && tags.toLowerCase().contains(lowerQuery)) {
                   return true;
+                }
 
                 return false;
               }).toList();

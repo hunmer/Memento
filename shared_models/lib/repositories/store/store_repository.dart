@@ -1,4 +1,5 @@
 /// Store 插件 - Repository 接口定义
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -113,7 +114,8 @@ class UserItemDto {
       expireDate: DateTime.parse(json['expireDate'] as String),
       purchaseDate: DateTime.parse(json['purchaseDate'] as String),
       purchasePrice: json['purchasePrice'] as int,
-      productSnapshot: Map<String, dynamic>.from(json['productSnapshot'] as Map),
+      productSnapshot:
+          Map<String, dynamic>.from(json['productSnapshot'] as Map),
     );
   }
 
@@ -222,7 +224,8 @@ class UsedItemDto {
       id: json['id'] as String,
       productId: json['productId'] as String,
       useDate: DateTime.parse(json['useDate'] as String),
-      productSnapshot: Map<String, dynamic>.from(json['productSnapshot'] as Map),
+      productSnapshot:
+          Map<String, dynamic>.from(json['productSnapshot'] as Map),
     );
   }
 
@@ -357,7 +360,8 @@ abstract class IStoreRepository {
   Future<Result<bool>> restoreProduct(String id);
 
   /// 获取归档商品
-  Future<Result<List<ProductDto>>> getArchivedProducts({PaginationParams? pagination});
+  Future<Result<List<ProductDto>>> getArchivedProducts(
+      {PaginationParams? pagination});
 
   /// 搜索商品
   Future<Result<List<ProductDto>>> searchProducts(ProductQuery query);
@@ -379,7 +383,8 @@ abstract class IStoreRepository {
   // ============ 用户物品操作 ============
 
   /// 获取用户物品列表
-  Future<Result<List<UserItemDto>>> getUserItems({PaginationParams? pagination});
+  Future<Result<List<UserItemDto>>> getUserItems(
+      {PaginationParams? pagination});
 
   /// 根据 ID 获取用户物品
   Future<Result<UserItemDto?>> getUserItemById(String id);
@@ -399,7 +404,8 @@ abstract class IStoreRepository {
   // ============ 已使用物品操作 ============
 
   /// 获取已使用物品列表
-  Future<Result<List<UsedItemDto>>> getUsedItems({PaginationParams? pagination});
+  Future<Result<List<UsedItemDto>>> getUsedItems(
+      {PaginationParams? pagination});
 
   // ============ 统计查询 ============
 

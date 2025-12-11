@@ -1,6 +1,7 @@
 /// Tracker 插件 - UseCase 业务逻辑层
 ///
 /// 此文件包含共享的业务逻辑，客户端和服务端都使用此层
+library;
 
 import 'package:uuid/uuid.dart';
 
@@ -56,7 +57,8 @@ class TrackerUseCase {
         final jsonList = goals.map((g) => g.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -69,7 +71,8 @@ class TrackerUseCase {
   ///
   /// [params] 必需参数:
   /// - `id`: 目标 ID
-  Future<Result<Map<String, dynamic>?>> getGoalById(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>?>> getGoalById(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
 
     if (id == null || id.isEmpty) {
@@ -99,30 +102,37 @@ class TrackerUseCase {
   /// - `progressColor`: 进度颜色
   /// - `reminderTime`: 提醒时间
   /// - `isLoopReset`: 是否循环重置
-  Future<Result<Map<String, dynamic>>> createGoal(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> createGoal(
+      Map<String, dynamic> params) async {
     // 验证必需参数
     final nameValidation = ParamValidator.requireString(params, 'name');
     if (!nameValidation.isValid) {
-      return Result.failure(nameValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(nameValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final iconValidation = ParamValidator.requireString(params, 'icon');
     if (!iconValidation.isValid) {
-      return Result.failure(iconValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(iconValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final unitTypeValidation = ParamValidator.requireString(params, 'unitType');
     if (!unitTypeValidation.isValid) {
-      return Result.failure(unitTypeValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(unitTypeValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
-    final targetValueValidation = ParamValidator.requireInt(params, 'targetValue');
+    final targetValueValidation =
+        ParamValidator.requireInt(params, 'targetValue');
     if (!targetValueValidation.isValid) {
-      return Result.failure(targetValueValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(targetValueValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     if (params['dateSettings'] == null) {
-      return Result.failure('缺少必需参数: dateSettings', code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: dateSettings',
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -169,7 +179,8 @@ class TrackerUseCase {
   /// - `dateSettings`: 日期设置
   /// - `reminderTime`: 提醒时间
   /// - `isLoopReset`: 是否循环重置
-  Future<Result<Map<String, dynamic>>> updateGoal(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> updateGoal(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -204,12 +215,16 @@ class TrackerUseCase {
         unitType: params['unitType'] as String? ?? existing.unitType,
         group: params['group'] as String? ?? existing.group,
         imagePath: params['imagePath'] as String? ?? existing.imagePath,
-        progressColor: params['progressColor'] as int? ?? existing.progressColor,
+        progressColor:
+            params['progressColor'] as int? ?? existing.progressColor,
         targetValue: params['targetValue'] != null
             ? (params['targetValue'] as num).toDouble()
             : existing.targetValue,
-        dateSettings: params.containsKey('dateSettings') ? dateSettings : existing.dateSettings,
-        reminderTime: params['reminderTime'] as String? ?? existing.reminderTime,
+        dateSettings: params.containsKey('dateSettings')
+            ? dateSettings
+            : existing.dateSettings,
+        reminderTime:
+            params['reminderTime'] as String? ?? existing.reminderTime,
         isLoopReset: params['isLoopReset'] as bool? ?? existing.isLoopReset,
       );
 
@@ -224,7 +239,8 @@ class TrackerUseCase {
   ///
   /// [params] 必需参数:
   /// - `id`: 目标 ID
-  Future<Result<Map<String, dynamic>>> deleteGoal(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> deleteGoal(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -304,7 +320,8 @@ class TrackerUseCase {
         final jsonList = records.map((r) => r.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -322,21 +339,26 @@ class TrackerUseCase {
   /// 可选参数:
   /// - `note`: 备注
   /// - `durationSeconds`: 持续时间（秒）
-  Future<Result<Map<String, dynamic>>> addRecord(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> addRecord(
+      Map<String, dynamic> params) async {
     // 验证必需参数
     final goalIdValidation = ParamValidator.requireString(params, 'goalId');
     if (!goalIdValidation.isValid) {
-      return Result.failure(goalIdValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(goalIdValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final valueValidation = ParamValidator.requireInt(params, 'value');
     if (!valueValidation.isValid) {
-      return Result.failure(valueValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(valueValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
-    final recordedAtValidation = ParamValidator.requireString(params, 'recordedAt');
+    final recordedAtValidation =
+        ParamValidator.requireString(params, 'recordedAt');
     if (!recordedAtValidation.isValid) {
-      return Result.failure(recordedAtValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(recordedAtValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -362,7 +384,8 @@ class TrackerUseCase {
   ///
   /// [params] 必需参数:
   /// - `recordId`: 记录 ID
-  Future<Result<Map<String, dynamic>>> deleteRecord(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> deleteRecord(
+      Map<String, dynamic> params) async {
     final recordId = params['recordId'] as String?;
     if (recordId == null || recordId.isEmpty) {
       return Result.failure('缺少必需参数: recordId', code: ErrorCodes.invalidParams);
@@ -383,7 +406,8 @@ class TrackerUseCase {
   ///
   /// [params] 必需参数:
   /// - `goalId`: 目标 ID
-  Future<Result<Map<String, dynamic>>> clearRecordsForGoal(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> clearRecordsForGoal(
+      Map<String, dynamic> params) async {
     final goalId = params['goalId'] as String?;
     if (goalId == null || goalId.isEmpty) {
       return Result.failure('缺少必需参数: goalId', code: ErrorCodes.invalidParams);
@@ -409,7 +433,8 @@ class TrackerUseCase {
   /// - `field`: 字段名
   /// - `value`: 字段值
   /// - `fuzzy`: 是否模糊搜索
-  Future<Result<List<dynamic>>> searchRecords(Map<String, dynamic> params) async {
+  Future<Result<List<dynamic>>> searchRecords(
+      Map<String, dynamic> params) async {
     try {
       DateTime? startDate;
       DateTime? endDate;
@@ -448,7 +473,8 @@ class TrackerUseCase {
   // ============ 统计操作 ============
 
   /// 获取统计信息
-  Future<Result<Map<String, dynamic>>> getStats(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> getStats(
+      Map<String, dynamic> params) async {
     try {
       final result = await repository.getStats();
       return result.map((stats) => stats.toJson());

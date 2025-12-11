@@ -1,6 +1,7 @@
 /// Tracker 插件 - 服务端 Repository 实现
 ///
 /// 通过 PluginDataService 访问用户的加密数据文件
+library;
 
 import 'package:shared_models/shared_models.dart';
 
@@ -30,7 +31,9 @@ class ServerTrackerRepository extends ITrackerRepository {
     if (goalsData == null) return [];
 
     final goals = goalsData['goals'] as List<dynamic>? ?? [];
-    return goals.map((g) => GoalDto.fromJson(g as Map<String, dynamic>)).toList();
+    return goals
+        .map((g) => GoalDto.fromJson(g as Map<String, dynamic>))
+        .toList();
   }
 
   /// 保存所有目标
@@ -53,7 +56,9 @@ class ServerTrackerRepository extends ITrackerRepository {
     if (recordsData == null) return [];
 
     final records = recordsData['records'] as List<dynamic>? ?? [];
-    return records.map((r) => RecordDto.fromJson(r as Map<String, dynamic>)).toList();
+    return records
+        .map((r) => RecordDto.fromJson(r as Map<String, dynamic>))
+        .toList();
   }
 
   /// 保存所有记录
@@ -197,7 +202,9 @@ class ServerTrackerRepository extends ITrackerRepository {
           final json = goal.toJson();
           final fieldValue = json[query.field]?.toString() ?? '';
           if (query.fuzzy) {
-            return fieldValue.toLowerCase().contains(query.value!.toLowerCase());
+            return fieldValue
+                .toLowerCase()
+                .contains(query.value!.toLowerCase());
           }
           return fieldValue == query.value;
         }).toList();
@@ -306,7 +313,8 @@ class ServerTrackerRepository extends ITrackerRepository {
       if (goalIndex != -1) {
         final goal = goals[goalIndex];
         final updatedGoal = goal.copyWith(
-          currentValue: (goal.currentValue - record.value).clamp(0.0, double.infinity),
+          currentValue:
+              (goal.currentValue - record.value).clamp(0.0, double.infinity),
         );
         goals[goalIndex] = updatedGoal;
         await _saveAllGoals(goals);
@@ -322,7 +330,7 @@ class ServerTrackerRepository extends ITrackerRepository {
   Future<Result<bool>> clearRecordsForGoal(String goalId) async {
     try {
       final records = await _readAllRecords();
-      final goalRecords = records.where((r) => r.goalId == goalId).toList();
+      records.where((r) => r.goalId == goalId).toList();
 
       records.removeWhere((r) => r.goalId == goalId);
       await _saveAllRecords(records);
@@ -356,10 +364,14 @@ class ServerTrackerRepository extends ITrackerRepository {
 
       // 按日期范围过滤
       if (query.startDate != null) {
-        records = records.where((r) => r.recordedAt.isAfter(query.startDate!)).toList();
+        records = records
+            .where((r) => r.recordedAt.isAfter(query.startDate!))
+            .toList();
       }
       if (query.endDate != null) {
-        records = records.where((r) => r.recordedAt.isBefore(query.endDate!)).toList();
+        records = records
+            .where((r) => r.recordedAt.isBefore(query.endDate!))
+            .toList();
       }
 
       // 通用字段查找
@@ -368,7 +380,9 @@ class ServerTrackerRepository extends ITrackerRepository {
           final json = record.toJson();
           final fieldValue = json[query.field]?.toString() ?? '';
           if (query.fuzzy) {
-            return fieldValue.toLowerCase().contains(query.value!.toLowerCase());
+            return fieldValue
+                .toLowerCase()
+                .contains(query.value!.toLowerCase());
           }
           return fieldValue == query.value;
         }).toList();
@@ -405,11 +419,10 @@ class ServerTrackerRepository extends ITrackerRepository {
       final startOfMonth = DateTime(now.year, now.month, 1);
 
       final todayRecords = records.where((r) {
-        final recordDate = DateTime(r.recordedAt.year, r.recordedAt.month, r.recordedAt.day);
+        final recordDate =
+            DateTime(r.recordedAt.year, r.recordedAt.month, r.recordedAt.day);
         return recordDate == today;
       }).length;
-
-      final monthRecords = records.where((r) => r.recordedAt.isAfter(startOfMonth)).length;
 
       final todayCompletedGoals = goals.where((g) {
         return g.isCompleted && g.currentValue >= g.targetValue;

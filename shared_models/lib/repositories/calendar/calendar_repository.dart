@@ -1,4 +1,5 @@
 /// Calendar 插件 - Repository 接口定义
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -42,12 +43,16 @@ class CalendarEventDto {
       title: json['title'] as String,
       description: json['description'] as String? ?? '',
       startTime: DateTime.parse(json['startTime'] as String),
-      endTime: json['endTime'] != null ? DateTime.parse(json['endTime'] as String) : null,
+      endTime: json['endTime'] != null
+          ? DateTime.parse(json['endTime'] as String)
+          : null,
       icon: json['icon'] as int,
       color: json['color'] as int,
       source: json['source'] as String? ?? 'default',
       reminderMinutes: json['reminderMinutes'] as int?,
-      completedTime: json['completedTime'] != null ? DateTime.parse(json['completedTime'] as String) : null,
+      completedTime: json['completedTime'] != null
+          ? DateTime.parse(json['completedTime'] as String)
+          : null,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -131,7 +136,8 @@ abstract class ICalendarRepository {
   // ============ 事件操作 ============
 
   /// 获取所有事件
-  Future<Result<List<CalendarEventDto>>> getEvents({PaginationParams? pagination});
+  Future<Result<List<CalendarEventDto>>> getEvents(
+      {PaginationParams? pagination});
 
   /// 根据 ID 获取事件
   Future<Result<CalendarEventDto?>> getEventById(String id);
@@ -140,13 +146,15 @@ abstract class ICalendarRepository {
   Future<Result<CalendarEventDto>> createEvent(CalendarEventDto event);
 
   /// 更新事件
-  Future<Result<CalendarEventDto>> updateEvent(String id, CalendarEventDto event);
+  Future<Result<CalendarEventDto>> updateEvent(
+      String id, CalendarEventDto event);
 
   /// 删除事件
   Future<Result<bool>> deleteEvent(String id);
 
   /// 完成事件
-  Future<Result<CalendarEventDto>> completeEvent(String id, DateTime completedTime);
+  Future<Result<CalendarEventDto>> completeEvent(
+      String id, DateTime completedTime);
 
   /// 搜索事件
   Future<Result<List<CalendarEventDto>>> searchEvents(CalendarEventQuery query);
@@ -154,7 +162,8 @@ abstract class ICalendarRepository {
   // ============ 已完成事件操作 ============
 
   /// 获取已完成事件
-  Future<Result<List<CalendarEventDto>>> getCompletedEvents({PaginationParams? pagination});
+  Future<Result<List<CalendarEventDto>>> getCompletedEvents(
+      {PaginationParams? pagination});
 
   /// 根据 ID 获取已完成事件
   Future<Result<CalendarEventDto?>> getCompletedEventById(String id);

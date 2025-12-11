@@ -1,6 +1,7 @@
 /// Activity 插件 - UseCase 业务逻辑层
 ///
 /// 此文件包含共享的业务逻辑，客户端和服务端都使用此层
+library;
 
 import 'package:uuid/uuid.dart';
 
@@ -64,7 +65,8 @@ class ActivityUseCase {
         final jsonList = activities.map((a) => a.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -78,7 +80,8 @@ class ActivityUseCase {
   /// [params] 必需参数:
   /// - `id`: 活动 ID
   /// - `date`: 日期字符串 (YYYY-MM-DD)
-  Future<Result<Map<String, dynamic>?>> getActivityById(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>?>> getActivityById(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     final date = params['date'] as String?;
 
@@ -109,21 +112,26 @@ class ActivityUseCase {
   /// - `description`: 描述
   /// - `mood`: 心情值
   /// - `metadata`: 元数据
-  Future<Result<Map<String, dynamic>>> createActivity(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> createActivity(
+      Map<String, dynamic> params) async {
     // 验证必需参数
-    final startTimeValidation = ParamValidator.requireString(params, 'startTime');
+    final startTimeValidation =
+        ParamValidator.requireString(params, 'startTime');
     if (!startTimeValidation.isValid) {
-      return Result.failure(startTimeValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(startTimeValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final endTimeValidation = ParamValidator.requireString(params, 'endTime');
     if (!endTimeValidation.isValid) {
-      return Result.failure(endTimeValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(endTimeValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final titleValidation = ParamValidator.requireString(params, 'title');
     if (!titleValidation.isValid) {
-      return Result.failure(titleValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(titleValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -185,7 +193,8 @@ class ActivityUseCase {
   /// - `description`: 描述
   /// - `mood`: 心情值
   /// - `metadata`: 元数据
-  Future<Result<Map<String, dynamic>>> updateActivity(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> updateActivity(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -198,7 +207,8 @@ class ActivityUseCase {
 
     try {
       // 获取现有活动
-      final existingResult = await repository.getActivityById(id: id, date: date);
+      final existingResult =
+          await repository.getActivityById(id: id, date: date);
       if (existingResult.isFailure) {
         return Result.failure('活动不存在', code: ErrorCodes.notFound);
       }
@@ -237,7 +247,8 @@ class ActivityUseCase {
         description: params.containsKey('description')
             ? params['description'] as String?
             : existing.description,
-        mood: params.containsKey('mood') ? params['mood'] as int? : existing.mood,
+        mood:
+            params.containsKey('mood') ? params['mood'] as int? : existing.mood,
         metadata: params.containsKey('metadata')
             ? params['metadata'] as Map<String, dynamic>?
             : existing.metadata,
@@ -265,7 +276,8 @@ class ActivityUseCase {
   /// [params] 必需参数:
   /// - `id`: 活动 ID
   /// - `date`: 日期字符串 (YYYY-MM-DD)
-  Future<Result<Map<String, dynamic>>> deleteActivity(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> deleteActivity(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -290,7 +302,8 @@ class ActivityUseCase {
   // ============ 统计操作 ============
 
   /// 获取今日统计
-  Future<Result<Map<String, dynamic>>> getTodayStats(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> getTodayStats(
+      Map<String, dynamic> params) async {
     try {
       final result = await repository.getTodayStats();
       return result.map((stats) => stats.toJson());
@@ -304,12 +317,14 @@ class ActivityUseCase {
   /// [params] 必需参数:
   /// - `startDate`: 开始日期 (YYYY-MM-DD)
   /// - `endDate`: 结束日期 (YYYY-MM-DD)
-  Future<Result<Map<String, dynamic>>> getRangeStats(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> getRangeStats(
+      Map<String, dynamic> params) async {
     final startDate = params['startDate'] as String?;
     final endDate = params['endDate'] as String?;
 
     if (startDate == null || startDate.isEmpty) {
-      return Result.failure('缺少必需参数: startDate', code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: startDate',
+          code: ErrorCodes.invalidParams);
     }
     if (endDate == null || endDate.isEmpty) {
       return Result.failure('缺少必需参数: endDate', code: ErrorCodes.invalidParams);
@@ -333,7 +348,8 @@ class ActivityUseCase {
   // ============ 标签操作 ============
 
   /// 获取标签分组
-  Future<Result<List<dynamic>>> getTagGroups(Map<String, dynamic> params) async {
+  Future<Result<List<dynamic>>> getTagGroups(
+      Map<String, dynamic> params) async {
     try {
       final result = await repository.getTagGroups();
       return result.map((groups) => groups.map((g) => g.toJson()).toList());
@@ -343,7 +359,8 @@ class ActivityUseCase {
   }
 
   /// 获取最近使用的标签
-  Future<Result<List<String>>> getRecentTags(Map<String, dynamic> params) async {
+  Future<Result<List<String>>> getRecentTags(
+      Map<String, dynamic> params) async {
     try {
       return repository.getRecentTags();
     } catch (e) {

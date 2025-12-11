@@ -1,4 +1,5 @@
 /// Nodes 插件 - 服务端 Repository 实现
+library;
 
 import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
@@ -58,8 +59,7 @@ class ServerNodesRepository implements INodesRepository {
 
       return Result.success(notebooks);
     } catch (e) {
-      return Result.failure('获取笔记本列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取笔记本列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -124,16 +124,15 @@ class ServerNodesRepository implements INodesRepository {
   }
 
   @override
-  Future<Result<List<NotebookDto>>> searchNotebooks(
-      NotebookQuery query) async {
+  Future<Result<List<NotebookDto>>> searchNotebooks(NotebookQuery query) async {
     try {
       var notebooks = await _readAllNotebooks();
 
       if (query.titleKeyword != null) {
         notebooks = notebooks.where((notebook) {
           return notebook.title.toLowerCase().contains(
-            query.titleKeyword!.toLowerCase(),
-          );
+                query.titleKeyword!.toLowerCase(),
+              );
         }).toList();
       }
 
@@ -178,8 +177,7 @@ class ServerNodesRepository implements INodesRepository {
 
       return Result.success(nodes);
     } catch (e) {
-      return Result.failure('获取节点列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取节点列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -295,7 +293,8 @@ class ServerNodesRepository implements INodesRepository {
   Future<Result<List<NodeDto>>> searchNodes(NodeQuery query) async {
     try {
       final notebooks = await _readAllNotebooks();
-      final notebook = notebooks.where((n) => n.id == query.notebookId).firstOrNull;
+      final notebook =
+          notebooks.where((n) => n.id == query.notebookId).firstOrNull;
 
       if (notebook == null) {
         return Result.success([]);
@@ -306,17 +305,19 @@ class ServerNodesRepository implements INodesRepository {
       if (query.titleKeyword != null) {
         allNodes = allNodes.where((node) {
           return node.title.toLowerCase().contains(
-            query.titleKeyword!.toLowerCase(),
-          );
+                query.titleKeyword!.toLowerCase(),
+              );
         }).toList();
       }
 
       if (query.status != null) {
-        allNodes = allNodes.where((node) => node.status == query.status).toList();
+        allNodes =
+            allNodes.where((node) => node.status == query.status).toList();
       }
 
       if (query.tag != null) {
-        allNodes = allNodes.where((node) => node.tags.contains(query.tag)).toList();
+        allNodes =
+            allNodes.where((node) => node.tags.contains(query.tag)).toList();
       }
 
       if (query.pagination != null && query.pagination!.hasPagination) {
@@ -337,7 +338,8 @@ class ServerNodesRepository implements INodesRepository {
   // ============ 树形结构操作实现 ============
 
   @override
-  Future<Result<NodeDto>> toggleNodeExpansion(String id, bool isExpanded) async {
+  Future<Result<NodeDto>> toggleNodeExpansion(
+      String id, bool isExpanded) async {
     try {
       final notebooks = await _readAllNotebooks();
 
@@ -440,7 +442,8 @@ class ServerNodesRepository implements INodesRepository {
     return false;
   }
 
-  List<String> _findNodePath(List<NodeDto> nodes, String nodeId, List<String> path) {
+  List<String> _findNodePath(
+      List<NodeDto> nodes, String nodeId, List<String> path) {
     for (final node in nodes) {
       if (node.id == nodeId) {
         path.add(node.title);
@@ -455,7 +458,8 @@ class ServerNodesRepository implements INodesRepository {
     return [];
   }
 
-  List<NodeDto> _findSiblingNodes(List<NodeDto> nodes, String nodeId, List<NodeDto> siblings) {
+  List<NodeDto> _findSiblingNodes(
+      List<NodeDto> nodes, String nodeId, List<NodeDto> siblings) {
     for (final node in nodes) {
       if (node.id == nodeId) {
         return siblings;

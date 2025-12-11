@@ -1,4 +1,5 @@
 /// Calendar Album 插件 - UseCase 业务逻辑层
+library;
 
 import 'package:uuid/uuid.dart';
 import 'package:shared_models/repositories/calendar_album/calendar_album_repository.dart';
@@ -38,8 +39,7 @@ class CalendarAlbumUseCase {
         return jsonList;
       });
     } catch (e) {
-      return Result.failure('获取日记列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取日记列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -88,8 +88,7 @@ class CalendarAlbumUseCase {
         return jsonList;
       });
     } catch (e) {
-      return Result.failure('根据日期获取日记失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('根据日期获取日记失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -120,8 +119,7 @@ class CalendarAlbumUseCase {
         return jsonList;
       });
     } catch (e) {
-      return Result.failure('根据标签获取日记失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('根据标签获取日记失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -153,8 +151,7 @@ class CalendarAlbumUseCase {
         return jsonList;
       });
     } catch (e) {
-      return Result.failure('根据多标签获取日记失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('根据多标签获取日记失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -240,10 +237,14 @@ class CalendarAlbumUseCase {
         mood: params['mood'] as String?,
         weather: params['weather'] as String?,
         imageUrls: params['imageUrls'] is List<dynamic>
-            ? (params['imageUrls'] as List<dynamic>).map((e) => e as String).toList()
+            ? (params['imageUrls'] as List<dynamic>)
+                .map((e) => e as String)
+                .toList()
             : const [],
         thumbUrls: params['thumbUrls'] is List<dynamic>
-            ? (params['thumbUrls'] as List<dynamic>).map((e) => e as String).toList()
+            ? (params['thumbUrls'] as List<dynamic>)
+                .map((e) => e as String)
+                .toList()
             : const [],
       );
 
@@ -286,10 +287,14 @@ class CalendarAlbumUseCase {
         mood: params['mood'] as String?,
         weather: params['weather'] as String?,
         imageUrls: params['imageUrls'] is List<dynamic>
-            ? (params['imageUrls'] as List<dynamic>).map((e) => e as String).toList()
+            ? (params['imageUrls'] as List<dynamic>)
+                .map((e) => e as String)
+                .toList()
             : null,
         thumbUrls: params['thumbUrls'] is List<dynamic>
-            ? (params['thumbUrls'] as List<dynamic>).map((e) => e as String).toList()
+            ? (params['thumbUrls'] as List<dynamic>)
+                .map((e) => e as String)
+                .toList()
             : null,
         updatedAt: DateTime.now(),
       );
@@ -337,7 +342,8 @@ class CalendarAlbumUseCase {
 
     try {
       final tagGroups = tagGroupsJson
-          .map((e) => CalendarAlbumTagGroupDto.fromJson(e as Map<String, dynamic>))
+          .map((e) =>
+              CalendarAlbumTagGroupDto.fromJson(e as Map<String, dynamic>))
           .toList();
 
       final result = await repository.updateTagGroups(tagGroups);
@@ -348,7 +354,8 @@ class CalendarAlbumUseCase {
   }
 
   /// 添加标签
-  Future<Result<Map<String, dynamic>>> addTag(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> addTag(
+      Map<String, dynamic> params) async {
     final tag = params['tag'] as String?;
     if (tag == null || tag.isEmpty) {
       return Result.failure('缺少必需参数: tag', code: ErrorCodes.invalidParams);
@@ -445,8 +452,7 @@ class CalendarAlbumUseCase {
   ) async {
     final imageUrl = params['imageUrl'] as String?;
     if (imageUrl == null || imageUrl.isEmpty) {
-      return Result.failure('缺少必需参数: imageUrl',
-          code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: imageUrl', code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -467,8 +473,7 @@ class CalendarAlbumUseCase {
       final result = await repository.getStats();
       return result.map((stats) => stats.toJson());
     } catch (e) {
-      return Result.failure('获取统计信息失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取统计信息失败: $e', code: ErrorCodes.serverError);
     }
   }
 

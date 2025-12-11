@@ -1,6 +1,7 @@
 /// Notes 插件 - 服务端 Repository 实现
 ///
 /// 通过 PluginDataService 访问用户的加密数据文件
+library;
 
 import 'package:shared_models/shared_models.dart';
 
@@ -30,7 +31,9 @@ class ServerNotesRepository extends INotesRepository {
     if (notesData == null) return [];
 
     final notes = notesData['notes'] as List<dynamic>? ?? [];
-    return notes.map((n) => NoteDto.fromJson(n as Map<String, dynamic>)).toList();
+    return notes
+        .map((n) => NoteDto.fromJson(n as Map<String, dynamic>))
+        .toList();
   }
 
   /// 保存所有笔记
@@ -53,7 +56,9 @@ class ServerNotesRepository extends INotesRepository {
     if (foldersData == null) return [];
 
     final folders = foldersData['folders'] as List<dynamic>? ?? [];
-    return folders.map((f) => FolderDto.fromJson(f as Map<String, dynamic>)).toList();
+    return folders
+        .map((f) => FolderDto.fromJson(f as Map<String, dynamic>))
+        .toList();
   }
 
   /// 保存所有文件夹
@@ -211,7 +216,9 @@ class ServerNotesRepository extends INotesRepository {
           final json = note.toJson();
           final fieldValue = json[query.field]?.toString() ?? '';
           if (query.fuzzy) {
-            return fieldValue.toLowerCase().contains(query.value!.toLowerCase());
+            return fieldValue
+                .toLowerCase()
+                .contains(query.value!.toLowerCase());
           }
           return fieldValue == query.value;
         }).toList();

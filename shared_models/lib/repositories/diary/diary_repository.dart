@@ -1,6 +1,7 @@
 /// Diary 插件 - Repository 接口定义
 ///
 /// 定义日记条目的数据访问抽象接口
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';

@@ -1,6 +1,7 @@
 /// Day 插件 - Repository 接口定义
 ///
 /// 定义纪念日的数据访问抽象接口
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -165,7 +166,8 @@ abstract class IDayRepository {
   Future<Result<MemorialDayDto>> createMemorialDay(MemorialDayDto memorialDay);
 
   /// 更新纪念日
-  Future<Result<MemorialDayDto>> updateMemorialDay(String id, MemorialDayDto memorialDay);
+  Future<Result<MemorialDayDto>> updateMemorialDay(
+      String id, MemorialDayDto memorialDay);
 
   /// 删除纪念日
   Future<Result<bool>> deleteMemorialDay(String id);
@@ -174,7 +176,8 @@ abstract class IDayRepository {
   Future<Result<bool>> reorderMemorialDays(List<String> orderedIds);
 
   /// 搜索纪念日
-  Future<Result<List<MemorialDayDto>>> searchMemorialDays(MemorialDayQuery query);
+  Future<Result<List<MemorialDayDto>>> searchMemorialDays(
+      MemorialDayQuery query);
 
   /// 获取统计信息
   Future<Result<MemorialDayStatsDto>> getStats();

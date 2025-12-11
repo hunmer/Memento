@@ -1,4 +1,5 @@
 /// Habits 插件 - Repository 接口定义
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -47,10 +48,9 @@ class HabitDto {
           const [],
       intervalDays: json['intervalDays'] as int? ?? 0,
       durationMinutes: json['durationMinutes'] as int,
-      tags: (json['tags'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
+      tags:
+          (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const [],
       skillId: json['skillId'] as String?,
     );
   }

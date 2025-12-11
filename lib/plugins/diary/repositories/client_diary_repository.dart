@@ -1,6 +1,7 @@
 /// Diary 插件 - 客户端 Repository 实现
 ///
 /// 通过适配现有的 DiaryUtils 来实现 IDiaryRepository 接口
+library;
 
 import 'package:shared_models/shared_models.dart';
 import 'package:Memento/plugins/diary/models/diary_entry.dart';
@@ -25,15 +26,31 @@ class ClientDiaryRepository extends IDiaryRepository {
       // 按日期范围过滤
       if (startDate != null) {
         final start = DateTime.parse(startDate);
-        dtos = dtos.where((d) => DateTime.parse(d.date).isAfter(start.subtract(const Duration(days: 1)))).toList();
+        dtos =
+            dtos
+                .where(
+                  (d) => DateTime.parse(
+                    d.date,
+                  ).isAfter(start.subtract(const Duration(days: 1))),
+                )
+                .toList();
       }
       if (endDate != null) {
         final end = DateTime.parse(endDate);
-        dtos = dtos.where((d) => DateTime.parse(d.date).isBefore(end.add(const Duration(days: 1)))).toList();
+        dtos =
+            dtos
+                .where(
+                  (d) => DateTime.parse(
+                    d.date,
+                  ).isBefore(end.add(const Duration(days: 1))),
+                )
+                .toList();
       }
 
       // 按日期排序
-      dtos.sort((a, b) => DateTime.parse(b.date).compareTo(DateTime.parse(a.date)));
+      dtos.sort(
+        (a, b) => DateTime.parse(b.date).compareTo(DateTime.parse(a.date)),
+      );
 
       // 应用分页
       if (pagination != null && pagination.hasPagination) {
@@ -89,7 +106,10 @@ class ClientDiaryRepository extends IDiaryRepository {
   }
 
   @override
-  Future<Result<DiaryEntryDto>> updateEntry(String date, DiaryEntryDto dto) async {
+  Future<Result<DiaryEntryDto>> updateEntry(
+    String date,
+    DiaryEntryDto dto,
+  ) async {
     try {
       final dateTime = DateTime.parse(date);
       await DiaryUtils.saveDiaryEntry(
@@ -131,21 +151,37 @@ class ClientDiaryRepository extends IDiaryRepository {
       // 按日期范围过滤
       if (query.startDate != null) {
         final start = DateTime.parse(query.startDate!);
-        dtos = dtos.where((d) => DateTime.parse(d.date).isAfter(start.subtract(const Duration(days: 1)))).toList();
+        dtos =
+            dtos
+                .where(
+                  (d) => DateTime.parse(
+                    d.date,
+                  ).isAfter(start.subtract(const Duration(days: 1))),
+                )
+                .toList();
       }
       if (query.endDate != null) {
         final end = DateTime.parse(query.endDate!);
-        dtos = dtos.where((d) => DateTime.parse(d.date).isBefore(end.add(const Duration(days: 1)))).toList();
+        dtos =
+            dtos
+                .where(
+                  (d) => DateTime.parse(
+                    d.date,
+                  ).isBefore(end.add(const Duration(days: 1))),
+                )
+                .toList();
       }
 
       // 按关键词过滤
       if (query.keyword != null && query.keyword!.isNotEmpty) {
         final lowerKeyword = query.keyword!.toLowerCase();
-        dtos = dtos.where((d) {
-          final title = d.title.toLowerCase();
-          final content = d.content.toLowerCase();
-          return title.contains(lowerKeyword) || content.contains(lowerKeyword);
-        }).toList();
+        dtos =
+            dtos.where((d) {
+              final title = d.title.toLowerCase();
+              final content = d.content.toLowerCase();
+              return title.contains(lowerKeyword) ||
+                  content.contains(lowerKeyword);
+            }).toList();
       }
 
       // 按心情过滤
@@ -173,11 +209,13 @@ class ClientDiaryRepository extends IDiaryRepository {
   Future<Result<DiaryStatsDto>> getStats() async {
     try {
       final stats = await DiaryUtils.getDiaryStats();
-      return Result.success(DiaryStatsDto(
-        totalEntries: stats['entryCount'] as int,
-        totalWords: stats['totalCharCount'] as int,
-        averageWords: stats['averageCharCount'] as int,
-      ));
+      return Result.success(
+        DiaryStatsDto(
+          totalEntries: stats['entryCount'] as int,
+          totalWords: stats['totalCharCount'] as int,
+          averageWords: stats['averageCharCount'] as int,
+        ),
+      );
     } catch (e) {
       return Result.failure('获取统计信息失败: $e', code: ErrorCodes.serverError);
     }
@@ -188,7 +226,8 @@ class ClientDiaryRepository extends IDiaryRepository {
     try {
       // 获取今天的日期
       final today = DateTime.now();
-      final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final todayStr =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
 
       // 检查今天是否有日记
       final result = await getEntryByDate(todayStr);
@@ -212,14 +251,13 @@ class ClientDiaryRepository extends IDiaryRepository {
   Future<Result<int>> getMonthWordCount() async {
     try {
       final now = DateTime.now();
-      final startDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
-      final endDate = '${now.year}-${(now.month + 1).toString().padLeft(2, '0')}-01';
+      final startDate =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
+      final endDate =
+          '${now.year}-${(now.month + 1).toString().padLeft(2, '0')}-01';
 
       // 获取本月所有日记
-      final result = await getEntries(
-        startDate: startDate,
-        endDate: endDate,
-      );
+      final result = await getEntries(startDate: startDate, endDate: endDate);
 
       if (result.isFailure) {
         return Result.failure('获取本月日记失败', code: ErrorCodes.serverError);
@@ -241,14 +279,13 @@ class ClientDiaryRepository extends IDiaryRepository {
   Future<Result<Map<String, int>>> getMonthProgress() async {
     try {
       final now = DateTime.now();
-      final startDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
-      final endDate = '${now.year}-${(now.month + 1).toString().padLeft(2, '0')}-01';
+      final startDate =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-01';
+      final endDate =
+          '${now.year}-${(now.month + 1).toString().padLeft(2, '0')}-01';
 
       // 获取本月所有日记
-      final result = await getEntries(
-        startDate: startDate,
-        endDate: endDate,
-      );
+      final result = await getEntries(startDate: startDate, endDate: endDate);
 
       if (result.isFailure) {
         return Result.failure('获取本月日记失败', code: ErrorCodes.serverError);
@@ -271,7 +308,8 @@ class ClientDiaryRepository extends IDiaryRepository {
 
   DiaryEntryDto _entryToDto(DiaryEntry entry) {
     return DiaryEntryDto(
-      date: '${entry.date.year}-${entry.date.month.toString().padLeft(2, '0')}-${entry.date.day.toString().padLeft(2, '0')}',
+      date:
+          '${entry.date.year}-${entry.date.month.toString().padLeft(2, '0')}-${entry.date.day.toString().padLeft(2, '0')}',
       title: entry.title,
       content: entry.content,
       createdAt: entry.createdAt,

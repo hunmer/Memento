@@ -1,6 +1,7 @@
 /// Day 插件 - UseCase 业务逻辑层
 ///
 /// 此文件包含共享的业务逻辑，客户端和服务端都使用此层
+library;
 
 import 'package:uuid/uuid.dart';
 
@@ -53,7 +54,8 @@ class DayUseCase {
         final jsonList = days.map((d) => d.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -66,7 +68,8 @@ class DayUseCase {
   ///
   /// [params] 必需参数:
   /// - `id`: 纪念日 ID
-  Future<Result<Map<String, dynamic>?>> getMemorialDayById(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>?>> getMemorialDayById(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
 
     if (id == null || id.isEmpty) {
@@ -91,21 +94,27 @@ class DayUseCase {
   /// - `notes`: 备注列表
   /// - `backgroundImageUrl`: 背景图片 URL
   /// - `sortIndex`: 排序索引
-  Future<Result<Map<String, dynamic>>> createMemorialDay(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> createMemorialDay(
+      Map<String, dynamic> params) async {
     // 验证必需参数
     final titleValidation = ParamValidator.requireString(params, 'title');
     if (!titleValidation.isValid) {
-      return Result.failure(titleValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(titleValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
-    final targetDateValidation = ParamValidator.requireString(params, 'targetDate');
+    final targetDateValidation =
+        ParamValidator.requireString(params, 'targetDate');
     if (!targetDateValidation.isValid) {
-      return Result.failure(targetDateValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(targetDateValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
-    final backgroundColorValidation = ParamValidator.requireInt(params, 'backgroundColor');
+    final backgroundColorValidation =
+        ParamValidator.requireInt(params, 'backgroundColor');
     if (!backgroundColorValidation.isValid) {
-      return Result.failure(backgroundColorValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(backgroundColorValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -140,7 +149,8 @@ class DayUseCase {
   /// - `backgroundColor`: 背景颜色
   /// - `backgroundImageUrl`: 背景图片 URL
   /// - `sortIndex`: 排序索引
-  Future<Result<Map<String, dynamic>>> updateMemorialDay(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> updateMemorialDay(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -174,8 +184,10 @@ class DayUseCase {
         notes: params.containsKey('notes')
             ? (params['notes'] as List<dynamic>?)?.cast<String>() ?? []
             : existing.notes,
-        backgroundColor: params['backgroundColor'] as int? ?? existing.backgroundColor,
-        backgroundImageUrl: params['backgroundImageUrl'] as String? ?? existing.backgroundImageUrl,
+        backgroundColor:
+            params['backgroundColor'] as int? ?? existing.backgroundColor,
+        backgroundImageUrl: params['backgroundImageUrl'] as String? ??
+            existing.backgroundImageUrl,
         sortIndex: params['sortIndex'] as int? ?? existing.sortIndex,
       );
 
@@ -190,7 +202,8 @@ class DayUseCase {
   ///
   /// [params] 必需参数:
   /// - `id`: 纪念日 ID
-  Future<Result<Map<String, dynamic>>> deleteMemorialDay(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> deleteMemorialDay(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -211,11 +224,13 @@ class DayUseCase {
   ///
   /// [params] 必需参数:
   /// - `orderedIds`: 有序的 ID 列表
-  Future<Result<Map<String, dynamic>>> reorderMemorialDays(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> reorderMemorialDays(
+      Map<String, dynamic> params) async {
     final orderedIds = params['orderedIds'] as List<dynamic>?;
 
     if (orderedIds == null || orderedIds.isEmpty) {
-      return Result.failure('缺少必需参数: orderedIds', code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: orderedIds',
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -237,7 +252,8 @@ class DayUseCase {
   /// - `startDate`: 开始日期
   /// - `endDate`: 结束日期
   /// - `includeExpired`: 是否包含过期的
-  Future<Result<List<dynamic>>> searchMemorialDays(Map<String, dynamic> params) async {
+  Future<Result<List<dynamic>>> searchMemorialDays(
+      Map<String, dynamic> params) async {
     try {
       DateTime? startDate;
       DateTime? endDate;
@@ -274,7 +290,8 @@ class DayUseCase {
   // ============ 统计操作 ============
 
   /// 获取统计信息
-  Future<Result<Map<String, dynamic>>> getStats(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> getStats(
+      Map<String, dynamic> params) async {
     try {
       final result = await repository.getStats();
       return result.map((stats) => stats.toJson());

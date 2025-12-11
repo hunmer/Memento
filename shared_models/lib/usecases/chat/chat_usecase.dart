@@ -2,6 +2,7 @@
 ///
 /// 此文件包含共享的业务逻辑，客户端和服务端都使用此层
 /// 通过依赖 IChatRepository 接口实现解耦
+library;
 
 import 'package:uuid/uuid.dart';
 
@@ -33,7 +34,8 @@ class ChatUseCase {
         final jsonList = channels.map((c) => c.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -59,7 +61,8 @@ class ChatUseCase {
     // 参数验证
     final nameValidation = ParamValidator.requireString(params, 'name');
     if (!nameValidation.isValid) {
-      return Result.failure(nameValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(nameValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -90,7 +93,8 @@ class ChatUseCase {
   Future<Result<bool>> deleteChannel(Map<String, dynamic> params) async {
     final id = params['id'] as String? ?? params['channelId'] as String?;
     if (id == null || id.isEmpty) {
-      return Result.failure('缺少必需参数: id 或 channelId', code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: id 或 channelId',
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -156,12 +160,16 @@ class ChatUseCase {
         id: existing.id,
         title: params['title'] as String? ?? existing.title,
         iconCodePoint: params['icon'] as int? ?? existing.iconCodePoint,
-        iconFontFamily: params['iconFontFamily'] as String? ?? existing.iconFontFamily,
-        backgroundColor: params['backgroundColor'] as String? ?? existing.backgroundColor,
+        iconFontFamily:
+            params['iconFontFamily'] as String? ?? existing.iconFontFamily,
+        backgroundColor:
+            params['backgroundColor'] as String? ?? existing.backgroundColor,
         priority: params['priority'] as int? ?? existing.priority,
-        groups: (params['groups'] as List<dynamic>?)?.cast<String>() ?? existing.groups,
+        groups: (params['groups'] as List<dynamic>?)?.cast<String>() ??
+            existing.groups,
         lastMessageTime: existing.lastMessageTime,
-        metadata: params['metadata'] as Map<String, dynamic>? ?? existing.metadata,
+        metadata:
+            params['metadata'] as Map<String, dynamic>? ?? existing.metadata,
       );
 
       final result = await repository.updateChannel(id, updated);
@@ -183,19 +191,22 @@ class ChatUseCase {
   Future<Result<dynamic>> getMessages(Map<String, dynamic> params) async {
     final idValidation = ParamValidator.requireString(params, 'channelId');
     if (!idValidation.isValid) {
-      return Result.failure(idValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(idValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
       final channelId = params['channelId'] as String;
       final pagination = _extractPagination(params);
-      final result = await repository.getMessages(channelId, pagination: pagination);
+      final result =
+          await repository.getMessages(channelId, pagination: pagination);
 
       return result.map((messages) {
         final jsonList = messages.map((m) => m.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -221,12 +232,14 @@ class ChatUseCase {
     // 参数验证
     final channelValidation = ParamValidator.requireString(params, 'channelId');
     if (!channelValidation.isValid) {
-      return Result.failure(channelValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(channelValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final contentValidation = ParamValidator.requireString(params, 'content');
     if (!contentValidation.isValid) {
-      return Result.failure(contentValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(contentValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -272,12 +285,14 @@ class ChatUseCase {
   Future<Result<bool>> deleteMessage(Map<String, dynamic> params) async {
     final channelValidation = ParamValidator.requireString(params, 'channelId');
     if (!channelValidation.isValid) {
-      return Result.failure(channelValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(channelValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final messageValidation = ParamValidator.requireString(params, 'messageId');
     if (!messageValidation.isValid) {
-      return Result.failure(messageValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(messageValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -304,7 +319,8 @@ class ChatUseCase {
     final value = params['value'] as String?;
 
     if (field == null || value == null) {
-      return Result.failure('缺少必需参数: field, value', code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: field, value',
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -330,7 +346,8 @@ class ChatUseCase {
         final jsonList = channels.map((c) => c.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -345,11 +362,13 @@ class ChatUseCase {
   ) async {
     final idValidation = ParamValidator.requireString(params, 'channelId');
     if (!idValidation.isValid) {
-      return Result.failure(idValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(idValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
-      final result = await repository.getChannelById(params['channelId'] as String);
+      final result =
+          await repository.getChannelById(params['channelId'] as String);
       return result.map((c) => c?.toJson());
     } catch (e) {
       return Result.failure('查找频道失败: $e', code: ErrorCodes.serverError);
@@ -357,10 +376,12 @@ class ChatUseCase {
   }
 
   /// 按标题查找频道
-  Future<Result<dynamic>> findChannelByTitle(Map<String, dynamic> params) async {
+  Future<Result<dynamic>> findChannelByTitle(
+      Map<String, dynamic> params) async {
     final titleValidation = ParamValidator.requireString(params, 'title');
     if (!titleValidation.isValid) {
-      return Result.failure(titleValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(titleValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final modifiedParams = Map<String, dynamic>.from(params);
@@ -374,14 +395,16 @@ class ChatUseCase {
   Future<Result<dynamic>> findMessageBy(Map<String, dynamic> params) async {
     final channelValidation = ParamValidator.requireString(params, 'channelId');
     if (!channelValidation.isValid) {
-      return Result.failure(channelValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(channelValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final field = params['field'] as String?;
     final value = params['value'] as String?;
 
     if (field == null || value == null) {
-      return Result.failure('缺少必需参数: field, value', code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: field, value',
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -408,7 +431,8 @@ class ChatUseCase {
         final jsonList = messages.map((m) => m.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -423,12 +447,14 @@ class ChatUseCase {
   ) async {
     final channelValidation = ParamValidator.requireString(params, 'channelId');
     if (!channelValidation.isValid) {
-      return Result.failure(channelValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(channelValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final messageValidation = ParamValidator.requireString(params, 'messageId');
     if (!messageValidation.isValid) {
-      return Result.failure(messageValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(messageValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final modifiedParams = Map<String, dynamic>.from(params);
@@ -444,10 +470,12 @@ class ChatUseCase {
   }
 
   /// 按内容查找消息
-  Future<Result<dynamic>> findMessageByContent(Map<String, dynamic> params) async {
+  Future<Result<dynamic>> findMessageByContent(
+      Map<String, dynamic> params) async {
     final contentValidation = ParamValidator.requireString(params, 'content');
     if (!contentValidation.isValid) {
-      return Result.failure(contentValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(contentValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final modifiedParams = Map<String, dynamic>.from(params);
@@ -477,12 +505,14 @@ class ChatUseCase {
   }
 
   /// 在所有频道中查找消息
-  Future<Result<dynamic>> _findMessagesInAllChannels(Map<String, dynamic> params) async {
+  Future<Result<dynamic>> _findMessagesInAllChannels(
+      Map<String, dynamic> params) async {
     final field = params['field'] as String?;
     final value = params['value'] as String?;
 
     if (field == null || value == null) {
-      return Result.failure('缺少必需参数: field, value', code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: field, value',
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -504,7 +534,7 @@ class ChatUseCase {
           field: field,
           value: value,
           fuzzy: fuzzy,
-          findAll: true,  // 在每个频道中获取所有匹配
+          findAll: true, // 在每个频道中获取所有匹配
         );
 
         final messagesResult = await repository.findMessages(query);
@@ -545,7 +575,8 @@ class ChatUseCase {
   // ============ 用户操作 ============
 
   /// 获取当前用户
-  Future<Result<Map<String, dynamic>>> getCurrentUser(Map<String, dynamic>? params) async {
+  Future<Result<Map<String, dynamic>>> getCurrentUser(
+      Map<String, dynamic>? params) async {
     try {
       final result = await repository.getCurrentUser();
       return result.map((u) => u.toJson());
@@ -555,7 +586,8 @@ class ChatUseCase {
   }
 
   /// 获取所有用户列表
-  Future<Result<List<Map<String, dynamic>>>> getUsers(Map<String, dynamic>? params) async {
+  Future<Result<List<Map<String, dynamic>>>> getUsers(
+      Map<String, dynamic>? params) async {
     try {
       final result = await repository.getUsers();
       return result.map((users) => users.map((u) => u.toJson()).toList());

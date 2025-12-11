@@ -1,4 +1,5 @@
 /// OpenAI 插件 - UseCase 业务逻辑层
+library;
 
 import 'package:uuid/uuid.dart';
 import 'package:shared_models/repositories/openai/openai_repository.dart';
@@ -80,7 +81,8 @@ class OpenAIUseCase {
       );
     }
 
-    final descriptionValidation = ParamValidator.requireString(params, 'description');
+    final descriptionValidation =
+        ParamValidator.requireString(params, 'description');
     if (!descriptionValidation.isValid) {
       return Result.failure(
         descriptionValidation.errorMessage!,
@@ -88,7 +90,8 @@ class OpenAIUseCase {
       );
     }
 
-    final systemPromptValidation = ParamValidator.requireString(params, 'systemPrompt');
+    final systemPromptValidation =
+        ParamValidator.requireString(params, 'systemPrompt');
     if (!systemPromptValidation.isValid) {
       return Result.failure(
         systemPromptValidation.errorMessage!,
@@ -96,7 +99,8 @@ class OpenAIUseCase {
       );
     }
 
-    final providerIdValidation = ParamValidator.requireString(params, 'serviceProviderId');
+    final providerIdValidation =
+        ParamValidator.requireString(params, 'serviceProviderId');
     if (!providerIdValidation.isValid) {
       return Result.failure(
         providerIdValidation.errorMessage!,
@@ -140,14 +144,19 @@ class OpenAIUseCase {
         temperature: (params['temperature'] as num?)?.toDouble() ?? 0.7,
         maxLength: params['maxLength'] as int? ?? 2000,
         topP: (params['topP'] as num?)?.toDouble() ?? 1.0,
-        frequencyPenalty: (params['frequencyPenalty'] as num?)?.toDouble() ?? 0.0,
+        frequencyPenalty:
+            (params['frequencyPenalty'] as num?)?.toDouble() ?? 0.0,
         presencePenalty: (params['presencePenalty'] as num?)?.toDouble() ?? 0.0,
         stop: (params['stop'] as List<dynamic>?)?.cast<String>(),
         avatarUrl: params['avatarUrl'] as String?,
-        enableFunctionCalling: params['enableFunctionCalling'] as bool? ?? false,
+        enableFunctionCalling:
+            params['enableFunctionCalling'] as bool? ?? false,
         promptPresetId: params['promptPresetId'] as String?,
-        enableOpeningQuestions: params['enableOpeningQuestions'] as bool? ?? false,
-        openingQuestions: (params['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? const [],
+        enableOpeningQuestions:
+            params['enableOpeningQuestions'] as bool? ?? false,
+        openingQuestions:
+            (params['openingQuestions'] as List<dynamic>?)?.cast<String>() ??
+                const [],
       );
 
       final result = await repository.createAgent(agent);
@@ -184,13 +193,14 @@ class OpenAIUseCase {
         description: params['description'] as String?,
         systemPrompt: params['systemPrompt'] as String?,
         tags: params.containsKey('tags')
-            ? (params['tags'] as List<dynamic>?)?.cast<String>() ?? existing.tags
+            ? (params['tags'] as List<dynamic>?)?.cast<String>() ??
+                existing.tags
             : existing.tags,
         serviceProviderId: params['serviceProviderId'] as String?,
         baseUrl: params['baseUrl'] as String?,
         headers: params.containsKey('headers')
             ? (params['headers'] as Map<dynamic, dynamic>?)
-                ?.map((k, v) => MapEntry(k as String, v as String)) ??
+                    ?.map((k, v) => MapEntry(k as String, v as String)) ??
                 existing.headers
             : existing.headers,
         updatedAt: DateTime.now(),
@@ -199,20 +209,25 @@ class OpenAIUseCase {
             ? (params['temperature'] as num?)?.toDouble()
             : existing.temperature,
         maxLength: params['maxLength'] as int?,
-        topP: params.containsKey('topP') ? (params['topP'] as num?)?.toDouble() : existing.topP,
+        topP: params.containsKey('topP')
+            ? (params['topP'] as num?)?.toDouble()
+            : existing.topP,
         frequencyPenalty: params.containsKey('frequencyPenalty')
             ? (params['frequencyPenalty'] as num?)?.toDouble()
             : existing.frequencyPenalty,
         presencePenalty: params.containsKey('presencePenalty')
             ? (params['presencePenalty'] as num?)?.toDouble()
             : existing.presencePenalty,
-        stop: params.containsKey('stop') ? (params['stop'] as List<dynamic>?)?.cast<String>() : existing.stop,
+        stop: params.containsKey('stop')
+            ? (params['stop'] as List<dynamic>?)?.cast<String>()
+            : existing.stop,
         avatarUrl: params['avatarUrl'] as String?,
         enableFunctionCalling: params['enableFunctionCalling'] as bool?,
         promptPresetId: params['promptPresetId'] as String?,
         enableOpeningQuestions: params['enableOpeningQuestions'] as bool?,
         openingQuestions: params.containsKey('openingQuestions')
-            ? (params['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? existing.openingQuestions
+            ? (params['openingQuestions'] as List<dynamic>?)?.cast<String>() ??
+                existing.openingQuestions
             : existing.openingQuestions,
       );
 
@@ -270,10 +285,12 @@ class OpenAIUseCase {
   // ============ 服务商 CRUD 操作 ============
 
   /// 获取服务商列表
-  Future<Result<dynamic>> getServiceProviders(Map<String, dynamic> params) async {
+  Future<Result<dynamic>> getServiceProviders(
+      Map<String, dynamic> params) async {
     try {
       final pagination = _extractPagination(params);
-      final result = await repository.getServiceProviders(pagination: pagination);
+      final result =
+          await repository.getServiceProviders(pagination: pagination);
 
       return result.map((providers) {
         final jsonList = providers.map((p) => p.toJson()).toList();
@@ -384,7 +401,7 @@ class OpenAIUseCase {
         baseUrl: params['baseUrl'] as String?,
         headers: params.containsKey('headers')
             ? (params['headers'] as Map<dynamic, dynamic>?)
-                ?.map((k, v) => MapEntry(k as String, v as String)) ??
+                    ?.map((k, v) => MapEntry(k as String, v as String)) ??
                 existing.headers
             : existing.headers,
         defaultModel: params['defaultModel'] as String?,
@@ -398,7 +415,8 @@ class OpenAIUseCase {
   }
 
   /// 删除服务商
-  Future<Result<bool>> deleteServiceProvider(Map<String, dynamic> params) async {
+  Future<Result<bool>> deleteServiceProvider(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -412,7 +430,8 @@ class OpenAIUseCase {
   }
 
   /// 搜索服务商
-  Future<Result<dynamic>> searchServiceProviders(Map<String, dynamic> params) async {
+  Future<Result<dynamic>> searchServiceProviders(
+      Map<String, dynamic> params) async {
     try {
       final query = OpenAIServiceProviderQuery(
         nameKeyword: params['nameKeyword'] as String?,
@@ -500,7 +519,8 @@ class OpenAIUseCase {
       );
     }
 
-    final descriptionValidation = ParamValidator.requireString(params, 'description');
+    final descriptionValidation =
+        ParamValidator.requireString(params, 'description');
     if (!descriptionValidation.isValid) {
       return Result.failure(
         descriptionValidation.errorMessage!,

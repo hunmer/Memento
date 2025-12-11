@@ -1,6 +1,7 @@
 /// Chat 插件 - 服务端 Repository 实现
 ///
 /// 通过 PluginDataService 访问用户的加密数据文件
+library;
 
 import 'package:shared_models/shared_models.dart';
 
@@ -36,9 +37,9 @@ class ServerChatRepository extends IChatRepository {
         return Result.success([]);
       }
 
-      final channelIds = (channelsListData['channels'] as List<dynamic>?)
-              ?.cast<String>() ??
-          [];
+      final channelIds =
+          (channelsListData['channels'] as List<dynamic>?)?.cast<String>() ??
+              [];
 
       // 读取每个频道的详细信息
       final channels = <ChannelDto>[];
@@ -174,7 +175,8 @@ class ServerChatRepository extends IChatRepository {
       await dataService.deletePluginFile(userId, _pluginId, 'channel/$id.json');
 
       // 删除消息文件
-      await dataService.deletePluginFile(userId, _pluginId, 'messages/$id.json');
+      await dataService.deletePluginFile(
+          userId, _pluginId, 'messages/$id.json');
 
       // 从频道列表中移除
       final channelsListData = await dataService.readPluginData(
@@ -300,9 +302,8 @@ class ServerChatRepository extends IChatRepository {
         'messages/$channelId.json',
       );
 
-      final messages = (messagesData?['messages'] as List<dynamic>?)
-              ?.toList() ??
-          [];
+      final messages =
+          (messagesData?['messages'] as List<dynamic>?)?.toList() ?? [];
 
       // 添加新消息
       messages.add(dto.toJson());
@@ -354,13 +355,12 @@ class ServerChatRepository extends IChatRepository {
         return Result.failure('频道不存在', code: ErrorCodes.notFound);
       }
 
-      final messages = (messagesData['messages'] as List<dynamic>?)
-              ?.toList() ??
-          [];
+      final messages =
+          (messagesData['messages'] as List<dynamic>?)?.toList() ?? [];
 
       final initialLength = messages.length;
-      messages.removeWhere((m) =>
-          (m as Map<String, dynamic>)['id'] == messageId);
+      messages
+          .removeWhere((m) => (m as Map<String, dynamic>)['id'] == messageId);
 
       if (messages.length == initialLength) {
         return Result.failure('消息不存在', code: ErrorCodes.notFound);
@@ -467,9 +467,11 @@ class ServerChatRepository extends IChatRepository {
 
       final users = (usersData?['users'] as List<dynamic>?) ?? [];
 
-      final aiUser = users.where(
-        (u) => (u as Map<String, dynamic>)['isAI'] == true,
-      ).firstOrNull;
+      final aiUser = users
+          .where(
+            (u) => (u as Map<String, dynamic>)['isAI'] == true,
+          )
+          .firstOrNull;
 
       if (aiUser == null) {
         return Result.success(null);

@@ -1,4 +1,5 @@
 /// Timer 插件 - UseCase 业务逻辑层
+library;
 
 import 'package:uuid/uuid.dart';
 import 'package:shared_models/repositories/timer/timer_repository.dart';
@@ -76,7 +77,8 @@ class TimerUseCase {
       );
     }
 
-    final iconCodePointValidation = ParamValidator.requireInt(params, 'iconCodePoint');
+    final iconCodePointValidation =
+        ParamValidator.requireInt(params, 'iconCodePoint');
     if (!iconCodePointValidation.isValid) {
       return Result.failure(
         iconCodePointValidation.errorMessage!,
@@ -137,7 +139,8 @@ class TimerUseCase {
         iconCodePoint: params['iconCodePoint'] as int?,
         timerItems: params.containsKey('timerItems')
             ? (params['timerItems'] as List<dynamic>?)
-                    ?.map((e) => TimerItemDto.fromJson(e as Map<String, dynamic>))
+                    ?.map(
+                        (e) => TimerItemDto.fromJson(e as Map<String, dynamic>))
                     .toList() ??
                 existing.timerItems
             : existing.timerItems,
@@ -209,7 +212,8 @@ class TimerUseCase {
 
     try {
       final pagination = _extractPagination(params);
-      final result = await repository.getTimerItems(taskId, pagination: pagination);
+      final result =
+          await repository.getTimerItems(taskId, pagination: pagination);
 
       return result.map((items) {
         final jsonList = items.map((i) => i.toJson()).toList();

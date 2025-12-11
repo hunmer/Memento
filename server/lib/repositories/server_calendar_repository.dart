@@ -1,4 +1,5 @@
 /// Calendar 插件 - 服务端 Repository 实现
+library;
 
 import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
@@ -34,7 +35,8 @@ class ServerCalendarRepository implements ICalendarRepository {
     );
   }
 
-  Future<List<CalendarEventDto>> _parseEvents(Map<String, dynamic>? data) async {
+  Future<List<CalendarEventDto>> _parseEvents(
+      Map<String, dynamic>? data) async {
     if (data == null) return [];
 
     final events = data['events'] as List<dynamic>? ?? [];
@@ -43,7 +45,8 @@ class ServerCalendarRepository implements ICalendarRepository {
         .toList();
   }
 
-  Future<List<CalendarEventDto>> _parseCompletedEvents(Map<String, dynamic>? data) async {
+  Future<List<CalendarEventDto>> _parseCompletedEvents(
+      Map<String, dynamic>? data) async {
     if (data == null) return [];
 
     final completedEvents = data['completedEvents'] as List<dynamic>? ?? [];
@@ -72,8 +75,7 @@ class ServerCalendarRepository implements ICalendarRepository {
 
       return Result.success(events);
     } catch (e) {
-      return Result.failure('获取事件列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取事件列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -202,14 +204,14 @@ class ServerCalendarRepository implements ICalendarRepository {
       if (query.startDate != null) {
         events = events.where((event) {
           return event.startTime.isAfter(query.startDate!) ||
-                 event.startTime.isAtSameMomentAs(query.startDate!);
+              event.startTime.isAtSameMomentAs(query.startDate!);
         }).toList();
       }
 
       if (query.endDate != null) {
         events = events.where((event) {
           return event.startTime.isBefore(query.endDate!) ||
-                 event.startTime.isAtSameMomentAs(query.endDate!);
+              event.startTime.isAtSameMomentAs(query.endDate!);
         }).toList();
       }
 
@@ -222,8 +224,8 @@ class ServerCalendarRepository implements ICalendarRepository {
       if (query.titleKeyword != null) {
         events = events.where((event) {
           return event.title.toLowerCase().contains(
-            query.titleKeyword!.toLowerCase(),
-          );
+                query.titleKeyword!.toLowerCase(),
+              );
         }).toList();
       }
 
@@ -268,8 +270,7 @@ class ServerCalendarRepository implements ICalendarRepository {
 
       return Result.success(completedEvents);
     } catch (e) {
-      return Result.failure('获取已完成事件列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取已完成事件列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 

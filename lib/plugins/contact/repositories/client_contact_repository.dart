@@ -1,11 +1,19 @@
 /// Contact 插件 - 客户端 Repository 实现
 ///
 /// 通过适配现有的 ContactController 来实现 IContactRepository 接口
+library;
 
 import 'package:shared_models/repositories/contact/contact_repository.dart'
     as shared_models;
 import 'package:shared_models/repositories/contact/contact_repository.dart'
-    show IContactRepository, ContactDto, InteractionRecordDto, ContactQuery, InteractionRecordQuery, FilterConfigDto, SortConfigDto;
+    show
+        IContactRepository,
+        ContactDto,
+        InteractionRecordDto,
+        ContactQuery,
+        InteractionRecordQuery,
+        FilterConfigDto,
+        SortConfigDto;
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
 import 'package:flutter/material.dart';

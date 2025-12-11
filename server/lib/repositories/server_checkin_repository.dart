@@ -1,6 +1,7 @@
 /// Checkin 插件 - 服务端 Repository 实现
 ///
 /// 通过 PluginDataService 访问用户的加密数据文件
+library;
 
 import 'package:shared_models/shared_models.dart';
 
@@ -30,7 +31,9 @@ class ServerCheckinRepository extends ICheckinRepository {
     if (itemsData == null) return [];
 
     final items = itemsData['items'] as List<dynamic>? ?? [];
-    return items.map((i) => CheckinItemDto.fromJson(i as Map<String, dynamic>)).toList();
+    return items
+        .map((i) => CheckinItemDto.fromJson(i as Map<String, dynamic>))
+        .toList();
   }
 
   /// 保存所有打卡项目
@@ -92,7 +95,8 @@ class ServerCheckinRepository extends ICheckinRepository {
   }
 
   @override
-  Future<Result<CheckinItemDto>> updateItem(String id, CheckinItemDto item) async {
+  Future<Result<CheckinItemDto>> updateItem(
+      String id, CheckinItemDto item) async {
     try {
       final items = await _readAllItems();
       final index = items.indexWhere((i) => i.id == id);
@@ -141,9 +145,11 @@ class ServerCheckinRepository extends ICheckinRepository {
       }
 
       final item = items[index];
-      final dateKey = '${record.checkinTime.year}-${record.checkinTime.month.toString().padLeft(2, '0')}-${record.checkinTime.day.toString().padLeft(2, '0')}';
+      final dateKey =
+          '${record.checkinTime.year}-${record.checkinTime.month.toString().padLeft(2, '0')}-${record.checkinTime.day.toString().padLeft(2, '0')}';
 
-      final updatedRecords = Map<String, List<CheckinRecordDto>>.from(item.checkInRecords);
+      final updatedRecords =
+          Map<String, List<CheckinRecordDto>>.from(item.checkInRecords);
       if (!updatedRecords.containsKey(dateKey)) {
         updatedRecords[dateKey] = [];
       }
@@ -174,7 +180,8 @@ class ServerCheckinRepository extends ICheckinRepository {
       }
 
       final item = items[index];
-      final updatedRecords = Map<String, List<CheckinRecordDto>>.from(item.checkInRecords);
+      final updatedRecords =
+          Map<String, List<CheckinRecordDto>>.from(item.checkInRecords);
 
       if (!updatedRecords.containsKey(date) || updatedRecords[date]!.isEmpty) {
         return Result.failure('打卡记录不存在', code: ErrorCodes.notFound);
@@ -205,11 +212,14 @@ class ServerCheckinRepository extends ICheckinRepository {
       final items = await _readAllItems();
       final totalItems = items.length;
       final totalCheckins = items.fold<int>(0, (sum, item) {
-        return sum + item.checkInRecords.values.fold<int>(0, (itemSum, records) => itemSum + records.length);
+        return sum +
+            item.checkInRecords.values
+                .fold<int>(0, (itemSum, records) => itemSum + records.length);
       });
 
       final today = DateTime.now();
-      final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final todayStr =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
       final todayCheckins = items.fold<int>(0, (sum, item) {
         final todayRecords = item.checkInRecords[todayStr];
         return sum + (todayRecords?.length ?? 0);
@@ -220,7 +230,8 @@ class ServerCheckinRepository extends ICheckinRepository {
         return todayRecords != null && todayRecords.isNotEmpty;
       }).length;
 
-      final completionRate = totalItems > 0 ? todayCompletedItems / totalItems : 0.0;
+      final completionRate =
+          totalItems > 0 ? todayCompletedItems / totalItems : 0.0;
 
       // 按分组统计
       final groupStats = <String, int>{};

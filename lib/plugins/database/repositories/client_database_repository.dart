@@ -1,6 +1,7 @@
 /// Database 插件 - 客户端 Repository 实现
 ///
 /// 通过适配现有的 DatabaseService 和 DatabaseController 来实现 IDatabaseRepository 接口
+library;
 
 import 'package:shared_models/shared_models.dart';
 import 'package:Memento/plugins/database/services/database_service.dart';
@@ -14,10 +15,7 @@ class ClientDatabaseRepository extends IDatabaseRepository {
   final DatabaseService service;
   final DatabaseController controller;
 
-  ClientDatabaseRepository({
-    required this.service,
-    required this.controller,
-  });
+  ClientDatabaseRepository({required this.service, required this.controller});
 
   // ============ 数据库操作 ============
 
@@ -59,9 +57,7 @@ class ClientDatabaseRepository extends IDatabaseRepository {
   }
 
   @override
-  Future<Result<DatabaseModelDto>> createDatabase(
-    DatabaseModelDto dto,
-  ) async {
+  Future<Result<DatabaseModelDto>> createDatabase(DatabaseModelDto dto) async {
     try {
       final database = _dtoToDatabase(dto);
       await service.createDatabase(database);
@@ -179,9 +175,7 @@ class ClientDatabaseRepository extends IDatabaseRepository {
   }
 
   @override
-  Future<Result<DatabaseRecordDto>> createRecord(
-    DatabaseRecordDto dto,
-  ) async {
+  Future<Result<DatabaseRecordDto>> createRecord(DatabaseRecordDto dto) async {
     try {
       final record = _dtoToRecord(dto);
       await controller.createRecord(record);

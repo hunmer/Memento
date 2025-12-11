@@ -1,6 +1,7 @@
 /// Notes 插件 - UseCase 业务逻辑层
 ///
 /// 此文件包含共享的业务逻辑，客户端和服务端都使用此层
+library;
 
 import 'package:uuid/uuid.dart';
 
@@ -37,7 +38,8 @@ class NotesUseCase {
         final jsonList = notes.map((n) => n.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -47,7 +49,8 @@ class NotesUseCase {
   }
 
   /// 根据 ID 获取笔记
-  Future<Result<Map<String, dynamic>?>> getNoteById(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>?>> getNoteById(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -71,10 +74,12 @@ class NotesUseCase {
   /// - `tags`: 标签列表
   /// - `isPinned`: 是否置顶
   /// - `metadata`: 元数据
-  Future<Result<Map<String, dynamic>>> createNote(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> createNote(
+      Map<String, dynamic> params) async {
     final titleValidation = ParamValidator.requireString(params, 'title');
     if (!titleValidation.isValid) {
-      return Result.failure(titleValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(titleValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -99,7 +104,8 @@ class NotesUseCase {
   }
 
   /// 更新笔记
-  Future<Result<Map<String, dynamic>>> updateNote(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> updateNote(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -121,10 +127,15 @@ class NotesUseCase {
       final updated = existing.copyWith(
         title: params['title'] as String? ?? existing.title,
         content: params['content'] as String? ?? existing.content,
-        folderId: params.containsKey('folderId') ? params['folderId'] as String? : existing.folderId,
-        tags: params['tags'] != null ? (params['tags'] as List<dynamic>).cast<String>() : existing.tags,
+        folderId: params.containsKey('folderId')
+            ? params['folderId'] as String?
+            : existing.folderId,
+        tags: params['tags'] != null
+            ? (params['tags'] as List<dynamic>).cast<String>()
+            : existing.tags,
         isPinned: params['isPinned'] as bool? ?? existing.isPinned,
-        metadata: params['metadata'] as Map<String, dynamic>? ?? existing.metadata,
+        metadata:
+            params['metadata'] as Map<String, dynamic>? ?? existing.metadata,
         updatedAt: DateTime.now(),
       );
 
@@ -150,7 +161,8 @@ class NotesUseCase {
   }
 
   /// 移动笔记到其他文件夹
-  Future<Result<Map<String, dynamic>>> moveNote(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> moveNote(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -193,7 +205,8 @@ class NotesUseCase {
         final jsonList = notes.map((n) => n.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -218,7 +231,8 @@ class NotesUseCase {
         final jsonList = folders.map((f) => f.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -228,7 +242,8 @@ class NotesUseCase {
   }
 
   /// 根据 ID 获取文件夹
-  Future<Result<Map<String, dynamic>?>> getFolderById(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>?>> getFolderById(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -250,10 +265,12 @@ class NotesUseCase {
   /// - `parentId`: 父文件夹 ID
   /// - `icon`: 图标
   /// - `color`: 颜色
-  Future<Result<Map<String, dynamic>>> createFolder(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> createFolder(
+      Map<String, dynamic> params) async {
     final nameValidation = ParamValidator.requireString(params, 'name');
     if (!nameValidation.isValid) {
-      return Result.failure(nameValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(nameValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -276,7 +293,8 @@ class NotesUseCase {
   }
 
   /// 更新文件夹
-  Future<Result<Map<String, dynamic>>> updateFolder(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> updateFolder(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -297,7 +315,9 @@ class NotesUseCase {
       // 合并更新
       final updated = existing.copyWith(
         name: params['name'] as String? ?? existing.name,
-        parentId: params.containsKey('parentId') ? params['parentId'] as String? : existing.parentId,
+        parentId: params.containsKey('parentId')
+            ? params['parentId'] as String?
+            : existing.parentId,
         icon: params['icon'] as int? ?? existing.icon,
         color: params['color'] as String? ?? existing.color,
         updatedAt: DateTime.now(),
@@ -333,13 +353,15 @@ class NotesUseCase {
 
     try {
       final pagination = _extractPagination(params);
-      final result = await repository.getFolderNotes(id, pagination: pagination);
+      final result =
+          await repository.getFolderNotes(id, pagination: pagination);
 
       return result.map((notes) {
         final jsonList = notes.map((n) => n.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });

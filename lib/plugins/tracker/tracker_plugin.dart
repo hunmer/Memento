@@ -133,7 +133,6 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   @override
   Future<void> registerToApp(
-    
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
@@ -148,9 +147,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   /// 打开目标详情页
   void openGoalDetail(BuildContext context, Goal goal) {
-    NavigationHelper.push(context, ChangeNotifierProvider.value(
-              value: _controller,
-              child: GoalDetailScreen(goal: goal),
+    NavigationHelper.push(
+      context,
+      ChangeNotifierProvider.value(
+        value: _controller,
+        child: GoalDetailScreen(goal: goal),
       ),
     );
   }
@@ -283,21 +284,12 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   // ==================== 辅助方法 ====================
 
-  /// 将 Result 转换为适合 JS API 的格式
-  /// 成功时返回数据，失败时返回 {'error': message}
-  dynamic _convertResult<T>(Result<T> result) {
-    if (result.isFailure) {
-      final failure = result.errorOrNull;
-      return {'error': failure?.message ?? 'Unknown error'};
-    }
-    return result.dataOrNull;
-  }
-
   /// 分页控制器 - 对列表进行分页处理
   /// @param list 原始数据列表
   /// @param offset 起始位置（默认 0）
   /// @param count 返回数量（默认 100）
   /// @return 分页后的数据，包含 data、total、offset、count、hasMore
+  // ignore: unused_element
   Map<String, dynamic> _paginate<T>(
     List<T> list, {
     int offset = 0,
@@ -378,17 +370,24 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     // 提取必需参数
     if (params['name'] != null) useCaseParams['name'] = params['name'];
     if (params['icon'] != null) useCaseParams['icon'] = params['icon'];
-    if (params['unitType'] != null) useCaseParams['unitType'] = params['unitType'];
-    if (params['targetValue'] != null) useCaseParams['targetValue'] = params['targetValue'];
+    if (params['unitType'] != null)
+      useCaseParams['unitType'] = params['unitType'];
+    if (params['targetValue'] != null)
+      useCaseParams['targetValue'] = params['targetValue'];
 
     // 提取可选参数
     if (params['id'] != null) useCaseParams['id'] = params['id'];
     if (params['group'] != null) useCaseParams['group'] = params['group'];
-    if (params['iconColor'] != null) useCaseParams['iconColor'] = params['iconColor'];
-    if (params['imagePath'] != null) useCaseParams['imagePath'] = params['imagePath'];
-    if (params['progressColor'] != null) useCaseParams['progressColor'] = params['progressColor'];
-    if (params['reminderTime'] != null) useCaseParams['reminderTime'] = params['reminderTime'];
-    if (params['isLoopReset'] != null) useCaseParams['isLoopReset'] = params['isLoopReset'];
+    if (params['iconColor'] != null)
+      useCaseParams['iconColor'] = params['iconColor'];
+    if (params['imagePath'] != null)
+      useCaseParams['imagePath'] = params['imagePath'];
+    if (params['progressColor'] != null)
+      useCaseParams['progressColor'] = params['progressColor'];
+    if (params['reminderTime'] != null)
+      useCaseParams['reminderTime'] = params['reminderTime'];
+    if (params['isLoopReset'] != null)
+      useCaseParams['isLoopReset'] = params['isLoopReset'];
 
     // 处理日期设置
     final dateType = params['dateType'] ?? 'daily';
@@ -427,14 +426,22 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     // 添加所有可能的更新字段
     if (updateJson['name'] != null) useCaseParams['name'] = updateJson['name'];
     if (updateJson['icon'] != null) useCaseParams['icon'] = updateJson['icon'];
-    if (updateJson['iconColor'] != null) useCaseParams['iconColor'] = updateJson['iconColor'];
-    if (updateJson['unitType'] != null) useCaseParams['unitType'] = updateJson['unitType'];
-    if (updateJson['targetValue'] != null) useCaseParams['targetValue'] = updateJson['targetValue'];
-    if (updateJson['group'] != null) useCaseParams['group'] = updateJson['group'];
-    if (updateJson['imagePath'] != null) useCaseParams['imagePath'] = updateJson['imagePath'];
-    if (updateJson['progressColor'] != null) useCaseParams['progressColor'] = updateJson['progressColor'];
-    if (updateJson['reminderTime'] != null) useCaseParams['reminderTime'] = updateJson['reminderTime'];
-    if (updateJson['isLoopReset'] != null) useCaseParams['isLoopReset'] = updateJson['isLoopReset'];
+    if (updateJson['iconColor'] != null)
+      useCaseParams['iconColor'] = updateJson['iconColor'];
+    if (updateJson['unitType'] != null)
+      useCaseParams['unitType'] = updateJson['unitType'];
+    if (updateJson['targetValue'] != null)
+      useCaseParams['targetValue'] = updateJson['targetValue'];
+    if (updateJson['group'] != null)
+      useCaseParams['group'] = updateJson['group'];
+    if (updateJson['imagePath'] != null)
+      useCaseParams['imagePath'] = updateJson['imagePath'];
+    if (updateJson['progressColor'] != null)
+      useCaseParams['progressColor'] = updateJson['progressColor'];
+    if (updateJson['reminderTime'] != null)
+      useCaseParams['reminderTime'] = updateJson['reminderTime'];
+    if (updateJson['isLoopReset'] != null)
+      useCaseParams['isLoopReset'] = updateJson['isLoopReset'];
 
     // 处理日期设置
     if (updateJson['dateSettings'] != null) {
@@ -482,7 +489,8 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     // 提取可选参数
     if (params['id'] != null) useCaseParams['id'] = params['id'];
     if (params['note'] != null) useCaseParams['note'] = params['note'];
-    if (params['durationSeconds'] != null) useCaseParams['durationSeconds'] = params['durationSeconds'];
+    if (params['durationSeconds'] != null)
+      useCaseParams['durationSeconds'] = params['durationSeconds'];
 
     // 处理记录时间
     final dateTime = params['dateTime'];
@@ -576,7 +584,8 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     final targetValue = (goalJson['targetValue'] as num).toDouble();
 
     // 计算进度
-    final progress = targetValue > 0 ? (currentValue / targetValue).clamp(0.0, 1.0) : 0.0;
+    final progress =
+        targetValue > 0 ? (currentValue / targetValue).clamp(0.0, 1.0) : 0.0;
 
     return {
       'goalId': goalId,
@@ -606,7 +615,9 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       final goalJson = goalResult.dataOrNull as Map<String, dynamic>;
 
       // 获取记录列表
-      final recordsResult = await _trackerUseCase.getRecordsForGoal({'goalId': goalId});
+      final recordsResult = await _trackerUseCase.getRecordsForGoal({
+        'goalId': goalId,
+      });
 
       if (recordsResult.isFailure) {
         final failure = recordsResult.errorOrNull;
@@ -614,10 +625,15 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       }
 
       final records = recordsResult.dataOrNull as List;
-      final totalValue = records.fold<double>(0.0, (sum, r) => sum + ((r as Map<String, dynamic>)['value'] as num).toDouble());
+      final totalValue = records.fold<double>(
+        0.0,
+        (sum, r) =>
+            sum + ((r as Map<String, dynamic>)['value'] as num).toDouble(),
+      );
       final currentValue = (goalJson['currentValue'] as num).toDouble();
       final targetValue = (goalJson['targetValue'] as num).toDouble();
-      final progress = targetValue > 0 ? (currentValue / targetValue).clamp(0.0, 1.0) : 0.0;
+      final progress =
+          targetValue > 0 ? (currentValue / targetValue).clamp(0.0, 1.0) : 0.0;
 
       return {
         'goalId': goalId,
@@ -645,49 +661,52 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
   /// 注册数据选择器
   void _registerDataSelectors() {
-    pluginDataSelectorService.registerSelector(SelectorDefinition(
-      id: 'tracker.goal',
-      pluginId: id,
-      name: '选择追踪目标',
-      icon: icon,
-      color: color,
-      searchable: true,
-      selectionMode: SelectionMode.single,
-      steps: [
-        SelectorStep(
-          id: 'goal',
-          title: '选择目标',
-          viewType: SelectorViewType.list,
-          isFinalStep: true,
-          dataLoader: (_) async {
-            final goals = await _controller.getAllGoals();
-            return goals.map((goal) {
-              // 构建副标题：显示进度和分组信息
-              final progress = _controller.calculateProgress(goal);
-              final progressText = '${(progress * 100).toStringAsFixed(1)}% (${goal.currentValue}/${goal.targetValue} ${goal.unitType})';
-              final subtitle = '${goal.group} • $progressText';
+    pluginDataSelectorService.registerSelector(
+      SelectorDefinition(
+        id: 'tracker.goal',
+        pluginId: id,
+        name: '选择追踪目标',
+        icon: icon,
+        color: color,
+        searchable: true,
+        selectionMode: SelectionMode.single,
+        steps: [
+          SelectorStep(
+            id: 'goal',
+            title: '选择目标',
+            viewType: SelectorViewType.list,
+            isFinalStep: true,
+            dataLoader: (_) async {
+              final goals = await _controller.getAllGoals();
+              return goals.map((goal) {
+                // 构建副标题：显示进度和分组信息
+                final progress = _controller.calculateProgress(goal);
+                final progressText =
+                    '${(progress * 100).toStringAsFixed(1)}% (${goal.currentValue}/${goal.targetValue} ${goal.unitType})';
+                final subtitle = '${goal.group} • $progressText';
 
-              return SelectableItem(
-                id: goal.id,
-                title: goal.name,
-                subtitle: subtitle,
-                icon: Icons.track_changes,
-                rawData: goal,
-              );
-            }).toList();
-          },
-          searchFilter: (items, query) {
-            if (query.isEmpty) return items;
-            final lowerQuery = query.toLowerCase();
-            return items.where((item) {
-              final goal = item.rawData as Goal;
-              return item.title.toLowerCase().contains(lowerQuery) ||
-                  goal.group.toLowerCase().contains(lowerQuery) ||
-                  goal.unitType.toLowerCase().contains(lowerQuery);
-            }).toList();
-          },
-        ),
-      ],
-    ));
+                return SelectableItem(
+                  id: goal.id,
+                  title: goal.name,
+                  subtitle: subtitle,
+                  icon: Icons.track_changes,
+                  rawData: goal,
+                );
+              }).toList();
+            },
+            searchFilter: (items, query) {
+              if (query.isEmpty) return items;
+              final lowerQuery = query.toLowerCase();
+              return items.where((item) {
+                final goal = item.rawData as Goal;
+                return item.title.toLowerCase().contains(lowerQuery) ||
+                    goal.group.toLowerCase().contains(lowerQuery) ||
+                    goal.unitType.toLowerCase().contains(lowerQuery);
+              }).toList();
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

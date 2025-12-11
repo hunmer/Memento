@@ -1,4 +1,5 @@
 /// Contact 插件 - Repository 接口定义
+library;
 
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
@@ -61,10 +62,10 @@ class ContactDto {
       gender: json['gender'] as String?,
       tags: List<String>.from(json['tags'] as List),
       customFields: Map<String, String>.from(json['customFields'] as Map),
-      customActivityEvents:
-          (json['customActivityEvents'] as List<dynamic>? ?? [])
-              .map((e) => InteractionRecordDto.fromJson(e as Map<String, dynamic>))
-              .toList(),
+      customActivityEvents: (json['customActivityEvents'] as List<dynamic>? ??
+              [])
+          .map((e) => InteractionRecordDto.fromJson(e as Map<String, dynamic>))
+          .toList(),
       createdTime: DateTime.parse(json['createdTime'] as String),
       lastContactTime: DateTime.parse(json['lastContactTime'] as String),
     );

@@ -2,6 +2,7 @@
 ///
 /// 通过适配现有的 AgentController、ServiceProviderController 和 ModelController
 /// 来实现 IOpenAIRepository 接口
+library;
 
 import 'package:shared_models/repositories/openai/openai_repository.dart';
 import 'package:shared_models/utils/result.dart';
@@ -72,7 +73,10 @@ class ClientOpenAIRepository implements IOpenAIRepository {
   }
 
   @override
-  Future<Result<OpenAIAgentDto>> updateAgent(String id, OpenAIAgentDto dto) async {
+  Future<Result<OpenAIAgentDto>> updateAgent(
+    String id,
+    OpenAIAgentDto dto,
+  ) async {
     try {
       final agent = _dtoToAgent(dto);
       await agentController.saveAgent(agent);
@@ -93,7 +97,9 @@ class ClientOpenAIRepository implements IOpenAIRepository {
   }
 
   @override
-  Future<Result<List<OpenAIAgentDto>>> searchAgents(OpenAIAgentQuery query) async {
+  Future<Result<List<OpenAIAgentDto>>> searchAgents(
+    OpenAIAgentQuery query,
+  ) async {
     try {
       final agents = await agentController.loadAgents();
       final List<AIAgent> filtered = [];
@@ -113,11 +119,8 @@ class ClientOpenAIRepository implements IOpenAIRepository {
           isMatch = agent.serviceProviderId == query.serviceProviderId;
         }
 
-
         if (!isMatch && query.tags != null && query.tags!.isNotEmpty) {
-          isMatch = query.tags!.any(
-            (tag) => agent.tags.contains(tag),
-          );
+          isMatch = query.tags!.any((tag) => agent.tags.contains(tag));
         }
 
         if (isMatch) {

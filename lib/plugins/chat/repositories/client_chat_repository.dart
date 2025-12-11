@@ -1,6 +1,7 @@
 /// Chat 插件 - 客户端 Repository 实现
 ///
 /// 通过适配现有的 ChannelService 和 UserService 来实现 IChatRepository 接口
+library;
 
 import 'package:shared_models/shared_models.dart';
 import 'package:Memento/plugins/chat/services/channel_service.dart';
@@ -50,7 +51,8 @@ class ClientChatRepository extends IChatRepository {
   @override
   Future<Result<ChannelDto?>> getChannelById(String id) async {
     try {
-      final channel = channelService.channels.where((c) => c.id == id).firstOrNull;
+      final channel =
+          channelService.channels.where((c) => c.id == id).firstOrNull;
       if (channel == null) {
         return Result.success(null);
       }
@@ -66,13 +68,24 @@ class ClientChatRepository extends IChatRepository {
       final channel = Channel(
         id: dto.id,
         title: dto.title,
-        icon: dto.iconCodePoint != null
-            ? IconData(dto.iconCodePoint!, fontFamily: dto.iconFontFamily ?? 'MaterialIcons')
-            : Icons.chat,
+        icon:
+            dto.iconCodePoint != null
+                ? IconData(
+                  dto.iconCodePoint!,
+                  fontFamily: dto.iconFontFamily ?? 'MaterialIcons',
+                )
+                : Icons.chat,
         messages: [],
-        backgroundColor: dto.backgroundColor != null
-            ? Color(int.parse(dto.backgroundColor!.replaceFirst('#', ''), radix: 16) | 0xFF000000)
-            : pluginColor,
+        backgroundColor:
+            dto.backgroundColor != null
+                ? Color(
+                  int.parse(
+                        dto.backgroundColor!.replaceFirst('#', ''),
+                        radix: 16,
+                      ) |
+                      0xFF000000,
+                )
+                : pluginColor,
         priority: dto.priority,
         groups: dto.groups,
       );
@@ -87,7 +100,8 @@ class ClientChatRepository extends IChatRepository {
   Future<Result<ChannelDto>> updateChannel(String id, ChannelDto dto) async {
     try {
       // 获取现有频道
-      final existingChannel = channelService.channels.where((c) => c.id == id).firstOrNull;
+      final existingChannel =
+          channelService.channels.where((c) => c.id == id).firstOrNull;
       if (existingChannel == null) {
         return Result.failure('频道不存在', code: ErrorCodes.notFound);
       }
@@ -95,12 +109,16 @@ class ClientChatRepository extends IChatRepository {
       // ChannelService 没有通用的 updateChannel 方法
       // 使用现有的方法更新颜色
       if (dto.backgroundColor != null) {
-        final color = Color(int.parse(dto.backgroundColor!.replaceFirst('#', ''), radix: 16) | 0xFF000000);
+        final color = Color(
+          int.parse(dto.backgroundColor!.replaceFirst('#', ''), radix: 16) |
+              0xFF000000,
+        );
         await channelService.updateChannelColor(id, color);
       }
 
       // 返回更新后的 DTO（实际上只更新了颜色）
-      final updatedChannel = channelService.channels.where((c) => c.id == id).first;
+      final updatedChannel =
+          channelService.channels.where((c) => c.id == id).first;
       return Result.success(_channelToDto(updatedChannel));
     } catch (e) {
       return Result.failure('更新频道失败: $e', code: ErrorCodes.serverError);
@@ -133,7 +151,9 @@ class ClientChatRepository extends IChatRepository {
             break;
           case 'title':
             if (query.fuzzy) {
-              isMatch = channel.title.toLowerCase().contains((query.value ?? '').toLowerCase());
+              isMatch = channel.title.toLowerCase().contains(
+                (query.value ?? '').toLowerCase(),
+              );
             } else {
               isMatch = channel.title == query.value;
             }
@@ -142,7 +162,9 @@ class ClientChatRepository extends IChatRepository {
             // 通用字段查找
             final fieldValue = channelJson[query.field]?.toString() ?? '';
             if (query.fuzzy) {
-              isMatch = fieldValue.toLowerCase().contains((query.value ?? '').toLowerCase());
+              isMatch = fieldValue.toLowerCase().contains(
+                (query.value ?? '').toLowerCase(),
+              );
             } else {
               isMatch = fieldValue == query.value;
             }
@@ -267,7 +289,9 @@ class ClientChatRepository extends IChatRepository {
             break;
           case 'content':
             if (query.fuzzy) {
-              isMatch = message.content.toLowerCase().contains((query.value ?? '').toLowerCase());
+              isMatch = message.content.toLowerCase().contains(
+                (query.value ?? '').toLowerCase(),
+              );
             } else {
               isMatch = message.content == query.value;
             }
@@ -276,7 +300,9 @@ class ClientChatRepository extends IChatRepository {
             // 通用字段查找
             final fieldValue = messageJson[query.field]?.toString() ?? '';
             if (query.fuzzy) {
-              isMatch = fieldValue.toLowerCase().contains((query.value ?? '').toLowerCase());
+              isMatch = fieldValue.toLowerCase().contains(
+                (query.value ?? '').toLowerCase(),
+              );
             } else {
               isMatch = fieldValue == query.value;
             }
@@ -349,7 +375,8 @@ class ClientChatRepository extends IChatRepository {
       title: channel.title,
       iconCodePoint: channel.icon.codePoint,
       iconFontFamily: channel.icon.fontFamily,
-      backgroundColor: '#${channel.backgroundColor.value.toRadixString(16).padLeft(8, '0')}',
+      backgroundColor:
+          '#${channel.backgroundColor.value.toRadixString(16).padLeft(8, '0')}',
       priority: channel.priority,
       groups: channel.groups,
       lastMessageTime: channel.lastMessageTime,
@@ -373,17 +400,17 @@ class ClientChatRepository extends IChatRepository {
   UserDto _userToDto(User user) {
     return UserDto(
       id: user.id,
-      name: user.username,  // User 模型使用 username
-      avatarPath: user.iconPath,  // User 模型使用 iconPath
-      isAI: false,  // User 模型没有 isAI 字段
+      name: user.username, // User 模型使用 username
+      avatarPath: user.iconPath, // User 模型使用 iconPath
+      isAI: false, // User 模型没有 isAI 字段
     );
   }
 
   User _dtoToUser(UserDto dto) {
     return User(
       id: dto.id,
-      username: dto.name,  // 映射到 username
-      iconPath: dto.avatarPath,  // 映射到 iconPath
+      username: dto.name, // 映射到 username
+      iconPath: dto.avatarPath, // 映射到 iconPath
     );
   }
 }

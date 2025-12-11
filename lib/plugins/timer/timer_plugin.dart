@@ -398,7 +398,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
     // 如果是分页结果，转换格式
     if (data is Map<String, dynamic> && data.containsKey('data')) {
-      final paginatedData = data as Map<String, dynamic>;
+      final paginatedData = data;
       final timerList = paginatedData['data'] as List<dynamic>;
       return {
         'data': timerList,
@@ -426,11 +426,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       return {'error': '创建失败'};
     }
 
-    return {
-      'success': true,
-      'id': data['id'],
-      'message': '计时器创建成功',
-    };
+    return {'success': true, 'id': data['id'], 'message': '计时器创建成功'};
   }
 
   /// 删除计时器
@@ -560,14 +556,15 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     // 将 DTO 转换为原始格式返回
-    final taskJson = data as Map<String, dynamic>;
+    final taskJson = data;
     final timerItems = taskJson['timerItems'] as List<dynamic>;
 
     // 查找当前活动的计时器
     final activeTimerIndex = timerItems.indexWhere(
       (item) => item['isRunning'] == true,
     );
-    final activeTimer = activeTimerIndex != -1 ? timerItems[activeTimerIndex] : null;
+    final activeTimer =
+        activeTimerIndex != -1 ? timerItems[activeTimerIndex] : null;
 
     return {
       'id': taskJson['id'],
@@ -603,36 +600,47 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
     // 如果是分页结果，转换格式
     if (data is Map<String, dynamic> && data.containsKey('data')) {
-      final paginatedData = data as Map<String, dynamic>;
+      final paginatedData = data;
       final taskList = paginatedData['data'] as List<dynamic>;
 
       // 过滤已完成的任务（这里简化处理，假设非运行状态就是已完成）
-      final completedTasks = taskList.where((task) {
-        final taskJson = task as Map<String, dynamic>;
-        final timerItems = taskJson['timerItems'] as List<dynamic>;
-        // 如果所有计时器都完成了，认为任务已完成
-        return timerItems.every((item) => item['duration'] == item['completedDuration']);
-      }).map((task) {
-        final taskJson = task as Map<String, dynamic>;
-        final timerItems = taskJson['timerItems'] as List<dynamic>;
-        final totalDuration = timerItems.fold<int>(
-          0,
-          (sum, item) => sum + (item['completedDuration'] as int),
-        );
+      final completedTasks =
+          taskList
+              .where((task) {
+                final taskJson = task as Map<String, dynamic>;
+                final timerItems = taskJson['timerItems'] as List<dynamic>;
+                // 如果所有计时器都完成了，认为任务已完成
+                return timerItems.every(
+                  (item) => item['duration'] == item['completedDuration'],
+                );
+              })
+              .map((task) {
+                final taskJson = task as Map<String, dynamic>;
+                final timerItems = taskJson['timerItems'] as List<dynamic>;
+                final totalDuration = timerItems.fold<int>(
+                  0,
+                  (sum, item) => sum + (item['completedDuration'] as int),
+                );
 
-        return {
-          'id': taskJson['id'],
-          'name': taskJson['name'],
-          'group': taskJson['group'],
-          'createdAt': taskJson['createdAt'],
-          'totalDuration': totalDuration,
-          'timerItems': timerItems.map((item) => {
-            'name': item['name'],
-            'type': _getTimerTypeName(item['type'] as int),
-            'completedDuration': item['completedDuration'],
-          }).toList(),
-        };
-      }).toList();
+                return {
+                  'id': taskJson['id'],
+                  'name': taskJson['name'],
+                  'group': taskJson['group'],
+                  'createdAt': taskJson['createdAt'],
+                  'totalDuration': totalDuration,
+                  'timerItems':
+                      timerItems
+                          .map(
+                            (item) => {
+                              'name': item['name'],
+                              'type': _getTimerTypeName(item['type'] as int),
+                              'completedDuration': item['completedDuration'],
+                            },
+                          )
+                          .toList(),
+                };
+              })
+              .toList();
 
       return {
         'data': completedTasks,
@@ -645,31 +653,42 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
     // 非分页结果
     final taskList = data as List<dynamic>;
-    final completedTasks = taskList.where((task) {
-      final taskJson = task as Map<String, dynamic>;
-      final timerItems = taskJson['timerItems'] as List<dynamic>;
-      return timerItems.every((item) => item['duration'] == item['completedDuration']);
-    }).map((task) {
-      final taskJson = task as Map<String, dynamic>;
-      final timerItems = taskJson['timerItems'] as List<dynamic>;
-      final totalDuration = timerItems.fold<int>(
-        0,
-        (sum, item) => sum + (item['completedDuration'] as int),
-      );
+    final completedTasks =
+        taskList
+            .where((task) {
+              final taskJson = task as Map<String, dynamic>;
+              final timerItems = taskJson['timerItems'] as List<dynamic>;
+              return timerItems.every(
+                (item) => item['duration'] == item['completedDuration'],
+              );
+            })
+            .map((task) {
+              final taskJson = task as Map<String, dynamic>;
+              final timerItems = taskJson['timerItems'] as List<dynamic>;
+              final totalDuration = timerItems.fold<int>(
+                0,
+                (sum, item) => sum + (item['completedDuration'] as int),
+              );
 
-      return {
-        'id': taskJson['id'],
-        'name': taskJson['name'],
-        'group': taskJson['group'],
-        'createdAt': taskJson['createdAt'],
-        'totalDuration': totalDuration,
-        'timerItems': timerItems.map((item) => {
-          'name': item['name'],
-          'type': _getTimerTypeName(item['type'] as int),
-          'completedDuration': item['completedDuration'],
-        }).toList(),
-      };
-    }).toList();
+              return {
+                'id': taskJson['id'],
+                'name': taskJson['name'],
+                'group': taskJson['group'],
+                'createdAt': taskJson['createdAt'],
+                'totalDuration': totalDuration,
+                'timerItems':
+                    timerItems
+                        .map(
+                          (item) => {
+                            'name': item['name'],
+                            'type': _getTimerTypeName(item['type'] as int),
+                            'completedDuration': item['completedDuration'],
+                          },
+                        )
+                        .toList(),
+              };
+            })
+            .toList();
 
     return {'total': completedTasks.length, 'tasks': completedTasks};
   }
@@ -744,20 +763,21 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
     // 查找所有
     if (data is Map<String, dynamic> && data.containsKey('data')) {
-      final paginatedData = data as Map<String, dynamic>;
+      final paginatedData = data;
       final taskList = paginatedData['data'] as List<dynamic>;
-      final matches = taskList.map((task) {
-        final taskJson = task as Map<String, dynamic>;
-        return {
-          'id': taskJson['id'],
-          'name': taskJson['name'],
-          'color': taskJson['color'],
-          'icon': taskJson['iconCodePoint'],
-          'group': taskJson['group'],
-          'isRunning': taskJson['isRunning'],
-          'repeatCount': taskJson['repeatCount'],
-        };
-      }).toList();
+      final matches =
+          taskList.map((task) {
+            final taskJson = task as Map<String, dynamic>;
+            return {
+              'id': taskJson['id'],
+              'name': taskJson['name'],
+              'color': taskJson['color'],
+              'icon': taskJson['iconCodePoint'],
+              'group': taskJson['group'],
+              'isRunning': taskJson['isRunning'],
+              'repeatCount': taskJson['repeatCount'],
+            };
+          }).toList();
 
       // 如果有分页参数，返回分页格式
       final int? offset = params['offset'];
@@ -796,7 +816,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       return null;
     }
 
-    final taskJson = data as Map<String, dynamic>;
+    final taskJson = data;
     return {
       'id': taskJson['id'],
       'name': taskJson['name'],
@@ -837,7 +857,10 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       return findAll ? [] : null;
     }
 
-    final taskList = data is List ? data : (data as Map<String, dynamic>)['data'] as List<dynamic>? ?? [];
+    final taskList =
+        data is List
+            ? data
+            : (data as Map<String, dynamic>)['data'] as List<dynamic>? ?? [];
 
     final matches = <Map<String, dynamic>>[];
 
@@ -845,9 +868,10 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       final taskJson = task as Map<String, dynamic>;
       final taskName = taskJson['name'] as String;
 
-      final isMatch = fuzzy
-          ? taskName.toLowerCase().contains(name.toLowerCase())
-          : taskName == name;
+      final isMatch =
+          fuzzy
+              ? taskName.toLowerCase().contains(name.toLowerCase())
+              : taskName == name;
 
       if (isMatch) {
         final taskData = {
@@ -911,7 +935,10 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     final matches = <Map<String, dynamic>>[];
 
     // 转换格式
-    final taskList = data is List ? data : (data as Map<String, dynamic>)['data'] as List<dynamic>? ?? [];
+    final taskList =
+        data is List
+            ? data
+            : (data as Map<String, dynamic>)['data'] as List<dynamic>? ?? [];
 
     for (final task in taskList) {
       final taskJson = task as Map<String, dynamic>;
@@ -945,62 +972,65 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   /// 注册插件数据选择器
   void _registerDataSelectors() {
     // 注册计时任务选择器
-    pluginDataSelectorService.registerSelector(SelectorDefinition(
-      id: 'timer.task',
-      pluginId: id,
-      name: '选择计时任务',
-      icon: icon,
-      color: color,
-      searchable: true,
-      selectionMode: SelectionMode.single,
-      steps: [
-        SelectorStep(
-          id: 'task',
-          title: '选择计时任务',
-          viewType: SelectorViewType.list,
-          isFinalStep: true,
-          dataLoader: (_) async {
-            return _tasks.map((task) {
-              // 计算任务总时长
-              final totalDuration = task.timerItems.fold<Duration>(
-                Duration.zero,
-                (sum, item) => sum + item.duration,
-              );
+    pluginDataSelectorService.registerSelector(
+      SelectorDefinition(
+        id: 'timer.task',
+        pluginId: id,
+        name: '选择计时任务',
+        icon: icon,
+        color: color,
+        searchable: true,
+        selectionMode: SelectionMode.single,
+        steps: [
+          SelectorStep(
+            id: 'task',
+            title: '选择计时任务',
+            viewType: SelectorViewType.list,
+            isFinalStep: true,
+            dataLoader: (_) async {
+              return _tasks.map((task) {
+                // 计算任务总时长
+                final totalDuration = task.timerItems.fold<Duration>(
+                  Duration.zero,
+                  (sum, item) => sum + item.duration,
+                );
 
-              // 格式化时长显示
-              String formatDuration(Duration duration) {
-                final hours = duration.inHours;
-                final minutes = duration.inMinutes.remainder(60);
-                final seconds = duration.inSeconds.remainder(60);
-                if (hours > 0) {
-                  return '${hours}小时${minutes}分钟';
-                } else if (minutes > 0) {
-                  return '${minutes}分钟${seconds}秒';
-                } else {
-                  return '${seconds}秒';
+                // 格式化时长显示
+                String formatDuration(Duration duration) {
+                  final hours = duration.inHours;
+                  final minutes = duration.inMinutes.remainder(60);
+                  final seconds = duration.inSeconds.remainder(60);
+                  if (hours > 0) {
+                    return '$hours小时$minutes分钟';
+                  } else if (minutes > 0) {
+                    return '$minutes分钟$seconds秒';
+                  } else {
+                    return '$seconds秒';
+                  }
                 }
-              }
 
-              return SelectableItem(
-                id: task.id,
-                title: task.name,
-                subtitle: '分组: ${task.group} · 时长: ${formatDuration(totalDuration)} · ${task.timerItems.length}个计时器',
-                icon: task.icon,
-                rawData: task,
-              );
-            }).toList();
-          },
-          searchFilter: (items, query) {
-            if (query.isEmpty) return items;
-            final lowerQuery = query.toLowerCase();
-            return items.where((item) {
-              final task = item.rawData as TimerTask;
-              return item.title.toLowerCase().contains(lowerQuery) ||
-                  task.group.toLowerCase().contains(lowerQuery);
-            }).toList();
-          },
-        ),
-      ],
-    ));
+                return SelectableItem(
+                  id: task.id,
+                  title: task.name,
+                  subtitle:
+                      '分组: ${task.group} · 时长: ${formatDuration(totalDuration)} · ${task.timerItems.length}个计时器',
+                  icon: task.icon,
+                  rawData: task,
+                );
+              }).toList();
+            },
+            searchFilter: (items, query) {
+              if (query.isEmpty) return items;
+              final lowerQuery = query.toLowerCase();
+              return items.where((item) {
+                final task = item.rawData as TimerTask;
+                return item.title.toLowerCase().contains(lowerQuery) ||
+                    task.group.toLowerCase().contains(lowerQuery);
+              }).toList();
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

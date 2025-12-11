@@ -1,5 +1,6 @@
 /// Day 插件 - 客户端 Repository 实现
 /// 通过适配现有的 DayController 来实现 IDayRepository 接口
+library;
 
 import 'package:shared_models/repositories/day/day_repository.dart';
 import 'package:shared_models/shared_models.dart';

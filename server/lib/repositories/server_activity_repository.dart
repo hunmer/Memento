@@ -1,6 +1,7 @@
 /// Activity 插件 - 服务端 Repository 实现
 ///
 /// 通过 PluginDataService 访问用户的加密数据文件
+library;
 
 import 'package:shared_models/shared_models.dart';
 
@@ -270,7 +271,9 @@ class ServerActivityRepository extends IActivityRepository {
 
       // tag_groups.json 是一个数组
       final tagGroups = data is List
-          ? (data as List).map((g) => TagGroupDto.fromJson(g as Map<String, dynamic>)).toList()
+          ? (data as List)
+              .map((g) => TagGroupDto.fromJson(g as Map<String, dynamic>))
+              .toList()
           : <TagGroupDto>[];
 
       return Result.success(tagGroups);
@@ -289,7 +292,8 @@ class ServerActivityRepository extends IActivityRepository {
       );
 
       // recent_tags.json 是一个字符串数组
-      final recentTags = data is List ? (data as List).cast<String>() : <String>[];
+      final recentTags =
+          data is List ? (data as List).cast<String>() : <String>[];
 
       return Result.success(recentTags);
     } catch (e) {

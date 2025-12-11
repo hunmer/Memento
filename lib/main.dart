@@ -177,9 +177,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           (theme, darkTheme) => WidgetUriHandler(
             child: GetMaterialApp(
               translations: UnifiedTranslations(),
-              locale: globalConfigManager.getLocale().languageCode == 'zh'
-                  ? const Locale('zh', 'CN')
-                  : const Locale('en', 'US'),
+              locale:
+                  globalConfigManager.getLocale().languageCode == 'zh'
+                      ? const Locale('zh', 'CN')
+                      : const Locale('en', 'US'),
               fallbackLocale: const Locale('zh', 'CN'),
               scaffoldMessengerKey: scaffoldMessengerKey,
               navigatorKey: navigatorKey,
@@ -192,27 +193,26 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 GlobalWidgetsLocalizations.delegate,
                 GlobalCupertinoLocalizations.delegate,
                 FlutterQuillLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('zh', 'CN'), // 中文
-              Locale('en', 'US'), // 英文
-            ],
-            theme: theme,
-            darkTheme: darkTheme,
-            builder: (context, child) {
-              // 确保字体大小不受系统设置影响
-              return MediaQuery(
-                data: MediaQuery.of(
-                  context,
-                ).copyWith(textScaler: const TextScaler.linear(1.0)),
-                child: child!,
-              );
-            },
-            initialRoute: AppRoutes.initialRoute,
-            routes: AppRoutes.routes,
-            onGenerateRoute: AppRoutes.generateRoute,
-              onGenerateTitle:
-                  (BuildContext context) => 'app_appTitle'.tr,
+              ],
+              supportedLocales: const [
+                Locale('zh', 'CN'), // 中文
+                Locale('en', 'US'), // 英文
+              ],
+              theme: theme,
+              darkTheme: darkTheme,
+              builder: (context, child) {
+                // 确保字体大小不受系统设置影响
+                return MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: const TextScaler.linear(1.0)),
+                  child: child!,
+                );
+              },
+              initialRoute: AppRoutes.initialRoute,
+              routes: AppRoutes.routes,
+              onGenerateRoute: AppRoutes.generateRoute,
+              onGenerateTitle: (BuildContext context) => 'app_appTitle'.tr,
             ),
           ),
     );

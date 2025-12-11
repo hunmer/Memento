@@ -1,6 +1,7 @@
 /// Checkin 插件 - UseCase 业务逻辑层
 ///
 /// 此文件包含共享的业务逻辑，客户端和服务端都使用此层
+library;
 
 import 'package:uuid/uuid.dart';
 
@@ -17,11 +18,6 @@ class CheckinUseCase {
   CheckinUseCase(this.repository);
 
   // ============ 辅助方法 ============
-
-  /// 格式化日期为文件名格式 (YYYY-MM-DD)
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
 
   /// 从参数提取分页配置
   PaginationParams? _extractPagination(Map<String, dynamic> params) {
@@ -53,7 +49,8 @@ class CheckinUseCase {
         final jsonList = items.map((i) => i.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
-          return PaginationUtils.toMap(jsonList, offset: pagination.offset, count: pagination.count);
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
         }
         return jsonList;
       });
@@ -66,7 +63,8 @@ class CheckinUseCase {
   ///
   /// [params] 必需参数:
   /// - `id`: 项目 ID
-  Future<Result<Map<String, dynamic>?>> getItemById(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>?>> getItemById(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
 
     if (id == null || id.isEmpty) {
@@ -92,21 +90,25 @@ class CheckinUseCase {
   /// - `description`: 描述
   /// - `cardStyle`: 卡片样式
   /// - `reminderSettings`: 提醒设置
-  Future<Result<Map<String, dynamic>>> createItem(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> createItem(
+      Map<String, dynamic> params) async {
     // 验证必需参数
     final nameValidation = ParamValidator.requireString(params, 'name');
     if (!nameValidation.isValid) {
-      return Result.failure(nameValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(nameValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final iconValidation = ParamValidator.requireInt(params, 'icon');
     if (!iconValidation.isValid) {
-      return Result.failure(iconValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(iconValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final colorValidation = ParamValidator.requireInt(params, 'color');
     if (!colorValidation.isValid) {
-      return Result.failure(colorValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(colorValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -119,7 +121,8 @@ class CheckinUseCase {
         description: params['description'] as String? ?? '',
         cardStyle: params['cardStyle'] as int? ?? 0,
         reminderSettings: params['reminderSettings'] != null
-            ? ReminderSettingsDto.fromJson(params['reminderSettings'] as Map<String, dynamic>)
+            ? ReminderSettingsDto.fromJson(
+                params['reminderSettings'] as Map<String, dynamic>)
             : null,
       );
 
@@ -142,7 +145,8 @@ class CheckinUseCase {
   /// - `description`: 描述
   /// - `cardStyle`: 卡片样式
   /// - `reminderSettings`: 提醒设置
-  Future<Result<Map<String, dynamic>>> updateItem(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> updateItem(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -193,7 +197,8 @@ class CheckinUseCase {
   ///
   /// [params] 必需参数:
   /// - `id`: 项目 ID
-  Future<Result<Map<String, dynamic>>> deleteItem(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> deleteItem(
+      Map<String, dynamic> params) async {
     final id = params['id'] as String?;
     if (id == null || id.isEmpty) {
       return Result.failure('缺少必需参数: id', code: ErrorCodes.invalidParams);
@@ -221,26 +226,33 @@ class CheckinUseCase {
   /// - `checkinTime`: 打卡时间 (ISO8601 字符串)
   /// 可选参数:
   /// - `note`: 备注
-  Future<Result<Map<String, dynamic>>> addCheckinRecord(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> addCheckinRecord(
+      Map<String, dynamic> params) async {
     // 验证必需参数
     final itemIdValidation = ParamValidator.requireString(params, 'itemId');
     if (!itemIdValidation.isValid) {
-      return Result.failure(itemIdValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(itemIdValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
-    final startTimeValidation = ParamValidator.requireString(params, 'startTime');
+    final startTimeValidation =
+        ParamValidator.requireString(params, 'startTime');
     if (!startTimeValidation.isValid) {
-      return Result.failure(startTimeValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(startTimeValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     final endTimeValidation = ParamValidator.requireString(params, 'endTime');
     if (!endTimeValidation.isValid) {
-      return Result.failure(endTimeValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(endTimeValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
-    final checkinTimeValidation = ParamValidator.requireString(params, 'checkinTime');
+    final checkinTimeValidation =
+        ParamValidator.requireString(params, 'checkinTime');
     if (!checkinTimeValidation.isValid) {
-      return Result.failure(checkinTimeValidation.errorMessage!, code: ErrorCodes.invalidParams);
+      return Result.failure(checkinTimeValidation.errorMessage!,
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -254,7 +266,8 @@ class CheckinUseCase {
       }
 
       if (checkinTime.isBefore(startTime) || checkinTime.isAfter(endTime)) {
-        return Result.failure('打卡时间必须在开始和结束时间之间', code: ErrorCodes.validationError);
+        return Result.failure('打卡时间必须在开始和结束时间之间',
+            code: ErrorCodes.validationError);
       }
 
       final record = CheckinRecordDto(
@@ -280,7 +293,8 @@ class CheckinUseCase {
   /// - `itemId`: 项目 ID
   /// - `date`: 日期 (YYYY-MM-DD)
   /// - `recordIndex`: 记录索引
-  Future<Result<Map<String, dynamic>>> deleteCheckinRecord(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> deleteCheckinRecord(
+      Map<String, dynamic> params) async {
     final itemId = params['itemId'] as String?;
     final date = params['date'] as String?;
     final recordIndex = params['recordIndex'] as int?;
@@ -292,7 +306,8 @@ class CheckinUseCase {
       return Result.failure('缺少必需参数: date', code: ErrorCodes.invalidParams);
     }
     if (recordIndex == null) {
-      return Result.failure('缺少必需参数: recordIndex', code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: recordIndex',
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -310,7 +325,8 @@ class CheckinUseCase {
   // ============ 统计操作 ============
 
   /// 获取统计信息
-  Future<Result<Map<String, dynamic>>> getStats(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> getStats(
+      Map<String, dynamic> params) async {
     try {
       final result = await repository.getStats();
       return result.map((stats) => stats.toJson());

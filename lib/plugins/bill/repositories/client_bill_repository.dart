@@ -1,6 +1,7 @@
 /// Bill 插件 - 客户端 Repository 实现
 ///
 /// 通过适配现有的 BillController 来实现 IBillRepository 接口
+library;
 
 import 'package:flutter/material.dart';
 import 'package:shared_models/repositories/bill/bill_repository.dart';
@@ -48,9 +49,8 @@ class ClientBillRepository implements IBillRepository {
   @override
   Future<Result<AccountDto?>> getAccountById(String id) async {
     try {
-      final account = billController.accounts
-          .where((a) => a.id == id)
-          .firstOrNull;
+      final account =
+          billController.accounts.where((a) => a.id == id).firstOrNull;
       if (account == null) {
         return Result.success(null);
       }
@@ -68,9 +68,8 @@ class ClientBillRepository implements IBillRepository {
         id: dto.id,
         title: dto.name,
         icon: Icons.account_balance_wallet,
-        backgroundColor: dto.color != null
-            ? Color(int.parse(dto.color!))
-            : pluginColor,
+        backgroundColor:
+            dto.color != null ? Color(int.parse(dto.color!)) : pluginColor,
       );
 
       await billController.createAccount(account);
@@ -84,9 +83,8 @@ class ClientBillRepository implements IBillRepository {
   Future<Result<AccountDto>> updateAccount(String id, AccountDto dto) async {
     try {
       // 获取现有账户
-      final existingAccount = billController.accounts
-          .where((a) => a.id == id)
-          .firstOrNull;
+      final existingAccount =
+          billController.accounts.where((a) => a.id == id).firstOrNull;
       if (existingAccount == null) {
         return Result.failure('账户不存在', code: ErrorCodes.notFound);
       }
@@ -94,9 +92,10 @@ class ClientBillRepository implements IBillRepository {
       // 更新账户信息
       final updatedAccount = existingAccount.copyWith(
         title: dto.name,
-        backgroundColor: dto.color != null
-            ? Color(int.parse(dto.color!))
-            : existingAccount.backgroundColor,
+        backgroundColor:
+            dto.color != null
+                ? Color(int.parse(dto.color!))
+                : existingAccount.backgroundColor,
       );
 
       await billController.saveAccount(updatedAccount);
@@ -125,9 +124,10 @@ class ClientBillRepository implements IBillRepository {
   }) async {
     try {
       final bills = await billController.getBills();
-      final filteredBills = accountId != null && accountId.isNotEmpty
-          ? bills.where((b) => b.accountId == accountId).toList()
-          : bills;
+      final filteredBills =
+          accountId != null && accountId.isNotEmpty
+              ? bills.where((b) => b.accountId == accountId).toList()
+              : bills;
 
       final dtos = filteredBills.map(_billToDto).toList();
 
@@ -254,8 +254,10 @@ class ClientBillRepository implements IBillRepository {
         // 过滤类型
         if (query.type != null && query.type!.isNotEmpty) {
           final isIncome = bill.amount > 0;
-          matches = matches && ((query.type == 'income' && isIncome) ||
-              (query.type == 'expense' && !isIncome));
+          matches =
+              matches &&
+              ((query.type == 'income' && isIncome) ||
+                  (query.type == 'expense' && !isIncome));
         }
 
         // 过滤分类
@@ -266,7 +268,8 @@ class ClientBillRepository implements IBillRepository {
         // 过滤关键词
         if (query.keyword != null && query.keyword!.isNotEmpty) {
           final keyword = query.keyword!.toLowerCase();
-          matches = matches &&
+          matches =
+              matches &&
               (bill.title.toLowerCase().contains(keyword) ||
                   bill.note.toLowerCase().contains(keyword));
         }
@@ -319,10 +322,11 @@ class ClientBillRepository implements IBillRepository {
         totalIncome: totalIncome,
         totalExpense: totalExpense,
         balance: totalIncome - totalExpense,
-        billCount: (await billController.getBills(
-          startDate: startDate,
-          endDate: endDate,
-        )).length,
+        billCount:
+            (await billController.getBills(
+              startDate: startDate,
+              endDate: endDate,
+            )).length,
       );
 
       return Result.success(stats);
@@ -368,16 +372,18 @@ class ClientBillRepository implements IBillRepository {
         totalAmount = income + expense;
       }
 
-      final stats = categoryStats.entries.map((entry) {
-        final amount = entry.value.abs().toDouble(); // 确保为正数并转为 double
-        final percentage = totalAmount > 0 ? (amount / totalAmount) * 100 : 0.0;
-        return CategoryStatsDto(
-          category: entry.key,
-          amount: amount,
-          count: 0, // 账单数量需要额外计算
-          percentage: percentage,
-        );
-      }).toList();
+      final stats =
+          categoryStats.entries.map((entry) {
+            final amount = entry.value.abs().toDouble(); // 确保为正数并转为 double
+            final percentage =
+                totalAmount > 0 ? (amount / totalAmount) * 100 : 0.0;
+            return CategoryStatsDto(
+              category: entry.key,
+              amount: amount,
+              count: 0, // 账单数量需要额外计算
+              percentage: percentage,
+            );
+          }).toList();
 
       return Result.success(stats);
     } catch (e) {

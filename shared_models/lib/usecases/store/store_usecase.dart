@@ -1,4 +1,5 @@
 /// Store 插件 - UseCase 业务逻辑层
+library;
 
 import 'package:uuid/uuid.dart';
 import 'package:shared_models/repositories/store/store_repository.dart';
@@ -68,7 +69,8 @@ class StoreUseCase {
       );
     }
 
-    final descriptionValidation = ParamValidator.requireString(params, 'description');
+    final descriptionValidation =
+        ParamValidator.requireString(params, 'description');
     if (!descriptionValidation.isValid) {
       return Result.failure(
         descriptionValidation.errorMessage!,
@@ -193,7 +195,8 @@ class StoreUseCase {
   ) async {
     try {
       final pagination = _extractPagination(params);
-      final result = await repository.getArchivedProducts(pagination: pagination);
+      final result =
+          await repository.getArchivedProducts(pagination: pagination);
 
       return result.map((products) {
         final jsonList = products.map((p) => p.toJson()).toList();
@@ -372,7 +375,8 @@ class StoreUseCase {
   ) async {
     final productId = params['productId'] as String?;
     if (productId == null || productId.isEmpty) {
-      return Result.failure('缺少必需参数: productId', code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: productId',
+          code: ErrorCodes.invalidParams);
     }
 
     try {
@@ -384,7 +388,8 @@ class StoreUseCase {
   }
 
   /// 使用物品
-  Future<Result<Map<String, dynamic>>> useItem(Map<String, dynamic> params) async {
+  Future<Result<Map<String, dynamic>>> useItem(
+      Map<String, dynamic> params) async {
     final itemId = params['itemId'] as String?;
     if (itemId == null || itemId.isEmpty) {
       return Result.failure('缺少必需参数: itemId', code: ErrorCodes.invalidParams);

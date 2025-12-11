@@ -1,6 +1,7 @@
 /// Diary 插件 - 服务端 Repository 实现
 ///
 /// 通过 PluginDataService 访问用户的加密数据文件
+library;
 
 import 'package:shared_models/shared_models.dart';
 
@@ -30,7 +31,9 @@ class ServerDiaryRepository extends IDiaryRepository {
     if (diaryData == null) return [];
 
     final entries = diaryData['entries'] as List<dynamic>? ?? [];
-    return entries.map((e) => DiaryEntryDto.fromJson(e as Map<String, dynamic>)).toList();
+    return entries
+        .map((e) => DiaryEntryDto.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   /// 保存所有日记
@@ -56,7 +59,8 @@ class ServerDiaryRepository extends IDiaryRepository {
 
       // 按日期范围过滤
       if (startDate != null) {
-        entries = entries.where((e) => e.date.compareTo(startDate) >= 0).toList();
+        entries =
+            entries.where((e) => e.date.compareTo(startDate) >= 0).toList();
       }
       if (endDate != null) {
         entries = entries.where((e) => e.date.compareTo(endDate) <= 0).toList();
@@ -102,7 +106,8 @@ class ServerDiaryRepository extends IDiaryRepository {
   }
 
   @override
-  Future<Result<DiaryEntryDto>> updateEntry(String date, DiaryEntryDto entry) async {
+  Future<Result<DiaryEntryDto>> updateEntry(
+      String date, DiaryEntryDto entry) async {
     try {
       final entries = await _readAllEntries();
       final index = entries.indexWhere((e) => e.date == date);
@@ -144,10 +149,14 @@ class ServerDiaryRepository extends IDiaryRepository {
 
       // 按日期范围过滤
       if (query.startDate != null) {
-        entries = entries.where((e) => e.date.compareTo(query.startDate!) >= 0).toList();
+        entries = entries
+            .where((e) => e.date.compareTo(query.startDate!) >= 0)
+            .toList();
       }
       if (query.endDate != null) {
-        entries = entries.where((e) => e.date.compareTo(query.endDate!) <= 0).toList();
+        entries = entries
+            .where((e) => e.date.compareTo(query.endDate!) <= 0)
+            .toList();
       }
 
       // 按关键词过滤
@@ -186,8 +195,10 @@ class ServerDiaryRepository extends IDiaryRepository {
     try {
       final entries = await _readAllEntries();
       final totalEntries = entries.length;
-      final totalWords = entries.fold<int>(0, (sum, e) => sum + e.content.length);
-      final averageWords = totalEntries > 0 ? (totalWords / totalEntries).round() : 0;
+      final totalWords =
+          entries.fold<int>(0, (sum, e) => sum + e.content.length);
+      final averageWords =
+          totalEntries > 0 ? (totalWords / totalEntries).round() : 0;
 
       return Result.success(DiaryStatsDto(
         totalEntries: totalEntries,
@@ -203,7 +214,8 @@ class ServerDiaryRepository extends IDiaryRepository {
   Future<Result<int>> getTodayWordCount() async {
     try {
       final today = DateTime.now();
-      final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final todayStr =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
 
       final entry = await getEntryByDate(todayStr);
       if (entry.isSuccess && entry.dataOrNull != null) {
@@ -222,13 +234,16 @@ class ServerDiaryRepository extends IDiaryRepository {
       final startOfMonth = DateTime(now.year, now.month, 1);
       final endOfMonth = DateTime(now.year, now.month + 1, 0);
 
-      final startStr = '${startOfMonth.year}-${startOfMonth.month.toString().padLeft(2, '0')}-${startOfMonth.day.toString().padLeft(2, '0')}';
-      final endStr = '${endOfMonth.year}-${endOfMonth.month.toString().padLeft(2, '0')}-${endOfMonth.day.toString().padLeft(2, '0')}';
+      final startStr =
+          '${startOfMonth.year}-${startOfMonth.month.toString().padLeft(2, '0')}-${startOfMonth.day.toString().padLeft(2, '0')}';
+      final endStr =
+          '${endOfMonth.year}-${endOfMonth.month.toString().padLeft(2, '0')}-${endOfMonth.day.toString().padLeft(2, '0')}';
 
       final result = await getEntries(startDate: startStr, endDate: endStr);
       if (result.isSuccess) {
         final entries = result.dataOrNull ?? [];
-        final totalWords = entries.fold<int>(0, (sum, e) => sum + e.content.length);
+        final totalWords =
+            entries.fold<int>(0, (sum, e) => sum + e.content.length);
         return Result.success(totalWords);
       }
       return Result.failure('获取本月字数失败', code: ErrorCodes.serverError);
@@ -246,11 +261,14 @@ class ServerDiaryRepository extends IDiaryRepository {
 
       final totalDays = endOfMonth.day;
       final completedDays = await getEntries(
-        startDate: '${startOfMonth.year}-${startOfMonth.month.toString().padLeft(2, '0')}-01',
-        endDate: '${endOfMonth.year}-${endOfMonth.month.toString().padLeft(2, '0')}-${endOfMonth.day.toString().padLeft(2, '0')}',
+        startDate:
+            '${startOfMonth.year}-${startOfMonth.month.toString().padLeft(2, '0')}-01',
+        endDate:
+            '${endOfMonth.year}-${endOfMonth.month.toString().padLeft(2, '0')}-${endOfMonth.day.toString().padLeft(2, '0')}',
       );
 
-      final completed = completedDays.isSuccess ? completedDays.dataOrNull?.length ?? 0 : 0;
+      final completed =
+          completedDays.isSuccess ? completedDays.dataOrNull?.length ?? 0 : 0;
 
       return Result.success({
         'completed': completed,

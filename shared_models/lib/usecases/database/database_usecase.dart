@@ -1,4 +1,5 @@
 /// Database 插件 - UseCase 业务逻辑层
+library;
 
 import 'package:uuid/uuid.dart';
 import 'package:shared_models/repositories/database/database_repository.dart';
@@ -83,7 +84,8 @@ class DatabaseUseCase {
         description: params['description'] as String?,
         coverImage: params['coverImage'] as String?,
         fields: (params['fields'] as List<dynamic>?)
-                ?.map((e) => DatabaseFieldDto.fromJson(e as Map<String, dynamic>))
+                ?.map(
+                    (e) => DatabaseFieldDto.fromJson(e as Map<String, dynamic>))
                 .toList() ??
             const [],
         createdAt: now,
@@ -125,7 +127,8 @@ class DatabaseUseCase {
         coverImage: params['coverImage'] as String?,
         fields: params.containsKey('fields')
             ? (params['fields'] as List<dynamic>?)
-                    ?.map((e) => DatabaseFieldDto.fromJson(e as Map<String, dynamic>))
+                    ?.map((e) =>
+                        DatabaseFieldDto.fromJson(e as Map<String, dynamic>))
                     .toList() ??
                 existing.fields
             : existing.fields,
@@ -193,7 +196,8 @@ class DatabaseUseCase {
 
     try {
       final pagination = _extractPagination(params);
-      final result = await repository.getRecords(tableId, pagination: pagination);
+      final result =
+          await repository.getRecords(tableId, pagination: pagination);
 
       return result.map((records) {
         final jsonList = records.map((r) => r.toJson()).toList();

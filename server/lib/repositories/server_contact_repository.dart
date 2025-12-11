@@ -1,4 +1,5 @@
 /// Contact 插件 - 服务端 Repository 实现
+library;
 
 import 'package:shared_models/shared_models.dart';
 import '../services/plugin_data_service.dart';
@@ -123,8 +124,7 @@ class ServerContactRepository implements IContactRepository {
 
       return Result.success(contacts);
     } catch (e) {
-      return Result.failure('获取联系人列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取联系人列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -283,8 +283,7 @@ class ServerContactRepository implements IContactRepository {
 
       return Result.success(records);
     } catch (e) {
-      return Result.failure('获取交互记录列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取交互记录列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -296,8 +295,7 @@ class ServerContactRepository implements IContactRepository {
       final record = records.where((r) => r.id == id).firstOrNull;
       return Result.success(record);
     } catch (e) {
-      return Result.failure('获取交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -322,8 +320,7 @@ class ServerContactRepository implements IContactRepository {
 
       return Result.success(record);
     } catch (e) {
-      return Result.failure('创建交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('创建交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -342,8 +339,7 @@ class ServerContactRepository implements IContactRepository {
       await _saveAllInteractionRecords(records);
       return Result.success(record);
     } catch (e) {
-      return Result.failure('更新交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('更新交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -361,8 +357,7 @@ class ServerContactRepository implements IContactRepository {
       await _saveAllInteractionRecords(records);
       return Result.success(true);
     } catch (e) {
-      return Result.failure('删除交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('删除交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -377,8 +372,7 @@ class ServerContactRepository implements IContactRepository {
       await _saveAllInteractionRecords(records);
       return Result.success(initialLength != records.length);
     } catch (e) {
-      return Result.failure('删除交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('删除交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -419,8 +413,7 @@ class ServerContactRepository implements IContactRepository {
 
       return Result.success(records);
     } catch (e) {
-      return Result.failure('搜索交互记录失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('搜索交互记录失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -432,8 +425,7 @@ class ServerContactRepository implements IContactRepository {
       final config = await _readFilterConfig();
       return Result.success(config);
     } catch (e) {
-      return Result.failure('获取筛选配置失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取筛选配置失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -444,8 +436,7 @@ class ServerContactRepository implements IContactRepository {
       await _saveFilterConfig(config);
       return Result.success(config);
     } catch (e) {
-      return Result.failure('保存筛选配置失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('保存筛选配置失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -455,8 +446,7 @@ class ServerContactRepository implements IContactRepository {
       final config = await _readSortConfig();
       return Result.success(config);
     } catch (e) {
-      return Result.failure('获取排序配置失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取排序配置失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -466,8 +456,7 @@ class ServerContactRepository implements IContactRepository {
       await _saveSortConfig(config);
       return Result.success(config);
     } catch (e) {
-      return Result.failure('保存排序配置失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('保存排序配置失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -485,8 +474,7 @@ class ServerContactRepository implements IContactRepository {
 
       return Result.success(tags.toList()..sort());
     } catch (e) {
-      return Result.failure('获取标签列表失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取标签列表失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -506,8 +494,7 @@ class ServerContactRepository implements IContactRepository {
 
       return Result.success(count);
     } catch (e) {
-      return Result.failure('获取最近联系人数量失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取最近联系人数量失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -518,8 +505,7 @@ class ServerContactRepository implements IContactRepository {
       final count = records.where((r) => r.contactId == contactId).length;
       return Result.success(count);
     } catch (e) {
-      return Result.failure('获取交互记录数量失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取交互记录数量失败: $e', code: ErrorCodes.serverError);
     }
   }
 
@@ -529,8 +515,7 @@ class ServerContactRepository implements IContactRepository {
       final contacts = await _readAllContacts();
       return Result.success(contacts.length);
     } catch (e) {
-      return Result.failure('获取总联系人数失败: $e',
-          code: ErrorCodes.serverError);
+      return Result.failure('获取总联系人数失败: $e', code: ErrorCodes.serverError);
     }
   }
 }

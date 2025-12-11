@@ -1,4 +1,5 @@
 /// Nodes 插件 - UseCase 业务逻辑层
+library;
 
 import 'package:uuid/uuid.dart';
 import 'package:shared_models/repositories/nodes/nodes_repository.dart';
@@ -182,7 +183,8 @@ class NodesUseCase {
 
     try {
       final pagination = _extractPagination(params);
-      final result = await repository.getNodes(notebookId, pagination: pagination);
+      final result =
+          await repository.getNodes(notebookId, pagination: pagination);
 
       return result.map((nodes) {
         final jsonList = nodes.map((n) => n.toJson()).toList();
@@ -313,7 +315,8 @@ class NodesUseCase {
             : existing.endDate,
         customFields: params.containsKey('customFields')
             ? (params['customFields'] as List<dynamic>?)
-                    ?.map((e) => CustomFieldDto.fromJson(e as Map<String, dynamic>))
+                    ?.map((e) =>
+                        CustomFieldDto.fromJson(e as Map<String, dynamic>))
                     .toList() ??
                 existing.customFields
             : existing.customFields,
@@ -402,7 +405,8 @@ class NodesUseCase {
 
     final isExpanded = params['isExpanded'] as bool?;
     if (isExpanded == null) {
-      return Result.failure('缺少必需参数: isExpanded', code: ErrorCodes.invalidParams);
+      return Result.failure('缺少必需参数: isExpanded',
+          code: ErrorCodes.invalidParams);
     }
 
     try {

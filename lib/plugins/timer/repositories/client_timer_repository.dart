@@ -1,11 +1,11 @@
 /// Timer 插件 - 客户端 Repository 实现
 ///
 /// 通过适配现有的 TimerController、TimerTask 和 TimerItem 来实现 ITimerRepository 接口
+library;
 
 import 'package:shared_models/repositories/timer/timer_repository.dart';
 import 'package:shared_models/utils/result.dart';
 import 'package:shared_models/utils/pagination.dart';
-import 'package:shared_models/utils/validation.dart';
 import 'package:flutter/material.dart';
 import '../models/timer_task.dart';
 import '../models/timer_item.dart';
@@ -81,7 +81,10 @@ class ClientTimerRepository extends ITimerRepository {
   }
 
   @override
-  Future<Result<TimerTaskDto>> updateTimerTask(String id, TimerTaskDto dto) async {
+  Future<Result<TimerTaskDto>> updateTimerTask(
+    String id,
+    TimerTaskDto dto,
+  ) async {
     try {
       await timerController.loadTasks();
       final tasks = timerController.getTasks();
@@ -228,18 +231,27 @@ class ClientTimerRepository extends ITimerRepository {
     try {
       // TimerItem 是 TimerTask 的一部分，不能单独创建
       // 需要通过更新任务来添加计时器项
-      return Result.failure('请使用 updateTimerTask 添加计时器项', code: ErrorCodes.invalidParams);
+      return Result.failure(
+        '请使用 updateTimerTask 添加计时器项',
+        code: ErrorCodes.invalidParams,
+      );
     } catch (e) {
       return Result.failure('创建计时器项失败: $e', code: ErrorCodes.serverError);
     }
   }
 
   @override
-  Future<Result<TimerItemDto>> updateTimerItem(String id, TimerItemDto dto) async {
+  Future<Result<TimerItemDto>> updateTimerItem(
+    String id,
+    TimerItemDto dto,
+  ) async {
     try {
       // TimerItem 是 TimerTask 的一部分，不能单独更新
       // 需要通过更新任务来更新计时器项
-      return Result.failure('请使用 updateTimerTask 更新计时器项', code: ErrorCodes.invalidParams);
+      return Result.failure(
+        '请使用 updateTimerTask 更新计时器项',
+        code: ErrorCodes.invalidParams,
+      );
     } catch (e) {
       return Result.failure('更新计时器项失败: $e', code: ErrorCodes.serverError);
     }
@@ -297,7 +309,8 @@ class ClientTimerRepository extends ITimerRepository {
   Future<Result<int>> getTaskCountByGroup(String group) async {
     try {
       await timerController.loadTasks();
-      final count = timerController.getTasks().where((t) => t.group == group).length;
+      final count =
+          timerController.getTasks().where((t) => t.group == group).length;
       return Result.success(count);
     } catch (e) {
       return Result.failure('获取分组任务数失败: $e', code: ErrorCodes.serverError);
@@ -365,15 +378,22 @@ class ClientTimerRepository extends ITimerRepository {
       duration: Duration(seconds: dto.duration),
       completedDuration: Duration(seconds: dto.completedDuration),
       isRunning: dto.isRunning,
-      workDuration: dto.workDuration != null ? Duration(seconds: dto.workDuration!) : null,
-      breakDuration: dto.breakDuration != null ? Duration(seconds: dto.breakDuration!) : null,
+      workDuration:
+          dto.workDuration != null
+              ? Duration(seconds: dto.workDuration!)
+              : null,
+      breakDuration:
+          dto.breakDuration != null
+              ? Duration(seconds: dto.breakDuration!)
+              : null,
       cycles: dto.cycles,
       currentCycle: dto.currentCycle,
       isWorkPhase: dto.isWorkPhase,
       repeatCount: dto.repeatCount,
-      intervalAlertDuration: dto.intervalAlertDuration != null
-          ? Duration(seconds: dto.intervalAlertDuration!)
-          : null,
+      intervalAlertDuration:
+          dto.intervalAlertDuration != null
+              ? Duration(seconds: dto.intervalAlertDuration!)
+              : null,
       enableNotification: dto.enableNotification,
     );
   }

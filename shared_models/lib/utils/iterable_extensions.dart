@@ -1,6 +1,7 @@
 /// Iterable 扩展方法 - 客户端和服务端共享
 ///
 /// 提供常用的 Iterable 操作扩展
+library;
 
 /// Iterable 扩展
 extension IterableExtensions<E> on Iterable<E> {
