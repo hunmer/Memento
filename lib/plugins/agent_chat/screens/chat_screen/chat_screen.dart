@@ -21,6 +21,7 @@ import 'components/message_input.dart';
 import 'components/save_tool_dialog.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
+
 /// 聊天界面
 class ChatScreen extends StatefulWidget {
   final Conversation conversation;
@@ -53,10 +54,8 @@ class _ChatScreenState extends State<ChatScreen> {
   // 猜你想问相关
   List<String> _suggestedQuestions = [];
   bool _isLoadingSuggestions = false;
-  final SuggestedQuestionsService _suggestionsService = SuggestedQuestionsService();
-
-  // 消息淡入动画相关
-  final Set<String> _fadingMessages = {}; // 记录正在淡入的消息ID
+  final SuggestedQuestionsService _suggestionsService =
+      SuggestedQuestionsService();
 
   @override
   void initState() {
@@ -85,7 +84,8 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller = ChatController(
       conversation: widget.conversation,
       messageService: MessageService(storage: widget.storage),
-      conversationService: widget.conversationService ??
+      conversationService:
+          widget.conversationService ??
           ConversationService(storage: widget.storage),
       messageDetailService: MessageDetailService(storage: widget.storage),
       templateService: _templateService,
@@ -122,20 +122,6 @@ class _ChatScreenState extends State<ChatScreen> {
       final wasEmpty = _lastMessageCount == 0;
       final newMessageCount = currentMessageCount - _lastMessageCount;
       _lastMessageCount = currentMessageCount;
-
-      // 如果有新消息，标记它们以添加淡入动画
-      if (hasNewMessage && newMessageCount > 0) {
-        // 标记新消息以添加淡入动画
-        for (
-          int i = currentMessageCount - newMessageCount;
-          i < currentMessageCount;
-          i++
-        ) {
-          if (i >= 0 && i < _controller.messages.length) {
-            _fadingMessages.add(_controller.messages[i].id);
-          }
-        }
-      }
 
       // 使用 addPostFrameCallback 避免在构建过程中调用 setState
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -174,7 +160,8 @@ class _ChatScreenState extends State<ChatScreen> {
         // 只朗读AI消息，且消息已完成(非生成中)
         if (!message.isUser && !message.isGenerating) {
           // 检查是否是新消息(避免重复朗读)
-          if (_lastReadMessageId != message.id && message.content.trim().isNotEmpty) {
+          if (_lastReadMessageId != message.id &&
+              message.content.trim().isNotEmpty) {
             _lastReadMessageId = message.id;
 
             // 调用TTS朗读
@@ -224,7 +211,9 @@ class _ChatScreenState extends State<ChatScreen> {
     // 如果有预设问题,使用预设问题
     if (_controller.currentAgent!.openingQuestions.isNotEmpty) {
       setState(() {
-        _suggestedQuestions = List.from(_controller.currentAgent!.openingQuestions);
+        _suggestedQuestions = List.from(
+          _controller.currentAgent!.openingQuestions,
+        );
       });
     } else {
       // 否则使用随机问题
@@ -281,9 +270,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
       // 显示提示
       if (mounted) {
-        toastService.showToast(
-          result.enabled ? '已开启自动朗读' : '已关闭自动朗读',
-        );
+        toastService.showToast(result.enabled ? '已开启自动朗读' : '已关闭自动朗读');
       }
     }
   }
@@ -312,7 +299,9 @@ class _ChatScreenState extends State<ChatScreen> {
               curve: Curves.easeOutCubic,
             );
           } else {
-            _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+            _scrollController.jumpTo(
+              _scrollController.position.maxScrollExtent,
+            );
           }
         }
       });
@@ -345,7 +334,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    _controller.currentAgent?.name ?? 'agent_chat_selectAgent'.tr,
+                    _controller.currentAgent?.name ??
+                        'agent_chat_selectAgent'.tr,
                     style: TextStyle(
                       fontSize: 12,
                       color:
@@ -402,48 +392,49 @@ class _ChatScreenState extends State<ChatScreen> {
                   break;
               }
             },
-            itemBuilder: (context) => [
+            itemBuilder:
+                (context) => [
                   PopupMenuItem(
-                value: 'tool_management',
-                child: Row(
-                  children: [
+                    value: 'tool_management',
+                    child: Row(
+                      children: [
                         const Icon(Icons.build_outlined),
                         const SizedBox(width: 12),
-                    Text('agent_chat_toolManagement'.tr),
-                  ],
-                ),
-              ),
+                        Text('agent_chat_toolManagement'.tr),
+                      ],
+                    ),
+                  ),
                   PopupMenuItem(
-                value: 'token_stats',
-                child: Row(
-                  children: [
+                    value: 'token_stats',
+                    child: Row(
+                      children: [
                         const Icon(Icons.analytics_outlined),
                         const SizedBox(width: 12),
-                    Text('agent_chat_tokenStatistics'.tr),
-                  ],
-                ),
-              ),
+                        Text('agent_chat_tokenStatistics'.tr),
+                      ],
+                    ),
+                  ),
                   PopupMenuItem(
-                value: 'clear_messages',
-                child: Row(
-                  children: [
+                    value: 'clear_messages',
+                    child: Row(
+                      children: [
                         const Icon(Icons.delete_sweep),
                         const SizedBox(width: 12),
-                    Text('agent_chat_confirmClear'.tr),
-                  ],
-                ),
-              ),
+                        Text('agent_chat_confirmClear'.tr),
+                      ],
+                    ),
+                  ),
                   PopupMenuItem(
-                value: 'settings',
-                child: Row(
-                  children: [
+                    value: 'settings',
+                    child: Row(
+                      children: [
                         const Icon(Icons.settings),
                         const SizedBox(width: 12),
-                    Text('agent_chat_conversationSettings'.tr),
-                  ],
-                ),
-              ),
-            ],
+                        Text('agent_chat_conversationSettings'.tr),
+                      ],
+                    ),
+                  ),
+                ],
           ),
         ],
       ),
@@ -455,7 +446,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   // 已选工具列表
                   if (_controller.selectedTools.isNotEmpty)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.blue.withValues(alpha: 0.1),
                         border: Border(
@@ -469,7 +463,11 @@ class _ChatScreenState extends State<ChatScreen> {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.build, size: 16, color: Colors.blue),
+                              const Icon(
+                                Icons.build,
+                                size: 16,
+                                color: Colors.blue,
+                              ),
                               const SizedBox(width: 4),
                               const Text(
                                 '已选工具:',
@@ -484,20 +482,37 @@ class _ChatScreenState extends State<ChatScreen> {
                                 onPressed: () async {
                                   final confirm = await showDialog<bool>(
                                     context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: Text('agent_chat_confirmClear'.tr),
-                                      content: Text('agent_chat_confirmClearTools'.tr),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, false),
-                                          child: Text('agent_chat_cancel'.tr),
+                                    builder:
+                                        (context) => AlertDialog(
+                                          title: Text(
+                                            'agent_chat_confirmClear'.tr,
+                                          ),
+                                          content: Text(
+                                            'agent_chat_confirmClearTools'.tr,
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed:
+                                                  () => Navigator.pop(
+                                                    context,
+                                                    false,
+                                                  ),
+                                              child: Text(
+                                                'agent_chat_cancel'.tr,
+                                              ),
+                                            ),
+                                            TextButton(
+                                              onPressed:
+                                                  () => Navigator.pop(
+                                                    context,
+                                                    true,
+                                                  ),
+                                              child: Text(
+                                                'agent_chat_confirm'.tr,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context, true),
-                                          child: Text('agent_chat_confirm'.tr),
-                                        ),
-                                      ],
-                                    ),
                                   );
                                   if (confirm == true) {
                                     await _controller.clearSelectedTools();
@@ -509,7 +524,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                   style: TextStyle(fontSize: 12),
                                 ),
                                 style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
                                   minimumSize: const Size(0, 28),
                                 ),
                               ),
@@ -519,31 +536,40 @@ class _ChatScreenState extends State<ChatScreen> {
                           Wrap(
                             spacing: 8,
                             runSpacing: 4,
-                            children: _controller.selectedTools.map((tool) {
-                              return Chip(
-                                label: Text(
-                                  tool['toolName'] ?? tool['toolId'] ?? '',
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                                deleteIcon: const Icon(Icons.close, size: 16),
-                                onDeleted: () async {
-                                  await _controller.removeToolFromConversation(
-                                    tool['pluginId']!,
-                                    tool['toolId']!,
+                            children:
+                                _controller.selectedTools.map((tool) {
+                                  return Chip(
+                                    label: Text(
+                                      tool['toolName'] ?? tool['toolId'] ?? '',
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                    deleteIcon: const Icon(
+                                      Icons.close,
+                                      size: 16,
+                                    ),
+                                    onDeleted: () async {
+                                      await _controller
+                                          .removeToolFromConversation(
+                                            tool['pluginId']!,
+                                            tool['toolId']!,
+                                          );
+                                    },
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    visualDensity: VisualDensity.compact,
                                   );
-                                },
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                visualDensity: VisualDensity.compact,
-                              );
-                            }).toList(),
+                                }).toList(),
                           ),
                         ],
                       ),
                     ),
 
                   // 猜你想问区域
-                  if (_suggestedQuestions.isNotEmpty && _controller.messages.isEmpty)
+                  if (_suggestedQuestions.isNotEmpty &&
+                      _controller.messages.isEmpty)
                     _buildSuggestedQuestionsBar(),
 
                   // 消息列表
@@ -567,89 +593,57 @@ class _ChatScreenState extends State<ChatScreen> {
                                 }
 
                                 final message = _controller.messages[index];
-                                final isNewMessage = _fadingMessages.contains(
-                                  message.id,
-                                );
 
-                                return AnimatedOpacity(
-                                  opacity: isNewMessage ? 0.0 : 1.0,
-                                  duration: const Duration(milliseconds: 200),
-                                  curve: Curves.easeIn,
-                                  onEnd: () {
-                                    // 动画结束后移除标记
-                                    if (isNewMessage && mounted) {
-                                      // 使用 addPostFrameCallback 避免在构建过程中调用 setState
-                                      WidgetsBinding.instance
-                                          .addPostFrameCallback((_) {
-                                            if (mounted) {
-                                              setState(() {
-                                                _fadingMessages.remove(
-                                                  message.id,
-                                                );
-                                              });
-                                            }
-                                          });
-                                    }
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    child: MessageBubble(
-                                      message: message,
-                                      hasAgent:
-                                          _controller.currentAgent != null,
-                                      storage: widget.storage,
-                                      onEdit: (messageId, newContent) async {
-                                        await _controller.editMessage(
-                                          messageId,
-                                          newContent,
-                                        );
-                                      },
-                                      onDelete: (messageId) async {
-                                        await _showDeleteConfirmation(
-                                          messageId,
-                                        );
-                                      },
-                                      onRegenerate: (messageId) async {
-                                        await _controller.regenerateResponse(
-                                          messageId,
-                                        );
-                                      },
-                                      onSaveTool: (message) async {
-                                        await _handleSaveTool(message);
-                                      },
-                                      onRerunTool: (messageId) async {
-                                        await _handleRerunTool(messageId);
-                                      },
-                                      onRerunStep: (
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: MessageBubble(
+                                    message: message,
+                                    hasAgent: _controller.currentAgent != null,
+                                    storage: widget.storage,
+                                    onEdit: (messageId, newContent) async {
+                                      await _controller.editMessage(
+                                        messageId,
+                                        newContent,
+                                      );
+                                    },
+                                    onDelete: (messageId) async {
+                                      await _showDeleteConfirmation(messageId);
+                                    },
+                                    onRegenerate: (messageId) async {
+                                      await _controller.regenerateResponse(
+                                        messageId,
+                                      );
+                                    },
+                                    onSaveTool: (message) async {
+                                      await _handleSaveTool(message);
+                                    },
+                                    onRerunTool: (messageId) async {
+                                      await _handleRerunTool(messageId);
+                                    },
+                                    onRerunStep: (messageId, stepIndex) async {
+                                      await _handleRerunStep(
                                         messageId,
                                         stepIndex,
-                                      ) async {
-                                        await _handleRerunStep(
-                                          messageId,
-                                          stepIndex,
-                                        );
-                                      },
-                                      onExecuteTemplate: (
+                                      );
+                                    },
+                                    onExecuteTemplate: (
+                                      messageId,
+                                      templateId,
+                                    ) async {
+                                      await _controller.executeMatchedTemplate(
                                         messageId,
                                         templateId,
-                                      ) async {
-                                        await _controller
-                                            .executeMatchedTemplate(
-                                              messageId,
-                                              templateId,
-                                            );
-                                      },
-                                      getTemplateName: (templateId) {
-                                        return _controller.templateService
-                                            ?.getTemplateById(templateId)
-                                            ?.name;
-                                      },
-                                      onCancel:
-                                          message.isGenerating
-                                              ? () =>
-                                                  _controller.cancelSending()
-                                              : null,
-                                    ),
+                                      );
+                                    },
+                                    getTemplateName: (templateId) {
+                                      return _controller.templateService
+                                          ?.getTemplateById(templateId)
+                                          ?.name;
+                                    },
+                                    onCancel:
+                                        message.isGenerating
+                                            ? () => _controller.cancelSending()
+                                            : null,
                                   ),
                                 );
                               },
@@ -668,7 +662,9 @@ class _ChatScreenState extends State<ChatScreen> {
     return Container(
       height: 56,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         border: Border(
           bottom: BorderSide(
             color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
@@ -726,7 +722,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                       backgroundColor: Theme.of(context).colorScheme.surface,
                       side: BorderSide(
-                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outline.withValues(alpha: 0.3),
                       ),
                     ),
                   );
@@ -737,23 +735,25 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(width: 8),
           // 刷新按钮
           IconButton(
-            icon: _isLoadingSuggestions
-                ? SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).colorScheme.primary,
+            icon:
+                _isLoadingSuggestions
+                    ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.primary,
+                        ),
                       ),
+                    )
+                    : Icon(
+                      Icons.refresh,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
-                  )
-                : Icon(
-                    Icons.refresh,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-            onPressed: _isLoadingSuggestions ? null : _refreshSuggestedQuestions,
+            onPressed:
+                _isLoadingSuggestions ? null : _refreshSuggestedQuestions,
             tooltip: '刷新问题',
           ),
           const SizedBox(width: 8),
@@ -796,48 +796,59 @@ class _ChatScreenState extends State<ChatScreen> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        child: _controller.isLastMessageSessionDivider
-            ? Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
+        child:
+            _controller.isLastMessageSessionDivider
+                ? Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
                     color: Colors.blue.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: Colors.blue.withValues(alpha: 0.3),
                     ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.check_circle, size: 16, color: Colors.blue[700]),
-                    const SizedBox(width: 8),
-                    Text(
-                      '已开启新会话',
-                      style: TextStyle(
-                        fontSize: 14,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        size: 16,
                         color: Colors.blue[700],
-                        fontWeight: FontWeight.w500,
                       ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '已开启新会话',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.blue[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                : OutlinedButton.icon(
+                  onPressed: () async {
+                    await _controller.createNewSession();
+                    // 自动滚动到底部
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _scrollToBottom(animate: true);
+                    });
+                  },
+                  icon: const Icon(Icons.add_circle_outline, size: 18),
+                  label: Text('agent_chat_createNewChat'.tr),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
                     ),
-                  ],
-                ),
-              )
-            : OutlinedButton.icon(
-                onPressed: () async {
-                  await _controller.createNewSession();
-                  // 自动滚动到底部
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _scrollToBottom(animate: true);
-                  });
-                },
-                icon: const Icon(Icons.add_circle_outline, size: 18),
-                label: Text('agent_chat_createNewChat'.tr),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     side: BorderSide(color: Colors.blue.withValues(alpha: 0.5)),
-                  foregroundColor: Colors.blue[700],
+                    foregroundColor: Colors.blue[700],
+                  ),
                 ),
-              ),
       ),
     );
   }
@@ -938,11 +949,14 @@ class _ChatScreenState extends State<ChatScreen> {
       icon: Icons.inventory_2_outlined,
     );
 
-    NavigationHelper.push(context, ToolTemplateScreen(
-              templateService: _templateService,
-              onUseTemplate: (template) {
-                _controller.setSelectedToolTemplate(template);
-              },),
+    NavigationHelper.push(
+      context,
+      ToolTemplateScreen(
+        templateService: _templateService,
+        onUseTemplate: (template) {
+          _controller.setSelectedToolTemplate(template);
+        },
+      ),
     );
   }
 
@@ -955,18 +969,20 @@ class _ChatScreenState extends State<ChatScreen> {
       icon: Icons.settings_outlined,
     );
 
-    NavigationHelper.push(context, ToolManagementScreen(
-          conversationId: widget.conversation.id,
-          onAddToChat: (pluginId, toolId, config) async {
-            await _controller.addToolToConversation(
-              pluginId,
-              toolId,
-              config.title,
-            );
-            if (mounted) {
-              toastService.showToast('已添加工具: ${config.title}');
-            }
-          },
+    NavigationHelper.push(
+      context,
+      ToolManagementScreen(
+        conversationId: widget.conversation.id,
+        onAddToChat: (pluginId, toolId, config) async {
+          await _controller.addToolToConversation(
+            pluginId,
+            toolId,
+            config.title,
+          );
+          if (mounted) {
+            toastService.showToast('已添加工具: ${config.title}');
+          }
+        },
       ),
     );
   }

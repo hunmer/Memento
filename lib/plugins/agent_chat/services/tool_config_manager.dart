@@ -69,6 +69,9 @@ class ToolConfigManager {
   // 是否已初始化
   bool _initialized = false;
 
+  /// 检查是否已初始化
+  bool get isInitialized => _initialized;
+
   /// 初始化配置管理器
   ///
   /// 首次启动时会从 assets 复制配置到数据目录
@@ -287,28 +290,51 @@ class ToolConfigManager {
     // 过滤已禁用的工具
     return _toolIndex.where((item) {
       final toolId = item[0];
+
+      // 遍历所有插件查找工具（支持任意 toolId 格式）
+      for (final entry in _pluginTools.entries) {
+        final toolSet = entry.value;
+        final tool = toolSet.tools[toolId];
+        if (tool != null) {
+          return tool.enabled;
+        }
+      }
+
+      // 如果在 _pluginTools 中找不到，尝试旧的格式匹配（向后兼容）
       final parts = toolId.split('_');
-      if (parts.length < 2) return false;
+      if (parts.length >= 2) {
+        final pluginId = parts[0];
+        final toolSet = _pluginTools[pluginId];
+        if (toolSet != null) {
+          final tool = toolSet.tools[toolId];
+          return tool?.enabled ?? false;
+        }
+      }
 
-      final pluginId = parts[0];
-
-      final toolSet = _pluginTools[pluginId];
-      if (toolSet == null) return false;
-
-      final tool = toolSet.tools[toolId];
-      return tool?.enabled ?? false;
+      return false;
     }).toList();
   }
 
   /// 获取指定工具的详细信息
   Future<ToolConfig?> getToolDetails(String toolId) async {
+    // 遍历所有插件查找工具（支持任意 toolId 格式）
+    for (final entry in _pluginTools.entries) {
+      final toolSet = entry.value;
+      final tool = toolSet.tools[toolId];
+      if (tool != null) {
+        return tool;
+      }
+    }
+
+    // 如果在 _pluginTools 中找不到，尝试旧的格式匹配（向后兼容）
     final parts = toolId.split('_');
-    if (parts.length < 2) return null;
+    if (parts.length >= 2) {
+      final pluginId = parts[0];
+      final toolSet = _pluginTools[pluginId];
+      return toolSet?.tools[toolId];
+    }
 
-    final pluginId = parts[0];
-    final toolSet = _pluginTools[pluginId];
-
-    return toolSet?.tools[toolId];
+    return null;
   }
 
   /// 获取多个工具的详细信息

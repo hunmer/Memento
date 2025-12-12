@@ -98,8 +98,22 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     // 等待 JSBridgeManager 完全初始化
     print('[WebViewPlugin] 等待 JSBridgeManager 初始化...');
-    await Future.delayed(Duration(milliseconds: 1000));
-    print('[WebViewPlugin] JSBridgeManager 应该已初始化');
+    final jsBridge = JSBridgeManager.instance;
+
+    // 等待引擎初始化完成
+    int retryCount = 0;
+    while (!jsBridge.isSupported && retryCount < 50) {
+      await Future.delayed(Duration(milliseconds: 100));
+      retryCount++;
+      print('[WebViewPlugin] 等待初始化... (${retryCount}/50)');
+    }
+
+    if (jsBridge.isSupported) {
+      print('[WebViewPlugin] ✓ JSBridgeManager 初始化完成');
+    } else {
+      print('[WebViewPlugin] ✗ JSBridgeManager 初始化超时');
+      throw Exception('JSBridgeManager 初始化失败');
+    }
 
     // 加载所有卡片的 preload.js 并注册工具
     await _loadPreloadScripts();
@@ -110,7 +124,6 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     try {
       print('[WebViewPlugin] ========== 开始加载 preload.js 脚本 ==========');
 
-      // 验证 JSBridgeManager 是否已初始化
       final jsBridge = JSBridgeManager.instance;
       print('[WebViewPlugin] JSBridgeManager 实例获取成功');
 
@@ -141,10 +154,13 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
             print('[WebViewPlugin] preload.js 内容长度: ${scriptContent.length} 字符');
             print('[WebViewPlugin] preload.js 内容预览: ${scriptContent.substring(0, min(100, scriptContent.length))}...');
 
-            // 在 QuickJS 引擎中执行脚本
+            // 在 QuickJS 引擎中执行脚本（如果 JS Bridge 未初始化，会自动加入延迟队列）
             try {
               print('[WebViewPlugin] >>> 开始在 QuickJS 中执行 preload.js...');
-              final result = await jsBridge.evaluate(scriptContent);
+              final result = await jsBridge.evaluateWhenReady(
+                scriptContent,
+                description: 'preload.js: ${card.title}',
+              );
               print('[WebViewPlugin] <<< QuickJS 执行完成，结果: ${result.success ? '成功' : '失败'}');
               if (!result.success) {
                 print('[WebViewPlugin] 执行错误: ${result.error}');
