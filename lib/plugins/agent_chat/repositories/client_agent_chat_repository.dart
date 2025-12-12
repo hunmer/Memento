@@ -4,7 +4,6 @@
 
 library;
 
-import 'package:shared_models/shared_models.dart';
 import 'package:Memento/plugins/agent_chat/services/conversation_service.dart';
 import 'package:Memento/plugins/agent_chat/services/message_service.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
@@ -13,6 +12,7 @@ import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
 import 'package:Memento/plugins/agent_chat/models/file_attachment.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_models/shared_models.dart';
 
 /// 客户端 AgentChat Repository 实现
 class ClientAgentChatRepository extends IAgentChatRepository {

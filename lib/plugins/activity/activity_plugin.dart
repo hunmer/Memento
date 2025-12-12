@@ -21,7 +21,7 @@ import 'services/activity_service.dart';
 import 'services/activity_notification_service.dart';
 import 'models/activity_record.dart';
 import 'repositories/client_activity_repository.dart';
-import 'package:shared_models/usecases/activity/activity_usecase.dart';
+import 'package:shared_models/shared_models.dart';
 import 'dart:io';
 
 class ActivityPlugin extends BasePlugin with JSBridgePlugin {

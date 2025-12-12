@@ -9,9 +9,7 @@ import 'package:Memento/plugins/activity/models/activity_record.dart'
 import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart'
     as widgets_models;
 import 'package:Memento/plugins/activity/services/activity_service.dart';
-import 'package:shared_models/repositories/activity/activity_repository.dart';
-import 'package:shared_models/utils/pagination.dart';
-import 'package:shared_models/utils/result.dart';
+import 'package:shared_models/shared_models.dart';
 
 /// 客户端 Activity Repository 实现
 class ClientActivityRepository implements IActivityRepository {
