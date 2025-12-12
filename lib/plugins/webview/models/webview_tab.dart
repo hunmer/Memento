@@ -12,6 +12,8 @@ class WebViewTab {
   bool canGoForward;
   bool isLoading;
   double progress;
+  /// 关联的卡片 ID（用于防止重复打开同一卡片）
+  final String? cardId;
 
   WebViewTab({
     required this.id,
@@ -26,6 +28,7 @@ class WebViewTab {
     this.canGoForward = false,
     this.isLoading = false,
     this.progress = 0.0,
+    this.cardId,
   });
 
   Map<String, dynamic> toJson() {
@@ -42,6 +45,7 @@ class WebViewTab {
       'canGoForward': canGoForward,
       'isLoading': isLoading,
       'progress': progress,
+      'cardId': cardId,
     };
   }
 
@@ -59,6 +63,7 @@ class WebViewTab {
       canGoForward: json['canGoForward'] as bool? ?? false,
       isLoading: json['isLoading'] as bool? ?? false,
       progress: (json['progress'] as num?)?.toDouble() ?? 0.0,
+      cardId: json['cardId'] as String?,
     );
   }
 
@@ -75,6 +80,7 @@ class WebViewTab {
     bool? canGoForward,
     bool? isLoading,
     double? progress,
+    String? cardId,
   }) {
     return WebViewTab(
       id: id ?? this.id,
@@ -89,6 +95,7 @@ class WebViewTab {
       canGoForward: canGoForward ?? this.canGoForward,
       isLoading: isLoading ?? this.isLoading,
       progress: progress ?? this.progress,
+      cardId: cardId ?? this.cardId,
     );
   }
 

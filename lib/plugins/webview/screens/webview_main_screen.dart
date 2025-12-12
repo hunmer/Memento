@@ -261,6 +261,13 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
     }
   }
 
+  /// 将文件路径转换为正确的 URL 格式
+  /// 优先使用 HTTP URL（Windows），否则使用 file:// URL
+  String _formatFileUrl(String filePath) {
+    // 使用插件的 filePathToUrl 方法
+    return WebViewPlugin.instance.filePathToUrl(filePath);
+  }
+
   void _openUrl(String url) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -269,18 +276,38 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
     );
   }
 
-  void _openCard(WebViewCard card) {
+  void _openCard(WebViewCard card) async {
     // 增加打开次数
     WebViewPlugin.instance.cardManager.incrementOpenCount(card.id);
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => WebViewBrowserScreen(
-          initialUrl: card.url,
-          initialTitle: card.title,
+    final tabManager = WebViewPlugin.instance.tabManager;
+
+    // 检查是否已经有该卡片的标签页
+    final existingTab = tabManager.findTabByCardId(card.id);
+
+    if (existingTab != null) {
+      // 已存在，切换到该标签页
+      await tabManager.switchToTab(existingTab.id);
+
+      // 导航到浏览器界面
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const WebViewBrowserScreen(),
         ),
-      ),
-    );
+      );
+    } else {
+      // 不存在，创建新标签页并导航
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => WebViewBrowserScreen(
+            initialUrl: card.url,
+            initialTitle: card.title,
+            cardId: card.id,
+          ),
+        ),
+      );
+    }
   }
 
   void _showCardOptions(WebViewCard card) {
@@ -346,7 +373,9 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
     final titleController = TextEditingController();
     final urlController = TextEditingController();
     final descController = TextEditingController();
+    final projectNameController = TextEditingController();
     CardType selectedType = CardType.url;
+    bool isLocalFileMode = false;
 
     showDialog(
       context: context,
@@ -365,39 +394,79 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                        // 项目名称输入（本地文件模式）
+                        if (isLocalFileMode) ...[
+                          TextField(
+                            controller: projectNameController,
+                            decoration: InputDecoration(
+                              labelText: '项目名称（英文/数字/下划线）',
+                              border: const OutlineInputBorder(),
+                              helperText: '文件将复制到 http_server/项目名称/ 目录',
+                              helperMaxLines: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+
                 TextField(
                   controller: urlController,
+                          readOnly: isLocalFileMode,
                   decoration: InputDecoration(
                     labelText: 'webview_card_url'.tr,
                     border: const OutlineInputBorder(),
+                            helperText:
+                                isLocalFileMode
+                                    ? 'URL 将自动生成为 ./项目名称/...'
+                                    : null,
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.folder_open),
                               tooltip: 'webview_select_local_file'.tr,
                               onPressed: () async {
-                                // 选择本地文件
+                                // 选择本地文件或目录
                                 final result = await FilePicker.platform
                                     .pickFiles(
-                                      type: FileType.any,
+                                      type: FileType.custom,
+                                      allowedExtensions: ['html', 'htm'],
                                       allowMultiple: false,
                                     );
 
                                 if (result != null &&
                                     result.files.single.path != null) {
                                   final filePath = result.files.single.path!;
-                                  // 将文件路径转换为 file:// URL
-                                  final fileUrl = 'file://$filePath';
-                                  urlController.text = fileUrl;
+                                  final fileName = result.files.single.name;
+
+                                  setState(() {
+                                    isLocalFileMode = true;
+                                    selectedType = CardType.localFile;
+                                  });
 
                                   // 如果标题为空，使用文件名作为标题
                                   if (titleController.text.isEmpty) {
-                                    final fileName = result.files.single.name;
-                                    titleController.text = fileName;
+                                    titleController.text = fileName.replaceAll(
+                                      RegExp(r'\.(html|htm)$'),
+                                      '',
+                                    );
                                   }
 
-                                  // 自动设置为本地文件类型
-                                  setState(() {
-                                    selectedType = CardType.localFile;
-                                  });
+                                  // 如果项目名称为空，生成默认名称
+                                  if (projectNameController.text.isEmpty) {
+                                    final baseName = fileName.replaceAll(
+                                      RegExp(r'\.(html|htm)$'),
+                                      '',
+                                    );
+                                    // 转换为合法的项目名称
+                                    final projectName = baseName
+                                        .replaceAll(
+                                          RegExp(r'[^a-zA-Z0-9_-]'),
+                                          '_',
+                                        )
+                                        .replaceAll(RegExp(r'_+'), '_');
+                                    projectNameController.text = projectName;
+                                  }
+
+                                  // 临时存储文件路径
+                                  urlController.text = filePath;
                                 }
                               },
                             ),
@@ -430,6 +499,11 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                   onSelectionChanged: (value) {
                     setState(() {
                       selectedType = value.first;
+                              isLocalFileMode =
+                                  selectedType == CardType.localFile;
+                              if (!isLocalFileMode) {
+                                projectNameController.clear();
+                              }
                     });
                   },
                 ),
@@ -443,13 +517,73 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (titleController.text.isNotEmpty && urlController.text.isNotEmpty) {
+                        if (titleController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('请输入卡片标题')),
+                          );
+                          return;
+                        }
+
+                        if (isLocalFileMode) {
+                          // 本地文件模式：复制文件并生成 ./ 路径
+                          if (projectNameController.text.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('请输入项目名称')),
+                            );
+                            return;
+                          }
+
+                          try {
+                            final sourcePath = urlController.text;
+                            final projectName = projectNameController.text;
+
+                            // 复制文件到 HTTP 服务器目录
+                            final relativePath = await WebViewPlugin.instance
+                                .copyToHttpServer(
+                                  sourcePath: sourcePath,
+                                  projectName: projectName,
+                                );
+
+                            // 添加卡片（使用 ./ 相对路径）
+                            await WebViewPlugin.instance.cardManager.addCard(
+                              title: titleController.text,
+                              url: relativePath,
+                              type: selectedType,
+                              description:
+                                  descController.text.isNotEmpty
+                                      ? descController.text
+                                      : null,
+                            );
+
+                            if (mounted) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('本地项目已添加')),
+                              );
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('添加失败: $e')),
+                              );
+                            }
+                          }
+                        } else {
+                          // 在线 URL 模式
+                          if (urlController.text.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('请输入 URL')),
+                            );
+                            return;
+                          }
+
                   await WebViewPlugin.instance.cardManager.addCard(
                     title: titleController.text,
                     url: urlController.text,
                     type: selectedType,
                     description: descController.text.isNotEmpty ? descController.text : null,
                   );
+
                   if (mounted) Navigator.pop(context);
                 }
               },
@@ -500,8 +634,8 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
 
                         if (result != null && result.files.single.path != null) {
                           final filePath = result.files.single.path!;
-                          // 将文件路径转换为 file:// URL
-                          final fileUrl = 'file://$filePath';
+                                  // 将文件路径转换为正确的 file:// URL
+                                  final fileUrl = _formatFileUrl(filePath);
                           urlController.text = fileUrl;
 
                           // 如果标题为空，使用文件名作为标题
