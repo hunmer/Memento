@@ -669,75 +669,22 @@
             return div.innerHTML;
         }
 
-        // 等待 Memento Bridge 准备就绪（JS 已预加载，只需等待注入完成）
-        function waitForMemento(maxAttempts = 15) {
-            let attempts = 0;
-
-            function check() {
-                attempts++;
-                console.log(`[PasswordManager] 检查 Memento Bridge (尝试 ${attempts}/${maxAttempts})...`);
-
-                if (window.Memento && window.Memento.storage) {
-                    console.log('[PasswordManager] Memento Bridge 已就绪');
-                    if (window.Memento._ready) {
-                        init();
-                    } else {
-                        Memento.ready(init);
-                    }
-                } else if (attempts < maxAttempts) {
-                    setTimeout(check, 100);
-                } else {
-                    console.error('[PasswordManager] Memento 不可用');
-                    showErrorPage();
-                }
+        // 页面加载完成后直接初始化（JS 已预加载，Memento API 立即可用）
+        function startApp() {
+            if (window.Memento && window.Memento._ready) {
+                init();
+            } else if (window.Memento) {
+                Memento.ready(init);
+            } else {
+                console.error('Memento API 不可用');
+                alert('Memento API 不可用，请确保在 Memento WebView 中打开此页面');
             }
-
-            check();
         }
 
-        // 显示错误页面
-        function showErrorPage() {
-            document.body.innerHTML = `
-                <div style="
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    min-height: 100vh;
-                    padding: 20px;
-                    background: var(--bg);
-                    color: var(--text);
-                    text-align: center;
-                ">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" style="margin-bottom: 20px;">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="15" y1="9" x2="9" y2="15"></line>
-                        <line x1="9" y1="9" x2="15" y2="15"></line>
-                    </svg>
-                    <h2 style="font-size: 24px; margin-bottom: 12px;">连接失败</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 24px; max-width: 400px;">
-                        无法连接到 Memento 应用。请确保：
-                        <br>1. 您在 Memento WebView 中打开此页面
-                        <br>2. Memento 版本支持 Storage API
-                    </p>
-                    <button onclick="location.reload()" style="
-                        padding: 12px 24px;
-                        background: var(--primary);
-                        color: white;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 14px;
-                        cursor: pointer;
-                    ">重新加载</button>
-                </div>
-            `;
-        }
-
-        // 页面加载完成后开始检查
         if (document.readyState === 'complete') {
-            waitForMemento();
+            startApp();
         } else {
-            window.addEventListener('load', () => waitForMemento());
+            window.addEventListener('load', startApp);
         }
     </script>
 </body>
