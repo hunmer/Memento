@@ -176,6 +176,122 @@ async function main() {
                     const result = await client.getTodoStats();
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
+                // ==================== Diary 工具 ====================
+                case 'memento_diary_getEntries': {
+                    const result = await client.getDiaryEntries(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_diary_getEntry': {
+                    const { date } = args;
+                    const result = await client.getDiaryEntry(date);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_diary_createEntry': {
+                    const result = await client.createDiaryEntry(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_diary_updateEntry': {
+                    const { date, ...data } = args;
+                    const result = await client.updateDiaryEntry(date, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_diary_searchEntries': {
+                    const result = await client.searchDiaryEntries(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_diary_getStats': {
+                    const result = await client.getDiaryStats();
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                // ==================== Checkin 工具 ====================
+                case 'memento_checkin_getItems': {
+                    const result = await client.getCheckinItems(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_checkin_createItem': {
+                    const result = await client.createCheckinItem(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_checkin_addRecord': {
+                    const { itemId, ...data } = args;
+                    const result = await client.addCheckinRecord(itemId, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_checkin_getStats': {
+                    const result = await client.getCheckinStats();
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                // ==================== Day 工具 ====================
+                case 'memento_day_getMemorialDays': {
+                    const result = await client.getMemorialDays(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_day_createMemorialDay': {
+                    const result = await client.createMemorialDay(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_day_searchMemorialDays': {
+                    const result = await client.searchMemorialDays(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_day_getStats': {
+                    const result = await client.getDayStats();
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                // ==================== Tracker 工具 ====================
+                case 'memento_tracker_getGoals': {
+                    const result = await client.getTrackerGoals(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_tracker_createGoal': {
+                    const result = await client.createTrackerGoal(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_tracker_addRecord': {
+                    const result = await client.addTrackerRecord(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_tracker_getStats': {
+                    const result = await client.getTrackerStats();
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                // ==================== Contact 工具 ====================
+                case 'memento_contact_getContacts': {
+                    const result = await client.getContacts(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_contact_createContact': {
+                    const result = await client.createContact(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_contact_searchContacts': {
+                    const { keyword } = args;
+                    const result = await client.searchContacts(keyword);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_contact_getStats': {
+                    const result = await client.getContactStats();
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                // ==================== Calendar 工具 ====================
+                case 'memento_calendar_getEvents': {
+                    const result = await client.getCalendarEvents(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_calendar_createEvent': {
+                    const result = await client.createCalendarEvent(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_calendar_completeEvent': {
+                    const { id } = args;
+                    const result = await client.completeCalendarEvent(id);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_calendar_searchEvents': {
+                    const { keyword } = args;
+                    const result = await client.searchCalendarEvents(keyword);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
                 default:
                     throw new Error(`未知工具: ${name}`);
             }

@@ -250,5 +250,161 @@ export class MementoClient {
     async getTodoStats() {
         return this.get('/api/v1/plugins/todo/stats');
     }
+    // ==================== Diary API ====================
+    /**
+     * 获取日记列表
+     */
+    async getDiaryEntries(params) {
+        return this.get('/api/v1/plugins/diary/entries', params);
+    }
+    /**
+     * 获取指定日期的日记
+     */
+    async getDiaryEntry(date) {
+        return this.get(`/api/v1/plugins/diary/entries/${date}`);
+    }
+    /**
+     * 创建日记
+     */
+    async createDiaryEntry(data) {
+        return this.post('/api/v1/plugins/diary/entries', data);
+    }
+    /**
+     * 更新日记
+     */
+    async updateDiaryEntry(date, data) {
+        return this.put(`/api/v1/plugins/diary/entries/${date}`, data);
+    }
+    /**
+     * 删除日记
+     */
+    async deleteDiaryEntry(date) {
+        return this.delete(`/api/v1/plugins/diary/entries/${date}`);
+    }
+    /**
+     * 搜索日记
+     */
+    async searchDiaryEntries(params) {
+        return this.get('/api/v1/plugins/diary/search', params);
+    }
+    /**
+     * 获取日记统计
+     */
+    async getDiaryStats() {
+        return this.get('/api/v1/plugins/diary/stats');
+    }
+    // ==================== Checkin API ====================
+    async getCheckinItems(params) {
+        return this.get('/api/v1/plugins/checkin/items', params);
+    }
+    async getCheckinItem(id) {
+        return this.get(`/api/v1/plugins/checkin/items/${id}`);
+    }
+    async createCheckinItem(data) {
+        return this.post('/api/v1/plugins/checkin/items', data);
+    }
+    async updateCheckinItem(id, data) {
+        return this.put(`/api/v1/plugins/checkin/items/${id}`, data);
+    }
+    async deleteCheckinItem(id) {
+        return this.delete(`/api/v1/plugins/checkin/items/${id}`);
+    }
+    async addCheckinRecord(itemId, data) {
+        return this.post(`/api/v1/plugins/checkin/items/${itemId}/checkin`, data);
+    }
+    async getCheckinStats() {
+        return this.get('/api/v1/plugins/checkin/stats');
+    }
+    // ==================== Day API ====================
+    async getMemorialDays(params) {
+        return this.get('/api/v1/plugins/day/days', params);
+    }
+    async getMemorialDay(id) {
+        return this.get(`/api/v1/plugins/day/days/${id}`);
+    }
+    async createMemorialDay(data) {
+        return this.post('/api/v1/plugins/day/days', data);
+    }
+    async updateMemorialDay(id, data) {
+        return this.put(`/api/v1/plugins/day/days/${id}`, data);
+    }
+    async deleteMemorialDay(id) {
+        return this.delete(`/api/v1/plugins/day/days/${id}`);
+    }
+    async searchMemorialDays(params) {
+        return this.get('/api/v1/plugins/day/search', params);
+    }
+    async getDayStats() {
+        return this.get('/api/v1/plugins/day/stats');
+    }
+    // ==================== Tracker API ====================
+    async getTrackerGoals(params) {
+        return this.get('/api/v1/plugins/tracker/goals', params);
+    }
+    async getTrackerGoal(id) {
+        return this.get(`/api/v1/plugins/tracker/goals/${id}`);
+    }
+    async createTrackerGoal(data) {
+        return this.post('/api/v1/plugins/tracker/goals', data);
+    }
+    async updateTrackerGoal(id, data) {
+        return this.put(`/api/v1/plugins/tracker/goals/${id}`, data);
+    }
+    async deleteTrackerGoal(id) {
+        return this.delete(`/api/v1/plugins/tracker/goals/${id}`);
+    }
+    async addTrackerRecord(data) {
+        return this.post('/api/v1/plugins/tracker/records', data);
+    }
+    async getTrackerRecords(goalId) {
+        return this.get(`/api/v1/plugins/tracker/goals/${goalId}/records`);
+    }
+    async getTrackerStats() {
+        return this.get('/api/v1/plugins/tracker/stats');
+    }
+    // ==================== Contact API ====================
+    async getContacts(params) {
+        return this.get('/api/v1/plugins/contact/contacts', params);
+    }
+    async getContact(id) {
+        return this.get(`/api/v1/plugins/contact/contacts/${id}`);
+    }
+    async createContact(data) {
+        return this.post('/api/v1/plugins/contact/contacts', data);
+    }
+    async updateContact(id, data) {
+        return this.put(`/api/v1/plugins/contact/contacts/${id}`, data);
+    }
+    async deleteContact(id) {
+        return this.delete(`/api/v1/plugins/contact/contacts/${id}`);
+    }
+    async searchContacts(keyword) {
+        return this.get('/api/v1/plugins/contact/contacts/search', { keyword });
+    }
+    async getContactStats() {
+        return this.get('/api/v1/plugins/contact/stats/total-contacts');
+    }
+    // ==================== Calendar API ====================
+    async getCalendarEvents(params) {
+        return this.get('/api/v1/plugins/calendar/events', params);
+    }
+    async getCalendarEvent(id) {
+        return this.get(`/api/v1/plugins/calendar/events/${id}`);
+    }
+    async createCalendarEvent(data) {
+        return this.post('/api/v1/plugins/calendar/events', data);
+    }
+    async updateCalendarEvent(id, data) {
+        return this.put(`/api/v1/plugins/calendar/events/${id}`, data);
+    }
+    async deleteCalendarEvent(id) {
+        return this.delete(`/api/v1/plugins/calendar/events/${id}`);
+    }
+    async completeCalendarEvent(id) {
+        return this.post(`/api/v1/plugins/calendar/events/${id}/complete`);
+    }
+    async searchCalendarEvents(keyword) {
+        return this.get('/api/v1/plugins/calendar/events/search', { keyword });
+    }
 }
 //# sourceMappingURL=memento-client.js.map
