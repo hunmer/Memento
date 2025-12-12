@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
 
 /// JavaScript 工具配置模型
 class JSToolConfig {
@@ -11,6 +12,12 @@ class JSToolConfig {
   /// 工具描述
   final String description;
 
+  /// 工具参数定义
+  final List<ToolParameter> parameters;
+
+  /// 工具示例代码
+  final List<ToolExample> examples;
+
   /// JavaScript 代码
   final String code;
 
@@ -21,6 +28,8 @@ class JSToolConfig {
     required this.id,
     required this.name,
     required this.description,
+    required this.parameters,
+    required this.examples,
     required this.code,
     this.cardId,
   });
@@ -31,6 +40,8 @@ class JSToolConfig {
       'id': id,
       'name': name,
       'description': description,
+      'parameters': parameters.map((p) => p.toJson()).toList(),
+      'examples': examples.map((e) => e.toJson()).toList(),
       'code': code,
       'cardId': cardId,
     };
@@ -42,6 +53,14 @@ class JSToolConfig {
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
+      parameters: (json['parameters'] as List<dynamic>?)
+              ?.map((e) => ToolParameter.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      examples: (json['examples'] as List<dynamic>?)
+              ?.map((e) => ToolExample.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       code: json['code'] as String,
       cardId: json['cardId'] as String?,
     );
@@ -49,7 +68,7 @@ class JSToolConfig {
 
   @override
   String toString() {
-    return 'JSToolConfig{id: $id, name: $name, description: $description, cardId: $cardId}';
+    return 'JSToolConfig{id: $id, name: $name, description: $description, parameters: ${parameters.length}, examples: ${examples.length}, cardId: $cardId}';
   }
 
   @override
@@ -60,12 +79,20 @@ class JSToolConfig {
           id == other.id &&
           name == other.name &&
           description == other.description &&
+          parameters == other.parameters &&
+          examples == other.examples &&
           code == other.code &&
           cardId == other.cardId;
 
   @override
   int get hashCode =>
-      id.hashCode ^ name.hashCode ^ description.hashCode ^ code.hashCode ^ cardId.hashCode;
+      id.hashCode ^
+      name.hashCode ^
+      description.hashCode ^
+      parameters.hashCode ^
+      examples.hashCode ^
+      code.hashCode ^
+      cardId.hashCode;
 }
 
 /// JavaScript 工具注册表

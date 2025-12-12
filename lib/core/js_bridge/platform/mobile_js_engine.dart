@@ -526,6 +526,8 @@ class MobileJSEngine implements JSEngine {
         final jsToolConfig = ToolConfig(
           title: tool.name,
           description: tool.description,
+          parameters: tool.parameters,
+          examples: tool.examples,
           returns: ToolReturns(
             type: 'object',
             description: 'JS工具执行结果',
@@ -540,7 +542,7 @@ class MobileJSEngine implements JSEngine {
             tool.id,
             jsToolConfig,
           );
-          print('JS工具已添加到工具管理页面: ${tool.id}');
+          print('JS工具已添加到工具管理页面: ${tool.id} (${tool.parameters.length}个参数, ${tool.examples.length}个示例)');
         } catch (e) {
           print('添加JS工具到ToolConfigManager失败: $e');
         }
