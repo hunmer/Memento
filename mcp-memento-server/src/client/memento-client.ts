@@ -357,4 +357,227 @@ export class MementoClient {
   async getTodoStats() {
     return this.get('/api/v1/plugins/todo/stats');
   }
+
+  // ==================== Diary API ====================
+
+  /**
+   * 获取日记列表
+   */
+  async getDiaryEntries(params?: { startDate?: string; endDate?: string; offset?: number; count?: number }) {
+    return this.get('/api/v1/plugins/diary/entries', params as Record<string, string>);
+  }
+
+  /**
+   * 获取指定日期的日记
+   */
+  async getDiaryEntry(date: string) {
+    return this.get(`/api/v1/plugins/diary/entries/${date}`);
+  }
+
+  /**
+   * 创建日记
+   */
+  async createDiaryEntry(data: {
+    date: string;
+    content: string;
+    mood?: number;
+    weather?: string;
+    tags?: string[];
+  }) {
+    return this.post('/api/v1/plugins/diary/entries', data);
+  }
+
+  /**
+   * 更新日记
+   */
+  async updateDiaryEntry(date: string, data: {
+    content?: string;
+    mood?: number;
+    weather?: string;
+    tags?: string[];
+  }) {
+    return this.put(`/api/v1/plugins/diary/entries/${date}`, data);
+  }
+
+  /**
+   * 删除日记
+   */
+  async deleteDiaryEntry(date: string) {
+    return this.delete(`/api/v1/plugins/diary/entries/${date}`);
+  }
+
+  /**
+   * 搜索日记
+   */
+  async searchDiaryEntries(params?: {
+    keyword?: string;
+    startDate?: string;
+    endDate?: string;
+    mood?: string;
+    offset?: number;
+    count?: number;
+  }) {
+    return this.get('/api/v1/plugins/diary/search', params as Record<string, string>);
+  }
+
+  /**
+   * 获取日记统计
+   */
+  async getDiaryStats() {
+    return this.get('/api/v1/plugins/diary/stats');
+  }
+
+  // ==================== Checkin API ====================
+
+  async getCheckinItems(params?: { offset?: number; count?: number }) {
+    return this.get('/api/v1/plugins/checkin/items', params as Record<string, string>);
+  }
+
+  async getCheckinItem(id: string) {
+    return this.get(`/api/v1/plugins/checkin/items/${id}`);
+  }
+
+  async createCheckinItem(data: { name: string; icon?: string; color?: string; group?: string; description?: string }) {
+    return this.post('/api/v1/plugins/checkin/items', data);
+  }
+
+  async updateCheckinItem(id: string, data: { name?: string; icon?: string; color?: string; group?: string; description?: string }) {
+    return this.put(`/api/v1/plugins/checkin/items/${id}`, data);
+  }
+
+  async deleteCheckinItem(id: string) {
+    return this.delete(`/api/v1/plugins/checkin/items/${id}`);
+  }
+
+  async addCheckinRecord(itemId: string, data: { date: string; note?: string }) {
+    return this.post(`/api/v1/plugins/checkin/items/${itemId}/checkin`, data);
+  }
+
+  async getCheckinStats() {
+    return this.get('/api/v1/plugins/checkin/stats');
+  }
+
+  // ==================== Day API ====================
+
+  async getMemorialDays(params?: { sortMode?: string; offset?: number; count?: number }) {
+    return this.get('/api/v1/plugins/day/days', params as Record<string, string>);
+  }
+
+  async getMemorialDay(id: string) {
+    return this.get(`/api/v1/plugins/day/days/${id}`);
+  }
+
+  async createMemorialDay(data: { name: string; date: string; type?: string; description?: string; color?: string }) {
+    return this.post('/api/v1/plugins/day/days', data);
+  }
+
+  async updateMemorialDay(id: string, data: { name?: string; date?: string; type?: string; description?: string; color?: string }) {
+    return this.put(`/api/v1/plugins/day/days/${id}`, data);
+  }
+
+  async deleteMemorialDay(id: string) {
+    return this.delete(`/api/v1/plugins/day/days/${id}`);
+  }
+
+  async searchMemorialDays(params?: { sortMode?: string; startDate?: string; endDate?: string; includeExpired?: boolean }) {
+    return this.get('/api/v1/plugins/day/search', params as Record<string, string>);
+  }
+
+  async getDayStats() {
+    return this.get('/api/v1/plugins/day/stats');
+  }
+
+  // ==================== Tracker API ====================
+
+  async getTrackerGoals(params?: { offset?: number; count?: number }) {
+    return this.get('/api/v1/plugins/tracker/goals', params as Record<string, string>);
+  }
+
+  async getTrackerGoal(id: string) {
+    return this.get(`/api/v1/plugins/tracker/goals/${id}`);
+  }
+
+  async createTrackerGoal(data: { name: string; targetValue: number; unit: string; group?: string; description?: string }) {
+    return this.post('/api/v1/plugins/tracker/goals', data);
+  }
+
+  async updateTrackerGoal(id: string, data: { name?: string; targetValue?: number; unit?: string; group?: string; description?: string }) {
+    return this.put(`/api/v1/plugins/tracker/goals/${id}`, data);
+  }
+
+  async deleteTrackerGoal(id: string) {
+    return this.delete(`/api/v1/plugins/tracker/goals/${id}`);
+  }
+
+  async addTrackerRecord(data: { goalId: string; value: number; date: string; note?: string }) {
+    return this.post('/api/v1/plugins/tracker/records', data);
+  }
+
+  async getTrackerRecords(goalId: string) {
+    return this.get(`/api/v1/plugins/tracker/goals/${goalId}/records`);
+  }
+
+  async getTrackerStats() {
+    return this.get('/api/v1/plugins/tracker/stats');
+  }
+
+  // ==================== Contact API ====================
+
+  async getContacts(params?: { offset?: number; count?: number }) {
+    return this.get('/api/v1/plugins/contact/contacts', params as Record<string, string>);
+  }
+
+  async getContact(id: string) {
+    return this.get(`/api/v1/plugins/contact/contacts/${id}`);
+  }
+
+  async createContact(data: { name: string; phone?: string; email?: string; tags?: string[]; notes?: string }) {
+    return this.post('/api/v1/plugins/contact/contacts', data);
+  }
+
+  async updateContact(id: string, data: { name?: string; phone?: string; email?: string; tags?: string[]; notes?: string }) {
+    return this.put(`/api/v1/plugins/contact/contacts/${id}`, data);
+  }
+
+  async deleteContact(id: string) {
+    return this.delete(`/api/v1/plugins/contact/contacts/${id}`);
+  }
+
+  async searchContacts(keyword: string) {
+    return this.get('/api/v1/plugins/contact/contacts/search', { keyword });
+  }
+
+  async getContactStats() {
+    return this.get('/api/v1/plugins/contact/stats/total-contacts');
+  }
+
+  // ==================== Calendar API ====================
+
+  async getCalendarEvents(params?: { startDate?: string; endDate?: string; offset?: number; count?: number }) {
+    return this.get('/api/v1/plugins/calendar/events', params as Record<string, string>);
+  }
+
+  async getCalendarEvent(id: string) {
+    return this.get(`/api/v1/plugins/calendar/events/${id}`);
+  }
+
+  async createCalendarEvent(data: { title: string; startTime: string; endTime?: string; description?: string; location?: string }) {
+    return this.post('/api/v1/plugins/calendar/events', data);
+  }
+
+  async updateCalendarEvent(id: string, data: { title?: string; startTime?: string; endTime?: string; description?: string; location?: string }) {
+    return this.put(`/api/v1/plugins/calendar/events/${id}`, data);
+  }
+
+  async deleteCalendarEvent(id: string) {
+    return this.delete(`/api/v1/plugins/calendar/events/${id}`);
+  }
+
+  async completeCalendarEvent(id: string) {
+    return this.post(`/api/v1/plugins/calendar/events/${id}/complete`);
+  }
+
+  async searchCalendarEvents(keyword: string) {
+    return this.get('/api/v1/plugins/calendar/events/search', { keyword });
+  }
 }

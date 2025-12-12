@@ -19,6 +19,19 @@ import 'package:memento_server/routes/plugin_routes/activity_routes.dart';
 import 'package:memento_server/routes/plugin_routes/goods_routes.dart';
 import 'package:memento_server/routes/plugin_routes/bill_routes.dart';
 import 'package:memento_server/routes/plugin_routes/todo_routes.dart';
+import 'package:memento_server/routes/plugin_routes/agent_chat_routes.dart';
+import 'package:memento_server/routes/plugin_routes/calendar_album_routes.dart';
+import 'package:memento_server/routes/plugin_routes/calendar_routes.dart';
+import 'package:memento_server/routes/plugin_routes/checkin_routes.dart';
+import 'package:memento_server/routes/plugin_routes/contact_routes.dart';
+import 'package:memento_server/routes/plugin_routes/database_routes.dart';
+import 'package:memento_server/routes/plugin_routes/day_routes.dart';
+import 'package:memento_server/routes/plugin_routes/diary_routes.dart';
+import 'package:memento_server/routes/plugin_routes/nodes_routes.dart';
+import 'package:memento_server/routes/plugin_routes/openai_routes.dart';
+import 'package:memento_server/routes/plugin_routes/store_routes.dart';
+import 'package:memento_server/routes/plugin_routes/timer_routes.dart';
+import 'package:memento_server/routes/plugin_routes/tracker_routes.dart';
 import 'package:memento_server/middleware/auth_middleware.dart';
 import 'package:memento_server/middleware/api_enabled_middleware.dart';
 
@@ -167,7 +180,98 @@ void main(List<String> args) async {
     pluginPipeline().addHandler(todoRoutes.router.call),
   );
 
-  logger.info('已挂载 6 个插件路由: chat, notes, activity, goods, bill, todo');
+  // AgentChat 插件路由
+  final agentChatRoutes = AgentChatRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/agent_chat',
+    pluginPipeline().addHandler(agentChatRoutes.router.call),
+  );
+
+  // CalendarAlbum 插件路由
+  final calendarAlbumRoutes = CalendarAlbumRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/calendar_album',
+    pluginPipeline().addHandler(calendarAlbumRoutes.router.call),
+  );
+
+  // Calendar 插件路由
+  final calendarRoutes = CalendarRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/calendar',
+    pluginPipeline().addHandler(calendarRoutes.router.call),
+  );
+
+  // Checkin 插件路由
+  final checkinRoutes = CheckinRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/checkin',
+    pluginPipeline().addHandler(checkinRoutes.router.call),
+  );
+
+  // Contact 插件路由
+  final contactRoutes = ContactRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/contact',
+    pluginPipeline().addHandler(contactRoutes.router.call),
+  );
+
+  // Database 插件路由
+  final databaseRoutes = DatabaseRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/database',
+    pluginPipeline().addHandler(databaseRoutes.router.call),
+  );
+
+  // Day 插件路由
+  final dayRoutes = DayRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/day',
+    pluginPipeline().addHandler(dayRoutes.router.call),
+  );
+
+  // Diary 插件路由
+  final diaryRoutes = DiaryRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/diary',
+    pluginPipeline().addHandler(diaryRoutes.router.call),
+  );
+
+  // Nodes 插件路由
+  final nodesRoutes = NodesRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/nodes',
+    pluginPipeline().addHandler(nodesRoutes.router.call),
+  );
+
+  // OpenAI 插件路由
+  final openaiRoutes = OpenAIRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/openai',
+    pluginPipeline().addHandler(openaiRoutes.router.call),
+  );
+
+  // Store 插件路由
+  final storeRoutes = StoreRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/store',
+    pluginPipeline().addHandler(storeRoutes.router.call),
+  );
+
+  // Timer 插件路由
+  final timerRoutes = TimerRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/timer',
+    pluginPipeline().addHandler(timerRoutes.router.call),
+  );
+
+  // Tracker 插件路由
+  final trackerRoutes = TrackerRoutes(pluginDataService);
+  router.mount(
+    '/api/v1/plugins/tracker',
+    pluginPipeline().addHandler(trackerRoutes.router.call),
+  );
+
+  logger.info('已挂载 19 个插件路由: chat, notes, activity, goods, bill, todo, agent_chat, calendar_album, calendar, checkin, contact, database, day, diary, nodes, openai, store, timer, tracker');
 
   // 管理界面静态文件服务
   final scriptDir = path.dirname(Platform.script.toFilePath());
@@ -265,12 +369,25 @@ void main(List<String> args) async {
   print('  GET  /api/v1/sync/list     - 文件列表 (需认证)');
   print('');
   print('插件 API (需认证 + API 启用):');
-  print('  /api/v1/plugins/chat     - 聊天插件');
-  print('  /api/v1/plugins/notes    - 笔记插件');
-  print('  /api/v1/plugins/activity - 活动记录插件');
-  print('  /api/v1/plugins/goods    - 物品管理插件');
-  print('  /api/v1/plugins/bill     - 账单插件');
-  print('  /api/v1/plugins/todo     - 任务插件');
+  print('  /api/v1/plugins/chat           - 聊天插件');
+  print('  /api/v1/plugins/notes          - 笔记插件');
+  print('  /api/v1/plugins/activity       - 活动记录插件');
+  print('  /api/v1/plugins/goods          - 物品管理插件');
+  print('  /api/v1/plugins/bill           - 账单插件');
+  print('  /api/v1/plugins/todo           - 任务插件');
+  print('  /api/v1/plugins/agent_chat     - AI 代理聊天插件');
+  print('  /api/v1/plugins/calendar_album - 日记相册插件');
+  print('  /api/v1/plugins/calendar       - 日历插件');
+  print('  /api/v1/plugins/checkin        - 签到插件');
+  print('  /api/v1/plugins/contact        - 联系人插件');
+  print('  /api/v1/plugins/database       - 自定义数据库插件');
+  print('  /api/v1/plugins/day            - 纪念日插件');
+  print('  /api/v1/plugins/diary          - 日记插件');
+  print('  /api/v1/plugins/nodes          - 节点插件');
+  print('  /api/v1/plugins/openai         - AI 助手插件');
+  print('  /api/v1/plugins/store          - 物品兑换插件');
+  print('  /api/v1/plugins/timer          - 计时器插件');
+  print('  /api/v1/plugins/tracker        - 目标追踪插件');
   print('');
 
   // 优雅关闭

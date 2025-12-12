@@ -351,5 +351,330 @@ export function getToolDefinitions() {
         properties: {},
       },
     },
+
+    // ==================== Diary 工具 ====================
+    {
+      name: 'memento_diary_getEntries',
+      description: '获取日记列表',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          startDate: { type: 'string', description: '开始日期 (YYYY-MM-DD)' },
+          endDate: { type: 'string', description: '结束日期 (YYYY-MM-DD)' },
+          offset: { type: 'number', description: '偏移量' },
+          count: { type: 'number', description: '数量限制' },
+        },
+      },
+    },
+    {
+      name: 'memento_diary_getEntry',
+      description: '获取指定日期的日记',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          date: { type: 'string', description: '日期 (YYYY-MM-DD)' },
+        },
+        required: ['date'],
+      },
+    },
+    {
+      name: 'memento_diary_createEntry',
+      description: '创建日记',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          date: { type: 'string', description: '日期 (YYYY-MM-DD)' },
+          content: { type: 'string', description: '日记内容 (支持 Markdown)' },
+          mood: { type: 'number', description: '心情 (1-5)' },
+          weather: { type: 'string', description: '天气' },
+          tags: { type: 'array', items: { type: 'string' }, description: '标签' },
+        },
+        required: ['date', 'content'],
+      },
+    },
+    {
+      name: 'memento_diary_updateEntry',
+      description: '更新日记',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          date: { type: 'string', description: '日期 (YYYY-MM-DD)' },
+          content: { type: 'string', description: '新内容' },
+          mood: { type: 'number', description: '新心情' },
+          weather: { type: 'string', description: '新天气' },
+          tags: { type: 'array', items: { type: 'string' }, description: '新标签' },
+        },
+        required: ['date'],
+      },
+    },
+    {
+      name: 'memento_diary_searchEntries',
+      description: '搜索日记',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          keyword: { type: 'string', description: '搜索关键词' },
+          startDate: { type: 'string', description: '开始日期' },
+          endDate: { type: 'string', description: '结束日期' },
+          mood: { type: 'string', description: '心情筛选' },
+        },
+      },
+    },
+    {
+      name: 'memento_diary_getStats',
+      description: '获取日记统计',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+      },
+    },
+
+    // ==================== Checkin 工具 ====================
+    {
+      name: 'memento_checkin_getItems',
+      description: '获取打卡项目列表',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          offset: { type: 'number', description: '偏移量' },
+          count: { type: 'number', description: '数量限制' },
+        },
+      },
+    },
+    {
+      name: 'memento_checkin_createItem',
+      description: '创建打卡项目',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: '项目名称' },
+          icon: { type: 'string', description: '图标' },
+          color: { type: 'string', description: '颜色' },
+          group: { type: 'string', description: '分组' },
+          description: { type: 'string', description: '描述' },
+        },
+        required: ['name'],
+      },
+    },
+    {
+      name: 'memento_checkin_addRecord',
+      description: '添加打卡记录',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          itemId: { type: 'string', description: '打卡项目 ID' },
+          date: { type: 'string', description: '日期 (YYYY-MM-DD)' },
+          note: { type: 'string', description: '备注' },
+        },
+        required: ['itemId', 'date'],
+      },
+    },
+    {
+      name: 'memento_checkin_getStats',
+      description: '获取打卡统计',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+      },
+    },
+
+    // ==================== Day 工具 ====================
+    {
+      name: 'memento_day_getMemorialDays',
+      description: '获取纪念日列表',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          sortMode: { type: 'string', description: '排序模式' },
+          offset: { type: 'number', description: '偏移量' },
+          count: { type: 'number', description: '数量限制' },
+        },
+      },
+    },
+    {
+      name: 'memento_day_createMemorialDay',
+      description: '创建纪念日',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: '纪念日名称' },
+          date: { type: 'string', description: '日期 (YYYY-MM-DD)' },
+          type: { type: 'string', description: '类型（倒计时/正计时）' },
+          description: { type: 'string', description: '描述' },
+          color: { type: 'string', description: '颜色' },
+        },
+        required: ['name', 'date'],
+      },
+    },
+    {
+      name: 'memento_day_searchMemorialDays',
+      description: '搜索纪念日',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          sortMode: { type: 'string', description: '排序模式' },
+          startDate: { type: 'string', description: '开始日期' },
+          endDate: { type: 'string', description: '结束日期' },
+          includeExpired: { type: 'boolean', description: '包含已过期' },
+        },
+      },
+    },
+    {
+      name: 'memento_day_getStats',
+      description: '获取纪念日统计',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+      },
+    },
+
+    // ==================== Tracker 工具 ====================
+    {
+      name: 'memento_tracker_getGoals',
+      description: '获取追踪目标列表',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          offset: { type: 'number', description: '偏移量' },
+          count: { type: 'number', description: '数量限制' },
+        },
+      },
+    },
+    {
+      name: 'memento_tracker_createGoal',
+      description: '创建追踪目标',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: '目标名称' },
+          targetValue: { type: 'number', description: '目标值' },
+          unit: { type: 'string', description: '单位' },
+          group: { type: 'string', description: '分组' },
+          description: { type: 'string', description: '描述' },
+        },
+        required: ['name', 'targetValue', 'unit'],
+      },
+    },
+    {
+      name: 'memento_tracker_addRecord',
+      description: '添加追踪记录',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          goalId: { type: 'string', description: '目标 ID' },
+          value: { type: 'number', description: '记录值' },
+          date: { type: 'string', description: '日期 (YYYY-MM-DD)' },
+          note: { type: 'string', description: '备注' },
+        },
+        required: ['goalId', 'value', 'date'],
+      },
+    },
+    {
+      name: 'memento_tracker_getStats',
+      description: '获取追踪统计',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+      },
+    },
+
+    // ==================== Contact 工具 ====================
+    {
+      name: 'memento_contact_getContacts',
+      description: '获取联系人列表',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          offset: { type: 'number', description: '偏移量' },
+          count: { type: 'number', description: '数量限制' },
+        },
+      },
+    },
+    {
+      name: 'memento_contact_createContact',
+      description: '创建联系人',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: '姓名' },
+          phone: { type: 'string', description: '电话' },
+          email: { type: 'string', description: '邮箱' },
+          tags: { type: 'array', items: { type: 'string' }, description: '标签' },
+          notes: { type: 'string', description: '备注' },
+        },
+        required: ['name'],
+      },
+    },
+    {
+      name: 'memento_contact_searchContacts',
+      description: '搜索联系人',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          keyword: { type: 'string', description: '搜索关键词' },
+        },
+        required: ['keyword'],
+      },
+    },
+    {
+      name: 'memento_contact_getStats',
+      description: '获取联系人统计',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+      },
+    },
+
+    // ==================== Calendar 工具 ====================
+    {
+      name: 'memento_calendar_getEvents',
+      description: '获取日历事件列表',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          startDate: { type: 'string', description: '开始日期 (YYYY-MM-DD)' },
+          endDate: { type: 'string', description: '结束日期 (YYYY-MM-DD)' },
+          offset: { type: 'number', description: '偏移量' },
+          count: { type: 'number', description: '数量限制' },
+        },
+      },
+    },
+    {
+      name: 'memento_calendar_createEvent',
+      description: '创建日历事件',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          title: { type: 'string', description: '事件标题' },
+          startTime: { type: 'string', description: '开始时间 (ISO 8601)' },
+          endTime: { type: 'string', description: '结束时间 (ISO 8601)' },
+          description: { type: 'string', description: '描述' },
+          location: { type: 'string', description: '地点' },
+        },
+        required: ['title', 'startTime'],
+      },
+    },
+    {
+      name: 'memento_calendar_completeEvent',
+      description: '完成日历事件',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '事件 ID' },
+        },
+        required: ['id'],
+      },
+    },
+    {
+      name: 'memento_calendar_searchEvents',
+      description: '搜索日历事件',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          keyword: { type: 'string', description: '搜索关键词' },
+        },
+        required: ['keyword'],
+      },
+    },
   ];
 }
