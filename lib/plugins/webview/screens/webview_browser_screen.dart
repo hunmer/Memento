@@ -633,9 +633,17 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
         final url = navigationAction.request.url?.toString() ?? '';
         final currentUrl = widget.tab.url;
 
-        // 如果是 HTTP 重定向到 HTTPS，允许加载
-        // 如果是 HTTPS 重定向到 HTTP，允许加载
-        // 但防止同一页面的重复加载
+        // 允许 about:blank
+        if (url == 'about:blank') {
+          return NavigationActionPolicy.ALLOW;
+        }
+
+        // 允许初始加载（currentUrl 为空或为 about:blank）
+        if (currentUrl.isEmpty || currentUrl == 'about:blank') {
+          return NavigationActionPolicy.ALLOW;
+        }
+
+        // 允许协议切换（HTTP <-> HTTPS）
         final isHttpToHttps =
             currentUrl.startsWith('http://') && url.startsWith('https://');
         final isHttpsToHttp =
@@ -645,11 +653,8 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
           return NavigationActionPolicy.ALLOW;
         }
 
-        // 防止无限循环：检查 URL 是否已经加载过
-        final normalizedCurrent = _normalizeUrl(currentUrl);
-        final normalizedNew = _normalizeUrl(url);
-
-        if (normalizedCurrent == normalizedNew) {
+        // 防止无限循环：仅在完全相同的 URL 时才取消（不做过多规范化）
+        if (currentUrl == url) {
           return NavigationActionPolicy.CANCEL;
         }
 
@@ -708,6 +713,28 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
       onConsoleMessage: (controller, consoleMessage) {
         debugPrint('[WebView Console] ${consoleMessage.message}');
       },
+      onReceivedError: (controller, request, error) async {
+        // 忽略 about:blank 的错误
+        if (request.url.toString() == 'about:blank') {
+          return;
+        }
+
+        // 忽略连接停止错误（type 9），这通常是用户主动停止或页面跳转
+        // WebResourceErrorType 在不同平台上的值可能不同，直接比较数值
+        if (error.type.toNativeValue() == 9) {
+          return;
+        }
+
+        // 记录其他错误以便调试
+        debugPrint(
+          '[WebView Error] URL: ${request.url}, '
+          'Error Type: ${error.type} (${error.type.toNativeValue()}), '
+          'Description: ${error.description}',
+        );
+
+        // 停止加载状态
+        widget.onLoadingChanged(false);
+      },
       onReceivedServerTrustAuthRequest: (controller, challenge) async {
         // 处理 SSL 证书信任请求
         // 在开发环境中，自动信任所有有效证书
@@ -719,14 +746,5 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
         );
       },
     );
-  }
-
-  /// 规范化 URL（去除尾部斜杠等差异）
-  String _normalizeUrl(String url) {
-    // 去除尾部斜杠（除了根路径）
-    if (url.length > 1 && url.endsWith('/')) {
-      return url.substring(0, url.length - 1);
-    }
-    return url;
   }
 }

@@ -9,6 +9,7 @@ import 'models/webview_card.dart';
 import 'models/webview_settings.dart';
 import 'services/tab_manager.dart';
 import 'services/card_manager.dart';
+import 'services/proxy_controller_service.dart';
 import 'screens/webview_main_screen.dart';
 
 /// WebView 插件
@@ -31,6 +32,7 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   // Services
   late final TabManager tabManager;
   late final CardManager cardManager;
+  late final ProxyControllerService proxyController;
   late WebViewSettings webviewSettings;
 
   bool _isInitialized = false;
@@ -53,9 +55,18 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     // 初始化服务
     tabManager = TabManager(maxTabs: 10);
     cardManager = CardManager(storage);
+    proxyController = ProxyControllerService();
+
+    // 检查 proxy 支持
+    await proxyController.checkSupport();
 
     // 加载设置
     await _loadSettings();
+
+    // 应用 proxy 配置（如果支持）
+    if (proxyController.isSupported) {
+      await proxyController.applyProxySettings(webviewSettings.proxySettings);
+    }
 
     // 初始化卡片服务
     await cardManager.initialize();
@@ -89,6 +100,12 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   /// 保存设置
   Future<void> saveWebviewSettings() async {
     await storage.write('webview/settings.json', webviewSettings.toJson());
+
+    // 重新应用 proxy 配置
+    if (proxyController.isSupported) {
+      await proxyController.applyProxySettings(webviewSettings.proxySettings);
+    }
+
     notifyListeners();
   }
 
