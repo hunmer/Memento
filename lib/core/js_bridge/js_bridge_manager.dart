@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,19 @@ class PendingPluginRegistration {
   final Map<String, Function> apis;
 
   PendingPluginRegistration({required this.plugin, required this.apis});
+}
+
+/// 延迟执行的脚本信息
+class _PendingScript {
+  final String code;
+  final String? description;
+  final Completer<JSResult> completer;
+
+  _PendingScript({
+    required this.code,
+    this.description,
+    required this.completer,
+  });
 }
 
 /// 全局 JS 桥接管理器
@@ -44,6 +58,9 @@ class JSBridgeManager {
   // 延迟注册队列 - 存储等待 JS Bridge 初始化完成后注册的插件
   final List<PendingPluginRegistration> _pendingRegistrations = [];
 
+  // 延迟执行队列 - 存储等待 JS Bridge 初始化完成后执行的脚本
+  final List<_PendingScript> _pendingScripts = [];
+
   /// 初始化 JS 引擎
   Future<void> initialize() async {
     if (_initialized) return;
@@ -60,6 +77,9 @@ class JSBridgeManager {
 
       // 处理延迟注册的插件
       await _processPendingRegistrations();
+
+      // 处理延迟执行的脚本
+      await _processPendingScripts();
     } catch (e) {
       print('JS Bridge 初始化失败: $e');
       _initialized = false;
@@ -128,6 +148,29 @@ class JSBridgeManager {
     }
 
     print('所有延迟注册已完成');
+  }
+
+  /// 处理延迟执行的脚本
+  Future<void> _processPendingScripts() async {
+    if (_pendingScripts.isEmpty) return;
+
+    print('正在处理 ${_pendingScripts.length} 个延迟执行的脚本...');
+
+    final scripts = List<_PendingScript>.from(_pendingScripts);
+    _pendingScripts.clear();
+
+    for (final script in scripts) {
+      try {
+        final result = await _engine!.evaluate(script.code);
+        script.completer.complete(result);
+        print('✓ 延迟脚本执行成功: ${script.description ?? '(未命名)'}');
+      } catch (e) {
+        script.completer.complete(JSResult.error(e.toString()));
+        print('✗ 延迟脚本执行失败: ${script.description ?? '(未命名)'} - $e');
+      }
+    }
+
+    print('所有延迟脚本已处理');
   }
 
   /// 执行实际的插件注册（拆分出来以便复用）
@@ -283,6 +326,27 @@ class JSBridgeManager {
       return JSResult.error('JS Bridge not initialized');
     }
     return await _engine!.evaluate(code);
+  }
+
+  /// 执行 JS 代码（如果未初始化则加入延迟队列）
+  ///
+  /// 与 [evaluate] 不同，此方法在 JS Bridge 未初始化时不会立即返回错误，
+  /// 而是将脚本加入延迟执行队列，等待初始化完成后自动执行。
+  Future<JSResult> evaluateWhenReady(String code, {String? description}) async {
+    // 如果已初始化，直接执行
+    if (_initialized && _engine != null) {
+      return await _engine!.evaluate(code);
+    }
+
+    // 否则加入延迟执行队列
+    print('[JSBridge] JS Bridge 未初始化，脚本加入延迟队列: ${description ?? '(未命名)'}');
+    final completer = Completer<JSResult>();
+    _pendingScripts.add(_PendingScript(
+      code: code,
+      description: description,
+      completer: completer,
+    ));
+    return completer.future;
   }
 
   /// 注册全局 API

@@ -6,6 +6,8 @@ import 'js_engine_interface.dart';
 import '../js_tool_registry.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_config_manager.dart';
+import 'package:Memento/plugins/agent_chat/services/tool_service.dart';
+import 'package:Memento/core/app_initializer.dart'; // 用于访问 globalStorage
 
 class MobileJSEngine implements JSEngine {
   late JavascriptRuntime _runtime;
@@ -403,111 +405,125 @@ class MobileJSEngine implements JSEngine {
 
   /// 扩展 memento 对象，添加工具注册和存储功能
   Future<void> _extendMementoWithToolRegistration() async {
-    // 先扩展 memento 对象，添加工具注册和存储方法
-    final script = '''
-      // 确保 memento 对象存在
-      if (typeof globalThis.memento === 'undefined') {
-        globalThis.memento = {};
-      }
+    // 1. 创建 memento 对象和 tools 命名空间
+    await evaluateDirect('globalThis.memento = {}; globalThis.memento.tools = {};');
 
-      // 添加工具注册方法
+    // 2. 添加 registerTool 方法
+    await evaluateDirect('''
       globalThis.memento.registerTool = function(config) {
-        // 调用 Dart 侧的方法注册工具
+        if (config && config.id) {
+          globalThis.memento.tools[config.id] = function(params) {
+            try {
+              var toolCode = config.code || '';
+              var toolParams = params || {};
+              var executionId = Date.now() + '_' + Math.floor(Math.random() * 1000000);
+              globalThis.__EVAL_RESULTS__ = globalThis.__EVAL_RESULTS__ || {};
+              globalThis.__EVAL_RESULTS__[executionId] = null;
+              var wrappedCode = '(async function() {' +
+                'var params = arguments[0];' +
+                'var setResult = arguments[1];' +
+                'try {' +
+                  'var __result__ = await (async function() {' + toolCode + '})();' +
+                  'setResult(__result__);' +
+                  'return __result__;' +
+                '} catch (error) { setResult({ error: error.toString() }); }' +
+                '})';
+              var executor = eval(wrappedCode);
+              return executor(toolParams, function(result) {
+                globalThis.__EVAL_RESULTS__[executionId] = result;
+              }).then(function() {
+                return globalThis.__EVAL_RESULTS__[executionId];
+              });
+            } catch (e) {
+              return Promise.reject(new Error('工具执行失败: ' + e.toString()));
+            }
+          };
+        }
         if (typeof __DART_TOOL_REGISTRY__ !== 'undefined') {
           try {
             __DART_TOOL_REGISTRY__(JSON.stringify(config));
-            return {
-              success: true,
-              toolId: config.id,
-              message: '工具已提交注册: ' + config.id
-            };
+            return { success: true, toolId: config.id, message: '工具已提交注册: ' + config.id };
           } catch (e) {
-            return {
-              success: false,
-              error: e.toString(),
-              toolId: config.id
-            };
+            return { success: false, error: e.toString(), toolId: config.id };
           }
         } else {
-          return {
-            success: false,
-            error: 'Dart 工具注册器未初始化',
-            toolId: config.id
-          };
+          return { success: false, error: 'Dart 工具注册器未初始化', toolId: config.id };
         }
       };
+    ''');
 
-      // 添加工具列表方法
+    // 3. 添加 listTools 方法
+    await evaluateDirect('''
       globalThis.memento.listTools = function() {
         if (typeof __DART_GET_TOOLS__ !== 'undefined') {
           try {
             var toolsJson = __DART_GET_TOOLS__();
-            return {
-              success: true,
-              tools: JSON.parse(toolsJson || '[]')
-            };
+            return { success: true, tools: JSON.parse(toolsJson || '[]') };
           } catch (e) {
-            return {
-              success: false,
-              error: e.toString(),
-              tools: []
-            };
+            return { success: false, error: e.toString(), tools: [] };
           }
         }
-        return {
-          success: true,
-          tools: []
-        };
+        return { success: true, tools: [] };
       };
+    ''');
 
-      // 添加 memento.storage 命名空间
+    // 4. 添加 storage 命名空间（内存存储 + 文件存储能力）
+    await evaluateDirect('''
       globalThis.memento.storage = {
         _data: {},
+        read: function(key) { return this._data[key] || null; },
+        write: function(key, value) { this._data[key] = value; return { success: true, key: key }; },
+        delete: function(key) { delete this._data[key]; return { success: true, key: key }; },
+        exists: function(key) { return key in this._data; },
+        keys: function() { return Object.keys(this._data); },
+        clear: function() { this._data = {}; return { success: true }; },
 
-        // 读取数据
-        read: function(key) {
-          return this._data[key] || null;
+        // 卡片数据文件读写（基于 cardId）
+        readCardData: function(cardId) {
+          console.log('[readCardData] 开始读取: ' + cardId);
+          if (typeof __DART_STORAGE_READ_CARD_DATA__ !== 'undefined') {
+            return __DART_STORAGE_READ_CARD_DATA__(cardId).then(function(result) {
+              console.log('[readCardData] Dart 返回类型: ' + typeof result);
+              console.log('[readCardData] Dart 返回值: ' + (typeof result === 'string' ? result.substring(0, 100) : JSON.stringify(result)));
+              // Dart 返回的是 JSON 字符串，需要解析
+              if (result === 'null' || result === null || result === undefined) {
+                console.log('[readCardData] 返回 null');
+                return null;
+              }
+              if (typeof result === 'string') {
+                try {
+                  var parsed = JSON.parse(result);
+                  console.log('[readCardData] 解析成功，类型: ' + typeof parsed);
+                  return parsed;
+                } catch (e) {
+                  console.error('[readCardData] JSON 解析失败:', e);
+                  return null;
+                }
+              }
+              console.log('[readCardData] 直接返回对象');
+              return result;
+            });
+          }
+          console.log('[readCardData] Dart 函数未定义');
+          return Promise.resolve(null);
         },
-
-        // 写入数据
-        write: function(key, value) {
-          this._data[key] = value;
-          return {
-            success: true,
-            key: key
-          };
-        },
-
-        // 删除数据
-        delete: function(key) {
-          delete this._data[key];
-          return {
-            success: true,
-            key: key
-          };
-        },
-
-        // 检查是否存在
-        exists: function(key) {
-          return key in this._data;
-        },
-
-        // 获取所有键
-        keys: function() {
-          return Object.keys(this._data);
-        },
-
-        // 清空所有数据
-        clear: function() {
-          this._data = {};
-          return {
-            success: true
-          };
+        writeCardData: function(cardId, data) {
+          if (typeof __DART_STORAGE_WRITE_CARD_DATA__ !== 'undefined') {
+            return __DART_STORAGE_WRITE_CARD_DATA__(JSON.stringify({ cardId: cardId, data: data })).then(function(result) {
+              if (typeof result === 'string') {
+                try {
+                  return JSON.parse(result);
+                } catch (e) {
+                  return { success: false, error: 'JSON parse error' };
+                }
+              }
+              return result;
+            });
+          }
+          return Promise.resolve({ success: false, error: 'Storage not initialized' });
         }
       };
-    ''';
-
-    await evaluateDirect(script);
+    ''');
 
     // 注册 Dart 回调函数，供 JS 调用
     await _registerDartCallbacks();
@@ -521,6 +537,13 @@ class MobileJSEngine implements JSEngine {
         final config = jsonDecode(configJson);
         final tool = JSToolConfig.fromJson(config);
         JSToolRegistry().registerTool(tool);
+
+        // 确保 ToolConfigManager 已初始化
+        if (!ToolConfigManager.instance.isInitialized) {
+          print('[ToolRegistry] ToolConfigManager 未初始化，等待初始化...');
+          await ToolConfigManager.instance.initialize();
+          print('[ToolRegistry] ✓ ToolConfigManager 初始化完成');
+        }
 
         // 同时在 ToolConfigManager 中添加该工具，使用 'js_tools' 作为插件ID
         final jsToolConfig = ToolConfig(
@@ -542,14 +565,17 @@ class MobileJSEngine implements JSEngine {
             tool.id,
             jsToolConfig,
           );
-          print('JS工具已添加到工具管理页面: ${tool.id} (${tool.parameters.length}个参数, ${tool.examples.length}个示例)');
+          print('✓ JS工具已添加到工具管理页面: ${tool.id} (${tool.parameters.length}个参数, ${tool.examples.length}个示例)');
+
+          // 刷新 ToolService 缓存，确保工具列表保持最新
+          await ToolService.refreshCache();
         } catch (e) {
-          print('添加JS工具到ToolConfigManager失败: $e');
+          print('❌ 添加JS工具到ToolConfigManager失败: $e');
         }
 
         return 'true';
       } catch (e) {
-        print('注册工具失败: $e');
+        print('❌ 注册工具失败: $e');
         return 'false';
       }
     });
@@ -559,12 +585,58 @@ class MobileJSEngine implements JSEngine {
       final tools = JSToolRegistry().getAllTools();
       return jsonEncode(tools.map((t) => t.toJson()).toList());
     });
+
+    // 读取卡片数据文件的 Dart 回调
+    await registerFunction('__DART_STORAGE_READ_CARD_DATA__', (String cardId) async {
+      try {
+        // 卡片数据存储路径：webview/{cardId}/data.json
+        final path = 'webview/$cardId/data.json';
+        print('[Storage] 读取卡片数据: $path');
+
+        final data = await globalStorage.read(path);
+        if (data != null) {
+          print('[Storage] ✓ 卡片数据读取成功: $cardId');
+          // 直接返回数据对象，registerFunction 会自动 JSON 序列化
+          return data;
+        }
+        print('[Storage] 卡片数据不存在: $cardId');
+        return null;
+      } catch (e) {
+        print('[Storage] ✗ 读取卡片数据失败: $e');
+        return {'error': e.toString()};
+      }
+    });
+
+    // 写入卡片数据文件的 Dart 回调
+    await registerFunction('__DART_STORAGE_WRITE_CARD_DATA__', (String paramsJson) async {
+      try {
+        final params = jsonDecode(paramsJson);
+        final cardId = params['cardId'] as String;
+        final data = params['data'];
+
+        // 卡片数据存储路径：webview/{cardId}/data.json
+        final path = 'webview/$cardId/data.json';
+        print('[Storage] 写入卡片数据: $path');
+
+        await globalStorage.write(path, data);
+        print('[Storage] ✓ 卡片数据写入成功: $cardId');
+        // 直接返回对象，registerFunction 会自动 JSON 序列化
+        return {'success': true, 'cardId': cardId};
+      } catch (e) {
+        print('[Storage] ✗ 写入卡片数据失败: $e');
+        return {'success': false, 'error': e.toString()};
+      }
+    });
   }
 
   @override
   Future<void> evaluateDirect(String code) async {
     // 直接执行代码，不包装，不等待结果（用于注册函数等操作）
-    _runtime.evaluate(code);
+    final result = _runtime.evaluate(code);
+    // 检查是否有错误
+    if (result.isError) {
+      print('[MobileJSEngine] evaluateDirect 错误: ${result.stringResult}');
+    }
   }
 
   @override
@@ -851,8 +923,10 @@ class MobileJSEngine implements JSEngine {
               'if (!globalThis.__DART_RESULTS__) { globalThis.__DART_RESULTS__ = {}; }',
             );
 
-            // 先将结果设置到临时全局变量（避免转义问题）
-            _runtime.evaluate('globalThis.__TEMP_RESULT__ = $jsonResult;');
+            // 将 jsonResult 作为 JS 字符串传递（再次 JSON 编码以添加引号和转义）
+            // 这样 JS 端可以正确 JSON.parse
+            final jsStringValue = jsonEncode(jsonResult);
+            _runtime.evaluate('globalThis.__TEMP_RESULT__ = $jsStringValue;');
 
             // 然后移动到目标位置
             _runtime.evaluate(
@@ -895,7 +969,9 @@ class MobileJSEngine implements JSEngine {
         final resultKey = '${callbackChannel}_$callId';
 
         try {
-          _runtime.evaluate('globalThis.__TEMP_RESULT__ = $errorJson;');
+          // 同样需要作为 JS 字符串传递
+          final jsStringValue = jsonEncode(errorJson);
+          _runtime.evaluate('globalThis.__TEMP_RESULT__ = $jsStringValue;');
           _runtime.evaluate(
             "globalThis.__DART_RESULTS__['$resultKey'] = globalThis.__TEMP_RESULT__; "
             "delete globalThis.__TEMP_RESULT__;",

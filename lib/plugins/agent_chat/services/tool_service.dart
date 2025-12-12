@@ -215,6 +215,26 @@ class ToolService {
     }
   }
 
+  /// 刷新工具缓存（当有新工具注册时调用）
+  ///
+  /// 此方法用于在 JS 工具动态注册后更新缓存，确保工具列表保持最新
+  static Future<void> refreshCache() async {
+    if (!_initialized) {
+      print('[ToolService] 警告：工具服务未初始化，跳过刷新');
+      return;
+    }
+
+    try {
+      // 重新生成并缓存两种 Prompt
+      _cachedToolBriefPrompt = _generateToolBriefPrompt();
+      _cachedToolListPrompt = await _generateToolListPrompt();
+
+      print('[ToolService] 缓存已刷新，当前加载了 ${_cachedToolBriefPrompt?.length ?? 0} 字符的简要索引');
+    } catch (e) {
+      print('[ToolService] 刷新缓存失败: $e');
+    }
+  }
+
   /// 检查内容是否包含工具调用 JSON
   static bool containsToolCall(String content) {
     // 使用通用JSON解析方法检查是否包含有效的工具调用
