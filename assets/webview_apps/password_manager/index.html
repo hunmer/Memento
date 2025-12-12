@@ -669,8 +669,8 @@
             return div.innerHTML;
         }
 
-        // 等待 Memento Bridge 准备就绪
-        function waitForMemento(maxAttempts = 30) {
+        // 等待 Memento Bridge 准备就绪（JS 已预加载，只需等待注入完成）
+        function waitForMemento(maxAttempts = 15) {
             let attempts = 0;
 
             function check() {
@@ -685,7 +685,7 @@
                         Memento.ready(init);
                     }
                 } else if (attempts < maxAttempts) {
-                    setTimeout(check, 200);
+                    setTimeout(check, 100);
                 } else {
                     console.error('[PasswordManager] Memento 不可用');
                     showErrorPage();

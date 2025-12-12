@@ -5,9 +5,9 @@ import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/webview/webview_plugin.dart';
 
-/// JS Bridge 注入服务
+/// JS Bridge Handlers 注册服务
 ///
-/// 将 Memento 命名空间注入到 WebView 中，使网页能够调用：
+/// 通过 flutter_inappwebview 的 JavaScript Handlers 使网页能够调用：
 /// - Memento.plugins.<pluginId>.<method>()
 /// - Memento.system.*
 /// - Memento.plugins.ui.*
@@ -16,7 +16,6 @@ class JSBridgeInjector {
   final InAppWebViewController controller;
   final bool enabled;
   BuildContext? _context;
-  final Set<String> _injectedPages = {};
 
   JSBridgeInjector({
     required this.controller,
@@ -28,47 +27,12 @@ class JSBridgeInjector {
     _context = context;
   }
 
-  /// 重置注入状态（在新页面加载时调用）
-  void reset() {
-    _injectedPages.clear();
-  }
-
-  /// 初始化 JS Bridge（在 onWebViewCreated 中调用）
+  /// 初始化 JS Bridge Handlers（在 onWebViewCreated 中调用）
   Future<void> initialize() async {
     if (!enabled) return;
 
     // 注册核心 handler
     _registerCoreHandlers();
-  }
-
-  /// 注入 JS Bridge（在 onLoadStop 中调用）
-  Future<void> inject(String? currentUrl) async {
-    if (!enabled) return;
-
-    // 防止重复注入同一页面
-    if (currentUrl != null && _injectedPages.contains(currentUrl)) {
-      return;
-    }
-
-    // 1. 注入基础命名空间
-    await _injectBaseNamespace();
-
-    // 2. 注入插件代理
-    await _injectPluginProxies();
-
-    // 3. 注入系统 API 代理
-    await _injectSystemAPIs();
-
-    // 4. 注入 UI API 代理
-    await _injectUIAPIs();
-
-    // 5. 注入 Storage API 代理
-    await _injectStorageAPIs();
-
-    // 标记该页面已注入
-    if (currentUrl != null) {
-      _injectedPages.add(currentUrl);
-    }
   }
 
   /// 注册核心 JavaScript Handlers
@@ -421,262 +385,5 @@ class JSBridgeInjector {
         }
       },
     );
-  }
-
-  /// 注入基础命名空间
-  Future<void> _injectBaseNamespace() async {
-    const script = '''
-    (function() {
-      if (typeof window.Memento !== 'undefined') return;
-
-      window.Memento = {
-        version: '1.0.0',
-        plugins: {},
-        system: {},
-        _ready: false,
-        _readyCallbacks: []
-      };
-
-      window.Memento.ready = function(callback) {
-        if (window.Memento._ready) {
-          try { callback(); } catch(e) { console.error('Memento ready callback error:', e); }
-        } else {
-          window.Memento._readyCallbacks.push(callback);
-        }
-      };
-
-      console.log('[Memento] JS Bridge namespace initialized');
-    })();
-    ''';
-
-    await controller.evaluateJavascript(source: script);
-  }
-
-  /// 注入插件代理
-  Future<void> _injectPluginProxies() async {
-    const script = '''
-    (function() {
-      if (!window.Memento) return;
-
-      // 使用 Proxy 动态代理所有插件调用
-      window.Memento.plugins = new Proxy({}, {
-        get: function(target, pluginId) {
-          // 跳过内置属性
-          if (pluginId === 'ui' || typeof pluginId === 'symbol') {
-            return target[pluginId];
-          }
-
-          // 为每个插件创建代理
-          if (!target[pluginId]) {
-            target[pluginId] = new Proxy({}, {
-              get: function(_, methodName) {
-                if (typeof methodName === 'symbol') return undefined;
-
-                return function(params) {
-                  return window.flutter_inappwebview.callHandler('Memento_plugin_call', {
-                    pluginId: pluginId,
-                    method: methodName,
-                    params: params || {}
-                  }).then(function(result) {
-                    if (typeof result === 'string') {
-                      try {
-                        return JSON.parse(result);
-                      } catch(e) {
-                        return result;
-                      }
-                    }
-                    return result;
-                  });
-                };
-              }
-            });
-          }
-          return target[pluginId];
-        }
-      });
-
-      console.log('[Memento] Plugin proxies initialized');
-    })();
-    ''';
-
-    await controller.evaluateJavascript(source: script);
-  }
-
-  /// 注入系统 API 代理
-  Future<void> _injectSystemAPIs() async {
-    const script = '''
-    (function() {
-      if (!window.Memento) return;
-
-      var systemMethods = [
-        'getCurrentTime',
-        'getDeviceInfo',
-        'getAppInfo',
-        'formatDate',
-        'getTimestamp',
-        'getCustomDate'
-      ];
-
-      window.Memento.system = {};
-
-      systemMethods.forEach(function(methodName) {
-        window.Memento.system[methodName] = function(params) {
-          return window.flutter_inappwebview.callHandler('Memento_system_call', {
-            method: methodName,
-            params: params
-          }).then(function(result) {
-            if (typeof result === 'string') {
-              try {
-                return JSON.parse(result);
-              } catch(e) {
-                return result;
-              }
-            }
-            return result;
-          });
-        };
-      });
-
-      console.log('[Memento] System APIs initialized');
-    })();
-    ''';
-
-    await controller.evaluateJavascript(source: script);
-  }
-
-  /// 注入 UI API 代理
-  Future<void> _injectUIAPIs() async {
-    const script = '''
-    (function() {
-      if (!window.Memento || !window.Memento.plugins) return;
-
-      // 定义 UI API
-      var uiApi = {
-        toast: function(message, options) {
-          return window.flutter_inappwebview.callHandler('Memento_ui_toast', {
-            message: message,
-            options: options || {}
-          });
-        },
-
-        alert: function(message, options) {
-          return window.flutter_inappwebview.callHandler('Memento_ui_alert', {
-            message: message,
-            options: options || {}
-          });
-        },
-
-        dialog: function(options) {
-          return window.flutter_inappwebview.callHandler('Memento_ui_dialog', options || {});
-        }
-      };
-
-      // 同时支持 Memento.plugins.ui 和 Memento.ui 两种调用方式
-      window.Memento.plugins.ui = uiApi;
-      window.Memento.ui = uiApi;
-
-      // 标记准备完成并触发回调
-      window.Memento._ready = true;
-      if (window.Memento._readyCallbacks) {
-        window.Memento._readyCallbacks.forEach(function(cb) {
-          try { cb(); } catch(e) { console.error('Memento ready callback error:', e); }
-        });
-        window.Memento._readyCallbacks = [];
-      }
-
-      console.log('[Memento] UI APIs initialized, bridge ready');
-    })();
-    ''';
-
-    await controller.evaluateJavascript(source: script);
-  }
-
-  /// 注入 Storage API 代理
-  Future<void> _injectStorageAPIs() async {
-    const script = '''
-    (function() {
-      if (!window.Memento) return;
-
-      // 定义 Storage API
-      var storageApi = {
-        // 读取数据
-        read: function(key) {
-          return window.flutter_inappwebview.callHandler('Memento_storage_read', {
-            key: key
-          }).then(function(result) {
-            if (typeof result === 'string') {
-              try {
-                var parsed = JSON.parse(result);
-                if (parsed.error) {
-                  throw new Error(parsed.error);
-                }
-                return parsed.data;
-              } catch(e) {
-                if (e.message && !e.message.includes('JSON')) {
-                  throw e;
-                }
-                return result;
-              }
-            }
-            return result;
-          });
-        },
-
-        // 写入数据
-        write: function(key, value) {
-          return window.flutter_inappwebview.callHandler('Memento_storage_write', {
-            key: key,
-            value: value
-          }).then(function(result) {
-            if (typeof result === 'string') {
-              try {
-                var parsed = JSON.parse(result);
-                if (parsed.error) {
-                  throw new Error(parsed.error);
-                }
-                return parsed.success;
-              } catch(e) {
-                if (e.message && !e.message.includes('JSON')) {
-                  throw e;
-                }
-                return true;
-              }
-            }
-            return result;
-          });
-        },
-
-        // 删除数据
-        delete: function(key) {
-          return window.flutter_inappwebview.callHandler('Memento_storage_delete', {
-            key: key
-          }).then(function(result) {
-            if (typeof result === 'string') {
-              try {
-                var parsed = JSON.parse(result);
-                if (parsed.error) {
-                  throw new Error(parsed.error);
-                }
-                return parsed.success;
-              } catch(e) {
-                if (e.message && !e.message.includes('JSON')) {
-                  throw e;
-                }
-                return true;
-              }
-            }
-            return result;
-          });
-        }
-      };
-
-      // 支持 Memento.storage 调用方式
-      window.Memento.storage = storageApi;
-
-      console.log('[Memento] Storage APIs initialized');
-    })();
-    ''';
-
-    await controller.evaluateJavascript(source: script);
   }
 }
