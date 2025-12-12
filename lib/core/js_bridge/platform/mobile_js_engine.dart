@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter_js/flutter_js.dart';
 import 'js_engine_interface.dart';
 import '../js_tool_registry.dart';
+import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
+import 'package:Memento/plugins/agent_chat/services/tool_config_manager.dart';
 
 class MobileJSEngine implements JSEngine {
   late JavascriptRuntime _runtime;
@@ -514,11 +516,35 @@ class MobileJSEngine implements JSEngine {
   /// 注册 Dart 回调函数，供 JS 调用
   Future<void> _registerDartCallbacks() async {
     // 注册工具的 Dart 回调
-    await registerFunction('__DART_TOOL_REGISTRY__', (String configJson) {
+    await registerFunction('__DART_TOOL_REGISTRY__', (String configJson) async {
       try {
         final config = jsonDecode(configJson);
         final tool = JSToolConfig.fromJson(config);
         JSToolRegistry().registerTool(tool);
+
+        // 同时在 ToolConfigManager 中添加该工具，使用 'js_tools' 作为插件ID
+        final jsToolConfig = ToolConfig(
+          title: tool.name,
+          description: tool.description,
+          returns: ToolReturns(
+            type: 'object',
+            description: 'JS工具执行结果',
+          ),
+          enabled: true,
+        );
+
+        // 使用 try-catch 避免初始化失败影响工具注册
+        try {
+          await ToolConfigManager.instance.addTool(
+            'js_tools',
+            tool.id,
+            jsToolConfig,
+          );
+          print('JS工具已添加到工具管理页面: ${tool.id}');
+        } catch (e) {
+          print('添加JS工具到ToolConfigManager失败: $e');
+        }
+
         return 'true';
       } catch (e) {
         print('注册工具失败: $e');
