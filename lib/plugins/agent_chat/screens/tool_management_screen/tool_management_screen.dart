@@ -7,10 +7,12 @@ import 'package:Memento/plugins/agent_chat/services/tool_config_manager.dart';
 import 'components/plugin_section.dart';
 import 'components/tool_editor_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
+
 /// 工具管理界面
 class ToolManagementScreen extends StatefulWidget {
   final String? conversationId;
-  final Function(String pluginId, String toolId, ToolConfig config)? onAddToChat;
+  final Function(String pluginId, String toolId, ToolConfig config)?
+  onAddToChat;
 
   const ToolManagementScreen({
     super.key,
@@ -92,32 +94,33 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
     // 选择插件
     final selectedPlugin = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder:
+          (context) => AlertDialog(
             title: Text('agent_chat_selectPlugin'.tr),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ScrollConfiguration(
-            behavior: ScrollConfiguration.of(context).copyWith(
-              dragDevices: {
-                PointerDeviceKind.touch,
-                PointerDeviceKind.mouse,
-                PointerDeviceKind.trackpad,
-              },
-            ),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: pluginIds.length,
-              itemBuilder: (context, index) {
-                final pluginId = pluginIds[index];
-                return ListTile(
-                  title: Text(pluginId),
-                  onTap: () => Navigator.pop(context, pluginId),
-                );
-              },
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context).copyWith(
+                  dragDevices: {
+                    PointerDeviceKind.touch,
+                    PointerDeviceKind.mouse,
+                    PointerDeviceKind.trackpad,
+                  },
+                ),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: pluginIds.length,
+                  itemBuilder: (context, index) {
+                    final pluginId = pluginIds[index];
+                    return ListTile(
+                      title: Text(pluginId),
+                      onTap: () => Navigator.pop(context, pluginId),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
-        ),
-      ),
     );
 
     if (selectedPlugin == null) return;
@@ -125,10 +128,8 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
     // 打开编辑对话框
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => ToolEditorDialog(
-        pluginId: selectedPlugin,
-        isNew: true,
-      ),
+      builder:
+          (context) => ToolEditorDialog(pluginId: selectedPlugin, isNew: true),
     );
 
     if (result != null) {
@@ -166,20 +167,21 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
       // 确认导入
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder:
+            (context) => AlertDialog(
               title: Text('agent_chat_confirmImport'.tr),
               content: Text('agent_chat_importConfigOverride'.tr),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
                   child: Text('agent_chat_cancel'.tr),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
                   child: Text('agent_chat_confirm'.tr),
+                ),
+              ],
             ),
-          ],
-        ),
       );
 
       if (confirmed != true) return;
@@ -232,28 +234,25 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
   Future<void> _resetToDefault() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-            title: Text(
-              'agent_chat_confirmRestoreDefault'.tr,
-            ),
-            content: Text(
-              'agent_chat_restoreDefaultDescription'.tr,
-            ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
+      builder:
+          (context) => AlertDialog(
+            title: Text('agent_chat_confirmRestoreDefault'.tr),
+            content: Text('agent_chat_restoreDefaultDescription'.tr),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
                 child: Text('agent_chat_cancel'.tr),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
                 child: Text('agent_chat_restoreDefault'.tr),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirmed != true) return;
@@ -298,9 +297,10 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
       // 如果有搜索关键词，只显示匹配的工具
       List<String> toolIds;
       if (_searchKeyword.isNotEmpty) {
-        toolIds = toolSet.tools.keys
-            .where((toolId) => _filteredToolIds.contains(toolId))
-            .toList();
+        toolIds =
+            toolSet.tools.keys
+                .where((toolId) => _filteredToolIds.contains(toolId))
+                .toList();
         if (toolIds.isEmpty) return; // 跳过没有匹配工具的插件
       } else {
         toolIds = toolSet.tools.keys.toList();
@@ -411,109 +411,111 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                   break;
               }
             },
-            itemBuilder: (context) => [
+            itemBuilder:
+                (context) => [
                   PopupMenuItem(
-                value: 'add',
-                child: Row(
-                  children: [
+                    value: 'add',
+                    child: Row(
+                      children: [
                         const Icon(Icons.add),
                         const SizedBox(width: 12),
                         Text('agent_chat_addTool'.tr),
-                  ],
-                ),
-              ),
+                      ],
+                    ),
+                  ),
                   PopupMenuItem(
-                value: 'import',
-                child: Row(
-                  children: [
+                    value: 'import',
+                    child: Row(
+                      children: [
                         const Icon(Icons.file_download),
                         const SizedBox(width: 12),
                         Text('agent_chat_importConfig'.tr),
-                  ],
-                ),
-              ),
+                      ],
+                    ),
+                  ),
                   PopupMenuItem(
-                value: 'export',
-                child: Row(
-                  children: [
+                    value: 'export',
+                    child: Row(
+                      children: [
                         const Icon(Icons.file_upload),
                         const SizedBox(width: 12),
                         Text('agent_chat_exportConfig'.tr),
-                  ],
-                ),
-              ),
-              const PopupMenuDivider(),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
                   PopupMenuItem(
-                value: 'reset',
-                child: Row(
-                  children: [
+                    value: 'reset',
+                    child: Row(
+                      children: [
                         const Icon(Icons.restore, color: Colors.red),
                         const SizedBox(width: 12),
                         Text(
                           'agent_chat_restoreDefault'.tr,
                           style: const TextStyle(color: Colors.red),
                         ),
-                  ],
-                ),
-              ),
-            ],
+                      ],
+                    ),
+                  ),
+                ],
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                // 搜索栏
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: const InputDecoration(
-                      hintText: '搜索工具...',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                children: [
+                  // 搜索栏
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: const InputDecoration(
+                        hintText: '搜索工具...',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: _onSearchChanged,
                     ),
-                    onChanged: _onSearchChanged,
                   ),
-                ),
 
-                // 插件筛选按钮栏
-                if (_allPluginTools.isNotEmpty) _buildPluginFilterBar(),
+                  // 插件筛选按钮栏
+                  if (_allPluginTools.isNotEmpty) _buildPluginFilterBar(),
 
-                const SizedBox(height: 8),
-                const Divider(),
+                  const SizedBox(height: 8),
+                  const Divider(),
 
-                // 工具列表
-                Expanded(
-                  child: _allPluginTools.isEmpty
-                            ? Center(
-                              child: Text(
-                                'agent_chat_noToolConfig'.tr,
+                  // 工具列表
+                  Expanded(
+                    child:
+                        _allPluginTools.isEmpty
+                            ? Center(child: Text('agent_chat_noToolConfig'.tr))
+                            : ScrollConfiguration(
+                              behavior: ScrollConfiguration.of(
+                                context,
+                              ).copyWith(
+                                dragDevices: {
+                                  PointerDeviceKind.touch,
+                                  PointerDeviceKind.mouse,
+                                  PointerDeviceKind.trackpad,
+                                },
                               ),
-                            )
-                      : ScrollConfiguration(
-                          behavior: ScrollConfiguration.of(context).copyWith(
-                            dragDevices: {
-                              PointerDeviceKind.touch,
-                              PointerDeviceKind.mouse,
-                              PointerDeviceKind.trackpad,
-                            },
-                          ),
-                          child: ListView(
-                            children: _buildPluginSections(),
-                          ),
-                        ),
-                ),
+                              child: ListView(children: _buildPluginSections()),
+                            ),
+                  ),
 
-                // 底部统计信息
-                const Divider(height: 1),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: _buildStatistics(),
-                ),
-              ],
-            ),
+                  // 底部统计信息
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: _buildStatistics(),
+                  ),
+                ],
+              ),
     );
   }
 
@@ -541,8 +543,12 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _buildStatItem('总工具数', totalTools.toString(), Icons.build),
-            _buildStatItem('已启用', enabledTools.toString(), Icons.check_circle,
-                color: Colors.green),
+            _buildStatItem(
+              '已启用',
+              enabledTools.toString(),
+              Icons.check_circle,
+              color: Colors.green,
+            ),
             _buildStatItem(
               '已禁用',
               disabledCount.toString(),
@@ -572,10 +578,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
           value,
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        Text(
-          label,
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-        ),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
       ],
     );
 
@@ -583,10 +586,7 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
       return InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: child,
-        ),
+        child: Padding(padding: const EdgeInsets.all(8), child: child),
       );
     }
 
@@ -625,175 +625,179 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
     print('📊 总共找到 ${disabledTools.length} 个已禁用工具');
 
     // 按插件ID排序
-    disabledTools.sort((a, b) => (a['pluginId'] as String).compareTo(b['pluginId'] as String));
+    disabledTools.sort(
+      (a, b) => (a['pluginId'] as String).compareTo(b['pluginId'] as String),
+    );
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(Icons.block, color: Colors.grey),
-            const SizedBox(width: 8),
+      builder:
+          (context) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.block, color: Colors.grey),
+                const SizedBox(width: 8),
                 Text('agent_chat_disabledTools'.tr),
-            const Spacer(),
-            Text(
-              '${disabledTools.length} 个',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+                const Spacer(),
+                Text(
+                  '${disabledTools.length} 个',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: disabledTools.isEmpty
+            content: SizedBox(
+              width: double.maxFinite,
+              child:
+                  disabledTools.isEmpty
                       ? Center(
-                  child: Padding(
+                        child: Padding(
                           padding: const EdgeInsets.all(32),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
                               const Icon(
                                 Icons.check_circle,
                                 size: 64,
                                 color: Colors.green,
                               ),
                               const SizedBox(height: 16),
-                              Text(
-                                'agent_chat_allToolsEnabled'.tr,
-                              ),
-                      ],
-                    ),
-                  ),
-                )
-              : ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(context).copyWith(
-                    dragDevices: {
-                      PointerDeviceKind.touch,
-                      PointerDeviceKind.mouse,
-                      PointerDeviceKind.trackpad,
-                    },
-                  ),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: disabledTools.length,
-                    itemBuilder: (context, index) {
-                    final item = disabledTools[index];
-                    final pluginId = item['pluginId'] as String;
-                    final toolId = item['toolId'] as String;
-                    final config = item['config'] as ToolConfig;
+                              Text('agent_chat_allToolsEnabled'.tr),
+                            ],
+                          ),
+                        ),
+                      )
+                      : ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(context).copyWith(
+                          dragDevices: {
+                            PointerDeviceKind.touch,
+                            PointerDeviceKind.mouse,
+                            PointerDeviceKind.trackpad,
+                          },
+                        ),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: disabledTools.length,
+                          itemBuilder: (context, index) {
+                            final item = disabledTools[index];
+                            final pluginId = item['pluginId'] as String;
+                            final toolId = item['toolId'] as String;
+                            final config = item['config'] as ToolConfig;
 
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.grey[200],
-                        child: Text(
-                          pluginId[0].toUpperCase(),
-                          style: TextStyle(color: Colors.grey[700]),
-                        ),
-                      ),
-                      title: Text(
-                        toolId,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            config.title,
-                            style: const TextStyle(fontSize: 13),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '插件: $pluginId',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.check_circle_outline, color: Colors.green),
-                        tooltip: '启用此工具',
-                        onPressed: () async {
-                          try {
-                            await ToolConfigManager.instance.toggleToolEnabled(
-                              pluginId,
-                              toolId,
-                              true,
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: Colors.grey[200],
+                                child: Text(
+                                  pluginId[0].toUpperCase(),
+                                  style: TextStyle(color: Colors.grey[700]),
+                                ),
+                              ),
+                              title: Text(
+                                toolId,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.lineThrough,
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    config.title,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '插件: $pluginId',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(
+                                  Icons.check_circle_outline,
+                                  color: Colors.green,
+                                ),
+                                tooltip: '启用此工具',
+                                onPressed: () async {
+                                  try {
+                                    await ToolConfigManager.instance
+                                        .toggleToolEnabled(
+                                          pluginId,
+                                          toolId,
+                                          true,
+                                        );
+                                    Navigator.pop(context);
+                                    await _loadTools();
+                                    _showSuccess('已启用工具: $toolId');
+                                  } catch (e) {
+                                    _showError('启用失败: $e');
+                                  }
+                                },
+                              ),
                             );
-                            Navigator.pop(context);
-                            await _loadTools();
-                            _showSuccess('已启用工具: $toolId');
-                          } catch (e) {
-                            _showError('启用失败: $e');
-                          }
-                        },
+                          },
+                        ),
                       ),
-                    );
-                  },
-                ),
-              ),
-        ),
-        actions: [
-          if (disabledTools.isNotEmpty)
-            TextButton.icon(
-              onPressed: () async {
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                            title: Text(
-                              'agent_chat_confirmEnableAll'.tr,
-                            ),
+            ),
+            actions: [
+              if (disabledTools.isNotEmpty)
+                TextButton.icon(
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder:
+                          (context) => AlertDialog(
+                            title: Text('agent_chat_confirmEnableAll'.tr),
                             content: Text(
                               'agent_chat_confirmEnableAllTools'.trParams({
                                 'count': disabledTools.length.toString(),
                               }),
                             ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                                child: Text(
-                                  'agent_chat_cancel'.tr,
-                                ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => Navigator.pop(context, true),
-                                child: Text(
-                                  'agent_chat_enableAll'.tr,
-                                ),
-                      ),
-                    ],
-                  ),
-                );
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: Text('agent_chat_cancel'.tr),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: Text('agent_chat_enableAll'.tr),
+                              ),
+                            ],
+                          ),
+                    );
 
-                if (confirmed == true) {
-                  try {
-                    for (final item in disabledTools) {
-                      await ToolConfigManager.instance.toggleToolEnabled(
-                        item['pluginId'] as String,
-                        item['toolId'] as String,
-                        true,
-                      );
+                    if (confirmed == true) {
+                      try {
+                        for (final item in disabledTools) {
+                          await ToolConfigManager.instance.toggleToolEnabled(
+                            item['pluginId'] as String,
+                            item['toolId'] as String,
+                            true,
+                          );
+                        }
+                        Navigator.pop(context);
+                        await _loadTools();
+                        _showSuccess('已启用所有工具');
+                      } catch (e) {
+                        _showError('批量启用失败: $e');
+                      }
                     }
-                    Navigator.pop(context);
-                    await _loadTools();
-                    _showSuccess('已启用所有工具');
-                  } catch (e) {
-                    _showError('批量启用失败: $e');
-                  }
-                }
-              },
-              icon: const Icon(Icons.done_all),
+                  },
+                  icon: const Icon(Icons.done_all),
                   label: Text('agent_chat_enableAll'.tr),
-            ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
+                ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
                 child: Text('agent_chat_close'.tr),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }
