@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../webview_plugin.dart';
 import '../models/webview_card.dart';
 import '../services/card_manager.dart';
 import 'components/webview_card_item.dart';
 import 'webview_browser_screen.dart';
+import 'proxy_settings_screen.dart';
 
 /// WebView 主界面 - 网址卡片列表
 class WebViewMainScreen extends StatefulWidget {
@@ -38,6 +40,19 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
         appBar: AppBar(
           title: Text('webview_name'.tr),
           actions: [
+            // 代理设置按钮
+            IconButton(
+              icon: const Icon(Icons.wifi_tethering),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProxySettingsScreen(),
+                  ),
+                );
+              },
+              tooltip: 'webview_proxy_settings'.tr,
+            ),
             // 筛选按钮
             PopupMenuButton<CardType?>(
               icon: const Icon(Icons.filter_list),
@@ -355,6 +370,37 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                   decoration: InputDecoration(
                     labelText: 'webview_card_url'.tr,
                     border: const OutlineInputBorder(),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.folder_open),
+                              tooltip: 'webview_select_local_file'.tr,
+                              onPressed: () async {
+                                // 选择本地文件
+                                final result = await FilePicker.platform
+                                    .pickFiles(
+                                      type: FileType.any,
+                                      allowMultiple: false,
+                                    );
+
+                                if (result != null &&
+                                    result.files.single.path != null) {
+                                  final filePath = result.files.single.path!;
+                                  // 将文件路径转换为 file:// URL
+                                  final fileUrl = 'file://$filePath';
+                                  urlController.text = fileUrl;
+
+                                  // 如果标题为空，使用文件名作为标题
+                                  if (titleController.text.isEmpty) {
+                                    final fileName = result.files.single.name;
+                                    titleController.text = fileName;
+                                  }
+
+                                  // 自动设置为本地文件类型
+                                  setState(() {
+                                    selectedType = CardType.localFile;
+                                  });
+                                }
+                              },
+                            ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -422,27 +468,52 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('webview_edit_card'.tr),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: InputDecoration(
-                  labelText: 'webview_card_title'.tr,
-                  border: const OutlineInputBorder(),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text('webview_edit_card'.tr),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: 'webview_card_title'.tr,
+                    border: const OutlineInputBorder(),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: urlController,
-                decoration: InputDecoration(
-                  labelText: 'webview_card_url'.tr,
-                  border: const OutlineInputBorder(),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: urlController,
+                  decoration: InputDecoration(
+                    labelText: 'webview_card_url'.tr,
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.folder_open),
+                      tooltip: 'webview_select_local_file'.tr,
+                      onPressed: () async {
+                        // 选择本地文件
+                        final result = await FilePicker.platform.pickFiles(
+                          type: FileType.any,
+                          allowMultiple: false,
+                        );
+
+                        if (result != null && result.files.single.path != null) {
+                          final filePath = result.files.single.path!;
+                          // 将文件路径转换为 file:// URL
+                          final fileUrl = 'file://$filePath';
+                          urlController.text = fileUrl;
+
+                          // 如果标题为空，使用文件名作为标题
+                          if (titleController.text.isEmpty) {
+                            final fileName = result.files.single.name;
+                            titleController.text = fileName;
+                          }
+                        }
+                      },
+                    ),
+                  ),
                 ),
-              ),
               const SizedBox(height: 16),
               TextField(
                 controller: descController,
@@ -475,6 +546,7 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
             child: Text(MaterialLocalizations.of(context).saveButtonLabel),
           ),
         ],
+        ),
       ),
     );
   }

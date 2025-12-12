@@ -1,3 +1,5 @@
+import 'proxy_settings.dart';
+
 /// WebView 插件设置模型
 class WebViewSettings {
   bool enableJavaScript;
@@ -11,6 +13,7 @@ class WebViewSettings {
   String defaultSearchEngine;
   String homePage;
   bool blockDeepLinks;
+  ProxySettings proxySettings;
 
   WebViewSettings({
     this.enableJavaScript = true,
@@ -24,7 +27,8 @@ class WebViewSettings {
     this.defaultSearchEngine = 'https://www.google.com/search?q=',
     this.homePage = 'about:blank',
     this.blockDeepLinks = true,
-  });
+    ProxySettings? proxySettings,
+  }) : proxySettings = proxySettings ?? ProxySettings();
 
   Map<String, dynamic> toJson() {
     return {
@@ -38,6 +42,7 @@ class WebViewSettings {
       'restoreTabsOnStartup': restoreTabsOnStartup,
       'defaultSearchEngine': defaultSearchEngine,
       'homePage': homePage,
+      'proxySettings': proxySettings.toJson(),
     };
   }
 
@@ -54,6 +59,9 @@ class WebViewSettings {
       defaultSearchEngine:
           json['defaultSearchEngine'] as String? ?? 'https://www.google.com/search?q=',
       homePage: json['homePage'] as String? ?? 'about:blank',
+      proxySettings: json['proxySettings'] != null
+          ? ProxySettings.fromJson(json['proxySettings'] as Map<String, dynamic>)
+          : ProxySettings(),
     );
   }
 
@@ -68,6 +76,7 @@ class WebViewSettings {
     bool? restoreTabsOnStartup,
     String? defaultSearchEngine,
     String? homePage,
+    ProxySettings? proxySettings,
   }) {
     return WebViewSettings(
       enableJavaScript: enableJavaScript ?? this.enableJavaScript,
@@ -80,6 +89,7 @@ class WebViewSettings {
       restoreTabsOnStartup: restoreTabsOnStartup ?? this.restoreTabsOnStartup,
       defaultSearchEngine: defaultSearchEngine ?? this.defaultSearchEngine,
       homePage: homePage ?? this.homePage,
+      proxySettings: proxySettings ?? this.proxySettings,
     );
   }
 }
