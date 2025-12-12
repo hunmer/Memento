@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'dart:io' show Platform, File, Directory, FileSystemEntity, FileSystemEntityType;
+import 'dart:math' show min;
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
 
 import 'models/webview_card.dart';
 import 'models/webview_settings.dart';
@@ -93,6 +95,79 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     // 注册 JS API
     await registerJSAPI();
+
+    // 等待 JSBridgeManager 完全初始化
+    print('[WebViewPlugin] 等待 JSBridgeManager 初始化...');
+    await Future.delayed(Duration(milliseconds: 1000));
+    print('[WebViewPlugin] JSBridgeManager 应该已初始化');
+
+    // 加载所有卡片的 preload.js 并注册工具
+    await _loadPreloadScripts();
+  }
+
+  /// 加载所有卡片的 preload.js 文件
+  Future<void> _loadPreloadScripts() async {
+    try {
+      print('[WebViewPlugin] ========== 开始加载 preload.js 脚本 ==========');
+
+      // 验证 JSBridgeManager 是否已初始化
+      final jsBridge = JSBridgeManager.instance;
+      print('[WebViewPlugin] JSBridgeManager 实例获取成功');
+
+      final cards = cardManager.getAllCards();
+      print('[WebViewPlugin] 总共有 ${cards.length} 个卡片');
+
+      if (cards.isEmpty) {
+        print('[WebViewPlugin] 没有卡片，跳过 preload.js 加载');
+        return;
+      }
+
+      for (final card in cards) {
+        print('[WebViewPlugin] ----------------------------------------');
+        print('[WebViewPlugin] 检查卡片: ${card.title}, 类型: ${card.type}');
+
+        if (card.type == CardType.localFile) {
+          // 获取卡片对应的 HTTP 服务器路径
+          final cardPath = await cardManager.getCardPath(card);
+          print('[WebViewPlugin] 卡片 "${card.title}" 的路径: $cardPath');
+
+          final preloadFile = File('$cardPath/preload.js');
+          print('[WebViewPlugin] preload.js 文件路径: ${preloadFile.path}');
+
+          if (await preloadFile.exists()) {
+            print('[WebViewPlugin] ✓ preload.js 文件存在，开始加载...');
+            // 读取 preload.js 内容
+            final scriptContent = await preloadFile.readAsString();
+            print('[WebViewPlugin] preload.js 内容长度: ${scriptContent.length} 字符');
+            print('[WebViewPlugin] preload.js 内容预览: ${scriptContent.substring(0, min(100, scriptContent.length))}...');
+
+            // 在 QuickJS 引擎中执行脚本
+            try {
+              print('[WebViewPlugin] >>> 开始在 QuickJS 中执行 preload.js...');
+              final result = await jsBridge.evaluate(scriptContent);
+              print('[WebViewPlugin] <<< QuickJS 执行完成，结果: ${result.success ? '成功' : '失败'}');
+              if (!result.success) {
+                print('[WebViewPlugin] 执行错误: ${result.error}');
+              }
+              print('[WebViewPlugin] ✓ 已成功加载 preload.js: ${card.title}');
+            } catch (e) {
+              print('[WebViewPlugin] ✗ 加载 preload.js 失败: ${card.title}');
+              print('[WebViewPlugin] 错误详情: $e');
+              print('[WebViewPlugin] 错误类型: ${e.runtimeType}');
+            }
+          } else {
+            print('[WebViewPlugin] ✗ preload.js 文件不存在');
+          }
+        } else {
+          print('[WebViewPlugin] 跳过非本地文件类型的卡片');
+        }
+      }
+      print('[WebViewPlugin] ========== preload.js 加载流程完成 ==========');
+    } catch (e) {
+      print('[WebViewPlugin] ✗ 加载 preload.js 脚本时发生错误: $e');
+      print('[WebViewPlugin] 错误类型: ${e.runtimeType}');
+      print('[WebViewPlugin] 错误堆栈: ${StackTrace.current}');
+    }
   }
 
   /// 加载设置
@@ -456,10 +531,10 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return 'http_server'; // Web 平台使用相对路径
     }
 
-    // 获取应用文档目录的绝对路径
-    final appDir = await path_provider.getApplicationDocumentsDirectory();
-    final pluginPath = storage.getPluginStoragePath(id);
-    return path.join(appDir.path, pluginPath, 'http_server');
+    // 使用 StorageManager 获取应用数据目录（包含 app_data 前缀）
+    final appDataDir = await storageManager.getApplicationDataDirectory();
+    final pluginPath = storageManager.getPluginStoragePath(id);
+    return path.join(appDataDir.path, pluginPath, 'http_server');
   }
 
   /// 复制本地文件/目录到 HTTP 服务器目录
@@ -503,6 +578,19 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
         await sourceFile.copy(targetPath);
         debugPrint('[WebViewPlugin] 文件已复制: $sourcePath -> $targetPath');
 
+        // 如果是 HTML 文件，同时复制同目录下的 preload.js（如果存在）
+        if (fileName.endsWith('.html')) {
+          final sourceDir = path.dirname(sourcePath);
+          final preloadJsPath = path.join(sourceDir, 'preload.js');
+          final preloadJsFile = File(preloadJsPath);
+
+          if (await preloadJsFile.exists()) {
+            final targetPreloadPath = path.join(projectDir, 'preload.js');
+            await preloadJsFile.copy(targetPreloadPath);
+            debugPrint('[WebViewPlugin] preload.js 已复制: $preloadJsPath -> $targetPreloadPath');
+          }
+        }
+
         // 返回相对路径
         return './$projectName/$fileName';
       } else if (source == FileSystemEntityType.directory) {
@@ -543,8 +631,15 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       if (name.startsWith('.')) continue;
 
       if (entity is File) {
-        final targetFile = path.join(targetPath, name);
-        await entity.copy(targetFile);
+        // 特殊处理 preload.js：始终复制到目标根目录
+        if (name == 'preload.js') {
+          final targetPreloadPath = path.join(targetPath, 'preload.js');
+          await entity.copy(targetPreloadPath);
+          debugPrint('[WebViewPlugin] preload.js 已复制到根目录: ${entity.path} -> $targetPreloadPath');
+        } else {
+          final targetFile = path.join(targetPath, name);
+          await entity.copy(targetFile);
+        }
       } else if (entity is Directory) {
         final targetSubDir = path.join(targetPath, name);
         await _copyDirectory(entity.path, targetSubDir);

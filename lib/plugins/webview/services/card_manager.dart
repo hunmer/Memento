@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
+import 'package:path/path.dart' as path;
 import 'package:Memento/core/storage/storage_manager.dart';
 import '../models/webview_card.dart';
 
@@ -185,5 +186,30 @@ class CardManager extends ChangeNotifier {
     _cards.insert(newIndex, card);
     await _saveCards();
     notifyListeners();
+  }
+
+  /// 获取所有卡片（别名，与 cards 属性相同）
+  List<WebViewCard> getAllCards() {
+    return cards;
+  }
+
+  /// 获取卡片的本地文件路径
+  Future<String> getCardPath(WebViewCard card) async {
+    // 如果是本地文件类型，构建本地 HTTP 服务器路径
+    if (card.type == CardType.localFile) {
+      // 从 URL 中提取路径部分，例如：./password_manager/index.html
+      final uri = Uri.parse(card.url);
+      final pathSegments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+      if (pathSegments.isNotEmpty) {
+        final projectName = pathSegments.first;
+        // 获取 HTTP 服务器根目录（与 copyToHttpServer 保持一致）
+        final appDataDir = await _storage.getApplicationDataDirectory();
+        final pluginPath = _storage.getPluginStoragePath('webview');
+        final httpRoot = path.join(appDataDir.path, pluginPath, 'http_server');
+        // 构建完整路径：Documents/app_data/webview/http_server/projectName
+        return path.join(httpRoot, projectName);
+      }
+    }
+    return '';
   }
 }
