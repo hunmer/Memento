@@ -621,6 +621,8 @@ class _WebViewTabContent extends StatefulWidget {
 class _WebViewTabContentState extends State<_WebViewTabContent> {
   JSBridgeInjector? _jsBridgeInjector;
   bool _initialLoadCompleted = false; // 标记初始加载是否完成
+  String? _lastProcessedUrl; // 记录最后一次处理的 URL，避免重复处理
+  final Set<String> _redirectChain = {}; // 记录重定向链，检测循环重定向
 
   @override
   Widget build(BuildContext context) {
@@ -646,38 +648,93 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
       ),
       shouldOverrideUrlLoading: (controller, navigationAction) async {
         final url = navigationAction.request.url?.toString() ?? '';
-        final currentUrl = widget.tab.url;
 
         // 允许 about:blank
         if (url == 'about:blank') {
+          _lastProcessedUrl = url;
+          _redirectChain.clear();
           return NavigationActionPolicy.ALLOW;
         }
 
         // 允许初始加载（尚未完成首次加载）
         if (!_initialLoadCompleted) {
+          _lastProcessedUrl = url;
+          _redirectChain.clear();
           return NavigationActionPolicy.ALLOW;
         }
 
-        // 允许初始加载（currentUrl 为空或为 about:blank）
-        if (currentUrl.isEmpty || currentUrl == 'about:blank') {
+        // 允许初始加载（tab.url 为空或为 about:blank）
+        if (widget.tab.url.isEmpty || widget.tab.url == 'about:blank') {
+          _lastProcessedUrl = url;
+          _redirectChain.clear();
           return NavigationActionPolicy.ALLOW;
         }
 
-        // 允许协议切换（HTTP <-> HTTPS）
-        final isHttpToHttps =
-            currentUrl.startsWith('http://') && url.startsWith('https://');
-        final isHttpsToHttp =
-            currentUrl.startsWith('https://') && url.startsWith('http://');
-
-        if (isHttpToHttps || isHttpsToHttp) {
-          return NavigationActionPolicy.ALLOW;
+        // 规范化 URL：去除尾部斜杠（除了根路径）
+        String normalizeUrl(String u) {
+          if (u.length > 1 && u.endsWith('/')) {
+            return u.substring(0, u.length - 1);
+          }
+          return u;
         }
 
-        // 防止无限循环：仅在初始加载完成后，完全相同的 URL 重复导航时才取消
-        if (currentUrl == url) {
+        final normalizedUrl = normalizeUrl(url);
+
+        // 防止无限循环重定向：检测是否在相同的规范化 URL 之间反复跳转
+        if (_redirectChain.contains(normalizedUrl)) {
+          debugPrint('[WebView] 检测到循环重定向，已阻止: $url');
           return NavigationActionPolicy.CANCEL;
         }
 
+        // 添加到重定向链
+        _redirectChain.add(normalizedUrl);
+
+        // 限制重定向链长度（防止内存泄漏）
+        if (_redirectChain.length > 10) {
+          // 保留最近的 5 个 URL
+          final urls = _redirectChain.toList();
+          _redirectChain.clear();
+          _redirectChain.addAll(urls.sublist(5));
+        }
+
+        // 对于百度等网站，特殊处理：如果检测到 HTTP/HTTPS 反复切换，直接允许第一次，然后阻止后续
+        final lastUrl = _lastProcessedUrl;
+        if (lastUrl != null) {
+          final normalizedLastUrl = normalizeUrl(lastUrl);
+
+          // 如果只是协议不同（HTTP <-> HTTPS），但域名相同
+          final isProtocolSwitch =
+              (normalizedUrl.startsWith('http://') &&
+                  normalizedLastUrl.startsWith('https://')) ||
+              (normalizedUrl.startsWith('https://') &&
+                  normalizedLastUrl.startsWith('http://'));
+
+          if (isProtocolSwitch) {
+            // 提取域名部分进行比较
+            Uri? currentUri;
+            Uri? lastUri;
+            try {
+              currentUri = Uri.parse(normalizedUrl);
+              lastUri = Uri.parse(normalizedLastUrl);
+            } catch (_) {
+              // 解析失败，继续正常流程
+            }
+
+            if (currentUri != null &&
+                lastUri != null &&
+                currentUri.host == lastUri.host) {
+              // 如果已经在重定向链中，说明是循环，阻止
+              if (_redirectChain.contains(normalizedUrl)) {
+                debugPrint(
+                    '[WebView] 检测到协议切换循环，阻止: $url (上次: $lastUrl)');
+                return NavigationActionPolicy.CANCEL;
+              }
+            }
+          }
+        }
+
+        // 记录 URL 并允许导航
+        _lastProcessedUrl = url;
         return NavigationActionPolicy.ALLOW;
       },
       onWebViewCreated: (controller) {
@@ -696,6 +753,7 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
       onLoadStart: (controller, url) async {
         widget.onLoadingChanged(true);
         if (url != null) {
+          // 在开始新导航时，重置最后处理的 URL（但不重置为 null，避免误判）
           widget.onUrlChanged(url.toString());
         }
       },
@@ -706,6 +764,9 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
         if (!_initialLoadCompleted) {
           _initialLoadCompleted = true;
         }
+
+        // 页面加载完成后清理重定向链（为下次导航做准备）
+        _redirectChain.clear();
 
         // 更新导航状态
         final canGoBack = await controller.canGoBack();
@@ -728,6 +789,13 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
       onUpdateVisitedHistory: (controller, url, androidIsReload) async {
         if (url != null) {
           widget.onUrlChanged(url.toString());
+
+          // 如果是刷新（androidIsReload 为 true），重置 JS Bridge 注入状态
+          if (androidIsReload == true && _jsBridgeInjector != null) {
+            _jsBridgeInjector!.reset();
+            // 重新注入 JS Bridge
+            await _jsBridgeInjector!.inject(url.toString());
+          }
 
           // 更新导航状态
           final canGoBack = await controller.canGoBack();

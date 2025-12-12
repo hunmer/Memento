@@ -52,7 +52,6 @@ class ToolTemplateService extends ChangeNotifier {
   /// 初始化服务
   Future<void> _initialize() async {
     await _storage.createDirectory(_templatesDir);
-    await _migrateOldFormat();
     await _loadTemplates();
     await _ensureDefaultTemplates();
   }
@@ -85,36 +84,6 @@ class ToolTemplateService extends ChangeNotifier {
   /// 克隆模板步骤，确保去除执行态字段
   List<ToolCallStep> cloneTemplateSteps(SavedToolTemplate template) {
     return _normalizeSteps(template.steps);
-  }
-
-  /// 迁移旧格式数据到新格式
-  Future<void> _migrateOldFormat() async {
-    try {
-      final oldData = await _storage.read(_oldStorageKey);
-      if (oldData != null && oldData is List && oldData.isNotEmpty) {
-        debugPrint('检测到旧格式工具模板，开始迁移...');
-
-        for (final item in oldData) {
-          try {
-            final template = SavedToolTemplate.fromJson(
-              item as Map<String, dynamic>,
-            );
-            final normalizedTemplate = template.copyWith(
-              steps: _normalizeSteps(template.steps),
-            );
-            await _saveTemplateFile(normalizedTemplate);
-          } catch (e) {
-            debugPrint('迁移模板失败: $e');
-          }
-        }
-
-        // 删除旧数据
-        await _storage.delete(_oldStorageKey);
-        debugPrint('工具模板迁移完成，已删除旧数据');
-      }
-    } catch (e) {
-      debugPrint('迁移旧格式失败: $e');
-    }
   }
 
   /// 确保默认模板存在
@@ -161,9 +130,9 @@ class ToolTemplateService extends ChangeNotifier {
           final template = SavedToolTemplate.fromJson(
             jsonData as Map<String, dynamic>,
           );
-          templates.add(template.copyWith(
-            steps: _normalizeSteps(template.steps),
-          ));
+          templates.add(
+            template.copyWith(steps: _normalizeSteps(template.steps)),
+          );
         }
       } catch (e) {
         debugPrint('加载默认模板失败 ($fileName): $e');
