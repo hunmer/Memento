@@ -642,6 +642,7 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
         // 允许本地文件访问（用于 file:// URL）
         allowFileAccessFromFileURLs: true,
         allowUniversalAccessFromFileURLs: true,
+        useHybridComposition: true, // 启用混合组成，提高性能
       ),
       shouldOverrideUrlLoading: (controller, navigationAction) async {
         final url = navigationAction.request.url?.toString() ?? '';
