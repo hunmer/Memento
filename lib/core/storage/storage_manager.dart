@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'storage_interface.dart';
 import 'mobile_storage.dart';
@@ -125,6 +126,17 @@ class StorageManager {
       return Directory('memento_app');
     }
     return await path_provider.getApplicationDocumentsDirectory();
+  }
+
+  /// 获取应用数据目录（包含 app_data 前缀）
+  /// 所有插件数据都存储在这个目录下
+  Future<Directory> getApplicationDataDirectory() async {
+    if (kIsWeb) {
+      // Web 平台返回虚拟目录
+      return Directory('memento_app');
+    }
+    final appDir = await getApplicationDocumentsDirectory();
+    return Directory(path.join(appDir.path, 'app_data'));
   }
 
   /// 创建目录

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'tool_config_manager.dart';
+import 'package:Memento/plugins/webview/services/js_tool_service.dart';
 
 /// 模板修改策略
 enum TemplateStrategy {
@@ -255,6 +256,11 @@ class ToolService {
   /// 执行 JS 代码
   static Future<String> executeJsCode(String jsCode) async {
     try {
+      // 检查是否是 JS 工具调用（格式：js_tool:<toolId>:<paramsJson>）
+      if (jsCode.startsWith('js_tool:')) {
+        return await _executeJsTool(jsCode);
+      }
+
       final jsBridge = JSBridgeManager.instance;
 
       // 执行 JS 代码
@@ -277,6 +283,36 @@ class ToolService {
 
     } catch (e) {
       print('[ToolService] JS 执行失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 执行 JS 工具
+  static Future<String> _executeJsTool(String jsCode) async {
+    try {
+      // 解析工具调用格式：js_tool:<toolId>:<paramsJson>
+      final parts = jsCode.split(':');
+      if (parts.length < 3) {
+        throw Exception('无效的 JS 工具调用格式: $jsCode');
+      }
+
+      final toolId = parts[1];
+      final paramsJson = parts.sublist(2).join(':'); // 重新组装剩余部分（防止 JSON 中包含冒号）
+      final params = paramsJson.isNotEmpty ? json.decode(paramsJson) : {};
+
+      // 通过 JSToolService 执行工具
+      final jsToolService = JSToolService();
+      final result = await jsToolService.executeTool(toolId, params);
+
+      if (!result['success']) {
+        throw Exception(result['error'] ?? '工具执行失败');
+      }
+
+      // 返回结果
+      return json.encode(result['data'] ?? {});
+    } catch (e) {
+      print('[ToolService] JS 工具执行失败: $e');
+      print('[ToolService] 调用代码: $jsCode');
       rethrow;
     }
   }

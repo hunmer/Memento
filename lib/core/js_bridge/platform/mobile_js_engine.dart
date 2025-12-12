@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'package:flutter_js/flutter_js.dart';
 import 'js_engine_interface.dart';
+import '../js_tool_registry.dart';
 
 class MobileJSEngine implements JSEngine {
   late JavascriptRuntime _runtime;
@@ -392,6 +393,143 @@ class MobileJSEngine implements JSEngine {
       } catch (e) {
         print('[JS Bridge] Location 错误: $e');
       }
+    });
+
+    // 扩展 memento 对象，添加工具注册功能
+    await _extendMementoWithToolRegistration();
+  }
+
+  /// 扩展 memento 对象，添加工具注册和存储功能
+  Future<void> _extendMementoWithToolRegistration() async {
+    // 先扩展 memento 对象，添加工具注册和存储方法
+    final script = '''
+      // 确保 memento 对象存在
+      if (typeof globalThis.memento === 'undefined') {
+        globalThis.memento = {};
+      }
+
+      // 添加工具注册方法
+      globalThis.memento.registerTool = function(config) {
+        // 调用 Dart 侧的方法注册工具
+        if (typeof __DART_TOOL_REGISTRY__ !== 'undefined') {
+          try {
+            __DART_TOOL_REGISTRY__(JSON.stringify(config));
+            return {
+              success: true,
+              toolId: config.id,
+              message: '工具已提交注册: ' + config.id
+            };
+          } catch (e) {
+            return {
+              success: false,
+              error: e.toString(),
+              toolId: config.id
+            };
+          }
+        } else {
+          return {
+            success: false,
+            error: 'Dart 工具注册器未初始化',
+            toolId: config.id
+          };
+        }
+      };
+
+      // 添加工具列表方法
+      globalThis.memento.listTools = function() {
+        if (typeof __DART_GET_TOOLS__ !== 'undefined') {
+          try {
+            var toolsJson = __DART_GET_TOOLS__();
+            return {
+              success: true,
+              tools: JSON.parse(toolsJson || '[]')
+            };
+          } catch (e) {
+            return {
+              success: false,
+              error: e.toString(),
+              tools: []
+            };
+          }
+        }
+        return {
+          success: true,
+          tools: []
+        };
+      };
+
+      // 添加 memento.storage 命名空间
+      globalThis.memento.storage = {
+        _data: {},
+
+        // 读取数据
+        read: function(key) {
+          return this._data[key] || null;
+        },
+
+        // 写入数据
+        write: function(key, value) {
+          this._data[key] = value;
+          return {
+            success: true,
+            key: key
+          };
+        },
+
+        // 删除数据
+        delete: function(key) {
+          delete this._data[key];
+          return {
+            success: true,
+            key: key
+          };
+        },
+
+        // 检查是否存在
+        exists: function(key) {
+          return key in this._data;
+        },
+
+        // 获取所有键
+        keys: function() {
+          return Object.keys(this._data);
+        },
+
+        // 清空所有数据
+        clear: function() {
+          this._data = {};
+          return {
+            success: true
+          };
+        }
+      };
+    ''';
+
+    await evaluateDirect(script);
+
+    // 注册 Dart 回调函数，供 JS 调用
+    await _registerDartCallbacks();
+  }
+
+  /// 注册 Dart 回调函数，供 JS 调用
+  Future<void> _registerDartCallbacks() async {
+    // 注册工具的 Dart 回调
+    await registerFunction('__DART_TOOL_REGISTRY__', (String configJson) {
+      try {
+        final config = jsonDecode(configJson);
+        final tool = JSToolConfig.fromJson(config);
+        JSToolRegistry().registerTool(tool);
+        return 'true';
+      } catch (e) {
+        print('注册工具失败: $e');
+        return 'false';
+      }
+    });
+
+    // 获取工具列表的 Dart 回调
+    await registerFunction('__DART_GET_TOOLS__', () {
+      final tools = JSToolRegistry().getAllTools();
+      return jsonEncode(tools.map((t) => t.toJson()).toList());
     });
   }
 
