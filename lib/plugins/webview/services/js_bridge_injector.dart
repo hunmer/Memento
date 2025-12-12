@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/webview/webview_plugin.dart';
 
 /// JS Bridge 注入服务
 ///
@@ -9,6 +11,7 @@ import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 /// - Memento.plugins.<pluginId>.<method>()
 /// - Memento.system.*
 /// - Memento.plugins.ui.*
+/// - Memento.storage.*
 class JSBridgeInjector {
   final InAppWebViewController controller;
   final bool enabled;
@@ -58,6 +61,9 @@ class JSBridgeInjector {
 
     // 4. 注入 UI API 代理
     await _injectUIAPIs();
+
+    // 5. 注入 Storage API 代理
+    await _injectStorageAPIs();
 
     // 标记该页面已注入
     if (currentUrl != null) {
@@ -287,6 +293,134 @@ class JSBridgeInjector {
         }
       },
     );
+
+    // Storage read handler
+    controller.addJavaScriptHandler(
+      handlerName: 'Memento_storage_read',
+      callback: (args) async {
+        if (args.isEmpty) return jsonEncode({'error': 'Missing arguments'});
+
+        try {
+          final data = args[0];
+          final Map<String, dynamic> params;
+
+          if (data is Map<String, dynamic>) {
+            params = data;
+          } else if (data is String) {
+            params = jsonDecode(data) as Map<String, dynamic>;
+          } else {
+            return jsonEncode({'error': 'Invalid arguments type'});
+          }
+
+          final key = params['key'] as String?;
+          if (key == null) {
+            return jsonEncode({'error': 'Missing key parameter'});
+          }
+
+          // 获取 webview 插件的存储
+          final webviewPlugin = PluginManager.instance.getPlugin('webview') as WebViewPlugin?;
+          if (webviewPlugin == null) {
+            return jsonEncode({'error': 'WebView plugin not found'});
+          }
+
+          // 构建存储路径: app_data/webview/<key>
+          final storagePath = 'webview/$key';
+          final result = await webviewPlugin.storage.read(storagePath);
+
+          if (result == null) {
+            return jsonEncode({'success': true, 'data': null});
+          }
+          return jsonEncode({'success': true, 'data': result});
+        } catch (e) {
+          debugPrint('Storage read error: $e');
+          return jsonEncode({'error': e.toString()});
+        }
+      },
+    );
+
+    // Storage write handler
+    controller.addJavaScriptHandler(
+      handlerName: 'Memento_storage_write',
+      callback: (args) async {
+        if (args.isEmpty) return jsonEncode({'error': 'Missing arguments'});
+
+        try {
+          final data = args[0];
+          final Map<String, dynamic> params;
+
+          if (data is Map<String, dynamic>) {
+            params = data;
+          } else if (data is String) {
+            params = jsonDecode(data) as Map<String, dynamic>;
+          } else {
+            return jsonEncode({'error': 'Invalid arguments type'});
+          }
+
+          final key = params['key'] as String?;
+          final value = params['value'];
+
+          if (key == null) {
+            return jsonEncode({'error': 'Missing key parameter'});
+          }
+
+          // 获取 webview 插件的存储
+          final webviewPlugin = PluginManager.instance.getPlugin('webview') as WebViewPlugin?;
+          if (webviewPlugin == null) {
+            return jsonEncode({'error': 'WebView plugin not found'});
+          }
+
+          // 构建存储路径: app_data/webview/<key>
+          final storagePath = 'webview/$key';
+          await webviewPlugin.storage.write(storagePath, value);
+
+          return jsonEncode({'success': true});
+        } catch (e) {
+          debugPrint('Storage write error: $e');
+          return jsonEncode({'error': e.toString()});
+        }
+      },
+    );
+
+    // Storage delete handler
+    controller.addJavaScriptHandler(
+      handlerName: 'Memento_storage_delete',
+      callback: (args) async {
+        if (args.isEmpty) return jsonEncode({'error': 'Missing arguments'});
+
+        try {
+          final data = args[0];
+          final Map<String, dynamic> params;
+
+          if (data is Map<String, dynamic>) {
+            params = data;
+          } else if (data is String) {
+            params = jsonDecode(data) as Map<String, dynamic>;
+          } else {
+            return jsonEncode({'error': 'Invalid arguments type'});
+          }
+
+          final key = params['key'] as String?;
+          if (key == null) {
+            return jsonEncode({'error': 'Missing key parameter'});
+          }
+
+          // 获取 webview 插件的存储
+          final webviewPlugin = PluginManager.instance.getPlugin('webview') as WebViewPlugin?;
+          if (webviewPlugin == null) {
+            return jsonEncode({'error': 'WebView plugin not found'});
+          }
+
+          // 构建存储路径: app_data/webview/<key>
+          final storagePath = 'webview/$key';
+          await webviewPlugin.storage.delete(storagePath);
+
+          return jsonEncode({'success': true});
+        } catch (e) {
+          debugPrint('Storage delete error: $e');
+          return jsonEncode({'error': e.toString()});
+        }
+      },
+    );
   }
 
   /// 注入基础命名空间
@@ -451,6 +585,95 @@ class JSBridgeInjector {
       }
 
       console.log('[Memento] UI APIs initialized, bridge ready');
+    })();
+    ''';
+
+    await controller.evaluateJavascript(source: script);
+  }
+
+  /// 注入 Storage API 代理
+  Future<void> _injectStorageAPIs() async {
+    const script = '''
+    (function() {
+      if (!window.Memento) return;
+
+      // 定义 Storage API
+      var storageApi = {
+        // 读取数据
+        read: function(key) {
+          return window.flutter_inappwebview.callHandler('Memento_storage_read', {
+            key: key
+          }).then(function(result) {
+            if (typeof result === 'string') {
+              try {
+                var parsed = JSON.parse(result);
+                if (parsed.error) {
+                  throw new Error(parsed.error);
+                }
+                return parsed.data;
+              } catch(e) {
+                if (e.message && !e.message.includes('JSON')) {
+                  throw e;
+                }
+                return result;
+              }
+            }
+            return result;
+          });
+        },
+
+        // 写入数据
+        write: function(key, value) {
+          return window.flutter_inappwebview.callHandler('Memento_storage_write', {
+            key: key,
+            value: value
+          }).then(function(result) {
+            if (typeof result === 'string') {
+              try {
+                var parsed = JSON.parse(result);
+                if (parsed.error) {
+                  throw new Error(parsed.error);
+                }
+                return parsed.success;
+              } catch(e) {
+                if (e.message && !e.message.includes('JSON')) {
+                  throw e;
+                }
+                return true;
+              }
+            }
+            return result;
+          });
+        },
+
+        // 删除数据
+        delete: function(key) {
+          return window.flutter_inappwebview.callHandler('Memento_storage_delete', {
+            key: key
+          }).then(function(result) {
+            if (typeof result === 'string') {
+              try {
+                var parsed = JSON.parse(result);
+                if (parsed.error) {
+                  throw new Error(parsed.error);
+                }
+                return parsed.success;
+              } catch(e) {
+                if (e.message && !e.message.includes('JSON')) {
+                  throw e;
+                }
+                return true;
+              }
+            }
+            return result;
+          });
+        }
+      };
+
+      // 支持 Memento.storage 调用方式
+      window.Memento.storage = storageApi;
+
+      console.log('[Memento] Storage APIs initialized');
     })();
     ''';
 

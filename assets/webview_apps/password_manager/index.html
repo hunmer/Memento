@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>密码管理器</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #475569;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-input);
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            background: transparent;
+            color: var(--text-muted);
+        }
+
+        .btn-icon:hover {
+            color: var(--text);
+        }
+
+        .password-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .password-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .password-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .password-card-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .password-card-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .password-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .password-field label {
+            width: 60px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .password-field-value {
+            flex: 1;
+            font-family: monospace;
+            font-size: 14px;
+            padding: 6px 10px;
+            background: var(--bg-input);
+            border-radius: 4px;
+            word-break: break-all;
+        }
+
+        .password-masked {
+            letter-spacing: 2px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-input);
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn-secondary {
+            background: var(--bg-input);
+            color: var(--text);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .generate-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-group input {
+            flex: 1;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 11px;
+            background: var(--primary);
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>密码管理器</h1>
+            <p>安全存储在本地，数据不上传</p>
+        </header>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="搜索密码...">
+            <button class="btn btn-primary" onclick="showAddModal()">+ 添加</button>
+        </div>
+
+        <div id="passwordList" class="password-list">
+            <!-- 密码列表会动态生成 -->
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <p>暂无保存的密码</p>
+            <p style="margin-top: 8px; font-size: 12px;">点击上方"添加"按钮创建第一条记录</p>
+        </div>
+    </div>
+
+    <!-- 添加/编辑弹窗 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2 id="modalTitle">添加密码</h2>
+            <form id="passwordForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>名称 *</label>
+                    <input type="text" id="inputName" required placeholder="例如：GitHub">
+                </div>
+                <div class="form-group">
+                    <label>用户名/邮箱</label>
+                    <input type="text" id="inputUsername" placeholder="例如：user@example.com">
+                </div>
+                <div class="form-group">
+                    <label>密码 *</label>
+                    <div class="input-group">
+                        <input type="text" id="inputPassword" required placeholder="输入密码">
+                        <button type="button" class="btn btn-secondary generate-btn" onclick="generatePassword()">生成</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>网址</label>
+                    <input type="text" id="inputUrl" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label>分类</label>
+                    <input type="text" id="inputCategory" placeholder="例如：社交、工作、金融">
+                </div>
+                <div class="form-group">
+                    <label>备注</label>
+                    <input type="text" id="inputNotes" placeholder="其他信息...">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div class="modal-overlay" id="deleteModalOverlay">
+        <div class="modal">
+            <h2>确认删除</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">确定要删除这条密码记录吗？此操作无法撤销。</p>
+            <input type="hidden" id="deleteId">
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="hideDeleteModal()">取消</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">已复制到剪贴板</div>
+
+    <script>
+        // 存储键（保存在 app_data/webview/password_manager/data.json）
+        const STORAGE_KEY = 'password_manager/data.json';
+
+        // 密码数据
+        let passwords = [];
+
+        // 可见密码状态
+        const visiblePasswords = new Set();
+
+        // 初始化
+        async function init() {
+            await loadPasswords();
+            renderList();
+
+            // 搜索功能
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                renderList(e.target.value);
+            });
+
+            // 表单提交
+            document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await savePassword();
+            });
+        }
+
+        // 加载密码
+        async function loadPasswords() {
+            console.log('[PasswordManager] 开始加载密码数据...');
+            try {
+                if (window.Memento && window.Memento.storage) {
+                    console.log('[PasswordManager] 调用 Memento.storage.read:', STORAGE_KEY);
+                    const data = await Memento.storage.read(STORAGE_KEY);
+                    console.log('[PasswordManager] 读取到的数据:', data);
+                    if (data && data.passwords) {
+                        passwords = data.passwords;
+                        console.log('[PasswordManager] 加载了', passwords.length, '条密码记录');
+                    } else {
+                        console.log('[PasswordManager] 没有找到密码数据或数据为空');
+                    }
+                } else {
+                    console.log('[PasswordManager] Memento.storage 不可用');
+                }
+            } catch (e) {
+                console.error('[PasswordManager] 加载密码失败:', e);
+            }
+        }
+
+        // 保存到存储
+        async function saveToStorage() {
+            try {
+                if (window.Memento && window.Memento.storage) {
+                    await Memento.storage.write(STORAGE_KEY, {
+                        passwords: passwords,
+                        updatedAt: new Date().toISOString()
+                    });
+                }
+            } catch (e) {
+                console.error('保存失败:', e);
+                showToast('保存失败: ' + e.message);
+            }
+        }
+
+        // 渲染列表
+        function renderList(searchTerm = '') {
+            const list = document.getElementById('passwordList');
+            const emptyState = document.getElementById('emptyState');
+
+            let filtered = passwords;
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filtered = passwords.filter(p =>
+                    p.name.toLowerCase().includes(term) ||
+                    (p.username && p.username.toLowerCase().includes(term)) ||
+                    (p.category && p.category.toLowerCase().includes(term)) ||
+                    (p.url && p.url.toLowerCase().includes(term))
+                );
+            }
+
+            if (filtered.length === 0) {
+                list.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            list.innerHTML = filtered.map(p => createPasswordCard(p)).join('');
+        }
+
+        // 创建密码卡片
+        function createPasswordCard(p) {
+            const isVisible = visiblePasswords.has(p.id);
+            const maskedPassword = '••••••••';
+
+            return `
+                <div class="password-card">
+                    <div class="password-card-header">
+                        <span class="password-card-title">
+                            ${escapeHtml(p.name)}
+                            ${p.category ? `<span class="category-badge">${escapeHtml(p.category)}</span>` : ''}
+                        </span>
+                        <div class="password-card-actions">
+                            <button class="btn btn-icon" onclick="editPassword('${p.id}')" title="编辑">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            <button class="btn btn-icon" onclick="showDeleteModal('${p.id}')" title="删除">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    ${p.username ? `
+                    <div class="password-field">
+                        <label>用户名</label>
+                        <div class="password-field-value">${escapeHtml(p.username)}</div>
+                        <button class="btn btn-icon" onclick="copyToClipboard('${escapeHtml(p.username)}')" title="复制">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    ` : ''}
+                    <div class="password-field">
+                        <label>密码</label>
+                        <div class="password-field-value ${isVisible ? '' : 'password-masked'}">${isVisible ? escapeHtml(p.password) : maskedPassword}</div>
+                        <button class="btn btn-icon" onclick="togglePasswordVisibility('${p.id}')" title="${isVisible ? '隐藏' : '显示'}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                ${isVisible ?
+                                    '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>' :
+                                    '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>'
+                                }
+                            </svg>
+                        </button>
+                        <button class="btn btn-icon" onclick="copyToClipboard('${escapeHtml(p.password)}')" title="复制">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    ${p.url ? `
+                    <div class="password-field">
+                        <label>网址</label>
+                        <div class="password-field-value"><a href="${escapeHtml(p.url)}" target="_blank" style="color: var(--primary); text-decoration: none;">${escapeHtml(p.url)}</a></div>
+                    </div>
+                    ` : ''}
+                    ${p.notes ? `
+                    <div class="password-field">
+                        <label>备注</label>
+                        <div class="password-field-value">${escapeHtml(p.notes)}</div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // 切换密码可见性
+        function togglePasswordVisibility(id) {
+            if (visiblePasswords.has(id)) {
+                visiblePasswords.delete(id);
+            } else {
+                visiblePasswords.add(id);
+            }
+            renderList(document.getElementById('searchInput').value);
+        }
+
+        // 显示添加弹窗
+        function showAddModal() {
+            document.getElementById('modalTitle').textContent = '添加密码';
+            document.getElementById('passwordForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        // 编辑密码
+        function editPassword(id) {
+            const p = passwords.find(x => x.id === id);
+            if (!p) return;
+
+            document.getElementById('modalTitle').textContent = '编辑密码';
+            document.getElementById('editId').value = id;
+            document.getElementById('inputName').value = p.name;
+            document.getElementById('inputUsername').value = p.username || '';
+            document.getElementById('inputPassword').value = p.password;
+            document.getElementById('inputUrl').value = p.url || '';
+            document.getElementById('inputCategory').value = p.category || '';
+            document.getElementById('inputNotes').value = p.notes || '';
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        // 隐藏弹窗
+        function hideModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // 保存密码
+        async function savePassword() {
+            const editId = document.getElementById('editId').value;
+            const passwordData = {
+                id: editId || Date.now().toString(),
+                name: document.getElementById('inputName').value.trim(),
+                username: document.getElementById('inputUsername').value.trim(),
+                password: document.getElementById('inputPassword').value,
+                url: document.getElementById('inputUrl').value.trim(),
+                category: document.getElementById('inputCategory').value.trim(),
+                notes: document.getElementById('inputNotes').value.trim(),
+                updatedAt: new Date().toISOString()
+            };
+
+            if (editId) {
+                const index = passwords.findIndex(p => p.id === editId);
+                if (index !== -1) {
+                    passwords[index] = { ...passwords[index], ...passwordData };
+                }
+            } else {
+                passwordData.createdAt = new Date().toISOString();
+                passwords.unshift(passwordData);
+            }
+
+            await saveToStorage();
+            hideModal();
+            renderList(document.getElementById('searchInput').value);
+            showToast(editId ? '已更新' : '已添加');
+        }
+
+        // 显示删除确认
+        function showDeleteModal(id) {
+            document.getElementById('deleteId').value = id;
+            document.getElementById('deleteModalOverlay').classList.add('active');
+        }
+
+        // 隐藏删除确认
+        function hideDeleteModal() {
+            document.getElementById('deleteModalOverlay').classList.remove('active');
+        }
+
+        // 确认删除
+        async function confirmDelete() {
+            const id = document.getElementById('deleteId').value;
+            passwords = passwords.filter(p => p.id !== id);
+            await saveToStorage();
+            hideDeleteModal();
+            renderList(document.getElementById('searchInput').value);
+            showToast('已删除');
+        }
+
+        // 生成随机密码
+        function generatePassword() {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+            let password = '';
+            for (let i = 0; i < 16; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('inputPassword').value = password;
+        }
+
+        // 复制到剪贴板
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('已复制到剪贴板');
+            } catch (e) {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('已复制到剪贴板');
+            }
+        }
+
+        // 显示提示
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 等待 Memento Bridge 准备就绪
+        function waitForMemento(maxAttempts = 30) {
+            let attempts = 0;
+
+            function check() {
+                attempts++;
+                console.log(`[PasswordManager] 检查 Memento Bridge (尝试 ${attempts}/${maxAttempts})...`);
+
+                if (window.Memento && window.Memento.storage) {
+                    console.log('[PasswordManager] Memento Bridge 已就绪');
+                    if (window.Memento._ready) {
+                        init();
+                    } else {
+                        Memento.ready(init);
+                    }
+                } else if (attempts < maxAttempts) {
+                    setTimeout(check, 200);
+                } else {
+                    console.error('[PasswordManager] Memento 不可用');
+                    showErrorPage();
+                }
+            }
+
+            check();
+        }
+
+        // 显示错误页面
+        function showErrorPage() {
+            document.body.innerHTML = `
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 100vh;
+                    padding: 20px;
+                    background: var(--bg);
+                    color: var(--text);
+                    text-align: center;
+                ">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" style="margin-bottom: 20px;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    <h2 style="font-size: 24px; margin-bottom: 12px;">连接失败</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 24px; max-width: 400px;">
+                        无法连接到 Memento 应用。请确保：
+                        <br>1. 您在 Memento WebView 中打开此页面
+                        <br>2. Memento 版本支持 Storage API
+                    </p>
+                    <button onclick="location.reload()" style="
+                        padding: 12px 24px;
+                        background: var(--primary);
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 14px;
+                        cursor: pointer;
+                    ">重新加载</button>
+                </div>
+            `;
+        }
+
+        // 页面加载完成后开始检查
+        if (document.readyState === 'complete') {
+            waitForMemento();
+        } else {
+            window.addEventListener('load', () => waitForMemento());
+        }
+    </script>
+</body>
+</html>
