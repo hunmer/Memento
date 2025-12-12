@@ -1,6 +1,10 @@
 import 'dart:convert';
+import 'dart:io' show Platform, File, Directory, FileSystemEntity, FileSystemEntityType;
 import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -10,6 +14,7 @@ import 'models/webview_settings.dart';
 import 'services/tab_manager.dart';
 import 'services/card_manager.dart';
 import 'services/proxy_controller_service.dart';
+import 'services/local_http_server.dart';
 import 'screens/webview_main_screen.dart';
 
 /// WebView 插件
@@ -33,6 +38,7 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   late final TabManager tabManager;
   late final CardManager cardManager;
   late final ProxyControllerService proxyController;
+  late final LocalHttpServer localHttpServer;
   late WebViewSettings webviewSettings;
 
   bool _isInitialized = false;
@@ -56,6 +62,7 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     tabManager = TabManager(maxTabs: 10);
     cardManager = CardManager(storage);
     proxyController = ProxyControllerService();
+    localHttpServer = LocalHttpServer();
 
     // 检查 proxy 支持
     await proxyController.checkSupport();
@@ -74,6 +81,11 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     // 恢复标签页状态
     if (webviewSettings.restoreTabsOnStartup) {
       await _restoreTabs();
+    }
+
+    // 在非 Web 平台启动本地 HTTP 服务器（主要用于 Windows）
+    if (!kIsWeb) {
+      await _startLocalHttpServer();
     }
 
     _isInitialized = true;
@@ -415,5 +427,269 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'success': true});
     }
     return jsonEncode({'success': false, 'error': '没有活动的标签页'});
+  }
+
+  // ==================== 本地 HTTP 服务器管理 ====================
+
+  /// 启动本地 HTTP 服务器
+  Future<void> _startLocalHttpServer() async {
+    // 使用统一的 HTTP 服务器根目录
+    final rootDir = await getHttpServerRootDir();
+
+    debugPrint('[WebViewPlugin] 尝试启动本地 HTTP 服务器，根目录: $rootDir');
+
+    final success = await localHttpServer.start(
+      rootDir: rootDir,
+      port: 8080,
+    );
+
+    if (success) {
+      debugPrint('[WebViewPlugin] 本地 HTTP 服务器启动成功: ${localHttpServer.serverUrl}');
+    } else {
+      debugPrint('[WebViewPlugin] 本地 HTTP 服务器启动失败');
+    }
+  }
+
+  /// 获取 HTTP 服务器根目录
+  Future<String> getHttpServerRootDir() async {
+    if (kIsWeb) {
+      return 'http_server'; // Web 平台使用相对路径
+    }
+
+    // 获取应用文档目录的绝对路径
+    final appDir = await path_provider.getApplicationDocumentsDirectory();
+    final pluginPath = storage.getPluginStoragePath(id);
+    return path.join(appDir.path, pluginPath, 'http_server');
+  }
+
+  /// 复制本地文件/目录到 HTTP 服务器目录
+  ///
+  /// [sourcePath] 源文件或目录的绝对路径
+  /// [projectName] 项目名称（将作为子目录名）
+  /// 返回：复制后的相对路径（如 ./projectName/index.html）
+  Future<String> copyToHttpServer({
+    required String sourcePath,
+    required String projectName,
+  }) async {
+    if (kIsWeb) {
+      throw UnsupportedError('Web 平台不支持本地文件操作');
+    }
+
+    // 验证项目名称（只允许字母、数字、下划线、连字符）
+    if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(projectName)) {
+      throw ArgumentError('项目名称只能包含字母、数字、下划线和连字符');
+    }
+
+    final httpRoot = await getHttpServerRootDir();
+    final projectDir = path.join(httpRoot, projectName);
+
+    try {
+      // 创建项目目录
+      final dir = Directory(projectDir);
+      if (await dir.exists()) {
+        // 如果目录已存在，先删除
+        await dir.delete(recursive: true);
+      }
+      await dir.create(recursive: true);
+
+      final source = FileSystemEntity.typeSync(sourcePath);
+
+      if (source == FileSystemEntityType.file) {
+        // 复制单个文件
+        final sourceFile = File(sourcePath);
+        final fileName = path.basename(sourcePath);
+        final targetPath = path.join(projectDir, fileName);
+
+        await sourceFile.copy(targetPath);
+        debugPrint('[WebViewPlugin] 文件已复制: $sourcePath -> $targetPath');
+
+        // 返回相对路径
+        return './$projectName/$fileName';
+      } else if (source == FileSystemEntityType.directory) {
+        // 复制整个目录
+        await _copyDirectory(sourcePath, projectDir);
+        debugPrint('[WebViewPlugin] 目录已复制: $sourcePath -> $projectDir');
+
+        // 查找入口文件（index.html 或第一个 .html 文件）
+        final entryFile = await _findEntryFile(projectDir);
+        if (entryFile != null) {
+          final relativePath = path.relative(entryFile, from: httpRoot);
+          return './${relativePath.replaceAll(path.separator, '/')}';
+        } else {
+          return './$projectName/';
+        }
+      } else {
+        throw ArgumentError('源路径不是有效的文件或目录: $sourcePath');
+      }
+    } catch (e) {
+      debugPrint('[WebViewPlugin] 复制文件失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 递归复制目录
+  Future<void> _copyDirectory(String sourcePath, String targetPath) async {
+    final sourceDir = Directory(sourcePath);
+    final targetDir = Directory(targetPath);
+
+    if (!await targetDir.exists()) {
+      await targetDir.create(recursive: true);
+    }
+
+    await for (final entity in sourceDir.list(recursive: false)) {
+      final name = path.basename(entity.path);
+
+      // 跳过隐藏文件和系统文件
+      if (name.startsWith('.')) continue;
+
+      if (entity is File) {
+        final targetFile = path.join(targetPath, name);
+        await entity.copy(targetFile);
+      } else if (entity is Directory) {
+        final targetSubDir = path.join(targetPath, name);
+        await _copyDirectory(entity.path, targetSubDir);
+      }
+    }
+  }
+
+  /// 查找入口文件（index.html 或第一个 .html 文件）
+  Future<String?> _findEntryFile(String directoryPath) async {
+    final dir = Directory(directoryPath);
+
+    // 优先查找 index.html
+    final indexFile = File(path.join(directoryPath, 'index.html'));
+    if (await indexFile.exists()) {
+      return indexFile.path;
+    }
+
+    // 查找第一个 .html 文件
+    await for (final entity in dir.list(recursive: false)) {
+      if (entity is File && entity.path.toLowerCase().endsWith('.html')) {
+        return entity.path;
+      }
+    }
+
+    return null;
+  }
+
+  /// 获取项目列表（HTTP 服务器目录下的所有子目录）
+  Future<List<String>> getHttpProjects() async {
+    if (kIsWeb) return [];
+
+    final httpRoot = await getHttpServerRootDir();
+    final dir = Directory(httpRoot);
+
+    if (!await dir.exists()) {
+      return [];
+    }
+
+    final projects = <String>[];
+    await for (final entity in dir.list(recursive: false)) {
+      if (entity is Directory) {
+        projects.add(path.basename(entity.path));
+      }
+    }
+
+    return projects;
+  }
+
+  /// 删除 HTTP 项目
+  Future<void> deleteHttpProject(String projectName) async {
+    if (kIsWeb) return;
+
+    final httpRoot = await getHttpServerRootDir();
+    final projectDir = Directory(path.join(httpRoot, projectName));
+
+    if (await projectDir.exists()) {
+      await projectDir.delete(recursive: true);
+      debugPrint('[WebViewPlugin] 已删除项目: $projectName');
+    }
+  }
+
+  /// 停止本地 HTTP 服务器
+  Future<void> stopLocalHttpServer() async {
+    await localHttpServer.stop();
+  }
+
+  /// 将 file:// URL 转换为 HTTP URL（如果需要）
+  ///
+  /// 在 Windows 平台且本地服务器运行时，自动将 file:// URL 转换为 http://localhost URL
+  /// 同时支持 ./ 相对路径转换
+  String convertUrlIfNeeded(String url) {
+    // Web 平台不转换
+    if (kIsWeb) {
+      return url;
+    }
+
+    // 处理 ./ 相对路径
+    if (url.startsWith('./')) {
+      // 确保服务器运行
+      if (!localHttpServer.isRunning) {
+        // 同步启动服务器（如果尚未启动）
+        _startLocalHttpServer();
+      }
+
+      // 将 ./ 转换为 http://localhost:port/
+      final relativePath = url.substring(2); // 移除 ./
+      return '${localHttpServer.serverUrl}/$relativePath';
+    }
+
+    // 只在服务器运行时转换
+    if (!localHttpServer.isRunning) {
+      return url;
+    }
+
+    // 只在 Windows 平台转换 file:// URL
+    if (!Platform.isWindows) {
+      return url;
+    }
+
+    // 如果是可转换的本地文件 URL，则转换
+    if (localHttpServer.isConvertibleFileUrl(url)) {
+      return localHttpServer.convertFileUrlToHttpUrl(url);
+    }
+
+    return url;
+  }
+
+  /// 将文件路径转换为可访问的 URL
+  ///
+  /// 优先使用 HTTP URL（Windows），否则使用 file:// URL
+  String filePathToUrl(String filePath) {
+    // Web 平台不支持本地文件
+    if (kIsWeb) {
+      return filePath;
+    }
+
+    // 如果服务器运行且是 Windows 平台，使用 HTTP URL
+    if (localHttpServer.isRunning && Platform.isWindows) {
+      return localHttpServer.filePathToHttpUrl(filePath);
+    }
+
+    // 否则使用 file:// URL
+    return _formatFileUrl(filePath);
+  }
+
+  /// 将文件路径转换为 file:// URL 格式
+  String _formatFileUrl(String filePath) {
+    String normalizedPath = filePath.replaceAll('\\', '/');
+
+    if (Platform.isWindows) {
+      if (normalizedPath.length >= 2 && normalizedPath[1] == ':') {
+        normalizedPath = normalizedPath[0].toUpperCase() + normalizedPath.substring(1);
+      }
+      return 'file:///$normalizedPath';
+    } else {
+      return 'file://$normalizedPath';
+    }
+  }
+
+  @override
+  void dispose() {
+    // 停止本地 HTTP 服务器
+    if (!kIsWeb) {
+      stopLocalHttpServer();
+    }
+    super.dispose();
   }
 }

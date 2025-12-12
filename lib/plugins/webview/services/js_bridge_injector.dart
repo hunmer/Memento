@@ -93,9 +93,24 @@ class JSBridgeInjector {
             return jsonEncode({'error': 'Missing pluginId or method'});
           }
 
-          // 构建 JS Bridge 调用代码
+          // 检查 JSBridgeManager 是否已初始化
+          if (!JSBridgeManager.instance.isSupported) {
+            return jsonEncode({
+              'error': 'JS Bridge not initialized. Please wait for the bridge to be ready.',
+            });
+          }
+
+          // 检查插件是否已注册
+          final registeredPlugins = JSBridgeManager.instance.registeredPluginIds;
+          if (!registeredPlugins.contains(pluginId)) {
+            return jsonEncode({
+              'error': 'Plugin "$pluginId" is not registered. Available plugins: ${registeredPlugins.join(", ")}',
+            });
+          }
+
+          // 构建 JS Bridge 调用代码（必须有 return 语句才能获取返回值）
           final paramsJson = jsonEncode(methodParams);
-          final code = 'Memento_${pluginId}_$method($paramsJson)';
+          final code = 'return Memento_${pluginId}_$method($paramsJson)';
 
           final result = await JSBridgeManager.instance.evaluate(code);
           if (result.success) {
@@ -135,7 +150,8 @@ class JSBridgeInjector {
           }
 
           final paramsArg = methodParams != null ? jsonEncode(methodParams) : '';
-          final code = 'Memento_system_$method($paramsArg)';
+          // 构建 JS Bridge 调用代码（必须有 return 语句才能获取返回值）
+          final code = 'return Memento_system_$method($paramsArg)';
 
           final result = await JSBridgeManager.instance.evaluate(code);
           if (result.success) {
@@ -391,7 +407,8 @@ class JSBridgeInjector {
     (function() {
       if (!window.Memento || !window.Memento.plugins) return;
 
-      window.Memento.plugins.ui = {
+      // 定义 UI API
+      var uiApi = {
         toast: function(message, options) {
           return window.flutter_inappwebview.callHandler('Memento_ui_toast', {
             message: message,
@@ -410,6 +427,10 @@ class JSBridgeInjector {
           return window.flutter_inappwebview.callHandler('Memento_ui_dialog', options || {});
         }
       };
+
+      // 同时支持 Memento.plugins.ui 和 Memento.ui 两种调用方式
+      window.Memento.plugins.ui = uiApi;
+      window.Memento.ui = uiApi;
 
       // 标记准备完成并触发回调
       window.Memento._ready = true;

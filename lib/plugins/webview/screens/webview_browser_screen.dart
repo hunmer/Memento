@@ -16,8 +16,14 @@ import 'tab_manager_screen.dart';
 class WebViewBrowserScreen extends StatefulWidget {
   final String? initialUrl;
   final String? initialTitle;
+  final String? cardId;
 
-  const WebViewBrowserScreen({super.key, this.initialUrl, this.initialTitle});
+  const WebViewBrowserScreen({
+    super.key,
+    this.initialUrl,
+    this.initialTitle,
+    this.cardId,
+  });
 
   @override
   State<WebViewBrowserScreen> createState() => _WebViewBrowserScreenState();
@@ -40,10 +46,14 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
 
     // 如果有初始 URL，创建新标签页
     if (widget.initialUrl != null) {
+      // 自动转换 file:// URL（Windows 平台）
+      final convertedUrl = plugin.convertUrlIfNeeded(widget.initialUrl!);
+
       final tab = await plugin.tabManager.createTab(
-        url: widget.initialUrl!,
+        url: convertedUrl,
         title: widget.initialTitle ?? '新标签页',
         setActive: true,
+        cardId: widget.cardId,
       );
       setState(() {
         _currentTab = tab;
@@ -610,6 +620,7 @@ class _WebViewTabContent extends StatefulWidget {
 
 class _WebViewTabContentState extends State<_WebViewTabContent> {
   JSBridgeInjector? _jsBridgeInjector;
+  bool _initialLoadCompleted = false; // 标记初始加载是否完成
 
   @override
   Widget build(BuildContext context) {
@@ -628,6 +639,9 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
                 : null,
         mediaPlaybackRequiresUserGesture: false,
         allowsInlineMediaPlayback: true,
+        // 允许本地文件访问（用于 file:// URL）
+        allowFileAccessFromFileURLs: true,
+        allowUniversalAccessFromFileURLs: true,
       ),
       shouldOverrideUrlLoading: (controller, navigationAction) async {
         final url = navigationAction.request.url?.toString() ?? '';
@@ -635,6 +649,11 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
 
         // 允许 about:blank
         if (url == 'about:blank') {
+          return NavigationActionPolicy.ALLOW;
+        }
+
+        // 允许初始加载（尚未完成首次加载）
+        if (!_initialLoadCompleted) {
           return NavigationActionPolicy.ALLOW;
         }
 
@@ -653,7 +672,7 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
           return NavigationActionPolicy.ALLOW;
         }
 
-        // 防止无限循环：仅在完全相同的 URL 时才取消（不做过多规范化）
+        // 防止无限循环：仅在初始加载完成后，完全相同的 URL 重复导航时才取消
         if (currentUrl == url) {
           return NavigationActionPolicy.CANCEL;
         }
@@ -681,6 +700,11 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
       },
       onLoadStop: (controller, url) async {
         widget.onLoadingChanged(false);
+
+        // 标记初始加载已完成
+        if (!_initialLoadCompleted) {
+          _initialLoadCompleted = true;
+        }
 
         // 更新导航状态
         final canGoBack = await controller.canGoBack();

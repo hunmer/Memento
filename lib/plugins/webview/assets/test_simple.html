@@ -103,7 +103,15 @@
         async function testDiary() {
             log('获取日记条目...');
             try {
-                const r = await call(() => Memento.plugins.diary.getEntries({ limit: 5 }));
+                // 使用正确的 API: getDiaries（需要 startDate 和 endDate 参数）
+                const today = new Date();
+                const startDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+                const endDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                const r = await call(() => Memento.plugins.diary.getDiaries({
+                    startDate: startDate,
+                    endDate: endDate,
+                    count: 5
+                }));
                 const data = typeof r === 'string' ? JSON.parse(r) : r;
                 log('日记数据:', 'success');
                 log(data);

@@ -44,6 +44,7 @@ class TabManager extends ChangeNotifier {
     required String url,
     String? title,
     bool setActive = true,
+    String? cardId,
   }) async {
     if (_tabs.length >= maxTabs) {
       throw Exception('已达到最大标签页数量 ($maxTabs)');
@@ -57,6 +58,7 @@ class TabManager extends ChangeNotifier {
       createdAt: now,
       lastAccessedAt: now,
       isActive: setActive,
+      cardId: cardId,
     );
 
     _tabs.add(tab);
@@ -142,6 +144,15 @@ class TabManager extends ChangeNotifier {
   WebViewTab? getTabById(String tabId) {
     try {
       return _tabs.firstWhere((t) => t.id == tabId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// 根据卡片 ID 查找标签页
+  WebViewTab? findTabByCardId(String cardId) {
+    try {
+      return _tabs.firstWhere((t) => t.cardId == cardId);
     } catch (_) {
       return null;
     }
