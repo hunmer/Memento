@@ -67,6 +67,15 @@ class JSBridgeInjector {
 
   /// 注册核心 JavaScript Handlers
   void _registerCoreHandlers() {
+    // Bridge 就绪信号 handler（供网页检测 bridge 是否可用）
+    controller.addJavaScriptHandler(
+      handlerName: 'Memento_ready',
+      callback: (args) {
+        debugPrint('[JSBridge] Memento_ready called');
+        return true;
+      },
+    );
+
     // 插件调用 handler
     controller.addJavaScriptHandler(
       handlerName: 'Memento_plugin_call',
