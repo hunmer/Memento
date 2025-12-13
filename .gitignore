@@ -39,6 +39,7 @@ migrate_working_dir/
 scripts/release_config.json
 .env
 .env.*
+.npmrc
 
 # Web related
 
