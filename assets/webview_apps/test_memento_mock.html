@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memento JavaScript Bridge Mock - 测试页面</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+      line-height: 1.6;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #333;
+      margin-top: 0;
+      border-bottom: 3px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      color: #555;
+      margin-top: 30px;
+    }
+
+    .test-section {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .log-container {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      margin: 5px 0;
+      padding: 3px 0;
+      border-bottom: 1px solid #333;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .status-ready {
+      background: #4CAF50;
+      animation: pulse 2s infinite;
+    }
+
+    .status-not-ready {
+      background: #ff9800;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .code-block {
+      background: #f4f4f4;
+      border-left: 4px solid #4CAF50;
+      padding: 15px;
+      margin: 10px 0;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+
+    .storage-view {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+
+    .storage-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      background: white;
+      margin: 5px 0;
+      border-radius: 4px;
+    }
+
+    .storage-key {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .storage-value {
+      color: #666;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Memento JavaScript Bridge Mock 测试</h1>
+
+    <div>
+      <span class="status-indicator" id="statusIndicator"></span>
+      <span id="statusText">加载中...</span>
+    </div>
+
+    <h2>📋 使用说明</h2>
+    <p>这是一个独立的测试页面，用于开发和测试 Memento 的 JavaScript API。你可以在控制台中直接调用这些方法：</p>
+
+    <div class="code-block">
+// 基本用法示例<br>
+Memento.ready(() => {<br>
+&nbsp;&nbsp;console.log('Memento is ready!');<br>
+});<br>
+<br>
+Memento.system.getCurrentTime().then(time => console.log(time));<br>
+Memento.ui.toast('Hello from Memento!');<br>
+Memento.storage.write('test', { message: 'Hello' });<br>
+Memento.storage.read('test').then(data => console.log(data));
+    </div>
+
+    <h2>🧪 API 测试</h2>
+
+    <div class="test-section">
+      <h3>系统 API 测试</h3>
+      <button onclick="testGetCurrentTime()">获取当前时间</button>
+      <button onclick="testGetDeviceInfo()">获取设备信息</button>
+      <button onclick="testGetAppInfo()">获取应用信息</button>
+      <button onclick="testFormatDate()">格式化日期</button>
+      <button onclick="testGetTimestamp()">获取时间戳</button>
+    </div>
+
+    <div class="test-section">
+      <h3>UI API 测试</h3>
+      <button onclick="testToast()">显示 Toast</button>
+      <button onclick="testAlert()">显示 Alert</button>
+      <button onclick="testDialog()">显示 Dialog</button>
+    </div>
+
+    <div class="test-section">
+      <h3>存储 API 测试</h3>
+      <button onclick="testWriteData()">写入数据</button>
+      <button onclick="testReadData()">读取数据</button>
+      <button onclick="testDeleteData()">删除数据</button>
+      <button onclick="testClearStorage()">清空存储</button>
+      <button onclick="showStorageState()">查看存储状态</button>
+    </div>
+
+    <div class="test-section">
+      <h3>插件 API 测试</h3>
+      <button onclick="testPluginCall()">调用插件方法</button>
+      <button onclick="testCustomPlugin()">自定义插件</button>
+    </div>
+
+    <h2>📊 日志输出</h2>
+    <div class="log-container" id="logContainer">
+      <div class="log-entry">等待操作...</div>
+    </div>
+
+    <h2>💾 存储状态</h2>
+    <div class="storage-view" id="storageView">
+      暂无数据
+    </div>
+  </div>
+
+  <!-- 加载 Memento Mock -->
+  <script src="memento_mock.js"></script>
+
+  <script>
+    // 日志记录函数
+    function addLog(message, type = 'log') {
+      const logContainer = document.getElementById('logContainer');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      const timestamp = new Date().toLocaleTimeString();
+
+      let color = '#d4d4d4';
+      if (type === 'error') color = '#f48771';
+      if (type === 'warn') color = '#dcdcaa';
+      if (type === 'success') color = '#4ec9b0';
+
+      entry.innerHTML = `<span style="color: #666;">[${timestamp}]</span> <span style="color: ${color};">${message}</span>`;
+      logContainer.insertBefore(entry, logContainer.firstChild);
+
+      // 限制日志条数
+      while (logContainer.children.length > 50) {
+        logContainer.removeChild(logContainer.lastChild);
+      }
+    }
+
+    // 更新状态指示器
+    function updateStatus() {
+      const indicator = document.getElementById('statusIndicator');
+      const text = document.getElementById('statusText');
+
+      if (window.Memento && window.Memento._ready) {
+        indicator.className = 'status-indicator status-ready';
+        text.textContent = 'Memento 已准备就绪 ✓';
+      } else {
+        indicator.className = 'status-indicator status-not-ready';
+        text.textContent = 'Memento 尚未准备';
+      }
+    }
+
+    // 监听 Memento 准备完成
+    Memento.ready(() => {
+      addLog('Memento JS Bridge 已初始化完成！', 'success');
+      updateStatus();
+      showStorageState();
+    });
+
+    // 监听控制台输出
+    const originalLog = console.log;
+    const originalError = console.error;
+    const originalWarn = console.warn;
+
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      addLog(args.join(' '));
+    };
+
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      addLog(args.join(' '), 'error');
+    };
+
+    console.warn = function(...args) {
+      originalWarn.apply(console, args);
+      addLog(args.join(' '), 'warn');
+    };
+
+    // 测试函数
+    async function testGetCurrentTime() {
+      addLog('测试系统 API: getCurrentTime');
+      const time = await Memento.system.getCurrentTime();
+      addLog(`当前时间: ${time}`, 'success');
+    }
+
+    async function testGetDeviceInfo() {
+      addLog('测试系统 API: getDeviceInfo');
+      const info = await Memento.system.getDeviceInfo();
+      addLog(`设备信息: ${JSON.stringify(info, null, 2)}`, 'success');
+    }
+
+    async function testGetAppInfo() {
+      addLog('测试系统 API: getAppInfo');
+      const info = await Memento.system.getAppInfo();
+      addLog(`应用信息: ${JSON.stringify(info, null, 2)}`, 'success');
+    }
+
+    async function testFormatDate() {
+      addLog('测试系统 API: formatDate');
+      const formatted = await Memento.system.formatDate({
+        date: new Date().toISOString(),
+        format: 'YYYY年MM月DD日 HH:mm:ss'
+      });
+      addLog(`格式化日期: ${formatted}`, 'success');
+    }
+
+    async function testGetTimestamp() {
+      addLog('测试系统 API: getTimestamp');
+      const timestamp = await Memento.system.getTimestamp();
+      addLog(`时间戳: ${timestamp}`, 'success');
+    }
+
+    function testToast() {
+      addLog('测试 UI API: toast');
+      Memento.ui.toast('这是一个测试 Toast 消息！', { duration: 2000 });
+    }
+
+    function testAlert() {
+      addLog('测试 UI API: alert');
+      Memento.ui.alert('这是一个测试 Alert 消息！');
+    }
+
+    async function testDialog() {
+      addLog('测试 UI API: dialog');
+      const result = await Memento.ui.dialog({
+        title: '测试对话框',
+        message: '这是一个测试对话框，确认或取消？',
+        showCancel: true
+      });
+      addLog(`对话框结果: ${JSON.stringify(result)}`, 'success');
+    }
+
+    async function testWriteData() {
+      addLog('测试存储 API: write');
+      const testData = {
+        name: '张三',
+        age: 30,
+        timestamp: Date.now(),
+        nested: {
+          key: 'value',
+          array: [1, 2, 3]
+        }
+      };
+      await Memento.storage.write('test_user', testData);
+      await Memento.storage.write('test_number', 42);
+      await Memento.storage.write('test_string', 'Hello Memento!');
+      addLog('数据写入成功', 'success');
+      showStorageState();
+    }
+
+    async function testReadData() {
+      addLog('测试存储 API: read');
+      const data1 = await Memento.storage.read('test_user');
+      const data2 = await Memento.storage.read('test_number');
+      const data3 = await Memento.storage.read('test_string');
+      addLog(`读取数据: ${JSON.stringify({ user: data1, number: data2, string: data3 })}`, 'success');
+    }
+
+    async function testDeleteData() {
+      addLog('测试存储 API: delete');
+      await Memento.storage.delete('test_user');
+      addLog('数据删除成功', 'success');
+      showStorageState();
+    }
+
+    async function testClearStorage() {
+      addLog('测试存储 API: clear');
+      await Memento.storage.clear();
+      addLog('存储清空成功', 'success');
+      showStorageState();
+    }
+
+    async function testPluginCall() {
+      addLog('测试插件 API: plugins.diary.createEntry');
+      const result = await Memento.plugins.diary.createEntry({
+        title: '测试日记',
+        content: '这是一篇测试日记',
+        tags: ['测试', 'Mock']
+      });
+      addLog(`插件调用结果: ${JSON.stringify(result)}`, 'success');
+    }
+
+    async function testCustomPlugin() {
+      addLog('测试自定义插件调用');
+      const result = await Memento.plugins.customPlugin.customMethod({
+        data: 'custom data'
+      });
+      addLog(`自定义插件结果: ${JSON.stringify(result)}`, 'success');
+    }
+
+    function showStorageState() {
+      const storageView = document.getElementById('storageView');
+      const state = Memento.utils.getStorageState();
+      const keys = Object.keys(state);
+
+      if (keys.length === 0) {
+        storageView.innerHTML = '暂无数据';
+        return;
+      }
+
+      let html = '';
+      keys.forEach(key => {
+        const value = state[key];
+        html += `
+          <div class="storage-item">
+            <span class="storage-key">${key}:</span>
+            <span class="storage-value">${value}</span>
+          </div>
+        `;
+      });
+
+      storageView.innerHTML = html;
+    }
+
+    // 初始化
+    updateStatus();
+  </script>
+</body>
+</html>
