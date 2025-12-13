@@ -23,7 +23,7 @@ class WebViewSettings {
     this.userAgent = '',
     this.saveHistory = true,
     this.maxTabs = 10,
-    this.restoreTabsOnStartup = true,
+    this.restoreTabsOnStartup = false,
     this.defaultSearchEngine = 'https://www.google.com/search?q=',
     this.homePage = 'about:blank',
     this.blockDeepLinks = true,
@@ -42,6 +42,7 @@ class WebViewSettings {
       'restoreTabsOnStartup': restoreTabsOnStartup,
       'defaultSearchEngine': defaultSearchEngine,
       'homePage': homePage,
+      'blockDeepLinks': blockDeepLinks,
       'proxySettings': proxySettings.toJson(),
     };
   }
@@ -55,10 +56,11 @@ class WebViewSettings {
       userAgent: json['userAgent'] as String? ?? '',
       saveHistory: json['saveHistory'] as bool? ?? true,
       maxTabs: json['maxTabs'] as int? ?? 10,
-      restoreTabsOnStartup: json['restoreTabsOnStartup'] as bool? ?? true,
+      restoreTabsOnStartup: json['restoreTabsOnStartup'] as bool? ?? false,
       defaultSearchEngine:
           json['defaultSearchEngine'] as String? ?? 'https://www.google.com/search?q=',
       homePage: json['homePage'] as String? ?? 'about:blank',
+      blockDeepLinks: json['blockDeepLinks'] as bool? ?? true,
       proxySettings: json['proxySettings'] != null
           ? ProxySettings.fromJson(json['proxySettings'] as Map<String, dynamic>)
           : ProxySettings(),
@@ -76,6 +78,7 @@ class WebViewSettings {
     bool? restoreTabsOnStartup,
     String? defaultSearchEngine,
     String? homePage,
+    bool? blockDeepLinks,
     ProxySettings? proxySettings,
   }) {
     return WebViewSettings(
@@ -89,6 +92,7 @@ class WebViewSettings {
       restoreTabsOnStartup: restoreTabsOnStartup ?? this.restoreTabsOnStartup,
       defaultSearchEngine: defaultSearchEngine ?? this.defaultSearchEngine,
       homePage: homePage ?? this.homePage,
+      blockDeepLinks: blockDeepLinks ?? this.blockDeepLinks,
       proxySettings: proxySettings ?? this.proxySettings,
     );
   }

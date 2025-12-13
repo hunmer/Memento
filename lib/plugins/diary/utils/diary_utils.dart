@@ -59,9 +59,6 @@ class DiaryUtils {
             final entry = DiaryEntry.fromJson(jsonMap);
             final normalizedDate = _normalizeDate(entry.date);
             entries[normalizedDate] = entry;
-            debugPrint(
-              'Loaded entry for ${_formatDate(normalizedDate)}: ${entry.content.length} chars',
-            );
           } catch (e) {
             debugPrint('Error loading entry $dateStr: $e');
           }
@@ -168,7 +165,6 @@ class DiaryUtils {
         await _updateDiaryIndex(dateStr);
       }
 
-      debugPrint('Created ${sampleEntries.length} sample diary entries');
     } catch (e) {
       debugPrint('Error creating sample entries: $e');
     }
@@ -249,7 +245,6 @@ class DiaryUtils {
       // 同步到小组件
       await _syncWidget();
 
-      debugPrint('Deleted diary entry for $dateStr');
       return true;
     } catch (e) {
       debugPrint('Error deleting diary entry: $e');
