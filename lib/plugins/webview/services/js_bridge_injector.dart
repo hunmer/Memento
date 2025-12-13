@@ -291,6 +291,14 @@ class JSBridgeInjector {
           final storagePath = 'webview/$key';
           final result = await webviewPlugin.storage.read(storagePath);
 
+          debugPrint('[JSBridge Storage Read] key=$key, hasData=${result != null}, dataType=${result?.runtimeType}, value=$result');
+
+          // 修复：当 result 是空 Map 时，返回 null（因为文件不存在时某些存储实现返回空 Map）
+          if (result != null && result is Map && result.isEmpty) {
+            debugPrint('[JSBridge Storage Read] Converting empty Map to null for key=$key');
+            return jsonEncode({'success': true, 'data': null});
+          }
+
           if (result == null) {
             return jsonEncode({'success': true, 'data': null});
           }
@@ -336,6 +344,8 @@ class JSBridgeInjector {
           // 构建存储路径: app_data/webview/<key>
           final storagePath = 'webview/$key';
           await webviewPlugin.storage.write(storagePath, value);
+
+          debugPrint('[JSBridge Storage Write] key=$key, valueType=${value?.runtimeType}, success=true');
 
           return jsonEncode({'success': true});
         } catch (e) {

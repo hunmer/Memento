@@ -740,12 +740,15 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
           return window.flutter_inappwebview.callHandler('Memento_storage_read', {
             key: key
           }).then(function(result) {
+            console.log('[Memento Storage] Read key:', key, 'result:', result);
             if (typeof result === 'string') {
               try {
                 var parsed = JSON.parse(result);
                 if (parsed.error) {
+                  console.error('[Memento Storage] Read error:', parsed.error);
                   throw new Error(parsed.error);
                 }
+                console.log('[Memento Storage] Parsed data:', parsed.data);
                 return parsed.data;
               } catch(e) {
                 if (e.message && !e.message.includes('JSON')) {
@@ -981,6 +984,113 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
 
         // 注意：JS Bridge 已通过 UserScript 预加载，无需重复注入
         // Handler 已在 onWebViewCreated 中注册
+
+        // 调试：检查页面 DOM 状态和运行时错误
+        try {
+          final domCheck = await controller.evaluateJavascript(source: '''
+            (function() {
+              const bodyHTML = document.body ? document.body.innerHTML : 'NO BODY';
+              const rootElement = document.getElementById('root') || document.getElementById('app');
+              const rootHTML = rootElement ? rootElement.innerHTML : 'NO ROOT';
+              const hasChildren = document.body ? document.body.children.length : 0;
+
+              // 检查是否有全局错误
+              const errors = window.__webviewErrors || [];
+
+              // 尝试获取 React/Vue 的错误状态
+              let frameworkError = null;
+              try {
+                // 检查常见的全局状态
+                if (window.Vue && window.Vue.config && window.Vue.config.errorHandler) {
+                  frameworkError = 'Vue detected';
+                }
+                if (window.React) {
+                  frameworkError = 'React detected';
+                }
+              } catch (e) {
+                frameworkError = 'Error checking framework: ' + e.message;
+              }
+
+              // 检查是否有加载指示器
+              const hasLoadingIndicator = document.querySelector('.loading, [class*="loading"], [class*="spinner"]') !== null;
+
+              return JSON.stringify({
+                bodyEmpty: !document.body || document.body.innerHTML.trim() === '',
+                hasRoot: !!rootElement,
+                rootEmpty: !rootElement || rootElement.innerHTML.trim() === '',
+                childCount: hasChildren,
+                bodyPreview: bodyHTML.substring(0, 300),
+                rootPreview: rootHTML.substring(0, 300),
+                documentReady: document.readyState,
+                mementoReady: typeof window.Memento !== 'undefined',
+                hasLoadingIndicator: hasLoadingIndicator,
+                globalErrors: errors.length,
+                frameworkError: frameworkError
+              });
+            })();
+          ''');
+          debugPrint('[WebView DOM Check] $domCheck');
+
+          // 注入全局错误捕获器
+          await controller.evaluateJavascript(source: '''
+            (function() {
+              if (!window.__webviewErrors) {
+                window.__webviewErrors = [];
+
+                // 捕获未捕获的 Promise 错误
+                window.addEventListener('unhandledrejection', function(event) {
+                  const error = {
+                    type: 'unhandledrejection',
+                    message: event.reason ? event.reason.message || event.reason : 'Unknown error',
+                    stack: event.reason ? event.reason.stack : null
+                  };
+                  window.__webviewErrors.push(error);
+                  console.error('[Unhandled Promise Rejection]', error.message);
+                });
+
+                // 捕获全局错误
+                window.addEventListener('error', function(event) {
+                  const error = {
+                    type: 'error',
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno
+                  };
+                  window.__webviewErrors.push(error);
+                  console.error('[Global Error]', error.message, 'at', error.filename + ':' + error.lineno);
+                });
+
+                console.log('[Memento] Global error handlers installed');
+              }
+            })();
+          ''');
+
+          // 延迟 3 秒后再次检查页面状态（用于诊断是否卡在加载状态）
+          Future.delayed(const Duration(seconds: 3), () async {
+            try {
+              final laterCheck = await controller.evaluateJavascript(source: '''
+                (function() {
+                  const rootElement = document.getElementById('root') || document.getElementById('app');
+                  const hasLoadingIndicator = document.querySelector('.loading, [class*="loading"], [class*="spinner"]') !== null;
+                  const errors = window.__webviewErrors || [];
+
+                  return JSON.stringify({
+                    stillLoading: hasLoadingIndicator,
+                    errorCount: errors.length,
+                    errors: errors,
+                    bodyHTML: document.body ? document.body.innerHTML.substring(0, 500) : 'NO BODY'
+                  });
+                })();
+              ''');
+              debugPrint('[WebView Status After 3s] $laterCheck');
+            } catch (e) {
+              debugPrint('[WebView Status After 3s] Error: $e');
+            }
+          });
+        } catch (e) {
+          debugPrint('[WebView DOM Check] Error: $e');
+        }
       },
       onProgressChanged: (controller, progress) {
         widget.onProgressChanged(progress / 100);
@@ -1001,7 +1111,9 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
         }
       },
       onConsoleMessage: (controller, consoleMessage) {
-        debugPrint('[WebView Console] ${consoleMessage.message}');
+        // 增强日志：包含消息级别
+        final levelStr = consoleMessage.messageLevel.toString().split('.').last;
+        debugPrint('[WebView Console][$levelStr] ${consoleMessage.message}');
       },
       onReceivedError: (controller, request, error) async {
         // 忽略 about:blank 的错误
@@ -1024,6 +1136,14 @@ class _WebViewTabContentState extends State<_WebViewTabContent> {
 
         // 停止加载状态
         widget.onLoadingChanged(false);
+      },
+      onReceivedHttpError: (controller, request, errorResponse) async {
+        // 记录 HTTP 错误（如 404, 500 等）
+        debugPrint(
+          '[WebView HTTP Error] URL: ${request.url}, '
+          'Status: ${errorResponse.statusCode}, '
+          'Reason: ${errorResponse.reasonPhrase}',
+        );
       },
       onReceivedServerTrustAuthRequest: (controller, challenge) async {
         // 处理 SSL 证书信任请求
