@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as path;
 
 import '../webview_plugin.dart';
 import '../models/webview_card.dart';
@@ -344,6 +347,17 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                 );
               },
             ),
+            // 同步复制（仅本地文件且有原始路径）
+            if (card.type == CardType.localFile && card.sourcePath != null)
+              ListTile(
+                leading: const Icon(Icons.sync),
+                title: const Text('同步复制'),
+                subtitle: const Text('从原始路径重新复制文件'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _syncCopyCard(card);
+                },
+              ),
             ListTile(
               leading: const Icon(Icons.edit),
               title: Text('webview_edit_card'.tr),
@@ -423,40 +437,47 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                               icon: const Icon(Icons.folder_open),
                               tooltip: 'webview_select_local_file'.tr,
                               onPressed: () async {
-                                // 选择本地文件或目录
-                                final result = await FilePicker.platform
-                                    .pickFiles(
-                                      type: FileType.custom,
-                                      allowedExtensions: ['html', 'htm'],
-                                      allowMultiple: false,
+                                // 选择目录
+                                final directoryPath = await FilePicker.platform
+                                    .getDirectoryPath(
+                                      dialogTitle: '选择包含 index.html 的目录',
                                     );
 
-                                if (result != null &&
-                                    result.files.single.path != null) {
-                                  final filePath = result.files.single.path!;
-                                  final fileName = result.files.single.name;
+                                if (directoryPath != null) {
+                                  // 检测目录中是否存在 index.html
+                                  final indexHtmlPath = path.join(directoryPath, 'index.html');
+                                  final indexHtmlFile = File(indexHtmlPath);
+
+                                  if (!await indexHtmlFile.exists()) {
+                                    // 未找到 index.html，显示错误提示
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('错误：所选目录中未找到 index.html'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                    return;
+                                  }
+
+                                  // 找到 index.html，继续处理
+                                  final directoryName = path.basename(directoryPath);
 
                                   setState(() {
                                     isLocalFileMode = true;
                                     selectedType = CardType.localFile;
                                   });
 
-                                  // 如果标题为空，使用文件名作为标题
+                                  // 如果标题为空，使用目录名作为标题
                                   if (titleController.text.isEmpty) {
-                                    titleController.text = fileName.replaceAll(
-                                      RegExp(r'\.(html|htm)$'),
-                                      '',
-                                    );
+                                    titleController.text = directoryName;
                                   }
 
                                   // 如果项目名称为空，生成默认名称
                                   if (projectNameController.text.isEmpty) {
-                                    final baseName = fileName.replaceAll(
-                                      RegExp(r'\.(html|htm)$'),
-                                      '',
-                                    );
                                     // 转换为合法的项目名称
-                                    final projectName = baseName
+                                    final projectName = directoryName
                                         .replaceAll(
                                           RegExp(r'[^a-zA-Z0-9_-]'),
                                           '_',
@@ -465,8 +486,8 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                                     projectNameController.text = projectName;
                                   }
 
-                                  // 临时存储文件路径
-                                  urlController.text = filePath;
+                                  // 临时存储目录路径
+                                  urlController.text = directoryPath;
                                 }
                               },
                             ),
@@ -544,7 +565,7 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                                   projectName: projectName,
                                 );
 
-                            // 添加卡片（使用 ./ 相对路径）
+                            // 添加卡片（使用 ./ 相对路径，同时保存原始路径）
                             await WebViewPlugin.instance.cardManager.addCard(
                               title: titleController.text,
                               url: relativePath,
@@ -553,6 +574,7 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                                   descController.text.isNotEmpty
                                       ? descController.text
                                       : null,
+                              sourcePath: sourcePath, // 保存原始路径用于同步
                             );
 
                             if (mounted) {
@@ -683,6 +705,90 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
         ),
       ),
     );
+  }
+
+  /// 同步复制卡片（从原始路径重新复制）
+  Future<void> _syncCopyCard(WebViewCard card) async {
+    if (card.sourcePath == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('错误：未保存原始路径'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // 检查原始路径是否存在
+    final sourceDir = Directory(card.sourcePath!);
+    if (!await sourceDir.exists()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('错误：原始路径不存在\n${card.sourcePath}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    // 检查是否存在 index.html
+    final indexHtmlPath = path.join(card.sourcePath!, 'index.html');
+    final indexHtmlFile = File(indexHtmlPath);
+    if (!await indexHtmlFile.exists()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('错误：原始目录中未找到 index.html'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // 显示加载提示
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('正在同步复制...'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    try {
+      // 从卡片 URL 中提取项目名称
+      // 例如：./projectName/index.html -> projectName
+      final uri = Uri.parse(card.url);
+      final pathSegments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+
+      if (pathSegments.isEmpty) {
+        throw Exception('无法从 URL 中提取项目名称');
+      }
+
+      final projectName = pathSegments.first;
+
+      // 重新复制文件到 HTTP 服务器目录
+      await WebViewPlugin.instance.copyToHttpServer(
+        sourcePath: card.sourcePath!,
+        projectName: projectName,
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('同步成功！文件已更新'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('同步失败: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   void _confirmDeleteCard(WebViewCard card) {
