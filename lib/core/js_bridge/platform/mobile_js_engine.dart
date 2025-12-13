@@ -405,8 +405,26 @@ class MobileJSEngine implements JSEngine {
 
   /// 扩展 memento 对象，添加工具注册和存储功能
   Future<void> _extendMementoWithToolRegistration() async {
-    // 1. 创建 memento 对象和 tools 命名空间
-    await evaluateDirect('globalThis.memento = {}; globalThis.memento.tools = {};');
+    // 1. 创建 memento 对象和 tools 命名空间，同时支持大小写两种命名
+    await evaluateDirect('''
+      (function() {
+        // 创建小写命名空间
+        globalThis.memento = globalThis.memento || {};
+        globalThis.memento.tools = globalThis.memento.tools || {};
+
+        // 确保大写 Memento 存在
+        globalThis.Memento = globalThis.Memento || { version: '1.0.0', plugins: {}, system: {} };
+
+        // 将 tools 命名空间同步到大写 Memento（共享同一个对象）
+        globalThis.Memento.tools = globalThis.memento.tools;
+
+        // 兼容浏览器环境
+        if (typeof window !== 'undefined') {
+          window.memento = globalThis.memento;
+          window.Memento = globalThis.Memento;
+        }
+      })();
+    ''');
 
     // 2. 添加 registerTool 方法
     await evaluateDirect('''
@@ -523,6 +541,18 @@ class MobileJSEngine implements JSEngine {
           return Promise.resolve({ success: false, error: 'Storage not initialized' });
         }
       };
+    ''');
+
+    // 5. 同步别名到大写 Memento 命名空间
+    await evaluateDirect('''
+      (function() {
+        // 同步 registerTool、listTools、storage 到大写 Memento
+        if (globalThis.Memento) {
+          globalThis.Memento.registerTool = globalThis.memento.registerTool;
+          globalThis.Memento.listTools = globalThis.memento.listTools;
+          globalThis.Memento.storage = globalThis.memento.storage;
+        }
+      })();
     ''');
 
     // 注册 Dart 回调函数，供 JS 调用
