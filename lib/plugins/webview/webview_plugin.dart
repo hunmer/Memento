@@ -18,6 +18,7 @@ import 'services/card_manager.dart';
 import 'services/proxy_controller_service.dart';
 import 'services/local_http_server.dart';
 import 'screens/webview_main_screen.dart';
+import 'screens/webview_settings_screen.dart';
 
 /// WebView 插件
 ///
@@ -250,6 +251,11 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   @override
   Widget buildMainView(BuildContext context) {
     return const WebViewMainScreen();
+  }
+
+  @override
+  Widget buildSettingsView(BuildContext context) {
+    return const WebViewSettingsScreen();
   }
 
   @override
