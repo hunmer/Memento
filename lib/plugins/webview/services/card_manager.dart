@@ -56,6 +56,7 @@ class CardManager extends ChangeNotifier {
     String? iconUrl,
     int? iconCodePoint,
     List<String>? tags,
+    String? sourcePath,
   }) async {
     final card = WebViewCard(
       id: const Uuid().v4(),
@@ -68,6 +69,7 @@ class CardManager extends ChangeNotifier {
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       tags: tags ?? [],
+      sourcePath: sourcePath,
     );
 
     _cards.add(card);

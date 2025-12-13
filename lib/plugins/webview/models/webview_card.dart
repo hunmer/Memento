@@ -22,6 +22,7 @@ class WebViewCard {
   bool isPinned;
   List<String> tags;
   String? groupId;
+  String? sourcePath; // 原始路径（用于本地文件同步）
 
   WebViewCard({
     required this.id,
@@ -38,6 +39,7 @@ class WebViewCard {
     this.isPinned = false,
     this.tags = const [],
     this.groupId,
+    this.sourcePath,
   });
 
   /// 获取 Material 图标
@@ -82,6 +84,7 @@ class WebViewCard {
       'isPinned': isPinned,
       'tags': tags,
       'groupId': groupId,
+      'sourcePath': sourcePath,
     };
   }
 
@@ -105,6 +108,7 @@ class WebViewCard {
       isPinned: json['isPinned'] as bool? ?? false,
       tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       groupId: json['groupId'] as String?,
+      sourcePath: json['sourcePath'] as String?,
     );
   }
 
@@ -123,6 +127,7 @@ class WebViewCard {
     bool? isPinned,
     List<String>? tags,
     String? groupId,
+    String? sourcePath,
   }) {
     return WebViewCard(
       id: id ?? this.id,
@@ -139,6 +144,7 @@ class WebViewCard {
       isPinned: isPinned ?? this.isPinned,
       tags: tags ?? List.from(this.tags),
       groupId: groupId ?? this.groupId,
+      sourcePath: sourcePath ?? this.sourcePath,
     );
   }
 

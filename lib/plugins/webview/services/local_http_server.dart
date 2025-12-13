@@ -88,6 +88,31 @@ class LocalHttpServer {
 
       debugPrint('[LocalHttpServer] 请求文件: $filePath');
 
+      // 如果文件不存在，尝试从 Referer 中提取项目名称
+      if (!await file.exists()) {
+        final referer = request.headers.value('referer');
+        if (referer != null) {
+          // 从 Referer 中提取项目名称
+          // 例如：http://localhost:8080/projectName/index.html -> projectName
+          final projectName = _extractProjectNameFromReferer(referer);
+          if (projectName != null) {
+            // 尝试在项目目录下查找文件
+            final projectFilePath = _rootDir +
+                Platform.pathSeparator +
+                projectName +
+                path.replaceAll('/', Platform.pathSeparator);
+            final projectFile = File(projectFilePath);
+
+            debugPrint('[LocalHttpServer] 尝试项目路径: $projectFilePath');
+
+            if (await projectFile.exists()) {
+              file = projectFile;
+              filePath = projectFilePath;
+            }
+          }
+        }
+      }
+
       if (await file.exists()) {
         // 获取 MIME 类型
         var mimeType = lookupMimeType(filePath) ?? 'application/octet-stream';
@@ -125,6 +150,24 @@ class LocalHttpServer {
     } finally {
       await request.response.close();
     }
+  }
+
+  /// 从 Referer 中提取项目名称
+  ///
+  /// 例如：http://localhost:8080/projectName/index.html -> projectName
+  String? _extractProjectNameFromReferer(String referer) {
+    try {
+      final uri = Uri.parse(referer);
+      final pathSegments = uri.pathSegments;
+
+      // 如果有路径段，第一个段就是项目名称
+      if (pathSegments.isNotEmpty) {
+        return pathSegments.first;
+      }
+    } catch (e) {
+      debugPrint('[LocalHttpServer] 解析 Referer 失败: $e');
+    }
+    return null;
   }
 
   /// 将 file:// URL 转换为 HTTP URL

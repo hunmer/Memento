@@ -9,7 +9,6 @@ import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/core/storage/storage_manager.dart';
 
 import 'models/webview_card.dart';
 import 'models/webview_settings.dart';
