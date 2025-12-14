@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as path;
@@ -90,6 +91,28 @@ class CardManager extends ChangeNotifier {
 
   /// 删除卡片
   Future<void> deleteCard(String cardId) async {
+    // 查找要删除的卡片
+    final card = getCardById(cardId);
+    if (card == null) return;
+
+    // 如果是本地文件类型，删除对应的目录
+    if (card.type == CardType.localFile) {
+      try {
+        final cardPath = await getCardPath(card);
+        if (cardPath.isNotEmpty) {
+          final dir = Directory(cardPath);
+          if (await dir.exists()) {
+            await dir.delete(recursive: true);
+            debugPrint('已删除卡片目录: $cardPath');
+          }
+        }
+      } catch (e) {
+        debugPrint('删除卡片目录失败: $e');
+        // 继续删除卡片数据，即使目录删除失败
+      }
+    }
+
+    // 从列表中删除卡片
     _cards.removeWhere((c) => c.id == cardId);
     await _saveCards();
     notifyListeners();

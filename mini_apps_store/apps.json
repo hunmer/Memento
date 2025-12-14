@@ -1,0 +1,35 @@
+[
+  {
+    "id": "password_manager",
+    "title": "密码管理器",
+    "desc": "一个简单安全的本地密码管理工具，支持密码存储、分类管理和搜索功能。所有数据都存储在本地，确保您的密码安全。",
+    "files": "password_manager/files.json",
+    "version": "1.0.0",
+    "author": "mementoTeam",
+    "homepage": "",
+    "tags": ["工具", "安全", "密码"],
+    "permissions": ["storage"]
+  },
+  {
+    "id": "emoji-time-capsule",
+    "title": "Emoji 时光胶囊",
+    "desc": "一个创意的时光胶囊应用，用 Emoji 表情记录和封存你的珍贵时刻，让回忆更加生动有趣。",
+    "files": "emoji-time-capsule/files.json",
+    "version": "1.0.0",
+    "author": "mementoTeam",
+    "homepage": "",
+    "tags": ["娱乐", "记录", "创意"],
+    "permissions": ["storage"]
+  },
+  {
+    "id": "pure_read",
+    "title": "纯净阅读",
+    "desc": "一个简洁优雅的阅读应用，提供无干扰的纯净阅读体验，让你专注于内容本身。",
+    "files": "pure_read/files.json",
+    "version": "1.0.0",
+    "author": "mementoTeam",
+    "homepage": "",
+    "tags": ["阅读", "工具", "效率"],
+    "permissions": ["storage"]
+  }
+]

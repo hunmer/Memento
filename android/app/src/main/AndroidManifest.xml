@@ -34,7 +34,8 @@
         android:label="Memento"
         android:name="${applicationName}"
         android:icon="@drawable/app_icon"
-        android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="true"
+        android:networkSecurityConfig="@xml/network_security_config">
         <!-- 前台服务类型声明 -->
         <meta-data
             android:name="flutterEmbedding"
