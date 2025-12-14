@@ -1,9 +1,11 @@
 import 'dart:convert';
-import 'dart:io' show Platform, File, Directory, FileSystemEntity, FileSystemEntityType;
+import 'dart:io'
+    show Platform, File, Directory, FileSystemEntity, FileSystemEntityType;
 import 'dart:math' show min;
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
@@ -16,6 +18,8 @@ import 'services/tab_manager.dart';
 import 'services/card_manager.dart';
 import 'services/proxy_controller_service.dart';
 import 'services/local_http_server.dart';
+import 'services/app_store_manager.dart';
+import 'services/download_manager.dart';
 import 'screens/webview_main_screen.dart';
 import 'screens/webview_settings_screen.dart';
 
@@ -41,7 +45,12 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   late final CardManager cardManager;
   late final ProxyControllerService proxyController;
   late final LocalHttpServer localHttpServer;
+  late final AppStoreManager appStoreManager;
+  late final DownloadManager downloadManager;
   late WebViewSettings webviewSettings;
+
+  /// 待复制的文件列表（用于 Android 11+ 的文件访问）
+  List<String>? pendingFilesToCopy;
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
@@ -66,6 +75,19 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     proxyController = ProxyControllerService();
     localHttpServer = LocalHttpServer();
 
+    // 初始化应用商场管理器
+    appStoreManager = AppStoreManager(
+      storage: storage,
+      cardManager: cardManager,
+    );
+
+    // 初始化下载管理器
+    downloadManager = DownloadManager(
+      storage: storage,
+      cardManager: cardManager,
+      appStoreManager: appStoreManager,
+    );
+
     // 检查 proxy 支持
     await proxyController.checkSupport();
 
@@ -79,6 +101,9 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     // 初始化卡片服务
     await cardManager.initialize();
+
+    // 初始化应用商场
+    await appStoreManager.initialize();
 
     // 恢复标签页状态
     if (webviewSettings.restoreTabsOnStartup) {
@@ -151,8 +176,12 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
             print('[WebViewPlugin] ✓ preload.js 文件存在，开始加载...');
             // 读取 preload.js 内容
             final scriptContent = await preloadFile.readAsString();
-            print('[WebViewPlugin] preload.js 内容长度: ${scriptContent.length} 字符');
-            print('[WebViewPlugin] preload.js 内容预览: ${scriptContent.substring(0, min(100, scriptContent.length))}...');
+            print(
+              '[WebViewPlugin] preload.js 内容长度: ${scriptContent.length} 字符',
+            );
+            print(
+              '[WebViewPlugin] preload.js 内容预览: ${scriptContent.substring(0, min(100, scriptContent.length))}...',
+            );
 
             // 在 QuickJS 引擎中执行脚本（如果 JS Bridge 未初始化，会自动加入延迟队列）
             try {
@@ -161,7 +190,9 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
                 scriptContent,
                 description: 'preload.js: ${card.title}',
               );
-              print('[WebViewPlugin] <<< QuickJS 执行完成，结果: ${result.success ? '成功' : '失败'}');
+              print(
+                '[WebViewPlugin] <<< QuickJS 执行完成，结果: ${result.success ? '成功' : '失败'}',
+              );
               if (!result.success) {
                 print('[WebViewPlugin] 执行错误: ${result.error}');
               }
@@ -191,7 +222,9 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     try {
       final data = await storage.read('webview/settings.json');
       if (data != null) {
-        webviewSettings = WebViewSettings.fromJson(data as Map<String, dynamic>);
+        webviewSettings = WebViewSettings.fromJson(
+          data as Map<String, dynamic>,
+        );
       } else {
         webviewSettings = WebViewSettings();
       }
@@ -231,7 +264,8 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取本地文件存储路径
-  String get localFilesPath => '${storage.getPluginStoragePath(id)}/local_files';
+  String get localFilesPath =>
+      '${storage.getPluginStoragePath(id)}/local_files';
 
   /// 检查 URL 是否为本地文件
   bool isLocalFileUrl(String url) {
@@ -242,14 +276,23 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
   int getTotalCardsCount() => _isInitialized ? cardManager.count : 0;
   int getUrlCardsCount() => _isInitialized ? cardManager.urlCards.length : 0;
-  int getLocalFileCardsCount() => _isInitialized ? cardManager.localFileCards.length : 0;
+  int getLocalFileCardsCount() =>
+      _isInitialized ? cardManager.localFileCards.length : 0;
   int getActiveTabsCount() => _isInitialized ? tabManager.tabCount : 0;
 
   // ==================== UI 构建 ====================
 
   @override
   Widget buildMainView(BuildContext context) {
-    return const WebViewMainScreen();
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: cardManager),
+        ChangeNotifierProvider.value(value: tabManager),
+        ChangeNotifierProvider.value(value: appStoreManager),
+        ChangeNotifierProvider.value(value: downloadManager),
+      ],
+      child: const WebViewMainScreen(),
+    );
   }
 
   @override
@@ -534,13 +577,12 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     debugPrint('[WebViewPlugin] 尝试启动本地 HTTP 服务器，根目录: $rootDir');
 
-    final success = await localHttpServer.start(
-      rootDir: rootDir,
-      port: 8080,
-    );
+    final success = await localHttpServer.start(rootDir: rootDir, port: 8080);
 
     if (success) {
-      debugPrint('[WebViewPlugin] 本地 HTTP 服务器启动成功: ${localHttpServer.serverUrl}');
+      debugPrint(
+        '[WebViewPlugin] 本地 HTTP 服务器启动成功: ${localHttpServer.serverUrl} www路径：${rootDir}',
+      );
     } else {
       debugPrint('[WebViewPlugin] 本地 HTTP 服务器启动失败');
     }
@@ -588,6 +630,23 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       }
       await dir.create(recursive: true);
 
+      // 优先使用 pendingFilesToCopy（Android 11+ SAF 方式）
+      if (pendingFilesToCopy != null && pendingFilesToCopy!.isNotEmpty) {
+        debugPrint('[WebViewPlugin] 使用 pendingFilesToCopy 复制 ${pendingFilesToCopy!.length} 个文件');
+        await _copyFilesFromList(pendingFilesToCopy!, sourcePath, projectDir);
+        pendingFilesToCopy = null; // 清空列表
+
+        // 查找入口文件
+        final entryFile = await _findEntryFile(projectDir);
+        if (entryFile != null) {
+          final relativePath = path.relative(entryFile, from: httpRoot);
+          return './${relativePath.replaceAll(path.separator, '/')}';
+        } else {
+          return './$projectName/';
+        }
+      }
+
+      // 传统方式：直接访问文件系统
       final source = FileSystemEntity.typeSync(sourcePath);
 
       if (source == FileSystemEntityType.file) {
@@ -608,7 +667,9 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
           if (await preloadJsFile.exists()) {
             final targetPreloadPath = path.join(projectDir, 'preload.js');
             await preloadJsFile.copy(targetPreloadPath);
-            debugPrint('[WebViewPlugin] preload.js 已复制: $preloadJsPath -> $targetPreloadPath');
+            debugPrint(
+              '[WebViewPlugin] preload.js 已复制: $preloadJsPath -> $targetPreloadPath',
+            );
           }
         }
 
@@ -636,35 +697,107 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
   }
 
+  /// 从文件列表复制文件（用于 Android 11+ SAF 方式）
+  Future<void> _copyFilesFromList(
+    List<String> filePaths,
+    String baseSourcePath,
+    String targetDir,
+  ) async {
+    int fileCount = 0;
+
+    for (final filePath in filePaths) {
+      try {
+        final sourceFile = File(filePath);
+        if (!await sourceFile.exists()) {
+          debugPrint('[WebViewPlugin] 文件不存在，跳过: $filePath');
+          continue;
+        }
+
+        // 计算相对路径（相对于 baseSourcePath）
+        String relativePath;
+        if (filePath.startsWith(baseSourcePath)) {
+          relativePath = filePath.substring(baseSourcePath.length);
+          if (relativePath.startsWith('/') || relativePath.startsWith('\\')) {
+            relativePath = relativePath.substring(1);
+          }
+        } else {
+          // 如果不在 baseSourcePath 下，只取文件名
+          relativePath = path.basename(filePath);
+        }
+
+        final targetPath = path.join(targetDir, relativePath);
+
+        // 确保目标目录存在
+        final targetFileDir = Directory(path.dirname(targetPath));
+        if (!await targetFileDir.exists()) {
+          await targetFileDir.create(recursive: true);
+        }
+
+        await sourceFile.copy(targetPath);
+        fileCount++;
+        debugPrint('[WebViewPlugin] 文件复制成功: $relativePath');
+      } catch (e) {
+        debugPrint('[WebViewPlugin] 复制文件失败: $filePath, 错误: $e');
+      }
+    }
+
+    debugPrint('[WebViewPlugin] 文件列表复制完成，共 $fileCount 个文件');
+  }
+
   /// 递归复制目录
   Future<void> _copyDirectory(String sourcePath, String targetPath) async {
     final sourceDir = Directory(sourcePath);
     final targetDir = Directory(targetPath);
 
+    // 检查源目录是否存在
+    if (!await sourceDir.exists()) {
+      debugPrint('[WebViewPlugin] 错误: 源目录不存在: $sourcePath');
+      throw Exception('源目录不存在: $sourcePath');
+    }
+
     if (!await targetDir.exists()) {
       await targetDir.create(recursive: true);
     }
 
-    await for (final entity in sourceDir.list(recursive: false)) {
-      final name = path.basename(entity.path);
+    // 统计文件数量
+    int fileCount = 0;
+    int dirCount = 0;
 
-      // 跳过隐藏文件和系统文件
-      if (name.startsWith('.')) continue;
+    try {
+      final entities = await sourceDir.list(recursive: false).toList();
+      debugPrint('[WebViewPlugin] 源目录包含 ${entities.length} 个项目: $sourcePath');
 
-      if (entity is File) {
-        // 特殊处理 preload.js：始终复制到目标根目录
-        if (name == 'preload.js') {
-          final targetPreloadPath = path.join(targetPath, 'preload.js');
-          await entity.copy(targetPreloadPath);
-          debugPrint('[WebViewPlugin] preload.js 已复制到根目录: ${entity.path} -> $targetPreloadPath');
-        } else {
-          final targetFile = path.join(targetPath, name);
-          await entity.copy(targetFile);
+      for (final entity in entities) {
+        final name = path.basename(entity.path);
+
+        // 跳过隐藏文件和系统文件
+        if (name.startsWith('.')) {
+          debugPrint('[WebViewPlugin] 跳过隐藏文件: $name');
+          continue;
         }
-      } else if (entity is Directory) {
-        final targetSubDir = path.join(targetPath, name);
-        await _copyDirectory(entity.path, targetSubDir);
+
+        if (entity is File) {
+          final targetFile = path.join(targetPath, name);
+          try {
+            await entity.copy(targetFile);
+            fileCount++;
+            debugPrint('[WebViewPlugin] 文件复制成功: $name');
+          } catch (e) {
+            debugPrint('[WebViewPlugin] 文件复制失败: $name, 错误: $e');
+            rethrow;
+          }
+        } else if (entity is Directory) {
+          final targetSubDir = path.join(targetPath, name);
+          debugPrint('[WebViewPlugin] 进入子目录: $name');
+          await _copyDirectory(entity.path, targetSubDir);
+          dirCount++;
+        }
       }
+
+      debugPrint('[WebViewPlugin] 目录复制完成: $sourcePath -> $targetPath (文件: $fileCount, 子目录: $dirCount)');
+    } catch (e) {
+      debugPrint('[WebViewPlugin] 列出目录内容失败: $sourcePath, 错误: $e');
+      rethrow;
     }
   }
 
@@ -792,7 +925,8 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     if (Platform.isWindows) {
       if (normalizedPath.length >= 2 && normalizedPath[1] == ':') {
-        normalizedPath = normalizedPath[0].toUpperCase() + normalizedPath.substring(1);
+        normalizedPath =
+            normalizedPath[0].toUpperCase() + normalizedPath.substring(1);
       }
       return 'file:///$normalizedPath';
     } else {
