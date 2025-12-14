@@ -186,34 +186,7 @@ class _AppStoreScreenState extends State<AppStoreScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 左侧图标（小尺寸）
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child:
-                        app.icon != null
-                            ? Image.network(
-                              app.icon!,
-                              width: 48,
-                              height: 48,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  width: 48,
-                                  height: 48,
-                                  color: Colors.grey[300],
-                                  child: const Icon(Icons.apps, size: 24),
-                                );
-                              },
-                            )
-                            : Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[300],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.apps, size: 24),
-                            ),
-                  ),
+                  _buildAppIcon(app.icon, size: 48),
                   const Spacer(),
                   // 右侧版本信息
                   Column(
@@ -503,6 +476,49 @@ class _AppStoreScreenState extends State<AppStoreScreen> {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  /// 构建应用图标（支持网络图片、emoji文本、默认图标）
+  Widget _buildAppIcon(String? icon, {double size = 48}) {
+    // 判断是否为网络图片 URL
+    final bool isNetworkImage = icon != null &&
+        (icon.startsWith('http://') || icon.startsWith('https://'));
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: isNetworkImage ? null : Colors.grey[300],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: isNetworkImage
+            ? Image.network(
+                icon,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: size,
+                    height: size,
+                    color: Colors.grey[300],
+                    child: Icon(Icons.apps, size: size / 2),
+                  );
+                },
+              )
+            : icon != null && icon.isNotEmpty
+                ? Center(
+                    child: Text(
+                      icon,
+                      style: TextStyle(fontSize: size * 0.6),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                : Icon(Icons.apps, size: size / 2),
+      ),
+    );
   }
 
   @override

@@ -109,37 +109,7 @@ class _AppDetailSheetState extends State<AppDetailSheet> {
                     // 应用图标和标题
                     Row(
                       children: [
-                        if (widget.app.icon != null)
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              widget.app.icon!,
-                              width: 64,
-                              height: 64,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  width: 64,
-                                  height: 64,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[300],
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Icon(Icons.apps, size: 32),
-                                );
-                              },
-                            ),
-                          )
-                        else
-                          Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(Icons.apps, size: 32),
-                          ),
+                        _buildAppIcon(widget.app.icon, size: 64),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
@@ -486,5 +456,48 @@ class _AppDetailSheetState extends State<AppDetailSheet> {
         ).showSnackBar(SnackBar(content: Text('Error opening URL: $e')));
       }
     }
+  }
+
+  /// 构建应用图标（支持网络图片、emoji文本、默认图标）
+  Widget _buildAppIcon(String? icon, {double size = 64}) {
+    // 判断是否为网络图片 URL
+    final bool isNetworkImage = icon != null &&
+        (icon.startsWith('http://') || icon.startsWith('https://'));
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: isNetworkImage ? null : Colors.grey[300],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: isNetworkImage
+            ? Image.network(
+                icon,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: size,
+                    height: size,
+                    color: Colors.grey[300],
+                    child: Icon(Icons.apps, size: size / 2),
+                  );
+                },
+              )
+            : icon != null && icon.isNotEmpty
+                ? Center(
+                    child: Text(
+                      icon,
+                      style: TextStyle(fontSize: size * 0.6),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                : Icon(Icons.apps, size: size / 2),
+      ),
+    );
   }
 }

@@ -109,7 +109,7 @@ class WebViewCardItem extends StatelessWidget {
   Widget _buildIcon(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // 如果有自定义图标
+    // 如果有自定义图标（Material Icons）
     if (card.icon != null) {
       return Container(
         width: 40,
@@ -126,8 +126,12 @@ class WebViewCardItem extends StatelessWidget {
       );
     }
 
-    // 如果有 favicon URL
+    // 如果有 iconUrl（支持网络图片和 emoji 文本）
     if (card.iconUrl != null && card.iconUrl!.isNotEmpty) {
+      // 判断是否为网络图片 URL
+      final bool isNetworkImage = card.iconUrl!.startsWith('http://') ||
+          card.iconUrl!.startsWith('https://');
+
       return Container(
         width: 40,
         height: 40,
@@ -136,19 +140,27 @@ class WebViewCardItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
         ),
         clipBehavior: Clip.antiAlias,
-        child: Image.network(
-          card.iconUrl!,
-          width: 40,
-          height: 40,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Icon(
-              card.isLocalFile ? Icons.folder : Icons.language,
-              size: 24,
-              color: isDark ? Colors.white70 : Colors.black54,
-            );
-          },
-        ),
+        child: isNetworkImage
+            ? Image.network(
+                card.iconUrl!,
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    card.isLocalFile ? Icons.folder : Icons.language,
+                    size: 24,
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  );
+                },
+              )
+            : Center(
+                child: Text(
+                  card.iconUrl!,
+                  style: const TextStyle(fontSize: 24),
+                  textAlign: TextAlign.center,
+                ),
+              ),
       );
     }
 
