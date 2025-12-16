@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:uuid/uuid.dart';
+import '../../../widgets/circle_icon_picker.dart';
 import '../models/subscription.dart';
 import '../bill_plugin.dart';
-import 'package:Memento/plugins/bill/controls/subscription_controller.dart';
 
 class SubscriptionEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -33,12 +32,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
   DateTime? _endDate;
   IconData _selectedIcon = Icons.subscriptions;
   Color _selectedColor = Colors.blue;
-
-  /// 计算出的单日金额
-  double? _calculatedDailyAmount;
-
-  /// 标记用户是否手动修改过结束日期
-  bool _endDateManuallyChanged = false;
+  bool _isActive = true;
 
   @override
   void initState() {
@@ -60,24 +54,10 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
       _endDate = sub.endDate;
       _selectedIcon = sub.icon;
       _selectedColor = sub.iconColor;
-
-      // 如果有结束日期，标记为手动修改过（避免覆盖用户可能设置的日期）
-      if (sub.endDate != null) {
-        _endDateManuallyChanged = true;
-      }
-
-      // 初始化时计算一次值
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _calculateValues();
-      });
+      _isActive = sub.isActive;
     } else {
-      // 新建订阅时，结束日期是自动计算的
-      _endDateManuallyChanged = false;
-
-      // 新建订阅时，也计算一次（可能默认值已有）
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _calculateValues();
-      });
+      // Defaults
+      _daysController.text = '30'; // Default to Monthly
     }
   }
 
@@ -90,22 +70,11 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
     super.dispose();
   }
 
-  void _calculateValues() {
-    final totalAmount = double.tryParse(_totalAmountController.text);
-    final days = int.tryParse(_daysController.text);
-
+  void _setCycle(int days) {
     setState(() {
-      if (totalAmount != null && days != null && days > 0) {
-        _calculatedDailyAmount = totalAmount / days;
-
-        // 自动计算结束日期
-        // 只有在用户没有手动修改过结束日期时才重新计算
-        if (!_endDateManuallyChanged) {
-          _endDate = _startDate.add(Duration(days: days - 1));
-        }
-      } else {
-        _calculatedDailyAmount = null;
-      }
+      _daysController.text = days.toString();
+      // Optional: Auto-calculate End Date if needed, 
+      // but for now we follow the logic that days defines the cycle duration.
     });
   }
 
@@ -116,7 +85,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
         final days = int.parse(_daysController.text);
 
         if (days <= 0) {
-          Toast.error('订阅天数必须大于0');
+          Toast.error('Subscription days must be greater than 0');
           return;
         }
 
@@ -131,240 +100,349 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
           note: _noteController.text.isEmpty ? null : _noteController.text,
           icon: _selectedIcon,
           iconColor: _selectedColor,
+          isActive: _isActive,
         );
 
         if (widget.subscription == null) {
           await widget.billPlugin.controller.subscriptions.createSubscription(subscription);
-          Toast.success('订阅服务创建成功');
+          Toast.success('Subscription created');
         } else {
           await widget.billPlugin.controller.subscriptions.updateSubscription(subscription);
-          Toast.success('订阅服务更新成功');
+          Toast.success('Subscription updated');
         }
 
-        Navigator.of(context).pop();
+        if (mounted) Navigator.of(context).pop();
       } catch (e) {
-        Toast.error('保存失败: $e');
+        Toast.error('Save failed: $e');
       }
+    }
+  }
+
+  Future<void> _deleteSubscription() async {
+    if (widget.subscription == null) return;
+    
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Subscription'),
+        content: const Text('Are you sure you want to delete this subscription? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await widget.billPlugin.controller.subscriptions.deleteSubscription(widget.subscription!.id);
+      if (mounted) Navigator.of(context).pop();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Determine selected cycle for UI highlights
+    final currentDays = int.tryParse(_daysController.text) ?? 0;
+
     return Scaffold(
+      backgroundColor: const Color(0xFFF2F2F7), // Light grey background
       appBar: AppBar(
-        title: Text(widget.subscription == null ? '新建订阅' : '编辑订阅'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel', style: TextStyle(fontSize: 16)),
+        ),
+        leadingWidth: 80,
+        title: Text(
+          widget.subscription == null ? 'Add Subscription' : 'Edit Subscription',
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17, color: Colors.black),
+        ),
+        centerTitle: true,
         actions: [
           TextButton(
             onPressed: _saveSubscription,
-            child: Text('保存', style: TextStyle(color: Colors.white)),
+            child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           children: [
-            // 服务名称
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: '服务名称 *',
-                hintText: '例如：Netflix会员、Spotify等',
-                border: OutlineInputBorder(),
+            // Icon Picker
+            Center(
+              child: Column(
+                children: [
+                  CircleIconPicker(
+                    currentIcon: _selectedIcon,
+                    backgroundColor: _selectedColor,
+                    onIconSelected: (icon) => setState(() => _selectedIcon = icon),
+                    onColorSelected: (color) => setState(() => _selectedColor = color),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Choose Icon',
+                    style: TextStyle(color: Colors.blue, fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                ],
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入服务名称';
-                }
-                return null;
-              },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-            // 总金额
-            TextFormField(
-              controller: _totalAmountController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: '总金额 *',
-                hintText: '0.00',
-                border: OutlineInputBorder(),
-                prefixText: '¥ ',
+            // Name & Price Group
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
               ),
-              onChanged: (value) => _calculateValues(),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入总金额';
-                }
-                if (double.tryParse(value) == null) {
-                  return '请输入有效金额';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 16),
-
-            // 订阅天数
-            TextFormField(
-              controller: _daysController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: '订阅天数 *',
-                hintText: '例如：30（一个月）',
-                border: OutlineInputBorder(),
-                suffixText: '天',
-              ),
-              onChanged: (value) => _calculateValues(),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入订阅天数';
-                }
-                final days = int.tryParse(value);
-                if (days == null || days <= 0) {
-                  return '请输入有效天数';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 16),
-
-            // 单日金额显示（自动计算）
-            if (_calculatedDailyAmount != null)
-              Card(
-                color: Colors.blue.withOpacity(0.1),
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Icon(Icons.calculate, color: Colors.blue),
-                      SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '单日金额',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          Text(
-                            '¥${_calculatedDailyAmount!.toStringAsFixed(2)} / 天',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ],
+              child: Column(
+                children: [
+                  _buildInputRow(
+                    label: 'Name',
+                    child: TextFormField(
+                      controller: _nameController,
+                      textAlign: TextAlign.end,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Netflix',
+                        hintStyle: TextStyle(color: Colors.grey),
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
                       ),
+                      style: const TextStyle(fontSize: 17),
+                      validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                    ),
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 0, color: Color(0xFFE5E5EA)),
+                  _buildInputRow(
+                    label: 'Price',
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Text('¥ ', style: TextStyle(color: Colors.grey, fontSize: 17)),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _totalAmountController,
+                            textAlign: TextAlign.end,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: '0.00',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            style: const TextStyle(fontSize: 17),
+                            validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Timing Group
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  // Start Date
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _startDate,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) setState(() => _startDate = picked);
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Start Date', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                        Text(
+                          DateFormat('yyyy-MM-dd').format(_startDate),
+                          style: const TextStyle(fontSize: 17, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(height: 1, color: Color(0xFFE5E5EA)),
+                  ),
+                  
+                  // End Date (Optional)
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _endDate ?? _startDate.add(Duration(days: currentDays > 0 ? currentDays : 30)),
+                        firstDate: _startDate,
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) setState(() => _endDate = picked);
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('End Date', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                        Text(
+                          _endDate != null ? DateFormat('yyyy-MM-dd').format(_endDate!) : 'None',
+                          style: const TextStyle(fontSize: 17, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Cycle Buttons
+                  Row(
+                    children: [
+                      Expanded(child: _buildCycleButton('Monthly', 30, currentDays == 30)),
+                      const SizedBox(width: 8),
+                      Expanded(child: _buildCycleButton('Quarterly', 90, currentDays == 90)),
+                      const SizedBox(width: 8),
+                      Expanded(child: _buildCycleButton('Yearly', 365, currentDays >= 360)),
                     ],
                   ),
-                ),
+                ],
               ),
-            SizedBox(height: 16),
-
-            // 开始日期
-            ListTile(
-              title: Text('开始日期'),
-              subtitle: Text(
-                '${_startDate.year}-${_startDate.month.toString().padLeft(2, '0')}-${_startDate.day.toString().padLeft(2, '0')}',
-              ),
-              trailing: Icon(Icons.calendar_today),
-              onTap: () async {
-                final date = await showDatePicker(
-                  context: context,
-                  initialDate: _startDate,
-                  firstDate: DateTime.now().subtract(Duration(days: 365)),
-                  lastDate: DateTime.now().add(Duration(days: 365 * 5)),
-                );
-                if (date != null) {
-                  setState(() {
-                    _startDate = date;
-                    // 开始日期改变时，重置结束日期的手动修改标记
-                    _endDateManuallyChanged = false;
-                  });
-                  // 重新计算值（特别是结束日期）
-                  _calculateValues();
-                }
-              },
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 24),
 
-            // 结束日期（可选）
-            ListTile(
-              title: Text('结束日期（可选）'),
-              subtitle: Text(
-                _endDate != null
-                    ? '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}'
-                    : '不限制',
+            // Auto-subscribe
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
               ),
-              trailing: Icon(Icons.calendar_today),
-              onTap: () async {
-                final date = await showDatePicker(
-                  context: context,
-                  initialDate: _endDate ?? DateTime.now(),
-                  firstDate: _startDate,
-                  lastDate: DateTime.now().add(Duration(days: 365 * 5)),
-                );
-                if (date != null) {
-                  setState(() {
-                    _endDate = date;
-                    _endDateManuallyChanged = true; // 标记用户手动修改过
-                  });
-                }
-              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Auto-subscribe', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                      SizedBox(height: 2),
+                      Text('Renew automatically when expired', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    ],
+                  ),
+                  Switch.adaptive(
+                    value: _isActive,
+                    onChanged: (val) => setState(() => _isActive = val),
+                    activeColor: const Color(0xFF34C759),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(height: 24),
 
-            // 如果结束日期是自动计算的，显示提示
-            if (_endDate != null && !_endDateManuallyChanged && _daysController.text.isNotEmpty)
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  '根据开始日期和订阅天数自动计算',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontStyle: FontStyle.italic,
+            // Notes
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Notes', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _noteController,
+                    maxLines: 4,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Add comments, order numbers, or account details...',
+                      hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Delete Button
+            if (widget.subscription != null)
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: _deleteSubscription,
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text(
+                    'Delete Subscription',
+                    style: TextStyle(color: Colors.red, fontSize: 17, fontWeight: FontWeight.w500),
                   ),
                 ),
               ),
-            SizedBox(height: 16),
-
-            // 分类
-            TextFormField(
-              decoration: InputDecoration(
-                labelText: '分类',
-                border: OutlineInputBorder(),
-              ),
-              initialValue: _category,
-              onChanged: (value) => _category = value,
-            ),
-            SizedBox(height: 16),
-
-            // 备注
-            TextFormField(
-              controller: _noteController,
-              decoration: InputDecoration(
-                labelText: '备注（可选）',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            SizedBox(height: 24),
-
-            // 保存按钮
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton.icon(
-                onPressed: _saveSubscription,
-                icon: Icon(Icons.save),
-                label: Text('保存订阅服务', style: TextStyle(fontSize: 16)),
-              ),
-            ),
-            SizedBox(height: 16),
+            const SizedBox(height: 32),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildInputRow({required String label, required Widget child}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(label, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+          ),
+          Expanded(child: child),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCycleButton(String label, int days, bool isSelected) {
+    return GestureDetector(
+      onTap: () => _setCycle(days),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFEFF6FF) : const Color(0xFFF2F2F7),
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected ? Border.all(color: Colors.blue.withOpacity(0.3)) : null,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.blue : Colors.grey[700],
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
 }
+

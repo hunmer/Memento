@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Subscription List</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3B82F6", // Blue accent for prices/progress
+                        "background-light": "#F3F4F6",
+                        "background-dark": "#000000",
+                        "card-dark": "#1C1C1E",
+                        "card-light": "#FFFFFF",
+                        "text-primary-dark": "#FFFFFF",
+                        "text-secondary-dark": "#9CA3AF",
+                        "text-primary-light": "#111827",
+                        "text-secondary-light": "#6B7280",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem",
+                        'xl': '1.25rem',
+                        '2xl': '1.5rem',
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .bg-icon-overlay {
+            mask-image: linear-gradient(to right, transparent, black);
+            -webkit-mask-image: linear-gradient(to right, transparent 20%, black);
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen text-text-primary-light dark:text-text-primary-dark antialiased selection:bg-primary selection:text-white transition-colors duration-300">
+<div class="max-w-md mx-auto min-h-screen relative p-4">
+<main class="space-y-4 pt-2">
+<div class="relative overflow-hidden rounded-2xl bg-white dark:bg-[#151e22] shadow-sm border border-gray-100 dark:border-gray-800/50 group h-32">
+<div class="absolute -right-6 -bottom-6 w-40 h-40 opacity-30 rotate-12 pointer-events-none">
+<img alt="Lightroom logo background" class="w-full h-full object-contain grayscale invert dark:invert-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuKB_zwjjslXNeL365eWdDnjGncQFUhmcxW3K6LQ4BBrnl02iIVt5uoFY4fO9nrWoZQl25X5KVASfMgs09Co7Sg3vFtCkrwqsP2HsbWw9j27hndnX8EM1V0jda2Vx3YOEDQmmd6cwTKs1M5Z-oG0EjCdPhAKA9DAS76kcbszT1vhbTsNOwU8v4QKrHmGhrzi6Ikjt2rKBFPobKgdxfTAbxR_-Sou3IcrB9Lkvtedb7tGu3RxpVMkndRoQ09lfH-X2GsZ65sQOpUoc"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-teal-900/10 dark:to-teal-500/10 pointer-events-none"></div>
+<div class="relative z-10 flex items-center p-4 h-full">
+<div class="flex-shrink-0 mr-4">
+<div class="w-14 h-14 rounded-xl bg-[#001E36] flex items-center justify-center overflow-hidden">
+<span class="text-[#31A8FF] font-bold text-xl">Lr</span>
+</div>
+</div>
+<div class="flex-grow min-w-0 flex flex-col justify-center gap-1">
+<div class="flex justify-between items-start">
+<h3 class="font-semibold text-lg truncate">Lightroom</h3>
+</div>
+<div class="flex items-center gap-2 text-sm">
+<span class="text-blue-500 dark:text-blue-400 font-medium">¥148</span>
+<span class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs px-1.5 py-0.5 rounded font-medium">Yearly</span>
+</div>
+<div class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-0.5 flex items-center gap-1">
+<span class="material-icons-round text-[10px] opacity-70">event</span>
+                            Next bill: May 3, 2026
+                        </div>
+<div class="flex items-center gap-3 mt-1.5 w-full">
+<div class="h-1.5 w-24 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-teal-500 rounded-full" style="width: 87%"></div>
+</div>
+<span class="text-[10px] text-teal-600 dark:text-teal-400 font-medium whitespace-nowrap">87%</span>
+<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] px-2 py-0.5 rounded-md font-medium whitespace-nowrap">Auto-renew</span>
+</div>
+</div>
+</div>
+</div>
+<div class="relative overflow-hidden rounded-2xl bg-white dark:bg-[#161b22] shadow-sm border border-gray-100 dark:border-gray-800/50 group h-32">
+<div class="absolute -right-6 -bottom-6 w-40 h-40 opacity-30 rotate-12 pointer-events-none">
+<img alt="TickTick logo background" class="w-full h-full object-contain grayscale invert dark:invert-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDblMqkYRZSJnM1R1a5ikuh2AATGo5GRN6tfQjcaELVRQSCAXLv_Pr6Hke3BGP2oD2A6SuhrcZIUX7r2XRf-o8rRlbfsiNkT5Vz43Pj2_XrQ8PoreIVUiB7vUmWAw_zKDKUi3qt0a1yTR5SWI_fjW3ackEZlsIbb0ehi_x_HaAzX_AxDLtOUADodvALeV-8Q_83Ji97AYVGY_oQbPyWApyMLmgQh7fj73EwJKN-s52xGAB6r0J6YV5LG6UAPikMaXhmUTFo7OZgwNI"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-blue-900/10 dark:to-blue-500/10 pointer-events-none"></div>
+<div class="relative z-10 flex items-center p-4 h-full">
+<div class="flex-shrink-0 mr-4">
+<div class="w-14 h-14 rounded-xl overflow-hidden">
+<img alt="TickTick Icon" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrL8yIrzHuFxZITLiKqHeyde3Pl7X5PyGZTGUU0gJZSPQ24WnjMF-NvAY37eWb-dZTopzLfqHKZv02qOrwVg9YUUanz9Ni99aGhN0spPnmuksqmAzjS1PXSTlwxUUy9i7bW5iZ4wIo8iJ5e30IAsodwChdE3sYyIWSel6m5j7dvJYRGlVErsqeTzPaLEkb4jBoTq5-ccY5hLPkmvgysWkyLqqVdtW0yUBMWq_jtE6t-DNBEeSTAOPggs_TyZSyh9t-i2dSWWTH7OY"/>
+</div>
+</div>
+<div class="flex-grow min-w-0 flex flex-col justify-center gap-1">
+<h3 class="font-semibold text-lg truncate">TickTick</h3>
+<div class="flex items-center gap-2 text-sm">
+<span class="text-blue-500 dark:text-blue-400 font-medium">¥139</span>
+<span class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs px-1.5 py-0.5 rounded font-medium">Yearly</span>
+</div>
+<div class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-0.5 flex items-center gap-1">
+<span class="material-icons-round text-[10px] opacity-70">event</span>
+                            Next bill: June 15, 2025
+                        </div>
+<div class="flex items-center gap-3 mt-1.5 w-full justify-end">
+<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] px-2 py-0.5 rounded-md font-medium whitespace-nowrap">Auto-renew</span>
+</div>
+</div>
+</div>
+</div>
+<div class="relative overflow-hidden rounded-2xl bg-white dark:bg-[#151c24] shadow-sm border border-gray-100 dark:border-gray-800/50 group h-32">
+<div class="absolute -right-6 -bottom-6 w-40 h-40 opacity-30 rotate-12 pointer-events-none">
+<img alt="iCloud background" class="w-full h-full object-contain grayscale invert dark:invert-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQ6fmAfDBRtbnsqY4dJeVj2WcuSW7Ykwq51efcXiR5RCPvAY0LZRvZeOd2-wqg1NnS3wuAoBL3VpSnQ4ROTAuHheNWjiN1sJUXrQVqXn_BP6J6J27WP0o-pvIr_CYMXfeta0k-kCkoLTGu4qRm1dyuc9VQkUVnXf9uE5jHnwkDKNQs0apLGhv3vFfn876Pw8j2VtsRVOZzWKGGx08QWrQje0BADorVPNBO26Li8FZM-_OYSO7i8jFJShxJmnwWYZ9mPGUAl-lxXV4"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-sky-900/10 dark:to-sky-500/10 pointer-events-none"></div>
+<div class="relative z-10 flex items-center p-4 h-full">
+<div class="flex-shrink-0 mr-4">
+<div class="w-14 h-14 rounded-xl overflow-hidden flex items-center justify-center bg-white/10 backdrop-blur-sm">
+<img alt="iCloud Icon" class="w-full h-full object-contain p-2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQ6fmAfDBRtbnsqY4dJeVj2WcuSW7Ykwq51efcXiR5RCPvAY0LZRvZeOd2-wqg1NnS3wuAoBL3VpSnQ4ROTAuHheNWjiN1sJUXrQVqXn_BP6J6J27WP0o-pvIr_CYMXfeta0k-kCkoLTGu4qRm1dyuc9VQkUVnXf9uE5jHnwkDKNQs0apLGhv3vFfn876Pw8j2VtsRVOZzWKGGx08QWrQje0BADorVPNBO26Li8FZM-_OYSO7i8jFJShxJmnwWYZ9mPGUAl-lxXV4"/>
+</div>
+</div>
+<div class="flex-grow min-w-0 flex flex-col justify-center gap-1">
+<h3 class="font-semibold text-lg truncate">iCloud Drive</h3>
+<div class="flex items-center gap-2 text-sm">
+<span class="text-blue-500 dark:text-blue-400 font-medium">¥21</span>
+<span class="bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 text-xs px-1.5 py-0.5 rounded font-medium">Monthly</span>
+</div>
+<div class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-0.5 flex items-center gap-1">
+<span class="material-icons-round text-[10px] opacity-70">event</span>
+                            Next bill: July 1, 2025
+                        </div>
+<div class="flex items-center gap-3 mt-1.5 w-full">
+<div class="h-1.5 w-24 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-sky-500 rounded-full" style="width: 50%"></div>
+</div>
+<span class="text-[10px] text-sky-600 dark:text-sky-400 font-medium whitespace-nowrap">50%</span>
+<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] px-2 py-0.5 rounded-md font-medium whitespace-nowrap">Auto-renew</span>
+</div>
+</div>
+</div>
+</div>
+<div class="relative overflow-hidden rounded-2xl bg-white dark:bg-[#251818] shadow-sm border border-gray-100 dark:border-gray-800/50 group h-32">
+<div class="absolute -right-6 -bottom-6 w-40 h-40 opacity-30 rotate-12 pointer-events-none">
+<span class="material-icons-round text-[160px] text-yellow-500/30 dark:text-yellow-500/30">music_note</span>
+</div>
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-red-900/10 dark:to-red-500/10 pointer-events-none"></div>
+<div class="relative z-10 flex items-center p-4 h-full">
+<div class="flex-shrink-0 mr-4">
+<div class="w-14 h-14 rounded-xl bg-yellow-400 flex items-center justify-center">
+<span class="material-icons-round text-3xl text-green-600">music_note</span>
+</div>
+</div>
+<div class="flex-grow min-w-0 flex flex-col justify-center gap-1">
+<h3 class="font-semibold text-lg truncate">QQ Music</h3>
+<div class="flex items-center gap-2 text-sm">
+<span class="text-blue-500 dark:text-blue-400 font-medium">¥28</span>
+<span class="bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 text-xs px-1.5 py-0.5 rounded font-medium">Monthly</span>
+</div>
+<div class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-0.5 flex items-center gap-1">
+<span class="material-icons-round text-[10px] opacity-70">event</span>
+                            Next bill: July 6, 2025
+                        </div>
+<div class="flex items-center gap-3 mt-1.5 w-full">
+<div class="h-1.5 w-24 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-rose-500 rounded-full" style="width: 66%"></div>
+</div>
+<span class="text-[10px] text-rose-600 dark:text-rose-400 font-medium whitespace-nowrap">66%</span>
+<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] px-2 py-0.5 rounded-md font-medium whitespace-nowrap">Auto-renew</span>
+</div>
+</div>
+</div>
+</div>
+<div class="relative overflow-hidden rounded-2xl bg-white dark:bg-[#151c24] shadow-sm border border-gray-100 dark:border-gray-800/50 group h-32">
+<div class="absolute -right-6 -bottom-6 w-40 h-40 opacity-30 rotate-12 pointer-events-none">
+<img alt="iCloud background" class="w-full h-full object-contain grayscale invert dark:invert-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuQQGy0ECd_4va6p1Y4UsrazUdYSCAYQfJANBDzb5uZr6rrq1RjidowgZKEgKht7zHAkVA_eXQ1g1rKDwQIDGSU-Y9_2NdiydvG25swyZkRo3T12VkAZfpn7ZoiKSNtFPe9ciAWjNMdZVnvg7o3irX5Az-cDDUjHeg3G4TWdRf9aZ-LrePC4D-S11fYOCp0OrSzG8EuhXkAJ3eOlBcBObzPSOtLl7FbMylNnvUs1niLnvPfd_n54_mcvjV4lAgeGGB4RKurpugbDo"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-sky-900/10 dark:to-sky-500/10 pointer-events-none"></div>
+<div class="relative z-10 flex items-center p-4 h-full">
+<div class="flex-shrink-0 mr-4">
+<div class="w-14 h-14 rounded-xl overflow-hidden flex items-center justify-center bg-white/10 backdrop-blur-sm">
+<img alt="iCloud Icon" class="w-full h-full object-contain p-2" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuQQGy0ECd_4va6p1Y4UsrazUdYSCAYQfJANBDzb5uZr6rrq1RjidowgZKEgKht7zHAkVA_eXQ1g1rKDwQIDGSU-Y9_2NdiydvG25swyZkRo3T12VkAZfpn7ZoiKSNtFPe9ciAWjNMdZVnvg7o3irX5Az-cDDUjHeg3G4TWdRf9aZ-LrePC4D-S11fYOCp0OrSzG8EuhXkAJ3eOlBcBObzPSOtLl7FbMylNnvUs1niLnvPfd_n54_mcvjV4lAgeGGB4RKurpugbDo"/>
+</div>
+</div>
+<div class="flex-grow min-w-0 flex flex-col justify-center gap-1">
+<h3 class="font-semibold text-lg truncate">iCloud Drive</h3>
+<div class="flex items-center gap-2 text-sm">
+<span class="text-blue-500 dark:text-blue-400 font-medium">¥21</span>
+<span class="bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 text-xs px-1.5 py-0.5 rounded font-medium">Monthly</span>
+</div>
+<div class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-0.5 flex items-center gap-1">
+<span class="material-icons-round text-[10px] opacity-70">event</span>
+                            Next bill: July 30, 2025
+                        </div>
+<div class="flex items-center gap-3 mt-1.5 w-full">
+<div class="h-1.5 w-24 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full bg-cyan-500 rounded-full" style="width: 100%"></div>
+</div>
+<span class="text-[10px] text-cyan-600 dark:text-cyan-400 font-medium whitespace-nowrap">100%</span>
+<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] px-2 py-0.5 rounded-md font-medium whitespace-nowrap">Auto-renew</span>
+</div>
+</div>
+</div>
+</div>
+<div class="relative overflow-hidden rounded-2xl bg-white dark:bg-[#1a1f1e] shadow-sm border border-gray-100 dark:border-gray-800/50 group h-32">
+<div class="absolute -right-6 -bottom-6 w-40 h-40 opacity-30 rotate-12 pointer-events-none flex items-center justify-center">
+<span class="text-[140px] font-bold text-red-600 dark:text-red-600 leading-none select-none">W</span>
+</div>
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-red-900/10 dark:to-red-500/10 pointer-events-none"></div>
+<div class="relative z-10 flex items-center p-4 h-full">
+<div class="flex-shrink-0 mr-4">
+<div class="w-14 h-14 rounded-xl bg-red-600 flex items-center justify-center text-white font-bold text-2xl">
+                            W
+                        </div>
+</div>
+<div class="flex-grow min-w-0 flex flex-col justify-center gap-1">
+<h3 class="font-semibold text-lg truncate">WPS Office</h3>
+<div class="flex items-center gap-2 text-sm">
+<span class="text-blue-500 dark:text-blue-400 font-medium">¥198</span>
+<span class="bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 text-xs px-1.5 py-0.5 rounded font-medium">Every 740 Days</span>
+</div>
+<div class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-0.5 flex items-center gap-1">
+<span class="material-icons-round text-[10px] opacity-70">event</span>
+                            Next bill: Sep 23, 2026
+                        </div>
+<div class="flex items-center gap-3 mt-1.5 w-full justify-end">
+<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] px-2 py-0.5 rounded-md font-medium whitespace-nowrap">Auto-renew</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.add('dark'); 
+        }
+    </script>
+</body></html>

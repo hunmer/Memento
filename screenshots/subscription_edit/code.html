@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add/Edit Subscription</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    primary: "#607AFB",
+                    "background-light": "#F2F2F7",
+                    "card-light": "#FFFFFF",
+                    "text-primary-light": "#000000",
+                    "text-secondary-light": "#8E8E93"
+                },
+                fontFamily: {
+                    display: "Spline Sans"
+                },
+                // Reduced corner radius as requested
+                borderRadius: {
+                    DEFAULT: "0.5rem", // 8px
+                    lg: "0.625rem",    // 10px
+                    xl: "0.75rem",     // 12px
+                    '2xl': "1rem",     // 16px
+                    full: "9999px"
+                }
+            }
+        }
+    };
+</script>
+<style>
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        opacity: 0.5;
+        cursor: pointer;
+    }
+    body {
+        min-height: max(884px, 100dvh);
+    }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light font-display min-h-screen text-text-primary-light antialiased selection:bg-primary selection:text-white transition-colors duration-300">
+<div class="max-w-md mx-auto min-h-screen relative p-4">
+<header class="flex items-center justify-between mb-8 pt-2">
+<button class="text-blue-500 text-[17px] leading-none hover:text-blue-600 transition-colors">Cancel</button>
+<h1 class="text-black font-semibold text-[17px] leading-none">Add Subscription</h1>
+<button class="text-blue-500 text-[17px] font-semibold leading-none hover:text-blue-600 transition-colors">Save</button>
+</header>
+<main class="space-y-6">
+<div class="flex flex-col items-center justify-center space-y-4 mb-8">
+<div class="relative group cursor-pointer">
+<div class="w-24 h-24 rounded-2xl bg-white border border-gray-200 flex items-center justify-center shadow-sm overflow-hidden transition-transform active:scale-95">
+<span class="material-icons-round text-4xl text-gray-400 group-hover:text-primary transition-colors">add_photo_alternate</span>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-primary text-white p-1.5 rounded-full border-4 border-background-light flex items-center justify-center">
+<span class="material-icons-round text-xs font-bold">edit</span>
+</div>
+</div>
+<div class="text-center">
+<p class="text-sm font-medium text-blue-500">Choose Icon</p>
+</div>
+</div>
+<div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
+<div class="flex items-center px-4 py-3 border-b border-gray-100">
+<label class="text-black w-28 flex-shrink-0 font-medium">Name</label>
+<input class="bg-transparent border-none text-black focus:ring-0 focus:text-black w-full text-right placeholder-gray-400 p-0 text-[17px]" placeholder="Netflix" type="text"/>
+</div>
+<div class="flex items-center px-4 py-3">
+<label class="text-black w-28 flex-shrink-0 font-medium">Price</label>
+<div class="flex-grow flex justify-end items-center gap-1">
+<span class="text-gray-400">¥</span>
+<input class="bg-transparent border-none text-black focus:ring-0 focus:text-black w-24 text-right placeholder-gray-400 p-0 text-[17px]" placeholder="0.00" type="number"/>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 p-4 space-y-5">
+<div class="flex justify-between items-center border-b border-gray-100 pb-4">
+<span class="text-black font-medium">Start Date</span>
+<input class="bg-transparent text-gray-500 border-none focus:ring-0 p-0 text-sm [color-scheme:light] font-medium font-display" type="date" value="2023-10-27"/>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-black font-medium">End Date</span>
+<input class="bg-transparent text-gray-500 border-none focus:ring-0 p-0 text-sm [color-scheme:light] font-medium font-display" type="date"/>
+</div>
+<div class="grid grid-cols-3 gap-2 pt-1">
+<button class="bg-gray-100 text-gray-600 text-xs py-2 rounded-lg font-medium hover:bg-gray-200 transition-all active:scale-95">Monthly</button>
+<button class="bg-gray-100 text-gray-600 text-xs py-2 rounded-lg font-medium hover:bg-gray-200 transition-all active:scale-95">Quarterly</button>
+<button class="bg-blue-50 border border-blue-200 text-blue-600 text-xs py-2 rounded-lg font-medium shadow-sm active:scale-95">Yearly</button>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 px-4 py-3 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-black font-medium text-[17px]">Auto-subscribe</span>
+<span class="text-xs text-gray-500 mt-0.5">Renew automatically when expired</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-[51px] h-[31px] bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-[27px] after:w-[27px] after:transition-all after:shadow-sm peer-checked:bg-green-500 transition-colors duration-300"></div>
+</label>
+</div>
+<div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 p-4">
+<span class="text-black block mb-2 font-medium">Notes</span>
+<textarea class="w-full bg-transparent text-black text-[15px] border-none focus:ring-0 p-0 h-24 resize-none placeholder-gray-400 leading-relaxed" placeholder="Add comments, order numbers, or account details..."></textarea>
+</div>
+<button class="w-full py-3.5 text-red-500 font-medium text-[17px] bg-white rounded-xl border border-gray-200 hover:bg-red-50 transition-colors">
+            Delete Subscription
+        </button>
+</main>
+</div>
+<script>
+    document.documentElement.classList.remove('dark');
+</script>
+
+</body></html>
