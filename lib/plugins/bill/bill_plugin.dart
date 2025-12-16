@@ -367,7 +367,10 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     final result = await _billUseCase.deleteAccount(params);
 
     if (result.isFailure) {
-      return jsonEncode({'success': false, 'error': result.errorOrNull?.message ?? '删除账户失败'});
+      return jsonEncode({
+        'success': false,
+        'error': result.errorOrNull?.message ?? '删除账户失败',
+      });
     }
 
     return jsonEncode({'success': true, 'accountId': params['accountId']});
@@ -433,7 +436,10 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     final result = await _billUseCase.deleteBill(params);
 
     if (result.isFailure) {
-      return jsonEncode({'success': false, 'error': result.errorOrNull?.message ?? '删除账单失败'});
+      return jsonEncode({
+        'success': false,
+        'error': result.errorOrNull?.message ?? '删除账单失败',
+      });
     }
 
     return jsonEncode({
@@ -890,110 +896,129 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   /// 注册数据选择器
   void _registerDataSelectors() {
     // 1. 选择账户（单级）
-    pluginDataSelectorService.registerSelector(SelectorDefinition(
-      id: 'bill.account',
-      pluginId: id,
-      name: '选择账户',
-      icon: icon,
-      color: color,
-      searchable: true,
-      selectionMode: SelectionMode.single,
-      steps: [
-        SelectorStep(
-          id: 'account',
-          title: '选择账户',
-          viewType: SelectorViewType.list,
-          isFinalStep: true,
-          dataLoader: (_) async {
-            return _billController.accounts.map((account) => SelectableItem(
-              id: account.id,
-              title: account.title,
-              subtitle: '余额: ¥${account.totalAmount.toStringAsFixed(2)}',
-              icon: account.icon,
-              color: account.backgroundColor,
-              rawData: account,
-            )).toList();
-          },
-          searchFilter: (items, query) {
-            if (query.isEmpty) return items;
-            final lowerQuery = query.toLowerCase();
-            return items.where((item) {
-              return item.title.toLowerCase().contains(lowerQuery);
-            }).toList();
-          },
-        ),
-      ],
-    ));
+    pluginDataSelectorService.registerSelector(
+      SelectorDefinition(
+        id: 'bill.account',
+        pluginId: id,
+        name: '选择账户',
+        icon: icon,
+        color: color,
+        searchable: true,
+        selectionMode: SelectionMode.single,
+        steps: [
+          SelectorStep(
+            id: 'account',
+            title: '选择账户',
+            viewType: SelectorViewType.list,
+            isFinalStep: true,
+            dataLoader: (_) async {
+              return _billController.accounts
+                  .map(
+                    (account) => SelectableItem(
+                      id: account.id,
+                      title: account.title,
+                      subtitle:
+                          '余额: ¥${account.totalAmount.toStringAsFixed(2)}',
+                      icon: account.icon,
+                      color: account.backgroundColor,
+                      rawData: account,
+                    ),
+                  )
+                  .toList();
+            },
+            searchFilter: (items, query) {
+              if (query.isEmpty) return items;
+              final lowerQuery = query.toLowerCase();
+              return items.where((item) {
+                return item.title.toLowerCase().contains(lowerQuery);
+              }).toList();
+            },
+          ),
+        ],
+      ),
+    );
 
     // 2. 选择账单记录（两级：账户 → 账单）
-    pluginDataSelectorService.registerSelector(SelectorDefinition(
-      id: 'bill.record',
-      pluginId: id,
-      name: '选择账单记录',
-      icon: Icons.receipt_long,
-      color: color,
-      searchable: true,
-      selectionMode: SelectionMode.single,
-      steps: [
-        // 第一步：选择账户
-        SelectorStep(
-          id: 'account',
-          title: '选择账户',
-          viewType: SelectorViewType.list,
-          isFinalStep: false,
-          dataLoader: (_) async {
-            return _billController.accounts.map((account) => SelectableItem(
-              id: account.id,
-              title: account.title,
-              subtitle: '余额: ¥${account.totalAmount.toStringAsFixed(2)} | ${account.bills.length} 条账单',
-              icon: account.icon,
-              color: account.backgroundColor,
-              rawData: account,
-            )).toList();
-          },
-          searchFilter: (items, query) {
-            if (query.isEmpty) return items;
-            final lowerQuery = query.toLowerCase();
-            return items.where((item) {
-              return item.title.toLowerCase().contains(lowerQuery);
-            }).toList();
-          },
-        ),
-        // 第二步：选择账单
-        SelectorStep(
-          id: 'bill',
-          title: '选择账单',
-          viewType: SelectorViewType.list,
-          isFinalStep: true,
-          dataLoader: (previousSelections) async {
-            final account = previousSelections['account'] as Account;
-            // 按日期倒序排列
-            final sortedBills = List<Bill>.from(account.bills)
-              ..sort((a, b) => b.date.compareTo(a.date));
+    pluginDataSelectorService.registerSelector(
+      SelectorDefinition(
+        id: 'bill.record',
+        pluginId: id,
+        name: '选择账单记录',
+        icon: Icons.receipt_long,
+        color: color,
+        searchable: true,
+        selectionMode: SelectionMode.single,
+        steps: [
+          // 第一步：选择账户
+          SelectorStep(
+            id: 'account',
+            title: '选择账户',
+            viewType: SelectorViewType.list,
+            isFinalStep: false,
+            dataLoader: (_) async {
+              return _billController.accounts
+                  .map(
+                    (account) => SelectableItem(
+                      id: account.id,
+                      title: account.title,
+                      subtitle:
+                          '余额: ¥${account.totalAmount.toStringAsFixed(2)} | ${account.bills.length} 条账单',
+                      icon: account.icon,
+                      color: account.backgroundColor,
+                      rawData: account,
+                    ),
+                  )
+                  .toList();
+            },
+            searchFilter: (items, query) {
+              if (query.isEmpty) return items;
+              final lowerQuery = query.toLowerCase();
+              return items.where((item) {
+                return item.title.toLowerCase().contains(lowerQuery);
+              }).toList();
+            },
+          ),
+          // 第二步：选择账单
+          SelectorStep(
+            id: 'bill',
+            title: '选择账单',
+            viewType: SelectorViewType.list,
+            isFinalStep: true,
+            dataLoader: (previousSelections) async {
+              final account = previousSelections['account'] as Account;
+              // 按日期倒序排列
+              final sortedBills = List<Bill>.from(account.bills)
+                ..sort((a, b) => b.date.compareTo(a.date));
 
-            return sortedBills.map((bill) => SelectableItem(
-              id: bill.id,
-              title: bill.title,
-              subtitle: '${bill.category} | ${bill.date.toString().substring(0, 10)} | ¥${bill.amount.toStringAsFixed(2)}',
-              icon: bill.icon,
-              color: bill.iconColor,
-              rawData: bill,
-            )).toList();
-          },
-          searchFilter: (items, query) {
-            if (query.isEmpty) return items;
-            final lowerQuery = query.toLowerCase();
-            return items.where((item) {
-              final bill = item.rawData as Bill;
-              return item.title.toLowerCase().contains(lowerQuery) ||
-                  bill.category.toLowerCase().contains(lowerQuery) ||
-                  bill.note.toLowerCase().contains(lowerQuery);
-            }).toList();
-          },
-          emptyText: '该账户暂无账单记录',
-        ),
-      ],
-    ));
+              return sortedBills
+                  .map(
+                    (bill) => SelectableItem(
+                      id: bill.id,
+                      title: bill.title,
+                      subtitle:
+                          '${bill.category} | ${bill.date.toString().substring(0, 10)} | ¥${bill.amount.toStringAsFixed(2)}',
+                      icon: bill.icon,
+                      color: bill.iconColor,
+                      rawData: bill,
+                    ),
+                  )
+                  .toList();
+            },
+            searchFilter: (items, query) {
+              if (query.isEmpty) return items;
+              final lowerQuery = query.toLowerCase();
+              return items.where((item) {
+                final bill = item.rawData as Bill;
+                return item.title.toLowerCase().contains(lowerQuery) ||
+                    bill.category.toLowerCase().contains(lowerQuery) ||
+                    bill.note.toLowerCase().contains(lowerQuery);
+              }).toList();
+            },
+            emptyText: '该账户暂无账单记录',
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -1041,7 +1066,9 @@ class _BillMainViewState extends State<BillMainView>
 
   void _checkAccountStatus() {
     if (billPlugin.accounts.isEmpty) {
-      NavigationHelper.pushReplacement(context, AccountListScreen(billPlugin: billPlugin),
+      NavigationHelper.pushReplacement(
+        context,
+        AccountListScreen(billPlugin: billPlugin),
       );
     } else if (billPlugin.selectedAccountId == null) {
       setState(() {
@@ -1158,22 +1185,22 @@ class _BillMainViewState extends State<BillMainView>
                 child: Padding(
                   padding: EdgeInsets.only(bottom: _bottomBarHeight),
                   child: TabBarView(
-                      controller: _tabController,
-                      dragStartBehavior: DragStartBehavior.down,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        BillListScreenSupercupertino(
-                          billPlugin: billPlugin,
-                          accountId: billPlugin.selectedAccount?.id ?? '',
-                        ),
-                        BillStatsScreenSupercupertino(
-                          billPlugin: billPlugin,
-                          accountId: billPlugin.selectedAccount?.id ?? '',
-                          startDate: DateTime.now().subtract(
-                            const Duration(days: 30),
-                          ), // 默认显示最近30天
-                          endDate: DateTime.now(),
-                        ),
+                    controller: _tabController,
+                    dragStartBehavior: DragStartBehavior.down,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      BillListScreenSupercupertino(
+                        billPlugin: billPlugin,
+                        accountId: billPlugin.selectedAccount?.id ?? '',
+                      ),
+                      BillStatsScreenSupercupertino(
+                        billPlugin: billPlugin,
+                        accountId: billPlugin.selectedAccount?.id ?? '',
+                        startDate: DateTime.now().subtract(
+                          const Duration(days: 30),
+                        ), // 默认显示最近30天
+                        endDate: DateTime.now(),
+                      ),
                     ],
                   ),
                 ),
@@ -1202,9 +1229,7 @@ class _BillMainViewState extends State<BillMainView>
             indicator: UnderlineTabIndicator(
               borderSide: BorderSide(
                 color:
-                    _currentPage < 2
-                        ? _colors[_currentPage]
-                        : unselectedColor,
+                    _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
                 width: 4,
               ),
               insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -1231,7 +1256,10 @@ class _BillMainViewState extends State<BillMainView>
                   accountId: billPlugin.selectedAccount?.id ?? '',
                 );
               },
-              closedBuilder: (BuildContext context, VoidCallback openContainer) {
+              closedBuilder: (
+                BuildContext context,
+                VoidCallback openContainer,
+              ) {
                 return FloatingActionButton(
                   onPressed: openContainer,
                   backgroundColor: Color(0xFF3498DB),

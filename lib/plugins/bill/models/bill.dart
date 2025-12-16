@@ -14,10 +14,27 @@ class Bill {
   final Color iconColor;
   final String accountId;
 
+  /// 订阅相关字段
+  final String? subscriptionId;
+  final bool isSubscription;
+  final DateTime? subscriptionStartDate;
+  final DateTime? subscriptionEndDate;
+
   /// 判断是否为支出
   bool get isExpense => amount < 0;
   /// 获取账单金额的绝对值
   double get absoluteAmount => amount.abs();
+
+  /// 判断是否为订阅账单
+  bool get isFromSubscription => isSubscription && subscriptionId != null;
+
+  /// 获取订阅账单标题（带[订阅]前缀）
+  String get subscriptionTitle {
+    if (isFromSubscription) {
+      return '[订阅] $title';
+    }
+    return title;
+  }
 
   Bill({
     required this.id,
@@ -32,6 +49,10 @@ class Bill {
     this.iconColor = Colors.blue,
     DateTime? createdAt,
     DateTime? updatedAt,
+    this.subscriptionId,
+    this.isSubscription = false,
+    this.subscriptionStartDate,
+    this.subscriptionEndDate,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -48,6 +69,10 @@ class Bill {
     Color? iconColor,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? subscriptionId,
+    bool? isSubscription,
+    DateTime? subscriptionStartDate,
+    DateTime? subscriptionEndDate,
   }) {
     return Bill(
       id: id ?? this.id,
@@ -62,11 +87,15 @@ class Bill {
       iconColor: iconColor ?? this.iconColor,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      subscriptionId: subscriptionId ?? this.subscriptionId,
+      isSubscription: isSubscription ?? this.isSubscription,
+      subscriptionStartDate: subscriptionStartDate ?? this.subscriptionStartDate,
+      subscriptionEndDate: subscriptionEndDate ?? this.subscriptionEndDate,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    final json = {
       'id': id,
       'title': title,
       'amount': amount,
@@ -76,11 +105,26 @@ class Bill {
       'tag': tag,
       'accountId': accountId,
       'icon': icon.codePoint,
-      // ignore: deprecated_member_use
       'iconColor': iconColor.value,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
+
+    // 只有当字段非null时才添加到JSON中（确保向后兼容）
+    if (subscriptionId != null) {
+      json['subscriptionId'] = subscriptionId;
+    }
+    if (isSubscription != false) {
+      json['isSubscription'] = isSubscription;
+    }
+    if (subscriptionStartDate != null) {
+      json['subscriptionStartDate'] = subscriptionStartDate!.toIso8601String();
+    }
+    if (subscriptionEndDate != null) {
+      json['subscriptionEndDate'] = subscriptionEndDate!.toIso8601String();
+    }
+
+    return json;
   }
 
   factory Bill.fromJson(Map<String, dynamic> json) {
@@ -97,6 +141,14 @@ class Bill {
       iconColor: Color(json['iconColor'] as int),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      subscriptionId: json['subscriptionId'] as String?,
+      isSubscription: json['isSubscription'] as bool? ?? false,
+      subscriptionStartDate: json['subscriptionStartDate'] != null
+          ? DateTime.parse(json['subscriptionStartDate'] as String)
+          : null,
+      subscriptionEndDate: json['subscriptionEndDate'] != null
+          ? DateTime.parse(json['subscriptionEndDate'] as String)
+          : null,
     );
   }
 }
