@@ -5,6 +5,8 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/models/bill.dart';
+import 'package:Memento/plugins/bill/models/subscription.dart';
+import 'package:Memento/plugins/bill/controls/subscription_controller.dart';
 
 class BillEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -47,6 +49,11 @@ class _BillEditScreenState extends State<BillEditScreen> {
   Color _selectedColor = Colors.blue;
   DateTime _selectedDate = DateTime.now();
 
+  /// 订阅服务相关字段
+  bool _isSubscription = false;
+  late final TextEditingController _subscriptionNameController;
+  late final TextEditingController _subscriptionDaysController;
+
   final List<String> _availableTags = <String>[
     '餐饮',
     '购物',
@@ -85,6 +92,8 @@ class _BillEditScreenState extends State<BillEditScreen> {
     _titleController = TextEditingController();
     _amountController = TextEditingController();
     _noteController = TextEditingController();
+    _subscriptionNameController = TextEditingController();
+    _subscriptionDaysController = TextEditingController();
 
     if (widget.initialDate != null) {
       _selectedDate = widget.initialDate!;
@@ -130,6 +139,8 @@ class _BillEditScreenState extends State<BillEditScreen> {
     _titleController.dispose();
     _amountController.dispose();
     _noteController.dispose();
+    _subscriptionNameController.dispose();
+    _subscriptionDaysController.dispose();
     super.dispose();
   }
 
@@ -138,32 +149,52 @@ class _BillEditScreenState extends State<BillEditScreen> {
       try {
         final amount = double.parse(_amountController.text);
 
-        // Use category as title if title is empty
-        final title =
-            _titleController.text.isEmpty
-                ? (_tag ?? '未分类')
-                : _titleController.text;
+        if (_isSubscription) {
+          // 保存为订阅服务
+          final subscription = Subscription(
+            name: _subscriptionNameController.text,
+            totalAmount: amount,
+            days: int.parse(_subscriptionDaysController.text),
+            category: _tag ?? '订阅',
+            startDate: _selectedDate,
+            note: _noteController.text.isEmpty ? null : _noteController.text,
+            icon: _selectedIcon,
+            iconColor: _selectedColor,
+          );
 
-        final bill = Bill(
-          id:
-              widget.bill?.id ??
-              const Uuid().v4(),
-          title: title,
-          amount: _isExpense ? -amount : amount,
-          accountId: widget.accountId,
-          category: _tag ?? '未分类',
-          date: _selectedDate,
-          tag: _tag,
-          note: _noteController.text,
-          icon: _selectedIcon,
-          iconColor: _selectedColor,
-          createdAt: widget.bill?.createdAt ?? _selectedDate,
-        );
+          await widget.billPlugin.controller.subscriptions.createSubscription(subscription);
 
-        await widget.billPlugin.controller.saveBill(bill);
+          if (!mounted) return;
+          Toast.success('订阅服务创建成功');
+        } else {
+          // 保存为普通账单
+          // Use category as title if title is empty
+          final title =
+              _titleController.text.isEmpty
+                  ? (_tag ?? '未分类')
+                  : _titleController.text;
 
-        if (!mounted) return;
-        Toast.success('bill_billSaved'.tr);
+          final bill = Bill(
+            id:
+                widget.bill?.id ??
+                const Uuid().v4(),
+            title: title,
+            amount: _isExpense ? -amount : amount,
+            accountId: widget.accountId,
+            category: _tag ?? '未分类',
+            date: _selectedDate,
+            tag: _tag,
+            note: _noteController.text,
+            icon: _selectedIcon,
+            iconColor: _selectedColor,
+            createdAt: widget.bill?.createdAt ?? _selectedDate,
+          );
+
+          await widget.billPlugin.controller.saveBill(bill);
+
+          if (!mounted) return;
+          Toast.success('bill_billSaved'.tr);
+        }
 
         Navigator.of(context).pop();
         widget.onSaved?.call();
@@ -275,6 +306,113 @@ class _BillEditScreenState extends State<BillEditScreen> {
                           _buildNoteInput(isDark),
                           Divider(height: 1, color: isDark ? Colors.grey[800] : Colors.grey[100]),
                           _buildDateInput(isDark),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // 订阅服务选项
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '订阅服务',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.grey[300] : Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          SwitchListTile(
+                            title: Text('启用订阅服务'),
+                            subtitle: Text('启用后将自动生成每日账单'),
+                            value: _isSubscription,
+                            onChanged: (value) => setState(() => _isSubscription = value),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          if (_isSubscription) ...[
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _subscriptionNameController,
+                              decoration: InputDecoration(
+                                labelText: '订阅服务名称 *',
+                                hintText: '例如：Netflix会员',
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (value) {
+                                if (_isSubscription && (value == null || value.isEmpty)) {
+                                  return '请输入订阅服务名称';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _subscriptionDaysController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                labelText: '订阅天数 *',
+                                hintText: '例如：30',
+                                border: OutlineInputBorder(),
+                                suffixText: '天',
+                              ),
+                              validator: (value) {
+                                if (_isSubscription) {
+                                  if (value == null || value.isEmpty) {
+                                    return '请输入订阅天数';
+                                  }
+                                  final days = int.tryParse(value);
+                                  if (days == null || days <= 0) {
+                                    return '请输入有效的订阅天数';
+                                  }
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            // 显示单日金额计算结果
+                            if (_amountController.text.isNotEmpty && _subscriptionDaysController.text.isNotEmpty)
+                              Card(
+                                color: primaryColor.withOpacity(0.1),
+                                child: Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.calculate, color: primaryColor),
+                                      SizedBox(width: 12),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '单日金额',
+                                            style: TextStyle(
+                                              color: isDark ? Colors.grey[300] : Colors.grey[600],
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          Text(
+                                            '¥${(double.parse(_amountController.text) / int.parse(_subscriptionDaysController.text)).toStringAsFixed(2)} / 天',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: primaryColor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
                         ],
                       ),
                     ),

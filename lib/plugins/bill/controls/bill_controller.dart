@@ -6,6 +6,7 @@ import 'package:Memento/plugins/bill/models/bill.dart';
 import 'package:Memento/plugins/bill/models/bill_statistics.dart';
 import 'package:Memento/plugins/bill/models/statistic_range.dart';
 import 'package:Memento/plugins/bill/data/sample_data.dart';
+import 'package:Memento/plugins/bill/controls/subscription_controller.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 
@@ -81,6 +82,9 @@ class BillController with ChangeNotifier {
   bool _initialized = false;
   bool _isLoading = false;
 
+  /// 订阅服务控制器
+  late final SubscriptionController _subscriptionController;
+
   List<Account> get accounts => List.unmodifiable(_accounts);
 
   String? get selectedAccountId => _selectedAccountId;
@@ -101,6 +105,11 @@ class BillController with ChangeNotifier {
     notifyListeners();
   }
 
+  /// 获取订阅服务控制器
+  SubscriptionController get subscriptions {
+    return _subscriptionController;
+  }
+
   // 确保控制器已初始化
   Future<void> _ensureInitialized() async {
     if (!_initialized && !_isLoading) {
@@ -114,11 +123,23 @@ class BillController with ChangeNotifier {
 
     _isLoading = true;
     try {
+      // 初始化订阅控制器
+      _initSubscriptionController();
+
       await _loadAccounts();
       _initialized = true;
+
+      // 加载订阅数据
+      await _subscriptionController.loadSubscriptions();
     } finally {
       _isLoading = false;
     }
+  }
+
+  /// 初始化订阅控制器
+  void _initSubscriptionController() {
+    _subscriptionController = SubscriptionController();
+    _subscriptionController.setPlugin(_plugin);
   }
 
   // 从插件存储加载账户列表
@@ -554,5 +575,10 @@ class BillController with ChangeNotifier {
   // 同步小组件数据
   Future<void> _syncWidget() async {
     await PluginWidgetSyncHelper.instance.syncBill();
+  }
+
+  /// 检查并生成缺失的订阅账单
+  Future<void> checkAndGenerateSubscriptionBills() async {
+    await _subscriptionController.checkAndGenerateMissingBills();
   }
 }

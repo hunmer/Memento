@@ -11,6 +11,7 @@ import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
 import 'bill_edit_screen.dart';
 import 'account_list_screen.dart';
+import 'subscription_list_screen.dart';
 
 class BillListScreenSupercupertino extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -318,6 +319,20 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
               context,
               MaterialPageRoute(
                 builder: (context) => AccountListScreen(
+                  billPlugin: widget.billPlugin,
+                ),
+              ),
+            );
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.subscriptions),
+          tooltip: '订阅服务',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SubscriptionListScreen(
                   billPlugin: widget.billPlugin,
                 ),
               ),
