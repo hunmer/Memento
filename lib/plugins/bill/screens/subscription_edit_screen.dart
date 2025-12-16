@@ -85,7 +85,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
         final days = int.parse(_daysController.text);
 
         if (days <= 0) {
-          Toast.error('Subscription days must be greater than 0');
+          Toast.error('bill_subscriptionDaysError'.tr);
           return;
         }
 
@@ -105,15 +105,15 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
 
         if (widget.subscription == null) {
           await widget.billPlugin.controller.subscriptions.createSubscription(subscription);
-          Toast.success('Subscription created');
+          Toast.success('bill_subscriptionCreated'.tr);
         } else {
           await widget.billPlugin.controller.subscriptions.updateSubscription(subscription);
-          Toast.success('Subscription updated');
+          Toast.success('bill_subscriptionUpdated'.tr);
         }
 
         if (mounted) Navigator.of(context).pop();
       } catch (e) {
-        Toast.error('Save failed: $e');
+        Toast.error('bill_saveFailed'.tr);
       }
     }
   }
@@ -124,17 +124,17 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Subscription'),
-        content: const Text('Are you sure you want to delete this subscription? This action cannot be undone.'),
+        title: Text('bill_deleteSubscription'.tr),
+        content: Text('bill_deleteConfirm'.tr.replaceAll('{name}', widget.subscription!.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text('bill_cancel'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text('bill_delete'.tr),
           ),
         ],
       ),
@@ -156,20 +156,34 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel', style: TextStyle(fontSize: 16)),
+        leading: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          child: TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              minimumSize: const Size(48, 48),
+              padding: EdgeInsets.zero,
+            ),
+            child: Text('bill_cancel'.tr, style: const TextStyle(fontSize: 16)),
+          ),
         ),
         leadingWidth: 80,
         title: Text(
-          widget.subscription == null ? 'Add Subscription' : 'Edit Subscription',
+          widget.subscription == null ? 'bill_addSubscription'.tr : 'bill_editSubscription'.tr,
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17, color: Colors.black),
         ),
         centerTitle: true,
         actions: [
-          TextButton(
-            onPressed: _saveSubscription,
-            child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            child: TextButton(
+              onPressed: _saveSubscription,
+              style: TextButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                padding: EdgeInsets.zero,
+              ),
+              child: Text('bill_save'.tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ),
           ),
         ],
       ),
@@ -189,9 +203,9 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                     onColorSelected: (color) => setState(() => _selectedColor = color),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Choose Icon',
-                    style: TextStyle(color: Colors.blue, fontSize: 14, fontWeight: FontWeight.w500),
+                  Text(
+                    'bill_chooseIcon'.tr,
+                    style: const TextStyle(color: Colors.blue, fontSize: 14, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -207,7 +221,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
               child: Column(
                 children: [
                   _buildInputRow(
-                    label: 'Name',
+                    label: 'bill_subscriptionName'.tr,
                     child: TextFormField(
                       controller: _nameController,
                       textAlign: TextAlign.end,
@@ -219,16 +233,16 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                         contentPadding: EdgeInsets.zero,
                       ),
                       style: const TextStyle(fontSize: 17),
-                      validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                      validator: (v) => v?.isEmpty == true ? 'bill_requiredField'.tr : null,
                     ),
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 0, color: Color(0xFFE5E5EA)),
                   _buildInputRow(
-                    label: 'Price',
+                    label: 'bill_subscriptionPrice'.tr,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Text('¥ ', style: TextStyle(color: Colors.grey, fontSize: 17)),
                         Expanded(
                           child: TextFormField(
                             controller: _totalAmountController,
@@ -239,10 +253,20 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                               hintText: '0.00',
                               hintStyle: TextStyle(color: Colors.grey),
                               isDense: true,
-                              contentPadding: EdgeInsets.zero,
+                              contentPadding: EdgeInsets.only(right: 8),
                             ),
                             style: const TextStyle(fontSize: 17),
-                            validator: (v) => v?.isEmpty == true ? 'Required' : null,
+                            validator: (v) => v?.isEmpty == true ? 'bill_requiredField'.tr : null,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: Text(
+                            '¥',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 17,
+                            ),
                           ),
                         ),
                       ],
@@ -276,7 +300,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Start Date', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                        Text('bill_startDate'.tr, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
                         Text(
                           DateFormat('yyyy-MM-dd').format(_startDate),
                           style: const TextStyle(fontSize: 17, color: Colors.grey),
@@ -303,9 +327,9 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('End Date', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                        Text('bill_endDate'.tr, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
                         Text(
-                          _endDate != null ? DateFormat('yyyy-MM-dd').format(_endDate!) : 'None',
+                          _endDate != null ? DateFormat('yyyy-MM-dd').format(_endDate!) : 'bill_none'.tr,
                           style: const TextStyle(fontSize: 17, color: Colors.grey),
                         ),
                       ],
@@ -316,11 +340,11 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                   // Cycle Buttons
                   Row(
                     children: [
-                      Expanded(child: _buildCycleButton('Monthly', 30, currentDays == 30)),
+                      Expanded(child: _buildCycleButton('bill_monthly'.tr, 30, currentDays == 30)),
                       const SizedBox(width: 8),
-                      Expanded(child: _buildCycleButton('Quarterly', 90, currentDays == 90)),
+                      Expanded(child: _buildCycleButton('bill_quarterly'.tr, 90, currentDays == 90)),
                       const SizedBox(width: 8),
-                      Expanded(child: _buildCycleButton('Yearly', 365, currentDays >= 360)),
+                      Expanded(child: _buildCycleButton('bill_yearly'.tr, 365, currentDays >= 360)),
                     ],
                   ),
                 ],
@@ -338,12 +362,12 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Auto-subscribe', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
-                      SizedBox(height: 2),
-                      Text('Renew automatically when expired', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      Text('bill_autoSubscribe'.tr, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                      const SizedBox(height: 2),
+                      Text('bill_autoSubscribeDesc'.tr, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                     ],
                   ),
                   Switch.adaptive(
@@ -366,15 +390,15 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Notes', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                  Text('bill_notes'.tr, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _noteController,
                     maxLines: 4,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: 'Add comments, order numbers, or account details...',
-                      hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
+                      hintText: 'bill_notesHint'.tr,
+                      hintStyle: const TextStyle(color: Colors.grey, fontSize: 15),
                       contentPadding: EdgeInsets.zero,
                     ),
                   ),
@@ -394,9 +418,9 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text(
-                    'Delete Subscription',
-                    style: TextStyle(color: Colors.red, fontSize: 17, fontWeight: FontWeight.w500),
+                  child: Text(
+                    'bill_deleteSubscription'.tr,
+                    style: const TextStyle(color: Colors.red, fontSize: 17, fontWeight: FontWeight.w500),
                   ),
                 ),
               ),

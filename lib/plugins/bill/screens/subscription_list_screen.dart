@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 import '../models/subscription.dart';
 import '../bill_plugin.dart';
 import 'subscription_edit_screen.dart';
@@ -18,6 +20,13 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
   late final void Function() _listener;
   bool _isGridView = true;
   static const String _viewModeKey = 'subscription_list_view_mode_grid';
+
+  // 搜索相关状态
+  String _searchQuery = '';
+  final Map<String, bool> _searchFilters = {
+    'name': true,     // 是否搜索名称
+    'category': true, // 是否搜索分类
+  };
 
   @override
   void initState() {
@@ -49,6 +58,25 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
     }
   }
 
+  List<Subscription> _filterSubscriptions(List<Subscription> subscriptions) {
+    if (_searchQuery.isEmpty) {
+      return subscriptions;
+    }
+
+    final query = _searchQuery.toLowerCase();
+    return subscriptions.where((subscription) {
+      // 按名称搜索
+      final matchName = _searchFilters['name'] == true &&
+          subscription.name.toLowerCase().contains(query);
+
+      // 按分类搜索
+      final matchCategory = _searchFilters['category'] == true &&
+          subscription.category.toLowerCase().contains(query);
+
+      return matchName || matchCategory;
+    }).toList();
+  }
+
   @override
   void dispose() {
     widget.billPlugin.controller.subscriptions.removeListener(_listener);
@@ -59,61 +87,137 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
   Widget build(BuildContext context) {
     final subscriptions =
         widget.billPlugin.controller.subscriptions.subscriptions;
-    final activeSubscriptions = subscriptions.where((s) => s.isActive).toList();
-    final inactiveSubscriptions =
-        subscriptions.where((s) => !s.isActive).toList();
+    final activeSubscriptions = _filterSubscriptions(
+      subscriptions.where((s) => s.isActive).toList(),
+    );
+    final inactiveSubscriptions = _filterSubscriptions(
+      subscriptions.where((s) => !s.isActive).toList(),
+    );
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text(
-          '订阅服务',
-          style: TextStyle(fontWeight: FontWeight.w600),
+    return SuperCupertinoNavigationWrapper(
+      title: Text('bill_subscription'.tr),
+      largeTitle: 'bill_subscription'.tr,
+      enableSearchBar: true,
+      searchPlaceholder: '搜索订阅服务...',
+      onSearchChanged: (value) {
+        setState(() {
+          _searchQuery = value;
+        });
+      },
+      enableSearchFilter: true,
+      filterLabels: const {
+        'name': '名称',
+        'category': '分类',
+      },
+      onSearchFilterChanged: (filters) {
+        setState(() {
+          _searchFilters.addAll(filters);
+        });
+      },
+      searchBody: _buildSearchBody(),
+      body: _buildMainBody(activeSubscriptions, inactiveSubscriptions),
+      actions: [
+        IconButton(
+          icon: Icon(
+            _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
+          ),
+          tooltip: _isGridView
+              ? 'bill_switchToListView'.tr
+              : 'bill_switchToGridView'.tr,
+          onPressed: _toggleViewMode,
         ),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        actions: [
-          IconButton(
-            icon: Icon(_isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded),
-            tooltip: _isGridView ? 'Switch to List View' : 'Switch to Grid View',
-            onPressed: _toggleViewMode,
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => _navigateToEdit(),
-          ),
-        ],
-      ),
-      body:
-          subscriptions.isEmpty
-              ? _buildEmptyState()
-              : CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: [
-                  if (activeSubscriptions.isNotEmpty) ...[
-                    _buildSectionHeader('活跃订阅 (${activeSubscriptions.length})'),
-                    _buildSubscriptionList(activeSubscriptions),
-                  ],
-                  if (inactiveSubscriptions.isNotEmpty) ...[
-                    _buildSectionHeader(
-                      '已终止 (${inactiveSubscriptions.length})',
-                    ),
-                    _buildSubscriptionList(inactiveSubscriptions, isInactive: true),
-                  ],
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 80),
-                  ), // Bottom padding for FAB
-                ],
-              ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToEdit(),
-        child: const Icon(Icons.add),
-      ),
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () => _navigateToEdit(),
+        ),
+      ],
     );
   }
 
-  Widget _buildSubscriptionList(List<Subscription> subscriptions, {bool isInactive = false}) {
+  Widget _buildMainBody(
+    List<Subscription> activeSubscriptions,
+    List<Subscription> inactiveSubscriptions,
+  ) {
+    final allSubscriptions = [
+      ...activeSubscriptions,
+      ...inactiveSubscriptions,
+    ];
+
+    if (allSubscriptions.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        if (activeSubscriptions.isNotEmpty) ...[
+          _buildSectionHeader(
+            '${"bill_activeSubscriptions".tr} (${activeSubscriptions.length})',
+          ),
+          _buildSubscriptionList(activeSubscriptions),
+        ],
+        if (inactiveSubscriptions.isNotEmpty) ...[
+          _buildSectionHeader(
+            '${"bill_inactiveSubscriptions".tr} (${inactiveSubscriptions.length})',
+          ),
+          _buildSubscriptionList(
+            inactiveSubscriptions,
+            isInactive: true,
+          ),
+        ],
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 80),
+        ), // Bottom padding for FAB
+      ],
+    );
+  }
+
+  Widget _buildSearchBody() {
+    final subscriptions = widget.billPlugin.controller.subscriptions.subscriptions;
+    final filteredSubscriptions = _filterSubscriptions(subscriptions);
+
+    if (_searchQuery.isNotEmpty && filteredSubscriptions.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '未找到匹配的订阅服务',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (filteredSubscriptions.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        _buildSubscriptionList(filteredSubscriptions),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 80),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubscriptionList(
+    List<Subscription> subscriptions, {
+    bool isInactive = false,
+  }) {
     if (_isGridView) {
       return SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -143,7 +247,8 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
               padding: const EdgeInsets.only(bottom: 12),
               child: _SubscriptionListTile(
                 subscription: subscriptions[index],
-                onTap: () => _navigateToEdit(subscription: subscriptions[index]),
+                onTap:
+                    () => _navigateToEdit(subscription: subscriptions[index]),
                 onLongPress: () => _showMenuDialog(subscriptions[index]),
                 isInactive: isInactive,
               ),
@@ -166,7 +271,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            '暂无订阅服务',
+            'bill_noSubscriptions'.tr,
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey.shade600,
@@ -174,7 +279,10 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text('点击下方按钮添加订阅服务', style: TextStyle(color: Colors.grey.shade500)),
+          Text(
+            'bill_clickToAddSubscription'.tr,
+            style: TextStyle(color: Colors.grey.shade500),
+          ),
         ],
       ),
     );
@@ -222,7 +330,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.edit),
-                  title: const Text('编辑'),
+                  title: Text('bill_edit'.tr),
                   onTap: () {
                     Navigator.pop(context);
                     _navigateToEdit(subscription: subscription);
@@ -231,7 +339,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
                 if (subscription.isActive)
                   ListTile(
                     leading: const Icon(Icons.stop_circle_outlined),
-                    title: const Text('终止订阅'),
+                    title: Text('bill_terminateSubscription'.tr),
                     onTap: () {
                       Navigator.pop(context);
                       _showTerminateDialog(subscription);
@@ -239,7 +347,10 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
                   ),
                 ListTile(
                   leading: const Icon(Icons.delete_outline, color: Colors.red),
-                  title: const Text('删除', style: TextStyle(color: Colors.red)),
+                  title: Text(
+                    'bill_delete'.tr,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     _showDeleteDialog(subscription);
@@ -256,12 +367,17 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('终止订阅'),
-            content: Text('确定要终止"${subscription.name}"吗？'),
+            title: Text('bill_terminateSubscription'.tr),
+            content: Text(
+              'bill_terminateConfirm'.tr.replaceAll(
+                '{name}',
+                subscription.name,
+              ),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('取消'),
+                child: Text('bill_cancel'.tr),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -270,7 +386,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
                   Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text('确定'),
+                child: Text('bill_save'.tr),
               ),
             ],
           ),
@@ -282,12 +398,14 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('删除订阅'),
-            content: Text('确定要删除"${subscription.name}"吗？此操作不可撤销。'),
+            title: Text('bill_deleteSubscription'.tr),
+            content: Text(
+              'bill_deleteConfirm'.tr.replaceAll('{name}', subscription.name),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('取消'),
+                child: Text('bill_cancel'.tr),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -297,7 +415,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
                   Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text('删除'),
+                child: Text('bill_delete'.tr),
               ),
             ],
           ),
@@ -319,10 +437,10 @@ class _SubscriptionListTile extends StatelessWidget {
   });
 
   String _getFrequencyText(int days) {
-    if (days >= 360) return 'Yearly';
-    if (days >= 28) return 'Monthly';
-    if (days == 7) return 'Weekly';
-    return '$days Days';
+    if (days >= 360) return 'bill_yearly'.tr;
+    if (days >= 28) return 'bill_monthly'.tr;
+    if (days == 7) return 'bill_weekly'.tr;
+    return '$days ${"bill_days".tr}';
   }
 
   @override
@@ -393,13 +511,16 @@ class _SubscriptionListTile extends StatelessWidget {
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: isInactive ? Colors.grey.withOpacity(0.1) : color.withOpacity(0.1),
+                      color:
+                          isInactive
+                              ? Colors.grey.withOpacity(0.1)
+                              : color.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(subscription.icon, color: color, size: 28),
                   ),
                   const SizedBox(width: 16),
-                  
+
                   // Info Column
                   Expanded(
                     child: Column(
@@ -423,7 +544,7 @@ class _SubscriptionListTile extends StatelessWidget {
                             ),
                           ],
                         ),
-                        
+
                         // Price & Frequency
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
@@ -470,10 +591,14 @@ class _SubscriptionListTile extends StatelessWidget {
                             if (nextDate != null)
                               Row(
                                 children: [
-                                  Icon(Icons.event, size: 12, color: theme.hintColor),
+                                  Icon(
+                                    Icons.event,
+                                    size: 12,
+                                    color: theme.hintColor,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'Next: ${DateFormat('MMM d, yyyy').format(nextDate)}',
+                                    '${"bill_nextDate".tr} ${DateFormat('MMM d, yyyy').format(nextDate)}',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: theme.hintColor,
@@ -481,7 +606,7 @@ class _SubscriptionListTile extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                            
+
                             const Spacer(),
 
                             // Progress & Auto Badge
@@ -496,16 +621,21 @@ class _SubscriptionListTile extends StatelessWidget {
                                         child: Container(
                                           height: 6,
                                           decoration: BoxDecoration(
-                                            color: theme.disabledColor.withOpacity(0.2),
-                                            borderRadius: BorderRadius.circular(3),
+                                            color: theme.disabledColor
+                                                .withOpacity(0.2),
+                                            borderRadius: BorderRadius.circular(
+                                              3,
+                                            ),
                                           ),
                                           child: FractionallySizedBox(
                                             alignment: Alignment.centerLeft,
-                                            widthFactor: subscription.progress.clamp(0.0, 1.0),
+                                            widthFactor: subscription.progress
+                                                .clamp(0.0, 1.0),
                                             child: Container(
                                               decoration: BoxDecoration(
                                                 color: color,
-                                                borderRadius: BorderRadius.circular(3),
+                                                borderRadius:
+                                                    BorderRadius.circular(3),
                                               ),
                                             ),
                                           ),
@@ -524,7 +654,7 @@ class _SubscriptionListTile extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                
+
                                 // Auto Badge
                                 if (subscription.isActive)
                                   Container(
@@ -537,7 +667,7 @@ class _SubscriptionListTile extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
-                                      'Auto-renew',
+                                      'bill_autoRenew'.tr,
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w500,
@@ -576,10 +706,10 @@ class _SubscriptionCard extends StatelessWidget {
   });
 
   String _getFrequencyText(int days) {
-    if (days >= 360) return 'Yearly';
-    if (days >= 28) return 'Monthly';
-    if (days == 7) return 'Weekly';
-    return '$days Days';
+    if (days >= 360) return 'bill_yearly'.tr;
+    if (days >= 28) return 'bill_monthly'.tr;
+    if (days == 7) return 'bill_weekly'.tr;
+    return '$days ${"bill_days".tr}';
   }
 
   @override
@@ -729,7 +859,7 @@ class _SubscriptionCard extends StatelessWidget {
                             Icon(Icons.event, size: 12, color: theme.hintColor),
                             const SizedBox(width: 4),
                             Text(
-                              'Next: ${DateFormat('MMM d').format(nextDate)}',
+                              '${"bill_nextDate".tr} ${DateFormat('MMM d').format(nextDate)}',
                               style: TextStyle(
                                 fontSize: 10,
                                 color: theme.hintColor,
@@ -797,7 +927,7 @@ class _SubscriptionCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
-                                'Auto',
+                                'bill_autoRenew'.tr,
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w500,
@@ -818,4 +948,3 @@ class _SubscriptionCard extends StatelessWidget {
     );
   }
 }
-
