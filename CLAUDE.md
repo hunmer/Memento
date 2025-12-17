@@ -1,6 +1,7 @@
 # Memento 项目 - AI 上下文文档
 
 > **变更记录 (Changelog)**
+> - **2025-12-17T11:17:49+08:00**: 增量更新 - 识别新插件（agent_chat、webview、tts 等），新增 Mermaid 结构图
 > - **2025-11-13T04:06:10+00:00**: 初始化 AI 上下文文档，完成全仓扫描与模块识别
 
 ---
@@ -12,9 +13,10 @@ Memento 是一个使用 Flutter 构建的跨平台个人助手应用，旨在降
 ### 技术特点
 - **完全由 AI 编写**：开发者提供想法和框架，代码由 AI 生成
 - **跨平台支持**：Android、iOS、Web、Windows、macOS、Linux
-- **插件化架构**：18+ 功能插件，可独立开发和维护
+- **插件化架构**：25+ 功能插件，可独立开发和维护
 - **本地优先**：支持 WebDAV 同步，数据掌控在用户手中
 - **国际化支持**：内置中英双语
+- **新特性**：动作系统、悬浮球、数据同步服务、WebView 集成
 
 ---
 
@@ -42,9 +44,11 @@ Memento/
 │   ├── 存储管理器 (storage_manager.dart)
 │   ├── 配置管理器 (config_manager.dart)
 │   ├── 插件基类 (plugin_base.dart)
-│   └── 事件系统 (event/)
+│   ├── 事件系统 (event/)
+│   ├── 动作系统 (action/)
+│   └── 悬浮球系统 (floating_ball/)
 │
-├── 插件层 (Plugin Layer) - 18个功能插件
+├── 插件层 (Plugin Layer) - 25个功能插件
 │   ├── chat - 频道聊天与 AI 对话
 │   ├── openai - AI 助手管理
 │   ├── diary - 日记记录
@@ -52,7 +56,9 @@ Memento/
 │   ├── notes - 无限层级笔记
 │   ├── goods - 物品管理
 │   ├── bill - 账单管理
-│   └── ... (其他11个插件)
+│   ├── agent_chat - Agent 聊天与工具调用
+│   ├── webview - 内置浏览器与应用商店
+│   └── ... (其他 16 个插件)
 │
 ├── 界面层 (UI Layer)
 │   ├── 主屏幕 (home_screen/)
@@ -83,6 +89,9 @@ graph TD
     C --> C1["plugin_manager.dart"];
     C --> C2["storage/"];
     C --> C3["event/"];
+    C --> C4["action/ (动作系统)"];
+    C --> C5["floating_ball/ (悬浮球)"];
+    C --> C6["services/sync/ (数据同步)"];
 
     D --> D1["chat (聊天)"];
     D --> D2["openai (AI助手)"];
@@ -91,7 +100,9 @@ graph TD
     D --> D5["notes (笔记)"];
     D --> D6["goods (物品)"];
     D --> D7["bill (账单)"];
-    D --> D8["其他11个插件..."];
+    D --> D8["agent_chat (Agent聊天)"];
+    D --> D9["webview (浏览器)"];
+    D --> D10["其他 16 个插件..."];
 
     E --> E1["home_screen/"];
     E --> E2["settings_screen/"];
@@ -121,16 +132,16 @@ graph TD
 
 | 模块路径 | 职责描述 | 关键文件 | 文档链接 |
 |---------|---------|---------|---------|
-| `lib/core/` | 核心基础设施：插件系统、存储、配置、事件 | plugin_manager.dart, storage_manager.dart | [查看](lib/core/CLAUDE.md) |
+| `lib/core/` | 核心基础设施：插件系统、存储、配置、事件、动作系统、悬浮球 | plugin_manager.dart, storage_manager.dart, action_manager.dart | [查看](lib/core/CLAUDE.md) |
 | `lib/plugins/chat/` | 频道聊天插件：多频道、消息管理、AI对话 | chat_plugin.dart, channel_service.dart | [查看](lib/plugins/chat/CLAUDE.md) |
-| `lib/plugins/openai/` | AI 助手插件：多服务商集成、数据分析 | openai_plugin.dart, request_service.dart | [查看](lib/plugins/openai/CLAUDE.md) |
-| `lib/plugins/diary/` | 日记插件：日历视图、Markdown编辑 | diary_plugin.dart, diary_entry.dart | [查看](lib/plugins/diary/CLAUDE.md) |
-| `lib/plugins/activity/` | 活动记录插件：时间轴、标签、统计 | activity_plugin.dart, activity_service.dart | [查看](lib/plugins/activity/CLAUDE.md) |
-| `lib/plugins/notes/` | 笔记插件：无限层级、Markdown | notes_plugin.dart, note.dart | [查看](lib/plugins/notes/CLAUDE.md) |
+| `lib/plugins/openai/` | AI 助手插件：多服务商集成、数据分析、工具调用 | openai_plugin.dart, request_service.dart | [查看](lib/plugins/openai/CLAUDE.md) |
+| `lib/plugins/diary/` | 日记插件：日历视图、Markdown编辑、相册集成 | diary_plugin.dart, diary_entry.dart | [查看](lib/plugins/diary/CLAUDE.md) |
+| `lib/plugins/activity/` | 活动记录插件：时间轴、标签、统计、数据同步 | activity_plugin.dart, activity_service.dart | [查看](lib/plugins/activity/CLAUDE.md) |
+| `lib/plugins/notes/` | 笔记插件：无限层级、Markdown、全文搜索 | notes_plugin.dart, note.dart | [查看](lib/plugins/notes/CLAUDE.md) |
 | `lib/plugins/goods/` | 物品管理插件：分类、自定义字段、使用记录 | goods_plugin.dart, goods_item.dart | [查看](lib/plugins/goods/CLAUDE.md) |
-| `lib/plugins/bill/` | 账单插件：多账户、收支统计 | bill_plugin.dart, account.dart | [查看](lib/plugins/bill/CLAUDE.md) |
+| `lib/plugins/bill/` | 账单插件：多账户、收支统计、订阅管理 | bill_plugin.dart, account.dart, subscription.dart | [查看](lib/plugins/bill/CLAUDE.md) |
 | `lib/plugins/checkin/` | 签到插件：分组、统计、连续签到 | checkin_plugin.dart, checkin_item.dart | [查看](lib/plugins/checkin/CLAUDE.md) |
-| `lib/plugins/calendar/` | 日历插件：事件聚合、多视图 | calendar_plugin.dart, event.dart | [查看](lib/plugins/calendar/CLAUDE.md) |
+| `lib/plugins/calendar/` | 日历插件：事件聚合、多视图、设备日历同步 | calendar_plugin.dart, event.dart | [查看](lib/plugins/calendar/CLAUDE.md) |
 | `lib/plugins/day/` | 纪念日插件：倒计时/正计时 | day_plugin.dart, memorial_day.dart | [查看](lib/plugins/day/CLAUDE.md) |
 | `lib/plugins/todo/` | 任务插件：子任务、优先级、日期范围 | todo_plugin.dart, task.dart | [查看](lib/plugins/todo/CLAUDE.md) |
 | `lib/plugins/tracker/` | 目标追踪插件：量化目标、数据记录 | tracker_plugin.dart, goal.dart | [查看](lib/plugins/tracker/CLAUDE.md) |
@@ -141,6 +152,11 @@ graph TD
 | `lib/plugins/calendar_album/` | 日记相册插件：照片标签、日期记录 | calendar_album_plugin.dart | [查看](lib/plugins/calendar_album/CLAUDE.md) |
 | `lib/plugins/habits/` | 习惯管理插件：技能关联、一万小时 | habits_plugin.dart, habit.dart | [查看](lib/plugins/habits/CLAUDE.md) |
 | `lib/plugins/database/` | 自定义数据库插件：灵活字段定义 | database_plugin.dart, database_model.dart | [查看](lib/plugins/database/CLAUDE.md) |
+| `lib/plugins/agent_chat/` | Agent聊天插件：工具调用、语音识别、智能对话 | agent_chat_plugin.dart, tool_service.dart | [查看](lib/plugins/agent_chat/CLAUDE.md) |
+| `lib/plugins/webview/` | WebView插件：内置浏览器、应用商店、JS桥接 | webview_plugin.dart, download_manager.dart | [查看](lib/plugins/webview/CLAUDE.md) |
+| `lib/plugins/tts/` | 文本转语音插件：多语言支持 | tts_plugin.dart | [查看](lib/plugins/tts/CLAUDE.md) |
+| `lib/plugins/scripts_center/` | 脚本中心插件：自定义脚本执行 | scripts_center_plugin.dart | [查看](lib/plugins/scripts_center/CLAUDE.md) |
+| `lib/plugins/nfc/` | NFC插件：近场通信读写 | nfc_plugin.dart | [查看](lib/plugins/nfc/CLAUDE.md) |
 | `lib/screens/home_screen/` | 主屏幕：插件网格、卡片管理 | home_screen.dart, plugin_grid.dart | [查看](lib/screens/home_screen/CLAUDE.md) |
 | `lib/screens/settings_screen/` | 设置屏幕：WebDAV同步、数据管理、自动更新 | settings_screen.dart, webdav_controller.dart | [查看](lib/screens/settings_screen/CLAUDE.md) |
 | `lib/widgets/` | 通用 UI 组件：Markdown编辑器、文件预览、标签管理 | markdown_editor/, file_preview/, tag_manager_dialog/ | [查看](lib/widgets/CLAUDE.md) |
@@ -315,6 +331,12 @@ A: 使用 Flutter 的 Platform Channels，参考现有的平台目录（android/
 **Q: 如何为插件添加 Android 小组件？**
 A: 参考 [小组件实现指南](docs/WIDGET_IMPLEMENTATION_GUIDE.md) 或 [快速参考](docs/WIDGET_QUICK_REFERENCE.md)。
 
+**Q: 如何使用新添加的动作系统？**
+A: 动作系统允许用户创建自定义操作流程，参考 `lib/core/action/` 目录下的实现。
+
+**Q: 如何配置悬浮球？**
+A: 悬浮球系统位于 `lib/core/floating_ball/`，支持快速访问插件和自定义快捷操作。
+
 ---
 
 ## 开发文档
@@ -392,6 +414,6 @@ Memento 支持为各插件添加 Android 桌面小组件（1x1 和 2x2 尺寸）
 
 ---
 
-**最后更新**: 2025-11-13T04:06:10+00:00
+**最后更新**: 2025-12-17T11:17:49+08:00
 **维护者**: hunmer
 **许可证**: 未指定（建议添加）
