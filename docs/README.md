@@ -1,110 +1,136 @@
-# Memento 开发文档
+# Memento 文档站点
 
-本目录包含 Memento 项目的所有技术文档。
+这是 Memento 个人助手应用的文档站点，使用 [VitePress](https://vitepress.dev/) 构建。
 
-## 📚 文档索引
+## 快速开始
 
-### Android 小组件
+```bash
+# 进入文档目录
+cd docs
 
-| 文档 | 说明 | 适用版本 |
-|------|------|---------|
-| **[小组件迁移指南](./WIDGET_MIGRATION_GUIDE.md)** | 📘 **新版完整指南** - 新架构详细说明、API 参考、完整示例 | **2.0+** ⭐ |
-| **[小组件快速参考 (新版)](./WIDGET_QUICK_REFERENCE_NEW.md)** | 📝 **快速查阅** - 常用 API、代码片段、速查表 | **2.0+** ⭐ |
-| [小组件实现指南](./WIDGET_IMPLEMENTATION_GUIDE.md) | 原始实现文档（旧架构） | 1.x |
-| [小组件快速参考 (旧版)](./WIDGET_QUICK_REFERENCE.md) | 旧版快速参考 | 1.x |
+# 安装依赖（仅首次需要）
+npm install
 
-**推荐阅读顺序**:
-1. 新用户：[快速参考 (新版)](./WIDGET_QUICK_REFERENCE_NEW.md) → [完整指南](./WIDGET_MIGRATION_GUIDE.md)
-2. 从 1.x 迁移：[迁移指南](./WIDGET_MIGRATION_GUIDE.md#迁移指南)
+# 启动开发服务器
+npm run docs:dev
 
----
-
-### AI 集成
-
-| 文档 | 说明 |
-|------|------|
-| [AI Prompt 指南](./AI_PROMPT_GUIDE.md) | AI 提示词设计与使用 |
-| [Prompt 数据规范](./PROMPT_DATA_SPEC.md) | Prompt 数据结构定义 |
-| [JSAPI 过滤集成](./JSAPI_FILTER_INTEGRATION.md) | JavaScript API 过滤器集成 |
-
----
-
-### 平台特定
-
-| 文档 | 说明 |
-|------|------|
-| [Windows TTS 指南](./windows_tts_guide.md) | Windows 平台语音合成配置 |
-
----
-
-## 🚀 快速开始
-
-### 添加小组件支持到插件
-
-**新版本 (推荐)**:
-
-```dart
-import 'package:memento_widgets/memento_widgets.dart';
-
-final widgetData = PluginWidgetData(
-  pluginId: 'your_plugin',
-  pluginName: '插件名称',
-  iconCodePoint: Icons.star.codePoint,
-  colorValue: Colors.blue.value,
-  stats: [
-    WidgetStatItem(id: 'total', label: '总数', value: '42'),
-  ],
-);
-
-await SystemWidgetService.instance.updateWidgetData('your_plugin', widgetData);
+# 或者使用便捷脚本
+./start.sh
 ```
 
-详见: [小组件快速参考 (新版)](./WIDGET_QUICK_REFERENCE_NEW.md)
+## 开发命令
 
----
+```bash
+# 启动开发服务器（热重载）
+npm run docs:dev
 
-## 📖 架构说明
+# 构建静态文件
+npm run docs:build
 
-### Memento 2.0 小组件架构
-
-```
-主应用 (Flutter)
-    ↓ 调用
-SystemWidgetService
-    ↓ 使用
-memento_widgets 插件
-    ├── Flutter API (MyWidgetManager)
-    ├── 数据模型 (PluginWidgetData)
-    └── Android 原生 (Kotlin Providers)
-        ↓ 渲染
-    系统桌面小组件
+# 预览构建结果
+npm run docs:preview
 ```
 
-**关键改进**:
-- ✅ 插件化架构 - 代码独立可复用
-- ✅ 类型安全 - 使用 Dart 数据模型
-- ✅ 统一 API - 简化调用方式
-- ✅ 易于维护 - 清晰的职责分离
+开发服务器启动后，访问 `http://localhost:5173` 查看文档。
 
+## 目录结构
+
+```
+docs/
+├── .vitepress/          # VitePress 配置
+│   ├── config.js        # 站点配置
+│   └── public/          # 静态资源（图标等）
+├── guide/               # 使用指南
+│   └── installation.md  # 快速安装说明
+├── index.md            # 首页
+├── start.sh            # 便捷启动脚本
+└── package.json        # 依赖配置
+```
+
+## 文档编写
+
+### 添加新页面
+
+1. 在 `docs/guide/` 目录创建新的 `.md` 文件
+2. 在 `.vitepress/config.js` 中的 `themeConfig.sidebar` 添加导航项
+3. 文件首行使用 Front Matter 设置页面属性：
+
+```markdown
 ---
-
-## 📝 贡献指南
-
-添加新文档时：
-1. 创建 Markdown 文件到 `docs/` 目录
-2. 在本 README 中添加索引条目
-3. 使用清晰的标题和代码示例
-4. 添加更新日期和版本信息
-
+title: 页面标题
+description: 页面描述
 ---
+```
 
-## 🔗 相关资源
+### 页面内容
 
-- **项目主页**: [Memento](https://github.com/hunmer/Memento)
-- **Flutter 文档**: [flutter.dev](https://flutter.dev)
-- **home_widget 插件**: [pub.dev/packages/home_widget](https://pub.dev/packages/home_widget)
+- 使用标准 Markdown 语法
+- 支持 Vue 组件（如果需要）
+- 支持自定义容器、代码高亮等
 
----
+## 部署
 
-**最后更新**: 2025-11-30
-**维护者**: Memento 开发团队
+### 构建静态文件
+
+```bash
+npm run docs:build
+```
+
+构建后的文件位于 `.vitepress/dist/` 目录，可以部署到任何静态文件托管服务：
+
+- **GitHub Pages**: 将 dist 目录内容推送到 gh-pages 分支
+- **Vercel**: 连接 GitHub 仓库自动部署
+- **Netlify**: 拖拽 dist 文件夹或连接 Git 仓库
+- **阿里云 OSS**: 上传 dist 目录内容
+- **腾讯云 COS**: 上传 dist 目录内容
+
+### 部署到 GitHub Pages 示例
+
+1. 在项目根目录创建 `.github/workflows/deploy-docs.yml`：
+
+```yaml
+name: Deploy Docs
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: cd docs && npm install
+
+      - name: Build docs
+        run: cd docs && npm run docs:build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/.vitepress/dist
+```
+
+2. 提交并推送到 master 分支
+3. 在仓库设置中启用 GitHub Pages
+
+## 更新文档
+
+1. 编辑对应的 Markdown 文件
+2. 本地测试效果：`npm run docs:dev`
+3. 构建生产版本：`npm run docs:build`
+4. 提交代码并部署
+
+## 注意事项
+
+- 确保所有图片文件放在 `.vitepress/public/` 目录
+- 使用相对路径引用静态资源
+- 保持文档内容简洁明了，面向最终用户
