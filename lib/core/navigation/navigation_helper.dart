@@ -3,6 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:full_swipe_back_gesture/full_swipe_back_gesture.dart';
 
+import 'open_container_route.dart';
+export 'open_container_route.dart';
+
 /// 跨平台导航助手
 ///
 /// 提供统一的导航接口，自动根据平台选择合适的路由类型：
@@ -416,25 +419,57 @@ class NavigationHelper {
     );
   }
 
-  /// 使用 BackSwipePageRoute 导航到新页面（带 Hero 动画支持）
+  /// 使用 OpenContainer 风格导航到新页面
+  ///
+  /// 从源 widget 位置放大展开到全屏，实现 Material Design 的容器转换效果。
   ///
   /// [context] BuildContext
   /// [builder] 页面构建器
-  /// [heroTag] Hero 动画标签（必须确保唯一性）
+  /// [sourceKey] 源 widget 的 GlobalKey（用于获取位置）
   /// [transitionDuration] 转场动画时长
-  /// [closedBuilder] 关闭状态的构建器（用于 Hero 动画的开始状态）
+  /// [closedBuilder] 关闭状态的构建器（用于过渡动画）
+  /// [closedColor] 关闭状态的背景色
+  /// [openColor] 打开状态的背景色
+  /// [closedShape] 关闭状态的形状（默认圆角 12）
+  /// [openShape] 打开状态的形状（默认直角）
   /// [onClosed] 页面关闭时的回调
   static Future<T?> openContainerWithHero<T extends Object?>(
     BuildContext context,
     WidgetBuilder builder, {
     required String heroTag,
+    GlobalKey? sourceKey,
     Duration transitionDuration = const Duration(milliseconds: 300),
     Curve pushCurve = Curves.easeInOut,
     Curve popCurve = Curves.easeInOut,
     WidgetBuilder? closedBuilder,
+    Color? closedColor,
+    Color? openColor,
+    ShapeBorder closedShape = const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+    ),
+    ShapeBorder openShape = const RoundedRectangleBorder(),
     void Function(T?)? onClosed,
-  }) {
-    return Navigator.of(context).push<T>(
+  }) async {
+    // 如果提供了 sourceKey，使用 OpenContainer 动画
+    if (sourceKey != null) {
+      final result = await openContainerFromKey<T>(
+        context: context,
+        sourceKey: sourceKey,
+        openBuilder: builder,
+        closedBuilder: closedBuilder,
+        closedColor: closedColor,
+        openColor: openColor,
+        closedShape: closedShape,
+        openShape: openShape,
+        transitionDuration: transitionDuration,
+        routeSettings: RouteSettings(name: 'open_container_$heroTag'),
+      );
+      onClosed?.call(result);
+      return result;
+    }
+
+    // 降级：没有 sourceKey 时使用普通路由
+    final result = await Navigator.of(context).push<T>(
       BackSwipePageRoute<T>(
         builder: (_) => builder(context),
         transitionDuration: transitionDuration,
@@ -449,6 +484,47 @@ class NavigationHelper {
           },
         ),
       ),
+    );
+    onClosed?.call(result);
+    return result;
+  }
+
+  /// 使用 OpenContainer 风格导航（通过 GlobalKey）
+  ///
+  /// 这是更直接的 API，无需 heroTag 参数。
+  ///
+  /// [context] BuildContext
+  /// [sourceKey] 源 widget 的 GlobalKey（必需）
+  /// [openBuilder] 打开状态页面构建器
+  /// [closedBuilder] 关闭状态的构建器（可选，用于过渡动画中显示）
+  /// [closedColor] 关闭状态的背景色
+  /// [openColor] 打开状态的背景色
+  /// [closedShape] 关闭状态的形状
+  /// [openShape] 打开状态的形状
+  /// [transitionDuration] 过渡动画时长
+  static Future<T?> openContainerTransition<T extends Object?>(
+    BuildContext context, {
+    required GlobalKey sourceKey,
+    required WidgetBuilder openBuilder,
+    WidgetBuilder? closedBuilder,
+    Color? closedColor,
+    Color? openColor,
+    ShapeBorder closedShape = const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+    ),
+    ShapeBorder openShape = const RoundedRectangleBorder(),
+    Duration transitionDuration = const Duration(milliseconds: 300),
+  }) {
+    return openContainerFromKey<T>(
+      context: context,
+      sourceKey: sourceKey,
+      openBuilder: openBuilder,
+      closedBuilder: closedBuilder,
+      closedColor: closedColor,
+      openColor: openColor,
+      closedShape: closedShape,
+      openShape: openShape,
+      transitionDuration: transitionDuration,
     );
   }
 }
