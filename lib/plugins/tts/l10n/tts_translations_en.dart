@@ -96,4 +96,10 @@ const Map<String, String> ttsTranslationsEn = {
 
   // Parameterized translations - using @name placeholders
   'tts_availableVoiceCount': '@count available voices',
+
+  // Widget Home Strings
+  'tts_widgetName': 'Text-to-Speech',
+  'tts_widgetDescription': 'Quick access to TTS',
+  'tts_overviewName': 'TTS Overview',
+  'tts_overviewDescription': 'Display TTS service status',
 };

@@ -125,4 +125,10 @@ const Map<String, String> webviewTranslationsEn = {
   'webview_installing': 'Installing',
   'webview_downloading_files': 'Downloading files',
   'webview_verifying_files': 'Verifying files',
+
+  // Widget Home Strings
+  'webview_widgetName': 'Browser',
+  'webview_widgetDescription': 'Quick access to Browser',
+  'webview_overviewName': 'Browser Overview',
+  'webview_overviewDescription': 'Display browser statistics',
 };

@@ -96,4 +96,10 @@ const Map<String, String> ttsTranslationsZh = {
 
   // 参数化翻译 - 使用 @name 占位符
   'tts_availableVoiceCount': '共 @count 个可用语音',
+
+  // Widget Home Strings
+  'tts_widgetName': '语音朗读',
+  'tts_widgetDescription': '快速打开语音朗读',
+  'tts_overviewName': 'TTS概览',
+  'tts_overviewDescription': '显示TTS服务状态',
 };

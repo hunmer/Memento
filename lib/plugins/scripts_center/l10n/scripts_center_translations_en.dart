@@ -32,4 +32,10 @@ const Map<String, String> scriptsCenterTranslationsEn = {
   'scripts_center_categoryLabel': 'Category: @category',
   'scripts_center_descriptionLabel': 'Description: @description',
   'scripts_center_delayLabel': 'Delay: @delayms',
+
+  // Widget Home Strings
+  'scripts_center_widgetName': 'Script Center',
+  'scripts_center_widgetDescription': 'Quick access to Script Center',
+  'scripts_center_overviewName': 'Script Overview',
+  'scripts_center_overviewDescription': 'Display script statistics',
 };

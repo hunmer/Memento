@@ -25,6 +25,10 @@ import 'package:Memento/plugins/contact/home_widgets.dart';
 import 'package:Memento/plugins/habits/home_widgets.dart';
 import 'package:Memento/plugins/database/home_widgets.dart';
 import 'package:Memento/plugins/calendar_album/home_widgets.dart';
+import 'package:Memento/plugins/scripts_center/home_widgets.dart';
+import 'package:Memento/plugins/nfc/home_widgets.dart';
+import 'package:Memento/plugins/tts/home_widgets.dart';
+import 'package:Memento/plugins/webview/home_widgets.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/route.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
@@ -57,6 +61,10 @@ Future<void> initializeHomeWidgets() async {
     HabitsHomeWidgets.register();
     DatabaseHomeWidgets.register();
     CalendarAlbumHomeWidgets.register();
+    ScriptsCenterHomeWidgets.register();
+    NfcHomeWidgets.register();
+    TtsHomeWidgets.register();
+    WebviewHomeWidgets.register();
 
     // 初始化布局管理器
     final layoutManager = HomeLayoutManager();

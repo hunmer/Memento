@@ -30,4 +30,10 @@ const Map<String, String> nfcTranslationsEn = {
   'nfc_timerNotePrefix': 'Note: ',
   'nfc_timerWarning': '',
   'nfc_timerSuccess': '',
+
+  // Widget Home Strings
+  'nfc_widgetName': 'NFC',
+  'nfc_widgetDescription': 'Quick access to NFC Controller',
+  'nfc_overviewName': 'NFC Overview',
+  'nfc_overviewDescription': 'Display NFC feature status',
 };
