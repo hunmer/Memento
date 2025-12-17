@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -539,15 +538,13 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     required Widget emptyWidget,
     required Widget listWidget,
   }) {
-    return PageTransitionSwitcher(
-      transitionBuilder: (
-        Widget child,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-      ) {
-        return FadeThroughTransition(
-          animation: animation,
-          secondaryAnimation: secondaryAnimation,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      switchInCurve: Curves.easeInOut,
+      switchOutCurve: Curves.easeInOut,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
           child: child,
         );
       },
