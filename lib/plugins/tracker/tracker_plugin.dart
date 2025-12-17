@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:Memento/core/config_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -56,22 +55,15 @@ class _TrackerMainViewState extends State<TrackerMainView> {
       searchPlaceholder: 'tracker_searchPlaceholder'.tr,
       onSearchChanged: _onSearchChanged,
       actions: [
-        OpenContainer(
-          transitionType: ContainerTransitionType.fade,
-          closedColor: Theme.of(context).colorScheme.surface,
-          openBuilder: (context, _) {
-            return GoalEditPage(controller: TrackerPlugin.instance.controller);
-          },
-          onClosed: (result) {
-            // 处理关闭后的逻辑
-          },
-          closedBuilder: (context, VoidCallback openContainer) {
-            return IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: openContainer,
-              tooltip: '添加目标',
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () {
+            NavigationHelper.openContainer(
+              context,
+              (context) => GoalEditPage(controller: TrackerPlugin.instance.controller),
             );
           },
+          tooltip: '添加目标',
         ),
       ],
       searchBody: ChangeNotifierProvider.value(

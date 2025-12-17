@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'dart:io';
 import 'package:Memento/plugins/contact/controllers/contact_controller.dart';
@@ -31,62 +30,57 @@ class ContactCard extends StatelessWidget {
         theme.textTheme.bodyMedium?.color ?? theme.colorScheme.onSurfaceVariant;
     final chipColor = theme.colorScheme.surfaceVariant;
 
-    return OpenContainer(
-      transitionType: ContainerTransitionType.fade,
-      closedColor: Theme.of(context).colorScheme.surface,
-      openColor: Theme.of(context).scaffoldBackgroundColor,
-      openBuilder: (context, _) {
-        return ContactForm(
-          contact: contact,
-          controller: controller,
-          onSave: (savedContact) async {
-            await controller.updateContact(savedContact);
-            onContactUpdated?.call();
-          },
-        );
-      },
-      closedBuilder: (context, VoidCallback openContainer) {
-        return Card(
-          elevation: 0,
-          color: theme.colorScheme.surface,
-          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: InkWell(
-            onTap: openContainer,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTopSection(
-                    context,
-                    primaryTextColor,
-                    secondaryTextColor,
-                  ),
-                  if (contact.notes != null && contact.notes!.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      contact.notes!,
-                      style: TextStyle(fontSize: 14, color: secondaryTextColor),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-                  _buildTags(context, chipColor, secondaryTextColor),
-                  const SizedBox(height: 12),
-                  Divider(height: 1, color: theme.dividerColor),
-                  const SizedBox(height: 8),
-                  _buildBottomSection(context, primaryTextColor),
-                ],
-              ),
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surface,
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () {
+          NavigationHelper.openContainer(
+            context,
+            (context) => ContactForm(
+              contact: contact,
+              controller: controller,
+              onSave: (savedContact) async {
+                await controller.updateContact(savedContact);
+                onContactUpdated?.call();
+              },
             ),
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTopSection(
+                context,
+                primaryTextColor,
+                secondaryTextColor,
+              ),
+              if (contact.notes != null && contact.notes!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Text(
+                  contact.notes!,
+                  style: TextStyle(fontSize: 14, color: secondaryTextColor),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              const SizedBox(height: 16),
+              _buildTags(context, chipColor, secondaryTextColor),
+              const SizedBox(height: 12),
+              Divider(height: 1, color: theme.dividerColor),
+              const SizedBox(height: 8),
+              _buildBottomSection(context, primaryTextColor),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 

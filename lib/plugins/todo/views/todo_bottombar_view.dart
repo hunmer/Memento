@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:Memento/plugins/todo/models/task.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/todo/controllers/task_controller.dart';
@@ -215,25 +214,23 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
           ),
           Positioned(
             top: -25,
-            child: OpenContainer<bool>(
-              transitionType: ContainerTransitionType.fade,
-              tappable: false,
-              closedElevation: 0.0,
-              closedShape: const RoundedRectangleBorder(),
-              closedColor: Colors.transparent,
-              openBuilder: (BuildContext context, VoidCallback _) {
-                return TaskForm(
-                  taskController: _plugin.taskController,
-                  reminderController: _plugin.reminderController,
-                );
-              },
-              closedBuilder: (BuildContext context, VoidCallback openContainer) {
+            child: Builder(
+              builder: (context) {
                 final fabColor = _colors[_currentPage];
                 return FloatingActionButton(
                   backgroundColor: fabColor,
                   elevation: 4,
                   shape: const CircleBorder(),
-                  onPressed: openContainer,
+                  onPressed: () {
+                    NavigationHelper.openContainer(
+                      context,
+                      (context) => TaskForm(
+                        taskController: _plugin.taskController,
+                        reminderController: _plugin.reminderController,
+                      ),
+                      transitionDuration: const Duration(milliseconds: 300),
+                    );
+                  },
                   child: Icon(
                     Icons.add,
                     color: fabColor.computeLuminance() < 0.5

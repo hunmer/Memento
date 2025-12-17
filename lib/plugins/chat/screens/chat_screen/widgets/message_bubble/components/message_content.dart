@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/quill_viewer/index.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
@@ -81,6 +83,42 @@ class MessageContent extends StatelessWidget {
     } catch (e) {
       return content;
     }
+  }
+
+  /// 打开链接
+  Future<void> _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  /// 检测文本是否包含 Markdown 语法
+  bool _containsMarkdown(String text) {
+    // 常见 Markdown 语法的正则表达式
+    final patterns = [
+      RegExp(r'^#{1,6}\s', multiLine: true),          // 标题: # ## ###
+      RegExp(r'\*\*[^*]+\*\*'),                        // 粗体: **text**
+      RegExp(r'__[^_]+__'),                            // 粗体: __text__
+      RegExp(r'(?<!\*)\*(?!\*)[^*]+\*(?!\*)'),        // 斜体: *text*
+      RegExp(r'(?<!_)_(?!_)[^_]+_(?!_)'),             // 斜体: _text_
+      RegExp(r'\[([^\]]+)\]\(([^)]+)\)'),             // 链接: [text](url)
+      RegExp(r'!\[([^\]]*)\]\(([^)]+)\)'),            // 图片: ![alt](url)
+      RegExp(r'`[^`]+`'),                              // 行内代码: `code`
+      RegExp(r'```[\s\S]*?```', multiLine: true),     // 代码块: ```code```
+      RegExp(r'^>\s', multiLine: true),               // 引用: > text
+      RegExp(r'^[-*+]\s', multiLine: true),           // 无序列表: - * +
+      RegExp(r'^\d+\.\s', multiLine: true),           // 有序列表: 1. 2.
+      RegExp(r'^---+$', multiLine: true),             // 水平线: ---
+      RegExp(r'^\*\*\*+$', multiLine: true),          // 水平线: ***
+    ];
+
+    for (final pattern in patterns) {
+      if (pattern.hasMatch(text)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
@@ -315,15 +353,64 @@ class MessageContent extends StatelessWidget {
       // 普通文本消息
       // 判断是否为纯文本（无 Quill 格式）
       if (_isPlainText(message.content)) {
-        // 纯文本，使用 Text 显示（禁用选择功能以避免与长按菜单冲突）
         final plainText = _extractPlainText(message.content);
-        return Text(
-          plainText,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 15,
-          ),
-        );
+
+        // 检测是否包含 Markdown 语法
+        if (_containsMarkdown(plainText)) {
+          // 包含 Markdown，使用 MarkdownBody 渲染
+          return MarkdownBody(
+            data: plainText,
+            selectable: false,
+            styleSheet: MarkdownStyleSheet(
+              p: TextStyle(color: textColor, fontSize: 15, height: 1.5),
+              code: TextStyle(
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: textColor,
+                fontFamily: 'monospace',
+                fontSize: 14,
+              ),
+              codeblockDecoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              codeblockPadding: const EdgeInsets.all(12),
+              blockquote: TextStyle(
+                color: textColor.withValues(alpha: 0.8),
+                fontStyle: FontStyle.italic,
+              ),
+              blockquoteDecoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 4,
+                  ),
+                ),
+              ),
+              blockquotePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              h1: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold),
+              h2: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
+              h3: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
+              listBullet: TextStyle(color: textColor, fontSize: 15),
+              a: TextStyle(color: Theme.of(context).colorScheme.primary, decoration: TextDecoration.underline),
+              strong: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+              em: TextStyle(color: textColor, fontStyle: FontStyle.italic),
+            ),
+            onTapLink: (text, href, title) {
+              if (href != null) {
+                _launchURL(href);
+              }
+            },
+          );
+        } else {
+          // 纯文本，使用 Text 显示（保留换行符）
+          return Text(
+            plainText,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 15,
+            ),
+          );
+        }
       } else {
         // 包含 Quill 格式，使用 QuillViewer 显示（禁用选择功能以避免与长按菜单冲突）
         return QuillViewer(

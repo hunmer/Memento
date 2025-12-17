@@ -116,6 +116,7 @@ dependencies:
 
   flutter_localizations:
     sdk: flutter
+  full_swipe_back_gesture: ^0.1.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

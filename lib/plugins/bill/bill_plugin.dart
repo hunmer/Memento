@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
@@ -1239,25 +1238,19 @@ class _BillMainViewState extends State<BillMainView>
           ),
           Positioned(
             top: -25,
-            child: OpenContainer<bool>(
-              transitionType: ContainerTransitionType.fade,
-              tappable: false,
-              closedElevation: 0.0,
-              closedShape: const RoundedRectangleBorder(),
-              closedColor: Colors.transparent,
-              openBuilder: (BuildContext context, VoidCallback _) {
-                return BillEditScreen(
-                  billPlugin: billPlugin,
-                  accountId: billPlugin.selectedAccount?.id ?? '',
-                );
-              },
-              closedBuilder: (
-                BuildContext context,
-                VoidCallback openContainer,
-              ) {
+            child: Builder(
+              builder: (context) {
                 const fabColor = Color(0xFF3498DB);
                 return FloatingActionButton(
-                  onPressed: openContainer,
+                  onPressed: () {
+                    NavigationHelper.openContainer(
+                      context,
+                      (context) => BillEditScreen(
+                        billPlugin: billPlugin,
+                        accountId: billPlugin.selectedAccount?.id ?? '',
+                      ),
+                    );
+                  },
                   backgroundColor: fabColor,
                   elevation: 4,
                   shape: const CircleBorder(),

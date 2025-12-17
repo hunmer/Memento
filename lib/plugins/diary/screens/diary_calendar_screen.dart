@@ -1,5 +1,4 @@
 import 'dart:io' show Platform;
-import 'package:animations/animations.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
 import 'package:flutter/material.dart';
@@ -504,60 +503,61 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                                 color: textColor,
                               ),
                             ),
-                            OpenContainer<void>(
-                              transitionType: ContainerTransitionType.fadeThrough,
-                              transitionDuration: const Duration(milliseconds: 400),
-                              closedElevation: 2,
-                              closedShape: RoundedRectangleBorder(
+                            Material(
+                              elevation: 2,
+                              borderRadius: BorderRadius.circular(20),
+                              color: primaryColor,
+                              child: InkWell(
                                 borderRadius: BorderRadius.circular(20),
-                              ),
-                              closedColor: primaryColor,
-                              onClosed: (_) => _loadDiaryEntries(),
-                              openBuilder: (context, _) {
-                                final targetDay = _selectedDay ?? DateTime.now();
-                                final normalizedTargetDay = DateTime(
-                                  targetDay.year,
-                                  targetDay.month,
-                                  targetDay.day,
-                                );
-                                return DiaryEditorScreen(
-                                  date: normalizedTargetDay,
-                                  storage: widget.storage,
-                                  initialTitle: selectedEntry?.title ?? '',
-                                  initialContent: selectedEntry?.content ?? '',
-                                );
-                              },
-                              closedBuilder: (context, openContainer) {
-                                return InkWell(
-                                  onTap: openContainer,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
+                                onTap: () {
+                                  final targetDay = _selectedDay ?? DateTime.now();
+                                  final normalizedTargetDay = DateTime(
+                                    targetDay.year,
+                                    targetDay.month,
+                                    targetDay.day,
+                                  );
+                                  NavigationHelper.openContainer(
+                                    context,
+                                    (_) => DiaryEditorScreen(
+                                      date: normalizedTargetDay,
+                                      storage: widget.storage,
+                                      initialTitle: selectedEntry?.title ?? '',
+                                      initialContent: selectedEntry?.content ?? '',
                                     ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          selectedEntry != null ? Icons.edit : Icons.add,
-                                          size: 16,
-                                          color: Colors.white,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          selectedEntry != null
-                                              ? 'diary_edit'.tr
-                                              : 'diary_create'.tr,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
+                                    closedColor: primaryColor,
+                                    closedElevation: 2,
+                                    closedShape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
+                                  ).then((_) => _loadDiaryEntries());
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
                                   ),
-                                );
-                              },
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        selectedEntry != null ? Icons.edit : Icons.add,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        selectedEntry != null
+                                            ? 'diary_edit'.tr
+                                            : 'diary_create'.tr,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -640,38 +640,42 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
           Positioned(
             bottom: 16,
             right: 16,
-            child: OpenContainer<void>(
-              transitionType: ContainerTransitionType.fadeThrough,
-              transitionDuration: const Duration(milliseconds: 400),
-              closedElevation: 6,
-              closedShape: const CircleBorder(),
-              closedColor: primaryColor,
-              onClosed: (_) => _loadDiaryEntries(),
-              openBuilder: (context, _) {
-                final targetDay = _selectedDay ?? DateTime.now();
-                final normalizedTargetDay = DateTime(
-                  targetDay.year,
-                  targetDay.month,
-                  targetDay.day,
-                );
-                // 获取当前选中日期的条目
-                final entry = _diaryEntries[normalizedTargetDay];
-                return DiaryEditorScreen(
-                  date: normalizedTargetDay,
-                  storage: widget.storage,
-                  initialTitle: entry?.title ?? '',
-                  initialContent: entry?.content ?? '',
-                );
-              },
-              closedBuilder: (context, openContainer) {
-                return const SizedBox(
+            child: Material(
+              elevation: 6,
+              shape: const CircleBorder(),
+              color: primaryColor,
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () {
+                  final targetDay = _selectedDay ?? DateTime.now();
+                  final normalizedTargetDay = DateTime(
+                    targetDay.year,
+                    targetDay.month,
+                    targetDay.day,
+                  );
+                  // 获取当前选中日期的条目
+                  final entry = _diaryEntries[normalizedTargetDay];
+                  NavigationHelper.openContainer(
+                    context,
+                    (_) => DiaryEditorScreen(
+                      date: normalizedTargetDay,
+                      storage: widget.storage,
+                      initialTitle: entry?.title ?? '',
+                      initialContent: entry?.content ?? '',
+                    ),
+                    closedColor: primaryColor,
+                    closedElevation: 6,
+                    closedShape: const CircleBorder(),
+                  ).then((_) => _loadDiaryEntries());
+                },
+                child: const SizedBox(
                   height: 56,
                   width: 56,
                   child: Center(
                     child: Icon(Icons.add, color: Colors.white, size: 32),
                   ),
-                );
-              },
+                ),
+              ),
             ),
           ),
       ],

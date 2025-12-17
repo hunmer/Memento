@@ -13,9 +13,9 @@
   },
   {
     "id": "emoji-time-capsule",
-    "title": "Emoji 时光胶囊",
+    "title": "日记时光胶囊",
     "icon": "⏰",
-    "desc": "一个创意的时光胶囊应用，用 Emoji 表情记录和封存你的珍贵时刻,让回忆更加生动有趣。",
+    "desc": "一个创意的时光胶囊来展示日记，用 Emoji 表情记录和封存你的珍贵时刻,让回忆更加生动有趣。",
     "files": "emoji-time-capsule/files.json",
     "version": "1.0.0",
     "author": "mementoTeam",
@@ -25,9 +25,9 @@
   },
   {
     "id": "pure_read",
-    "title": "纯净阅读",
+    "title": "阅读记录",
     "icon": "📖",
-    "desc": "一个简洁优雅的阅读应用，提供无干扰的纯净阅读体验，让你专注于内容本身。",
+    "desc": "记录阅读的书籍和文章，帮助你追踪阅读进度。",
     "files": "pure_read/files.json",
     "version": "1.0.0",
     "author": "mementoTeam",

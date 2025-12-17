@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
@@ -95,88 +95,110 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
     final presetService = PromptPresetService();
 
     // 1. AI 助手选择器
-    pluginDataSelectorService.registerSelector(SelectorDefinition(
-      id: 'openai.agent',
-      pluginId: id,
-      name: '选择 AI 助手',
-      description: '选择一个 AI 助手',
-      icon: Icons.smart_toy,
-      color: color,
-      steps: [
-        SelectorStep(
-          id: 'agent',
-          title: 'AI 助手列表',
-          viewType: SelectorViewType.grid,
-          gridCrossAxisCount: 2,
-          gridChildAspectRatio: 0.85,
-          isFinalStep: true,
-          emptyText: '暂无 AI 助手',
-          dataLoader: (_) async {
-            final agents = await agentController.loadAgents();
-            return agents.map((agent) => SelectableItem(
-              id: agent.id,
-              title: agent.name,
-              subtitle: agent.description.isEmpty
-                  ? agent.model
-                  : agent.description,
-              icon: agent.icon,
-              color: agent.iconColor,
-              avatarPath: agent.avatarUrl,
-              rawData: agent,
-              metadata: {'model': agent.model},
-            )).toList();
-          },
-          searchFilter: (items, query) {
-            final lowerQuery = query.toLowerCase();
-            return items.where((item) =>
-              item.title.toLowerCase().contains(lowerQuery) ||
-              (item.subtitle?.toLowerCase().contains(lowerQuery) ?? false)
-            ).toList();
-          },
-        ),
-      ],
-    ));
+    pluginDataSelectorService.registerSelector(
+      SelectorDefinition(
+        id: 'openai.agent',
+        pluginId: id,
+        name: '选择 AI 助手',
+        description: '选择一个 AI 助手',
+        icon: Icons.smart_toy,
+        color: color,
+        steps: [
+          SelectorStep(
+            id: 'agent',
+            title: 'AI 助手列表',
+            viewType: SelectorViewType.grid,
+            gridCrossAxisCount: 2,
+            gridChildAspectRatio: 0.85,
+            isFinalStep: true,
+            emptyText: '暂无 AI 助手',
+            dataLoader: (_) async {
+              final agents = await agentController.loadAgents();
+              return agents
+                  .map(
+                    (agent) => SelectableItem(
+                      id: agent.id,
+                      title: agent.name,
+                      subtitle:
+                          agent.description.isEmpty
+                              ? agent.model
+                              : agent.description,
+                      icon: agent.icon,
+                      color: agent.iconColor,
+                      avatarPath: agent.avatarUrl,
+                      rawData: agent,
+                      metadata: {'model': agent.model},
+                    ),
+                  )
+                  .toList();
+            },
+            searchFilter: (items, query) {
+              final lowerQuery = query.toLowerCase();
+              return items
+                  .where(
+                    (item) =>
+                        item.title.toLowerCase().contains(lowerQuery) ||
+                        (item.subtitle?.toLowerCase().contains(lowerQuery) ??
+                            false),
+                  )
+                  .toList();
+            },
+          ),
+        ],
+      ),
+    );
 
     // 2. Prompt 预设选择器
-    pluginDataSelectorService.registerSelector(SelectorDefinition(
-      id: 'openai.prompt',
-      pluginId: id,
-      name: '选择 Prompt 预设',
-      description: '选择一个提示词预设',
-      icon: Icons.description,
-      color: color,
-      steps: [
-        SelectorStep(
-          id: 'prompt',
-          title: 'Prompt 列表',
-          viewType: SelectorViewType.list,
-          isFinalStep: true,
-          emptyText: '暂无 Prompt 预设',
-          dataLoader: (_) async {
-            await presetService.loadPresets();
-            return presetService.presets.map((preset) => SelectableItem(
-              id: preset.id,
-              title: preset.name,
-              subtitle: preset.description.isEmpty
-                  ? (preset.content.length > 50
-                      ? '${preset.content.substring(0, 50)}...'
-                      : preset.content)
-                  : preset.description,
-              icon: Icons.text_snippet,
-              rawData: preset,
-              metadata: {'category': preset.category},
-            )).toList();
-          },
-          searchFilter: (items, query) {
-            final lowerQuery = query.toLowerCase();
-            return items.where((item) =>
-              item.title.toLowerCase().contains(lowerQuery) ||
-              (item.subtitle?.toLowerCase().contains(lowerQuery) ?? false)
-            ).toList();
-          },
-        ),
-      ],
-    ));
+    pluginDataSelectorService.registerSelector(
+      SelectorDefinition(
+        id: 'openai.prompt',
+        pluginId: id,
+        name: '选择 Prompt 预设',
+        description: '选择一个提示词预设',
+        icon: Icons.description,
+        color: color,
+        steps: [
+          SelectorStep(
+            id: 'prompt',
+            title: 'Prompt 列表',
+            viewType: SelectorViewType.list,
+            isFinalStep: true,
+            emptyText: '暂无 Prompt 预设',
+            dataLoader: (_) async {
+              await presetService.loadPresets();
+              return presetService.presets
+                  .map(
+                    (preset) => SelectableItem(
+                      id: preset.id,
+                      title: preset.name,
+                      subtitle:
+                          preset.description.isEmpty
+                              ? (preset.content.length > 50
+                                  ? '${preset.content.substring(0, 50)}...'
+                                  : preset.content)
+                              : preset.description,
+                      icon: Icons.text_snippet,
+                      rawData: preset,
+                      metadata: {'category': preset.category},
+                    ),
+                  )
+                  .toList();
+            },
+            searchFilter: (items, query) {
+              final lowerQuery = query.toLowerCase();
+              return items
+                  .where(
+                    (item) =>
+                        item.title.toLowerCase().contains(lowerQuery) ||
+                        (item.subtitle?.toLowerCase().contains(lowerQuery) ??
+                            false),
+                  )
+                  .toList();
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -228,7 +250,6 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Future<void> registerToApp(
-    
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
@@ -496,7 +517,10 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
       final result = await _useCase.getServiceProviders({});
 
       if (result.isFailure) {
-        return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
+        return jsonEncode({
+          'success': false,
+          'error': result.errorOrNull?.message,
+        });
       }
 
       final providers = result.dataOrNull ?? [];
@@ -658,7 +682,8 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
   void _scheduleBottomBarHeightMeasurement() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _bottomBarKey.currentContext != null) {
-        final RenderBox renderBox = _bottomBarKey.currentContext!.findRenderObject() as RenderBox;
+        final RenderBox renderBox =
+            _bottomBarKey.currentContext!.findRenderObject() as RenderBox;
         final newHeight = renderBox.size.height;
         if (_bottomBarHeight != newHeight) {
           setState(() {
@@ -695,8 +720,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
                   TextField(
                     controller: descriptionController,
                     decoration: InputDecoration(
-                      labelText:
-                          'openai_presetDescription'.tr,
+                      labelText: 'openai_presetDescription'.tr,
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -875,43 +899,38 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
           ),
           Positioned(
             top: -25,
-            child: _currentPage == 0
-                ? OpenContainer<bool>(
-                    transitionType: ContainerTransitionType.fade,
-                    tappable: false,
-                    closedElevation: 0.0,
-                    closedShape: const RoundedRectangleBorder(),
-                    closedColor: Colors.transparent,
-                    openBuilder: (BuildContext context, VoidCallback _) {
-                      return AgentEditScreen();
-                    },
-                    closedBuilder: (BuildContext context, VoidCallback openContainer) {
-                      return FloatingActionButton(
-                        onPressed: openContainer,
-                        backgroundColor: Colors.deepOrange,
-                        elevation: 4,
-                        shape: const CircleBorder(),
-                        child: const Icon(
-                          Icons.smart_toy,
-                          color: Colors.white,
-                          size: 32,
-                        ),
-                      );
-                    },
-                  )
-                : FloatingActionButton(
-                    onPressed: () {
-                      _showPresetEditDialog();
-                    },
-                    backgroundColor: Colors.deepOrange,
-                    elevation: 4,
-                    shape: const CircleBorder(),
-                    child: const Icon(
-                      Icons.text_snippet,
-                      color: Colors.white,
-                      size: 32,
+            child:
+                _currentPage == 0
+                    ? FloatingActionButton(
+                      onPressed: () {
+                        NavigationHelper.openContainer(context, (
+                          BuildContext context,
+                        ) {
+                          return AgentEditScreen();
+                        });
+                      },
+                      backgroundColor: Colors.deepOrange,
+                      elevation: 4,
+                      shape: const CircleBorder(),
+                      child: const Icon(
+                        Icons.smart_toy,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    )
+                    : FloatingActionButton(
+                      onPressed: () {
+                        _showPresetEditDialog();
+                      },
+                      backgroundColor: Colors.deepOrange,
+                      elevation: 4,
+                      shape: const CircleBorder(),
+                      child: const Icon(
+                        Icons.text_snippet,
+                        color: Colors.white,
+                        size: 32,
+                      ),
                     ),
-                  ),
           ),
         ],
       ),
