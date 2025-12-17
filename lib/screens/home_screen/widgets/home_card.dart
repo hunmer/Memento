@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:Memento/core/app_initializer.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:full_swipe_back_gesture/full_swipe_back_gesture.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
@@ -300,7 +300,7 @@ class HomeCard extends StatelessWidget {
     );
   }
 
-  /// 打开小组件对应的插件（使用 BackSwipePageRoute 支持全屏返回手势）
+  /// 打开小组件对应的插件（使用 openContainerWithHero 支持全屏返回手势和 Hero 动画）
   void _openWidgetPlugin(BuildContext context) {
     final widgetItem = item as HomeWidgetItem;
     final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
@@ -309,12 +309,12 @@ class HomeCard extends StatelessWidget {
       if (plugin != null) {
         // 记录插件打开历史
         globalPluginManager.recordPluginOpen(plugin);
-        // 使用 BackSwipePageRoute 导航，支持全屏滑动返回
-        Navigator.of(context).push(
-          BackSwipePageRoute(
-            builder: (_) => plugin.buildMainView(context),
-            transitionDuration: const Duration(milliseconds: 300),
-          ),
+        // 使用 NavigationHelper.openContainerWithHero 导航，支持全屏滑动返回和 Hero 动画
+        NavigationHelper.openContainerWithHero(
+          context,
+          (_) => plugin.buildMainView(context),
+          heroTag: 'widget_${widgetItem.id}',
+          transitionDuration: const Duration(milliseconds: 300),
         );
       }
     }
