@@ -30,6 +30,12 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   /// 缓存的分组列表，确保UI稳定性
   List<ConversationGroup> _cachedGroups = [];
 
+  /// 缓存的会话数量，用于检测实际变化
+  int _cachedConversationCount = 0;
+
+  /// 缓存的会话ID列表哈希，用于快速检测变化
+  int _cachedConversationHash = 0;
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +55,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         if (initialGroups.isNotEmpty) {
           _cachedGroups = List.from(initialGroups);
         }
+
+        // 初始化会话缓存，避免首次触发不必要的重建
+        final initialConversations = _controller.conversations;
+        _cachedConversationCount = initialConversations.length;
+        _cachedConversationHash = _computeConversationHash(initialConversations);
 
         // 触发一次更新以确保显示最新状态
         if (mounted) {
@@ -71,13 +82,42 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       if (currentGroups.isNotEmpty || _cachedGroups.isEmpty) {
         _cachedGroups = List.from(currentGroups);
       }
-      // 使用 addPostFrameCallback 避免在构建过程中调用 setState
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {});
-        }
-      });
+
+      // 检查会话列表是否有实际变化，避免不必要的重建导致闪烁
+      final conversations = _controller.conversations;
+      final newCount = conversations.length;
+      final newHash = _computeConversationHash(conversations);
+
+      // 仅当会话列表发生实际变化时才触发重建
+      final hasChanges = newCount != _cachedConversationCount ||
+          newHash != _cachedConversationHash;
+
+      if (hasChanges) {
+        _cachedConversationCount = newCount;
+        _cachedConversationHash = newHash;
+
+        // 使用 addPostFrameCallback 避免在构建过程中调用 setState
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {});
+          }
+        });
+      }
     }
+  }
+
+  /// 计算会话列表的哈希值，用于快速检测变化
+  int _computeConversationHash(List<Conversation> conversations) {
+    if (conversations.isEmpty) return 0;
+    // 基于会话ID和最后消息时间计算哈希
+    int hash = 0;
+    for (final conv in conversations) {
+      hash = hash ^ conv.id.hashCode ^ conv.lastMessageAt.hashCode;
+      if (conv.lastMessagePreview != null) {
+        hash = hash ^ conv.lastMessagePreview.hashCode;
+      }
+    }
+    return hash;
   }
 
   /// 打开设置页面
