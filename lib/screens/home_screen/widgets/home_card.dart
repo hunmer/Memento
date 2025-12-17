@@ -11,8 +11,8 @@ import 'folder_dialog.dart';
 
 /// 主页卡片组件
 ///
-/// 显示一个小组件或文件夹的卡片
-class HomeCard extends StatelessWidget {
+/// 显示一个小组件或文件夹的卡片，支持 OpenContainer 风格的页面转场动画
+class HomeCard extends StatefulWidget {
   final HomeItem item;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
@@ -33,6 +33,22 @@ class HomeCard extends StatelessWidget {
   });
 
   @override
+  State<HomeCard> createState() => _HomeCardState();
+}
+
+class _HomeCardState extends State<HomeCard> {
+  /// 用于 OpenContainer 动画的 GlobalKey
+  final GlobalKey _cardKey = GlobalKey();
+
+  HomeItem get item => widget.item;
+  VoidCallback? get onTap => widget.onTap;
+  VoidCallback? get onLongPress => widget.onLongPress;
+  bool get isSelected => widget.isSelected;
+  bool get isEditMode => widget.isEditMode;
+  bool get isBatchMode => widget.isBatchMode;
+  Widget? get dragHandle => widget.dragHandle;
+
+  @override
   Widget build(BuildContext context) {
     final isWidgetItem = item is HomeWidgetItem;
 
@@ -41,9 +57,10 @@ class HomeCard extends StatelessWidget {
       return _buildCardContent(context, isWidgetItem);
     }
 
-    // 小组件卡片使用 BackSwipePageRoute 支持全屏返回手势
+    // 小组件卡片使用 OpenContainer 动画
     if (isWidgetItem) {
       return GestureDetector(
+        key: _cardKey,
         onTap: onTap ?? () => _openWidgetPlugin(context),
         onLongPress: onLongPress,
         child: _buildCardContent(context, true),
@@ -300,7 +317,7 @@ class HomeCard extends StatelessWidget {
     );
   }
 
-  /// 打开小组件对应的插件（使用 openContainerWithHero 支持全屏返回手势和 Hero 动画）
+  /// 打开小组件对应的插件（使用 OpenContainer 风格动画）
   void _openWidgetPlugin(BuildContext context) {
     final widgetItem = item as HomeWidgetItem;
     final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
@@ -309,12 +326,16 @@ class HomeCard extends StatelessWidget {
       if (plugin != null) {
         // 记录插件打开历史
         globalPluginManager.recordPluginOpen(plugin);
-        // 使用 NavigationHelper.openContainerWithHero 导航，支持全屏滑动返回和 Hero 动画
+        // 使用 OpenContainer 风格导航，从卡片位置展开到全屏
         NavigationHelper.openContainerWithHero(
           context,
           (_) => plugin.buildMainView(context),
           heroTag: 'widget_${widgetItem.id}',
+          sourceKey: _cardKey,
           transitionDuration: const Duration(milliseconds: 300),
+          closedShape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12.0)),
+          ),
         );
       }
     }
