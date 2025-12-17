@@ -30,4 +30,10 @@ const Map<String, String> nfcTranslationsZh = {
   'nfc_timerNotePrefix': '备注: ',
   'nfc_timerWarning': '',
   'nfc_timerSuccess': '',
+
+  // Widget Home Strings
+  'nfc_widgetName': 'NFC',
+  'nfc_widgetDescription': '快速打开NFC控制器',
+  'nfc_overviewName': 'NFC概览',
+  'nfc_overviewDescription': '显示NFC功能状态',
 };

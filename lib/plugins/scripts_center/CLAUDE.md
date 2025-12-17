@@ -1,4 +1,4 @@
-# 脚本中心插件 (Scripts Center) - AI 上下文文档
+ # 脚本中心插件 (Scripts Center) - AI 上下文文档
 
 [根目录](../../../CLAUDE.md) > [plugins](../../) > **scripts_center**
 

@@ -32,4 +32,10 @@ const Map<String, String> scriptsCenterTranslationsZh = {
   'scripts_center_categoryLabel': '类别: @category',
   'scripts_center_descriptionLabel': '描述: @description',
   'scripts_center_delayLabel': '延迟: @delayms',
+
+  // Widget Home Strings
+  'scripts_center_widgetName': '脚本中心',
+  'scripts_center_widgetDescription': '快速打开脚本中心',
+  'scripts_center_overviewName': '脚本概览',
+  'scripts_center_overviewDescription': '显示脚本统计信息',
 };

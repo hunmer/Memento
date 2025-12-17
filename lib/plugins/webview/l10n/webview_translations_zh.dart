@@ -125,4 +125,10 @@ const Map<String, String> webviewTranslationsZh = {
   'webview_installing': '安装中',
   'webview_downloading_files': '正在下载文件',
   'webview_verifying_files': '正在校验文件',
+
+  // Widget Home Strings
+  'webview_widgetName': '浏览器',
+  'webview_widgetDescription': '快速打开内置浏览器',
+  'webview_overviewName': '浏览器概览',
+  'webview_overviewDescription': '显示浏览器统计信息',
 };
