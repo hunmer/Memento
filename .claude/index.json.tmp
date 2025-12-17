@@ -1,0 +1,32 @@
+  {
+      "name": "nfc",
+      "path": "lib/plugins/nfc",
+      "type": "plugin",
+      "description": "NFC插件：近场通信读写、卡片处理器、深度链接",
+      "entryPoints": ["lib/plugins/nfc/nfc_plugin.dart"],
+      "controllers": ["nfc_controller.dart"],
+      "models": ["NfcRecordType", "NfcRecordItem"],
+      "cardHandlers": [
+        "ReadCardHandler",
+        "CustomWriteCardHandler",
+        "CheckinCardHandler",
+        "GoodsUsageCardHandler",
+        "HabitTimerCardHandler",
+        "TrackerProgressCardHandler"
+      ],
+      "widgets": ["NfcWriteDialog"],
+      "keyFeatures": [
+        "NFC标签读取",
+        "多种记录类型支持（URI、TEXT、MIME、AAR、EXTERNAL）",
+        "深度链接生成（memento://协议）",
+        "卡片处理器架构模式",
+        "与其他插件深度集成（签到、物品使用、习惯计时等）"
+      ],
+      "documentation": "lib/plugins/nfc/CLAUDE.md",
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": true,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },

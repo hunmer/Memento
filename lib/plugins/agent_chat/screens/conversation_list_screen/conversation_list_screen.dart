@@ -425,6 +425,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         _controller.conversationService.conversations.isNotEmpty;
 
     return SuperCupertinoNavigationWrapper(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       title: Text('agent_chat_aiChat'.tr),
       largeTitle: 'agent_chat_aiChat'.tr,
       enableLargeTitle: true,
@@ -688,107 +689,129 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         );
       },
       closedBuilder: (BuildContext context, VoidCallback openContainer) {
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue[100],
-              child: Icon(
-                conversation.isPinned ? Icons.push_pin : Icons.chat,
-                color: Colors.blue[700],
-              ),
-            ),
-            title: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    conversation.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (conversation.unreadCount > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${conversation.unreadCount}',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: openContainer,
+            highlightColor: Colors.transparent,
+            splashColor: Colors.transparent,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.blue[100],
+                    child: Icon(
+                      conversation.isPinned ? Icons.push_pin : Icons.chat,
+                      color: Colors.blue[700],
                     ),
                   ),
-              ],
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (conversation.lastMessagePreview != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    conversation.lastMessagePreview!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.grey[600]),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                conversation.title,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (conversation.unreadCount > 0)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '${conversation.unreadCount}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (conversation.lastMessagePreview != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            conversation.lastMessagePreview!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ],
+                        const SizedBox(height: 4),
+                        Text(
+                          _formatDateTime(conversation.lastMessageAt),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuButton<String>(
+                    onSelected:
+                        (value) =>
+                            _onConversationMenuSelected(value, conversation),
+                    itemBuilder:
+                        (context) => [
+                          PopupMenuItem(
+                            value: 'pin',
+                            child: Row(
+                              children: [
+                                Icon(
+                                  conversation.isPinned
+                                      ? Icons.push_pin_outlined
+                                      : Icons.push_pin,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(conversation.isPinned ? '取消置顶' : '置顶'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.edit),
+                                const SizedBox(width: 8),
+                                Text('agent_chat_edit'.tr),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.delete, color: Colors.red),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'agent_chat_delete'.tr,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                   ),
                 ],
-                const SizedBox(height: 4),
-                Text(
-                  _formatDateTime(conversation.lastMessageAt),
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                ),
-              ],
+              ),
             ),
-            trailing: PopupMenuButton<String>(
-              onSelected:
-                  (value) => _onConversationMenuSelected(value, conversation),
-              itemBuilder:
-                  (context) => [
-                    PopupMenuItem(
-                      value: 'pin',
-                      child: Row(
-                        children: [
-                          Icon(
-                            conversation.isPinned
-                                ? Icons.push_pin_outlined
-                                : Icons.push_pin,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(conversation.isPinned ? '取消置顶' : '置顶'),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.edit),
-                          const SizedBox(width: 8),
-                          Text('agent_chat_edit'.tr),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.delete, color: Colors.red),
-                          const SizedBox(width: 8),
-                          Text(
-                            'agent_chat_delete'.tr,
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-            ),
-            onTap: openContainer,
           ),
         );
       },

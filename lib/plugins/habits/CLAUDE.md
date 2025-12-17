@@ -4,19 +4,25 @@
 
 # 习惯追踪插件 (Habits Plugin) - 模块文档
 
+> **变更记录 (Changelog)**
+> - **2025-12-17T12:10:45+08:00**: 完整更新 - 识别 JS API、UseCase 架构、Repository 模式、Android 小组件支持、数据选择器等新特性
+
 ## 模块职责
 
 习惯追踪插件是 Memento 的核心功能模块之一，提供：
 
-- **习惯管理**: 创建、编辑、删除习惯
-- **技能系统**: 将习惯关联到技能，实现目标导向的习惯培养
-- **完成记录**: 记录习惯的完成情况和时长
-- **计时器功能**: 内置倒计时/正计时器，支持暂停、恢复
+- **习惯管理**: 创建、编辑、删除习惯，支持图标、图片、标签、分组
+- **技能系统**: 将习惯关联到技能，实现目标导向的习惯培养（一万小时理念）
+- **完成记录**: 记录习惯的完成情况和时长，支持备注
+- **计时器功能**: 内置倒计时/正计时器，支持暂停、恢复、状态持久化
 - **双视图模式**: 支持列表视图和卡片视图切换
 - **分组管理**: 按技能或自定义分组组织习惯
-- **图标与图片**: 支持自定义图标和封面图片
 - **统计功能**: 完成次数、累计时长、历史记录
-- **事件系统**: 广播计时器的启动、停止事件
+- **事件系统**: 广播计时器的启动、停止事件，同步小组件
+- **JS API**: 15+ 个 JavaScript API 方法，支持跨模块调用
+- **数据选择器**: 可被其他模块选择习惯数据
+- **Android 小组件**: 支持习惯统计、周视图、分组列表等小组件
+- **UseCase 架构**: 采用 UseCase + Repository 架构模式
 
 ---
 
@@ -27,179 +33,169 @@
 **文件**: `habits_plugin.dart`
 
 ```dart
-class HabitsPlugin extends PluginBase {
-    @override
-    String get id => 'habits';
+class HabitsPlugin extends PluginBase with JSBridgePlugin {
+  // 单例模式
+  static HabitsPlugin get instance;
 
-    @override
-    Future<void> initialize() async {
-        _timerController = TimerController();
-        _habitController = HabitController(
-            storage,
-            timerController: _timerController,
-        );
-        _skillController = SkillController(storage);
-        _recordController = CompletionRecordController(
-            storage,
-            habitController: _habitController,
-            skillControlle: _skillController,
-        );
-    }
+  // 四大控制器
+  late final HabitController _habitController;
+  late final SkillController _skillController;
+  late final CompletionRecordController _recordController;
+  late final TimerController _timerController;
 
-    @override
-    Future<void> registerToApp(
-        PluginManager pluginManager,
-        ConfigManager configManager,
-    ) async {
-        // 插件已在 initialize() 中完成初始化
-    // 这里可以添加额外的应用级注册逻辑
-    }
+  // UseCase 架构
+  late final ClientHabitsRepository _repository;
+  late final HabitsUseCase _useCase;
 }
 ```
 
+**初始化流程**:
+1. 创建 TimerController（单例）
+2. 创建 SkillController 并加载数据
+3. 创建 HabitController（依赖 timerController 和 skillController）
+4. 创建 CompletionRecordController（依赖 habitController 和 skillController）
+5. 创建 ClientHabitsRepository 适配器
+6. 创建 HabitsUseCase 实例
+7. 注册 JS API
+8. 注册数据选择器
+
 ### 主界面入口
 
-**文件**: `widgets/habits_home.dart`
+**文件**: `widgets/habits_bottom_bar.dart`
 
-**路由**: 通过 `HabitsPlugin.buildMainView()` 返回 `HabitsMainView`，其内部渲染 `HabitsHome`
-
-**布局**: 底部导航栏双 Tab 结构（习惯列表 + 技能列表）
+**布局**: 底部导航栏双 Tab 结构
+- Tab 0: 习惯列表（CombinedHabitsView）
+- Tab 1: 技能列表（SkillsList）
+- 悬浮按钮: 动态切换添加习惯/技能
 
 ---
 
 ## 对外接口
 
-### 核心 API
+### JS API (JavaScript 接口)
 
-#### 统计接口
+插件提供 15+ 个 JavaScript API 方法，支持跨模块调用：
 
-```dart
-// 获取习惯数量
-int getHabitCount();
+#### 习惯管理 API
+```javascript
+// 获取习惯列表（支持分页）
+Memento.habits.getHabits({ offset: 0, count: 10 })
 
-// 获取技能数量
-int getSkillCount();
-```
+// 根据ID获取习惯
+Memento.habits.getHabitById({ habitId: "xxx" })
 
-#### HabitController 控制器
+// 创建习惯
+Memento.habits.createHabit({
+  title: "晨跑",
+  durationMinutes: 30,
+  skillId: "skill-001"
+})
 
-**文件**: `controllers/habit_controller.dart`
-
-```dart
-// 加载所有习惯
-Future<List<Habit>> loadHabits();
-
-// 获取习惯列表
-List<Habit> getHabits();
-
-// 保存习惯（创建或更新）
-Future<void> saveHabit(Habit habit);
+// 更新习惯
+Memento.habits.updateHabit({
+  habitId: "xxx",
+  title: "夜跑"
+})
 
 // 删除习惯
-Future<void> deleteHabit(String id);
-
-// 计时器模式监听器
-void addTimerModeListener(TimerModeListener listener);
-void removeTimerModeListener(TimerModeListener listener);
-void notifyTimerModeChanged(String habitId, bool isCountdown);
+Memento.habits.deleteHabit({ habitId: "xxx" })
 ```
 
-#### SkillController 控制器
+#### 技能管理 API
+```javascript
+// 获取技能列表（支持分页）
+Memento.habits.getSkills({ offset: 0, count: 10 })
 
-**文件**: `controllers/skill_controller.dart`
-
-```dart
-// 加载所有技能
-Future<List<Skill>> loadSkills();
-
-// 获取技能列表
-List<Skill> getSkills();
-
-// 根据ID获取技能
-Skill getSkillById(String id);
-
-// 根据标题获取技能（唯一性检查）
-Skill? getSkillByTitle(String? title);
-
-// 保存技能（创建或更新）
-Future<void> saveSkill(Skill skill);
-
-// 删除技能
-Future<void> deleteSkill(String id);
-
-// 获取技能的完成记录
-Future<List<CompletionRecord>> getSkillCompletionRecords(String skillId);
+// 创建技能
+Memento.habits.createSkill({
+  title: "健康生活",
+  targetMinutes: 10000
+})
 ```
 
-#### CompletionRecordController 控制器
+#### 打卡记录 API
+```javascript
+// 打卡（创建完成记录）
+Memento.habits.checkIn({
+  habitId: "xxx",
+  durationMinutes: 30,
+  notes: "今天跑了5公里"
+})
 
-**文件**: `controllers/completion_record_controller.dart`
-
-```dart
-// 保存完成记录
-Future<void> saveCompletionRecord(String habitId, CompletionRecord record);
-
-// 获取习惯的完成记录
-Future<List<CompletionRecord>> getHabitCompletionRecords(String habitId);
-
-// 获取技能的完成记录
-Future<List<CompletionRecord>> getSkillCompletionRecords(String skillId);
-
-// 获取技能关联的习惯ID列表
-Future<List<String>> getSkillHabitIds(String skillId);
-
-// 获取总时长（分钟）
-Future<int> getTotalDuration(String habitId);
-
-// 获取完成次数
-Future<int> getCompletionCount(String habitId);
+// 获取完成记录
+Memento.habits.getCompletionRecords({
+  habitId: "xxx",
+  offset: 0,
+  count: 10
+})
 
 // 删除完成记录
-Future<void> deleteCompletionRecord(String recordId);
-
-// 清空习惯的所有完成记录
-Future<void> clearAllCompletionRecords(String habitId);
+Memento.habits.deleteCompletionRecord({ recordId: "xxx" })
 ```
 
-#### TimerController 控制器
+#### 统计 API
+```javascript
+// 获取习惯统计
+Memento.habits.getStats({
+  habitId: "xxx"
+}) // 返回: { totalDurationMinutes, completionCount }
 
-**文件**: `controllers/timer_controller.dart`
+// 获取今日习惯
+Memento.habits.getTodayHabits()
+```
 
-```dart
+#### 计时器 API
+```javascript
 // 启动计时器
-void startTimer(
-    Habit habit,
-    TimerUpdateCallback onUpdate, {
-    Duration? initialDuration,
-});
+Memento.habits.startTimer({
+  habitId: "xxx",
+  initialSeconds: 1800
+})
 
 // 停止计时器
-void stopTimer(String habitId);
+Memento.habits.stopTimer({ habitId: "xxx" })
 
-// 暂停计时器
-void pauseTimer(String habitId);
-
-// 切换计时器状态
-void toggleTimer(String habitId, bool isRunning);
-
-// 设置倒计时模式
-void setCountdownMode(String habitId, bool isCountdown);
-
-// 获取计时器数据
-Map<String, dynamic>? getTimerData(String habitId);
-
-// 更新计时器数据
-void updateTimerData(String habitId, Map<String, dynamic> data);
-
-// 清除计时器数据
-void clearTimerData(String habitId);
-
-// 获取所有活动计时器
-Map<String, bool> getActiveTimers();
-
-// 检查习惯是否正在计时
-bool isHabitTiming(String habitId);
+// 获取计时器状态
+Memento.habits.getTimerStatus({ habitId: "xxx" })
+// 返回: { isRunning, elapsedSeconds, isCountdown }
 ```
+
+### 数据选择器
+
+插件注册了数据选择器，可被其他模块调用：
+
+```dart
+// 选择习惯
+pluginDataSelectorService.select(
+  context: context,
+  selectorId: 'habits.habit',
+  onSelected: (items) {
+    final habit = items.first.rawData as Habit;
+    // 处理选中的习惯
+  },
+);
+```
+
+**特性**:
+- 支持搜索（标题、分组、标签）
+- 显示累计时长和完成次数
+- 单选模式
+
+### Android 小组件 API
+
+插件支持多种 Android 桌面小组件：
+
+1. **习惯统计小组件** (1x1, 2x2)
+   - 显示习惯总数、技能总数
+   - 快速进入插件
+
+2. **习惯周视图小组件** (2x2)
+   - 显示选中习惯的周完成情况
+   - 热力图形式展示
+
+3. **习惯分组列表小组件** (2x2)
+   - 按技能分组显示习惯
+   - 快速访问常用习惯
 
 ---
 
@@ -207,7 +203,8 @@ bool isHabitTiming(String habitId);
 
 ### 外部依赖
 
-- `uuid`: 生成唯一ID（通过 `HabitsUtils.generateId()`）
+- `shared_models`: UseCase 和 Repository 接口定义
+- `uuid`: UUID 生成（通过 `HabitsUtils.generateId()`）
 - `path`: 路径处理
 
 ### 插件依赖
@@ -217,6 +214,7 @@ bool isHabitTiming(String habitId);
 - **ImageUtils**: 图片路径处理
 - **CircleIconPicker**: 图标选择器组件
 - **ImagePickerDialog**: 图片选择对话框
+- **PluginWidgetSyncHelper**: Android 小组件同步
 
 ### 存储路径
 
@@ -230,58 +228,12 @@ habits/
 ├── records/
 │   ├── <habitId>.json          # 习惯的完成记录
 │   └── ...
-└── habit_images/               # 习惯封面图片
+├── habit_images/               # 习惯封面图片
+│   ├── <uuid>.jpg
+│   └── ...
+└── habit_images/               # 技能封面图片
     ├── <uuid>.jpg
     └── ...
-```
-
-**习惯数据格式** (`habits.json`):
-```json
-[
-  {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "title": "晨跑",
-    "notes": "每天早上跑步30分钟",
-    "group": "健康",
-    "icon": "58248",
-    "image": "habits/habit_images/abc123.jpg",
-    "reminderDays": [1, 2, 3, 4, 5],
-    "intervalDays": 0,
-    "durationMinutes": 30,
-    "tags": ["运动", "健康"],
-    "skillId": "skill-001"
-  }
-]
-```
-
-**技能数据格式** (`skills.json`):
-```json
-[
-  {
-    "id": "skill-001",
-    "title": "健康生活",
-    "description": "保持健康的生活方式",
-    "notes": "包括运动、饮食、睡眠",
-    "group": "健康",
-    "icon": "59512",
-    "image": "habits/skill_images/xyz789.jpg",
-    "targetMinutes": 10000,
-    "maxDurationMinutes": 0
-  }
-]
-```
-
-**完成记录格式** (`records/<habitId>.json`):
-```json
-[
-  {
-    "id": "record-001",
-    "parentId": "550e8400-e29b-41d4-a716-446655440000",
-    "date": "2025-01-15T08:30:00.000Z",
-    "duration": 1800,
-    "notes": "今天跑了5公里"
-  }
-]
 ```
 
 ---
@@ -305,16 +257,8 @@ class Habit {
   final int durationMinutes;        // 持续时长（分钟）
   final List<String> tags;          // 标签列表
   final String? skillId;            // 关联的技能ID（可选）
-
-  Map<String, dynamic> toMap();
-  factory Habit.fromMap(Map<String, dynamic> map);
 }
 ```
-
-**字段说明**:
-- `icon`: 存储为 `IconData.codePoint.toString()`，使用时通过 `IconData(int.parse(icon!), fontFamily: 'MaterialIcons')` 恢复
-- `image`: 支持网络URL（`http`开头）或本地相对路径
-- `reminderDays`: `[1,2,3,4,5]` 表示周一到周五提醒
 
 ### Skill (技能)
 
@@ -331,9 +275,6 @@ class Skill {
   final String? image;              // 封面图片路径（可选）
   final int targetMinutes;          // 目标时长（分钟，0表示无目标）
   final int maxDurationMinutes;     // 最大时长限制（0表示无限制）
-
-  Map<String, dynamic> toMap();
-  factory Skill.fromMap(Map<String, dynamic> map);
 }
 ```
 
@@ -348,14 +289,79 @@ class CompletionRecord {
   final DateTime date;              // 完成日期
   final Duration duration;          // 持续时长
   final String notes;               // 备注
-
-  Map<String, dynamic> toMap();
-  factory CompletionRecord.fromMap(Map<String, dynamic> map);
 }
 ```
 
-**存储格式转换**:
-- `duration`: 存储为 `duration.inSeconds`，读取时转换为 `Duration(seconds: ...)`
+### 小组件相关模型
+
+**文件**: `models/habits_weekly_widget_data.dart`
+
+```dart
+class HabitsWeeklyData {
+  final int year;                   // 年份
+  final int week;                   // 周数
+  final String weekStart;           // 周开始日期 (MM.dd)
+  final String weekEnd;             // 周结束日期 (MM.dd)
+  final List<HabitWeeklyItem> habitItems; // 习惯周数据
+}
+
+class HabitWeeklyItem {
+  final String habitId;             // 习惯ID
+  final String habitTitle;          // 习惯标题
+  final String habitIcon;           // 习惯图标（emoji或字符）
+  final List<int> dailyMinutes;     // 每日时长（7天）
+  final int colorValue;             // 颜色值（ARGB）
+}
+```
+
+---
+
+## 架构设计
+
+### UseCase + Repository 架构
+
+插件采用了 UseCase + Repository 架构模式：
+
+```
+HabitsPlugin (JS API 适配层)
+    ↓
+HabitsUseCase (业务逻辑层)
+    ↓
+ClientHabitsRepository (数据访问适配层)
+    ↓
+Controllers (具体实现)
+    ↓
+StorageManager (数据持久化)
+```
+
+**优势**:
+- 清晰的职责分离
+- 易于测试（可 mock Repository）
+- 支持多种数据源
+- 业务逻辑集中管理
+
+### 控制器层设计
+
+#### 1. HabitController
+- 管理 CRUD 操作
+- 默认数据初始化（8个示例习惯）
+- 事件广播（数据变更）
+- 小组件同步
+
+#### 2. SkillController
+- 技能 CRUD 操作
+- 按标题查找（唯一性检查）
+- 与习惯的关联管理
+
+#### 3. CompletionRecordController
+- 完成记录 CRUD 操作
+- 统计功能（总时长、完成次数）
+- 技能级别的数据聚合
+
+#### 4. TimerController (单例)
+- 全局计时器管理
+- 状态持久化
+- 事件广播（启动/停止）
 
 ---
 
@@ -365,9 +371,8 @@ class CompletionRecord {
 
 | 组件 | 文件 | 职责 |
 |------|------|------|
-| `HabitsMainView` | `habits_plugin.dart` | 插件主视图容器 |
-| `HabitsHome` | `widgets/habits_home.dart` | 底部导航栏主界面 |
-| `CombinedHabitsView` | `widgets/habits_list/habits_view.dart` | 习惯列表视图 |
+| `HabitsBottomBar` | `widgets/habits_bottom_bar.dart` | 底部导航栏主界面 |
+| `CombinedHabitsView` | `widgets/habits_list/habits_view.dart` | 习惯列表视图（双视图模式） |
 | `HabitsAppBar` | `widgets/habits_list/habits_app_bar.dart` | 习惯列表AppBar |
 | `HabitsList` | `widgets/habits_list/habits_list.dart` | 习惯列表组件 |
 | `HabitsHistoryList` | `widgets/habits_list/habits_history_list.dart` | 历史记录列表 |
@@ -381,278 +386,20 @@ class CompletionRecord {
 | `CompletionRecordsTab` | `widgets/completion_records_tab.dart` | 完成记录Tab |
 | `CommonRecordList` | `widgets/common_record_list.dart` | 通用记录列表 |
 
-### HabitsHome 布局
+### 双视图模式
 
-**布局结构**:
-```
-Scaffold
-├── PageView (禁止手动滑动)
-│   ├── CombinedHabitsView (习惯列表)
-│   └── SkillsList (技能列表)
-└── BottomNavigationBar
-    ├── 习惯 (Icons.check_circle)
-    └── 技能 (Icons.star)
-```
+习惯列表支持两种视图模式：
 
-**关键特性**:
-- 使用 `KeepAliveWrapper` 保持页面状态
-- `PageView` 禁用手动滑动，仅通过底部导航栏切换
-- 页面切换动画（300ms，ease曲线）
+1. **列表视图**
+   - 按技能分组
+   - 显示习惯详情
+   - 支持长按查看历史
 
-### CombinedHabitsView 布局
-
-**布局结构**:
-```
-Column
-├── HabitsAppBar
-│   ├── 返回按钮
-│   ├── 标题（习惯）
-│   ├── 视图切换按钮（列表/卡片）
-│   └── 添加按钮
-└── Expanded
-    ├── 卡片视图（GridView 2列）
-    │   └── 按技能分组 + 习惯卡片
-    └── 列表视图（ListView）
-        └── 按技能分组 + 习惯列表项
-```
-
-**关键特性**:
-- 双视图模式（`_isCardView` 状态切换）
-- 按技能自动分组（未关联技能归入"未分类"）
-- 卡片视图显示封面图片和计时器按钮
-- 列表视图支持长按查看历史记录
-- 实时计时器状态更新（监听 `habit_timer_started/stopped` 事件）
-
-### HabitForm 表单
-
-**核心组件**: 全屏 Scaffold 表单
-
-**功能**:
-- 图片选择器（圆形头像，支持裁剪）
-- 图标选择器（`CircleIconPicker`）
-- 标题输入（必填）
-- 备注输入（可选，多行）
-- 分组输入（可选）
-- 时长输入（默认30分钟）
-- 技能关联下拉框（必填，可选"请选择技能"）
-
-**验证规则**:
-- 标题不能为空
-- 必须选择关联的技能
-
-### TimerDialog 对话框
-
-**核心组件**: 全屏对话框
-
-**功能**:
-- 显示习惯标题和时长
-- 倒计时/正计时模式切换
-- 时间显示（格式化为 HH:MM:SS）
-- 开始/暂停按钮
-- 完成按钮（保存完成记录）
-- 备注输入框
-- 自动保存计时器状态
-
-**计时器特性**:
-- 倒计时模式：从 `durationMinutes` 倒数到 0
-- 正计时模式：从 0 开始计时
-- 支持暂停/恢复
-- 完成时保存 `CompletionRecord`
-- 关闭对话框时停止计时器
-
----
-
-## 控制器层
-
-### HabitController
-
-**文件**: `controllers/habit_controller.dart`
-
-**核心职责**:
-- 习惯数据的 CRUD 操作
-- 从 `habits/habits.json` 加载/保存数据
-- 计时器模式变更通知
-
-**存储机制**:
-```dart
-// 保存时自动过滤空Map
-Future<void> saveHabit(Habit habit) async {
-    final habits = getHabits();
-    final index = habits.indexWhere((h) => h.id == habit.id);
-
-    if (index >= 0) {
-        habits[index] = habit;
-    } else {
-        habits.add(habit);
-    }
-
-    await storage.writeJson(
-        'habits/habits',
-        habits.map((h) => h.toMap()).toList(),
-    );
-}
-```
-
-**计时器模式监听器**:
-```dart
-// 当计时器模式（倒计时/正计时）改变时通知UI更新
-void notifyTimerModeChanged(String habitId, bool isCountdown) {
-    for (final listener in _timerModeListeners) {
-        listener(habitId, isCountdown);
-    }
-}
-```
-
-### SkillController
-
-**文件**: `controllers/skill_controller.dart`
-
-**核心职责**:
-- 技能数据的 CRUD 操作
-- 从 `habits/skills.json` 加载/保存数据
-- 根据标题查找技能（唯一性检查）
-
-**重要方法**:
-
-```dart
-// 根据标题获取技能（避免歧义）
-Skill? getSkillByTitle(String? title) {
-    if (title == null || title.isEmpty) {
-        return null;
-    }
-
-    final matchingSkills = _skills.where((s) => s.title == title).toList();
-
-    if (matchingSkills.isEmpty) {
-        return null;
-    }
-
-    if (matchingSkills.length > 1) {
-        return null; // 避免返回模糊结果
-    }
-
-    return matchingSkills.first;
-}
-```
-
-**设计要点**:
-- 当多个技能同名时返回 `null`，避免误操作
-- 在 UI 中用于按技能分组时获取技能信息
-
-### CompletionRecordController
-
-**文件**: `controllers/completion_record_controller.dart`
-
-**核心职责**:
-- 完成记录的 CRUD 操作
-- 从 `habits/records/<habitId>.json` 加载/保存数据
-- 统计功能（总时长、完成次数）
-- 技能与习惯的关联查询
-
-**重要方法**:
-
-```dart
-// 获取技能的所有完成记录（聚合所有关联习惯的记录）
-Future<List<CompletionRecord>> getSkillCompletionRecords(
-    String skillId,
-) async {
-    final matchingRecords = <CompletionRecord>[];
-
-    // 1. 获取所有属于指定skillId的habitIds
-    final skillHabitIds = await getSkillHabitIds(skillId);
-
-    // 2. 获取这些habitIds对应的records
-    for (final habitId in skillHabitIds) {
-        final path = 'habits/records/$habitId.json';
-        if (await storage.fileExists(path)) {
-            final data = await storage.readJson(path);
-            if (data != null) {
-                matchingRecords.addAll(
-                    List<Map<String, dynamic>>.from(
-                        data as Iterable,
-                    ).map((e) => CompletionRecord.fromMap(e)),
-                );
-            }
-        }
-    }
-
-    return matchingRecords;
-}
-```
-
-**设计要点**:
-- 每个习惯的完成记录单独存储在 `records/<habitId>.json`
-- 技能的统计数据通过聚合所有关联习惯的记录计算
-
-### TimerController
-
-**文件**: `controllers/timer_controller.dart`
-
-**核心职责**:
-- 管理所有活动计时器
-- 倒计时/正计时模式切换
-- 计时器状态持久化
-- 事件广播（启动/停止）
-
-**计时器状态管理**:
-```dart
-class TimerState {
-    final Habit habit;
-    final TimerUpdateCallback onUpdate;
-    bool isRunning = false;
-    bool isCountdown = true;
-    int elapsedSeconds = 0;
-    String? notes = '';
-    Timer? _timer;
-    final Duration? initialDuration;
-
-    void start() {
-        if (isRunning) return;
-        isRunning = true;
-        _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-            elapsedSeconds++;
-            onUpdate(elapsedSeconds);
-        });
-        EventManager.instance.broadcast(
-            'habit_timer_started',
-            HabitTimerEventArgs(...),
-        );
-    }
-
-    void stop() {
-        isRunning = false;
-        _timer?.cancel();
-        _timer = null;
-        EventManager.instance.broadcast(
-            'habit_timer_stopped',
-            HabitTimerEventArgs(...),
-        );
-    }
-}
-```
-
-**单例模式**:
-```dart
-class TimerController {
-    static TimerController? _instance;
-
-    factory TimerController() {
-        return _instance ??= TimerController._internal();
-    }
-
-    TimerController._internal() {
-        _timers = {};
-    }
-
-    Map<String, TimerState> _timers = {};
-}
-```
-
-**设计要点**:
-- 使用单例模式确保全局唯一计时器管理器
-- 每个习惯最多一个活动计时器
-- 启动新计时器时自动停止旧计时器
-- 计时器状态通过 `Map<String, dynamic>` 持久化
+2. **卡片视图**
+   - 2列网格布局
+   - 显示封面图片
+   - 快速计时按钮
+   - 视觉化展示
 
 ---
 
@@ -660,123 +407,41 @@ class TimerController {
 
 ### 事件类型
 
-**文件**: `controllers/timer_controller.dart`
-
-| 事件名 | 事件类 | 触发时机 | 参数 |
-|-------|--------|---------|------|
-| `habit_timer_started` | `HabitTimerEventArgs` | 计时器启动时 | `habitId`, `elapsedSeconds`, `isCountdown`, `isRunning=true` |
-| `habit_timer_stopped` | `HabitTimerEventArgs` | 计时器停止时 | `habitId`, `elapsedSeconds`, `isCountdown`, `isRunning=false` |
-
-### 事件广播示例
-
-```dart
-// 在 TimerState.start() 中
-EventManager.instance.broadcast(
-    'habit_timer_started',
-    HabitTimerEventArgs(
-        habitId: habit.id,
-        elapsedSeconds: elapsedSeconds,
-        isCountdown: isCountdown,
-        isRunning: true,
-    ),
-);
-
-// 在 CombinedHabitsView 中订阅
-EventManager.instance.subscribe('habit_timer_started', _onTimerStarted);
-
-void _onTimerStarted(EventArgs args) {
-    if (args is HabitTimerEventArgs) {
-        setState(() {
-            _timingStatus[args.habitId] = args.isRunning;
-        });
-    }
-}
-```
+| 事件名 | 触发时机 | 用途 |
+|-------|---------|------|
+| `habit_timer_started` | 计时器启动时 | 更新UI、同步小组件 |
+| `habit_timer_stopped` | 计时器停止时 | 更新UI、同步小组件 |
+| `habit_completion_record_saved` | 保存完成记录时 | 同步周视图小组件 |
+| `habit_data_changed` | 习惯数据变更时 | 同步分组列表小组件 |
+| `skill_data_changed` | 技能数据变更时 | 同步分组列表小组件 |
 
 ---
 
-## 卡片视图
+## 小组件服务
 
-插件在主页提供卡片视图，展示：
+### HabitsWidgetService
 
-**布局**:
-```
-┌─────────────────────────────┐
-│ ✨ 习惯追踪                │
-├─────────────────────────────┤
-│   习惯数    │    技能数     │
-│      8      │       3       │
-└─────────────────────────────┘
-```
+**文件**: `services/habits_widget_service.dart`
 
-**实现**: `habits_plugin.dart` 中的 `buildCardView()` 方法
+**功能**:
+- 计算习惯周统计数据
+- ISO 8601 周数计算
+- 习惯图标和颜色处理
+- 支持多个习惯的周视图
 
-**数据来源**:
-- 习惯数: `_habitController.getHabits().length`
-- 技能数: `_skillController.getSkills().length`
-
----
-
-## 国际化
-
-### 支持语言
-
-- 简体中文 (zh)
-- 英语 (en)
-
-### 本地化文件
-
-| 文件 | 语言 |
-|------|------|
-| `l10n/habits_localizations.dart` | 本地化接口 |
-| `l10n/habits_localizations_zh.dart` | 中文翻译 |
-| `l10n/habits_localizations_en.dart` | 英文翻译 |
-
-### 关键字符串
-
+**核心方法**:
 ```dart
-abstract class HabitsLocalizations {
-  String get name;                          // 插件名称
-  String get habits;                        // 习惯
-  String get skills;                        // 技能
-  String get habitsList;                    // 习惯列表
-  String get newHabit;                      // 新建习惯
-  String get editHabit;                     // 编辑习惯
-  String get deleteHabit;                   // 删除习惯
-  String get createHabit;                   // 创建习惯
-  String get createSkill;                   // 创建技能
-  String get editSkill;                     // 编辑技能
-  String get deleteSkill;                   // 删除技能
-  String get title;                         // 标题
-  String get pleaseEnterTitle;              // 请输入标题
-  String get notes;                         // 备注
-  String get group;                         // 分组
-  String get duration;                      // 时长
-  String get minutes;                       // 分钟
-  String get skill;                         // 技能
-  String get selectSkill;                   // 请选择技能
-  String get save;                          // 保存
-  String get cancel;                        // 取消
-  String get delete;                        // 删除
-  String get history;                       // 历史记录
-  String get records;                       // 记录
-  String get statistics;                    // 统计
-  String get completions;                   // 完成次数
-  String get totalDuration;                 // 总时长
-  String get totalCompletions;              // 总完成次数
-  String get sortByName;                    // 按名称排序
-  String get sortByCompletions;             // 按完成次数排序
-  String get sortByDuration;                // 按时长排序
-  String get deleteRecord;                  // 删除记录
-  String get deleteRecordMessage;           // 删除记录确认消息
-  String get clearAllRecords;               // 清空所有记录
-  String get skillName;                     // 技能名称
-  String get skillDescription;              // 技能描述
-  String get skillGroup;                    // 技能分组
-  String get maxDuration;                   // 最大时长
-  String get noLimitHint;                   // 无限制提示
-  String get statisticsChartsPlaceholder;   // 统计图表占位符
-}
+// 计算周数据
+Future<HabitsWeeklyData> calculateWeekData(
+  List<String> habitIds,
+  int weekOffset,
+)
+
+// 计算每日时长（支持多个记录聚合）
+Future<List<int>> _calculateDailyMinutes(
+  String habitId,
+  DateTime weekStart,
+)
 ```
 
 ---
@@ -786,214 +451,132 @@ abstract class HabitsLocalizations {
 ### 当前状态
 - **单元测试**: 无
 - **集成测试**: 无
+- **代码覆盖率**: 0%
 - **已知问题**:
-  - `CompletionRecordController` 构造函数参数 `skillControlle` 拼写错误（应为 `skillController`）
+  - `CompletionRecordController` 构造函数参数 `skillControlle` 拼写错误
   - 提醒功能未实现（`reminderDays` 字段未使用）
+  - 技能目标时长未在 UI 中展示
 
 ### 测试建议
 
 1. **高优先级**：
-   - `HabitController.saveHabit()` - 测试创建、更新逻辑
-   - `SkillController.getSkillByTitle()` - 测试唯一性检查逻辑
-   - `CompletionRecordController.getSkillCompletionRecords()` - 测试聚合逻辑
-   - `TimerController` - 测试计时器启动、停止、状态持久化
-   - 图片路径处理 - 测试网络URL和本地路径的区分
+   - `HabitController` - CRUD 操作和默认数据创建
+   - `TimerController` - 单例模式、状态持久化、计时器管理
+   - `ClientHabitsRepository` - UseCase 适配层
+   - `HabitsUtils` - 工具方法
 
 2. **中优先级**：
-   - 事件广播 - 测试事件是否正确触发
-   - 数据持久化 - 测试JSON序列化/反序列化
-   - 分组逻辑 - 测试按技能/分组的聚合
-   - 统计功能 - 测试总时长、完成次数计算
+   - `SkillController` - 唯一性检查
+   - `CompletionRecordController` - 数据聚合逻辑
+   - `HabitsWidgetService` - 周统计计算
 
 3. **低优先级**：
-   - UI 交互逻辑
-   - 国际化字符串完整性
-   - 图标选择器
+   - UI 组件测试
+   - 事件广播测试
 
 ---
 
 ## 常见问题 (FAQ)
 
-### Q1: 如何实现习惯提醒功能？
+### Q1: 如何实现连续打卡统计？
 
-当前 `reminderDays` 字段未使用，建议实现方式：
-
-```dart
-// 1. 在 HabitController 中添加提醒调度方法
-Future<void> scheduleReminders(Habit habit) async {
-    // 使用 flutter_local_notifications 插件
-    final notificationsPlugin = FlutterLocalNotificationsPlugin();
-
-    for (final day in habit.reminderDays) {
-        await notificationsPlugin.zonedSchedule(
-            habit.id.hashCode + day,
-            '习惯提醒',
-            habit.title,
-            _getNextWeekday(day, reminderTime),
-            const NotificationDetails(...),
-            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation:
-                UILocalNotificationDateInterpretation.absoluteTime,
-            matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-        );
-    }
-}
-```
-
-### Q2: 如何区分倒计时和正计时模式？
-
-在 `TimerDialog` 中：
+参考 `CompletionRecordController` 中的实现思路：
 
 ```dart
-// isCountdown = true: 倒计时模式
-// 显示时间 = durationMinutes * 60 - elapsedSeconds
-final remainingSeconds = (widget.habit.durationMinutes * 60) - elapsedSeconds;
-
-// isCountdown = false: 正计时模式
-// 显示时间 = elapsedSeconds
-final displaySeconds = elapsedSeconds;
-```
-
-用户可通过对话框中的切换按钮改变模式。
-
-### Q3: 如何实现习惯连续天数统计？
-
-当前未实现，建议添加：
-
-```dart
-// 在 CompletionRecordController 中
 Future<int> getStreakDays(String habitId) async {
-    final records = await getHabitCompletionRecords(habitId);
-    if (records.isEmpty) return 0;
+  final records = await getHabitCompletionRecords(habitId);
+  if (records.isEmpty) return 0;
 
-    // 按日期降序排序
-    records.sort((a, b) => b.date.compareTo(a.date));
+  // 按日期降序排序
+  records.sort((a, b) => b.date.compareTo(a.date));
 
-    int streak = 0;
-    DateTime? lastDate;
+  int streak = 0;
+  DateTime? lastDate;
 
-    for (final record in records) {
-        final recordDate = DateTime(
-            record.date.year,
-            record.date.month,
-            record.date.day,
-        );
+  for (final record in records) {
+    final recordDate = DateTime(
+      record.date.year,
+      record.date.month,
+      record.date.day,
+    );
 
-        if (lastDate == null) {
-            // 第一条记录
-            streak = 1;
-            lastDate = recordDate;
-        } else {
-            // 检查是否连续
-            final diff = lastDate.difference(recordDate).inDays;
-            if (diff == 1) {
-                streak++;
-                lastDate = recordDate;
-            } else {
-                break; // 中断连续
-            }
-        }
+    if (lastDate == null) {
+      streak = 1;
+      lastDate = recordDate;
+    } else {
+      final diff = lastDate.difference(recordDate).inDays;
+      if (diff == 1) {
+        streak++;
+        lastDate = recordDate;
+      } else {
+        break;
+      }
     }
+  }
 
-    return streak;
+  return streak;
 }
 ```
 
-### Q4: 技能的目标时长如何使用？
+### Q2: 如何处理计时器的持久化？
 
-当前 `targetMinutes` 和 `maxDurationMinutes` 字段未在 UI 中使用，建议在 `SkillDetailPage` 中：
+`TimerController` 自动处理持久化：
 
 ```dart
-// 显示进度条
+// 计时器状态保存
+await storage.writeJson(
+  'habits/timers/$habitId.json',
+  {
+    'elapsedSeconds': elapsedSeconds,
+    'isCountdown': isCountdown,
+    'notes': notes,
+  },
+);
+
+// 恢复计时器状态
+final timerData = storage.readJson('habits/timers/$habitId.json');
+```
+
+### Q3: 如何扩展技能的目标功能？
+
+在 `SkillDetailPage` 中添加进度显示：
+
+```dart
+// 计算进度
 final totalDuration = await recordController.getTotalDuration(skill.id);
 final progress = skill.targetMinutes > 0
     ? (totalDuration / skill.targetMinutes).clamp(0.0, 1.0)
     : 0.0;
 
+// 显示进度条
 LinearProgressIndicator(value: progress);
-Text('${totalDuration} / ${skill.targetMinutes} 分钟');
+Text('${(totalDuration / 60).toStringAsFixed(1)} / ${(skill.targetMinutes / 60).toStringAsFixed(1)} 小时');
 ```
 
-### Q5: 如何删除技能时同时删除关联习惯？
+### Q4: 如何优化大量数据的加载性能？
 
-当前删除技能不会删除关联习惯，建议添加级联删除：
+建议实现分页加载和缓存：
 
 ```dart
-Future<void> deleteSkillWithHabits(String skillId) async {
-    // 1. 删除所有关联习惯
-    final habits = habitController.getHabits();
-    final relatedHabits = habits.where((h) => h.skillId == skillId).toList();
+class HabitController {
+  final Map<String, _CachedStats> _statsCache = {};
 
-    for (final habit in relatedHabits) {
-        await habitController.deleteHabit(habit.id);
-        await recordController.clearAllCompletionRecords(habit.id);
+  Future<int> getTotalDuration(String habitId) async {
+    // 检查缓存
+    final cached = _statsCache[habitId];
+    if (cached != null && !cached.isExpired) {
+      return cached.totalDuration;
     }
 
-    // 2. 删除技能
-    await skillController.deleteSkill(skillId);
-}
-```
+    // 计算并缓存
+    final totalMinutes = await _calculateTotalDuration(habitId);
+    _statsCache[habitId] = _CachedStats(
+      totalDuration: totalMinutes,
+      timestamp: DateTime.now(),
+    );
 
-或者提供选项：
-
-```dart
-showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-        title: Text('删除技能'),
-        content: Text('是否同时删除关联的 ${relatedHabits.length} 个习惯？'),
-        actions: [
-            TextButton(
-                child: Text('仅删除技能'),
-                onPressed: () {
-                    // 将关联习惯的 skillId 设为 null
-                    for (final habit in relatedHabits) {
-                        habitController.saveHabit(
-                            habit.copyWith(skillId: null),
-                        );
-                    }
-                    skillController.deleteSkill(skillId);
-                    Navigator.pop(context);
-                },
-            ),
-            TextButton(
-                child: Text('删除技能和习惯'),
-                onPressed: () {
-                    deleteSkillWithHabits(skillId);
-                    Navigator.pop(context);
-                },
-            ),
-        ],
-    ),
-);
-```
-
-### Q6: 如何导出习惯数据？
-
-建议添加导出功能：
-
-```dart
-Future<File> exportHabitsToJson() async {
-    final habits = habitController.getHabits();
-    final skills = skillController.getSkills();
-    final records = <String, List<CompletionRecord>>{};
-
-    for (final habit in habits) {
-        records[habit.id] = await recordController.getHabitCompletionRecords(habit.id);
-    }
-
-    final exportData = {
-        'habits': habits.map((h) => h.toMap()).toList(),
-        'skills': skills.map((s) => s.toMap()).toList(),
-        'records': records.map(
-            (key, value) => MapEntry(key, value.map((r) => r.toMap()).toList()),
-        ),
-        'exportDate': DateTime.now().toIso8601String(),
-    };
-
-    final file = File('habits_export_${DateTime.now().millisecondsSinceEpoch}.json');
-    await file.writeAsString(jsonEncode(exportData));
-    return file;
+    return totalMinutes;
+  }
 }
 ```
 
@@ -1003,263 +586,136 @@ Future<File> exportHabitsToJson() async {
 
 ```
 habits/
-├── habits_plugin.dart                    # 插件主类 + 事件定义
+├── habits_plugin.dart                    # 插件主类
 ├── models/
 │   ├── habit.dart                        # 习惯模型
 │   ├── skill.dart                        # 技能模型
-│   └── completion_record.dart            # 完成记录模型
+│   ├── completion_record.dart            # 完成记录模型
+│   ├── habits_weekly_widget_config.dart  # 周视图小组件配置
+│   └── habits_weekly_widget_data.dart    # 周视图小组件数据
 ├── controllers/
 │   ├── habit_controller.dart             # 习惯控制器
 │   ├── skill_controller.dart             # 技能控制器
 │   ├── completion_record_controller.dart # 完成记录控制器
-│   └── timer_controller.dart             # 计时器控制器 + 事件定义
+│   └── timer_controller.dart             # 计时器控制器（单例）
+├── repositories/
+│   └── client_habits_repository.dart     # Repository 适配器
+├── services/
+│   └── habits_widget_service.dart        # 小组件业务逻辑
 ├── widgets/
-│   ├── habits_home.dart                  # 主界面（底部导航栏）
+│   ├── habits_bottom_bar.dart            # 底部导航栏
 │   ├── habits_list/
-│   │   ├── habits_view.dart              # 习惯列表视图（双视图模式）
-│   │   ├── habits_app_bar.dart           # 习惯列表AppBar
-│   │   ├── habits_list.dart              # 习惯列表组件
-│   │   └── habits_history_list.dart      # 历史记录列表
-│   ├── skills_list.dart                  # 技能列表视图
-│   ├── skill_detail_page.dart            # 技能详情页
-│   ├── habit_form.dart                   # 习惯创建/编辑表单
-│   ├── skill_form.dart                   # 技能创建/编辑表单
+│   │   ├── habits_view.dart              # 习惯列表视图（双视图）
+│   │   ├── habits_app_bar.dart           # AppBar
+│   │   ├── habits_list.dart              # 列表组件
+│   │   └── habits_history_list.dart      # 历史记录
+│   ├── skills_list.dart                  # 技能列表
+│   ├── skill_detail_page.dart            # 技能详情
+│   ├── habit_form.dart                   # 习惯表单
+│   ├── skill_form.dart                   # 技能表单
 │   ├── timer_dialog.dart                 # 计时器对话框
-│   ├── habit_card.dart                   # 习惯卡片组件
-│   ├── statistics_tab.dart               # 统计信息Tab
-│   ├── completion_records_tab.dart       # 完成记录Tab
+│   ├── habit_card.dart                   # 习惯卡片
+│   ├── statistics_tab.dart               # 统计Tab
+│   ├── completion_records_tab.dart       # 记录Tab
 │   └── common_record_list.dart           # 通用记录列表
+├── screens/
+│   ├── habits_weekly_config_screen.dart  # 周视图配置
+│   ├── habit_group_list_selector_screen.dart # 分组选择器
+│   └── habit_timer_selector_screen.dart   # 计时器选择器
 ├── utils/
-│   └── habits_utils.dart                 # 工具类（ID生成、时长格式化）
-└── l10n/
-    ├── habits_localizations.dart         # 国际化接口
-    ├── habits_localizations_zh.dart      # 中文翻译
-    └── habits_localizations_en.dart      # 英文翻译
+│   └── habits_utils.dart                 # 工具类
+├── l10n/
+│   ├── habits_translations.dart          # 国际化入口
+│   ├── habits_translations_zh.dart       # 中文
+│   └── habits_translations_en.dart       # 英文
+├── home_widgets.dart                     # 主页小组件注册
+└── habits_route_handler.dart             # 路由处理器
 ```
 
 ---
 
 ## 关键实现细节
 
-### 按技能分组的实现
-
-```dart
-// 在 CombinedHabitsView 中
-final groupedHabits = <String, List<Habit>>{};
-for (final habit in habits) {
-    final skillTitle = habit.skillId != null
-        ? skillController?.getSkillById(habit.skillId!)?.title ?? '未分类'
-        : '未分类';
-    groupedHabits.putIfAbsent(skillTitle, () => []).add(habit);
-}
-
-// 渲染分组
-return ListView(
-    children: groupedHabits.entries.map((entry) {
-        return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-                // 分组标题
-                Text(entry.key, style: ...),
-                // 分组内的习惯
-                ...entry.value.map((habit) => HabitListItem(...)),
-            ],
-        );
-    }).toList(),
-);
-```
-
-**设计要点**:
-- 使用 `Map<String, List<Habit>>` 实现分组
-- 未关联技能的习惯归入"未分类"
-- 技能被删除后，关联习惯仍显示为"未分类"
-
-### 图片路径处理
-
-```dart
-// 在 HabitForm/SkillForm 中
-FutureBuilder<String>(
-    future: _image!.startsWith('http')
-        ? Future.value(_image!)
-        : ImageUtils.getAbsolutePath(_image!),
-    builder: (context, snapshot) {
-        if (snapshot.hasData) {
-            return _image!.startsWith('http')
-                ? Image.network(snapshot.data!)
-                : Image.file(File(snapshot.data!));
-        }
-        return CircularProgressIndicator();
-    },
-)
-```
-
-**设计要点**:
-- 使用 `startsWith('http')` 区分网络URL和本地路径
-- 本地路径通过 `ImageUtils.getAbsolutePath()` 转换为绝对路径
-- 使用 `FutureBuilder` 异步加载图片
-
-### 计时器状态同步
-
-```dart
-// 在 CombinedHabitsView 中
-@override
-void initState() {
-    super.initState();
-    final activeTimers = habitsPlugin!.timerController.getActiveTimers();
-    _timingStatus.addAll(activeTimers);
-    EventManager.instance.subscribe('habit_timer_started', _onTimerStarted);
-    EventManager.instance.subscribe('habit_timer_stopped', _onTimerStopped);
-}
-
-void _onTimerStarted(EventArgs args) {
-    if (args is HabitTimerEventArgs) {
-        setState(() {
-            _timingStatus[args.habitId] = args.isRunning;
-        });
-    }
-}
-```
-
-**设计要点**:
-- 初始化时从 `TimerController` 获取所有活动计时器
-- 订阅计时器事件实时更新UI
-- 使用 `_timingStatus` Map 缓存计时状态，避免频繁查询
-
-### 单例模式的计时器管理
+### 1. 单例模式的计时器管理
 
 ```dart
 class TimerController {
-    static TimerController? _instance;
+  static TimerController? _instance;
 
-    factory TimerController() {
-        return _instance ??= TimerController._internal();
-    }
+  factory TimerController() {
+    return _instance ??= TimerController._internal();
+  }
 
-    TimerController._internal() {
-        _timers = {};
-    }
-
-    Map<String, TimerState> _timers = {};
+  TimerController._internal() {
+    _timers = {};
+  }
 }
 ```
 
-**设计要点**:
-- 使用单例模式确保全局唯一计时器管理器
-- 避免多个 `TimerController` 实例导致计时器状态不一致
-- 在插件初始化时创建实例
+### 2. 事件驱动的 UI 更新
 
----
+```dart
+// 在 CombinedHabitsView 中订阅
+@override
+void initState() {
+  super.initState();
+  EventManager.instance.subscribe('habit_timer_started', _onTimerEvent);
+  EventManager.instance.subscribe('habit_timer_stopped', _onTimerEvent);
+}
 
-## 依赖关系
+// 处理事件
+void _onTimerEvent(EventArgs args) {
+  if (args is HabitTimerEventArgs) {
+    setState(() {
+      _timingStatus[args.habitId] = args.isRunning;
+    });
+  }
+}
+```
 
-### 核心依赖
+### 3. 默认数据初始化
 
-- **PluginBase**: 插件基类
-- **StorageManager**: 数据持久化
-- **EventManager**: 事件广播系统
-- **PluginManager**: 插件管理器
+插件首次运行时创建 8 个示例习惯，关联到预设技能：
 
-### 第三方包依赖
+- 晨跑、冥想、健身 → 健康生活
+- 阅读、英语学习、学习新技能 → 学习提升
+- 写作 → 创意艺术
+- 时间回顾 → 工作效率
 
-- `uuid`: UUID生成（通过 `HabitsUtils.generateId()`）
-- `path`: 路径处理
+### 4. 图片路径处理
 
-### 组件依赖
-
-- **CircleIconPicker**: 圆形图标选择器（`lib/widgets/circle_icon_picker.dart`）
-- **ImagePickerDialog**: 图片选择对话框（`lib/widgets/image_picker_dialog.dart`）
-- **ImageUtils**: 图片路径工具类（`lib/utils/image_utils.dart`）
-- **KeepAliveWrapper**: 页面状态保持组件（`lib/core/widgets/keep_alive_wrapper.dart`）
+```dart
+// 网络图片和本地图片的统一处理
+FutureBuilder<String>(
+  future: _image!.startsWith('http')
+      ? Future.value(_image!)
+      : ImageUtils.getAbsolutePath(_image!),
+  builder: (context, snapshot) {
+    return snapshot.hasData
+        ? _image!.startsWith('http')
+            ? Image.network(snapshot.data!)
+            : Image.file(File(snapshot.data!))
+        : CircularProgressIndicator();
+  },
+)
+```
 
 ---
 
 ## 性能优化建议
 
-### 1. 完成记录统计优化
-
-当习惯数量较多时，统计功能可能成为性能瓶颈：
-
-```dart
-// 当前实现：每次都读取JSON文件
-Future<int> getTotalDuration(String habitId) async {
-    final records = await getSkillCompletionRecords(habitId);
-    return records.fold<int>(
-        0,
-        (sum, record) => sum + record.duration.inMinutes,
-    );
-}
-
-// 优化建议：缓存统计数据
-class CompletionRecordController {
-    final Map<String, _CachedStats> _statsCache = {};
-
-    Future<int> getTotalDuration(String habitId) async {
-        final cached = _statsCache[habitId];
-        if (cached != null && !cached.isExpired) {
-            return cached.totalDuration;
-        }
-
-        final records = await getSkillCompletionRecords(habitId);
-        final totalDuration = records.fold<int>(
-            0,
-            (sum, record) => sum + record.duration.inMinutes,
-        );
-
-        _statsCache[habitId] = _CachedStats(
-            totalDuration: totalDuration,
-            completionCount: records.length,
-            timestamp: DateTime.now(),
-        );
-
-        return totalDuration;
-    }
-}
-
-class _CachedStats {
-    final int totalDuration;
-    final int completionCount;
-    final DateTime timestamp;
-
-    bool get isExpired => DateTime.now().difference(timestamp).inMinutes > 5;
-}
-```
-
-### 2. 图片加载优化
-
-```dart
-// 使用 CachedNetworkImage 代替 Image.network
-import 'package:cached_network_image/cached_network_image.dart';
-
-CachedNetworkImage(
-    imageUrl: imageUrl,
-    placeholder: (context, url) => CircularProgressIndicator(),
-    errorWidget: (context, url, error) => Icon(Icons.broken_image),
-)
-```
-
-### 3. 列表渲染优化
-
-```dart
-// 当前实现已使用 ListView.builder，这是正确的做法
-// GridView.builder 也已正确使用
-GridView.builder(
-    shrinkWrap: true,
-    physics: const NeverScrollableScrollPhysics(),
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.8,
-    ),
-    itemCount: habits.length,
-    itemBuilder: (context, index) => HabitCard(...),
-)
-```
+1. **分页加载**: 实现记录的分页加载，避免一次性加载大量数据
+2. **缓存统计**: 缓存计算结果，设置合理的过期时间
+3. **图片优化**: 使用缩略图，延迟加载
+4. **计时器优化**: 使用 Isolate 处理计时逻辑，避免阻塞 UI
 
 ---
 
 ## 变更记录 (Changelog)
 
-- **2025-11-13**: 初始化习惯追踪插件文档，识别 25 个文件、3 个数据模型、4 个控制器、2 个计时器事件类型、双视图模式、技能系统
+- **2025-12-17**: 完整更新 - 识别 JS API、UseCase 架构、Repository 模式、Android 小组件支持、数据选择器等新特性
+- **2025-11-13**: 初始化文档，识别基础架构和功能
 
 ---
 
-**上级目录**: [返回插件目录](../../../CLAUDE.md#模块索引) | [返回根文档](../../../CLAUDE.md)
+**上级目录**: [返回插件目录](../) | [返回根文档](../../../CLAUDE.md)

@@ -145,10 +145,12 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
   });
 
   @override
-  State<SuperCupertinoNavigationWrapper> createState() => _SuperCupertinoNavigationWrapperState();
+  State<SuperCupertinoNavigationWrapper> createState() =>
+      _SuperCupertinoNavigationWrapperState();
 }
 
-class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigationWrapper> {
+class _SuperCupertinoNavigationWrapperState
+    extends State<SuperCupertinoNavigationWrapper> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearchFocused = false; // 搜索状态：基于文本内容判断
@@ -171,8 +173,11 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
   void initState() {
     super.initState();
     // 初始化搜索过滤器状态
-    _searchFilters.addAll(widget.filterLabels.keys.where((key) => !_searchFilters.containsKey(key))
-        .fold<Map<String, bool>>({}, (map, key) => map..[key] = true));
+    _searchFilters.addAll(
+      widget.filterLabels.keys
+          .where((key) => !_searchFilters.containsKey(key))
+          .fold<Map<String, bool>>({}, (map, key) => map..[key] = true),
+    );
 
     // 监听搜索框内容变化 - 使用 setState 强制重建 UI
     _searchController.addListener(() {
@@ -226,9 +231,10 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
     }
 
     // 获取过滤器标签（使用默认或自定义）
-    final filterLabels = widget.filterLabels.isNotEmpty
-        ? widget.filterLabels
-        : _getDefaultFilterLabels();
+    final filterLabels =
+        widget.filterLabels.isNotEmpty
+            ? widget.filterLabels
+            : _getDefaultFilterLabels();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -236,7 +242,7 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
         color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
           bottom: BorderSide(
-            color: Theme.of(context).dividerColor,
+            color: Theme.of(context).dividerColor.withOpacity(0.12),
             width: 0.5,
           ),
         ),
@@ -247,44 +253,47 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
           const SizedBox(height: 4),
           Text(
             'core_searchScope'.tr,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: Colors.grey,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 16,
-            children: filterLabels.entries.map((entry) {
-              final key = entry.key;
-              final label = entry.value;
-              final value = _searchFilters[key] ?? true;
+            children:
+                filterLabels.entries.map((entry) {
+                  final key = entry.key;
+                  final label = entry.value;
+                  final value = _searchFilters[key] ?? true;
 
                   // 简化过滤项：让点击直接触发更新，不影响焦点
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Checkbox(
-                    value: value,
-                    onChanged: (bool? newValue) {
-                      if (newValue != null) {
-                        _updateSearchFilter(key, newValue);
-                      }
-                    },
-                    visualDensity: VisualDensity.compact,
-                    activeColor: Theme.of(context).colorScheme.primary,
-                  ),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                  ),
-                ],
-              );
-            }).toList(),
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Checkbox(
+                        value: value,
+                        onChanged: (bool? newValue) {
+                          if (newValue != null) {
+                            _updateSearchFilter(key, newValue);
+                          }
+                        },
+                        visualDensity: VisualDensity.compact,
+                        activeColor: Theme.of(context).colorScheme.primary,
+                      ),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
           ),
           const SizedBox(height: 4),
         ],
@@ -312,13 +321,13 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
   @override
   Widget build(BuildContext context) {
     // 根据搜索状态选择显示哪个body - 使用 setState 保证实时更新
-    final shouldShowSearchBody = widget.enableSearchBar &&
-                                  widget.searchBody != null &&
-                                  _isSearchFocused;
+    final shouldShowSearchBody =
+        widget.enableSearchBar && widget.searchBody != null && _isSearchFocused;
     final currentBody = shouldShowSearchBody ? widget.searchBody! : widget.body;
 
     return Scaffold(
-      backgroundColor: widget.backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor:
+          widget.backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       body: SuperScaffold(
         onCollapsed: widget.onCollapsed,
         stretch: widget.stretch,
@@ -326,10 +335,15 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
         body: Column(
           children: [
             // 高级搜索条件筛选器
-            if (widget.enableAdvancedSearch && widget.searchFilters != null && widget.searchFilters!.isNotEmpty)
+            if (widget.enableAdvancedSearch &&
+                widget.searchFilters != null &&
+                widget.searchFilters!.isNotEmpty)
               Container(
                 height: 60,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: widget.searchFilters!,
@@ -339,7 +353,9 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
             if (widget.enableSearchFilter && _isSearchFocused)
               _buildSearchFilter(),
             // 过滤栏 - 只在非搜索状态下显示
-            if (widget.enableFilterBar && widget.filterBarChild != null && !_isSearchFocused)
+            if (widget.enableFilterBar &&
+                widget.filterBarChild != null &&
+                !_isSearchFocused)
               Container(
                 height: widget.filterBarHeight,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -366,25 +382,30 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
             );
 
     return SuperAppBar(
-      backgroundColor: widget.backgroundColor ?? Theme.of(context).appBarTheme.backgroundColor,
+      backgroundColor:
+          widget.backgroundColor ??
+          Theme.of(context).appBarTheme.backgroundColor ??
+          Theme.of(context).colorScheme.surface,
       automaticallyImplyLeading: widget.automaticallyImplyLeading,
-      leading: (Platform.isAndroid || Platform.isIOS)
-          ? null
-          : (widget.onLeadingPressed != null
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: widget.onLeadingPressed,
-                )
-              : null),
+      leading:
+          (Platform.isAndroid || Platform.isIOS)
+              ? null
+              : (widget.onLeadingPressed != null
+                  ? IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: widget.onLeadingPressed,
+                  )
+                  : null),
       title: widget.title,
       previousPageTitle: widget.previousPageTitle ?? 'core_back'.tr,
-      actions: widget.actions != null && widget.actions!.isNotEmpty
-          ? Wrap(
-              spacing: 4,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: widget.actions!,
-            )
-          : null,
+      actions:
+          widget.actions != null && widget.actions!.isNotEmpty
+              ? Wrap(
+                spacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: widget.actions!,
+              )
+              : null,
       bottom: _buildBottomBar(),
       largeTitle: SuperLargeTitle(
         height: 50,
@@ -403,7 +424,7 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
     return SuperAppBarBottom(
       enabled: true,
       height: widget.bottomBarHeight,
-      color: Colors.transparent,
+      color: Theme.of(context).colorScheme.surface,
       child: widget.filterBarChild ?? const SizedBox(),
     );
   }
@@ -415,9 +436,10 @@ class _SuperCupertinoNavigationWrapperState extends State<SuperCupertinoNavigati
       enabled: true,
       scrollBehavior: SearchBarScrollBehavior.pinned,
       resultBehavior: SearchBarResultBehavior.neverVisible,
-      placeholderText: widget.searchPlaceholder.isNotEmpty
-          ? widget.searchPlaceholder
-          : _getDefaultSearchPlaceholder(),
+      placeholderText:
+          widget.searchPlaceholder.isNotEmpty
+              ? widget.searchPlaceholder
+              : _getDefaultSearchPlaceholder(),
       searchController: _searchController,
       onChanged: (value) {
         widget.onSearchChanged?.call(value);
