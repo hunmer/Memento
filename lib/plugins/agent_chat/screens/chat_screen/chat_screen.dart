@@ -50,6 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _autoReadEnabled = false; // 自动朗读开关
   String? _selectedTTSServiceId; // 选择的TTS服务ID
   String? _lastReadMessageId; // 上次朗读的消息ID
+  bool _isListReady = false; // 列表是否准备好显示（滚动到底部后）
 
   // 猜你想问相关
   List<String> _suggestedQuestions = [];
@@ -102,14 +103,26 @@ class _ChatScreenState extends State<ChatScreen> {
     if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
+          // 先初始化消息计数，避免 _onControllerChanged 中 wasEmpty 触发额外滚动
+          _lastMessageCount = _controller.messages.length;
+
           _controller.addListener(_onControllerChanged);
           _controller.messageService.addListener(_onControllerChanged);
+
           // 触发一次更新以显示初始化后的数据
-          if (mounted) {
-            setState(() {});
-          }
-          // 滚动到底部
-          _scrollToBottom();
+          setState(() {});
+
+          // 延迟等待 Markdown 等复杂组件渲染完成后再滚动和显示
+          // Markdown 渲染会导致内容高度变化，需要等待高度稳定
+          Future.delayed(const Duration(milliseconds: 200), () {
+            if (mounted) {
+              _scrollToBottom();
+              // 滚动完成后显示列表
+              setState(() {
+                _isListReady = true;
+              });
+            }
+          });
         }
       });
     }
@@ -120,7 +133,6 @@ class _ChatScreenState extends State<ChatScreen> {
       final currentMessageCount = _controller.messages.length;
       final hasNewMessage = currentMessageCount > _lastMessageCount;
       final wasEmpty = _lastMessageCount == 0;
-      final newMessageCount = currentMessageCount - _lastMessageCount;
       _lastMessageCount = currentMessageCount;
 
       // 使用 addPostFrameCallback 避免在构建过程中调用 setState
@@ -135,7 +147,7 @@ class _ChatScreenState extends State<ChatScreen> {
       // 2. 从空消息列表变为有消息时（首次进入或清空后）
       if (hasNewMessage || wasEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          _scrollToBottom(animate: hasNewMessage);
+          _scrollToBottom();
         });
       }
 
@@ -275,36 +287,9 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _scrollToBottom({bool animate = false}) {
-    // 尝试滚动，如果控制器还未准备好则延迟重试
+  void _scrollToBottom() {
     if (_scrollController.hasClients) {
-      if (animate) {
-        // 使用更短的持续时间和更柔和的曲线，减少动画的明显程度
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.easeOutCubic,
-        );
-      } else {
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-      }
-    } else {
-      // 延迟一帧后重试，确保控制器已准备好
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          if (animate) {
-            _scrollController.animateTo(
-              _scrollController.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 150),
-              curve: Curves.easeOutCubic,
-            );
-          } else {
-            _scrollController.jumpTo(
-              _scrollController.position.maxScrollExtent,
-            );
-          }
-        }
-      });
+      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     }
   }
 
@@ -577,15 +562,16 @@ class _ChatScreenState extends State<ChatScreen> {
                     child:
                         _controller.messages.isEmpty
                             ? _buildEmptyState()
-                            : ListView.builder(
-                              controller: _scrollController,
-                              padding: const EdgeInsets.all(16),
-                              itemCount:
-                                  _controller.messages.length +
-                                  1, // +1 for new session button
-                              physics: const BouncingScrollPhysics(
-                                parent: AlwaysScrollableScrollPhysics(),
-                              ),
+                            : AnimatedOpacity(
+                              opacity: _isListReady ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 150),
+                              child: ListView.builder(
+                                controller: _scrollController,
+                                padding: const EdgeInsets.all(16),
+                                itemCount:
+                                    _controller.messages.length +
+                                    1, // +1 for new session button
+                                physics: const ClampingScrollPhysics(),
                               itemBuilder: (context, index) {
                                 // 最后一个 item 显示新会话按钮
                                 if (index == _controller.messages.length) {
@@ -646,7 +632,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                             : null,
                                   ),
                                 );
-                              },
+                                },
+                              ),
                             ),
                   ),
 
@@ -835,7 +822,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     await _controller.createNewSession();
                     // 自动滚动到底部
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _scrollToBottom(animate: true);
+                      _scrollToBottom();
                     });
                   },
                   icon: const Icon(Icons.add_circle_outline, size: 18),
