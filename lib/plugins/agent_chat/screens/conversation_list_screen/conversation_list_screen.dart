@@ -679,7 +679,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          NavigationHelper.openContainer(
+          NavigationHelper.openContainerWithHero(
             context,
             (context) => ChatScreen(
               conversation: conversation,

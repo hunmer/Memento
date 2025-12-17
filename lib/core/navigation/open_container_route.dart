@@ -119,14 +119,15 @@ class _OpenContainerPage<T> extends StatefulWidget {
   State<_OpenContainerPage<T>> createState() => _OpenContainerPageState<T>();
 }
 
-class _OpenContainerPageState<T> extends State<_OpenContainerPage<T>> {
+class _OpenContainerPageState<T> extends State<_OpenContainerPage<T>>
+    with SingleTickerProviderStateMixin {
   // 动画曲线
   static const Curve _curveForward = Curves.easeOutCubic;
   static const Curve _curveReverse = Curves.easeInCubic;
 
   // 动画区间
-  // 0.0 - 0.35: 容器展开动画
-  // 0.35 - 1.0: 内容淡入动画
+  // 展开时：0.0 - 0.35 容器展开，0.3 - 1.0 内容淡入
+  // 收缩时：先内容淡出遮罩淡入（150ms），再容器收缩
   static const double _containerExpandEnd = 0.35;
   static const double _contentFadeStart = 0.3;
 
@@ -134,17 +135,60 @@ class _OpenContainerPageState<T> extends State<_OpenContainerPage<T>> {
   late Animation<double> _contentFadeAnimation;
   late Animation<double> _closedFadeAnimation;
 
+  /// 是否正在收缩（反向动画）
+  bool _isClosing = false;
+
+  /// 缓存的打开页面内容（用于展开完成后显示）
+  Widget? _cachedOpenContent;
+
+  /// 收缩遮罩动画控制器
+  late AnimationController _closingMaskController;
+  late Animation<double> _closingMaskAnimation;
+
   @override
   void initState() {
     super.initState();
+    _closingMaskController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _closingMaskAnimation = CurvedAnimation(
+      parent: _closingMaskController,
+      curve: Curves.easeOut,
+    );
     _setupAnimations();
+    widget.animation.addStatusListener(_onAnimationStatusChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.animation.removeStatusListener(_onAnimationStatusChanged);
+    _closingMaskController.dispose();
+    super.dispose();
   }
 
   @override
   void didUpdateWidget(covariant _OpenContainerPage<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.animation != widget.animation) {
+      oldWidget.animation.removeStatusListener(_onAnimationStatusChanged);
+      widget.animation.addStatusListener(_onAnimationStatusChanged);
       _setupAnimations();
+    }
+  }
+
+  void _onAnimationStatusChanged(AnimationStatus status) {
+    final wasClosing = _isClosing;
+    _isClosing = status == AnimationStatus.reverse;
+
+    // 当开始收缩时，启动遮罩淡入动画
+    if (_isClosing && !wasClosing) {
+      _closingMaskController.forward();
+    }
+    // 当收缩结束或取消时，重置遮罩
+    if (!_isClosing && wasClosing) {
+      _closingMaskController.reset();
+      _cachedOpenContent = null;
     }
   }
 
@@ -187,9 +231,10 @@ class _OpenContainerPageState<T> extends State<_OpenContainerPage<T>> {
     final openColor = route.openColor ?? theme.scaffoldBackgroundColor;
 
     return AnimatedBuilder(
-      animation: _containerAnimation,
+      animation: Listenable.merge([_containerAnimation, _closingMaskAnimation]),
       builder: (context, child) {
         final t = _containerAnimation.value;
+        final maskOpacity = _closingMaskAnimation.value;
 
         // 计算当前位置和大小
         final currentRect = Rect.lerp(
@@ -215,12 +260,28 @@ class _OpenContainerPageState<T> extends State<_OpenContainerPage<T>> {
           t,
         )!;
 
+        // 构建打开状态的内容
+        Widget? openContent;
+        if (_contentFadeAnimation.value > 0) {
+          // 展开动画进行中或完成，显示实际内容
+          _cachedOpenContent ??= route.openBuilder(context);
+          // 收缩时内容透明度随遮罩反向变化（遮罩越不透明，内容越透明）
+          final contentOpacity = _isClosing
+              ? (1.0 - maskOpacity) * _contentFadeAnimation.value
+              : _contentFadeAnimation.value;
+          if (contentOpacity > 0) {
+            openContent = Opacity(
+              opacity: contentOpacity.clamp(0.0, 1.0),
+              child: _cachedOpenContent,
+            );
+          }
+        }
+
         return Stack(
           children: [
-            // 背景遮罩
+            // 背景遮罩（整个屏幕的半透明黑色）
             Positioned.fill(
-              child: FadeTransition(
-                opacity: _containerAnimation,
+              child: IgnorePointer(
                 child: Container(
                   color: Colors.black.withOpacity(0.3 * t),
                 ),
@@ -240,19 +301,22 @@ class _OpenContainerPageState<T> extends State<_OpenContainerPage<T>> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // 关闭状态内容（淡出）
-                    if (_closedFadeAnimation.value > 0)
+                    // 关闭状态内容（淡出）- 仅在展开时显示
+                    if (!_isClosing && _closedFadeAnimation.value > 0)
                       FadeTransition(
                         opacity: ReverseAnimation(_closedFadeAnimation),
                         child: IgnorePointer(
                           child: route.closedBuilder(context),
                         ),
                       ),
-                    // 打开状态内容（淡入）
-                    if (_contentFadeAnimation.value > 0)
-                      FadeTransition(
-                        opacity: _contentFadeAnimation,
-                        child: route.openBuilder(context),
+                    // 打开状态内容
+                    if (openContent != null) openContent,
+                    // 收缩遮罩层（渐显覆盖内容）
+                    if (_isClosing && maskOpacity > 0)
+                      Positioned.fill(
+                        child: Container(
+                          color: openColor.withOpacity(maskOpacity),
+                        ),
                       ),
                   ],
                 ),

@@ -5,20 +5,32 @@ import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:Memento/plugins/openai/screens/agent_edit_screen.dart';
 
-class AgentCard extends StatelessWidget {
+class AgentCard extends StatefulWidget {
   final AIAgent agent;
 
   const AgentCard({super.key, required this.agent});
 
   @override
+  State<AgentCard> createState() => _AgentCardState();
+}
+
+class _AgentCardState extends State<AgentCard> {
+  final GlobalKey _cardKey = GlobalKey();
+
+  AIAgent get agent => widget.agent;
+
+  @override
   Widget build(BuildContext context) {
     return Material(
+      key: _cardKey,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          NavigationHelper.openContainer(
+          NavigationHelper.openContainerWithHero(
             context,
             (context) => AgentEditScreen(agent: agent),
+            sourceKey: _cardKey,
+            heroTag: 'agent_card_${agent.id}',
           );
         },
         child: Column(

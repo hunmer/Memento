@@ -1243,7 +1243,7 @@ class _BillMainViewState extends State<BillMainView>
                 const fabColor = Color(0xFF3498DB);
                 return FloatingActionButton(
                   onPressed: () {
-                    NavigationHelper.openContainer(
+                    NavigationHelper.openContainerWithHero(
                       context,
                       (context) => BillEditScreen(
                         billPlugin: billPlugin,

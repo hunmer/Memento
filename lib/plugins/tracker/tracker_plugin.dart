@@ -58,7 +58,7 @@ class _TrackerMainViewState extends State<TrackerMainView> {
         IconButton(
           icon: const Icon(Icons.add),
           onPressed: () {
-            NavigationHelper.openContainer(
+            NavigationHelper.openContainerWithHero(
               context,
               (context) => GoalEditPage(controller: TrackerPlugin.instance.controller),
             );

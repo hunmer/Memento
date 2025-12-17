@@ -383,20 +383,10 @@ class NavigationHelper {
 
   // ==================== OpenContainer 替代方法 ====================
 
-  /// 使用 BackSwipePageRoute 导航到新页面（替代 OpenContainer）
+  /// 使用 BackSwipePageRoute 导航到新页面
   ///
-  /// 支持 Hero 动画和全屏返回手势
-  ///
-  /// [context] BuildContext
-  /// [builder] 页面构建器
-  /// [transitionDuration] 转场动画时长（默认 300ms）
-  /// [pushCurve] 推入动画曲线（默认 Curves.easeInOut）
-  /// [popCurve] 弹出动画曲线（默认 Curves.easeInOut）
-  /// [closedColor] 关闭时的背景色
-  /// [closedElevation] 关闭时的阴影高度
-  /// [closedShape] 关闭时的形状
-  /// [openColor] 打开时的背景色
-  /// [openElevation] 打开时的阴影高度
+  /// @deprecated 请使用 [openContainerWithHero] 替代，支持 OpenContainer 展开动画
+  @Deprecated('请使用 openContainerWithHero 替代')
   static Future<T?> openContainer<T extends Object?>(
     BuildContext context,
     WidgetBuilder builder, {
@@ -409,12 +399,16 @@ class NavigationHelper {
     Color? openColor,
     double? openElevation,
   }) {
-    return Navigator.of(context).push<T>(
-      BackSwipePageRoute<T>(
-        builder: (_) => builder(context),
-        transitionDuration: transitionDuration,
-        pushCurve: pushCurve,
-        popCurve: popCurve,
+    return openContainerWithHero<T>(
+      context,
+      builder,
+      transitionDuration: transitionDuration,
+      pushCurve: pushCurve,
+      popCurve: popCurve,
+      closedColor: closedColor,
+      openColor: openColor,
+      closedShape: closedShape ?? const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
     );
   }
@@ -425,7 +419,8 @@ class NavigationHelper {
   ///
   /// [context] BuildContext
   /// [builder] 页面构建器
-  /// [sourceKey] 源 widget 的 GlobalKey（用于获取位置）
+  /// [sourceKey] 源 widget 的 GlobalKey（用于获取位置，启用展开动画）
+  /// [heroTag] 可选的标识符，用于路由命名
   /// [transitionDuration] 转场动画时长
   /// [closedBuilder] 关闭状态的构建器（用于过渡动画）
   /// [closedColor] 关闭状态的背景色
@@ -436,7 +431,7 @@ class NavigationHelper {
   static Future<T?> openContainerWithHero<T extends Object?>(
     BuildContext context,
     WidgetBuilder builder, {
-    required String heroTag,
+    String? heroTag,
     GlobalKey? sourceKey,
     Duration transitionDuration = const Duration(milliseconds: 300),
     Curve pushCurve = Curves.easeInOut,
@@ -450,6 +445,9 @@ class NavigationHelper {
     ShapeBorder openShape = const RoundedRectangleBorder(),
     void Function(T?)? onClosed,
   }) async {
+    // 生成默认的 heroTag
+    final tag = heroTag ?? 'open_container_${DateTime.now().millisecondsSinceEpoch}';
+
     // 如果提供了 sourceKey，使用 OpenContainer 动画
     if (sourceKey != null) {
       final result = await openContainerFromKey<T>(
@@ -462,7 +460,7 @@ class NavigationHelper {
         closedShape: closedShape,
         openShape: openShape,
         transitionDuration: transitionDuration,
-        routeSettings: RouteSettings(name: 'open_container_$heroTag'),
+        routeSettings: RouteSettings(name: 'open_container_$tag'),
       );
       onClosed?.call(result);
       return result;
@@ -475,14 +473,7 @@ class NavigationHelper {
         transitionDuration: transitionDuration,
         pushCurve: pushCurve,
         popCurve: popCurve,
-        settings: RouteSettings(
-          name: 'hero_route_$heroTag',
-          arguments: {
-            'heroTag': heroTag,
-            'closedBuilder': closedBuilder,
-            'onClosed': onClosed,
-          },
-        ),
+        settings: RouteSettings(name: 'hero_route_$tag'),
       ),
     );
     onClosed?.call(result);
@@ -590,7 +581,10 @@ extension NavigationExtensions on BuildContext {
     );
   }
 
-  /// 打开容器页面（替代 OpenContainer）
+  /// 打开容器页面
+  ///
+  /// @deprecated 请使用 [openContainerWithHero] 替代
+  @Deprecated('请使用 openContainerWithHero 替代')
   Future<T?> openContainer<T extends Object?>(
     WidgetBuilder builder, {
     Duration transitionDuration = const Duration(milliseconds: 300),
@@ -602,38 +596,48 @@ extension NavigationExtensions on BuildContext {
     Color? openColor,
     double? openElevation,
   }) {
-    return NavigationHelper.openContainer<T>(
-      this,
+    return openContainerWithHero<T>(
       builder,
       transitionDuration: transitionDuration,
       pushCurve: pushCurve,
       popCurve: popCurve,
       closedColor: closedColor,
-      closedElevation: closedElevation,
-      closedShape: closedShape,
       openColor: openColor,
-      openElevation: openElevation,
+      closedShape: closedShape,
     );
   }
 
-  /// 打开容器页面（带 Hero 动画）
+  /// 打开容器页面（支持 OpenContainer 展开动画）
+  ///
+  /// [sourceKey] 源 widget 的 GlobalKey，提供时启用展开动画
+  /// [heroTag] 可选的标识符，用于路由命名
   Future<T?> openContainerWithHero<T extends Object?>(
     WidgetBuilder builder, {
-    required String heroTag,
+    String? heroTag,
+    GlobalKey? sourceKey,
     Duration transitionDuration = const Duration(milliseconds: 300),
     Curve pushCurve = Curves.easeInOut,
     Curve popCurve = Curves.easeInOut,
     WidgetBuilder? closedBuilder,
+    Color? closedColor,
+    Color? openColor,
+    ShapeBorder? closedShape,
     void Function(T?)? onClosed,
   }) {
     return NavigationHelper.openContainerWithHero<T>(
       this,
       builder,
       heroTag: heroTag,
+      sourceKey: sourceKey,
       transitionDuration: transitionDuration,
       pushCurve: pushCurve,
       popCurve: popCurve,
       closedBuilder: closedBuilder,
+      closedColor: closedColor,
+      openColor: openColor,
+      closedShape: closedShape ?? const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12.0)),
+      ),
       onClosed: onClosed,
     );
   }

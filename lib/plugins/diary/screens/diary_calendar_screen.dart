@@ -31,6 +31,10 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   String _searchQuery = '';
   List<DiaryEntry> _searchResults = [];
 
+  // GlobalKeys for OpenContainer animation
+  final GlobalKey _editButtonKey = GlobalKey();
+  final GlobalKey _fabKey = GlobalKey();
+
   // Colors from design
   static const Color _primaryColor = Color(0xFFD8BFD8); // Dusty Rose
   static const Color _primaryTextColor = Color(0xFF4A4A4A); // Soft charcoal
@@ -504,6 +508,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                               ),
                             ),
                             Material(
+                              key: _editButtonKey,
                               elevation: 2,
                               borderRadius: BorderRadius.circular(20),
                               color: primaryColor,
@@ -516,7 +521,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                                     targetDay.month,
                                     targetDay.day,
                                   );
-                                  NavigationHelper.openContainer(
+                                  NavigationHelper.openContainerWithHero(
                                     context,
                                     (_) => DiaryEditorScreen(
                                       date: normalizedTargetDay,
@@ -524,8 +529,9 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                                       initialTitle: selectedEntry?.title ?? '',
                                       initialContent: selectedEntry?.content ?? '',
                                     ),
+                                    sourceKey: _editButtonKey,
+                                    heroTag: 'diary_edit_button',
                                     closedColor: primaryColor,
-                                    closedElevation: 2,
                                     closedShape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20),
                                     ),
@@ -641,6 +647,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
             bottom: 16,
             right: 16,
             child: Material(
+              key: _fabKey,
               elevation: 6,
               shape: const CircleBorder(),
               color: primaryColor,
@@ -655,7 +662,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                   );
                   // 获取当前选中日期的条目
                   final entry = _diaryEntries[normalizedTargetDay];
-                  NavigationHelper.openContainer(
+                  NavigationHelper.openContainerWithHero(
                     context,
                     (_) => DiaryEditorScreen(
                       date: normalizedTargetDay,
@@ -663,8 +670,9 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                       initialTitle: entry?.title ?? '',
                       initialContent: entry?.content ?? '',
                     ),
+                    sourceKey: _fabKey,
+                    heroTag: 'diary_fab_add',
                     closedColor: primaryColor,
-                    closedElevation: 6,
                     closedShape: const CircleBorder(),
                   ).then((_) => _loadDiaryEntries());
                 },

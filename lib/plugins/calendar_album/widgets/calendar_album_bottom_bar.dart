@@ -31,6 +31,7 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
   late int _currentPage;
   double _bottomBarHeight = 60; // 默认底部栏高度
   final GlobalKey _bottomBarKey = GlobalKey();
+  final GlobalKey _fabKey = GlobalKey();
 
   // 使用插件主题色和辅助色
   final List<Color> _colors = [
@@ -255,10 +256,11 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
             child: Builder(
               builder: (context) {
                 return FloatingActionButton(
+                  key: _fabKey,
                   elevation: 4,
                   shape: const CircleBorder(),
                   onPressed: () {
-                    NavigationHelper.openContainer(
+                    NavigationHelper.openContainerWithHero(
                       context,
                       (context) {
                         if (_currentPage == 0) {
@@ -351,6 +353,9 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
                           );
                         }
                       },
+                      sourceKey: _fabKey,
+                      heroTag: 'calendar_album_fab_$_currentPage',
+                      closedShape: const CircleBorder(),
                     );
                   },
                   child: Icon(

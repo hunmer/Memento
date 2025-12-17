@@ -222,7 +222,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                   elevation: 4,
                   shape: const CircleBorder(),
                   onPressed: () {
-                    NavigationHelper.openContainer(
+                    NavigationHelper.openContainerWithHero(
                       context,
                       (context) => TaskForm(
                         taskController: _plugin.taskController,

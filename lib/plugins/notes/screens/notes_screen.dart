@@ -245,7 +245,7 @@ class _NotesMainViewState extends NotesMainViewState
                     setState(() {
                       _fabExpanded = false;
                     });
-                    NavigationHelper.openContainer(
+                    NavigationHelper.openContainerWithHero(
                       context,
                       (context) => NoteEditScreen(
                         onSave: (title, content) async {

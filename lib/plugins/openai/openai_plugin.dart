@@ -903,7 +903,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
                 _currentPage == 0
                     ? FloatingActionButton(
                       onPressed: () {
-                        NavigationHelper.openContainer(context, (
+                        NavigationHelper.openContainerWithHero(context, (
                           BuildContext context,
                         ) {
                           return AgentEditScreen();

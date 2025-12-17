@@ -32,7 +32,7 @@ class ChannelTile extends StatelessWidget {
           // 在打开之前执行回调（如设置当前频道）
           onBeforeOpen?.call();
           // 打开聊天页面
-          NavigationHelper.openContainer(
+          NavigationHelper.openContainerWithHero(
             context,
             (context) => ChatScreen(channel: channel),
             transitionDuration: const Duration(milliseconds: 400),
