@@ -39,7 +39,7 @@ class ContactCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () {
-          NavigationHelper.openContainer(
+          NavigationHelper.openContainerWithHero(
             context,
             (context) => ContactForm(
               contact: contact,

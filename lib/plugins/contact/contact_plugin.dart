@@ -688,6 +688,9 @@ class ContactMainViewState extends State<ContactMainView> {
   String _currentSearchQuery = '';
   bool _isSearching = false;
 
+  // GlobalKey for OpenContainer animation
+  final GlobalKey _addButtonKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -963,9 +966,10 @@ class ContactMainViewState extends State<ContactMainView> {
         ),
         IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
         IconButton(
+          key: _addButtonKey,
           icon: const Icon(Icons.add),
           onPressed: () {
-            NavigationHelper.openContainer(
+            NavigationHelper.openContainerWithHero(
               context,
               (context) => ContactForm(
                 controller: _controller,
@@ -974,6 +978,8 @@ class ContactMainViewState extends State<ContactMainView> {
                   setState(() {});
                 },
               ),
+              sourceKey: _addButtonKey,
+              heroTag: 'contact_add_button',
             );
           },
         ),

@@ -31,6 +31,7 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
   late int _currentPage;
   double _bottomBarHeight = 60; // 默认底部栏高度
   final GlobalKey _bottomBarKey = GlobalKey();
+  final GlobalKey _fabKey = GlobalKey();
 
   // 使用插件主题色和辅助色
   final List<Color> _colors = [
@@ -229,13 +230,14 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
           Positioned(
             top: -25,
             child: FloatingActionButton(
+              key: _fabKey,
               backgroundColor: widget.plugin.color, // 使用插件主题色
               elevation: 4,
               shape: const CircleBorder(),
               onPressed: () {
                 if (_currentPage == 0) {
                   // Tab0: 添加习惯
-                  NavigationHelper.openContainer(
+                  NavigationHelper.openContainerWithHero(
                     context,
                     (context) => Scaffold(
                       appBar: AppBar(
@@ -249,10 +251,13 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
                         },
                       ),
                     ),
+                    sourceKey: _fabKey,
+                    heroTag: 'habits_fab_add_habit',
+                    closedShape: const CircleBorder(),
                   );
                 } else {
                   // Tab1: 添加技能
-                  NavigationHelper.openContainer(
+                  NavigationHelper.openContainerWithHero(
                     context,
                     (context) => Scaffold(
                       appBar: AppBar(
@@ -266,6 +271,9 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
                         },
                       ),
                     ),
+                    sourceKey: _fabKey,
+                    heroTag: 'habits_fab_add_skill',
+                    closedShape: const CircleBorder(),
                   );
                 }
               },

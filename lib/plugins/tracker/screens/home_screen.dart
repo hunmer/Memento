@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
             goal: goal,
             controller: controller,
             onTap: () {
-              NavigationHelper.openContainer(
+              NavigationHelper.openContainerWithHero(
                 context,
                 (context) => ChangeNotifierProvider.value(
                   value: controller,
@@ -155,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
             goal: goal,
             controller: controller,
             onTap: () {
-              NavigationHelper.openContainer(
+              NavigationHelper.openContainerWithHero(
                 context,
                 (context) => ChangeNotifierProvider.value(
                   value: controller,
