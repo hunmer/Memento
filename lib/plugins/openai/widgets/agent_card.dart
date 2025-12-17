@@ -23,6 +23,15 @@ class _AgentCardState extends State<AgentCard> {
   Widget build(BuildContext context) {
     return Material(
       key: _cardKey,
+      elevation: 2,
+      shadowColor: Colors.black.withValues(alpha: 0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Colors.grey[300]!,
+          width: 1,
+        ),
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
@@ -176,6 +185,9 @@ class _AgentCardState extends State<AgentCard> {
   }
 
   Widget _buildTags() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Wrap(
       spacing: 4,
       runSpacing: 4,
@@ -184,10 +196,16 @@ class _AgentCardState extends State<AgentCard> {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: isDark ? Colors.grey[800] : Colors.grey[200],
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(tag, style: const TextStyle(fontSize: 10)),
+              child: Text(
+                tag,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: isDark ? Colors.grey[300] : Colors.grey[800],
+                ),
+              ),
             );
           }).toList(),
     );

@@ -15,6 +15,7 @@ import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_tem
 import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
+
 /// 会话列表屏幕
 class ConversationListScreen extends StatefulWidget {
   const ConversationListScreen({super.key});
@@ -59,7 +60,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         // 初始化会话缓存，避免首次触发不必要的重建
         final initialConversations = _controller.conversations;
         _cachedConversationCount = initialConversations.length;
-        _cachedConversationHash = _computeConversationHash(initialConversations);
+        _cachedConversationHash = _computeConversationHash(
+          initialConversations,
+        );
 
         // 触发一次更新以确保显示最新状态
         if (mounted) {
@@ -89,7 +92,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       final newHash = _computeConversationHash(conversations);
 
       // 仅当会话列表发生实际变化时才触发重建
-      final hasChanges = newCount != _cachedConversationCount ||
+      final hasChanges =
+          newCount != _cachedConversationCount ||
           newHash != _cachedConversationHash;
 
       if (hasChanges) {
@@ -137,8 +141,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       icon: Icons.settings_outlined,
     );
 
-    NavigationHelper.push(context, const ToolManagementScreen(),
-    );
+    NavigationHelper.push(context, const ToolManagementScreen());
   }
 
   /// 打开工具模板页面
@@ -150,9 +153,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       icon: Icons.inventory_2_outlined,
     );
 
-    NavigationHelper.push(context, ToolTemplateScreen(
-              templateService: _templateService,
-    ),
+    NavigationHelper.push(
+      context,
+      ToolTemplateScreen(templateService: _templateService),
     );
   }
 
@@ -333,17 +336,13 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                 ListTile(
                   leading: const Icon(Icons.chat),
                   title: Text('agent_chat_channel'.tr),
-                  subtitle: Text(
-                    'agent_chat_createNewConversationChannel'.tr,
-                  ),
+                  subtitle: Text('agent_chat_createNewConversationChannel'.tr),
                   onTap: () => Navigator.pop(context, 'channel'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.folder),
                   title: Text('agent_chat_group'.tr),
-                  subtitle: Text(
-                    'agent_chat_createNewGroupCategory'.tr,
-                  ),
+                  subtitle: Text('agent_chat_createNewGroupCategory'.tr),
                   onTap: () => Navigator.pop(context, 'group'),
                 ),
               ],
@@ -560,6 +559,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
             emptyWidget: _buildEmptyListState(key: const ValueKey('empty')),
             listWidget: ListView.builder(
               key: ValueKey('conversation_list_${conversations.length}'),
+              padding: EdgeInsets.zero,
               itemCount: conversations.length,
               itemBuilder: (context, index) {
                 final conversation = conversations[index];
@@ -583,10 +583,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       switchInCurve: Curves.easeInOut,
       switchOutCurve: Curves.easeInOut,
       transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
+        return FadeTransition(opacity: animation, child: child);
       },
       child: isEmpty ? emptyWidget : listWidget,
     );
@@ -733,125 +730,119 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         splashColor: Colors.transparent,
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(
-              color: Colors.grey.shade300,
-              width: 1.0,
-            ),
+            border: Border.all(color: Colors.grey.shade300, width: 1.0),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-              CircleAvatar(
-                backgroundColor: Colors.blue[100],
-                child: Icon(
-                  conversation.isPinned ? Icons.push_pin : Icons.chat,
-                  color: Colors.blue[700],
+                CircleAvatar(
+                  backgroundColor: Colors.blue[100],
+                  child: Icon(
+                    conversation.isPinned ? Icons.push_pin : Icons.chat,
+                    color: Colors.blue[700],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            conversation.title,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (conversation.unreadCount > 0)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
                             child: Text(
-                              '${conversation.unreadCount}',
+                              conversation.title,
                               style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (conversation.unreadCount > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '${conversation.unreadCount}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
-                          ),
+                        ],
+                      ),
+                      if (conversation.lastMessagePreview != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          conversation.lastMessagePreview!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
                       ],
-                    ),
-                    if (conversation.lastMessagePreview != null) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
                       Text(
-                        conversation.lastMessagePreview!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.grey[600]),
+                        _formatDateTime(conversation.lastMessageAt),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                       ),
                     ],
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatDateTime(conversation.lastMessageAt),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[500],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              PopupMenuButton<String>(
-                onSelected:
-                    (value) =>
-                        _onConversationMenuSelected(value, conversation),
-                itemBuilder:
-                    (context) => [
-                      PopupMenuItem(
-                        value: 'pin',
-                        child: Row(
-                          children: [
-                            Icon(
-                              conversation.isPinned
-                                  ? Icons.push_pin_outlined
-                                  : Icons.push_pin,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(conversation.isPinned ? '取消置顶' : '置顶'),
-                          ],
+                PopupMenuButton<String>(
+                  onSelected:
+                      (value) =>
+                          _onConversationMenuSelected(value, conversation),
+                  itemBuilder:
+                      (context) => [
+                        PopupMenuItem(
+                          value: 'pin',
+                          child: Row(
+                            children: [
+                              Icon(
+                                conversation.isPinned
+                                    ? Icons.push_pin_outlined
+                                    : Icons.push_pin,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(conversation.isPinned ? '取消置顶' : '置顶'),
+                            ],
+                          ),
                         ),
-                      ),
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.edit),
-                            const SizedBox(width: 8),
-                            Text('agent_chat_edit'.tr),
-                          ],
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.edit),
+                              const SizedBox(width: 8),
+                              Text('agent_chat_edit'.tr),
+                            ],
+                          ),
                         ),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.delete, color: Colors.red),
-                            const SizedBox(width: 8),
-                            Text(
-                              'agent_chat_delete'.tr,
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                          ],
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.delete, color: Colors.red),
+                              const SizedBox(width: 8),
+                              Text(
+                                'agent_chat_delete'.tr,
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-              ),
+                      ],
+                ),
               ],
             ),
           ),

@@ -64,31 +64,32 @@ class BasicInfoTab extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: Theme.of(context).dividerColor,
-            style: BorderStyle.solid, // Using solid as dashed border needs custom painter or package
+            style:
+                BorderStyle
+                    .solid, // Using solid as dashed border needs custom painter or package
           ),
         ),
-        child: controller.imagePath != null
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: _buildImage(),
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.add_a_photo,
-                    size: 48,
-                    color: Theme.of(context).disabledColor,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '上传物品图片', // TODO: Localize
-                    style: TextStyle(
+        child:
+            controller.imagePath != null
+                ? ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: _buildImage(),
+                )
+                : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add_a_photo,
+                      size: 48,
                       color: Theme.of(context).disabledColor,
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '上传物品图片', // TODO: Localize
+                      style: TextStyle(color: Theme.of(context).disabledColor),
+                    ),
+                  ],
+                ),
       ),
     );
   }
@@ -105,7 +106,11 @@ class BasicInfoTab extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.label_outline, size: 20, color: Theme.of(context).hintColor),
+              Icon(
+                Icons.label_outline,
+                size: 20,
+                color: Theme.of(context).hintColor,
+              ),
               const SizedBox(width: 6),
               Text(
                 'goods_productName'.tr,
@@ -123,11 +128,22 @@ class BasicInfoTab extends StatelessWidget {
               hintText: 'goods_enterProductName'.tr,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Theme.of(context).primaryColor),
               ),
               filled: true,
               fillColor: Theme.of(context).scaffoldBackgroundColor,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 12,
+              ),
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -227,13 +243,17 @@ class BasicInfoTab extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Text(
-                date != null ? DateFormat('yyyy-MM-dd').format(date) : '选择日期', // TODO: Localize
+                date != null
+                    ? DateFormat('yyyy-MM-dd').format(date)
+                    : '选择日期', // TODO: Localize
                 style: TextStyle(
-                  color: date != null
-                      ? Theme.of(context).textTheme.bodyLarge?.color
-                      : Theme.of(context).hintColor,
+                  color:
+                      date != null
+                          ? Theme.of(context).textTheme.bodyLarge?.color
+                          : Theme.of(context).hintColor,
                 ),
               ),
             ),
@@ -309,11 +329,22 @@ class BasicInfoTab extends StatelessWidget {
               hintText: hintText,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Theme.of(context).primaryColor),
               ),
               filled: true,
               fillColor: Theme.of(context).scaffoldBackgroundColor,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 12,
+              ),
             ),
           ),
         ],
@@ -350,7 +381,11 @@ class BasicInfoTab extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.category, size: 20, color: Theme.of(context).hintColor),
+              Icon(
+                Icons.category,
+                size: 20,
+                color: Theme.of(context).hintColor,
+              ),
               const SizedBox(width: 6),
               Text(
                 '分类', // TODO: Localize
@@ -365,48 +400,62 @@ class BasicInfoTab extends StatelessWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: categories.map((cat) {
-                final isSelected = selectedCategory == cat['id'];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: InkWell(
-                    onTap: () {
-                      // Clear old category tags
-                      controller.tags.removeWhere((t) => categories.any((c) => c['id'] == t));
-                      // Add new category tag
-                      controller.tags.add(cat['id'] as String);
-                      onStateChanged();
-                    },
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      width: 96,
-                      height: 96,
-                      decoration: BoxDecoration(
-                        color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).scaffoldBackgroundColor,
+              children:
+                  categories.map((cat) {
+                    final isSelected = selectedCategory == cat['id'];
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: InkWell(
+                        onTap: () {
+                          // Clear old category tags
+                          controller.tags.removeWhere(
+                            (t) => categories.any((c) => c['id'] == t),
+                          );
+                          // Add new category tag
+                          controller.tags.add(cat['id'] as String);
+                          onStateChanged();
+                        },
                         borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            cat['icon'] as IconData,
-                            size: 32,
-                            color: isSelected ? Colors.white : Theme.of(context).iconTheme.color,
+                        child: Container(
+                          width: 96,
+                          height: 96,
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected
+                                    ? Theme.of(context).primaryColor
+                                    : Theme.of(context).scaffoldBackgroundColor,
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            cat['label'] as String,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color,
-                            ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                cat['icon'] as IconData,
+                                size: 32,
+                                color:
+                                    isSelected
+                                        ? Colors.white
+                                        : Theme.of(context).iconTheme.color,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                cat['label'] as String,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color:
+                                      isSelected
+                                          ? Colors.white
+                                          : Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium?.color,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                );
-              }).toList(),
+                    );
+                  }).toList(),
             ),
           ),
         ],
@@ -433,7 +482,11 @@ class BasicInfoTab extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.inventory, size: 20, color: Theme.of(context).hintColor),
+              Icon(
+                Icons.inventory,
+                size: 20,
+                color: Theme.of(context).hintColor,
+              ),
               const SizedBox(width: 6),
               Text(
                 '使用状态', // TODO: Localize
@@ -447,47 +500,60 @@ class BasicInfoTab extends StatelessWidget {
           const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {
-              final itemWidth = (constraints.maxWidth - 24) / 4; // 24 = 3 gaps * 8
+              final itemWidth =
+                  (constraints.maxWidth - 24) / 4; // 24 = 3 gaps * 8
               return Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: statuses.map((status) {
-                  final isSelected = controller.status == status['id'];
-                  return InkWell(
-                    onTap: () {
-                      controller.status = status['id'] as String;
-                      onStateChanged();
-                    },
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      width: itemWidth,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).scaffoldBackgroundColor,
+                children:
+                    statuses.map((status) {
+                      final isSelected = controller.status == status['id'];
+                      return InkWell(
+                        onTap: () {
+                          controller.status = status['id'] as String;
+                          onStateChanged();
+                        },
                         borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            status['icon'] as IconData,
-                            size: 24,
-                            color: isSelected ? Colors.white : Theme.of(context).iconTheme.color,
+                        child: Container(
+                          width: itemWidth,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected
+                                    ? Theme.of(context).primaryColor
+                                    : Theme.of(context).scaffoldBackgroundColor,
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            status['label'] as String,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color,
-                            ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                status['icon'] as IconData,
+                                size: 24,
+                                color:
+                                    isSelected
+                                        ? Colors.white
+                                        : Theme.of(context).iconTheme.color,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                status['label'] as String,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color:
+                                      isSelected
+                                          ? Colors.white
+                                          : Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium?.color,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
+                        ),
+                      );
+                    }).toList(),
               );
-            }
+            },
           ),
         ],
       ),
@@ -558,56 +624,67 @@ class BasicInfoTab extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                ...controller.subItems.map((subItem) => Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: Container(
-                    width: 128,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    clipBehavior: Clip.hardEdge,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Stack(
-                          children: [
-                            SizedBox(
-                              height: 96,
-                              width: double.infinity,
-                              child: _buildSubItemImage(subItem),
-                            ),
-                            if (subItem.purchasePrice != null)
-                              Positioned(
-                                top: 4,
-                                right: 4,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.6),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    '¥${subItem.purchasePrice!.toStringAsFixed(0)}',
-                                    style: const TextStyle(color: Colors.white, fontSize: 10),
+                ...controller.subItems.map(
+                  (subItem) => Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Container(
+                      width: 128,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      clipBehavior: Clip.hardEdge,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Stack(
+                            children: [
+                              SizedBox(
+                                height: 96,
+                                width: double.infinity,
+                                child: _buildSubItemImage(subItem),
+                              ),
+                              if (subItem.purchasePrice != null)
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      '¥${subItem.purchasePrice!.toStringAsFixed(0)}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            subItem.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            ],
                           ),
-                        ),
-                      ],
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              subItem.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                )),
+                ),
                 InkWell(
                   onTap: () => _showAddSubItemDialog(context),
                   borderRadius: BorderRadius.circular(12),
@@ -625,7 +702,11 @@ class BasicInfoTab extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add, size: 32, color: Theme.of(context).hintColor),
+                        Icon(
+                          Icons.add,
+                          size: 32,
+                          color: Theme.of(context).hintColor,
+                        ),
                         const SizedBox(height: 4),
                         Text(
                           '添加', // TODO: Localize
@@ -647,37 +728,37 @@ class BasicInfoTab extends StatelessWidget {
   }
 
   Widget _buildSubItemImage(GoodsItem item) {
-     if (item.imageUrl != null) {
-       // This is simplified; ideally use the same resolving logic as GoodsItemCard
-       // But since we might not be able to async resolve here easily without state, 
-       // we can try to check if it's network or file.
-       // However, item.imageUrl stored in DB is relative.
-       // For preview here, if it's a new item, it might be absolute path.
-       // If it's existing item, it's relative.
-       // For simplicity, we use a FutureBuilder wrapper or just icon if complicated.
-       // Let's use a simple FutureBuilder for local images.
-       return FutureBuilder<String>(
+    if (item.imageUrl != null) {
+      // This is simplified; ideally use the same resolving logic as GoodsItemCard
+      // But since we might not be able to async resolve here easily without state,
+      // we can try to check if it's network or file.
+      // However, item.imageUrl stored in DB is relative.
+      // For preview here, if it's a new item, it might be absolute path.
+      // If it's existing item, it's relative.
+      // For simplicity, we use a FutureBuilder wrapper or just icon if complicated.
+      // Let's use a simple FutureBuilder for local images.
+      return FutureBuilder<String>(
         future: _getItemImageUrl(item),
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-             final path = snapshot.data!;
-             if (path.startsWith('http')) {
-               return Image.network(path, fit: BoxFit.cover);
-             } else {
-               return Image.file(File(path), fit: BoxFit.cover);
-             }
+            final path = snapshot.data!;
+            if (path.startsWith('http')) {
+              return Image.network(path, fit: BoxFit.cover);
+            } else {
+              return Image.file(File(path), fit: BoxFit.cover);
+            }
           }
           return Container(
             color: item.iconColor ?? Colors.grey[200],
             child: Icon(item.icon ?? Icons.inventory_2, color: Colors.white),
           );
-        }
-       );
-     }
-     return Container(
-       color: item.iconColor ?? Colors.grey[200],
-       child: Icon(item.icon ?? Icons.inventory_2, color: Colors.white),
-     );
+        },
+      );
+    }
+    return Container(
+      color: item.iconColor ?? Colors.grey[200],
+      child: Icon(item.icon ?? Icons.inventory_2, color: Colors.white),
+    );
   }
 
   // 获取物品图片URL的工具方法
@@ -694,10 +775,11 @@ class BasicInfoTab extends StatelessWidget {
   void _showAddSubItemDialog(BuildContext context) async {
     final result = await showDialog<dynamic>(
       context: context,
-      builder: (context) => GoodsItemSelectorDialog(
-        excludeItemId: controller.initialData?.id,
-        excludeItemIds: controller.subItems.map((e) => e.id).toList(),
-      ),
+      builder:
+          (context) => GoodsItemSelectorDialog(
+            excludeItemId: controller.initialData?.id,
+            excludeItemIds: controller.subItems.map((e) => e.id).toList(),
+          ),
     );
 
     if (result != null) {
@@ -722,9 +804,7 @@ class BasicInfoTab extends StatelessWidget {
           builder:
               (context) => AlertDialog(
                 title: Text('goods_confirmDelete'.tr),
-                content: Text(
-                  'goods_confirmDeleteItem'.tr,
-                ),
+                content: Text('goods_confirmDeleteItem'.tr),
                 actions: [
                   TextButton(
                     child: Text('goods_cancel'.tr),
@@ -759,13 +839,15 @@ class BasicInfoTab extends StatelessWidget {
       return const Icon(Icons.broken_image);
     }
 
-    if (displayPath.startsWith('http://') || displayPath.startsWith('https://')) {
+    if (displayPath.startsWith('http://') ||
+        displayPath.startsWith('https://')) {
       return Image.network(
         displayPath,
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,
-        errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
+        errorBuilder:
+            (context, error, stackTrace) => const Icon(Icons.broken_image),
       );
     }
 
@@ -776,9 +858,10 @@ class BasicInfoTab extends StatelessWidget {
           return Image.file(
             File(snapshot.data!),
             fit: BoxFit.cover,
-             width: double.infinity,
-             height: double.infinity,
-            errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
+            width: double.infinity,
+            height: double.infinity,
+            errorBuilder:
+                (context, error, stackTrace) => const Icon(Icons.broken_image),
           );
         }
         return const Icon(Icons.broken_image);

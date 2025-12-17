@@ -49,8 +49,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _controller.initializeControllers(context);
+    // 异步初始化控制器
+    _initializeAsync();
+  }
+
+  Future<void> _initializeAsync() async {
+    await _controller.initializeControllers(context);
     _backupService = BackupService(_controller, context);
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override

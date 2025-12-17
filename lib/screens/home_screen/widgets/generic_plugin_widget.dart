@@ -9,7 +9,7 @@ import 'package:Memento/utils/image_utils.dart';
 class GenericIconWidget extends StatelessWidget {
   final IconData icon;
   final Color color;
-  final String? name;  // 可选的插件名称
+  final String? name; // 可选的插件名称
 
   const GenericIconWidget({
     super.key,
@@ -34,11 +34,7 @@ class GenericIconWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: iconSize,
-                color: color,
-              ),
+              Icon(icon, size: iconSize, color: color),
               if (name != null) ...[
                 SizedBox(height: size * 0.05),
                 Text(
@@ -116,13 +112,15 @@ class GenericPluginWidget extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: config.backgroundImagePath == null
-              ? finalBackgroundColor
-              : Colors.transparent,
+            color:
+                config.backgroundImagePath == null
+                    ? finalBackgroundColor
+                    : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
-            image: config.backgroundImagePath != null
-              ? _buildBackgroundImage(config.backgroundImagePath!)
-              : null,
+            image:
+                config.backgroundImagePath != null
+                    ? _buildBackgroundImage(config.backgroundImagePath!)
+                    : null,
           ),
           child: Padding(
             padding: EdgeInsets.all(padding),
@@ -184,7 +182,12 @@ class GenericPluginWidget extends StatelessWidget {
   }
 
   /// 构建头部（图标和标题）
-  Widget _buildHeader(ThemeData theme, Color iconColor, double iconSize, double fontSize) {
+  Widget _buildHeader(
+    ThemeData theme,
+    Color iconColor,
+    double iconSize,
+    double fontSize,
+  ) {
     final containerSize = iconSize + 8; // 图标 + padding
 
     return Row(
@@ -210,9 +213,10 @@ class GenericPluginWidget extends StatelessWidget {
               fontWeight: FontWeight.bold,
               fontSize: fontSize,
               // 如果有背景图片，增强文字对比度
-              color: config.backgroundImagePath != null
-                ? theme.colorScheme.onSurface
-                : null,
+              color:
+                  config.backgroundImagePath != null
+                      ? theme.colorScheme.onSurface
+                      : null,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -224,10 +228,11 @@ class GenericPluginWidget extends StatelessWidget {
   /// 构建统计项
   Widget _buildStatItems(ThemeData theme, Color iconColor, double fontSize) {
     // 过滤出选中的统计项
-    final selectedItems = availableItems.where((item) {
-      return config.selectedItemIds.isEmpty ||
-        config.selectedItemIds.contains(item.id);
-    }).toList();
+    final selectedItems =
+        availableItems.where((item) {
+          return config.selectedItemIds.isEmpty ||
+              config.selectedItemIds.contains(item.id);
+        }).toList();
 
     if (selectedItems.isEmpty) {
       return Center(
@@ -243,8 +248,8 @@ class GenericPluginWidget extends StatelessWidget {
 
     // 根据显示风格选择布局
     return config.displayStyle == PluginWidgetDisplayStyle.oneColumn
-      ? _buildOneColumnLayout(selectedItems, theme, iconColor, fontSize)
-      : _buildTwoColumnsLayout(selectedItems, theme, iconColor, fontSize);
+        ? _buildOneColumnLayout(selectedItems, theme, iconColor, fontSize)
+        : _buildTwoColumnsLayout(selectedItems, theme, iconColor, fontSize);
   }
 
   /// 一列布局
@@ -257,15 +262,20 @@ class GenericPluginWidget extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: items.map((item) => Padding(
-          padding: EdgeInsets.symmetric(vertical: fontSize * 0.5),
-          child: _StatItem(
-            data: item,
-            theme: theme,
-            defaultColor: iconColor,
-            fontSize: fontSize,
-          ),
-        )).toList(),
+        children:
+            items
+                .map(
+                  (item) => Padding(
+                    padding: EdgeInsets.symmetric(vertical: fontSize * 0.5),
+                    child: _StatItem(
+                      data: item,
+                      theme: theme,
+                      defaultColor: iconColor,
+                      fontSize: fontSize,
+                    ),
+                  ),
+                )
+                .toList(),
       ),
     );
   }
@@ -346,9 +356,7 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayColor = data.highlight
-      ? (data.color ?? defaultColor)
-      : null;
+    final displayColor = data.highlight ? (data.color ?? defaultColor) : null;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -478,6 +478,7 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
             else
               ListView.builder(
                 shrinkWrap: true,
+                padding: EdgeInsets.zero,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _selectedDayBills.length,
                 itemBuilder: (context, index) {

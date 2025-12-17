@@ -106,4 +106,9 @@ const Map<String, String> settingsScreenTranslationsZh = {
   'server_sync_encryptionKeyHint': '⚠️ 此密钥用于管理后台启用 API 访问，请妥善保管，切勿泄露',
   'server_sync_copyKey': '复制密钥',
   'server_sync_keyCopied': '密钥已复制到剪贴板',
+
+  // 语言选择对话框
+  'settingsScreen_selectLanguage': '选择语言',
+  'settingsScreen_chinese': '中文',
+  'settingsScreen_english': 'English',
 };

@@ -83,4 +83,10 @@ final Map<String, String> nodesTranslationsZh = {
   // 界面元素
   'nodes_basicInfo': '基本信息',
   'nodes_dateAndFields': '时间与字段',
+
+  // Widget Home Strings
+  'nodes_widgetName': '节点',
+  'nodes_widgetDescription': '快速打开节点笔记本',
+  'nodes_overviewName': '节点概览',
+  'nodes_overviewDescription': '显示节点统计信息',
 };

@@ -54,5 +54,11 @@ class DatabaseTranslationsEn {
     'database_delete_action': 'Delete',
     'database_edit_record_title': 'Edit Record',
     'database_total_databases': 'Total Databases',
+
+    // Widget Home Strings
+    'database_widgetName': 'Database',
+    'database_widgetDescription': 'Quick access to Database',
+    'database_overviewName': 'Database Overview',
+    'database_overviewDescription': 'Display database statistics',
   };
 }

@@ -127,7 +127,7 @@ const Map<String, String> storeTranslationsZh = {
   'store_noRecords': '暂无记录',
   'store_pointsHistoryTitle': '积分历史',
   'store_pointsHistory': '积分记录',
-  'store_pointsHistoryEntry': '@value积分 (@type)',
+  'store_pointsHistoryEntry': '{value}积分 ({type})',
   'store_viewRedeemHistory': '查看兑换记录',
 
   // 按钮

@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 /// OpenContainer 风格的页面过渡路由
@@ -7,7 +9,7 @@ import 'package:flutter/material.dart';
 /// 特性：
 /// - 从源 widget 位置和大小开始，放大过渡到全屏
 /// - 支持背景色和形状过渡动画
-/// - 支持滑动返回手势（通过 [PopScope] 或手势检测器）
+/// - 支持 iOS 左滑返回手势
 /// - 关闭时从全屏收缩回源位置
 class OpenContainerRoute<T> extends PageRoute<T> {
   OpenContainerRoute({
@@ -83,6 +85,21 @@ class OpenContainerRoute<T> extends PageRoute<T> {
   @override
   bool get maintainState => true;
 
+  /// iOS 平台检测
+  static bool get _isIOS => Platform.isIOS;
+
+  /// 是否启用左滑返回手势（仅 iOS）
+  @override
+  bool get popGestureEnabled =>
+      _isIOS &&
+      !isFirst &&
+      controller!.status == AnimationStatus.completed &&
+      !navigator!.userGestureInProgress;
+
+  /// 是否正在进行手势返回
+  @override
+  bool get popGestureInProgress => navigator!.userGestureInProgress;
+
   @override
   Widget buildPage(
     BuildContext context,
@@ -102,7 +119,25 @@ class OpenContainerRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
+    // iOS 平台添加左滑返回手势
+    if (_isIOS) {
+      return _IOSBackGestureDetector<T>(
+        enabledCallback: () => popGestureEnabled,
+        onStartPopGesture: () => _startPopGesture(this),
+        child: child,
+      );
+    }
     return child;
+  }
+
+  /// 开始手势返回
+  static _IOSBackGestureController<T> _startPopGesture<T>(
+    OpenContainerRoute<T> route,
+  ) {
+    return _IOSBackGestureController<T>(
+      navigator: route.navigator!,
+      controller: route.controller!,
+    );
   }
 }
 
@@ -583,4 +618,166 @@ Future<T?> openContainerFromRect<T>({
       settings: routeSettings,
     ),
   );
+}
+
+// ==================== iOS 左滑返回手势支持 ====================
+
+/// iOS 左滑返回手势宽度
+const double _kBackGestureWidth = 20.0;
+
+/// iOS 左滑返回手势检测器
+class _IOSBackGestureDetector<T> extends StatefulWidget {
+  const _IOSBackGestureDetector({
+    super.key,
+    required this.enabledCallback,
+    required this.onStartPopGesture,
+    required this.child,
+  });
+
+  final Widget child;
+  final ValueGetter<bool> enabledCallback;
+  final ValueGetter<_IOSBackGestureController<T>> onStartPopGesture;
+
+  @override
+  State<_IOSBackGestureDetector<T>> createState() =>
+      _IOSBackGestureDetectorState<T>();
+}
+
+class _IOSBackGestureDetectorState<T>
+    extends State<_IOSBackGestureDetector<T>> {
+  _IOSBackGestureController<T>? _backGestureController;
+
+  late HorizontalDragGestureRecognizer _recognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _recognizer = HorizontalDragGestureRecognizer(debugOwner: this)
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..onEnd = _handleDragEnd
+      ..onCancel = _handleDragCancel;
+  }
+
+  @override
+  void dispose() {
+    _recognizer.dispose();
+    super.dispose();
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    _backGestureController = widget.onStartPopGesture();
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    _backGestureController?.dragUpdate(
+      _convertToLogical(details.primaryDelta! / context.size!.width),
+    );
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    _backGestureController?.dragEnd(
+      _convertToLogical(
+        details.velocity.pixelsPerSecond.dx / context.size!.width,
+      ),
+    );
+    _backGestureController = null;
+  }
+
+  void _handleDragCancel() {
+    _backGestureController?.dragEnd(0.0);
+    _backGestureController = null;
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    if (widget.enabledCallback()) {
+      _recognizer.addPointer(event);
+    }
+  }
+
+  double _convertToLogical(double value) {
+    switch (Directionality.of(context)) {
+      case TextDirection.rtl:
+        return -value;
+      case TextDirection.ltr:
+        return value;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 检测从左边缘开始的滑动
+    double dragAreaWidth = Directionality.of(context) == TextDirection.ltr
+        ? MediaQuery.paddingOf(context).left
+        : MediaQuery.paddingOf(context).right;
+    dragAreaWidth = dragAreaWidth.clamp(_kBackGestureWidth, double.infinity);
+
+    return Stack(
+      fit: StackFit.passthrough,
+      children: <Widget>[
+        widget.child,
+        PositionedDirectional(
+          start: 0.0,
+          width: dragAreaWidth,
+          top: 0.0,
+          bottom: 0.0,
+          child: Listener(
+            onPointerDown: _handlePointerDown,
+            behavior: HitTestBehavior.translucent,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// iOS 左滑返回手势控制器
+class _IOSBackGestureController<T> {
+  _IOSBackGestureController({
+    required this.navigator,
+    required this.controller,
+  }) {
+    navigator.didStartUserGesture();
+  }
+
+  final AnimationController controller;
+  final NavigatorState navigator;
+
+  /// 手势拖动更新
+  void dragUpdate(double delta) {
+    controller.value -= delta;
+  }
+
+  /// 手势拖动结束
+  void dragEnd(double velocity) {
+    // 参考 CupertinoPageRoute 的行为
+    const Curve animationCurve = Curves.linearToEaseOut;
+    final bool animateForward;
+
+    // 根据速度或位置决定是否完成返回
+    if (velocity.abs() >= 1.0) {
+      animateForward = velocity <= 0;
+    } else {
+      animateForward = controller.value > 0.5;
+    }
+
+    if (animateForward) {
+      // 取消返回，恢复到完全展开状态
+      final int droppedPageForwardAnimationTime = lerpDouble(
+        0,
+        300,
+        controller.value,
+      )!.floor();
+      controller.animateTo(
+        1.0,
+        duration: Duration(milliseconds: droppedPageForwardAnimationTime),
+        curve: animationCurve,
+      );
+    } else {
+      // 完成返回
+      navigator.pop();
+    }
+
+    navigator.didStopUserGesture();
+  }
 }

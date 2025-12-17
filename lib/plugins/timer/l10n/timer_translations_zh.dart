@@ -32,5 +32,11 @@ class TimerTranslationsZh {
     'timer_continueAdjust': '继续调整',
     'timer_confirmComplete': '确认完成',
     'timer_searchPlaceholder': '搜索计时器任务...',
+
+    // Widget Home Strings
+    'timer_widgetName': '计时器',
+    'timer_widgetDescription': '快速打开计时器',
+    'timer_overviewName': '计时器概览',
+    'timer_overviewDescription': '显示计时器统计信息',
   };
 }

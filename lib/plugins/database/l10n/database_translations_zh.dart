@@ -53,5 +53,11 @@ class DatabaseTranslationsZh {
     'database_delete_action': '删除',
     'database_edit_record_title': '编辑记录',
     'database_total_databases': '总数据库数',
+
+    // Widget Home Strings
+    'database_widgetName': '数据库',
+    'database_widgetDescription': '快速打开数据库',
+    'database_overviewName': '数据库概览',
+    'database_overviewDescription': '显示数据库统计信息',
   };
 }

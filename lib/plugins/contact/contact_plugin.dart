@@ -852,6 +852,7 @@ class ContactMainViewState extends State<ContactMainView> {
     }
 
     return ListView.builder(
+      padding: EdgeInsets.zero,
       itemCount: _searchResults.length,
       itemBuilder: (context, index) {
         final contact = _searchResults[index];
@@ -939,6 +940,7 @@ class ContactMainViewState extends State<ContactMainView> {
           }
 
           return ListView.builder(
+            padding: EdgeInsets.zero,
             itemCount: contacts.length,
             itemBuilder: (context, index) {
               return ContactCard(

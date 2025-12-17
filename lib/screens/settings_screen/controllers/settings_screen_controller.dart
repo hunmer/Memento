@@ -25,12 +25,11 @@ class SettingsScreenController extends ChangeNotifier {
 
   bool isInitialized() => _initialized;
 
-  SettingsScreenController() : _baseController = BaseSettingsController() {
-    initPrefs();
-  }
+  SettingsScreenController() : _baseController = BaseSettingsController();
 
-  void initializeControllers(BuildContext context) {
+  Future<void> initializeControllers(BuildContext context) async {
     _context = context;
+    await initPrefs(); // 确保等待初始化完成
     _exportController = ExportController(context);
     _importController = ImportController(context);
     _fullBackupController = FullBackupController(context);
