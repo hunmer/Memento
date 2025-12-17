@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:Memento/plugins/timer/models/timer_task.dart';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:Memento/plugins/timer/views/timer_task_details_page.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 
 class TimerTaskCard extends StatefulWidget {
   final TimerTask task;
@@ -52,26 +52,7 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
     final task = widget.task;
     final isRunning = task.isRunning;
 
-    return OpenContainer<TimerTask>(
-      transitionType: ContainerTransitionType.fade,
-      openBuilder: (context, _) {
-        return TimerTaskDetailsPage(
-          task: task,
-          onReset: () => widget.onReset(task),
-          onResume: () {
-            task.start();
-            setState(() {});
-          },
-        );
-      },
-      onClosed: (returnedTask) {
-        if (returnedTask != null) {
-          // 处理返回的任务
-          setState(() {});
-        }
-      },
-      closedBuilder: (context, VoidCallback openContainer) {
-        return Container(
+    return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -101,7 +82,24 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
           ),
         ),
         child: InkWell(
-          onTap: openContainer,
+          onTap: () async {
+            final returnedTask = await NavigationHelper.openContainer<TimerTask>(
+              context,
+              (context) => TimerTaskDetailsPage(
+                task: task,
+                onReset: () => widget.onReset(task),
+                onResume: () {
+                  task.start();
+                  setState(() {});
+                },
+              ),
+              transitionDuration: const Duration(milliseconds: 300),
+            );
+            if (returnedTask != null) {
+              // 处理返回的任务
+              setState(() {});
+            }
+          },
           onLongPress: () => _showContextMenu(context, task),
           child: Container(
             constraints: BoxConstraints(minHeight: 100), // 添加最小高度约束
@@ -210,8 +208,6 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
           ),
         ),
       ),
-        );
-      },
     );
   }
 

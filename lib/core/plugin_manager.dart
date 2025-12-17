@@ -234,6 +234,16 @@ class PluginManager {
     }
   }
 
+  /// 记录插件打开（仅记录，不导航）
+  ///
+  /// 用于 OpenContainer 等自定义导航场景，需要记录打开历史但不通过 Navigator 导航
+  void recordPluginOpen(PluginBase plugin) {
+    _currentPlugin = plugin;
+    _lastOpenedPluginId = plugin.id;
+    _saveLastOpenedPlugin();
+    _updatePluginAccessTime(plugin.id);
+  }
+
   /// 打开插件界面
   void openPlugin(BuildContext context, PluginBase plugin) {
     // 检查当前路由是否已经是该插件
@@ -242,10 +252,8 @@ class PluginManager {
     if (isPluginAlreadyOpen) {
       return;
     }
-    _currentPlugin = plugin; // 记录当前打开的插件
-    _lastOpenedPluginId = plugin.id; // 记录最后打开的插件ID
-    _saveLastOpenedPlugin(); // 保存最后打开的插件ID
-    _updatePluginAccessTime(plugin.id);
+    // 记录打开历史
+    recordPluginOpen(plugin);
     // 使用 NavigationHelper.push 以支持 iOS 左滑返回
     NavigationHelper.push(context, plugin.buildMainView(context));
   }

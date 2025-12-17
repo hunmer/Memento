@@ -164,7 +164,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: Text('settings_screen_darkModeSubtitle'.tr),
             trailing: Switch(
               value: ThemeController.isDarkTheme(context),
-              onChanged: (value) => _controller.toggleTheme(context),
+              onChanged: (value) => _controller.setTheme(context, value),
             ),
           ),
           const Divider(),

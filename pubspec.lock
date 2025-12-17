@@ -773,6 +773,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0+1"
+  full_swipe_back_gesture:
+    dependency: "direct main"
+    description:
+      name: full_swipe_back_gesture
+      sha256: "2c418bd6f7ec81385c6d3c25dc35ac8b9b30150a49255c526ec04adea0caedbe"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   get:
     dependency: "direct main"
     description:

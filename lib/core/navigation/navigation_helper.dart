@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:full_swipe_back_gesture/full_swipe_back_gesture.dart';
 
 /// 跨平台导航助手
 ///
@@ -376,6 +377,80 @@ class NavigationHelper {
   static bool isFirstRouteInStack(BuildContext context) {
     return !Navigator.of(context).canPop();
   }
+
+  // ==================== OpenContainer 替代方法 ====================
+
+  /// 使用 BackSwipePageRoute 导航到新页面（替代 OpenContainer）
+  ///
+  /// 支持 Hero 动画和全屏返回手势
+  ///
+  /// [context] BuildContext
+  /// [builder] 页面构建器
+  /// [transitionDuration] 转场动画时长（默认 300ms）
+  /// [pushCurve] 推入动画曲线（默认 Curves.easeInOut）
+  /// [popCurve] 弹出动画曲线（默认 Curves.easeInOut）
+  /// [closedColor] 关闭时的背景色
+  /// [closedElevation] 关闭时的阴影高度
+  /// [closedShape] 关闭时的形状
+  /// [openColor] 打开时的背景色
+  /// [openElevation] 打开时的阴影高度
+  static Future<T?> openContainer<T extends Object?>(
+    BuildContext context,
+    WidgetBuilder builder, {
+    Duration transitionDuration = const Duration(milliseconds: 300),
+    Curve pushCurve = Curves.easeInOut,
+    Curve popCurve = Curves.easeInOut,
+    Color? closedColor,
+    double? closedElevation,
+    ShapeBorder? closedShape,
+    Color? openColor,
+    double? openElevation,
+  }) {
+    return Navigator.of(context).push<T>(
+      BackSwipePageRoute<T>(
+        builder: (_) => builder(context),
+        transitionDuration: transitionDuration,
+        pushCurve: pushCurve,
+        popCurve: popCurve,
+      ),
+    );
+  }
+
+  /// 使用 BackSwipePageRoute 导航到新页面（带 Hero 动画支持）
+  ///
+  /// [context] BuildContext
+  /// [builder] 页面构建器
+  /// [heroTag] Hero 动画标签（必须确保唯一性）
+  /// [transitionDuration] 转场动画时长
+  /// [closedBuilder] 关闭状态的构建器（用于 Hero 动画的开始状态）
+  /// [onClosed] 页面关闭时的回调
+  static Future<T?> openContainerWithHero<T extends Object?>(
+    BuildContext context,
+    WidgetBuilder builder, {
+    required String heroTag,
+    Duration transitionDuration = const Duration(milliseconds: 300),
+    Curve pushCurve = Curves.easeInOut,
+    Curve popCurve = Curves.easeInOut,
+    WidgetBuilder? closedBuilder,
+    void Function(T?)? onClosed,
+  }) {
+    return Navigator.of(context).push<T>(
+      BackSwipePageRoute<T>(
+        builder: (_) => builder(context),
+        transitionDuration: transitionDuration,
+        pushCurve: pushCurve,
+        popCurve: popCurve,
+        settings: RouteSettings(
+          name: 'hero_route_$heroTag',
+          arguments: {
+            'heroTag': heroTag,
+            'closedBuilder': closedBuilder,
+            'onClosed': onClosed,
+          },
+        ),
+      ),
+    );
+  }
 }
 
 /// 扩展 BuildContext，提供便捷的导航方法
@@ -436,6 +511,54 @@ extension NavigationExtensions on BuildContext {
       this,
       builder,
       isScrollControlled: isScrollControlled,
+    );
+  }
+
+  /// 打开容器页面（替代 OpenContainer）
+  Future<T?> openContainer<T extends Object?>(
+    WidgetBuilder builder, {
+    Duration transitionDuration = const Duration(milliseconds: 300),
+    Curve pushCurve = Curves.easeInOut,
+    Curve popCurve = Curves.easeInOut,
+    Color? closedColor,
+    double? closedElevation,
+    ShapeBorder? closedShape,
+    Color? openColor,
+    double? openElevation,
+  }) {
+    return NavigationHelper.openContainer<T>(
+      this,
+      builder,
+      transitionDuration: transitionDuration,
+      pushCurve: pushCurve,
+      popCurve: popCurve,
+      closedColor: closedColor,
+      closedElevation: closedElevation,
+      closedShape: closedShape,
+      openColor: openColor,
+      openElevation: openElevation,
+    );
+  }
+
+  /// 打开容器页面（带 Hero 动画）
+  Future<T?> openContainerWithHero<T extends Object?>(
+    WidgetBuilder builder, {
+    required String heroTag,
+    Duration transitionDuration = const Duration(milliseconds: 300),
+    Curve pushCurve = Curves.easeInOut,
+    Curve popCurve = Curves.easeInOut,
+    WidgetBuilder? closedBuilder,
+    void Function(T?)? onClosed,
+  }) {
+    return NavigationHelper.openContainerWithHero<T>(
+      this,
+      builder,
+      heroTag: heroTag,
+      transitionDuration: transitionDuration,
+      pushCurve: pushCurve,
+      popCurve: popCurve,
+      closedBuilder: closedBuilder,
+      onClosed: onClosed,
     );
   }
 }

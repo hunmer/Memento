@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:Memento/plugins/tracker/screens/goal_detail_screen.dart';
 import 'package:provider/provider.dart';
@@ -88,20 +88,17 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: filteredGoals.length,
         itemBuilder: (context, index) {
           final goal = filteredGoals[index];
-          return OpenContainer(
-            transitionType: ContainerTransitionType.fade,
-            closedColor: Theme.of(context).colorScheme.surface,
-            openBuilder: (context, _) {
-              return ChangeNotifierProvider.value(
-                value: controller,
-                child: GoalDetailScreen(goal: goal),
-              );
-            },
-            closedBuilder: (context, VoidCallback openContainer) {
-              return GoalCard(
-                goal: goal,
-                controller: controller,
-                onTap: openContainer,
+          return GoalCard(
+            goal: goal,
+            controller: controller,
+            onTap: () {
+              NavigationHelper.openContainer(
+                context,
+                (context) => ChangeNotifierProvider.value(
+                  value: controller,
+                  child: GoalDetailScreen(goal: goal),
+                ),
+                closedColor: Theme.of(context).colorScheme.surface,
               );
             },
           );
@@ -154,20 +151,17 @@ class _HomeScreenState extends State<HomeScreen> {
               '${'tracker_goalDeleted'.tr} "${goal.name}"',
             );
           },
-          child: OpenContainer(
-            transitionType: ContainerTransitionType.fade,
-            closedColor: Theme.of(context).colorScheme.surface,
-            openBuilder: (context, _) {
-              return ChangeNotifierProvider.value(
-                value: controller,
-                child: GoalDetailScreen(goal: goal),
-              );
-            },
-            closedBuilder: (context, VoidCallback openContainer) {
-              return GoalCard(
-                goal: goal,
-                controller: controller,
-                onTap: openContainer,
+          child: GoalCard(
+            goal: goal,
+            controller: controller,
+            onTap: () {
+              NavigationHelper.openContainer(
+                context,
+                (context) => ChangeNotifierProvider.value(
+                  value: controller,
+                  child: GoalDetailScreen(goal: goal),
+                ),
+                closedColor: Theme.of(context).colorScheme.surface,
               );
             },
           ),

@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'notes_screen/folder_item.dart';
 import 'notes_screen/folder_operations.dart';
 import 'notes_screen/folder_selection_dialog.dart';
@@ -71,7 +71,7 @@ class _NotesMainViewState extends NotesMainViewState
         ),
       ],
       largeTitleActions: [
-       
+
       ],
       onCollapsed: (isCollapsed) {
         if (isCollapsed) {
@@ -238,30 +238,25 @@ class _NotesMainViewState extends NotesMainViewState
                   },
                 ),
                 const SizedBox(height: 16),
-                OpenContainer<bool>(
-                  transitionType: ContainerTransitionType.fade,
-                  openBuilder: (BuildContext context, VoidCallback _) {
-                    return NoteEditScreen(
-                      onSave: (title, content) async {
-                        await plugin.controller.createNote(
-                          title,
-                          content,
-                          currentFolderId,
-                        );
-                        loadCurrentFolder();
-                      },
-                    );
-                  },
-                  closedBuilder: (BuildContext context, VoidCallback openContainer) {
-                    return _buildFabChild(
-                      icon: Icons.note_add,
-                      label: 'notes_newNote'.tr,
-                      onPressed: () {
-                        setState(() {
-                          _fabExpanded = false;
-                        });
-                        openContainer();
-                      },
+                _buildFabChild(
+                  icon: Icons.note_add,
+                  label: 'notes_newNote'.tr,
+                  onPressed: () {
+                    setState(() {
+                      _fabExpanded = false;
+                    });
+                    NavigationHelper.openContainer(
+                      context,
+                      (context) => NoteEditScreen(
+                        onSave: (title, content) async {
+                          await plugin.controller.createNote(
+                            title,
+                            content,
+                            currentFolderId,
+                          );
+                          loadCurrentFolder();
+                        },
+                      ),
                     );
                   },
                 ),

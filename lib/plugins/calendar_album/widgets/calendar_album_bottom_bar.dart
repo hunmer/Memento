@@ -7,10 +7,10 @@ import 'package:Memento/plugins/calendar_album/screens/album_screen.dart';
 import 'package:Memento/plugins/calendar_album/screens/entry_editor_screen.dart';
 import 'package:Memento/plugins/calendar_album/widgets/tag_manager_dialog.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 
@@ -252,107 +252,107 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
                 MediaQuery.of(context).size.width *
                 0.15 *
                 0.25, // 向右偏移底部栏宽度的1/4
-            child: OpenContainer<void>(
-              transitionType: ContainerTransitionType.fade,
-              closedElevation: 0.0,
-              closedShape: const RoundedRectangleBorder(),
-              closedColor: Colors.transparent,
-              openBuilder: (context, _) {
-                if (_currentPage == 0) {
-                  // Tab0: 新建日记
-                  return MultiProvider(
-                    providers: [
-                      ChangeNotifierProvider.value(value: _calendarController),
-                      ChangeNotifierProvider.value(value: _tagController),
-                    ],
-                    child: EntryEditorScreen(
-                      initialDate: _calendarController.selectedDate,
-                      isEditing: false,
-                    ),
-                  );
-                } else if (_currentPage == 1) {
-                  // Tab1: 标签管理
-                  return Scaffold(
-                    body: TagManagerDialog(
-                      groups: _tagController.tagGroups,
-                      selectedTags: _tagController.selectedTags,
-                      onGroupsChanged: (newGroups) {
-                        _tagController.tagGroups = newGroups;
-                        // ignore: invalid_use_of_visible_for_testing_member
-                        _tagController.notifyListeners();
-                      },
-                    ),
-                  );
-                } else {
-                  // Tab2: 相册统计
-                  final allImages = _calendarController.getAllImages();
-                  return Scaffold(
-                    appBar: AppBar(
-                      title: Text('calendar_album_album_statistics'.tr),
-                    ),
-                    body: AlertDialog(
-                      title: Text('calendar_album_album_statistics'.tr),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('${'calendar_album_total_photo_count'.tr}: ${allImages.length}'),
-                          const SizedBox(height: 16),
-                          if (allImages.isNotEmpty) ...[
-                            Text(
-                              'calendar_album_recent_photos'.tr,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+            child: Builder(
+              builder: (context) {
+                return FloatingActionButton(
+                  elevation: 4,
+                  shape: const CircleBorder(),
+                  onPressed: () {
+                    NavigationHelper.openContainer(
+                      context,
+                      (context) {
+                        if (_currentPage == 0) {
+                          // Tab0: 新建日记
+                          return MultiProvider(
+                            providers: [
+                              ChangeNotifierProvider.value(value: _calendarController),
+                              ChangeNotifierProvider.value(value: _tagController),
+                            ],
+                            child: EntryEditorScreen(
+                              initialDate: _calendarController.selectedDate,
+                              isEditing: false,
                             ),
-                            const SizedBox(height: 8),
-                            SizedBox(
-                              height: 100,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: allImages.length.clamp(0, 10),
-                                itemBuilder: (context, index) {
-                                  final imageUrl = allImages[index];
-                                  return Container(
-                                    width: 80,
-                                    margin: const EdgeInsets.only(right: 8),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: Colors.grey.shade300),
+                          );
+                        } else if (_currentPage == 1) {
+                          // Tab1: 标签管理
+                          return Scaffold(
+                            body: TagManagerDialog(
+                              groups: _tagController.tagGroups,
+                              selectedTags: _tagController.selectedTags,
+                              onGroupsChanged: (newGroups) {
+                                _tagController.tagGroups = newGroups;
+                                // ignore: invalid_use_of_visible_for_testing_member
+                                _tagController.notifyListeners();
+                              },
+                            ),
+                          );
+                        } else {
+                          // Tab2: 相册统计
+                          final allImages = _calendarController.getAllImages();
+                          return Scaffold(
+                            appBar: AppBar(
+                              title: Text('calendar_album_album_statistics'.tr),
+                            ),
+                            body: AlertDialog(
+                              title: Text('calendar_album_album_statistics'.tr),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('${'calendar_album_total_photo_count'.tr}: ${allImages.length}'),
+                                  const SizedBox(height: 16),
+                                  if (allImages.isNotEmpty) ...[
+                                    Text(
+                                      'calendar_album_recent_photos'.tr,
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
                                     ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(7),
-                                      child: Image.network(
-                                        imageUrl,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      height: 100,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: allImages.length.clamp(0, 10),
+                                        itemBuilder: (context, index) {
+                                          final imageUrl = allImages[index];
                                           return Container(
-                                            color: Colors.grey.shade200,
-                                            child: const Icon(Icons.broken_image),
+                                            width: 80,
+                                            margin: const EdgeInsets.only(right: 8),
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(color: Colors.grey.shade300),
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(7),
+                                              child: Image.network(
+                                                imageUrl,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) {
+                                                  return Container(
+                                                    color: Colors.grey.shade200,
+                                                    child: const Icon(Icons.broken_image),
+                                                  );
+                                                },
+                                              ),
+                                            ),
                                           );
                                         },
                                       ),
                                     ),
-                                  );
-                                },
+                                  ],
+                                ],
                               ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: Text('calendar_album_close'.tr),
+                                ),
+                              ],
                             ),
-                          ],
-                        ],
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text('calendar_album_close'.tr),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              },
-              closedBuilder: (context, VoidCallback openContainer) {
-                return FloatingActionButton(
-                  elevation: 4,
-                  shape: const CircleBorder(),
-                  onPressed: openContainer,
+                          );
+                        }
+                      },
+                    );
+                  },
                   child: Icon(
                     _currentPage == 0
                         ? Icons.create

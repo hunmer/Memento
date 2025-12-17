@@ -6,7 +6,6 @@ import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:Memento/plugins/timer/views/add_timer_task_dialog.dart';
 import 'package:Memento/plugins/timer/views/timer_task_details_page.dart';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/timer/timer_plugin.dart';
@@ -78,13 +77,15 @@ class _TimerMainViewState extends State<TimerMainView> {
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       backgroundColor: Theme.of(context).colorScheme.surface,
       actions: [
-        OpenContainer<TimerTask>(
-          transitionType: ContainerTransitionType.fade,
-          openBuilder: (context, _) {
-            final groups = _plugin.timerController.getGroups();
-            return AddTimerTaskDialog(groups: groups);
-          },
-          onClosed: (newTask) async {
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () async {
+            final newTask = await NavigationHelper.openContainer<TimerTask>(
+              context,
+              (context) => AddTimerTaskDialog(
+                groups: _plugin.timerController.getGroups(),
+              ),
+            );
             if (newTask != null) {
               await _plugin.addTask(newTask);
               setState(() {
@@ -92,12 +93,6 @@ class _TimerMainViewState extends State<TimerMainView> {
                 _groupedTasks = groupBy(_tasks, (TimerTask task) => task.group);
               });
             }
-          },
-          closedBuilder: (context, VoidCallback openContainer) {
-            return IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: openContainer,
-            );
           },
         ),
       ],

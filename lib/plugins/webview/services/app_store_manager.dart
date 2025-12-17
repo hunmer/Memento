@@ -68,11 +68,22 @@ class AppStoreManager extends ChangeNotifier {
 
   /// 添加默认源
   Future<void> _addDefaultSource() async {
-    final defaultSource = AppStoreSource(
+    final localSource = AppStoreSource(
       id: const Uuid().v4(),
-      name: 'Default Store',
+      name: '本地开发仓库',
       url: 'http://127.0.0.1:8080/apps.json',
       baseUrl: 'http://127.0.0.1:8080',
+      createdAt: DateTime.now(),
+    );
+    await addSource(localSource);
+
+    final defaultSource = AppStoreSource(
+      id: const Uuid().v4(),
+      name: '网络仓库',
+      url:
+          'https://gitee.com/neysummer2000/memento/raw/master/mini_apps_store/apps.json',
+      baseUrl:
+          'https://gitee.com/neysummer2000/memento/raw/master/mini_apps_store0',
       isDefault: true,
       createdAt: DateTime.now(),
     );

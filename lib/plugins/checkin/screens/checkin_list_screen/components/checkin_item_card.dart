@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:Memento/plugins/checkin/screens/checkin_record_screen.dart';
@@ -57,37 +57,30 @@ class CheckinItemCard extends StatelessWidget {
           ),
         ],
       ),
-      child: OpenContainer<bool>(
-        transitionType: ContainerTransitionType.fade,
-        closedElevation: 0.0,
-        closedShape: const RoundedRectangleBorder(),
-        closedColor: Colors.transparent,
-        openBuilder: (BuildContext context, VoidCallback _) {
-          return CheckinRecordScreen(
-            checkinItem: item,
-            controller: controller,
-          );
-        },
-        closedBuilder: (BuildContext context, VoidCallback openContainer) {
-          return Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-            child: InkWell(
-              onTap: openContainer,
-              onLongPress: () {
-                controller.showItemOptionsDialog(item);
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: content,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () {
+            NavigationHelper.openContainer<bool>(
+              context,
+              (context) => CheckinRecordScreen(
+                checkinItem: item,
+                controller: controller,
               ),
-            ),
-          );
-        },
-        onClosed: (result) {
-          onStateChanged();
-        },
+            ).then((result) {
+              onStateChanged();
+            });
+          },
+          onLongPress: () {
+            controller.showItemOptionsDialog(item);
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: content,
+          ),
+        ),
       ),
     );
   }

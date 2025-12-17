@@ -95,6 +95,15 @@ class SettingsScreenController extends ChangeNotifier {
 
   void toggleTheme(context) => ThemeController.toggleTheme(context);
 
+  /// 直接设置主题，避免 toggleThemeMode 在三种模式间循环导致需要点击两次
+  void setTheme(BuildContext context, bool isDark) {
+    if (isDark) {
+      ThemeController.setDarkTheme(context);
+    } else {
+      ThemeController.setLightTheme(context);
+    }
+  }
+
   // 语言相关
   Future<void> toggleLanguage(context) async {
     await _baseController.showLanguageSelectionDialog(context);

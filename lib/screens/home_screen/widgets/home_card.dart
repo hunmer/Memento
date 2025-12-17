@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:animations/animations.dart';
+import 'package:full_swipe_back_gesture/full_swipe_back_gesture.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
@@ -42,41 +41,12 @@ class HomeCard extends StatelessWidget {
       return _buildCardContent(context, isWidgetItem);
     }
 
-    // 小组件卡片使用 OpenContainer 实现展开动画
+    // 小组件卡片使用 BackSwipePageRoute 支持全屏返回手势
     if (isWidgetItem) {
-      final widgetItem = item as HomeWidgetItem;
-      final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
-
-      return OpenContainer<bool>(
-        transitionType: ContainerTransitionType.fade,
-        transitionDuration: const Duration(milliseconds: 400),
-        openBuilder: (BuildContext context, VoidCallback _) {
-          if (widgetDef != null) {
-            final plugin = globalPluginManager.getPlugin(widgetDef.pluginId);
-            if (plugin != null) {
-              return Scaffold(body: plugin.buildMainView(context));
-            }
-          }
-          return Scaffold(
-            body: Center(
-              child: Text('screens_cannotOpenPlugin'.tr),
-            ),
-          );
-        },
-        closedElevation: 0,
-        closedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        closedColor: Colors.transparent,
-        openElevation: 0,
-        openColor: Theme.of(context).scaffoldBackgroundColor,
-        closedBuilder: (BuildContext context, VoidCallback openContainer) {
-          return GestureDetector(
-            onTap: onTap ?? openContainer,
-            onLongPress: onLongPress,
-            child: _buildCardContent(context, true),
-          );
-        },
+      return GestureDetector(
+        onTap: onTap ?? () => _openWidgetPlugin(context),
+        onLongPress: onLongPress,
+        child: _buildCardContent(context, true),
       );
     }
 
@@ -328,6 +298,26 @@ class HomeCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// 打开小组件对应的插件（使用 BackSwipePageRoute 支持全屏返回手势）
+  void _openWidgetPlugin(BuildContext context) {
+    final widgetItem = item as HomeWidgetItem;
+    final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
+    if (widgetDef != null) {
+      final plugin = globalPluginManager.getPlugin(widgetDef.pluginId);
+      if (plugin != null) {
+        // 记录插件打开历史
+        globalPluginManager.recordPluginOpen(plugin);
+        // 使用 BackSwipePageRoute 导航，支持全屏滑动返回
+        Navigator.of(context).push(
+          BackSwipePageRoute(
+            builder: (_) => plugin.buildMainView(context),
+            transitionDuration: const Duration(milliseconds: 300),
+          ),
+        );
+      }
+    }
   }
 
   /// 处理点击事件（用于文件夹）

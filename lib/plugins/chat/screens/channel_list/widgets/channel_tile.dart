@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:animations/animations.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/chat/utils/date_formatter.dart';
@@ -25,34 +25,21 @@ class ChannelTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OpenContainer<bool>(
-      transitionType: ContainerTransitionType.fade,
-      transitionDuration: const Duration(milliseconds: 400),
-      openBuilder: (BuildContext context, VoidCallback _) {
-        // 在打开之前执行回调（如设置当前频道）
-        onBeforeOpen?.call();
-        // 打开聊天页面
-        return ChatScreen(channel: channel);
-      },
-      closedElevation: 0,
-      closedShape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero, // 列表项使用直角
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: () {
+          // 在打开之前执行回调（如设置当前频道）
+          onBeforeOpen?.call();
+          // 打开聊天页面
+          NavigationHelper.openContainer(
+            context,
+            (context) => ChatScreen(channel: channel),
+            transitionDuration: const Duration(milliseconds: 400),
+          );
+        },
+        child: _buildTileContent(context),
       ),
-      closedColor: Colors.transparent,
-      openElevation: 0,
-      openColor: Theme.of(context).scaffoldBackgroundColor,
-      closedBuilder: (BuildContext context, VoidCallback openContainer) {
-        return Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            onTap: onTap ?? openContainer, // 如果提供了 onTap 则使用，否则使用 OpenContainer
-            child: _buildTileContent(context),
-          ),
-        );
-      },
-      onClosed: (result) {
-        // 从聊天页面返回时的回调
-      },
     );
   }
 

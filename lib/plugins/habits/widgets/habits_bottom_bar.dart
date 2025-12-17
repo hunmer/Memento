@@ -11,7 +11,7 @@ import 'package:Memento/core/widgets/keep_alive_wrapper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 
 /// Habits 插件的底部栏组件
@@ -228,56 +228,54 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
           ),
           Positioned(
             top: -25,
-            child: OpenContainer(
-              transitionType: ContainerTransitionType.fade,
-              closedColor: Theme.of(context).colorScheme.surface,
-              openBuilder: (context, _) {
-
+            child: FloatingActionButton(
+              backgroundColor: widget.plugin.color, // 使用插件主题色
+              elevation: 4,
+              shape: const CircleBorder(),
+              onPressed: () {
                 if (_currentPage == 0) {
                   // Tab0: 添加习惯
-                  return Scaffold(
-                    appBar: AppBar(
-                      title: Text('habits_newHabit'.tr),
-                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-                    ),
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    body: HabitForm(
-                      onSave: (habit) async {
-                        await _habitController.saveHabit(habit);
-                      },
+                  NavigationHelper.openContainer(
+                    context,
+                    (context) => Scaffold(
+                      appBar: AppBar(
+                        title: Text('habits_newHabit'.tr),
+                        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                      ),
+                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                      body: HabitForm(
+                        onSave: (habit) async {
+                          await _habitController.saveHabit(habit);
+                        },
+                      ),
                     ),
                   );
                 } else {
                   // Tab1: 添加技能
-                  return Scaffold(
-                    appBar: AppBar(
-                      title: Text('habits_createSkill'.tr),
-                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-                    ),
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    body: SkillForm(
-                      onSave: (skill) async {
-                        await _skillController.saveSkill(skill);
-                      },
+                  NavigationHelper.openContainer(
+                    context,
+                    (context) => Scaffold(
+                      appBar: AppBar(
+                        title: Text('habits_createSkill'.tr),
+                        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                      ),
+                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                      body: SkillForm(
+                        onSave: (skill) async {
+                          await _skillController.saveSkill(skill);
+                        },
+                      ),
                     ),
                   );
                 }
               },
-              closedBuilder: (context, VoidCallback openContainer) {
-                return FloatingActionButton(
-                  backgroundColor: widget.plugin.color, // 使用插件主题色
-                  elevation: 4,
-                  shape: const CircleBorder(),
-                  onPressed: openContainer,
-                  child: Icon(
-                    _currentPage == 0 ? Icons.add_task : Icons.add_reaction,
-                    color: widget.plugin.color.computeLuminance() < 0.5
-                        ? Colors.white
-                        : Colors.black,
-                    size: 32,
-                  ),
-                );
-              },
+              child: Icon(
+                _currentPage == 0 ? Icons.add_task : Icons.add_reaction,
+                color: widget.plugin.color.computeLuminance() < 0.5
+                    ? Colors.white
+                    : Colors.black,
+                size: 32,
+              ),
             ),
           ),
         ],

@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:Memento/plugins/openai/screens/agent_edit_screen.dart';
@@ -12,54 +12,51 @@ class AgentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OpenContainer<bool>(
-      transitionType: ContainerTransitionType.fade,
-      openBuilder: (BuildContext context, VoidCallback _) {
-        return AgentEditScreen(agent: agent);
-      },
-      closedBuilder: (BuildContext context, VoidCallback openContainer) {
-        return Material(
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: openContainer,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Agent Icon
-                Expanded(child: Center(child: _buildAgentIcon())),
+    return Material(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          NavigationHelper.openContainer(
+            context,
+            (context) => AgentEditScreen(agent: agent),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Agent Icon
+            Expanded(child: Center(child: _buildAgentIcon())),
 
-                // Agent Info
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        agent.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '服务商: ${agent.serviceProviderId}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      _buildTags(),
-                    ],
+            // Agent Info
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    agent.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    '服务商: ${agent.serviceProviderId}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  _buildTags(),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 

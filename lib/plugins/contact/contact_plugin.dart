@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 
@@ -963,23 +962,18 @@ class ContactMainViewState extends State<ContactMainView> {
           onPressed: _showFilterDialog,
         ),
         IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
-        OpenContainer(
-          transitionType: ContainerTransitionType.fade,
-          closedColor: Theme.of(context).colorScheme.surface,
-          openColor: Theme.of(context).scaffoldBackgroundColor,
-          openBuilder: (context, _) {
-            return ContactForm(
-              controller: _controller,
-              onSave: (savedContact) async {
-                await _controller.addContact(savedContact);
-                setState(() {});
-              },
-            );
-          },
-          closedBuilder: (context, VoidCallback openContainer) {
-            return IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: openContainer,
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: () {
+            NavigationHelper.openContainer(
+              context,
+              (context) => ContactForm(
+                controller: _controller,
+                onSave: (savedContact) async {
+                  await _controller.addContact(savedContact);
+                  setState(() {});
+                },
+              ),
             );
           },
         ),

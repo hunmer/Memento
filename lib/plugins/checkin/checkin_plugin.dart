@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
@@ -236,12 +236,15 @@ class _CheckinMainViewState extends State<CheckinMainView>
           ),
           Positioned(
             top: -25,
-            child: OpenContainer<CheckinItem>(
-              transitionType: ContainerTransitionType.fade,
-              openBuilder: (context, _) {
-                return const CheckinFormScreen();
-              },
-              onClosed: (newItem) async {
+            child: FloatingActionButton(
+              backgroundColor: checkinPlugin.color,
+              elevation: 4,
+              shape: const CircleBorder(),
+              onPressed: () async {
+                final newItem = await NavigationHelper.openContainer<CheckinItem>(
+                  context,
+                  (context) => const CheckinFormScreen(),
+                );
                 if (newItem != null) {
                   await checkinPlugin.addCheckinItem(newItem);
                   // 触发界面刷新
@@ -250,24 +253,13 @@ class _CheckinMainViewState extends State<CheckinMainView>
                   }
                 }
               },
-              closedElevation: 4,
-              closedShape: const CircleBorder(),
-              closedColor: checkinPlugin.color,
-              closedBuilder: (context, VoidCallback openContainer) {
-                return FloatingActionButton(
-                  backgroundColor: checkinPlugin.color,
-                  elevation: 4,
-                  shape: const CircleBorder(),
-                  onPressed: openContainer,
-                  child: Icon(
-                    Icons.add,
-                    color: checkinPlugin.color.computeLuminance() > 0.5
-                        ? Colors.black
-                        : Colors.white,
-                    size: 32,
-                  ),
-                );
-              },
+              child: Icon(
+                Icons.add,
+                color: checkinPlugin.color.computeLuminance() > 0.5
+                    ? Colors.black
+                    : Colors.white,
+                size: 32,
+              ),
             ),
           ),
         ],

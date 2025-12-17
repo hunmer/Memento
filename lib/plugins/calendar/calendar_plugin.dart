@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:animations/animations.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart' as syncfusion;
@@ -1106,26 +1105,19 @@ class _CalendarMainViewState extends State<CalendarMainView> {
               Positioned(
                 right: 16,
                 bottom: 16,
-                child: OpenContainer<bool>(
-                  transitionType: ContainerTransitionType.fade,
-                  tappable: false,
-                  closedElevation: 0.0,
-                  closedShape: const RoundedRectangleBorder(),
-                  closedColor: Colors.transparent,
-                  openBuilder: (BuildContext context, VoidCallback _) {
-                    return EventEditPage(
-                      initialDate: plugin.controller.selectedDate,
-                      onSave: (event) {
-                        plugin.controller.addEvent(event);
-                      },
+                child: FloatingActionButton(
+                  onPressed: () {
+                    NavigationHelper.openContainer<bool>(
+                      context,
+                      (context) => EventEditPage(
+                        initialDate: plugin.controller.selectedDate,
+                        onSave: (event) {
+                          plugin.controller.addEvent(event);
+                        },
+                      ),
                     );
                   },
-                  closedBuilder: (BuildContext context, VoidCallback openContainer) {
-                    return FloatingActionButton(
-                      onPressed: openContainer,
-                      child: const Icon(Icons.add),
-                    );
-                  },
+                  child: const Icon(Icons.add),
                 ),
               ),
             ],
