@@ -1,148 +1,244 @@
 # 💬 Chat 聊天插件
 
-![Chat Plugin](/icon.png)
-
 ## 插件简介
 
-Chat 聊天插件是 Memento 的核心功能之一，集成了多频道聊天和 AI 对话功能。无论是日常交流还是获取 AI 助手支持，Chat 插件都能为您提供便捷的沟通体验。
+Chat 聊天插件是 Memento 的核心功能模块之一，提供类似微信文件助手的多频道聊天体验，并集成 AI 对话功能。支持文本、图片、视频、音频、文件、Markdown 等多种消息类型。
+
+**插件 ID**: `chat`
 
 ## 主要功能
 
-### 🗣️ 多频道聊天
+### 多频道管理
 
-- **频道管理**：创建、编辑、删除聊天频道
-- **消息分类**：按主题或用途组织聊天内容
-- **消息搜索**：快速查找历史消息记录
-- **消息同步**：跨设备同步聊天记录
+- **独立频道**：创建多个独立的聊天频道
+- **频道定制**：自定义频道名称、头像、主题色
+- **消息预览**：频道列表显示最后一条消息
+- **未读计数**：实时显示未读消息数量
 
-### 🤖 AI 对话集成
+### 丰富消息类型
 
-- **智能助手**：内置多种 AI 模型支持
-- **上下文理解**：AI 记住对话历史
-- **多轮对话**：支持复杂的多轮交互
-- **快捷指令**：预设常用 AI 指令模板
+| 消息类型 | 说明 |
+|---------|------|
+| `text` | 文本消息 |
+| `image` | 图片消息 |
+| `video` | 视频消息 |
+| `audio` | 音频消息 |
+| `file` | 文件消息 |
+| `markdown` | Markdown 格式 |
 
-### 📝 消息功能
+### AI 对话集成
 
-- **富文本支持**：发送带格式的消息
-- **图片分享**：快速分享图片和媒体文件
-- **文件传输**：支持多种文件格式
-- **语音消息**：录制和播放语音消息
+- **@触发**：在消息中输入 `@AI` 或 `@助手名称` 触发 AI 对话
+- **上下文理解**：自动构建最近 10 条消息作为上下文
+- **多助手支持**：通过 OpenAI 插件连接多种 AI 服务
 
-### 🔔 通知管理
+### 时间线视图
 
-- **智能提醒**：重要消息优先提醒
-- **免打扰模式**：设置静音时段
-- **推送通知**：及时接收新消息
-- **消息状态**：已读/未读状态显示
+- **跨频道聚合**：汇总所有频道的消息
+- **按时间排序**：消息按时间倒序展示
+- **分页加载**：每页 20 条，支持无限滚动
+- **高级筛选**：按频道、用户、消息类型筛选
+- **全文搜索**：快速查找历史消息
 
-## 使用场景
+### 消息管理
 
-### 1. 日常沟通
-
-与朋友、家人或同事进行日常聊天，分享生活点滴。
-
-### 2. 工作协作
-
-创建工作频道，与团队成员讨论项目进展。
-
-### 3. AI 咨询
-
-向 AI 助手提问，获取专业建议或信息查询。
-
-### 4. 学习交流
-
-创建学习小组，与同伴讨论学术问题。
+- **收藏消息**：标记重要消息以便后续查看
+- **固定消息**：置顶重要消息
+- **回复功能**：引用并回复特定消息
+- **删除消息**：管理不需要的聊天内容
 
 ## 快速开始
 
 ### 创建频道
 
 1. 点击「新建频道」按钮
-2. 输入频道名称和描述
-3. 选择频道类型（公开/私密）
+2. 输入频道名称
+3. 可选设置头像和主题色
 4. 点击「创建」完成
 
-### 开始聊天
+### 发送消息
 
 1. 选择目标频道
-2. 在输入框输入消息
-3. 按 Enter 键或点击发送按钮
-4. 查看消息历史记录
+2. 在输入框输入消息内容
+3. 点击发送按钮或按 Enter 键
+4. 支持通过附件按钮发送图片、视频、音频、文件
 
 ### 使用 AI 助手
 
-1. 在任意频道输入 `@ai` 或 `/ask`
+1. 在消息中输入 `@AI` 或特定助手名称
 2. 输入您的问题
-3. AI 会自动回复并提供答案
-4. 可以继续追问或展开讨论
+3. 系统自动调用 AI 并回复
+4. AI 回复会作为新消息出现在对话中
 
-## 高级功能
+## 服务架构
+
+插件采用 **Service 层模式**，业务逻辑与 UI 分离：
+
+| 服务 | 职责 |
+|------|------|
+| `ChannelService` | 频道增删改查、消息加载 |
+| `MessageService` | 消息发送、编辑、删除、收藏 |
+| `UserService` | 用户管理（自己 + AI 用户） |
+| `SettingsService` | 插件配置（主题、排序等） |
+| `UIService` | UI 组件构建（卡片视图、设置界面） |
+| `FileService` | 文件上传、预览 |
+
+## 核心 API
+
+### 频道操作
+
+```dart
+// 获取所有频道
+Future<List<Channel>> getChannels();
+
+// 创建频道
+Future<Channel> createChannel(String name, {String? avatar, Color? color});
+
+// 删除频道
+Future<void> deleteChannel(String channelId);
+
+// 加载频道消息
+Future<List<Message>> getChannelMessages(String channelId, {int? limit});
+```
 
 ### 消息操作
 
-- **回复消息**：引用并回复特定消息
-- **转发消息**：将消息分享到其他频道
-- **收藏消息**：标记重要消息以便后续查看
-- **删除消息**：管理不需要的聊天内容
+```dart
+// 发送文本消息
+Future<Message> sendTextMessage(String channelId, String content, {String? replyToId});
 
-### 搜索与过滤
+// 发送文件消息
+Future<Message> sendFileMessage(String channelId, String filePath, FileType fileType);
 
-- **关键词搜索**：快速找到相关消息
-- **日期筛选**：按时间范围查看消息
-- **用户筛选**：查看特定用户的发言
-- **媒体筛选**：只显示图片、文件等
+// 删除消息
+Future<void> deleteMessage(String channelId, String messageId);
 
-### AI 功能定制
+// 收藏/取消收藏
+Future<void> toggleFavorite(String channelId, String messageId);
 
-- **模型选择**：选择不同的 AI 模型
-- **提示词优化**：自定义 AI 回答风格
-- **对话模板**：保存常用对话模板
-- **快捷键设置**：为常用操作设置快捷键
+// 固定/取消固定
+Future<void> togglePinned(String channelId, String messageId);
+```
+
+### 用户操作
+
+```dart
+// 获取当前用户
+User getCurrentUser();
+
+// 获取AI用户
+User getAIUser();
+
+// 更新用户信息
+Future<void> updateUser(User user);
+```
+
+## 数据模型
+
+### Channel (频道)
+
+```dart
+class Channel {
+  String id;              // UUID
+  String name;            // 频道名称
+  String? avatar;         // 头像路径
+  Color? color;           // 主题色
+  DateTime createdAt;     // 创建时间
+  DateTime updatedAt;     // 更新时间
+  Message? lastMessage;   // 最后一条消息
+  int unreadCount;        // 未读数量
+}
+```
+
+**存储路径**: `chat/channels/<channelId>.json`
+
+### Message (消息)
+
+```dart
+class Message {
+  String id;              // UUID
+  String channelId;       // 所属频道
+  String content;         // 消息内容
+  String userId;          // 发送者ID
+  MessageType type;       // 消息类型
+  DateTime timestamp;     // 发送时间
+  bool isFavorite;        // 是否收藏
+  bool isPinned;          // 是否固定
+  String? replyToId;      // 回复的消息ID
+  Map<String, dynamic>? metadata; // 额外元数据
+}
+```
+
+**存储路径**: `chat/messages/<channelId>/<messageId>.json`
+
+### User (用户)
+
+```dart
+class User {
+  String id;              // UUID
+  String name;            // 用户名
+  String? avatar;         // 头像路径
+  bool isAI;              // 是否为AI
+}
+```
+
+**存储路径**: `chat/users/<userId>.json`
+
+## 配置说明
+
+**配置路径**: `configs/chat/settings.json`
+
+```json
+{
+  "showTimestamp": true,
+  "messageGrouping": "byDate",
+  "defaultAvatar": "assets/icon/default_user.png"
+}
+```
+
+## 外部依赖
+
+- `image_picker`: 图片/视频选择
+- `file_picker`: 文件选择
+- `audioplayers`: 音频播放
+- `record`: 音频录制
+- `flutter_quill`: Markdown 渲染
+- `photo_view`: 图片查看器
+- `media_kit`: 视频播放
+
+## 插件依赖
+
+- **OpenAI Plugin**: AI 对话功能
+- **Core Event System**: 消息事件广播
+
+## 常见问题
+
+### Q: 如何添加新的消息类型？
+
+1. 在 `models/message.dart` 的 `MessageType` 枚举中添加类型
+2. 在 `MessageContent` 组件中添加渲染逻辑
+3. 在 `MessageInputActions` 中添加触发按钮
+
+### Q: 如何自定义消息气泡样式？
+
+修改 `screens/chat_screen/widgets/message_bubble.dart` 中的样式配置。
+
+### Q: 消息数量过多导致卡顿怎么办？
+
+优化方向：
+1. 使用虚拟滚动（`ListView.builder` 已部分实现）
+2. 限制内存中的消息数量
+3. 添加消息归档功能（30天后自动归档）
+
+### Q: 如何同步聊天记录到其他设备？
+
+在设置中开启 WebDAV 同步功能，聊天记录会自动同步到云端。
 
 ## 数据安全
 
 - **本地存储**：聊天记录优先本地保存
-- **端到端加密**：敏感对话支持加密传输
 - **云端同步**：可选的 WebDAV 同步备份
-- **隐私保护**：严格遵循数据隐私政策
-
-## 技巧与建议
-
-### 提升聊天效率
-
-1. **使用频道分类**：按主题创建不同频道
-2. **利用标签功能**：为重要消息添加标签
-3. **设置快捷键**：熟悉常用操作的快捷键
-4. **定期清理**：删除过期或不必要的历史消息
-
-### AI 使用技巧
-
-1. **明确问题**：尽量清晰地描述您的问题
-2. **分步提问**：复杂问题可以分解为多个步骤
-3. **利用上下文**：AI 会记住之前的对话内容
-4. **尝试不同模型**：不同模型擅长不同领域
-
-## 常见问题
-
-**Q: 如何同步聊天记录到其他设备？**
-A: 在设置中开启 WebDAV 同步功能，您的聊天记录会自动同步到云端。
-
-**Q: AI 助手回答不准确怎么办？**
-A: 可以尝试更换 AI 模型或优化问题表述，部分问题可能需要更具体的描述。
-
-**Q: 如何导出聊天记录？**
-A: 进入频道设置，选择「导出数据」，可以选择 JSON 或文本格式导出。
-
-**Q: 可以同时使用多个 AI 模型吗？**
-A: 是的，您可以在对话中切换不同的 AI 模型，每个模型都有其独特的优势。
-
-## 更新日志
-
-- **v1.1.8**：新增 AI 多模型支持
-- **v1.1.5**：优化消息搜索功能
-- **v1.1.0**：添加 WebDAV 同步
-- **v1.0.0**：首次发布，基础聊天功能
+- **隐私保护**：数据掌控在用户手中
 
 ---
 

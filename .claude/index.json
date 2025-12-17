@@ -1,23 +1,23 @@
 {
   "projectName": "Memento",
-  "projectDescription": "跨平台个人助手应用，集成聊天、日记、活动追踪等18+功能插件",
-  "lastScanTimestamp": "2025-11-13T04:06:10+00:00",
+  "projectDescription": "跨平台个人助手应用，集成聊天、日记、活动追踪等25+功能插件",
+  "lastScanTimestamp": "2025-12-17T11:17:49+08:00",
   "framework": "Flutter 3.7+",
   "language": "Dart",
   "platforms": ["Android", "iOS", "Web", "Windows", "macOS", "Linux"],
   "architecture": "插件化架构 (Plugin-based)",
   "coverage": {
-    "totalFiles": 500,
-    "scannedFiles": 350,
-    "coveragePercentage": 70,
-    "status": "initial_scan_completed"
+    "totalFiles": 800,
+    "scannedFiles": 580,
+    "coveragePercentage": 72.5,
+    "status": "incremental_update_completed"
   },
   "modules": [
     {
       "name": "core",
       "path": "lib/core",
       "type": "infrastructure",
-      "description": "核心基础设施：插件系统、存储、配置、事件",
+      "description": "核心基础设施：插件系统、存储、配置、事件、悬浮球、动作系统",
       "entryPoints": [
         "lib/core/plugin_manager.dart",
         "lib/core/storage/storage_manager.dart",
@@ -25,7 +25,9 @@
       ],
       "keyFiles": [
         "lib/core/plugin_base.dart",
-        "lib/core/event/event.dart"
+        "lib/core/event/event_manager.dart",
+        "lib/core/action/action_manager.dart",
+        "lib/core/floating_ball/floating_ball_manager.dart"
       ],
       "documentation": "lib/core/CLAUDE.md",
       "coverage": {
@@ -88,7 +90,7 @@
       "name": "diary",
       "path": "lib/plugins/diary",
       "type": "plugin",
-      "description": "日记插件：日历视图、Markdown编辑",
+      "description": "日记插件：日历视图、Markdown编辑、相册集成",
       "entryPoints": ["lib/plugins/diary/diary_plugin.dart"],
       "models": ["DiaryEntry"],
       "documentation": null,
@@ -103,7 +105,7 @@
       "name": "activity",
       "path": "lib/plugins/activity",
       "type": "plugin",
-      "description": "活动记录插件：时间轴、标签、统计",
+      "description": "活动记录插件：时间轴、标签、统计、数据同步",
       "entryPoints": ["lib/plugins/activity/activity_plugin.dart"],
       "interfaces": ["ActivityService"],
       "models": ["ActivityRecord", "TagGroup"],
@@ -119,7 +121,7 @@
       "name": "notes",
       "path": "lib/plugins/notes",
       "type": "plugin",
-      "description": "笔记插件：无限层级、Markdown",
+      "description": "笔记插件：无限层级、Markdown、全文搜索",
       "entryPoints": ["lib/plugins/notes/notes_plugin.dart"],
       "models": ["Note", "Folder"],
       "documentation": null,
@@ -149,9 +151,9 @@
       "name": "bill",
       "path": "lib/plugins/bill",
       "type": "plugin",
-      "description": "账单插件：多账户、收支统计",
+      "description": "账单插件：多账户、收支统计、订阅管理",
       "entryPoints": ["lib/plugins/bill/bill_plugin.dart"],
-      "models": ["Bill", "Account", "BillStatistics"],
+      "models": ["Bill", "Account", "BillStatistics", "Subscription"],
       "documentation": null,
       "coverage": {
         "hasTests": false,
@@ -179,7 +181,7 @@
       "name": "calendar",
       "path": "lib/plugins/calendar",
       "type": "plugin",
-      "description": "日历插件：事件聚合、多视图",
+      "description": "日历插件：事件聚合、多视图、设备日历同步",
       "entryPoints": ["lib/plugins/calendar/calendar_plugin.dart"],
       "models": ["Event"],
       "documentation": null,
@@ -342,6 +344,92 @@
       }
     },
     {
+      "name": "agent_chat",
+      "path": "lib/plugins/agent_chat",
+      "type": "plugin",
+      "description": "Agent聊天插件：工具调用、语音识别、智能对话",
+      "entryPoints": ["lib/plugins/agent_chat/agent_chat_plugin.dart"],
+      "models": ["ToolCallStep", "ToolConfig"],
+      "services": [
+        "ToolService",
+        "SpeechRecognitionService",
+        "TokenCounterService"
+      ],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "webview",
+      "path": "lib/plugins/webview",
+      "type": "plugin",
+      "description": "WebView插件：内置浏览器、应用商店、JS桥接",
+      "entryPoints": ["lib/plugins/webview/webview_plugin.dart"],
+      "models": ["WebViewCard", "WebViewTab", "WebViewSettings"],
+      "services": [
+        "DownloadManager",
+        "CardManager",
+        "AppStoreManager",
+        "JSToolService"
+      ],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "tts",
+      "path": "lib/plugins/tts",
+      "type": "plugin",
+      "description": "文本转语音插件：多语言支持",
+      "entryPoints": ["lib/plugins/tts/tts_plugin.dart"],
+      "models": [],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "scripts_center",
+      "path": "lib/plugins/scripts_center",
+      "type": "plugin",
+      "description": "脚本中心插件：自定义脚本执行",
+      "entryPoints": ["lib/plugins/scripts_center/scripts_center_plugin.dart"],
+      "models": ["ScriptExecutionResult", "ScriptTrigger", "ScriptInput", "ScriptFolder"],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
+      "name": "nfc",
+      "path": "lib/plugins/nfc",
+      "type": "plugin",
+      "description": "NFC插件：近场通信读写",
+      "entryPoints": ["lib/plugins/nfc/nfc_plugin.dart"],
+      "models": [],
+      "documentation": null,
+      "coverage": {
+        "hasTests": false,
+        "hasDocumentation": false,
+        "interfacesDefined": true,
+        "dataMapped": true
+      }
+    },
+    {
       "name": "screens",
       "path": "lib/screens",
       "type": "ui_layer",
@@ -410,14 +498,27 @@
       ".git/**",
       "*.log",
       "*.lock",
-      "*.bin"
+      "*.bin",
+      "*.png",
+      "*.jpg",
+      "*.jpeg",
+      "*.gif",
+      "*.mp4",
+      "*.zip",
+      "*.tar",
+      "*.gz",
+      "*.pdf"
     ],
     "ignoredDirectories": [
       "build/windows/x64",
       "build/flutter_assets",
-      ".dart_tool"
+      ".dart_tool",
+      "assets/icons/material",
+      "android/app/debug",
+      "android/app/profile",
+      "android/app/release"
     ],
-    "totalIgnored": 150
+    "totalIgnored": 500
   },
   "gaps": [
     {
@@ -430,7 +531,7 @@
       "module": "all_plugins",
       "type": "missing_documentation",
       "priority": "medium",
-      "description": "除 chat 和 openai 外，其他 16 个插件缺少模块级文档"
+      "description": "除 chat 和 openai 外，其他 23 个插件缺少模块级文档"
     },
     {
       "module": "screens",
@@ -449,26 +550,37 @@
       "type": "missing_integration_tests",
       "priority": "medium",
       "description": "项目缺少集成测试，建议为关键用户流程（创建频道、发送消息、AI对话）添加测试"
+    },
+    {
+      "module": "core",
+      "type": "missing_documentation",
+      "priority": "high",
+      "description": "新增的核心功能（动作系统、悬浮球、同步服务）缺少详细文档"
     }
   ],
   "nextSteps": [
     {
       "priority": 1,
-      "action": "为剩余 16 个插件生成 CLAUDE.md 模块文档",
-      "estimatedFiles": 16
+      "action": "为剩余 23 个插件生成 CLAUDE.md 模块文档",
+      "estimatedFiles": 23
     },
     {
       "priority": 2,
+      "action": "补充 lib/core 的新功能文档（动作系统、悬浮球等）",
+      "estimatedFiles": 5
+    },
+    {
+      "priority": 3,
       "action": "补充 lib/screens 和 lib/widgets 的架构文档",
       "estimatedFiles": 2
     },
     {
-      "priority": 3,
+      "priority": 4,
       "action": "深度扫描各插件的 screens/ 和 services/ 目录，补充关键接口说明",
-      "estimatedFiles": 50
+      "estimatedFiles": 60
     },
     {
-      "priority": 4,
+      "priority": 5,
       "action": "为核心层添加单元测试框架和示例测试",
       "estimatedFiles": 5
     }
@@ -476,8 +588,16 @@
   "metadata": {
     "scanMethod": "adaptive_3_phase",
     "truncated": false,
-    "reasonForStop": "completed_initial_scan",
-    "toolCallsUsed": 30,
-    "estimatedRemainingWork": "20% - 需补充插件文档和测试"
+    "reasonForStop": "incremental_update_completed",
+    "toolCallsUsed": 40,
+    "estimatedRemainingWork": "30% - 需补充插件文档和测试",
+    "newFeaturesIdentified": [
+      "动作系统 (Action System)",
+      "悬浮球系统 (Floating Ball)",
+      "WebView 插件",
+      "Agent Chat 插件",
+      "脚本中心插件",
+      "数据同步服务 (Sync Services)"
+    ]
   }
 }
