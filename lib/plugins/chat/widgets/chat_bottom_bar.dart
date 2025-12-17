@@ -27,11 +27,15 @@ class _ChatBottomBarState extends State<ChatBottomBar>
   double _bottomBarHeight = 60; // 默认底部栏高度
   final GlobalKey _bottomBarKey = GlobalKey();
 
-  // 使用插件主题色和辅助色
-  final List<Color> _colors = [
-    Colors.indigoAccent, // Tab0 - 频道列表 (插件主色)
-    Colors.blue.shade400, // Tab1 - 时间线
-  ];
+  // 使用插件主题色和辅助色（动态计算）
+  List<Color> _getColors(BuildContext context) {
+    final Color pluginColor = widget.plugin.color;
+    final Color secondaryColor = Theme.of(context).colorScheme.secondary;
+    return [
+      pluginColor, // Tab0 - 频道列表 (插件主色)
+      secondaryColor, // Tab1 - 时间线
+    ];
+  }
 
   @override
   void initState() {
@@ -58,7 +62,8 @@ class _ChatBottomBarState extends State<ChatBottomBar>
   void _scheduleBottomBarHeightMeasurement() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _bottomBarKey.currentContext != null) {
-        final RenderBox renderBox = _bottomBarKey.currentContext!.findRenderObject() as RenderBox;
+        final RenderBox renderBox =
+            _bottomBarKey.currentContext!.findRenderObject() as RenderBox;
         final newHeight = renderBox.size.height;
         if (_bottomBarHeight != newHeight) {
           setState(() {
@@ -82,16 +87,17 @@ class _ChatBottomBarState extends State<ChatBottomBar>
     Navigator.of(context).push(
       ModalSheetRoute(
         swipeDismissible: true,
-        builder: (context) => Sheet(
-          decoration: MaterialSheetDecoration(
-            size: SheetSize.fit,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20),
+        builder:
+            (context) => Sheet(
+              decoration: MaterialSheetDecoration(
+                size: SheetSize.fit,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+                clipBehavior: Clip.antiAlias,
+              ),
+              child: CreateChannelSheet(plugin: widget.plugin),
             ),
-            clipBehavior: Clip.antiAlias,
-          ),
-          child: CreateChannelSheet(plugin: widget.plugin),
-        ),
       ),
     );
   }
@@ -103,9 +109,11 @@ class _ChatBottomBarState extends State<ChatBottomBar>
       elevation: 4,
       shape: const CircleBorder(),
       onPressed: _showCreateChannelSheet,
-      child: const Icon(
+      child: Icon(
         Icons.add_comment,
-        color: Colors.white,
+        color: widget.plugin.color.computeLuminance() < 0.5
+            ? Colors.white
+            : Colors.black,
         size: 32,
       ),
     );
@@ -118,9 +126,11 @@ class _ChatBottomBarState extends State<ChatBottomBar>
       elevation: 4,
       shape: const CircleBorder(),
       onPressed: _createNewChat,
-      child: const Icon(
+      child: Icon(
         Icons.chat,
-        color: Colors.white,
+        color: widget.plugin.color.computeLuminance() < 0.5
+            ? Colors.white
+            : Colors.black,
         size: 32,
       ),
     );
@@ -129,8 +139,11 @@ class _ChatBottomBarState extends State<ChatBottomBar>
   @override
   Widget build(BuildContext context) {
     _scheduleBottomBarHeightMeasurement();
+    final colors = _getColors(context);
+    final Color currentColor =
+        _currentPage < colors.length ? colors[_currentPage] : colors.first;
     final Color unselectedColor =
-        _colors[_currentPage].computeLuminance() < 0.5
+        currentColor.computeLuminance() < 0.5
             ? Colors.black.withOpacity(0.6)
             : Colors.white.withOpacity(0.6);
     final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
@@ -152,7 +165,7 @@ class _ChatBottomBarState extends State<ChatBottomBar>
               },
               icon: Icon(
                 Icons.keyboard_arrow_up,
-                color: _colors[_currentPage],
+                color: currentColor,
                 size: width,
               ),
             ),
@@ -163,9 +176,7 @@ class _ChatBottomBarState extends State<ChatBottomBar>
       showIcon: true,
       width: MediaQuery.of(context).size.width * 0.85,
       barColor:
-          _colors[_currentPage].computeLuminance() > 0.5
-              ? Colors.black
-              : Colors.white,
+          currentColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
       start: 2,
       end: 0,
       offset: 12,
@@ -174,19 +185,16 @@ class _ChatBottomBarState extends State<ChatBottomBar>
       iconWidth: 35,
       reverse: false,
       barDecoration: BoxDecoration(
-        color: _colors[_currentPage].withOpacity(0.1),
+        color: currentColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: _colors[_currentPage].withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: currentColor.withOpacity(0.3), width: 1),
       ),
       iconDecoration: BoxDecoration(
-        color: _colors[_currentPage].withOpacity(0.8),
+        color: currentColor.withOpacity(0.8),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: _colors[_currentPage].withOpacity(0.3),
+            color: currentColor.withOpacity(0.3),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -244,15 +252,10 @@ class _ChatBottomBarState extends State<ChatBottomBar>
             overlayColor: WidgetStateProperty.all(Colors.transparent),
             indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
             indicator: UnderlineTabIndicator(
-              borderSide: BorderSide(
-                color:
-                    _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
-                width: 4,
-              ),
+              borderSide: BorderSide(color: currentColor, width: 4),
               insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             ),
-            labelColor:
-                _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
+            labelColor: currentColor,
             unselectedLabelColor: unselectedColor,
             tabs: [
               Tab(
@@ -267,9 +270,10 @@ class _ChatBottomBarState extends State<ChatBottomBar>
           ),
           Positioned(
             top: -25,
-            child: _currentPage == 0
-                ? _buildCreateChannelFAB()
-                : _buildNewChatFAB(),
+            child:
+                _currentPage == 0
+                    ? _buildCreateChannelFAB()
+                    : _buildNewChatFAB(),
           ),
         ],
       ),

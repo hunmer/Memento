@@ -4,6 +4,9 @@
 
 # 目标追踪插件 (Tracker Plugin) - 模块文档
 
+> **变更记录 (Changelog)**
+> - **2025-12-17T12:10:45+08:00**: 增量更新 - 新增 JS Bridge API、Repository 模式、UseCase 架构等功能的详细说明
+
 ## 模块职责
 
 目标追踪插件是 Memento 的核心目标管理模块，提供：
@@ -17,6 +20,9 @@
 - **计时器功能**：内置计时器，适合时间类目标记录
 - **统计展示**：今日完成数、本月完成数、整体进度统计
 - **事件系统**：广播记录添加事件，支持插件间协作
+- **JS Bridge API**：提供 JavaScript 接口供 WebView 和脚本调用
+- **Repository 模式**：使用仓储模式管理数据访问
+- **UseCase 架构**：业务逻辑与数据分离
 
 ---
 
@@ -27,26 +33,25 @@
 **文件**: `tracker_plugin.dart`
 
 ```dart
-class TrackerPlugin extends PluginBase with ChangeNotifier {
+class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     @override
     String get id => 'tracker';
 
     @override
     Future<void> initialize() async {
-        // 初始化通知系统
-        await TrackerNotificationUtils.initialize();
+        // 初始化 UseCase（需要 storage）
+        _trackerUseCase = TrackerUseCase(
+            ClientTrackerRepository(storage: storage, pluginId: id),
+        );
 
         // 加载目标和记录数据
         await _controller.loadInitialData();
-    }
 
-    @override
-    Future<void> registerToApp(
-        PluginManager pluginManager,
-        ConfigManager configManager,
-    ) async {
-        // 插件已在 initialize() 中完成初始化
-    // 这里可以添加额外的应用级注册逻辑
+        // 注册 JS API
+        await registerJSAPI();
+
+        // 注册数据选择器
+        _registerDataSelectors();
     }
 }
 ```
@@ -54,7 +59,8 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
 **特性**：
 - 单例模式（通过 `TrackerPlugin.instance` 获取）
 - 使用 `ChangeNotifier` 支持状态通知
-- 自动初始化通知系统
+- 集成 `JSBridgePlugin` 提供 JavaScript API
+- 使用 Repository + UseCase 架构模式
 
 ### 主界面入口
 
@@ -81,6 +87,11 @@ int getMonthCompletedGoals();
 int getMonthAddedGoals();
 
 // 获取今日记录数
+int getTodayRecordCount();
+
+// 小组件统计接口
+int getGoalCount();
+int getActiveGoalCount();
 int getTodayRecordCount();
 ```
 
@@ -111,6 +122,112 @@ Stream<List<Record>> watchRecordsForGoal(String goalId);
 double calculateProgress(Goal goal);
 double calculateOverallProgress();
 int getGoalCount();
+```
+
+### JS Bridge API
+
+**文件**: `tracker_plugin.dart` (defineJSAPI 方法)
+
+Tracker 插件通过 JS Bridge 提供以下 JavaScript API：
+
+#### 目标相关 API
+
+```javascript
+// 获取所有目标（支持分页和筛选）
+memento.tracker.getGoals({
+    status: 'active',    // 可选：'active'/'completed'
+    group: '学习',       // 可选：分组名称
+    offset: 0,          // 可选：分页偏移
+    count: 100          // 可选：分页大小
+});
+
+// 获取单个目标
+memento.tracker.getGoal({
+    goalId: '1234567890'
+});
+
+// 创建目标
+memento.tracker.createGoal({
+    name: '每日阅读',
+    icon: '57455',
+    unitType: '分钟',
+    targetValue: 30,
+    group: '学习',
+    dateSettings: {
+        type: 'daily'
+    },
+    isLoopReset: true
+});
+
+// 更新目标
+memento.tracker.updateGoal({
+    goalId: '1234567890',
+    updateJson: {
+        name: '每日阅读2小时',
+        targetValue: 120
+    }
+});
+
+// 删除目标
+memento.tracker.deleteGoal({
+    goalId: '1234567890'
+});
+```
+
+#### 记录相关 API
+
+```javascript
+// 记录数据
+memento.tracker.recordData({
+    goalId: '1234567890',
+    value: 30,
+    note: '阅读技术文档',
+    recordedAt: '2025-01-15T09:30:00.000Z',  // 可选
+    durationSeconds: 1800                     // 可选
+});
+
+// 获取记录列表（支持分页）
+memento.tracker.getRecords({
+    goalId: '1234567890',
+    offset: 0,
+    count: 50
+});
+
+// 删除记录
+memento.tracker.deleteRecord({
+    recordId: '1736950800123'
+});
+```
+
+#### 统计相关 API
+
+```javascript
+// 获取目标进度
+memento.tracker.getProgress({
+    goalId: '1234567890'
+});
+// 返回：{ goalId, currentValue, targetValue, progress, percentage, isCompleted }
+
+// 获取统计信息
+memento.tracker.getStats();  // 全局统计
+// 或
+memento.tracker.getStats({
+    goalId: '1234567890'    // 单个目标统计
+});
+```
+
+### 数据选择器 API
+
+插件注册了数据选择器，供其他插件选择追踪目标：
+
+```dart
+SelectorDefinition(
+    id: 'tracker.goal',
+    pluginId: 'tracker',
+    name: '选择追踪目标',
+    selectionMode: SelectionMode.single,
+    // ... 配置
+)
 ```
 
 ### 通知系统接口
@@ -162,16 +279,21 @@ static Future<void> showInstantNotification({
 
 ### 外部依赖
 
-- `uuid`: 生成唯一目标和记录 ID
 - `provider`: 状态管理和依赖注入
 - `flutter_local_notifications`: 本地通知
+- `memento_notifications`: 通知封装库（AwesomeNotifications）
 - `logging`: 日志记录
+- `get`: 状态管理（GetX）
+- `animations`: 动画效果
+- `shared_models`: 共享数据模型
 
 ### 插件依赖
 
 - **Core Event System**: 事件广播（`onRecordAdded` 事件）
 - **NotificationManager**: 通知管理
 - **StorageManager**: 数据存储
+- **JS Bridge**: JavaScript 桥接
+- **Plugin Data Selector**: 数据选择器服务
 
 ### 存储路径
 
@@ -313,6 +435,56 @@ class Record {
 
 ---
 
+## Repository 架构
+
+### ClientTrackerRepository
+
+**文件**: `repositories/client_tracker_repository.dart`
+
+Tracker 插件使用 Repository 模式管理数据访问，`ClientTrackerRepository` 实现了 `ITrackerRepository` 接口：
+
+```dart
+class ClientTrackerRepository extends ITrackerRepository {
+  final dynamic storage; // StorageManager 实例
+  final String pluginId;
+
+  // 目标管理
+  Future<Result<List<GoalDto>>> getGoals({...});
+  Future<Result<GoalDto>> getGoalById({...});
+  Future<Result<GoalDto>> createGoal({...});
+  Future<Result<GoalDto>> updateGoal({...});
+  Future<Result<void>> deleteGoal({...});
+
+  // 记录管理
+  Future<Result<List<RecordDto>>> getRecordsForGoal({...});
+  Future<Result<RecordDto>> addRecord({...});
+  Future<Result<void>> deleteRecord({...});
+
+  // 统计功能
+  Future<Result<Map<String, dynamic>>> getStats({...});
+}
+```
+
+**特性**：
+- 使用 Result 模式处理成功/失败
+- 支持分页查询（PaginationParams）
+- 统一错误处理
+- DTO（Data Transfer Object）模式
+
+### UseCase 层
+
+插件使用 UseCase 模式封装业务逻辑：
+
+```dart
+// 在 tracker_plugin.dart 中
+late final TrackerUseCase _trackerUseCase;
+
+// JS API 通过 UseCase 调用
+final result = await _trackerUseCase.getGoals(params);
+```
+
+---
+
 ## 界面层结构
 
 ### 主要界面组件
@@ -322,6 +494,9 @@ class Record {
 | `TrackerMainView` | `tracker_plugin.dart` | 插件主视图容器 |
 | `HomeScreen` | `screens/home_screen.dart` | 目标列表主界面 |
 | `GoalDetailScreen` | `screens/goal_detail_screen.dart` | 目标详情和记录历史 |
+| `TrackerGoalSelectorScreen` | `screens/tracker_goal_selector_screen.dart` | 目标选择器 |
+| `TrackerGoalProgressSelectorScreen` | `screens/tracker_goal_progress_selector_screen.dart` | 目标进度选择器 |
+| `SearchResultsScreen` | `screens/search_results_screen.dart` | 搜索结果页面 |
 | `GoalCard` | `widgets/goal_card.dart` | 目标卡片组件 |
 | `GoalEditPage` | `widgets/goal_edit_page.dart` | 目标编辑对话框 |
 | `GoalDetailPage` | `widgets/goal_detail_page.dart` | 目标详情页面 |
@@ -333,28 +508,48 @@ class Record {
 
 **布局结构**:
 ```
-Scaffold
+SuperCupertinoNavigationWrapper
 ├── AppBar
-│   ├── 视图切换按钮（列表/网格）
-│   ├── 状态筛选菜单（全部/进行中/已完成）
-│   └── 时间筛选菜单（最近/本周/本月）
-└── Column
+│   ├── 搜索栏
+│   ├── 添加按钮
+│   └── 视图切换按钮（列表/网格）
+├── 搜索结果（SearchResultsScreen，搜索时显示）
+└── HomeScreen（主内容）
     ├── 分组切换器（ChoiceChip 横向滚动）
-    └── Expanded - 目标列表
+    ├── 状态筛选菜单（全部/进行中/已完成）
+    └── 目标列表
         ├── ListView（列表模式）
         │   └── Dismissible（滑动删除）
         │       └── GoalCard
         └── GridView（网格模式，2列）
             └── GoalCard
-└── FloatingActionButton（新建目标）
 ```
 
 **关键特性**:
+- 搜索功能：实时搜索目标名称和分组
 - 双视图模式：列表视图和网格视图（2列）
 - 分组筛选：横向滚动的分组切换器
 - 状态筛选：全部/进行中/已完成
-- 时间筛选：最近/本周/本月（当前未实现逻辑）
 - 滑动删除：列表模式支持滑动删除（需确认）
+
+### 目标选择器界面
+
+**文件**: `screens/tracker_goal_selector_screen.dart`
+
+用于其他插件选择追踪目标：
+- 显示所有目标列表
+- 展示目标进度和分组信息
+- 支持搜索功能
+- 使用 Provider 注入控制器状态
+
+### 目标进度选择器
+
+**文件**: `screens/tracker_goal_progress_selector_screen.dart`
+
+用于选择特定目标的进度值：
+- 显示目标详情
+- 提供进度值选择界面
+- 支持快速选择和自定义输入
 
 ### GoalCard 组件
 
@@ -450,27 +645,20 @@ notifyListeners();
 
 ---
 
-## 卡片视图
+## 小组件集成
 
-插件在主页提供卡片视图，展示：
+### Android 小组件支持
 
-**布局**:
+Tracker 插件支持 Android 桌面小组件，通过以下方法提供统计数据：
+
+```dart
+// 在 tracker_plugin.dart 中
+int getGoalCount();              // 总目标数
+int getActiveGoalCount();        // 进行中的目标数
+int getTodayRecordCount();       // 今日记录数
 ```
-┌─────────────────────────────┐
-│ 🎯 目标追踪                │
-├─────────────────────────────┤
-│  今日完成    │   本月完成   │
-│      3      │      15      │
-└─────────────────────────────┘
-```
 
-**实现**: `tracker_plugin.dart` 中的 `buildCardView()` 方法
-
-**数据来源**:
-- 今日完成: `controller.getTodayCompletedGoals()`
-- 本月完成: `controller.getMonthCompletedGoals()`
-
-**注意**: 卡片视图创建了独立的 `TrackerController` 实例，未使用单例
+**实现位置**: `home_widgets.dart` 文件（通过 `lib/core/services/plugin_widget_sync_helper.dart` 同步）
 
 ---
 
@@ -485,43 +673,35 @@ notifyListeners();
 
 | 文件 | 语言 |
 |------|------|
-| `l10n/tracker_localizations.dart` | 本地化接口 |
-| `l10n/tracker_localizations_zh.dart` | 中文翻译 |
-| `l10n/tracker_localizations_en.dart` | 英文翻译 |
+| `l10n/tracker_translations.dart` | 本地化接口 |
+| `l10n/tracker_translations_zh.dart` | 中文翻译 |
+| `l10n/tracker_translations_en.dart` | 英文翻译 |
 
 ### 关键字符串
 
 ```dart
-abstract class TrackerLocalizations {
+abstract class TrackerTranslations {
   String get name;                      // 插件名称
-  String get goalsTitle;                // 目标
-  String get recordsTitle;              // 记录
-  String get createGoal;                // 创建目标
-  String get editGoal;                  // 编辑目标
-  String get goalName;                  // 目标名称
-  String get unitType;                  // 单位类型
-  String get targetValue;               // 目标值
-  String get dateSettings;              // 日期设置
-  String get reminder;                  // 提醒
-  String get dailyReset;                // 每日重置
-  String get addRecord;                 // 添加记录
-  String get recordValue;               // 记录值
-  String get note;                      // 备注
-  String get daily;                     // 每日
-  String get weekly;                    // 每周
-  String get monthly;                   // 每月
-  String get dateRange;                 // 日期范围
-  String get progress;                  // 进度
-  String get history;                   // 历史
+  String get goalTracking;              // 目标追踪
+  String get searchPlaceholder;         // 搜索占位符
   String get todayComplete;             // 今日完成
   String get thisMonthComplete;         // 本月完成
-  String get quickRecord;               // 快速记录
-  String get timer;                     // 计时器
-  String get calculateDifference;       // 计算差值
-  String get confirmDelete;             // 确认删除
-  String get noRecords;                 // 无记录
+  // ... 更多翻译
 }
 ```
+
+---
+
+## 路由处理
+
+### 路由注册
+
+**文件**: `tracker_route_handler.dart`
+
+插件注册了以下路由：
+- `/tracker/goal`: 目标详情页
+- `/tracker/select`: 目标选择器
+- `/tracker/select/progress`: 目标进度选择器
 
 ---
 
@@ -541,7 +721,7 @@ abstract class TrackerLocalizations {
    - `TrackerController.deleteRecord()` - 测试记录删除和目标值回退
    - `TrackerController.clearRecordsForGoal()` - 测试批量删除和目标重置
    - `Goal.validate()` / `Record.validate()` - 测试数据验证逻辑
-   - 日期设置类型处理 - 测试不同类型的日期配置
+   - JS Bridge API 测试 - 验证所有 API 接口
 
 2. **中优先级**：
    - 通知调度逻辑 - 测试每日提醒
@@ -559,7 +739,18 @@ abstract class TrackerLocalizations {
 
 ## 常见问题 (FAQ)
 
-### Q1: 如何添加新的日期设置类型？
+### Q1: 如何使用 JS API？
+
+参考 `JS_API_GUIDE.md` 和 `JS_API_README.md` 文件，包含完整的 API 文档和使用示例。
+
+### Q2: Repository 模式如何工作？
+
+Tracker 插件使用 Repository + UseCase 架构：
+- `ClientTrackerRepository`: 负责数据持久化
+- `TrackerUseCase`: 封装业务逻辑
+- `TrackerController`: UI 层控制器
+
+### Q3: 如何添加新的日期设置类型？
 
 在 `DateSettings` 模型中添加新类型：
 
@@ -574,25 +765,25 @@ class DateSettings {
 
 然后在 `GoalEditPage` 中添加对应的 UI 选项。
 
-### Q2: 目标的循环重置如何工作？
+### Q4: 如何集成数据选择器？
 
-`isLoopReset` 标志位指示目标是否在周期结束后自动重置 `currentValue` 为 0。
+其他插件可以通过以下方式使用 Tracker 的数据选择器：
 
-**实现建议**（当前未实现）:
-- 在应用启动时检查所有目标的日期设置
-- 根据 `type` 和当前日期判断是否需要重置
-- 如果 `isLoopReset == true`，将 `currentValue` 重置为 0
+```dart
+// 选择一个追踪目标
+final result = await pluginDataSelectorService.select(
+  context: context,
+  selectorId: 'tracker.goal',
+);
 
-### Q3: 如何自定义目标卡片的背景？
+// 使用选择的结果
+if (result != null) {
+  final goal = result.rawData as Goal;
+  // ...
+}
+```
 
-在 `GoalEditPage` 中选择图片，路径保存到 `Goal.imagePath`。
-
-**图片存储**:
-- 使用 `ImageUtils.getAbsolutePath()` 获取绝对路径
-- 图片存储在插件存储目录下
-- `GoalCard` 使用 `FutureBuilder` 异步加载图片
-
-### Q4: 计时器功能如何与记录关联？
+### Q5: 计时器功能如何与记录关联？
 
 `TimerDialog` 完成后创建 `Record` 对象，设置 `durationSeconds` 字段：
 
@@ -604,18 +795,6 @@ final record = Record(
   recordedAt: DateTime.now(),
   durationSeconds: elapsedSeconds,
 );
-```
-
-### Q5: 如何监听目标完成事件？
-
-当前插件仅广播 `onRecordAdded` 事件。如需目标完成事件，建议添加：
-
-```dart
-// 在 TrackerController.updateGoal() 中
-if (oldGoal.currentValue < oldGoal.targetValue &&
-    newGoal.currentValue >= newGoal.targetValue) {
-  eventManager.broadcast('onGoalCompleted', Value<Goal>(newGoal));
-}
 ```
 
 ### Q6: 如何实现目标模板功能？
@@ -655,29 +834,38 @@ class GoalTemplate {
 
 ```
 tracker/
-├── tracker_plugin.dart                    # 插件主类 + 主视图
+├── tracker_plugin.dart                          # 插件主类 + 主视图
+├── tracker_route_handler.dart                   # 路由处理器
+├── home_widgets.dart                            # 小组件支持
 ├── models/
-│   ├── goal.dart                          # 目标模型 + 日期设置模型
-│   └── record.dart                        # 记录模型
+│   ├── goal.dart                                # 目标模型 + 日期设置模型
+│   └── record.dart                              # 记录模型
 ├── controllers/
-│   └── tracker_controller.dart            # 目标和记录控制器
+│   └── tracker_controller.dart                  # 目标和记录控制器
+├── repositories/
+│   └── client_tracker_repository.dart           # 数据访问层（Repository）
 ├── screens/
-│   ├── home_screen.dart                   # 目标列表主界面
-│   └── goal_detail_screen.dart            # 目标详情界面
+│   ├── home_screen.dart                         # 目标列表主界面
+│   ├── goal_detail_screen.dart                  # 目标详情界面
+│   ├── tracker_goal_selector_screen.dart         # 目标选择器
+│   ├── tracker_goal_progress_selector_screen.dart # 目标进度选择器
+│   └── search_results_screen.dart               # 搜索结果页面
 ├── widgets/
-│   ├── goal_card.dart                     # 目标卡片组件
-│   ├── goal_edit_page.dart                # 目标编辑对话框
-│   ├── goal_detail_page.dart              # 目标详情页面
-│   ├── record_dialog.dart                 # 记录添加对话框
-│   ├── timer_dialog.dart                  # 计时器对话框
-│   └── tracker_summary_card.dart          # 统计卡片组件
+│   ├── goal_card.dart                           # 目标卡片组件
+│   ├── goal_edit_page.dart                      # 目标编辑对话框
+│   ├── goal_detail_page.dart                    # 目标详情页面
+│   ├── record_dialog.dart                       # 记录添加对话框
+│   ├── timer_dialog.dart                        # 计时器对话框
+│   └── tracker_summary_card.dart                # 统计卡片组件
 ├── utils/
-│   ├── date_utils.dart                    # 日期工具类
-│   └── tracker_notification_utils.dart    # 通知工具类
-└── l10n/
-    ├── tracker_localizations.dart         # 国际化接口
-    ├── tracker_localizations_zh.dart      # 中文翻译
-    └── tracker_localizations_en.dart      # 英文翻译
+│   ├── date_utils.dart                          # 日期工具类
+│   └── tracker_notification_utils.dart          # 通知工具类
+├── l10n/
+│   ├── tracker_translations.dart               # 国际化接口
+│   ├── tracker_translations_zh.dart            # 中文翻译
+│   └── tracker_translations_en.dart            # 英文翻译
+├── JS_API_GUIDE.md                              # JS API 使用指南
+└── JS_API_README.md                             # JS API 说明文档
 ```
 
 ---
@@ -702,6 +890,24 @@ class TrackerPlugin extends PluginBase with ChangeNotifier {
 ```
 
 **注意**: 每次调用构造函数都会更新 `_instance`，依赖 `PluginManager` 确保单例。
+
+### JS Bridge 集成
+
+插件通过 `JSBridgePlugin` mixin 提供 JavaScript API：
+
+```dart
+class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      'getGoals': _jsGetGoals,
+      'getGoal': _jsGetGoal,
+      'createGoal': _jsCreateGoal,
+      // ... 更多 API
+    };
+  }
+}
+```
 
 ### 目标进度计算
 
@@ -730,67 +936,28 @@ static void validate(Record record, Goal goal) {
 
 **调用时机**: 在 `TrackerController.addRecord()` 中调用
 
-### 目标日期验证
-
-```dart
-void _validateGoalDates(Goal goal) {
-  final settings = goal.dateSettings;
-  if (settings.type == 'range' &&
-      settings.startDate != null &&
-      settings.endDate != null &&
-      settings.startDate!.isAfter(settings.endDate!)) {
-    throw ArgumentError('End date must be after start date');
-  }
-}
-```
-
-### 实时记录流
-
-```dart
-Stream<List<Record>> watchRecordsForGoal(String goalId) {
-  return Stream.fromFuture(
-    Future.value(_records.where((r) => r.goalId == goalId).toList()),
-  ).asyncExpand((_) {
-    final controller = StreamController<List<Record>>();
-    void update() {
-      controller.add(_records.where((r) => r.goalId == goalId).toList());
-    }
-
-    addListener(update);
-    controller.onCancel = () => removeListener(update);
-    return controller.stream;
-  });
-}
-```
-
-**用途**: `GoalDetailScreen` 使用此流实时更新记录列表
-
 ### 通知通道创建
 
 ```dart
 static Future<void> initialize({
   Function(String?)? onSelectNotification,
 }) async {
-  await NotificationManager.initialize(
-    onSelectNotification: onSelectNotification,
-    appName: '目标跟踪提醒',
-    appId: 'github.hunmer.memento.tracker',
-  );
-
-  await NotificationManager.createNotificationChannel(
-    channelId: _channelId,
-    channelName: _channelName,
-    channelDescription: _channelDescription,
-    importance: Importance.high,
-    enableVibration: true,
-    enableSound: true,
-  );
+  await AwesomeNotifications().initialize(null, [
+    NotificationChannel(
+      channelKey: _channelKey,
+      channelName: _channelName,
+      channelDescription: _channelDescription,
+      importance: NotificationImportance.High,
+      enableVibration: true,
+      playSound: true,
+    ),
+  ]);
 }
 ```
 
 **通道配置**:
 - 通道 ID: `tracker_channel`
-- 重要性: `Importance.high`（显示浮动通知）
+- 重要性: `NotificationImportance.High`（显示浮动通知）
 - 振动和声音: 已启用
 
 ---
@@ -803,22 +970,37 @@ static Future<void> initialize({
 sequenceDiagram
     participant UI as HomeScreen/GoalDetailScreen
     participant Controller as TrackerController
+    participant UseCase as TrackerUseCase
+    participant Repo as ClientTrackerRepository
     participant Storage as StorageManager
     participant Event as EventManager
 
     UI->>Controller: addGoal(goal)
-    Controller->>Controller: _validateGoalDates(goal)
-    Controller->>Controller: _goals.add(goal)
-    Controller->>Storage: write('tracker/goals.json')
+    Controller->>UseCase: createGoal(params)
+    UseCase->>Repo: createGoal(goalDto)
+    Repo->>Storage: write('tracker/goals.json')
+    UseCase-->>Controller: Result<GoalDto>
     Controller->>UI: notifyListeners()
+```
 
-    UI->>Controller: addRecord(record, goal)
-    Controller->>Controller: Record.validate(record, goal)
-    Controller->>Controller: _records.add(record)
-    Controller->>Storage: write('tracker/records.json')
-    Controller->>Controller: updateGoal(goal.id, updatedGoal)
-    Controller->>Event: broadcast('onRecordAdded', record)
-    Controller->>UI: notifyListeners()
+### JS API 调用流程
+
+```mermaid
+sequenceDiagram
+    participant JS as JavaScript
+    participant Bridge as JSBridge
+    participant Plugin as TrackerPlugin
+    participant UseCase as TrackerUseCase
+    participant Repo as ClientTrackerRepository
+
+    JS->>Bridge: memento.tracker.getGoals()
+    Bridge->>Plugin: _jsGetGoals(params)
+    Plugin->>UseCase: getGoals(params)
+    UseCase->>Repo: getGoals()
+    Repo-->>UseCase: Result<List<GoalDto>>
+    UseCase-->>Plugin: Result
+    Plugin-->>Bridge: JSON response
+    Bridge-->>JS: Promise resolve
 ```
 
 ### 通知调度流程
@@ -828,13 +1010,11 @@ sequenceDiagram
     participant User as 用户
     participant Edit as GoalEditPage
     participant Utils as TrackerNotificationUtils
-    participant Manager as NotificationManager
     participant System as Android/iOS System
 
     User->>Edit: 设置提醒时间（09:00）
     Edit->>Utils: scheduleDailyNotification(...)
-    Utils->>Manager: scheduleNotification(isDaily: true)
-    Manager->>System: 调度本地通知
+    Utils->>System: 调度本地通知
 
     Note over System: 每天 09:00
     System->>User: 显示通知
@@ -850,25 +1030,30 @@ sequenceDiagram
 ### 核心依赖
 
 - **BasePlugin**: 插件基类
+- **JSBridgePlugin**: JavaScript 桥接
 - **StorageManager**: 数据持久化
 - **PluginManager**: 插件管理器
 - **ConfigManager**: 配置管理器
 - **EventManager**: 事件广播系统
 - **NotificationManager**: 通知管理
+- **Plugin Data Selector**: 数据选择器服务
 
 ### 第三方包依赖
 
 - `provider: ^6.0.0` - 状态管理
-- `uuid: ^4.0.0` - UUID 生成（未使用，使用时间戳代替）
-- `flutter_local_notifications: ^16.0.0` - 本地通知
+- `get: ^11.0.0` - GetX 状态管理
+- `animations: ^2.0.0` - 动画效果
+- `shared_models: ^0.0.1` - 共享数据模型
+- `memento_notifications: ^0.0.1` - 通知封装
 - `logging: ^1.2.0` - 日志记录
 
 ### 插件间依赖
 
 - **无直接插件依赖**: Tracker 插件独立运行
 - **事件订阅者**: 其他插件可监听 `onRecordAdded` 事件
+- **数据选择器**: 其他插件可使用 Tracker 的目标选择器
 
-**依赖方向**: 单向输出事件
+**依赖方向**: 单向输出事件和数据选择器
 
 ---
 
@@ -881,6 +1066,7 @@ sequenceDiagram
 **优化方案**:
 - 分页加载记录（按日期分文件）
 - 延迟加载历史记录（仅在 `GoalDetailScreen` 打开时加载）
+- 使用 Repository 的分页功能
 
 ### 2. 卡片视图优化
 
@@ -901,13 +1087,12 @@ Widget buildCardView(BuildContext context) {
 }
 ```
 
-### 3. 图片加载优化
+### 3. JS API 性能优化
 
-**当前问题**: 每次重建都异步加载图片路径
-
-**优化方案**:
-- 缓存图片路径到内存
-- 使用 `CachedNetworkImage` 或本地缓存机制
+**建议**:
+- 使用 Result 模式的异步处理
+- 实现适当的缓存机制
+- 批量操作支持（如批量创建记录）
 
 ---
 
@@ -953,10 +1138,18 @@ class Goal {
 }
 ```
 
+### 5. JS API 扩展
+
+- WebSocket 支持实时更新
+- 批量操作 API
+- 高级统计和分析 API
+- 导入/导出功能
+
 ---
 
 ## 变更记录 (Changelog)
 
+- **2025-12-17T12:10:45+08:00**: 增量更新 - 新增 JS Bridge API、Repository 模式、UseCase 架构、路由处理、数据选择器、小组件集成等功能的详细说明
 - **2025-11-13**: 初始化目标追踪插件文档，识别 16 个文件、3 个数据模型、20+ 个控制器接口、核心功能包括目标管理、记录追踪、通知系统、事件广播
 
 ---

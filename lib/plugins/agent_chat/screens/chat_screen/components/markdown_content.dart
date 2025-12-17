@@ -24,24 +24,24 @@ class MarkdownContent extends StatelessWidget {
         // 极简风格配置
         p: const TextStyle(fontSize: 15, height: 1.5),
         code: TextStyle(
-          backgroundColor: Colors.grey[200],
+          backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
           fontFamily: 'monospace',
           fontSize: 14,
         ),
         codeblockDecoration: BoxDecoration(
-          color: Colors.grey[100],
+          color: Theme.of(context).colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(8),
         ),
         codeblockPadding: const EdgeInsets.all(12),
         blockquote: TextStyle(
-          color: Colors.grey[600],
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           fontStyle: FontStyle.italic,
         ),
         blockquoteDecoration: BoxDecoration(
-          color: Colors.blue[50],
+          color: Theme.of(context).colorScheme.primaryContainer,
           border: Border(
             left: BorderSide(
-              color: Colors.blue[300]!,
+              color: Theme.of(context).colorScheme.primary,
               width: 4,
             ),
           ),
@@ -65,7 +65,7 @@ class MarkdownContent extends StatelessWidget {
         listBullet: const TextStyle(fontSize: 15),
         tableBody: const TextStyle(fontSize: 14),
         tableBorder: TableBorder.all(
-          color: Colors.grey[300]!,
+          color: Theme.of(context).colorScheme.outline,
           width: 1,
         ),
         tableColumnWidth: const FlexColumnWidth(),

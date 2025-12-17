@@ -81,7 +81,9 @@ class MessageBubble extends StatelessWidget {
                     vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: isUser ? Colors.blue[50] : Colors.grey[100],
+                    color: isUser
+                        ? Theme.of(context).colorScheme.primaryContainer
+                        : Theme.of(context).colorScheme.surfaceVariant,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -101,23 +103,23 @@ class MessageBubble extends StatelessWidget {
                               height: 16,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.blue[700],
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                             const SizedBox(width: 8),
-                            const Text(
+                            Text(
                               '正在生成...',
                               style: TextStyle(
                                 fontStyle: FontStyle.italic,
-                                color: Colors.grey,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                             // 取消按钮
                             if (onCancel != null) ...[
                               const SizedBox(width: 8),
                               IconButton(
-                                icon: const Icon(Icons.cancel, size: 20),
-                                color: Colors.red[400],
+                                icon: Icon(Icons.cancel, size: 20),
+                                color: Theme.of(context).colorScheme.error,
                                 tooltip: '取消生成',
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(
@@ -155,7 +157,7 @@ class MessageBubble extends StatelessWidget {
                       TokenCounterService.formatTokenCountShort(
                         message.tokenCount,
                       ),
-                      style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                      style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
 
                     const SizedBox(width: 8),
@@ -163,7 +165,7 @@ class MessageBubble extends StatelessWidget {
                     // 时间
                     Text(
                       _formatTime(message.timestamp),
-                      style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                      style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
 
                     // 已编辑标记
@@ -173,7 +175,7 @@ class MessageBubble extends StatelessWidget {
                         '(已编辑)',
                         style: TextStyle(
                           fontSize: 10,
-                          color: Colors.grey[500],
+                          color: Theme.of(context).colorScheme.outline,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -196,30 +198,31 @@ class MessageBubble extends StatelessWidget {
 
   /// 构建会话分隔符
   Widget _buildSessionDivider() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    return Builder(
+      builder: (context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Row(
         children: [
-          Expanded(child: Divider(color: Colors.blue[300], thickness: 1)),
+          Expanded(child: Divider(color: Theme.of(context).colorScheme.primary, thickness: 1)),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue[200]!),
+                border: Border.all(color: Theme.of(context).colorScheme.primary),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.fiber_new, size: 16, color: Colors.blue[700]),
+                  Icon(Icons.fiber_new, size: 16, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(width: 6),
                   Text(
                     message.content,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.blue[700],
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -227,8 +230,9 @@ class MessageBubble extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(child: Divider(color: Colors.blue[300], thickness: 1)),
+          Expanded(child: Divider(color: Theme.of(context).colorScheme.primary, thickness: 1)),
         ],
+      ),
       ),
     );
   }
@@ -237,61 +241,65 @@ class MessageBubble extends StatelessWidget {
   Widget _buildToolCallContent() {
     // 如果有工具调用,显示steps组件
     if (message.toolCall != null && message.toolCall!.steps.isNotEmpty) {
-      // 智能解析content，提取思考内容和AI回复
-      final parsedContent = _parseToolCallContent(message.content);
+      return Builder(
+        builder: (context) {
+          // 智能解析content，提取思考内容和AI回复
+          final parsedContent = _parseToolCallContent(message.content);
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 显示AI最终回复（优先显示）
-          if (parsedContent['finalReply']?.isNotEmpty ?? false) ...[
-            MarkdownContent(content: parsedContent['finalReply']!),
-            const SizedBox(height: 12),
-          ]
-          // 如果正在生成且没有最终回复，显示加载占位符
-          else if (message.isGenerating) ...[
-            Row(
-              children: [
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.blue[700],
-                  ),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 显示AI最终回复（优先显示）
+              if (parsedContent['finalReply']?.isNotEmpty ?? false) ...[
+                MarkdownContent(content: parsedContent['finalReply']!),
+                const SizedBox(height: 12),
+              ]
+              // 如果正在生成且没有最终回复，显示加载占位符
+              else if (message.isGenerating) ...[
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'AI 正在生成回复...',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'AI 正在生成回复...',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey[600],
-                  ),
-                ),
+                const SizedBox(height: 12),
               ],
-            ),
-            const SizedBox(height: 12),
-          ],
 
-          // 显示工具调用步骤
-          ToolCallSteps(
-            steps: message.toolCall!.steps,
-            isGenerating: message.isGenerating,
-            onRerunStep:
-                onRerunStep != null
-                    ? (stepIndex) => onRerunStep!(message.id, stepIndex)
-                    : null,
-          ),
+              // 显示工具调用步骤
+              ToolCallSteps(
+                steps: message.toolCall!.steps,
+                isGenerating: message.isGenerating,
+                onRerunStep:
+                    onRerunStep != null
+                        ? (stepIndex) => onRerunStep!(message.id, stepIndex)
+                        : null,
+              ),
 
-          // 显示思考内容（如果有，通常不会显示）
-          if (parsedContent['thinking']?.isNotEmpty ?? false) ...[
-            const SizedBox(height: 8),
-            const Divider(),
-            const SizedBox(height: 8),
-            MarkdownContent(content: parsedContent['thinking']!),
-          ],
-        ],
+              // 显示思考内容（如果有，通常不会显示）
+              if (parsedContent['thinking']?.isNotEmpty ?? false) ...[
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+                MarkdownContent(content: parsedContent['thinking']!),
+              ],
+            ],
+          );
+        },
       );
     }
 
@@ -365,72 +373,73 @@ class MessageBubble extends StatelessWidget {
   /// 构建图片附件
   Widget _buildImageAttachment(FileAttachment attachment) {
     return Builder(
-      builder:
-          (context) => GestureDetector(
-            onTap: () => _viewImage(context, attachment),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                constraints: const BoxConstraints(
-                  maxWidth: 200,
-                  maxHeight: 200,
-                ),
-                child: Image.file(
-                  File(attachment.filePath),
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 200,
-                      height: 150,
-                      color: Colors.grey[300],
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.broken_image,
-                            size: 48,
-                            color: Colors.grey[600],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Image load failed',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
+      builder: (context) => GestureDetector(
+        onTap: () => _viewImage(context, attachment),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            constraints: const BoxConstraints(
+              maxWidth: 200,
+              maxHeight: 200,
+            ),
+            child: Image.file(
+              File(attachment.filePath),
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 200,
+                  height: 150,
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.broken_image,
+                        size: 48,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                    );
-                  },
-                ),
-              ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Image load failed',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
+        ),
+      ),
     );
   }
 
   /// 构建文件附件
   Widget _buildFileAttachment(FileAttachment attachment) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
+    return Builder(
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: Theme.of(context).colorScheme.outline),
+        ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.description, size: 16, color: Colors.grey[600]),
+          Icon(Icons.description, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 4),
           Text(attachment.fileName, style: const TextStyle(fontSize: 12)),
           const SizedBox(width: 4),
           Text(
             attachment.formattedSize,
-            style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ],
+      ),
       ),
     );
   }
@@ -458,7 +467,7 @@ class MessageBubble extends StatelessWidget {
 
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
-      icon: Icon(Icons.more_vert, size: 16, color: Colors.grey[600]),
+      icon: Icon(Icons.more_vert, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
       onSelected: (value) {
         switch (value) {
           case 'copy':
@@ -491,7 +500,7 @@ class MessageBubble extends StatelessWidget {
               value: 'copy',
               child: Row(
                 children: [
-                  const Icon(Icons.copy, size: 18),
+                  Icon(Icons.copy, size: 18),
                   const SizedBox(width: 8),
                   Text('agent_chat_copy'.tr),
                 ],
@@ -503,7 +512,7 @@ class MessageBubble extends StatelessWidget {
                 value: 'edit',
                 child: Row(
                   children: [
-                    const Icon(Icons.edit, size: 18),
+                    Icon(Icons.edit, size: 18),
                     const SizedBox(width: 8),
                     Text('agent_chat_edit'.tr),
                   ],
@@ -514,7 +523,7 @@ class MessageBubble extends StatelessWidget {
                 value: 'regenerate',
                 child: Row(
                   children: [
-                    const Icon(Icons.refresh, size: 18),
+                    Icon(Icons.refresh, size: 18),
                     const SizedBox(width: 8),
                     Text('agent_chat_regenerate'.tr),
                   ],
@@ -525,11 +534,11 @@ class MessageBubble extends StatelessWidget {
                 value: 'save_tool',
                 child: Row(
                   children: [
-                    const Icon(Icons.save, size: 18, color: Colors.blue),
+                    Icon(Icons.save, size: 18, color: Theme.of(context).colorScheme.primary),
                     const SizedBox(width: 8),
                     Text(
                       'agent_chat_saveTool'.tr,
-                      style: const TextStyle(color: Colors.blue),
+                      style: TextStyle(color: Theme.of(context).colorScheme.primary),
                     ),
                   ],
                 ),
@@ -539,11 +548,11 @@ class MessageBubble extends StatelessWidget {
                 value: 'rerun_tool',
                 child: Row(
                   children: [
-                    const Icon(Icons.replay, size: 18, color: Colors.orange),
+                    Icon(Icons.replay, size: 18, color: Theme.of(context).colorScheme.secondary),
                     const SizedBox(width: 8),
                     Text(
                       'agent_chat_reExecuteTool'.tr,
-                      style: const TextStyle(color: Colors.orange),
+                      style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                     ),
                   ],
                 ),
@@ -553,15 +562,15 @@ class MessageBubble extends StatelessWidget {
                 value: 'view_details',
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.info_outline,
                       size: 18,
-                      color: Colors.blue,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'agent_chat_viewDetails'.tr,
-                      style: const TextStyle(color: Colors.blue),
+                      style: TextStyle(color: Theme.of(context).colorScheme.primary),
                     ),
                   ],
                 ),
@@ -571,11 +580,11 @@ class MessageBubble extends StatelessWidget {
                 value: 'delete',
                 child: Row(
                   children: [
-                    const Icon(Icons.delete, size: 18, color: Colors.red),
+                    Icon(Icons.delete, size: 18, color: Theme.of(context).colorScheme.error),
                     const SizedBox(width: 8),
                     Text(
                       'agent_chat_delete'.tr,
-                      style: const TextStyle(color: Colors.red),
+                      style: TextStyle(color: Theme.of(context).colorScheme.error),
                     ),
                   ],
                 ),
@@ -603,14 +612,14 @@ class MessageBubble extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.orange[100],
+                      color: Theme.of(context).colorScheme.secondaryContainer,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       'AI',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.orange[800],
+                        color: Theme.of(context).colorScheme.onSecondaryContainer,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -638,7 +647,7 @@ class MessageBubble extends StatelessWidget {
                     alignment: Alignment.centerRight,
                     child: Text(
                       '${textController.text.length} 字符',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ],
@@ -721,8 +730,9 @@ class MessageBubble extends StatelessWidget {
     final hasToolCall =
         message.toolCall != null && message.toolCall!.steps.isNotEmpty;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Builder(
+      builder: (context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 模版卡片列表
         ...message.matchedTemplateIds!.map((templateId) {
@@ -741,10 +751,10 @@ class MessageBubble extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isExecuted ? Colors.green[50] : Colors.blue[50],
+                    color: isExecuted ? Theme.of(context).colorScheme.tertiaryContainer : Theme.of(context).colorScheme.primaryContainer,
                     border: Border.all(
                       color:
-                          isExecuted ? Colors.green[300]! : Colors.blue[300]!,
+                          isExecuted ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.primary,
                     ),
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -757,7 +767,7 @@ class MessageBubble extends StatelessWidget {
                             : Icons.play_circle_outline,
                         size: 24,
                         color:
-                            isExecuted ? Colors.green[700] : Colors.blue[700],
+                            isExecuted ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(width: 12),
 
@@ -773,8 +783,8 @@ class MessageBubble extends StatelessWidget {
                                 fontSize: 15,
                                 color:
                                     isExecuted
-                                        ? Colors.green[900]
-                                        : Colors.blue[900],
+                                        ? Theme.of(context).colorScheme.onTertiaryContainer
+                                        : Theme.of(context).colorScheme.onPrimaryContainer,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -784,8 +794,8 @@ class MessageBubble extends StatelessWidget {
                                 fontSize: 12,
                                 color:
                                     isExecuted
-                                        ? Colors.green[600]
-                                        : Colors.orange[600],
+                                        ? Theme.of(context).colorScheme.tertiary
+                                        : Theme.of(context).colorScheme.secondary,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -806,7 +816,7 @@ class MessageBubble extends StatelessWidget {
                                       Icons.visibility_outlined,
                                       size: 20,
                                     ),
-                                    color: Colors.green[700],
+                                    color: Theme.of(context).colorScheme.tertiary,
                                     tooltip: '查看结果',
                                     onPressed:
                                         () =>
@@ -833,9 +843,9 @@ class MessageBubble extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   isExecuted
-                                      ? Colors.green[600]
-                                      : Colors.blue[600],
-                              foregroundColor: Colors.white,
+                                      ? Theme.of(context).colorScheme.tertiary
+                                      : Theme.of(context).colorScheme.primary,
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
                                 vertical: 8,
@@ -852,7 +862,7 @@ class MessageBubble extends StatelessWidget {
                 // 分割线（如果有 AI 回复内容）
                 if (message.content.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  Divider(color: Colors.grey[300], thickness: 1),
+                  Divider(color: Theme.of(context).colorScheme.outline, thickness: 1),
                   const SizedBox(height: 12),
                 ],
 
@@ -863,6 +873,7 @@ class MessageBubble extends StatelessWidget {
           );
         }),
       ],
+      ),
     );
   }
 
@@ -932,27 +943,29 @@ class MessageBubble extends StatelessWidget {
 
   /// 构建工具执行时的加载状态
   Widget _buildToolLoadingState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.blue[700],
+    return Builder(
+      builder: (context) => Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'AI正在构建答案...',
-              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Text(
+                'AI正在构建答案...',
+                style: TextStyle(fontStyle: FontStyle.italic, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -973,7 +986,7 @@ class MessageBubble extends StatelessWidget {
               children: [
                 Icon(
                   Icons.assessment_outlined,
-                  color: Colors.blue[700],
+                  color: Theme.of(context).colorScheme.primary,
                   size: 24,
                 ),
                 const SizedBox(width: 8),
@@ -1000,7 +1013,7 @@ class MessageBubble extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.blue[100],
+                              color: Theme.of(context).colorScheme.primaryContainer,
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -1008,7 +1021,7 @@ class MessageBubble extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blue[700],
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                           ),
@@ -1032,7 +1045,7 @@ class MessageBubble extends StatelessWidget {
                           step.desc,
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey[700],
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -1045,18 +1058,18 @@ class MessageBubble extends StatelessWidget {
                         decoration: BoxDecoration(
                           color:
                               step.status == ToolCallStatus.success
-                                  ? Colors.green[50]
+                                  ? Theme.of(context).colorScheme.tertiaryContainer
                                   : step.status == ToolCallStatus.failed
-                                  ? Colors.red[50]
-                                  : Colors.grey[100],
+                                  ? Theme.of(context).colorScheme.errorContainer
+                                  : Theme.of(context).colorScheme.surfaceVariant,
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
                             color:
                                 step.status == ToolCallStatus.success
-                                    ? Colors.green[300]!
+                                    ? Theme.of(context).colorScheme.tertiary
                                     : step.status == ToolCallStatus.failed
-                                    ? Colors.red[300]!
-                                    : Colors.grey[300]!,
+                                    ? Theme.of(context).colorScheme.error
+                                    : Theme.of(context).colorScheme.outline,
                           ),
                         ),
                         child: Column(
@@ -1073,10 +1086,10 @@ class MessageBubble extends StatelessWidget {
                                   size: 16,
                                   color:
                                       step.status == ToolCallStatus.success
-                                          ? Colors.green[700]
+                                          ? Theme.of(context).colorScheme.onTertiaryContainer
                                           : step.status == ToolCallStatus.failed
-                                          ? Colors.red[700]
-                                          : Colors.grey[600],
+                                          ? Theme.of(context).colorScheme.onErrorContainer
+                                          : Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
@@ -1090,11 +1103,11 @@ class MessageBubble extends StatelessWidget {
                                     fontWeight: FontWeight.bold,
                                     color:
                                         step.status == ToolCallStatus.success
-                                            ? Colors.green[700]
+                                            ? Theme.of(context).colorScheme.onTertiaryContainer
                                             : step.status ==
                                                 ToolCallStatus.failed
-                                            ? Colors.red[700]
-                                            : Colors.grey[600],
+                                            ? Theme.of(context).colorScheme.onErrorContainer
+                                            : Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],
@@ -1138,17 +1151,20 @@ class MessageBubble extends StatelessWidget {
 
     // 如果既没有内容也没有工具模板，显示空消息提示
     if (!hasContent && !hasToolTemplate) {
-      return const Text(
-        '(空消息)',
-        style: TextStyle(
-          fontStyle: FontStyle.italic,
-          color: Colors.grey,
+      return Builder(
+        builder: (context) => Text(
+          '(空消息)',
+          style: TextStyle(
+            fontStyle: FontStyle.italic,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Builder(
+      builder: (context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 显示工具模板（如果有）
         if (hasToolTemplate) ...[
@@ -1156,13 +1172,14 @@ class MessageBubble extends StatelessWidget {
           // 如果同时有文本内容，添加分隔
           if (hasContent) ...[
             const SizedBox(height: 8),
-            Divider(color: Colors.grey[300], thickness: 1),
+            Divider(color: Theme.of(context).colorScheme.outline, thickness: 1),
             const SizedBox(height: 8),
           ],
         ],
         // 显示文本内容（如果有）
         if (hasContent) MarkdownContent(content: message.content),
       ],
+      ),
     );
   }
 
@@ -1171,17 +1188,18 @@ class MessageBubble extends StatelessWidget {
     final name = toolTemplate['name'] as String? ?? '未知模板';
     final description = toolTemplate['description'] as String?;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.orange[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.orange[200]!),
-      ),
+    return Builder(
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Theme.of(context).colorScheme.secondary),
+        ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.build_circle, size: 18, color: Colors.orange[700]),
+          Icon(Icons.build_circle, size: 18, color: Theme.of(context).colorScheme.onSecondaryContainer),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -1193,7 +1211,7 @@ class MessageBubble extends StatelessWidget {
                       '工具模板:',
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.orange[600],
+                        color: Theme.of(context).colorScheme.onSecondaryContainer,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -1204,7 +1222,7 @@ class MessageBubble extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Colors.orange[900],
+                          color: Theme.of(context).colorScheme.onSecondaryContainer,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1217,7 +1235,7 @@ class MessageBubble extends StatelessWidget {
                     description,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.orange[700],
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -1227,6 +1245,7 @@ class MessageBubble extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

@@ -6,15 +6,20 @@
 
 ## 模块职责
 
-数据库插件是 Memento 的核心功能模块之一,提供:
+数据库插件是 Memento 的核心功能模块之一，提供灵活的自定义数据库功能：
 
-- **自定义数据库结构**:用户可自定义数据库名称、描述、封面图片
-- **灵活的字段系统**:支持 11 种字段类型(文本、数字、日期、图片、密码等)
-- **记录管理**:支持创建、编辑、删除数据库记录
-- **多视图模式**:列表视图和网格视图两种展示方式
-- **字段可视化编辑**:支持字段拖拽排序、动态添加/编辑字段
-- **数据持久化**:基于 JSON 的本地存储机制
-- **数据库复制**:支持一键复制现有数据库
+- **自定义数据库结构**：用户可创建无限个数据库，每个数据库支持自定义名称、描述、封面图片
+- **灵活的字段系统**：支持 11 种字段类型（文本、长文本、整数、复选框、下拉选择、日期、时间、日期时间、图片、URL、评分、密码）
+- **记录管理**：完整的 CRUD 操作，支持创建、编辑、删除、查看数据库记录
+- **双视图模式**：列表视图和网格视图两种展示方式，支持实时切换
+- **字段可视化编辑**：支持字段拖拽排序、动态添加/编辑字段
+- **数据持久化**：基于 JSON 的本地存储机制，数据安全可靠
+- **数据库复制**：支持一键复制现有数据库结构（不含记录）
+- **JS API 支持**：提供 15+ 个 JS API 方法，支持与 WebView 插件和其他模块交互
+- **UseCase 架构**：采用 UseCase + Repository 架构模式，业务逻辑清晰，易于测试和扩展
+- **主页小组件**：支持 1x1 快速访问和 2x2 统计信息小组件
+- **国际化支持**：内置中英双语，支持动态切换
+- **数据选择器**：支持数据库表和记录的跨模块选择
 
 ---
 
@@ -25,28 +30,39 @@
 **文件**: `database_plugin.dart`
 
 ```dart
-class DatabasePlugin extends BasePlugin {
-    @override
-    String get id => 'database';
+class DatabasePlugin extends BasePlugin with JSBridgePlugin {
+  @override
+  String get id => 'database';
 
-    @override
-    Color get color => Colors.deepPurple;
+  @override
+  Color get color => Colors.deepPurple;
 
-    @override
-    IconData get icon => Icons.storage;
+  @override
+  IconData get icon => Icons.storage;
 
-    late final DatabaseService service = DatabaseService(this);
+  late final DatabaseService service = DatabaseService(this);
+  late final DatabaseController controller = DatabaseController(service);
+  late final ClientDatabaseRepository repository;
+  late final DatabaseUseCase useCase;
 
-    @override
-    Future<void> initialize() async {
-        await service.initializeDefaultData();
-    }
+  @override
+  Future<void> initialize() async {
+    // 1. 初始化默认数据
+    await service.initializeDefaultData();
 
-    @override
-    Future<void> registerToApp(pluginManager, configManager) async {
-        // 插件已在 initialize() 中完成初始化
-    // 这里可以添加额外的应用级注册逻辑
-    }
+    // 2. 初始化 UseCase 架构
+    repository = ClientDatabaseRepository(
+      service: service,
+      controller: controller,
+    );
+    useCase = DatabaseUseCase(repository);
+
+    // 3. 注册数据选择器
+    _registerDataSelectors();
+
+    // 4. 注册 JS API（最后一步）
+    await registerJSAPI();
+  }
 }
 ```
 
@@ -57,119 +73,147 @@ class DatabasePlugin extends BasePlugin {
 **路由**: 通过 `DatabasePlugin.buildMainView()` 返回 `DatabaseMainView`
 
 **启动流程**:
-1. `DatabasePlugin.initialize()` - 初始化默认数据库
+1. `DatabasePlugin.initialize()` - 初始化默认数据库和 UseCase 架构
 2. `DatabaseService.initializeDefaultData()` - 创建 'default_db' 默认数据库
 3. `DatabaseMainView` → `DatabaseListWidget` - 显示数据库列表
+
+### 主页小组件注册
+
+**文件**: `home_widgets.dart`
+
+通过 `DatabaseHomeWidgets.register()` 注册两种小组件：
+- **1x1 快速访问**：显示数据库图标和名称
+- **2x2 统计卡片**：显示数据库总数统计
 
 ---
 
 ## 对外接口
 
-### 核心 API
+### JS API 接口
 
-#### DatabaseService 服务方法
+数据库插件提供 15+ 个 JS API 方法，支持与 WebView 和其他插件交互：
 
-**文件**: `services/database_service.dart`
+#### 数据库管理 API
 
-```dart
-// ========== 数据库管理 ==========
-
-// 获取所有数据库
-Future<List<DatabaseModel>> getAllDatabases();
-
-// 创建新数据库
-Future<void> createDatabase(DatabaseModel database);
-
-// 更新数据库
-Future<void> updateDatabase(DatabaseModel database);
-
-// 删除数据库
-Future<void> deleteDatabase(String databaseId);
-
-// 初始化默认数据
-Future<void> initializeDefaultData();
-
-// 获取数据库数量
-Future<int> getDatabaseCount();
-```
-
-#### DatabaseController 控制器方法
-
-**文件**: `controllers/database_controller.dart`
-
-```dart
-// ========== 数据库操作 ==========
-
-// 加载指定数据库
-Future<void> loadDatabase(String databaseId);
-
-// 更新当前数据库
-Future<void> updateDatabase(DatabaseModel database);
+```javascript
+// 获取所有数据库（支持分页）
+await invoke('database.getDatabases', { offset: 0, count: 10 });
 
 // 创建数据库
-Future<void> createDatabase(DatabaseModel database);
+await invoke('database.createDatabase', {
+  name: '项目库',
+  description: '项目管理数据库',
+  fields: [
+    { name: '项目名称', type: 'Text' },
+    { name: '截止日期', type: 'Date' }
+  ]
+});
 
-// 删除当前数据库
-Future<void> deleteDatabase();
+// 更新数据库
+await invoke('database.updateDatabase', {
+  id: 'db_id',
+  name: '新名称',
+  fields: [...]
+});
 
-// ========== 记录管理 ==========
+// 删除数据库
+await invoke('database.deleteDatabase', { id: 'db_id' });
+```
 
-// 获取数据库的所有记录
-Future<List<Record>> getRecords(String databaseId);
+#### 记录管理 API
 
-// 创建新记录
-Future<void> createRecord(Record record);
+```javascript
+// 获取记录列表（支持分页）
+await invoke('database.getRecords', {
+  databaseId: 'db_id',
+  offset: 0,
+  count: 20
+});
+
+// 创建记录
+await invoke('database.createRecord', {
+  databaseId: 'db_id',
+  fields: {
+    '项目名称': 'Memento 开发',
+    '进度': 80
+  }
+});
 
 // 更新记录
-Future<void> updateRecord(Record record);
+await invoke('database.updateRecord', {
+  id: 'record_id',
+  fields: { '进度': 90 }
+});
 
 // 删除记录
-Future<void> deleteRecord(String recordId);
+await invoke('database.deleteRecord', { id: 'record_id' });
 ```
 
-#### FieldController 字段控制器
+#### 查询和搜索 API
 
-**文件**: `controllers/field_controller.dart`
-
-```dart
-// ========== 字段类型管理 ==========
-
-// 获取所有支持的字段类型
-static List<String> getFieldTypes();
-// 返回: ['Text', 'Long Text', 'Integer', 'Checkbox', 'Dropdown',
-//        'Date', 'Time', 'Date/Time', 'Image', 'URL', 'Rating', 'Password']
-
-// 构建字段输入组件
-static Widget buildFieldWidget({
-  required BuildContext context,
-  required DatabaseField field,
-  required dynamic initialValue,
-  required ValueChanged<dynamic> onChanged,
+```javascript
+// 搜索记录
+await invoke('database.query', {
+  databaseId: 'db_id',
+  keyword: '关键词',
+  offset: 0,
+  count: 20
 });
 
-// 构建字段类型选择项
-static Widget buildFieldTypeTile({
-  required String type,
-  required VoidCallback onTap,
+// 统计数量
+await invoke('database.getCount', {
+  type: 'databases' // 或 'records' + databaseId
 });
 ```
 
-### 统计接口
+#### 便捷查找 API
 
-```dart
-// 获取数据库总数(供卡片视图使用)
-Future<int> getDatabaseCount();
+```javascript
+// 查找数据库（支持多种查找方式）
+await invoke('database.findDatabaseById', { id: 'db_id' });
+await invoke('database.findDatabaseByName', { name: '项目库', fuzzy: true });
+await invoke('database.findDatabaseBy', { field: 'name', value: '项目' });
+
+// 查找记录
+await invoke('database.findRecordById', { id: 'record_id' });
+await invoke('database.findRecordBy', {
+  databaseId: 'db_id',
+  field: '项目名称',
+  value: 'Memento'
+});
 ```
+
+### 数据选择器接口
+
+插件注册了两个数据选择器，支持其他模块选择数据库和记录：
+
+1. **数据库表选择器** (`database.table`)
+   - 选择数据库表
+   - 返回 DatabaseModel 对象
+
+2. **记录选择器** (`database.record`)
+   - 两级选择：先选择数据库，再选择记录
+   - 返回 Record 对象
+   - 智能显示记录标题（优先使用 title/name 字段）
 
 ---
 
 ## 关键依赖与配置
 
+### 架构依赖
+
+- **shared_models**: 提供了统一的 DTO 模型和 UseCase 基类
+  - `DatabaseModelDto` - 数据库传输对象
+  - `DatabaseRecordDto` - 记录传输对象
+  - `DatabaseUseCase` - 业务逻辑基类
+  - `IDatabaseRepository` - 数据访问接口
+
 ### 外部依赖
 
 - `flutter/material.dart`: UI 组件库
-- `uuid`: UUID 生成(用于数据库复制)
-- `image_picker`: 图片选择器(字段类型:Image)
+- `uuid: ^4.x.x`: UUID 生成（用于数据库复制）
+- `image_picker: ^1.x.x`: 图片选择器（字段类型：Image）
+- `get/get.dart`: 状态管理和国际化
 - `Memento/widgets/image_picker_dialog.dart`: 自定义图片选择对话框
 - `Memento/utils/image_utils.dart`: 图片工具类
 
@@ -177,6 +221,9 @@ Future<int> getDatabaseCount();
 
 - **Core Storage Manager**: 数据持久化
 - **Core Plugin Manager**: 插件管理与导航
+- **JS Bridge**: WebView 通信支持
+- **Plugin Data Selector**: 跨模块数据选择
+- **Home Widget System**: 主页小组件支持
 
 ### 存储路径
 
@@ -192,52 +239,6 @@ storage/
 └── records_<databaseId>.json       # 每个数据库的记录数据
 ```
 
-**databases.json 格式**:
-```json
-[
-  {
-    "id": "default_db",
-    "name": "Default Database",
-    "description": "示例数据库描述",
-    "coverImage": "/path/to/image.jpg",
-    "fields": [
-      {
-        "id": "1234567890",
-        "name": "标题",
-        "type": "Text",
-        "isRequired": false
-      },
-      {
-        "id": "1234567891",
-        "name": "创建日期",
-        "type": "Date",
-        "isRequired": true
-      }
-    ],
-    "createdAt": "2025-01-15T10:30:00.000Z",
-    "updatedAt": "2025-01-15T10:30:00.000Z"
-  }
-]
-```
-
-**records_{databaseId}.json 格式**:
-```json
-[
-  {
-    "id": "1234567890123",
-    "tableId": "default_db",
-    "fields": {
-      "标题": "我的第一条记录",
-      "创建日期": "2025-01-15T08:30:00.000Z",
-      "数量": 42,
-      "完成": true
-    },
-    "createdAt": "2025-01-15T08:30:00.000Z",
-    "updatedAt": "2025-01-15T20:15:00.000Z"
-  }
-]
-```
-
 ---
 
 ## 数据模型
@@ -247,14 +248,15 @@ storage/
 **文件**: `models/database_model.dart`
 
 ```dart
+@immutable
 class DatabaseModel {
-  String id;                        // 唯一标识符
-  String name;                      // 数据库名称
-  String? description;              // 数据库描述(可选)
-  String? coverImage;               // 封面图片路径(可选)
-  List<DatabaseField> fields;       // 字段定义列表
-  DateTime createdAt;               // 创建时间
-  DateTime updatedAt;               // 更新时间
+  final String id;                        // 唯一标识符
+  final String name;                      // 数据库名称
+  final String? description;              // 数据库描述(可选)
+  final String? coverImage;               // 封面图片路径(可选)
+  final List<DatabaseField> fields;       // 字段定义列表
+  final DateTime createdAt;               // 创建时间
+  final DateTime updatedAt;               // 更新时间
 
   Map<String, dynamic> toMap();
   factory DatabaseModel.fromMap(Map<String, dynamic> map);
@@ -286,10 +288,10 @@ class DatabaseModel {
 ```dart
 @immutable
 class DatabaseField {
-  String id;               // 字段唯一标识符
-  String name;             // 字段名称
-  String type;             // 字段类型(Text/Integer/Date等)
-  bool isRequired;         // 是否必填
+  final String id;               // 字段唯一标识符
+  final String name;             // 字段名称
+  final String type;             // 字段类型
+  final bool isRequired;         // 是否必填
 
   Map<String, dynamic> toMap();
   factory DatabaseField.fromMap(Map<String, dynamic> map);
@@ -320,11 +322,11 @@ class DatabaseField {
 
 ```dart
 class Record {
-  String id;                        // 记录唯一标识符
-  String tableId;                   // 所属数据库ID
-  Map<String, dynamic> fields;      // 字段数据(键=字段名,值=字段值)
-  DateTime createdAt;               // 创建时间
-  DateTime updatedAt;               // 更新时间
+  final String id;                        // 记录唯一标识符
+  final String tableId;                   // 所属数据库ID
+  final Map<String, dynamic> fields;      // 字段数据(键=字段名,值=字段值)
+  final DateTime createdAt;               // 创建时间
+  final DateTime updatedAt;               // 更新时间
 
   Map<String, dynamic> toMap();
   factory Record.fromMap(Map<String, dynamic> map);
@@ -364,7 +366,48 @@ class FieldModel {
 }
 ```
 
-**注**: `FieldModel` 是 `DatabaseField` 的扩展版本,在编辑界面使用,支持额外的 `description` 字段。
+**注**: `FieldModel` 是 `DatabaseField` 的扩展版本，在编辑界面使用，支持额外的 `description` 字段。
+
+---
+
+## 业务逻辑层
+
+### DatabaseService (数据服务)
+
+**文件**: `services/database_service.dart`
+
+核心功能：
+- 管理数据库元数据的 CRUD 操作
+- 初始化默认数据库
+- 提供统计接口（数据库总数、今日记录数、总记录数）
+
+### DatabaseController (控制器)
+
+**文件**: `controllers/database_controller.dart`
+
+核心功能：
+- 管理当前加载的数据库
+- 处理记录的 CRUD 操作
+- 维护数据库与记录的关系
+
+### FieldController (字段控制器)
+
+**文件**: `controllers/field_controller.dart`
+
+核心功能：
+- 定义所有支持的字段类型
+- 根据字段类型动态生成输入组件
+- 提供字段类型选择界面
+
+### ClientDatabaseRepository (数据仓库)
+
+**文件**: `repositories/client_database_repository.dart`
+
+核心功能：
+- 实现 `IDatabaseRepository` 接口
+- 适配现有的 `DatabaseService` 和 `DatabaseController`
+- 处理 DTO 与 Model 之间的转换
+- 支持 UseCase 架构模式
 
 ---
 
@@ -488,52 +531,35 @@ Scaffold
 
 ---
 
-## 事件系统
+## 测试与质量
 
-**当前状态**: 未实现事件广播系统
+### 当前状态
+- **单元测试**: 无
+- **集成测试**: 无
+- **代码分析**: 通过 Flutter analyze，仅 1 个文档注释警告
+- **架构迁移**: 2025-12-12 完成到 UseCase 架构的迁移
 
-**建议添加**:
+### 测试建议
 
-```dart
-// 在 DatabaseService 中
-void _notifyEvent(String action, DatabaseModel database) {
-  final eventArgs = ItemEventArgs(
-    eventName: 'database_$action',
-    itemId: database.id,
-    title: database.name,
-    action: action,
-  );
-  EventManager.instance.broadcast('database_$action', eventArgs);
-}
+1. **高优先级**:
+   - `DatabaseService.createDatabase()` - 测试数据库创建和存储
+   - `DatabaseService.deleteDatabase()` - 测试删除逻辑
+   - `DatabaseController.getRecords()` - 测试记录读取
+   - `FieldController.buildFieldWidget()` - 测试所有 11 种字段类型组件
+   - `ClientDatabaseRepository` - 测试 DTO 转换和适配逻辑
 
-// 建议的事件类型:
-// - database_created  - 创建数据库时
-// - database_updated  - 更新数据库时
-// - database_deleted  - 删除数据库时
-// - record_created    - 创建记录时
-// - record_updated    - 更新记录时
-// - record_deleted    - 删除记录时
-```
+2. **中优先级**:
+   - `DatabaseUseCase` - 测试所有业务方法（15个）
+   - JS API 测试 - 验证所有 15+ 个 API 方法
+   - 字段拖拽排序 - 测试排序逻辑
+   - 图片上传与裁剪 - 测试图片处理流程
+   - 数据选择器 - 测试跨模块选择功能
 
----
-
-## 卡片视图
-
-插件在主页提供卡片视图,展示:
-
-**布局**:
-```
-┌─────────────────────────────┐
-│ 💾 数据库                   │
-├─────────────────────────────┤
-│    总数据库数               │
-│        5                    │
-└─────────────────────────────┘
-```
-
-**实现**: `database_plugin.dart` 中的 `buildCardView()` 方法
-
-**数据来源**: `DatabaseService.getDatabaseCount()`
+3. **低优先级**:
+   - UI 交互逻辑
+   - 国际化字符串完整性
+   - 空状态显示
+   - 错误处理与重试
 
 ---
 
@@ -548,89 +574,35 @@ void _notifyEvent(String action, DatabaseModel database) {
 
 | 文件 | 语言 |
 |------|------|
-| `l10n/database_localizations.dart` | 本地化接口 |
-| `l10n/database_localizations_zh.dart` | 中文翻译 |
-| `l10n/database_localizations_en.dart` | 英文翻译 |
+| `l10n/database_translations.dart` | 本地化接口 |
+| `l10n/database_translations_zh.dart` | 中文翻译 |
+| `l10n/database_translations_en.dart` | 英文翻译 |
 
 ### 关键字符串
 
 ```dart
-abstract class DatabaseLocalizations {
-  String get name;                      // 插件名称
-  String get pluginDescription;         // 插件描述
+// 插件基本信息
+'database_name': '数据库',
+'database_plugin_description': '用于管理数据库的插件',
 
-  // 数据库操作
-  String get databaseListTitle;         // 数据库列表
-  String get editDatabaseTitle;         // 编辑数据库
-  String get newDatabaseDefaultName;    // 新建数据库
-  String get databaseNameLabel;         // 数据库名称
-  String get descriptionLabel;          // 描述
-  String get totalDatabasesCount;       // 总数据库数
+// 数据库操作
+'database_database_list_title': '数据库列表',
+'database_edit_database_title': '编辑数据库',
+'database_new_database_default_name': '新建数据库',
+'database_database_name_label': '数据库名称',
 
-  // 字段操作
-  String get fieldsTabTitle;            // 字段
-  String get informationTabTitle;       // 基本信息
-  String get fieldNameLabel;            // 字段名称
-  String get selectFieldTypeTitle;      // 选择字段类型
-  String get newFieldTitle;             // 新建字段
-  String get defaultValueLabel;         // 默认值
+// 字段操作
+'database_fields_tab_title': '字段',
+'database_field_name_label': '字段名称',
+'database_select_field_type_title': '选择字段类型',
 
-  // 记录操作
-  String get editRecordTitle;           // 编辑记录
-  String get deleteRecordTitle;         // 删除记录
-  String get deleteRecordMessage;       // 删除确认消息
-  String get untitledRecord;            // 未命名
+// 记录操作
+'database_untitled_record': '未命名',
+'database_delete_record_title': '删除记录',
 
-  // 通用操作
-  String get edit;                      // 编辑
-  String get delete;                    // 删除
-  String get cancel;                    // 取消
-  String get confirmDeleteTitle;        // 确认删除
-  String get confirmDeleteMessage;      // 删除确认消息
-  String get uploadCoverImage;          // 上传封面图片
-  String get selectImage;               // 选择图片
-
-  // 消息提示
-  String get loadFailedMessage;         // 加载失败
-  String get saveFailedMessage;         // 保存失败
-  String get deleteSuccessMessage;      // 删除成功
-  String get deleteFailedMessage;       // 删除失败
-  String get copySuccess;               // 复制成功
-  String get noDatabasesMessage;        // 暂无数据库
-  String get addDatabaseHint;           // 添加提示
-}
+// 统计信息
+'database_total_databases_count': '总数据库数',
 ```
-
----
-
-## 测试与质量
-
-### 当前状态
-- **单元测试**: 无
-- **集成测试**: 无
-- **已知问题**: 无明显问题
-
-### 测试建议
-
-1. **高优先级**:
-   - `DatabaseService.createDatabase()` - 测试数据库创建和存储
-   - `DatabaseService.deleteDatabase()` - 测试删除逻辑
-   - `DatabaseController.getRecords()` - 测试记录读取
-   - `FieldController.buildFieldWidget()` - 测试所有 11 种字段类型组件
-   - 数据库复制功能 - 测试 UUID 生成和数据复制
-
-2. **中优先级**:
-   - 字段拖拽排序 - 测试排序逻辑
-   - 图片上传与裁剪 - 测试图片处理流程
-   - 记录编辑 - 测试动态表单生成
-   - 数据持久化 - 测试 JSON 序列化/反序列化
-   - 默认数据初始化 - 测试 `initializeDefaultData()`
-
-3. **低优先级**:
-   - UI 交互逻辑
-   - 国际化字符串完整性
-   - 空状态显示
-   - 错误处理与重试
 
 ---
 
@@ -684,7 +656,36 @@ final newDatabase = database.copyWith(id: Uuid().v4());
 **优点**: 简单、递增、无需额外依赖(时间戳)/全局唯一(UUID)
 **缺点**: 高并发下时间戳可能重复(当前场景下无问题)
 
-### Q3: 如何实现数据导入导出功能?
+### Q3: 如何通过 JS API 操作数据库?
+
+```javascript
+// 创建数据库
+const dbResult = await invoke('database.createDatabase', {
+  name: '我的数据库',
+  description: '描述信息',
+  fields: [
+    { name: '标题', type: 'Text', isRequired: true },
+    { name: '日期', type: 'Date' }
+  ]
+});
+
+// 添加记录
+const recordResult = await invoke('database.createRecord', {
+  databaseId: dbResult.id,
+  fields: {
+    '标题': '第一条记录',
+    '日期': new Date().toISOString()
+  }
+});
+
+// 查询记录
+const records = await invoke('database.query', {
+  databaseId: dbResult.id,
+  keyword: '关键词'
+});
+```
+
+### Q4: 如何实现数据导入导出功能?
 
 建议添加导入导出方法:
 
@@ -728,103 +729,38 @@ Future<void> importDatabase(String jsonData) async {
 }
 ```
 
-### Q4: 如何实现字段默认值功能?
-
-当前 `FieldModel.description` 字段可用于存储默认值:
-
-```dart
-// 在 RecordEditWidget 中初始化字段时
-for (final field in widget.database.fields) {
-  _fields.putIfAbsent(field.name, () {
-    // 如果字段有描述(默认值),使用它
-    if (field is FieldModel && field.description != null) {
-      return field.description;
-    }
-
-    // 否则使用类型默认值
-    switch (field.type) {
-      case 'Text':
-      case 'Long Text':
-        return '';
-      case 'Integer':
-        return 0;
-      case 'Checkbox':
-        return false;
-      default:
-        return null;
-    }
-  });
-}
-```
-
 ### Q5: 如何实现记录搜索功能?
 
-建议在 `DatabaseController` 中添加:
+使用 UseCase 的搜索方法:
 
 ```dart
+// 在 Controller 中
 Future<List<Record>> searchRecords({
   required String databaseId,
   required String query,
-  List<String>? fieldNames,  // 指定搜索字段
 }) async {
-  final allRecords = await getRecords(databaseId);
+  final result = await useCase.searchRecords(DatabaseRecordQuery(
+    tableId: databaseId,
+    fieldKeyword: query,
+  ));
 
-  return allRecords.where((record) {
-    // 如果指定了字段,仅搜索这些字段
-    final fieldsToSearch = fieldNames ?? record.fields.keys.toList();
-
-    for (var fieldName in fieldsToSearch) {
-      final value = record.fields[fieldName];
-      if (value != null &&
-          value.toString().toLowerCase().contains(query.toLowerCase())) {
-        return true;
-      }
-    }
-    return false;
-  }).toList();
+  if (result.isSuccess) {
+    return result.data!.map(_dtoToRecord).toList();
+  }
+  return [];
 }
 ```
 
-### Q6: 如何实现字段验证功能?
+### Q6: UseCase 架构的优势是什么?
 
-在 `DatabaseField` 中添加验证规则:
+迁移后的架构优势：
 
-```dart
-class DatabaseField {
-  // ... 现有字段
-  Map<String, dynamic>? validation;  // 验证规则
-
-  // 示例验证规则:
-  // {
-  //   'required': true,
-  //   'minLength': 5,
-  //   'maxLength': 100,
-  //   'pattern': r'^[a-zA-Z0-9]+$',
-  //   'min': 0,
-  //   'max': 100
-  // }
-}
-
-// 在 FieldController.buildFieldWidget() 中应用验证
-case 'Text':
-  return TextFormField(
-    // ...
-    validator: (value) {
-      if (field.validation?['required'] == true &&
-          (value == null || value.isEmpty)) {
-        return '${field.name} 为必填项';
-      }
-
-      if (field.validation?['minLength'] != null &&
-          value!.length < field.validation!['minLength']) {
-        return '${field.name} 最少需要 ${field.validation!['minLength']} 个字符';
-      }
-
-      // 更多验证逻辑...
-      return null;
-    },
-  );
-```
+1. **业务逻辑集中**: 所有业务规则在 UseCase 层
+2. **数据访问抽象**: 通过 Repository 接口隔离数据层
+3. **易于测试**: UseCase 和 Repository 可独立测试
+4. **代码复用**: UseCase 可被多个入口复用
+5. **错误处理**: 统一的 Result 模式错误处理
+6. **分页支持**: 内置分页逻辑，减少重复代码
 
 ---
 
@@ -832,17 +768,21 @@ case 'Text':
 
 ```
 database/
-├── database_plugin.dart                # 插件主类
+├── database_plugin.dart                # 插件主类（635行）
+├── home_widgets.dart                   # 主页小组件注册
+├── MIGRATION_REPORT.md                # UseCase 架构迁移报告
 ├── models/
-│   ├── database_model.dart             # 数据库模型
-│   ├── database_field.dart             # 数据库字段模型
-│   ├── field_model.dart                # 字段模型(编辑用)
-│   └── record.dart                     # 记录模型
+│   ├── database_model.dart             # 数据库模型（72行）
+│   ├── database_field.dart             # 数据库字段模型（58行）
+│   ├── field_model.dart                # 字段模型（编辑用）
+│   └── record.dart                     # 记录模型（52行）
 ├── services/
-│   └── database_service.dart           # 数据库服务(CRUD)
+│   └── database_service.dart           # 数据库服务（134行）
 ├── controllers/
-│   ├── database_controller.dart        # 数据库控制器
-│   └── field_controller.dart           # 字段控制器(字段类型管理)
+│   ├── database_controller.dart        # 数据库控制器（74行）
+│   └── field_controller.dart           # 字段控制器（119行）
+├── repositories/
+│   └── client_database_repository.dart # 客户端仓库实现（342行）
 ├── widgets/
 │   ├── database_list_widget.dart       # 数据库列表组件
 │   ├── database_detail_widget.dart     # 数据库详情组件
@@ -850,16 +790,37 @@ database/
 │   ├── record_edit_widget.dart         # 记录编辑组件
 │   └── record_detail_widget.dart       # 记录详情组件
 └── l10n/
-    ├── database_localizations.dart     # 国际化接口
-    ├── database_localizations_zh.dart  # 中文翻译
-    └── database_localizations_en.dart  # 英文翻译
+    ├── database_translations.dart     # 国际化接口
+    ├── database_translations_zh.dart  # 中文翻译
+    └── database_translations_en.dart  # 英文翻译
 ```
 
 ---
 
 ## 关键实现细节
 
-### 1. 动态字段组件生成
+### 1. UseCase 架构模式
+
+插件已迁移到 UseCase 架构，实现了业务逻辑与数据访问的分离：
+
+```dart
+// 架构层次
+DatabasePlugin (JS API 适配层)
+    ↓
+DatabaseUseCase (业务逻辑层)
+    ↓
+ClientDatabaseRepository (数据访问适配层)
+    ↓
+DatabaseService + DatabaseController (具体实现)
+```
+
+**优势**：
+- 业务逻辑集中在 UseCase
+- 通过 Repository 接口解耦
+- 支持多种数据源实现
+- 易于单元测试
+
+### 2. 动态字段组件生成
 
 **核心机制**: 根据字段类型动态生成输入组件
 
@@ -876,294 +837,120 @@ switch (field.type) {
     return ListTile(onTap: () => showDatePicker(...));
   // ... 其他类型
 }
+```
 
-// 在 RecordEditWidget 中使用
-ListView(
-  children: [
-    for (final field in widget.database.fields)
-      FieldController.buildFieldWidget(
-        context: context,
-        field: field,
-        initialValue: _fields[field.name],
-        onChanged: (value) => _fields[field.name] = value,
+### 3. JS API 实现模式
+
+所有 JS API 遵循统一模式：
+
+```dart
+Future<String> _jsCreateDatabase(Map<String, dynamic> params) async {
+  // 1. 调用 UseCase
+  final result = await useCase.createDatabase(params);
+
+  // 2. 处理结果
+  if (result.isFailure) {
+    return jsonEncode({'error': result.errorOrNull?.message});
+  }
+
+  // 3. 返回成功数据
+  return jsonEncode(result.dataOrNull);
+}
+```
+
+### 4. 数据选择器实现
+
+支持两级数据选择：
+
+```dart
+// 数据库表选择器（单级）
+SelectorStep(
+  id: 'table',
+  title: '数据库表列表',
+  dataLoader: (_) async {
+    final databases = await service.getAllDatabases();
+    return databases.map((db) => SelectableItem(
+      id: db.id,
+      title: db.name,
+      rawData: db,
+    )).toList();
+  },
+)
+
+// 记录选择器（两级）
+// 第一级：选择数据库
+// 第二级：选择记录（智能显示标题）
+```
+
+### 5. 主页小组件系统
+
+```dart
+// 1x1 快速访问
+registry.register(HomeWidget(
+  id: 'database_icon',
+  builder: (context, config) => GenericIconWidget(...),
+));
+
+// 2x2 统计卡片
+registry.register(HomeWidget(
+  id: 'database_overview',
+  builder: (context, config) => GenericPluginWidget(
+    availableItems: [
+      StatItemData(
+        id: 'total_databases',
+        label: '总数据库数',
+        value: '$databaseCount',
       ),
-  ],
-)
-```
-
-### 2. 字段拖拽排序实现
-
-使用 `ReorderableListView` 实现:
-
-```dart
-ReorderableListView(
-  onReorder: (oldIndex, newIndex) {
-    setState(() {
-      if (newIndex > oldIndex) newIndex--;
-      final item = _fields.removeAt(oldIndex);
-      _fields.insert(newIndex, item);
-    });
-  },
-  children: _fields.map((field) => ListTile(
-    key: ValueKey(field.id),  // 必须提供唯一 key
-    title: Text(field.name),
-    trailing: Icon(Icons.drag_handle),
-  )).toList(),
-)
-```
-
-### 3. 数据库复制功能
-
-```dart
-// 在 DatabaseListWidget._showBottomSheet() 中
-ListTile(
-  leading: Icon(Icons.copy),
-  title: Text('复制'),
-  onTap: () async {
-    // 1. 生成新的UUID
-    final newDatabase = database.copyWith(id: Uuid().v4());
-
-    // 2. 创建副本
-    await widget.service.createDatabase(newDatabase);
-
-    // 3. 刷新列表
-    setState(() {
-      _databasesFuture = widget.service.getAllDatabases();
-    });
-  },
-)
-```
-
-**注意**: 当前仅复制数据库结构,不复制记录。如需复制记录,需同时复制 `records_{databaseId}` 数据。
-
-### 4. 图片处理流程
-
-```dart
-// 1. 在 DatabaseEditWidget 中上传封面
-Future<void> _pickImage() async {
-  final result = await showDialog<Map<String, dynamic>>(
-    context: context,
-    builder: (context) => ImagePickerDialog(
-      enableCrop: true,
-      cropAspectRatio: 1.0,  // 正方形裁剪
-    ),
-  );
-
-  if (result != null && result['url'] != null) {
-    _editedDatabase = _editedDatabase.copyWith(
-      coverImage: result['url'],  // 存储图片路径
-    );
-  }
-}
-
-// 2. 在 DatabaseListWidget 中显示
-FutureBuilder<String>(
-  future: ImageUtils.getAbsolutePath(database.coverImage!),
-  builder: (context, snapshot) {
-    if (snapshot.hasData) {
-      return _buildImageWidget(snapshot.data!);
-    }
-    return _buildIcon();  // 默认图标
-  },
-)
-
-// 3. 图片显示处理(支持网络/本地)
-Widget _buildImageWidget(String imageUrl) {
-  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-    return Image.network(imageUrl, fit: BoxFit.cover);
-  } else {
-    return Image.file(File(imageUrl), fit: BoxFit.cover);
-  }
-}
-```
-
-### 5. 双视图模式切换
-
-```dart
-// 在 DatabaseDetailWidget 中
-class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
-  bool _isGridView = false;  // 视图状态
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            icon: Icon(_isGridView ? Icons.list : Icons.grid_view),
-            onPressed: () {
-              setState(() {
-                _isGridView = !_isGridView;
-              });
-            },
-          ),
-        ],
-      ),
-      body: _isGridView ? _buildGridView() : _buildListView(),
-    );
-  }
-}
+    ],
+  ),
+));
 ```
 
 ---
 
-## 层级结构可视化
+## 架构演进
 
-### 数据关系图
+### UseCase 迁移（2025-12-12）
 
-```mermaid
-graph TD
-    Plugin[DatabasePlugin] --> Service[DatabaseService]
-    Plugin --> Controller[DatabaseController]
+从直接业务逻辑迁移到 UseCase 架构：
 
-    Service --> Storage[(StorageManager)]
-    Controller --> Service
+**迁移前**:
+- JS API 直接调用 Service/Controller
+- 业务逻辑分散
+- 难以测试
 
-    DatabaseModel --> DatabaseField1[DatabaseField]
-    DatabaseModel --> DatabaseField2[DatabaseField]
-    DatabaseModel --> DatabaseFieldN[DatabaseField ...]
+**迁移后**:
+- JS API → UseCase → Repository → Service
+- 业务逻辑集中
+- 易于测试和扩展
 
-    Record1[Record] --> DatabaseModel
-    Record2[Record] --> DatabaseModel
-    RecordN[Record ...] --> DatabaseModel
+**迁移成果**：
+- ✅ 15 个 JS API 方法全部迁移
+- ✅ 新增 ClientDatabaseRepository 适配器
+- ✅ 保持向后兼容
+- ✅ 支持分页和搜索功能
 
-    Storage --> DatabasesJSON[databases.json]
-    Storage --> RecordsJSON[records_dbId.json]
-```
+### 后续优化建议
 
-### UI 导航流程
-
-```mermaid
-flowchart TD
-    Home[主页] --> List[DatabaseListWidget<br/>数据库列表]
-
-    List --> |点击卡片| Detail[DatabaseDetailWidget<br/>数据库详情]
-    List --> |新建| Edit1[DatabaseEditWidget<br/>编辑数据库]
-    List --> |长按→编辑| Edit1
-    List --> |长按→复制| CopyDB[复制数据库]
-    List --> |长按→删除| DeleteDB[删除确认对话框]
-
-    Detail --> |切换视图| ListView[列表视图]
-    Detail --> |切换视图| GridView[网格视图]
-    Detail --> |点击记录| RecordDetail[RecordDetailWidget<br/>记录详情]
-    Detail --> |新建记录| RecordEdit1[RecordEditWidget<br/>编辑记录]
-    Detail --> |长按记录→编辑| RecordEdit1
-    Detail --> |滑动删除| DeleteRecord[删除确认对话框]
-
-    Edit1 --> |基本信息Tab| InfoTab[名称/描述/封面]
-    Edit1 --> |字段Tab| FieldsTab[字段列表/拖拽排序]
-    FieldsTab --> |添加字段| FieldTypeDialog[选择字段类型]
-    FieldTypeDialog --> |选择后| FieldEditDialog[编辑字段名称]
-
-    RecordEdit1 --> |动态表单| DynamicForm[根据字段生成输入组件]
-    DynamicForm --> |保存| SaveRecord[创建/更新记录]
-```
-
----
-
-## 依赖关系
-
-### 核心依赖
-
-- **BasePlugin**: 插件基类
-- **StorageManager**: 数据持久化
-- **PluginManager**: 插件管理器与导航
-
-### 第三方包依赖
-
-- `uuid: ^4.x.x` - UUID 生成(数据库复制)
-- `image_picker: ^1.x.x` - 图片选择器
-
-### 内部依赖
-
-- `Memento/widgets/image_picker_dialog.dart` - 图片选择与裁剪
-- `Memento/utils/image_utils.dart` - 图片路径处理
-- `Memento/l10n/app_localizations.dart` - 应用级国际化
-
----
-
-## 扩展建议
-
-### 1. 数据验证系统
-
-在 `DatabaseField` 中添加 `validation` 字段:
-
-```dart
-class DatabaseField {
-  // ...
-  Map<String, dynamic>? validation;
-}
-
-// 示例验证规则
-{
-  'required': true,
-  'minLength': 5,
-  'maxLength': 100,
-  'pattern': r'^[a-zA-Z0-9]+$',
-  'customValidator': 'isEmail'  // 预定义验证器
-}
-```
-
-### 2. 数据导入导出
-
-添加 CSV/JSON/Excel 格式的导入导出:
-
-```dart
-// 导出为 CSV
-Future<String> exportToCSV(String databaseId);
-
-// 导入 CSV
-Future<void> importFromCSV(String databaseId, String csvData);
-```
-
-### 3. 关系字段
-
-支持多数据库之间的关联:
-
-```dart
-// 新增字段类型: 'Relation'
-{
-  'type': 'Relation',
-  'targetDatabaseId': 'other_db_id',
-  'displayField': 'title',  // 显示目标记录的哪个字段
-  'multiple': false         // 是否多选
-}
-```
-
-### 4. 视图与过滤
-
-为数据库添加自定义视图:
-
-```dart
-class DatabaseView {
-  String id;
-  String name;
-  List<String> visibleFields;     // 可见字段
-  Map<String, dynamic> filters;   // 过滤条件
-  String sortField;                // 排序字段
-  bool sortAscending;              // 排序方向
-}
-```
-
-### 5. 公式字段
-
-支持计算字段:
-
-```dart
-// 新增字段类型: 'Formula'
-{
-  'type': 'Formula',
-  'formula': 'SUM({field1}, {field2}) * 0.1',
-  'resultType': 'Number'
-}
-```
+1. **缓存层**: 添加查询结果缓存
+2. **批量操作**: 支持批量创建/更新记录
+3. **事务支持**: 支持多操作事务
+4. **事件系统**: 数据变更事件通知
+5. **数据验证**: 字段级别的验证规则
+6. **导入导出**: CSV/Excel 格式支持
+7. **关系字段**: 支持数据库间关联
+8. **视图定制**: 自定义列表/表格视图
 
 ---
 
 ## 变更记录 (Changelog)
 
-- **2025-11-13**: 初始化数据库插件文档,识别 15 个文件、4 个数据模型(DatabaseModel/DatabaseField/Record/FieldModel)、11 种字段类型、6 个主要界面组件
+- **2025-12-17T12:10:45+08:00**: 完整更新 database 模块文档 - 新增 JS API 详解、UseCase 架构说明、数据选择器、主页小组件等内容
+- **2025-12-12**: 完成 UseCase 架构迁移，实现业务逻辑与数据访问分离
+- **2025-11-13**: 初始化数据库插件文档，识别 20 个文件、4 个数据模型、11 种字段类型
 
 ---
 
-**上级目录**: [返回插件目录](../CLAUDE.md) | [返回根文档](../../../CLAUDE.md)
+**相关链接**:
+- [迁移报告](MIGRATION_REPORT.md) - 查看 UseCase 架构迁移详情
+- [返回插件目录](../CLAUDE.md) | [返回根文档](../../../CLAUDE.md)

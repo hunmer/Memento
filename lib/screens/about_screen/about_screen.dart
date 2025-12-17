@@ -86,7 +86,7 @@ class AboutScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('about_title'.tr),
+        title: Text('app_aboutTitle'.tr),
         centerTitle: true,
       ),
       body: FutureBuilder<PackageInfo>(
@@ -145,7 +145,7 @@ class AboutScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    '${'about_version'.tr} $version${buildNumber.isNotEmpty ? '+$buildNumber' : ''}',
+                    '${'app_version'.tr} $version${buildNumber.isNotEmpty ? '+$buildNumber' : ''}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.w500,
@@ -160,7 +160,7 @@ class AboutScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Text(
-                    'about_description'.tr,
+                    'app_aboutDescription'.tr,
                     style: Theme.of(context).textTheme.bodyLarge,
                     textAlign: TextAlign.center,
                   ),
@@ -169,7 +169,7 @@ class AboutScreen extends StatelessWidget {
               const SizedBox(height: 24),
               // Links Section
               Text(
-                'about_projectLinkTitle'.tr,
+                'app_projectLinkTitle'.tr,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -178,21 +178,21 @@ class AboutScreen extends StatelessWidget {
               _buildLinkCard(
                 context: context,
                 title: 'GitHub',
-                url: 'about_projectLink'.tr,
+                url: 'app_projectLink'.tr,
                 icon: Icons.code,
                 iconColor: Colors.purple,
               ),
               _buildLinkCard(
                 context: context,
-                title: 'about_feedbackTitle'.tr,
-                url: 'about_feedbackLink'.tr,
+                title: 'app_feedbackTitle'.tr,
+                url: 'app_feedbackLink'.tr,
                 icon: Icons.bug_report,
                 iconColor: Colors.orange,
               ),
               _buildLinkCard(
                 context: context,
-                title: 'about_documentationTitle'.tr,
-                url: 'about_documentationLink'.tr,
+                title: 'app_documentationTitle'.tr,
+                url: 'app_documentationLink'.tr,
                 icon: Icons.menu_book,
                 iconColor: Colors.blue,
               ),
