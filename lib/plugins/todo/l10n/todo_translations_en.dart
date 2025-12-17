@@ -115,4 +115,10 @@ const Map<String, String> todoTranslationsEn = {
   'todo_widgetTitle': 'Widget Title',
   'todo_confirmConfiguration': 'Confirm Configuration',
   'todo_leaveEmptyForDefaultTitle': 'Leave empty for default title',
+
+  // Widget Home Strings
+  'todo_widgetName': 'Todo',
+  'todo_widgetDescription': 'Quick access to Todo',
+  'todo_overviewName': 'Todo Overview',
+  'todo_overviewDescription': 'Display todo task statistics',
 };

@@ -32,5 +32,11 @@ class TimerTranslationsEn {
     'timer_continueAdjust': 'Continue Adjust',
     'timer_confirmComplete': 'Confirm Complete',
     'timer_searchPlaceholder': 'Search timer tasks...',
+
+    // Widget Home Strings
+    'timer_widgetName': 'Timer',
+    'timer_widgetDescription': 'Quick access to Timer',
+    'timer_overviewName': 'Timer Overview',
+    'timer_overviewDescription': 'Display timer statistics',
   };
 }

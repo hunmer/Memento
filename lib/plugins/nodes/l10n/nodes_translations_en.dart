@@ -83,4 +83,10 @@ final Map<String, String> nodesTranslationsEn = {
   // UI elements
   'nodes_basicInfo': 'Basic Info',
   'nodes_dateAndFields': 'Date & Fields',
+
+  // Widget Home Strings
+  'nodes_widgetName': 'Nodes',
+  'nodes_widgetDescription': 'Quick access to Nodes',
+  'nodes_overviewName': 'Nodes Overview',
+  'nodes_overviewDescription': 'Display nodes statistics',
 };

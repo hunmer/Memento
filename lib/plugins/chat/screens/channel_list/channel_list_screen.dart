@@ -79,6 +79,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
             child: _controller.filteredChannels.isEmpty
                 ? EmptyChannelView(onAddChannel: _showAddChannelDialog)
                 : ReorderableListView.builder(
+                    padding: EdgeInsets.zero,
                     itemCount: _controller.filteredChannels.length,
                     onReorder: _controller.reorderChannels,
                     itemBuilder: (context, index) {

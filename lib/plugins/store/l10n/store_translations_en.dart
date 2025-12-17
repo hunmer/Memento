@@ -127,7 +127,7 @@ const Map<String, String> storeTranslationsEn = {
   'store_noRecords': 'No records',
   'store_pointsHistoryTitle': 'Points History',
   'store_pointsHistory': 'Points History',
-  'store_pointsHistoryEntry': '@value points (@type)',
+  'store_pointsHistoryEntry': '{value} points ({type})',
   'store_viewRedeemHistory': 'View Redeem History',
 
   // Buttons

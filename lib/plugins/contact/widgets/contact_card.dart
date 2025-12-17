@@ -31,11 +31,16 @@ class ContactCard extends StatelessWidget {
     final chipColor = theme.colorScheme.surfaceVariant;
 
     return Card(
-      elevation: 0,
+      elevation: 2,
+      shadowColor: theme.colorScheme.shadow.withOpacity(0.3),
       color: theme.colorScheme.surface,
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+          width: 1,
+        ),
       ),
       child: InkWell(
         onTap: () {

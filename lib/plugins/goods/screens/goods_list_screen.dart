@@ -254,11 +254,10 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
           allItems.isEmpty
               ? Center(child: Text('goods_noItems'.tr))
               : _isGridView
-              ? Padding(
-                padding: const EdgeInsets.all(16),
-                child: LayoutBuilder(
+              ? LayoutBuilder(
                   builder: (context, constraints) {
                     return GridView.builder(
+                      padding: const EdgeInsets.all(16),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount:
                             constraints.maxWidth > 600 ? 3 : 2, // 响应式列数
@@ -280,9 +279,9 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
                       },
                     );
                   },
-                ),
-              )
+                )
               : ListView.builder(
+                padding: EdgeInsets.zero,
                 itemCount: allItems.length,
                 itemBuilder: (context, index) {
                   final item = allItems[index]['item'] as GoodsItem;

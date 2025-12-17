@@ -410,10 +410,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   void _showOptionsMenu() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
             ListTile(
                   leading: Icon(_isEditMode ? Icons.check : Icons.edit),
                   title: Text(_isEditMode ? '完成排序' : '自定义排序'),
@@ -426,6 +428,14 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                       _isEditMode ? '长按拖拽可调整顺序' : '已退出编辑模式',
                       duration: const Duration(seconds: 1),
                     );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.check_box_outline_blank),
+                  title: const Text('批量编辑'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _toggleBatchMode();
                   },
                 ),
                 const Divider(),
@@ -491,6 +501,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               },
             ),
           ],
+          ),
         ),
       ),
     );
@@ -1122,12 +1133,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               tooltip: '退出选择',
             ),
           ] else ...[
-            // 批量编辑模式开关
-            IconButton(
-              icon: Icon(_isBatchMode ? Icons.check_box : Icons.check_box_outline_blank),
-              onPressed: _toggleBatchMode,
-              tooltip: _isBatchMode ? '退出批量编辑' : '批量编辑',
-            ),
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: _showAddWidgetDialog,

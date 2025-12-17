@@ -106,4 +106,9 @@ const Map<String, String> settingsScreenTranslationsEn = {
   'server_sync_encryptionKeyHint': '⚠️ This key is used for admin panel API access. Keep it secure and do not share',
   'server_sync_copyKey': 'Copy Key',
   'server_sync_keyCopied': 'Key copied to clipboard',
+
+  // Language selection dialog
+  'settingsScreen_selectLanguage': 'Select Language',
+  'settingsScreen_chinese': '中文',
+  'settingsScreen_english': 'English',
 };

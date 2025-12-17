@@ -114,4 +114,10 @@ const Map<String, String> todoTranslationsZh = {
   'todo_widgetTitle': '小组件标题',
   'todo_confirmConfiguration': '确认配置',
   'todo_leaveEmptyForDefaultTitle': '留空则使用默认标题',
+
+  // Widget Home Strings
+  'todo_widgetName': '待办事项',
+  'todo_widgetDescription': '快速打开待办事项',
+  'todo_overviewName': '待办概览',
+  'todo_overviewDescription': '显示待办任务统计信息',
 };

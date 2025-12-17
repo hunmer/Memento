@@ -89,7 +89,10 @@ class _HomeCardState extends State<HomeCard> {
                       color: Theme.of(context).primaryColor,
                       width: 2,
                     )
-                    : BorderSide.none,
+                    : BorderSide(
+                      color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
           ),
           // 对小组件卡片使用透明的 Card 背景色，这样内部背景颜色的透明度
           // 能够作用到整体（否则会被 Card 自身的背景色遮挡）
@@ -317,7 +320,7 @@ class _HomeCardState extends State<HomeCard> {
     );
   }
 
-  /// 打开小组件对应的插件（使用 OpenContainer 风格动画）
+  /// 打开小组件对应的插件（使用 OpenContainer 风格动画，iOS 支持左滑返回）
   void _openWidgetPlugin(BuildContext context) {
     final widgetItem = item as HomeWidgetItem;
     final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
@@ -326,7 +329,7 @@ class _HomeCardState extends State<HomeCard> {
       if (plugin != null) {
         // 记录插件打开历史
         globalPluginManager.recordPluginOpen(plugin);
-        // 使用 OpenContainer 风格导航，从卡片位置展开到全屏
+        // 使用 OpenContainer 风格导航，从卡片位置展开到全屏（iOS 支持左滑返回）
         NavigationHelper.openContainerWithHero(
           context,
           (_) => plugin.buildMainView(context),

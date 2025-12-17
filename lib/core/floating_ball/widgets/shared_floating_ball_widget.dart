@@ -354,8 +354,13 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
     }
   }
 
-  // 处理点击和双击
-  void _handleTap(TapDownDetails details) {
+  // 处理点击和双击（使用 TapUp 避免与长按拖动冲突）
+  void _handleTapUp(TapUpDetails details) {
+    // 如果刚刚结束拖动，忽略此次点击
+    if (_isDragging || _canDrag) {
+      return;
+    }
+
     final now = DateTime.now();
     final currentPosition = details.globalPosition;
 
@@ -377,7 +382,7 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
         _doubleTapTimer?.cancel();
         _doubleTapTimer = null;
         return;
-      } 
+      }
     }
 
     // 记录第一次点击
@@ -449,7 +454,7 @@ class _SharedFloatingBallWidgetState extends State<SharedFloatingBallWidget>
         }
       },
       child: GestureDetector(
-        onTapDown: _handleTap,
+        onTapUp: _handleTapUp,
         onLongPressDown: _handleLongPressDown,
         onLongPressMoveUpdate: _handleLongPressMoveUpdate,
         onLongPressEnd: _handleLongPressEnd,

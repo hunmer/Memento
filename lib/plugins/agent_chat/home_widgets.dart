@@ -18,8 +18,8 @@ class AgentChatHomeWidgets {
     registry.register(HomeWidget(
       id: 'agent_chat_icon',
       pluginId: 'agent_chat',
-      name: 'agent_chat_widgetName'.tr,
-      description: 'agent_chat_widgetDescription'.tr,
+      name: 'agent_chat_name'.tr,
+      description: 'agent_chat_description'.tr,
       icon: Icons.chat_bubble_outline,
       color: const Color(0xFF2196F3),
       defaultSize: HomeWidgetSize.small,
@@ -36,7 +36,7 @@ class AgentChatHomeWidgets {
     registry.register(HomeWidget(
       id: 'agent_chat_overview',
       pluginId: 'agent_chat',
-      name: 'agent_chat_overviewName'.tr,
+      name: 'agent_chat_overview'.tr,
       description: 'agent_chat_overviewDescription'.tr,
       icon: Icons.analytics_outlined,
       color: const Color(0xFF2196F3),
