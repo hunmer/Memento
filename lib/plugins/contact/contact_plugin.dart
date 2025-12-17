@@ -857,6 +857,7 @@ class ContactMainViewState extends State<ContactMainView> {
           contact: contact,
           controller: _controller,
           onTap: () => _addOrEditContact(contact),
+          onContactUpdated: () => setState(() {}),
         );
       },
     );
@@ -871,86 +872,25 @@ class ContactMainViewState extends State<ContactMainView> {
   }
 
   Future<void> _addOrEditContact([Contact? contact]) async {
-    final formStateKey = GlobalKey<ContactFormState>();
-
-    Contact? savedContact;
-
     await NavigationHelper.push(
       context,
-      Scaffold(
-        appBar: AppBar(
-          leading: TextButton(
-            child: Text('contact_cancel'.tr),
-
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-
-          leadingWidth: 80,
-
-          title: Text(
-            contact == null
-                ? 'contact_addContact'.tr
-                : 'contact_editContact'.tr,
-          ),
-
-          actions: [
-            TextButton(
-              child: Text(
-                'contact_done'.tr,
-
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-
-              onPressed: () async {
-                formStateKey.currentState?.saveContact();
-
-                // a small delay to allow savedContact to be set
-
-                await Future.delayed(const Duration(milliseconds: 50));
-
-                if (savedContact != null) {
-                  try {
-                    if (contact == null) {
-                      await _controller.addContact(savedContact!);
-                    } else {
-                      await _controller.updateContact(savedContact!);
-                    }
-
-                    if (mounted) {
-                      Navigator.of(context).pop();
-
-                      setState(() {});
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      ToastService.instance.showToast(
-                        'contact_saveFailedMessage'.tr,
-                      );
-                    }
-                  }
-                } else {
-                  ToastService.instance.showToast(
-                    'contact_formValidationMessage'.tr,
-                  );
-                }
-              },
-            ),
-          ],
-        ),
-
-        body: ContactForm(
-          key: formStateKey,
-
-          formStateKey: formStateKey,
-
-          controller: _controller,
-
-          contact: contact,
-
-          onSave: (updatedContact) {
-            savedContact = updatedContact;
-          },
-        ),
+      ContactForm(
+        controller: _controller,
+        contact: contact,
+        onSave: (savedContact) async {
+          try {
+            if (contact == null) {
+              await _controller.addContact(savedContact);
+            } else {
+              await _controller.updateContact(savedContact);
+            }
+            if (mounted) {
+              setState(() {});
+            }
+          } catch (e) {
+            ToastService.instance.showToast('contact_saveFailedMessage'.tr);
+          }
+        },
       ),
     );
   }
@@ -1003,6 +943,7 @@ class ContactMainViewState extends State<ContactMainView> {
                 contact: contacts[index],
                 controller: _controller,
                 onTap: () => _addOrEditContact(contacts[index]),
+                onContactUpdated: () => setState(() {}),
               );
             },
           );
@@ -1024,10 +965,15 @@ class ContactMainViewState extends State<ContactMainView> {
         IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
         OpenContainer(
           transitionType: ContainerTransitionType.fade,
+          closedColor: Theme.of(context).colorScheme.surface,
+          openColor: Theme.of(context).scaffoldBackgroundColor,
           openBuilder: (context, _) {
             return ContactForm(
               controller: _controller,
-              onSave: (savedContact) {},
+              onSave: (savedContact) async {
+                await _controller.addContact(savedContact);
+                setState(() {});
+              },
             );
           },
           closedBuilder: (context, VoidCallback openContainer) {

@@ -191,9 +191,10 @@ class _MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -247,7 +248,7 @@ class _MessageInputState extends State<MessageInput> {
                       maxHeight: 120,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
+                      color: theme.colorScheme.surfaceVariant,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: TextField(

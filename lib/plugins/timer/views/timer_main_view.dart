@@ -76,7 +76,7 @@ class _TimerMainViewState extends State<TimerMainView> {
       searchPlaceholder: 'timer_searchPlaceholder'.tr,
       onSearchChanged: _searchTasks,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
-      backgroundColor: const Color(0xFFF5F6F8),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       actions: [
         OpenContainer<TimerTask>(
           transitionType: ContainerTransitionType.fade,
@@ -191,29 +191,29 @@ class _TimerMainViewState extends State<TimerMainView> {
   /// 构建搜索结果
   Widget _buildSearchResults() {
     if (_currentQuery.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.search,
               size: 64,
-              color: Colors.grey,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               '搜索计时器任务',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               '输入任务名称或分组名称',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -229,22 +229,22 @@ class _TimerMainViewState extends State<TimerMainView> {
             Icon(
               Icons.inbox,
               size: 64,
-              color: Colors.grey,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: 16),
             Text(
               '未找到匹配的任务',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               '当前查询：$_currentQuery',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -343,11 +343,11 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
             blurRadius: 2,
             offset: const Offset(0, 1),
           ),
@@ -381,18 +381,18 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
                       children: [
                         Text(
                           task.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F172A),
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           task.group,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF64748B),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -435,21 +435,21 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(24),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.pause, size: 18, color: Color(0xFF1E293B)),
+                Icon(Icons.pause, size: 18, color: Theme.of(context).colorScheme.onSurface),
                 const SizedBox(width: 6),
                 Text(
                   timerText,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Monospace',
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
-                    color: Color(0xFF1E293B),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -553,7 +553,7 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
                   height: double.infinity,
                   child: CircularProgressIndicator(
                     value: 1.0,
-                    color: Colors.grey[200],
+                    color: Theme.of(context).colorScheme.surfaceVariant,
                     strokeWidth: 8,
                   ),
                 ),
@@ -575,10 +575,10 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
                   children: [
                     Text(
                       item.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
-                        color: Color(0xFF0F172A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -594,9 +594,9 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
                     const SizedBox(height: 4),
                     Text(
                       '${item.duration.inMinutes} min',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF64748B),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -652,18 +652,18 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
             children: [
               Text(
                 item.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: Color(0xFF1E293B),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               if (item.type == TimerType.pomodoro)
                 Text(
                   '${item.currentCycle}/${item.cycles} cycles',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF94A3B8),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
             ],
@@ -674,7 +674,7 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
               Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F0),
+                  color: Theme.of(context).colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -695,7 +695,7 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
             alignment: Alignment.centerRight,
             child: Text(
               item.formattedRemainingTime, // Or total duration? HTML shows total duration e.g. "50 min"
-              style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ),
         ],

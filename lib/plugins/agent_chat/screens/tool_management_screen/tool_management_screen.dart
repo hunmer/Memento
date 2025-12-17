@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/gestures.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_config_manager.dart';
 import 'components/plugin_section.dart';
@@ -387,99 +390,95 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('agent_chat_toolManagement'.tr),
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            tooltip: '更多选项',
-            enabled: !_isLoading,
-            onSelected: (value) {
-              switch (value) {
-                case 'add':
-                  _addTool();
-                  break;
-                case 'import':
-                  _importConfig();
-                  break;
-                case 'export':
-                  _exportConfig();
-                  break;
-                case 'reset':
-                  _resetToDefault();
-                  break;
-              }
-            },
-            itemBuilder:
-                (context) => [
-                  PopupMenuItem(
-                    value: 'add',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.add),
-                        const SizedBox(width: 12),
-                        Text('agent_chat_addTool'.tr),
-                      ],
-                    ),
+    return SuperCupertinoNavigationWrapper(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      title: Text('agent_chat_toolManagement'.tr),
+      largeTitle: 'agent_chat_toolManagement'.tr,
+      enableLargeTitle: true,
+      enableSearchBar: true,
+      searchPlaceholder: 'agent_chat_searchPlaceholder'.tr,
+      onSearchChanged: (query) {
+        _onSearchChanged(query);
+      },
+      onSearchSubmitted: (query) {
+        _onSearchChanged(query);
+      },
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      actions: [
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert),
+          tooltip: '更多选项',
+          enabled: !_isLoading,
+          onSelected: (value) {
+            switch (value) {
+              case 'add':
+                _addTool();
+                break;
+              case 'import':
+                _importConfig();
+                break;
+              case 'export':
+                _exportConfig();
+                break;
+              case 'reset':
+                _resetToDefault();
+                break;
+            }
+          },
+          itemBuilder:
+              (context) => [
+                PopupMenuItem(
+                  value: 'add',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.add),
+                      const SizedBox(width: 12),
+                      Text('agent_chat_addTool'.tr),
+                    ],
                   ),
-                  PopupMenuItem(
-                    value: 'import',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.file_download),
-                        const SizedBox(width: 12),
-                        Text('agent_chat_importConfig'.tr),
-                      ],
-                    ),
+                ),
+                PopupMenuItem(
+                  value: 'import',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.file_download),
+                      const SizedBox(width: 12),
+                      Text('agent_chat_importConfig'.tr),
+                    ],
                   ),
-                  PopupMenuItem(
-                    value: 'export',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.file_upload),
-                        const SizedBox(width: 12),
-                        Text('agent_chat_exportConfig'.tr),
-                      ],
-                    ),
+                ),
+                PopupMenuItem(
+                  value: 'export',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.file_upload),
+                      const SizedBox(width: 12),
+                      Text('agent_chat_exportConfig'.tr),
+                    ],
                   ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem(
-                    value: 'reset',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.restore, color: Colors.red),
-                        const SizedBox(width: 12),
-                        Text(
-                          'agent_chat_restoreDefault'.tr,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ],
-                    ),
+                ),
+                const PopupMenuDivider(),
+                PopupMenuItem(
+                  value: 'reset',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.restore, color: Colors.red),
+                      const SizedBox(width: 12),
+                      Text(
+                        'agent_chat_restoreDefault'.tr,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ],
                   ),
-                ],
-          ),
-        ],
-      ),
+                ),
+              ],
+        ),
+      ],
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : Column(
                 children: [
-                  // 搜索栏
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: const InputDecoration(
-                        hintText: '搜索工具...',
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: _onSearchChanged,
-                    ),
-                  ),
-
                   // 插件筛选按钮栏
                   if (_allPluginTools.isNotEmpty) _buildPluginFilterBar(),
 

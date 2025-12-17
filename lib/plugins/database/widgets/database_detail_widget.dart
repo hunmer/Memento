@@ -122,7 +122,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
               child: ListTile(
                 title: Text(
                   record.fields['title']?.toString() ??
-                      'database_untitledRecord'.tr,
+                      'database_untitled_record'.tr,
                 ),
                 subtitle: Text(record.updatedAt.toString()),
                 onTap: () {
@@ -180,7 +180,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
                         Image.network(record.fields['image'], height: 80),
                       Text(
                         record.fields['title']?.toString() ??
-                            'database_untitledRecord'.tr,
+                            'database_untitled_record'.tr,
                       ),
                     ],
                   ),
@@ -201,10 +201,10 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text('database_deleteRecordTitle'.tr),
+            title: Text('database_delete_record_title'.tr),
             content: Text(
-              'database_deleteRecordMessage'.trParams({
-                'name': record.fields['title'] ?? 'database_untitledRecord'.tr,
+              'database_delete_record_message'.trParams({
+                'name': record.fields['title'] ?? 'database_untitled_record'.tr,
               }),
             ),
             actions: [

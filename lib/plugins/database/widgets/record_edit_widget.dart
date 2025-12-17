@@ -54,7 +54,7 @@ class _RecordEditWidgetState extends State<RecordEditWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('database_editRecordTitle'.tr),
+        title: Text('database_edit_record_title'.tr),
         actions: [
           IconButton(icon: const Icon(Icons.save), onPressed: _saveRecord),
         ],

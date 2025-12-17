@@ -90,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
           final goal = filteredGoals[index];
           return OpenContainer(
             transitionType: ContainerTransitionType.fade,
+            closedColor: Theme.of(context).colorScheme.surface,
             openBuilder: (context, _) {
               return ChangeNotifierProvider.value(
                 value: controller,
@@ -155,6 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           child: OpenContainer(
             transitionType: ContainerTransitionType.fade,
+            closedColor: Theme.of(context).colorScheme.surface,
             openBuilder: (context, _) {
               return ChangeNotifierProvider.value(
                 value: controller,

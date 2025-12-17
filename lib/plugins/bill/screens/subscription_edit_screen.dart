@@ -133,7 +133,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
             child: Text('bill_delete'.tr),
           ),
         ],
@@ -152,7 +152,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
     final currentDays = int.tryParse(_daysController.text) ?? 0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7), // Light grey background
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -164,13 +164,13 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
               minimumSize: const Size(48, 48),
               padding: EdgeInsets.zero,
             ),
-            child: Text('bill_cancel'.tr, style: const TextStyle(fontSize: 16)),
+            child: Text('bill_cancel'.tr, style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.primary)),
           ),
         ),
         leadingWidth: 80,
         title: Text(
           widget.subscription == null ? 'bill_addSubscription'.tr : 'bill_editSubscription'.tr,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17, color: Colors.black),
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17, color: Theme.of(context).colorScheme.onSurface),
         ),
         centerTitle: true,
         actions: [
@@ -182,7 +182,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                 minimumSize: const Size(48, 48),
                 padding: EdgeInsets.zero,
               ),
-              child: Text('bill_save'.tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              child: Text('bill_save'.tr, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
             ),
           ),
         ],
@@ -205,7 +205,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'bill_chooseIcon'.tr,
-                    style: const TextStyle(color: Colors.blue, fontSize: 14, fontWeight: FontWeight.w500),
+                    style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 14, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -215,7 +215,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
             // Name & Price Group
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -225,18 +225,18 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                     child: TextFormField(
                       controller: _nameController,
                       textAlign: TextAlign.end,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Netflix',
-                        hintStyle: TextStyle(color: Colors.grey),
+                        hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                         isDense: true,
                         contentPadding: EdgeInsets.zero,
                       ),
-                      style: const TextStyle(fontSize: 17),
+                      style: TextStyle(fontSize: 17, color: Theme.of(context).colorScheme.onSurface),
                       validator: (v) => v?.isEmpty == true ? 'bill_requiredField'.tr : null,
                     ),
                   ),
-                  const Divider(height: 1, indent: 16, endIndent: 0, color: Color(0xFFE5E5EA)),
+                  Divider(height: 1, indent: 16, endIndent: 0, color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
                   _buildInputRow(
                     label: 'bill_subscriptionPrice'.tr,
                     child: Row(
@@ -248,14 +248,14 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                             controller: _totalAmountController,
                             textAlign: TextAlign.end,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               border: InputBorder.none,
                               hintText: '0.00',
-                              hintStyle: TextStyle(color: Colors.grey),
+                              hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                               isDense: true,
-                              contentPadding: EdgeInsets.only(right: 8),
+                              contentPadding: const EdgeInsets.only(right: 8),
                             ),
-                            style: const TextStyle(fontSize: 17),
+                            style: TextStyle(fontSize: 17, color: Theme.of(context).colorScheme.onSurface),
                             validator: (v) => v?.isEmpty == true ? 'bill_requiredField'.tr : null,
                           ),
                         ),
@@ -264,7 +264,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                           child: Text(
                             '¥',
                             style: TextStyle(
-                              color: Colors.grey.shade600,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               fontSize: 17,
                             ),
                           ),
@@ -281,7 +281,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -300,17 +300,17 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('bill_startDate'.tr, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                        Text('bill_startDate'.tr, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface)),
                         Text(
                           DateFormat('yyyy-MM-dd').format(_startDate),
-                          style: const TextStyle(fontSize: 17, color: Colors.grey),
+                          style: TextStyle(fontSize: 17, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Divider(height: 1, color: Color(0xFFE5E5EA)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(height: 1, color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
                   ),
                   
                   // End Date (Optional)
@@ -327,10 +327,10 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('bill_endDate'.tr, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                        Text('bill_endDate'.tr, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface)),
                         Text(
                           _endDate != null ? DateFormat('yyyy-MM-dd').format(_endDate!) : 'bill_none'.tr,
-                          style: const TextStyle(fontSize: 17, color: Colors.grey),
+                          style: TextStyle(fontSize: 17, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -356,7 +356,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -365,15 +365,15 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('bill_autoSubscribe'.tr, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                      Text('bill_autoSubscribe'.tr, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface)),
                       const SizedBox(height: 2),
-                      Text('bill_autoSubscribeDesc'.tr, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                      Text('bill_autoSubscribeDesc'.tr, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                     ],
                   ),
                   Switch.adaptive(
                     value: _isActive,
                     onChanged: (val) => setState(() => _isActive = val),
-                    activeColor: const Color(0xFF34C759),
+                    activeColor: Theme.of(context).colorScheme.primary,
                   ),
                 ],
               ),
@@ -384,13 +384,13 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('bill_notes'.tr, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+                  Text('bill_notes'.tr, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface)),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _noteController,
@@ -398,9 +398,10 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: 'bill_notesHint'.tr,
-                      hintStyle: const TextStyle(color: Colors.grey, fontSize: 15),
+                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 15),
                       contentPadding: EdgeInsets.zero,
                     ),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                   ),
                 ],
               ),
@@ -414,13 +415,13 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                 child: TextButton(
                   onPressed: _deleteSubscription,
                   style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Text(
                     'bill_deleteSubscription'.tr,
-                    style: const TextStyle(color: Colors.red, fontSize: 17, fontWeight: FontWeight.w500),
+                    style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 17, fontWeight: FontWeight.w500),
                   ),
                 ),
               ),
@@ -438,7 +439,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
         children: [
           SizedBox(
             width: 100,
-            child: Text(label, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500)),
+            child: Text(label, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface)),
           ),
           Expanded(child: child),
         ],
@@ -452,15 +453,21 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFEFF6FF) : const Color(0xFFF2F2F7),
+          color: isSelected
+            ? Theme.of(context).colorScheme.primaryContainer
+            : Theme.of(context).colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(8),
-          border: isSelected ? Border.all(color: Colors.blue.withOpacity(0.3)) : null,
+          border: isSelected
+            ? Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3))
+            : null,
         ),
         alignment: Alignment.center,
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.blue : Colors.grey[700],
+            color: isSelected
+              ? Theme.of(context).colorScheme.onPrimaryContainer
+              : Theme.of(context).colorScheme.onSurfaceVariant,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),

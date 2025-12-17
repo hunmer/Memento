@@ -86,8 +86,9 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
   @override
   Widget build(BuildContext context) {
     _scheduleBottomBarHeightMeasurement();
-    final Color unselectedColor = Colors.black.withOpacity(0.6);
-    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color unselectedColor = colorScheme.onSurface.withOpacity(0.6);
+    final Color bottomAreaColor = colorScheme.surface;
 
     return BottomBar(
       fit: StackFit.expand,
@@ -116,7 +117,7 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
       curve: Curves.decelerate,
       showIcon: true,
       width: MediaQuery.of(context).size.width * 0.85,
-      barColor: Colors.white,
+      barColor: colorScheme.surface,
       start: 2,
       end: 0,
       offset: 12,
@@ -253,6 +254,9 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
                 0.25, // 向右偏移底部栏宽度的1/4
             child: OpenContainer<void>(
               transitionType: ContainerTransitionType.fade,
+              closedElevation: 0.0,
+              closedShape: const RoundedRectangleBorder(),
+              closedColor: Colors.transparent,
               openBuilder: (context, _) {
                 if (_currentPage == 0) {
                   // Tab0: 新建日记
@@ -269,7 +273,6 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
                 } else if (_currentPage == 1) {
                   // Tab1: 标签管理
                   return Scaffold(
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                     body: TagManagerDialog(
                       groups: _tagController.tagGroups,
                       selectedTags: _tagController.selectedTags,
@@ -284,10 +287,8 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
                   // Tab2: 相册统计
                   final allImages = _calendarController.getAllImages();
                   return Scaffold(
-                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                     appBar: AppBar(
                       title: Text('calendar_album_album_statistics'.tr),
-                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                     ),
                     body: AlertDialog(
                       title: Text('calendar_album_album_statistics'.tr),
@@ -349,7 +350,6 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
               },
               closedBuilder: (context, VoidCallback openContainer) {
                 return FloatingActionButton(
-                  backgroundColor: widget.plugin.color, // 使用插件主题色
                   elevation: 4,
                   shape: const CircleBorder(),
                   onPressed: openContainer,

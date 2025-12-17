@@ -122,9 +122,9 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
         }
 
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -142,12 +142,12 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.close,
-                            color: Colors.black54,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             size: 20,
                           ),
                         ),
@@ -171,12 +171,12 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    color: Colors.red.withOpacity(0.1),
+                                    color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(
                                     _task.icon ?? Icons.work,
-                                    color: Colors.red.shade400,
+                                    color: Theme.of(context).colorScheme.primary,
                                     size: 24,
                                   ),
                                 ),
@@ -184,8 +184,8 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
                                 Expanded(
                                   child: Text(
                                     _task.title,
-                                    style: const TextStyle(
-                                      color: Colors.black87,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onSurface,
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -265,8 +265,8 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
                             _buildTag(
                               icon: Icons.circle,
                               text: '进行中',
-                              color: Colors.blue.shade400,
-                              bgColor: Colors.blue.withOpacity(0.1),
+                              color: Theme.of(context).colorScheme.primary,
+                              bgColor: Theme.of(context).colorScheme.primaryContainer,
                               iconSize: 14,
                             ),
                           _buildTag(
@@ -279,16 +279,16 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
                           _buildTag(
                             icon: Icons.timer,
                             text: _task.formattedDuration,
-                            color: Colors.black54,
-                            bgColor: Colors.black.withOpacity(0.05),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            bgColor: Theme.of(context).colorScheme.surfaceVariant,
                             iconSize: 14,
                           ),
                           ..._task.tags.map(
                             (tag) => _buildTag(
                               icon: Icons.label,
                               text: tag,
-                              color: Colors.black54,
-                              bgColor: Colors.black.withOpacity(0.05),
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              bgColor: Theme.of(context).colorScheme.surfaceVariant,
                               iconSize: 14,
                             ),
                           ),
@@ -302,8 +302,8 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
                           _task.description!.isNotEmpty)
                         Text(
                           _task.description!,
-                          style: const TextStyle(
-                            color: Colors.black87,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 16,
                           ),
                         ),
@@ -312,10 +312,10 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
 
                       // Subtasks
                       if (_task.subtasks.isNotEmpty) ...[
-                        const Text(
+                        Text(
                           '子任务',
                           style: TextStyle(
-                            color: Colors.black87,
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -341,10 +341,10 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
                                             );
                                       }
                                     },
-                                    activeColor: const Color(0xFF1392EC),
-                                    checkColor: Colors.white,
+                                    activeColor: Theme.of(context).colorScheme.primary,
+                                    checkColor: Theme.of(context).colorScheme.onPrimary,
                                     side: BorderSide(
-                                      color: Colors.black26,
+                                      color: Theme.of(context).colorScheme.outline,
                                       width: 2,
                                     ),
                                     shape: RoundedRectangleBorder(
@@ -357,16 +357,14 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
                                   child: Text(
                                     subtask.title,
                                     style: TextStyle(
-                                      color:
-                                          subtask.isCompleted
-                                              ? Colors.black38
-                                              : Colors.black87,
+                                      color: subtask.isCompleted
+                                          ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+                                          : Theme.of(context).colorScheme.onSurface,
                                       fontSize: 16,
-                                      decoration:
-                                          subtask.isCompleted
-                                              ? TextDecoration.lineThrough
-                                              : null,
-                                      decorationColor: Colors.black38,
+                                      decoration: subtask.isCompleted
+                                          ? TextDecoration.lineThrough
+                                          : null,
+                                      decorationColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                     ),
                                   ),
                                 ),
@@ -396,17 +394,17 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
                                   ),
                                 );
                               },
-                              icon: const Icon(Icons.edit, color: Colors.black54),
-                              label: const Text(
+                              icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
+                              label: Text(
                                 '编辑任务',
-                                style: TextStyle(color: Colors.black54),
+                                style: TextStyle(color: Theme.of(context).colorScheme.primary),
                               ),
                             ),
                           ],
                         ),
 
                       const SizedBox(height: 16),
-                      const Divider(color: Colors.black12),
+                      Divider(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
                       const SizedBox(height: 16),
 
                       // Metadata
@@ -477,12 +475,15 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
         children: [
           Text(
             label,
-            style: const TextStyle(color: Colors.black54, fontSize: 14),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 14,
+            ),
           ),
           Text(
             value,
-            style: const TextStyle(
-              color: Colors.black87,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),

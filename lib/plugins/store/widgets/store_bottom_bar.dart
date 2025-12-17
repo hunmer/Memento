@@ -138,11 +138,9 @@ class _StoreBottomBarState extends State<StoreBottomBar>
   @override
   Widget build(BuildContext context) {
     _scheduleBottomBarHeightMeasurement();
-    final Color unselectedColor =
-        _colors[_currentPage].computeLuminance() < 0.5
-            ? Colors.black.withOpacity(0.6)
-            : Colors.white.withOpacity(0.6);
-    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color unselectedColor = colorScheme.onSurface.withOpacity(0.6);
+    final Color bottomAreaColor = colorScheme.surface;
 
     return Scaffold(
       body: BottomBar(
@@ -292,7 +290,9 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                   _currentPage == 0
                       ? Icons.add_shopping_cart
                       : Icons.add_chart,
-                  color: Colors.white,
+                  color: widget.plugin.color.computeLuminance() < 0.5
+                      ? Colors.white
+                      : Colors.black,
                   size: 32,
                 ),
                 onPressed: () {

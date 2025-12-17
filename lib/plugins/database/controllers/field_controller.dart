@@ -89,7 +89,7 @@ class FieldController {
                   onChanged(pickedFile.path);
                 }
               },
-              child: Text('database_selectImage'.tr),
+              child: Text('database_select_image'.tr),
             ),
           ],
         );

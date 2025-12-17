@@ -89,12 +89,9 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
   @override
   Widget build(BuildContext context) {
     _scheduleBottomBarHeightMeasurement();
-    final theme = Theme.of(context);
-    final Color unselectedColor =
-        theme.brightness == Brightness.dark
-            ? Colors.white.withOpacity(0.6)
-            : Colors.black.withOpacity(0.6);
-    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color unselectedColor = colorScheme.onSurface.withOpacity(0.6);
+    final Color bottomAreaColor = colorScheme.surface;
 
     return BottomBar(
       fit: StackFit.expand,
@@ -233,6 +230,7 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
             top: -25,
             child: OpenContainer(
               transitionType: ContainerTransitionType.fade,
+              closedColor: Theme.of(context).colorScheme.surface,
               openBuilder: (context, _) {
 
                 if (_currentPage == 0) {
@@ -273,7 +271,9 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
                   onPressed: openContainer,
                   child: Icon(
                     _currentPage == 0 ? Icons.add_task : Icons.add_reaction,
-                    color: Colors.white,
+                    color: widget.plugin.color.computeLuminance() < 0.5
+                        ? Colors.white
+                        : Colors.black,
                     size: 32,
                   ),
                 );

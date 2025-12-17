@@ -139,14 +139,12 @@ class _ChatBottomBarState extends State<ChatBottomBar>
   @override
   Widget build(BuildContext context) {
     _scheduleBottomBarHeightMeasurement();
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final colors = _getColors(context);
     final Color currentColor =
         _currentPage < colors.length ? colors[_currentPage] : colors.first;
-    final Color unselectedColor =
-        currentColor.computeLuminance() < 0.5
-            ? Colors.black.withOpacity(0.6)
-            : Colors.white.withOpacity(0.6);
-    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
+    final Color unselectedColor = colorScheme.onSurface.withOpacity(0.6);
+    final Color bottomAreaColor = colorScheme.surface;
 
     return BottomBar(
       fit: StackFit.expand,
@@ -175,8 +173,7 @@ class _ChatBottomBarState extends State<ChatBottomBar>
       curve: Curves.decelerate,
       showIcon: true,
       width: MediaQuery.of(context).size.width * 0.85,
-      barColor:
-          currentColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+      barColor: colorScheme.surface,
       start: 2,
       end: 0,
       offset: 12,

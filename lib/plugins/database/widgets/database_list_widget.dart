@@ -36,8 +36,8 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
     final theme = Theme.of(context);
 
     return SuperCupertinoNavigationWrapper(
-      title: Text('database_databaseListTitle'.tr),
-      largeTitle: 'database_databaseListTitle'.tr,
+      title: Text('database_database_list_title'.tr),
+      largeTitle: 'database_database_list_title'.tr,
       enableLargeTitle: true,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: FutureBuilder<List<DatabaseModel>>(
@@ -55,7 +55,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
                   Text(
-                    'database_loadFailedMessage'.tr,
+                    'database_load_failed_message'.tr,
                     style: theme.textTheme.titleMedium?.copyWith(color: Colors.red),
                   ),
                   const SizedBox(height: 8),
@@ -88,14 +88,14 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   const Icon(Icons.inbox, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   Text(
-                    'database_noDatabasesMessage'.tr,
+                    'database_no_databases_message'.tr,
                     style: Theme.of(
                       context,
                     ).textTheme.titleMedium?.copyWith(color: Colors.grey),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'database_addDatabaseHint'.tr,
+                    'database_add_database_hint'.tr,
                     style: Theme.of(
                       context,
                     ).textTheme.bodySmall?.copyWith(color: Colors.grey),
@@ -234,7 +234,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   final newDatabase = database.copyWith(id: Uuid().v4());
                   await widget.service.createDatabase(newDatabase);
                   if (mounted) {
-                    Toast.success('database_copySuccess'.tr);
+                    Toast.success('database_copy_success'.tr);
                     setState(() {
                       _databasesFuture = widget.service.getAllDatabases();
                     });
@@ -244,7 +244,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
                 title: Text(
-                  'database_deleteAction'.tr,
+                  'database_delete_action'.tr,
                   style: const TextStyle(color: Colors.red),
                 ),
                 onTap: () async {
@@ -254,10 +254,10 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                     builder:
                         (context) => AlertDialog(
                           title: Text(
-                            'database_confirmDeleteTitle'.tr,
+                            'database_confirm_delete_title'.tr,
                           ),
                           content: Text(
-                            'database_confirmDeleteMessage'.trParams({
+                            'database_confirm_delete_message'.trParams({
                               'name': database.name,
                             }),
                           ),
@@ -280,14 +280,14 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                     try {
                       await widget.service.deleteDatabase(database.id);
                       if (mounted) {
-                        Toast.success('database_deleteSuccessMessage'.tr);
+                        Toast.success('database_delete_success_message'.tr);
                         setState(() {
                           _databasesFuture = widget.service.getAllDatabases();
                         });
                       }
                     } catch (e) {
                       if (mounted) {
-                        Toast.error('database_deleteFailedMessage'.trParams({
+                        Toast.error('database_delete_failed_message'.trParams({
                           'error': e.toString(),
                         }));
                       }
