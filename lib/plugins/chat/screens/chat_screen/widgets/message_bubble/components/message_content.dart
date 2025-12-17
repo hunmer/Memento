@@ -372,8 +372,8 @@ class MessageContent extends StatelessWidget {
             ),
             code: quill.DefaultTextBlockStyle(
               TextStyle(
-                backgroundColor: Colors.grey[200],
-                color: Colors.black87,
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontFamily: 'monospace',
               ),
               const quill.HorizontalSpacing(0, 0),
@@ -382,9 +382,9 @@ class MessageContent extends StatelessWidget {
               null,
             ),
             inlineCode: quill.InlineCodeStyle(
-              backgroundColor: Colors.grey[200],
-              style: const TextStyle(
-                color: Colors.black87,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontFamily: 'monospace',
               ),
             ),

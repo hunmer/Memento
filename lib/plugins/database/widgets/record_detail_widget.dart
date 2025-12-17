@@ -75,10 +75,10 @@ class _RecordDetailWidgetState extends State<RecordDetailWidget> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text('database_deleteRecordTitle'.tr),
+            title: Text('database_delete_record_title'.tr),
             content: Text(
-              'database_deleteRecordMessage'.trParams({
-                'name': _currentRecord.fields['title']?.toString() ?? 'database_untitledRecord'.tr,
+              'database_delete_record_message'.trParams({
+                'name': _currentRecord.fields['title']?.toString() ?? 'database_untitled_record'.tr,
               }),
             ),
             actions: [

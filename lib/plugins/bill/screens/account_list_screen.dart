@@ -38,15 +38,15 @@ class _AccountListScreenState extends State<AccountListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xCCF6F6F8), // Semi-transparent background
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         centerTitle: true,
         title: Text(
           'bill_accountManagement'.tr,
-          style: const TextStyle(
-            color: Colors.black,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -56,9 +56,9 @@ class _AccountListScreenState extends State<AccountListScreen> {
             (Platform.isAndroid || Platform.isIOS)
                 ? null
                 : IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_back_ios_new,
-                    color: Colors.black,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
@@ -74,7 +74,11 @@ class _AccountListScreenState extends State<AccountListScreen> {
           backgroundColor: Theme.of(context).primaryColor,
           elevation: 4,
           shape: const CircleBorder(),
-          child: const Icon(Icons.add, size: 32, color: Colors.white),
+          child: Icon(
+            Icons.add,
+            size: 32,
+            color: Theme.of(context).colorScheme.onPrimary,
+          ),
         ),
       ),
     );
@@ -95,12 +99,15 @@ class _AccountListScreenState extends State<AccountListScreen> {
           key: Key(account.id),
           background: Container(
             decoration: BoxDecoration(
-              color: Colors.red,
+              color: Theme.of(context).colorScheme.error,
               borderRadius: BorderRadius.circular(12),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             alignment: Alignment.centerRight,
-            child: const Icon(Icons.delete, color: Colors.white),
+            child: Icon(
+              Icons.delete,
+              color: Theme.of(context).colorScheme.onError,
+            ),
           ),
           direction: DismissDirection.endToStart,
           confirmDismiss: (direction) async {
@@ -119,9 +126,11 @@ class _AccountListScreenState extends State<AccountListScreen> {
                     ),
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
-                      child: const Text(
+                      child: Text(
                         '删除',
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                       ),
                     ),
                   ],
@@ -142,8 +151,12 @@ class _AccountListScreenState extends State<AccountListScreen> {
   Widget _buildAccountCard(BuildContext context, Account account) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -183,16 +196,19 @@ class _AccountListScreenState extends State<AccountListScreen> {
                     children: [
                       Text(
                         account.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '${account.bills.length} 笔账单',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -205,7 +221,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
                     color:
                         account.totalAmount < 0
                             ? const Color(0xFFE74C3C)
-                            : Colors.black87,
+                            : Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],

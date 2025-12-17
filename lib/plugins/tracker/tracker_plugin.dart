@@ -58,6 +58,7 @@ class _TrackerMainViewState extends State<TrackerMainView> {
       actions: [
         OpenContainer(
           transitionType: ContainerTransitionType.fade,
+          closedColor: Theme.of(context).colorScheme.surface,
           openBuilder: (context, _) {
             return GoalEditPage(controller: TrackerPlugin.instance.controller);
           },

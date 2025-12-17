@@ -85,11 +85,9 @@ class _CheckinMainViewState extends State<CheckinMainView>
   @override
   Widget build(BuildContext context) {
     _scheduleBottomBarHeightMeasurement();
-    final Color unselectedColor =
-        _colors[_currentPage].computeLuminance() < 0.5
-            ? Colors.black.withOpacity(0.6)
-            : Colors.white.withOpacity(0.6);
-    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color unselectedColor = colorScheme.onSurface.withOpacity(0.6);
+    final Color bottomAreaColor = colorScheme.surface;
 
     return BottomBar(
       fit: StackFit.expand,
@@ -118,10 +116,7 @@ class _CheckinMainViewState extends State<CheckinMainView>
       curve: Curves.decelerate,
       showIcon: true,
       width: MediaQuery.of(context).size.width * 0.85,
-      barColor:
-          _colors[_currentPage].computeLuminance() > 0.5
-              ? Colors.black
-              : Colors.white,
+      barColor: colorScheme.surface,
       start: 2,
       end: 0,
       offset: 12,
@@ -264,7 +259,13 @@ class _CheckinMainViewState extends State<CheckinMainView>
                   elevation: 4,
                   shape: const CircleBorder(),
                   onPressed: openContainer,
-                  child: const Icon(Icons.add, color: Colors.white, size: 32),
+                  child: Icon(
+                    Icons.add,
+                    color: checkinPlugin.color.computeLuminance() > 0.5
+                        ? Colors.black
+                        : Colors.white,
+                    size: 32,
+                  ),
                 );
               },
             ),

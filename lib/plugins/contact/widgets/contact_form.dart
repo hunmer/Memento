@@ -185,47 +185,83 @@ class ContactFormState extends State<ContactForm> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildAvatarSection(),
-              const SizedBox(height: 24),
-              _buildGenderPicker(),
-              const SizedBox(height: 24),
-              _buildTextFieldWithIcon(
-                _phoneController,
-                'Phone',
-                Icons.add_circle,
+    final theme = Theme.of(context);
+    final isEditing = widget.contact != null;
+
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          isEditing ? 'contact_editContact'.tr : 'contact_addContact'.tr,
+        ),
+        actions: [
+          TextButton(
+            onPressed: _handleSave,
+            child: Text(
+              'contact_done'.tr,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary,
               ),
-              const SizedBox(height: 16),
-              _buildNotesField(),
-              const SizedBox(height: 16),
-              _buildTextFieldWithIcon(
-                _tagsController,
-                'Add Tags (e.g., Work, Family)',
-                null,
-                iconOnLeft: false,
-              ),
-              const SizedBox(height: 16),
-              _buildTextFieldWithIcon(
-                _addressController,
-                'Address',
-                Icons.add_circle,
-              ),
-              const SizedBox(height: 24),
-              _buildCustomEventsSection(),
-              const SizedBox(height: 24),
-              _buildCustomFieldsSection(),
-            ],
+            ),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildAvatarSection(),
+                const SizedBox(height: 24),
+                _buildGenderPicker(),
+                const SizedBox(height: 24),
+                _buildTextFieldWithIcon(
+                  _phoneController,
+                  'Phone',
+                  Icons.add_circle,
+                ),
+                const SizedBox(height: 16),
+                _buildNotesField(),
+                const SizedBox(height: 16),
+                _buildTextFieldWithIcon(
+                  _tagsController,
+                  'Add Tags (e.g., Work, Family)',
+                  null,
+                  iconOnLeft: false,
+                ),
+                const SizedBox(height: 16),
+                _buildTextFieldWithIcon(
+                  _addressController,
+                  'Address',
+                  Icons.add_circle,
+                ),
+                const SizedBox(height: 24),
+                _buildCustomEventsSection(),
+                const SizedBox(height: 24),
+                _buildCustomFieldsSection(),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  /// 处理保存操作
+  Future<void> _handleSave() async {
+    saveContact();
+    // 延迟等待 onSave 回调完成
+    await Future.delayed(const Duration(milliseconds: 50));
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   Widget _buildAvatarSection() {
@@ -253,11 +289,11 @@ class ContactFormState extends State<ContactForm> {
                           },
                         )
                         : Container(
-                          color: Colors.grey[200],
+                          color: theme.cardColor,
                           child: Icon(
                             Icons.person,
                             size: 50,
-                            color: Colors.grey[400],
+                            color: theme.hintColor,
                           ),
                         ),
               ),
@@ -306,6 +342,7 @@ class ContactFormState extends State<ContactForm> {
       controller: controller,
       decoration: InputDecoration(
         hintText: placeholder,
+        hintStyle: TextStyle(color: theme.hintColor),
         border: InputBorder.none,
         enabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: theme.dividerColor),
@@ -319,15 +356,12 @@ class ContactFormState extends State<ContactForm> {
 
   Widget _buildGenderPicker() {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final bgColor = isDark ? Colors.grey[800] : Colors.grey[200];
-    final selectedColor = isDark ? theme.cardColor : Colors.white;
-
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
         children: [
@@ -337,7 +371,7 @@ class ContactFormState extends State<ContactForm> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: _gender == ContactGender.male ? selectedColor : null,
+                  color: _gender == ContactGender.male ? theme.cardColor : null,
                   borderRadius: BorderRadius.circular(6),
                   boxShadow:
                       _gender == ContactGender.male
@@ -353,7 +387,7 @@ class ContactFormState extends State<ContactForm> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.male, color: Colors.blue.shade400),
+                    Icon(Icons.male, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
                     Text(
                       'Male',
@@ -362,6 +396,10 @@ class ContactFormState extends State<ContactForm> {
                             _gender == ContactGender.male
                                 ? FontWeight.bold
                                 : FontWeight.normal,
+                        color:
+                            _gender == ContactGender.male
+                                ? theme.colorScheme.primary
+                                : null,
                       ),
                     ),
                   ],
@@ -375,7 +413,8 @@ class ContactFormState extends State<ContactForm> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: _gender == ContactGender.female ? selectedColor : null,
+                  color:
+                      _gender == ContactGender.female ? theme.cardColor : null,
                   borderRadius: BorderRadius.circular(6),
                   boxShadow:
                       _gender == ContactGender.female
@@ -391,7 +430,7 @@ class ContactFormState extends State<ContactForm> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.female, color: Colors.pink.shade400),
+                    Icon(Icons.female, color: theme.colorScheme.secondary),
                     const SizedBox(width: 8),
                     Text(
                       'Female',
@@ -400,6 +439,10 @@ class ContactFormState extends State<ContactForm> {
                             _gender == ContactGender.female
                                 ? FontWeight.bold
                                 : FontWeight.normal,
+                        color:
+                            _gender == ContactGender.female
+                                ? theme.colorScheme.secondary
+                                : null,
                       ),
                     ),
                   ],
@@ -418,10 +461,10 @@ class ContactFormState extends State<ContactForm> {
     IconData? icon, {
     bool iconOnLeft = true,
   }) {
-    Theme.of(context);
+    final theme = Theme.of(context);
     final iconWidget =
         icon != null
-            ? Icon(icon, color: Colors.green)
+            ? Icon(icon, color: theme.colorScheme.primary)
             : const SizedBox(width: 24);
 
     List<Widget> children = [
@@ -444,28 +487,28 @@ class ContactFormState extends State<ContactForm> {
 
   Widget _buildNotesField() {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final bgColor = isDark ? Colors.grey[800] : Colors.grey[200];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Annotation / Introduction',
-          style: TextStyle(fontSize: 12, color: Colors.grey),
+          style: TextStyle(fontSize: 12, color: theme.hintColor),
         ),
         const SizedBox(height: 4),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: bgColor,
+            color: theme.scaffoldBackgroundColor,
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: theme.dividerColor),
           ),
           child: TextFormField(
             controller: _notesController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               border: InputBorder.none,
               hintText: 'Add a note about this contact...',
+              hintStyle: TextStyle(color: theme.hintColor),
             ),
             maxLines: 3,
           ),
@@ -496,7 +539,7 @@ class ContactFormState extends State<ContactForm> {
                 child: _buildBorderlessTextField(controller.value, 'Value'),
               ),
               IconButton(
-                icon: const Icon(Icons.remove_circle, color: Colors.red),
+                icon: Icon(Icons.remove_circle, color: theme.colorScheme.error),
                 onPressed: () {
                   setState(() {
                     controller.key.dispose();
@@ -510,7 +553,7 @@ class ContactFormState extends State<ContactForm> {
         }),
         const SizedBox(height: 8),
         TextButton.icon(
-          icon: const Icon(Icons.add_circle),
+          icon: Icon(Icons.add_circle, color: theme.colorScheme.primary),
           label: Text('contact_addCustomField'.tr),
           onPressed: () {
             setState(() {
@@ -529,7 +572,10 @@ class ContactFormState extends State<ContactForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('contact_customActivityEvents'.tr, style: theme.textTheme.titleMedium),
+        Text(
+          'contact_customActivityEvents'.tr,
+          style: theme.textTheme.titleMedium,
+        ),
         ..._customEventControllers.asMap().entries.map((entry) {
           int idx = entry.key;
           var controller = entry.value;
@@ -541,7 +587,7 @@ class ContactFormState extends State<ContactForm> {
                 child: _buildBorderlessTextField(controller.key, 'Event Title'),
               ),
               IconButton(
-                icon: const Icon(Icons.remove_circle, color: Colors.red),
+                icon: Icon(Icons.remove_circle, color: theme.colorScheme.error),
                 onPressed: () {
                   setState(() {
                     controller.key.dispose();
@@ -557,12 +603,12 @@ class ContactFormState extends State<ContactForm> {
         }),
         const SizedBox(height: 8),
         TextButton.icon(
-          icon: const Icon(Icons.add_circle),
+          icon: Icon(Icons.add_circle, color: theme.colorScheme.primary),
           label: Text('contact_addCustomEvent'.tr),
           onPressed: () {
             setState(() {
               _customEventControllers.add(
-                MapEntry(TextEditingController(), Colors.green),
+                MapEntry(TextEditingController(), theme.colorScheme.primary),
               );
             });
           },
@@ -573,13 +619,18 @@ class ContactFormState extends State<ContactForm> {
 
   Widget _buildColorPickerButton(int index) {
     Color currentColor = _customEventControllers[index].value;
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
         showDialog(
           context: context,
           builder:
               (context) => AlertDialog(
-                title: Text('contact_pickColor'.tr),
+                backgroundColor: theme.colorScheme.surface,
+                title: Text(
+                  'contact_pickColor'.tr,
+                  style: theme.textTheme.titleLarge,
+                ),
                 content: SingleChildScrollView(
                   child: ColorPicker(
                     pickerColor: currentColor,
@@ -596,7 +647,10 @@ class ContactFormState extends State<ContactForm> {
                 ),
                 actions: [
                   TextButton(
-                    child: Text('contact_done'.tr),
+                    child: Text(
+                      'contact_done'.tr,
+                      style: TextStyle(color: theme.colorScheme.primary),
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],

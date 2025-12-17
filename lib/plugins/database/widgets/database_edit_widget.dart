@@ -56,12 +56,12 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('database_editDatabaseTitle'.tr),
+        title: Text('database_edit_database_title'.tr),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'database_informationTabTitle'.tr),
-            Tab(text: 'database_fieldsTabTitle'.tr),
+            Tab(text: 'database_information_tab_title'.tr),
+            Tab(text: 'database_fields_tab_title'.tr),
           ],
         ),
         actions: [
@@ -90,7 +90,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
             TextFormField(
               initialValue: _editedDatabase.name,
               decoration: InputDecoration(
-                labelText: 'database_databaseNameLabel'.tr,
+                labelText: 'database_database_name_label'.tr,
               ),
               onChanged: (value) {
                 _editedDatabase = _editedDatabase.copyWith(name: value);
@@ -99,13 +99,13 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: _pickImage,
-              child: Text('database_uploadCoverImage'.tr),
+              child: Text('database_upload_cover_image'.tr),
             ),
             const SizedBox(height: 16),
             TextFormField(
               initialValue: _editedDatabase.description,
               decoration: InputDecoration(
-                labelText: 'database_descriptionLabel'.tr,
+                labelText: 'database_description_label'.tr,
               ),
               maxLines: 3,
               onChanged: (value) {
@@ -175,7 +175,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
       builder:
           (context) => SimpleDialog(
             title: Text(
-              'Edit ${field.type} ${'database_fieldsTabTitle'.tr}',
+              'Edit ${field.type} ${'database_fields_tab_title'.tr}',
             ),
             children: [
               Padding(
@@ -185,7 +185,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                     TextFormField(
                       initialValue: field.name,
                       decoration: InputDecoration(
-                        labelText: 'database_fieldNameLabel'.tr,
+                        labelText: 'database_field_name_label'.tr,
                       ),
                       onChanged: (value) => field = field.copyWith(name: value),
                     ),
@@ -194,7 +194,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                         field.type == 'Password')
                       TextFormField(
                         decoration: InputDecoration(
-                          labelText: 'database_defaultValueLabel'.tr,
+                          labelText: 'database_default_value_label'.tr,
                           hintText:
                               'Enter default ${field.type.toLowerCase()} value',
                         ),
@@ -241,7 +241,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
       context: context,
       builder:
           (context) => SimpleDialog(
-            title: Text('database_selectFieldTypeTitle'.tr),
+            title: Text('database_select_field_type_title'.tr),
             children: [
               for (final type in FieldController.getFieldTypes())
                 FieldController.buildFieldTypeTile(
@@ -272,7 +272,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
     if (fieldType != null) {
       final newField = FieldModel(
         id: const Uuid().v4(),
-        name: 'database_newFieldTitle'.trParams({
+        name: 'database_new_field_title'.trParams({
           'type': fieldType,
         }),
         type: fieldType,
@@ -316,7 +316,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
       debugPrint('Save failed: $e\n$stackTrace');
       if (mounted) {
         Toast.error(
-          'database_saveFailedMessage'.trParams({'error': e.toString()}),
+          'database_save_failed_message'.trParams({'error': e.toString()}),
         );
       }
     }

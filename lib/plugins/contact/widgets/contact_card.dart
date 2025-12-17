@@ -12,41 +12,47 @@ class ContactCard extends StatelessWidget {
   final Contact contact;
   final ContactController controller;
   final VoidCallback onTap;
+  final VoidCallback? onContactUpdated;
 
   const ContactCard({
     super.key,
     required this.contact,
     required this.controller,
     required this.onTap,
+    this.onContactUpdated,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final primaryTextColor = theme.brightness == Brightness.dark
-        ? const Color(0xFFF2F2F7)
-        : const Color(0xFF1C1C1E);
-    final secondaryTextColor = theme.brightness == Brightness.dark
-        ? const Color(0xFF8E8E93)
-        : const Color(0xFF8A8A8E);
-    final chipColor = theme.brightness == Brightness.dark
-        ? const Color(0xFF2C2C2E)
-        : const Color(0xFFEFEFF4);
+    final primaryTextColor =
+        theme.textTheme.bodyLarge?.color ?? theme.colorScheme.onSurface;
+    final secondaryTextColor =
+        theme.textTheme.bodyMedium?.color ?? theme.colorScheme.onSurfaceVariant;
+    final chipColor = theme.colorScheme.surfaceVariant;
 
     return OpenContainer(
       transitionType: ContainerTransitionType.fade,
+      closedColor: Theme.of(context).colorScheme.surface,
+      openColor: Theme.of(context).scaffoldBackgroundColor,
       openBuilder: (context, _) {
         return ContactForm(
           contact: contact,
           controller: controller,
-          onSave: (savedContact) {},
+          onSave: (savedContact) async {
+            await controller.updateContact(savedContact);
+            onContactUpdated?.call();
+          },
         );
       },
       closedBuilder: (context, VoidCallback openContainer) {
         return Card(
           elevation: 0,
+          color: theme.colorScheme.surface,
           margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: InkWell(
             onTap: openContainer,
             borderRadius: BorderRadius.circular(12),
@@ -55,7 +61,11 @@ class ContactCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTopSection(context, primaryTextColor, secondaryTextColor),
+                  _buildTopSection(
+                    context,
+                    primaryTextColor,
+                    secondaryTextColor,
+                  ),
                   if (contact.notes != null && contact.notes!.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Text(
@@ -68,7 +78,7 @@ class ContactCard extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildTags(context, chipColor, secondaryTextColor),
                   const SizedBox(height: 12),
-                  const Divider(height: 1),
+                  Divider(height: 1, color: theme.dividerColor),
                   const SizedBox(height: 8),
                   _buildBottomSection(context, primaryTextColor),
                 ],
@@ -81,14 +91,17 @@ class ContactCard extends StatelessWidget {
   }
 
   void _navigateToRecords(BuildContext context) {
-    NavigationHelper.push(context, ContactRecordsScreen(
-          contact: contact,
-          controller: controller,),
+    NavigationHelper.push(
+      context,
+      ContactRecordsScreen(contact: contact, controller: controller),
     );
   }
 
   Widget _buildTopSection(
-      BuildContext context, Color primaryTextColor, Color secondaryTextColor) {
+    BuildContext context,
+    Color primaryTextColor,
+    Color secondaryTextColor,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -101,9 +114,10 @@ class ContactCard extends StatelessWidget {
               Text(
                 contact.name,
                 style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
-                    color: primaryTextColor),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  color: primaryTextColor,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -122,7 +136,7 @@ class ContactCard extends StatelessWidget {
         const SizedBox(width: 8),
         IconButton(
           icon: const Icon(Icons.history, size: 30),
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).colorScheme.primary,
           onPressed: () => _navigateToRecords(context),
         ),
       ],
@@ -130,6 +144,7 @@ class ContactCard extends StatelessWidget {
   }
 
   Widget _buildGenderInfo(BuildContext context) {
+    final theme = Theme.of(context);
     IconData icon;
     Color color;
     String text;
@@ -137,12 +152,12 @@ class ContactCard extends StatelessWidget {
     switch (contact.gender) {
       case ContactGender.female:
         icon = Icons.female;
-        color = Colors.pink.shade400;
+        color = theme.colorScheme.secondary;
         text = "Female";
         break;
       case ContactGender.male:
         icon = Icons.male;
-        color = Colors.blue.shade400;
+        color = theme.colorScheme.primary;
         text = "Male";
         break;
       default:
@@ -164,29 +179,33 @@ class ContactCard extends StatelessWidget {
         width: size,
         height: size,
         child: FutureBuilder<String>(
-          future: contact.avatar!.startsWith('http')
-              ? Future.value(contact.avatar!)
-              : ImageUtils.getAbsolutePath(contact.avatar),
+          future:
+              contact.avatar!.startsWith('http')
+                  ? Future.value(contact.avatar!)
+                  : ImageUtils.getAbsolutePath(contact.avatar),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return ClipOval(
-                child: contact.avatar!.startsWith('http')
-                    ? Image.network(
-                        snapshot.data!,
-                        width: size,
-                        height: size,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            _buildIconAvatar(size),
-                      )
-                    : Image.file(
-                        File(snapshot.data!),
-                        width: size,
-                        height: size,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            _buildIconAvatar(size),
-                      ),
+                child:
+                    contact.avatar!.startsWith('http')
+                        ? Image.network(
+                          snapshot.data!,
+                          width: size,
+                          height: size,
+                          fit: BoxFit.cover,
+                          errorBuilder:
+                              (context, error, stackTrace) =>
+                                  _buildIconAvatar(size),
+                        )
+                        : Image.file(
+                          File(snapshot.data!),
+                          width: size,
+                          height: size,
+                          fit: BoxFit.cover,
+                          errorBuilder:
+                              (context, error, stackTrace) =>
+                                  _buildIconAvatar(size),
+                        ),
               );
             } else if (snapshot.hasError) {
               return _buildIconAvatar(size);
@@ -195,7 +214,8 @@ class ContactCard extends StatelessWidget {
                 width: size,
                 height: size,
                 child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2)),
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
               );
             }
           },
@@ -225,24 +245,30 @@ class ContactCard extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 4,
-      children: contact.tags.map((tag) {
-        return Chip(
-          backgroundColor: chipColor,
-          label: Text(tag,
-              style: TextStyle(
+      children:
+          contact.tags.map((tag) {
+            return Chip(
+              backgroundColor: chipColor,
+              label: Text(
+                tag,
+                style: TextStyle(
                   fontSize: 12,
                   color: textColor,
-                  fontWeight: FontWeight.w500)),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          side: BorderSide.none,
-        );
-      }).toList(),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              side: BorderSide.none,
+            );
+          }).toList(),
     );
   }
 
   Widget _buildBottomSection(BuildContext context, Color textColor) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: () => _navigateToRecords(context),
       child: Row(
@@ -253,8 +279,11 @@ class ContactCard extends StatelessWidget {
               if (snapshot.hasData && snapshot.data! > 0) {
                 return Row(
                   children: [
-                    Icon(Icons.event_note,
-                        color: Colors.green, size: 16),
+                    Icon(
+                      Icons.event_note,
+                      color: theme.colorScheme.primary,
+                      size: 16,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       "View ${snapshot.data} record(s)",

@@ -679,6 +679,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   Widget _buildConversationCard(Conversation conversation) {
     return OpenContainer<bool>(
       transitionType: ContainerTransitionType.fade,
+      closedColor: Colors.transparent,
+      closedElevation: 0,
       openBuilder: (BuildContext context, VoidCallback _) {
         // 直接返回聊天页面，OpenContainer 会处理过渡动画
         return ChatScreen(
@@ -696,10 +698,18 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
             onTap: openContainer,
             highlightColor: Colors.transparent,
             splashColor: Colors.transparent,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Colors.grey.shade300,
+                  width: 1.0,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
                   CircleAvatar(
                     backgroundColor: Colors.blue[100],
                     child: Icon(
@@ -812,6 +822,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                 ],
               ),
             ),
+          ),
           ),
         );
       },

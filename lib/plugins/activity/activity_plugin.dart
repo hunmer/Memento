@@ -892,11 +892,9 @@ class _ActivityMainViewState extends State<ActivityMainView>
   @override
   Widget build(BuildContext context) {
     _scheduleBottomBarHeightMeasurement();
-    final Color unselectedColor =
-        _colors[_currentPage].computeLuminance() < 0.5
-            ? Colors.black.withOpacity(0.6)
-            : Colors.white.withOpacity(0.6);
-    final Color bottomAreaColor = Theme.of(context).scaffoldBackgroundColor;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color unselectedColor = colorScheme.onSurface.withOpacity(0.6);
+    final Color bottomAreaColor = colorScheme.surface;
     final mediaQuery = MediaQuery.of(context);
 
     return BottomBar(
@@ -927,10 +925,7 @@ class _ActivityMainViewState extends State<ActivityMainView>
       curve: Curves.decelerate,
       showIcon: true,
       width: mediaQuery.size.width * 0.85,
-      barColor:
-          _colors[_currentPage].computeLuminance() > 0.5
-              ? Colors.black
-              : Colors.white,
+      barColor: colorScheme.surface,
       start: 2,
       end: 0,
       offset: _bottomBarOffset,
@@ -1030,7 +1025,13 @@ class _ActivityMainViewState extends State<ActivityMainView>
               backgroundColor: ActivityPlugin.instance.color,
               elevation: 4,
               shape: const CircleBorder(),
-              child: const Icon(Icons.add, color: Colors.white, size: 32),
+              child: Icon(
+                Icons.add,
+                color: ActivityPlugin.instance.color.computeLuminance() > 0.5
+                    ? Colors.black
+                    : Colors.white,
+                size: 32,
+              ),
               onPressed: () async {
                 final activityService = ActivityPlugin.instance.activityService;
                 final today = DateTime.now();

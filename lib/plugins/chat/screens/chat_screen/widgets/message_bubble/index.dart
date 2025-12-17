@@ -198,6 +198,16 @@ class _MessageBubbleState extends State<MessageBubble> {
   }
 
   Color _getTextColor(BuildContext context) {
+    // 如果消息有自定义气泡颜色，根据背景亮度动态计算文字颜色
+    if (_currentMessage.bubbleColor != null) {
+      final bgColor = _currentMessage.bubbleColor!;
+      // 计算背景颜色的相对亮度
+      // 使用 computeLuminance() 方法，返回 0.0（最暗）到 1.0（最亮）
+      final luminance = bgColor.computeLuminance();
+      // 亮度阈值 0.5：浅色背景用深色文字，深色背景用浅色文字
+      return luminance > 0.5 ? Colors.black87 : Colors.white;
+    }
+
     if (widget.isSelected) {
       return Theme.of(context).colorScheme.onPrimaryContainer;
     }
@@ -206,7 +216,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     }
     return _isCurrentUser
         ? Theme.of(context).colorScheme.onPrimaryContainer
-        : Theme.of(context).colorScheme.onSurfaceVariant;
+        : Theme.of(context).colorScheme.onSurface;
   }
 
   @override
