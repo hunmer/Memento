@@ -9,12 +9,16 @@ class UserItemCard extends StatelessWidget {
   final UserItem item;
   final int count;
   final VoidCallback onUse;
+  final VoidCallback? onDelete;
+  final VoidCallback? onViewProduct;
 
   const UserItemCard({
     super.key,
     required this.item,
     required this.count,
     required this.onUse,
+    this.onDelete,
+    this.onViewProduct,
   });
 
   @override
@@ -45,6 +49,7 @@ class UserItemCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
+          onLongPress: () => _showBottomSheet(context),
           onTap: () {
             if (!isExpired) {
               showDialog(
@@ -370,6 +375,96 @@ class UserItemCard extends StatelessWidget {
         Icons.broken_image,
         size: 48,
         color: Colors.grey,
+      ),
+    );
+  }
+
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 拖拽指示器
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 8),
+            // 标题
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                item.productName,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const Divider(),
+            // 查看商品信息
+            if (onViewProduct != null)
+              ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: Text('store_viewProductInfo'.tr),
+                onTap: () {
+                  Navigator.pop(context);
+                  onViewProduct!();
+                },
+              ),
+            // 删除
+            if (onDelete != null)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                title: Text(
+                  'app_delete'.tr,
+                  style: const TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmDelete(context);
+                },
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('store_confirmDeleteTitle'.tr),
+        content: Text('store_confirmDeleteItemMessage'.tr),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('app_cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              onDelete!();
+            },
+            child: Text(
+              'app_delete'.tr,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -5,9 +5,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:shared_models/shared_models.dart';
-import 'package:shared_models/repositories/nodes/nodes_repository.dart';
-import 'package:shared_models/utils/result.dart';
-import 'package:shared_models/utils/pagination.dart';
 import '../controllers/nodes_controller.dart';
 import '../models/node.dart' as local;
 import '../models/notebook.dart';

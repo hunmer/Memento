@@ -228,6 +228,14 @@ class StoreController with ChangeNotifier {
     return true;
   }
 
+  // 删除用户物品
+  Future<void> deleteUserItem(UserItem item) async {
+    _userItems.remove(item);
+    await saveUserItems();
+    _updateStreams();
+    notifyListeners();
+  }
+
   // 保存已使用物品
   Future<void> saveUsedItems() async {
     await plugin.storage.write('store/used_items', {

@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:Memento/plugins/store/widgets/user_item_card.dart';
 import 'package:Memento/plugins/store/widgets/user_item_detail_page.dart';
+import 'package:Memento/plugins/store/widgets/add_product_page.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
@@ -104,6 +105,32 @@ class _UserItemsContentState extends State<UserItemsContent> {
                 Toast.success('store_useSuccess'.tr);
               } else {
                 Toast.error('store_itemExpired'.tr);
+              }
+            },
+            onDelete: () async {
+              final itemToDelete = widget.controller.sortedUserItems.firstWhere(
+                (item) => item.productId == group.item.productId,
+              );
+              await widget.controller.deleteUserItem(itemToDelete);
+              setState(() {});
+              Toast.success('app_deleteSuccess'.tr);
+            },
+            onViewProduct: () {
+              final product = widget.controller.products.firstWhereOrNull(
+                (p) => p.id == group.item.productId,
+              );
+              if (product != null) {
+                NavigationHelper.push(
+                  context,
+                  AddProductPage(
+                    controller: widget.controller,
+                    product: product,
+                  ),
+                ).then((_) {
+                  if (mounted) setState(() {});
+                });
+              } else {
+                Toast.warning('store_productNotFound'.tr);
               }
             },
           ),

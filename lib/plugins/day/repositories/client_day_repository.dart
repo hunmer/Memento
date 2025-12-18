@@ -2,7 +2,6 @@
 /// 通过适配现有的 DayController 来实现 IDayRepository 接口
 library;
 
-import 'package:shared_models/repositories/day/day_repository.dart';
 import 'package:shared_models/shared_models.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/day/controllers/day_controller.dart';

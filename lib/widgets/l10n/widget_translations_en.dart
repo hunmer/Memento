@@ -118,4 +118,17 @@ const Map<String, String> enUS = {
   'widget_calendarStrip_today': 'Today',
   'widget_calendarStrip_selectDate': 'Select Date',
   'widget_calendarStrip_loadingMore': 'Loading more...',
+
+  // TagManager 标签管理器
+  'tagManager_clearSelected': 'Clear Selected (\$selectedCount)',
+  'tagManager_cancel': 'Cancel',
+  'tagManager_confirm': 'Confirm',
+  'tagManager_newGroup': 'New Group',
+  'tagManager_newTag': 'New Tag',
+  'tagManager_editGroup': 'Edit Group',
+  'tagManager_deleteGroup': 'Delete Group',
+  'tagManager_editGroupTooltip': 'Edit Group',
+  'tagManager_deleteTagsTooltip': 'Delete Tags',
+  'tagManager_addTagTooltip': 'Add Tag',
+  'tagManager_createGroupTooltip': 'Create Group',
 };

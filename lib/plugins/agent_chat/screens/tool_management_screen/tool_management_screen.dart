@@ -500,7 +500,10 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
                                   PointerDeviceKind.trackpad,
                                 },
                               ),
-                              child: ListView(children: _buildPluginSections()),
+                              child: ListView(
+                                padding: EdgeInsets.zero,
+                                children: _buildPluginSections(),
+                              ),
                             ),
                   ),
 

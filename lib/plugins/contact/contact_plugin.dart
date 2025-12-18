@@ -866,14 +866,6 @@ class ContactMainViewState extends State<ContactMainView> {
     );
   }
 
-  Future<void> _showSortMenu() async {
-    await _controller.getSortConfig();
-
-    if (!mounted) return;
-
-    // ... (rest of the _showSortMenu method is the same)
-  }
-
   Future<void> _addOrEditContact([Contact? contact]) async {
     await NavigationHelper.push(
       context,
@@ -966,7 +958,6 @@ class ContactMainViewState extends State<ContactMainView> {
           icon: const Icon(Icons.filter_list),
           onPressed: _showFilterDialog,
         ),
-        IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
         IconButton(
           key: _addButtonKey,
           icon: const Icon(Icons.add),

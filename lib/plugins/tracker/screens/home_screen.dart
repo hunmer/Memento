@@ -30,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (context, controller, child) {
               final groups = ['全部', ...controller.getAllGroups()];
               return ListView.builder(
+                padding: EdgeInsets.zero,
                 scrollDirection: Axis.horizontal,
                 itemCount: groups.length,
                 itemBuilder: (context, index) {

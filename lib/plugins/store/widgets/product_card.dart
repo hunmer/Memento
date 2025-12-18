@@ -7,11 +7,13 @@ import 'package:Memento/plugins/store/models/product.dart';
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onExchange;
+  final VoidCallback? onLongPress;
 
   const ProductCard({
     super.key,
     required this.product,
     required this.onExchange,
+    this.onLongPress,
   });
 
   @override
@@ -41,6 +43,7 @@ class ProductCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
+          onLongPress: onLongPress,
           onTap: () {
             showDialog(
               context: context,

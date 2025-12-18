@@ -12,7 +12,6 @@ import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
 import 'package:Memento/plugins/calendar_album/widgets/entry_list.dart';
 import 'entry_editor_screen.dart';
 import 'entry_detail_screen.dart';
-import 'package:Memento/plugins/calendar_album/utils/date_utils.dart';
 import 'package:intl/intl.dart';
 
 final DateTime _calendarMinMonth = DateTime(2010, 1, 1);
@@ -31,7 +30,6 @@ class _CalendarScreenState extends State<CalendarScreen>
   @override
   bool get wantKeepAlive => true;
   DateTime _focusedDay = DateTime.now();
-  bool _isInitialized = false;
   // 搜索相关状态
   String _searchQuery = '';
   Map<String, bool> _searchFilters = {
@@ -45,18 +43,15 @@ class _CalendarScreenState extends State<CalendarScreen>
   @override
   void initState() {
     super.initState();
-    if (!_isInitialized) {
-      // 只在首次初始化时跳转到当前日期
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted) {
-          Provider.of<CalendarController>(
-            context,
-            listen: false,
-          ).selectDate(DateTime.now());
-          setState(() => _isInitialized = true);
-        }
-      });
-    }
+    // 使用 addPostFrameCallback 确保在第一帧渲染后初始化
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<CalendarController>(
+          context,
+          listen: false,
+        ).selectDate(DateTime.now());
+      }
+    });
   }
 
   /// 获取图片的绝对路径
@@ -706,18 +701,11 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
     _months.clear();
     final now = DateTime.now();
 
-    debugPrint('=== 垂直视图：初始化月份列表 ===');
-
     // 从当前月份开始，添加几个月份用于初始化显示
     for (int i = 0; i < 3; i++) {
       final month = DateTime(now.year, now.month - i, 1);
       _months.add(month);
-      debugPrint('初始化月份: ${month.year}-${month.month}');
     }
-
-    debugPrint(
-      '初始化完成，月份范围: ${_months.first.year}-${_months.first.month} 到 ${_months.last.year}-${_months.last.month}',
-    );
   }
 
   /// 加载更多月份（向下滚动时加载更早的月份）
@@ -729,30 +717,21 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
     final addedMonths = <DateTime>[];
     bool hasChanges = false;
 
-    debugPrint('=== 垂直视图：向下滚动，加载更早的月份 ===');
-    debugPrint(
-      '加载前月份范围: ${_months.first.year}-${_months.first.month} 到 ${_months.last.year}-${_months.last.month}',
-    );
-
     // 获取最早的月份，然后添加更早的月份
     final earliestMonth = _months.last; // 因为列表是从大到小排列，所以最后的是最早的
     var currentMonth = DateTime(earliestMonth.year, earliestMonth.month - 1, 1);
 
     for (int i = 0; i < _calendarLoadBatchSize; i++) {
       if (currentMonth.isBefore(_calendarMinMonth)) {
-        debugPrint('已达到最小月份限制: ${currentMonth.year}-${currentMonth.month}');
         break;
       }
 
       _months.add(currentMonth);
       addedMonths.add(currentMonth);
       hasChanges = true;
-      debugPrint('✓ 添加月份: ${currentMonth.year}-${currentMonth.month}');
 
       currentMonth = DateTime(currentMonth.year, currentMonth.month - 1, 1);
     }
-
-    debugPrint('当前月份总数: ${_months.length}');
 
     setState(() => _isLoading = false);
 
@@ -769,39 +748,36 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
   void _handleScroll() {
     if (!_scrollController.hasClients || _isLoading) return;
 
-    const threshold = 200.0;
-    final position = _scrollController.position;
+    // 使用 addPostFrameCallback 确保不在 build 阶段访问 position
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients || _isLoading) return;
 
-    // 只有向下滚动到底部时才加载更早的月份
-    if (position.maxScrollExtent > 0 &&
-        (position.maxScrollExtent - position.pixels) <= threshold) {
-      debugPrint('=== 滚动到底部，加载更早的月份 ===');
-      _loadMorePreviousMonths();
-    }
+      const threshold = 200.0;
+      final position = _scrollController.position;
+
+      // 只有向下滚动到底部时才加载更早的月份
+      if (position.maxScrollExtent > 0 &&
+          (position.maxScrollExtent - position.pixels) <= threshold) {
+        _loadMorePreviousMonths();
+      }
+    });
   }
 
   /// 生成月份的唯一key
   String _getMonthKey(DateTime month) {
-    final key = 'vertical_${month.year}_${month.month}';
-    debugPrint('垂直视图生成月份Key: ${month.year}-${month.month} -> $key');
-    return key;
+    return 'vertical_${month.year}_${month.month}';
   }
 
   /// 获取指定月份的日历数据（带缓存）- 垂直视图
+  /// 注意: isSelected 和 isToday 状态由 EnhancedCalendar 内部的 _dayBuilder 处理，
+  /// 这里只需要提供背景图片和条目数量等静态数据
   Map<DateTime, CalendarDayData> _getCalendarDayData(DateTime month) {
     final monthKey = _getMonthKey(month);
 
-    // 检查缓存
+    // 检查缓存 - 直接返回，不修改缓存中的选中/今日状态
+    // EnhancedCalendar._dayBuilder 会自己计算这些动态状态
     if (_cachedDayData.containsKey(monthKey)) {
-      final cachedData = _cachedDayData[monthKey]!;
-      // 更新选中状态和今天状态（这些是动态的）
-      cachedData.forEach((date, dayData) {
-        cachedData[date] = dayData.copyWith(
-          isSelected: isSameDay(date, widget.selectedDate),
-          isToday: isSameDay(date, DateTime.now()),
-        );
-      });
-      return cachedData;
+      return _cachedDayData[monthKey]!;
     }
 
     // 计算新的日历数据
@@ -833,15 +809,16 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
           date: date,
           backgroundImage: backgroundImage,
           count: entries.length,
-          isSelected: isSameDay(date, widget.selectedDate),
-          isToday: isSameDay(date, DateTime.now()),
+          // 以下状态由 EnhancedCalendar._dayBuilder 内部计算，这里设置默认值
+          isSelected: false,
+          isToday: false,
           isCurrentMonth: date.year == month.year && date.month == month.month,
         );
       }
     });
 
     // 缓存数据
-    _cachedDayData[monthKey] = Map.from(dayData);
+    _cachedDayData[monthKey] = dayData;
     return dayData;
   }
 
@@ -882,7 +859,9 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
               ),
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
+                // 为每个月份的日历添加独立 key，确保它们完全独立管理自己的状态
                 child: EnhancedCalendarWidget(
+                  key: ValueKey('enhanced_calendar_${month.year}_${month.month}'),
                   dayData: _getCalendarDayData(month),
                   focusedMonth: month,
                   selectedDate: widget.selectedDate,
@@ -902,12 +881,6 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
-    debugPrint('=== 垂直视图：构建月份显示 ===');
-    debugPrint('显示月份总数: ${_months.length}');
-    debugPrint(
-      '显示月份顺序: ${_months.map((m) => '${m.year}-${m.month}').join(', ')}',
-    );
 
     return Column(
       children: [

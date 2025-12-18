@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 /// 下载状态枚举
 enum DownloadStatus {

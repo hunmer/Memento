@@ -363,24 +363,31 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     // 提取必需参数
     if (params['name'] != null) useCaseParams['name'] = params['name'];
     if (params['icon'] != null) useCaseParams['icon'] = params['icon'];
-    if (params['unitType'] != null)
+    if (params['unitType'] != null) {
       useCaseParams['unitType'] = params['unitType'];
-    if (params['targetValue'] != null)
+    }
+    if (params['targetValue'] != null) {
       useCaseParams['targetValue'] = params['targetValue'];
+    }
 
     // 提取可选参数
     if (params['id'] != null) useCaseParams['id'] = params['id'];
     if (params['group'] != null) useCaseParams['group'] = params['group'];
-    if (params['iconColor'] != null)
+    if (params['iconColor'] != null) {
       useCaseParams['iconColor'] = params['iconColor'];
-    if (params['imagePath'] != null)
+    }
+    if (params['imagePath'] != null) {
       useCaseParams['imagePath'] = params['imagePath'];
-    if (params['progressColor'] != null)
+    }
+    if (params['progressColor'] != null) {
       useCaseParams['progressColor'] = params['progressColor'];
-    if (params['reminderTime'] != null)
+    }
+    if (params['reminderTime'] != null) {
       useCaseParams['reminderTime'] = params['reminderTime'];
-    if (params['isLoopReset'] != null)
+    }
+    if (params['isLoopReset'] != null) {
       useCaseParams['isLoopReset'] = params['isLoopReset'];
+    }
 
     // 处理日期设置
     final dateType = params['dateType'] ?? 'daily';
@@ -419,22 +426,30 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     // 添加所有可能的更新字段
     if (updateJson['name'] != null) useCaseParams['name'] = updateJson['name'];
     if (updateJson['icon'] != null) useCaseParams['icon'] = updateJson['icon'];
-    if (updateJson['iconColor'] != null)
+    if (updateJson['iconColor'] != null) {
       useCaseParams['iconColor'] = updateJson['iconColor'];
-    if (updateJson['unitType'] != null)
+    }
+    if (updateJson['unitType'] != null) {
       useCaseParams['unitType'] = updateJson['unitType'];
-    if (updateJson['targetValue'] != null)
+    }
+    if (updateJson['targetValue'] != null) {
       useCaseParams['targetValue'] = updateJson['targetValue'];
-    if (updateJson['group'] != null)
+    }
+    if (updateJson['group'] != null) {
       useCaseParams['group'] = updateJson['group'];
-    if (updateJson['imagePath'] != null)
+    }
+    if (updateJson['imagePath'] != null) {
       useCaseParams['imagePath'] = updateJson['imagePath'];
-    if (updateJson['progressColor'] != null)
+    }
+    if (updateJson['progressColor'] != null) {
       useCaseParams['progressColor'] = updateJson['progressColor'];
-    if (updateJson['reminderTime'] != null)
+    }
+    if (updateJson['reminderTime'] != null) {
       useCaseParams['reminderTime'] = updateJson['reminderTime'];
-    if (updateJson['isLoopReset'] != null)
+    }
+    if (updateJson['isLoopReset'] != null) {
       useCaseParams['isLoopReset'] = updateJson['isLoopReset'];
+    }
 
     // 处理日期设置
     if (updateJson['dateSettings'] != null) {
@@ -482,8 +497,9 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     // 提取可选参数
     if (params['id'] != null) useCaseParams['id'] = params['id'];
     if (params['note'] != null) useCaseParams['note'] = params['note'];
-    if (params['durationSeconds'] != null)
+    if (params['durationSeconds'] != null) {
       useCaseParams['durationSeconds'] = params['durationSeconds'];
+    }
 
     // 处理记录时间
     final dateTime = params['dateTime'];

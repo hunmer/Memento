@@ -122,6 +122,9 @@ const Map<String, String> storeTranslationsEn = {
   'store_expiryDateLabel': 'Expiry Date',
   'store_purchasePriceLabel': 'Purchase Price',
   'store_remainingQuantityLabel': 'Remaining Quantity',
+  'store_viewProductInfo': 'View Product Info',
+  'store_productNotFound': 'Product not found or deleted',
+  'store_confirmDeleteItemMessage': 'Are you sure you want to delete this item? This action cannot be undone.',
 
   // Records related
   'store_noRecords': 'No records',
