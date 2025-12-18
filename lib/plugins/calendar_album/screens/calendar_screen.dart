@@ -5,7 +5,7 @@ import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
-import 'package:Memento/widgets/enhanced_calendar/index.dart';
+import 'package:Memento/widgets/enhanced_calendar/syncfusion_calendar.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
 import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
@@ -860,8 +860,8 @@ class _VerticalCalendarViewState extends State<_VerticalCalendarView>
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 // 为每个月份的日历添加独立 key，确保它们完全独立管理自己的状态
-                child: EnhancedCalendarWidget(
-                  key: ValueKey('enhanced_calendar_${month.year}_${month.month}'),
+                child: SyncfusionCalendarWidget(
+                  key: ValueKey('syncfusion_calendar_${month.year}_${month.month}'),
                   dayData: _getCalendarDayData(month),
                   focusedMonth: month,
                   selectedDate: widget.selectedDate,
