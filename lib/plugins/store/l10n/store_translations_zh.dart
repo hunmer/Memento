@@ -122,6 +122,9 @@ const Map<String, String> storeTranslationsZh = {
   'store_expiryDateLabel': '过期日期',
   'store_purchasePriceLabel': '购买价格',
   'store_remainingQuantityLabel': '剩余数量',
+  'store_viewProductInfo': '查看商品信息',
+  'store_productNotFound': '商品不存在或已删除',
+  'store_confirmDeleteItemMessage': '确定要删除这个物品吗？此操作不可撤销。',
 
   // 记录相关
   'store_noRecords': '暂无记录',

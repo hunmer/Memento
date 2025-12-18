@@ -121,6 +121,17 @@ class _ProductListState extends State<ProductList> {
                   child: ProductCard(
                     key: ValueKey(product.id),
                     product: product,
+                    onLongPress: () {
+                      NavigationHelper.push(
+                        context,
+                        AddProductPage(
+                          controller: widget.controller,
+                          product: product,
+                        ),
+                      ).then((_) {
+                        if (mounted) setState(() {});
+                      });
+                    },
                     onExchange: () async {
                       if (await widget.controller.exchangeProduct(product)) {
                         if (mounted) setState(() {});

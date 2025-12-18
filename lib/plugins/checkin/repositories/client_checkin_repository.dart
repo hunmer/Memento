@@ -3,7 +3,6 @@
 /// 通过适配现有的存储系统来实现 ICheckinRepository 接口
 library;
 
-import 'package:shared_models/repositories/checkin/checkin_repository.dart';
 import 'package:shared_models/shared_models.dart';
 
 /// 客户端 Checkin Repository 实现

@@ -6,7 +6,6 @@ import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/models/bill.dart';
 import 'package:Memento/plugins/bill/models/subscription.dart';
-import 'package:Memento/plugins/bill/controls/subscription_controller.dart';
 
 class BillEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;

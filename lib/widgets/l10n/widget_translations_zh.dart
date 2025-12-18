@@ -109,4 +109,17 @@ const Map<String, String> zhCN = {
   'widget_calendarStrip_today': '今天',
   'widget_calendarStrip_selectDate': '选择日期',
   'widget_calendarStrip_loadingMore': '加载更多...',
+
+  // TagManager 标签管理器
+  'tagManager_clearSelected': '清空选中 (\$selectedCount)',
+  'tagManager_cancel': '取消',
+  'tagManager_confirm': '确定',
+  'tagManager_newGroup': '新建分组',
+  'tagManager_newTag': '新建标签',
+  'tagManager_editGroup': '编辑分组',
+  'tagManager_deleteGroup': '删除分组',
+  'tagManager_editGroupTooltip': '编辑分组',
+  'tagManager_deleteTagsTooltip': '删除标签',
+  'tagManager_addTagTooltip': '添加标签',
+  'tagManager_createGroupTooltip': '创建分组',
 };

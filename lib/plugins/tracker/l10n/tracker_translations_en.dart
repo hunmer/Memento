@@ -51,8 +51,8 @@ class TrackerTranslationsEn {
     'tracker_confirmClearMessage':
         'Are you sure you want to clear all records? This action cannot be undone.',
     'tracker_recordsCleared': 'Records cleared',
-    'tracker_currentProgress': 'Current Progress: @currentValue/@targetValue',
-    'tracker_reminderTime': 'Reminder Time: @reminderTime',
+    'tracker_currentProgress': 'Current Progress: {currentValue}/{targetValue}',
+    'tracker_reminderTime': 'Reminder Time: {reminderTime}',
     'tracker_recordHistory': 'Record History',
     'tracker_noRecords': 'No records',
     'tracker_confirmDelete': 'Confirm Delete',

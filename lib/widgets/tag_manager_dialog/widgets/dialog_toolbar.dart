@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/widgets/tag_manager_dialog/models/tag_manager_config.dart';
 
 class DialogToolbar extends StatelessWidget {
@@ -51,21 +52,25 @@ class DialogToolbar extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.edit),
+                tooltip: 'tagManager_editGroupTooltip'.tr,
                 onPressed:
                     selectedGroup == config.allTagsLabel ? null : onEditGroup,
               ),
               IconButton(
                 icon: const Icon(Icons.delete),
+                tooltip: 'tagManager_deleteTagsTooltip'.tr,
                 onPressed:
                     selectedGroup == config.allTagsLabel ? null : onDeleteTags,
               ),
               IconButton(
                 icon: const Icon(Icons.add),
+                tooltip: 'tagManager_addTagTooltip'.tr,
                 onPressed:
                     selectedGroup == config.allTagsLabel ? null : onAddTag,
               ),
               IconButton(
                 icon: const Icon(Icons.create_new_folder),
+                tooltip: 'tagManager_createGroupTooltip'.tr,
                 onPressed: onCreateGroup,
               ),
             ],

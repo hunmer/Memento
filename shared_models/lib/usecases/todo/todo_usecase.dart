@@ -208,14 +208,18 @@ class TodoUseCase {
           ? Map<String, dynamic>.from(existing.metadata!)
           : {};
 
-      if (params.containsKey('category'))
+      if (params.containsKey('category')) {
         metadata['category'] = params['category'];
-      if (params.containsKey('dueTime'))
+      }
+      if (params.containsKey('dueTime')) {
         metadata['dueTime'] = params['dueTime'];
-      if (params.containsKey('subtasks'))
+      }
+      if (params.containsKey('subtasks')) {
         metadata['subtasks'] = params['subtasks'];
-      if (params.containsKey('reminder'))
+      }
+      if (params.containsKey('reminder')) {
         metadata['reminder'] = params['reminder'];
+      }
       if (params.containsKey('repeat')) metadata['repeat'] = params['repeat'];
       if (params.containsKey('notes')) metadata['notes'] = params['notes'];
 

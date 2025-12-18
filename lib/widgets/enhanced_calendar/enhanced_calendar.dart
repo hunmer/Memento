@@ -95,27 +95,29 @@ class EnhancedCalendar extends StatefulWidget {
 }
 
 class _EnhancedCalendarState extends State<EnhancedCalendar> {
-  late DateTime _focusedDay;
+  // 只保留 selectedDay 作为内部状态（用于用户点击选择）
+  // focusedDay 直接使用 widget.config.focusedDay，确保每个日历显示正确的月份
   late DateTime? _selectedDay;
 
   @override
   void initState() {
     super.initState();
-    _focusedDay = widget.config.focusedDay;
     _selectedDay = widget.config.selectedDay;
   }
 
   @override
   void didUpdateWidget(EnhancedCalendar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // 当外部传入的 focusedDay 改变时，更新内部状态
-    if (oldWidget.config.focusedDay != widget.config.focusedDay) {
-      _focusedDay = widget.config.focusedDay;
-    }
+    // 只同步 selectedDay 状态
     if (oldWidget.config.selectedDay != widget.config.selectedDay) {
-      _selectedDay = widget.config.selectedDay;
+      setState(() {
+        _selectedDay = widget.config.selectedDay;
+      });
     }
   }
+
+  /// 获取当前要显示的月份 - 直接使用配置中的值
+  DateTime get _focusedDay => widget.config.focusedDay;
 
   /// 自定义日期单元格构建器
   Widget _dayBuilder(BuildContext context, DateTime day, DateTime focusedDay) {
@@ -126,7 +128,8 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
     final count = dayData?.count;
     final isSelected = _selectedDay != null && isSameDay(day, _selectedDay!);
     final isToday = isSameDay(day, DateTime.now());
-    final isCurrentMonth = day.month == _focusedDay.month;
+    // 使用传入的 focusedDay 参数判断当前月份，避免初始化时状态不同步
+    final isCurrentMonth = day.month == focusedDay.month && day.year == focusedDay.year;
 
     // 默认文本样式
     TextStyle textStyle =
@@ -304,7 +307,10 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
 
   @override
   Widget build(BuildContext context) {
+    // 使用 key 强制 TableCalendar 在月份变化时完全重建
+    // 这确保每个月份的日历完全独立，不受内部状态影响
     return TableCalendar(
+      key: ValueKey('table_calendar_${_focusedDay.year}_${_focusedDay.month}'),
       firstDay: DateTime(2010),
       lastDay: DateTime(2030),
       focusedDay: _focusedDay,
@@ -313,6 +319,9 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
       calendarFormat: widget.config.calendarFormat,
       locale: widget.config.locale,
       pageAnimationEnabled: false,
+      // 禁用水平滑动切换月份
+      pageJumpingEnabled: false,
+      availableGestures: AvailableGestures.none,
 
       // 样式配置
       calendarStyle: const CalendarStyle(
@@ -337,7 +346,7 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
               ? (selectedDay, focusedDay) {
                 setState(() {
                   _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
+                  // 不更新 _focusedDay，因为每个日历只显示固定的月份
                 });
                 widget.config.onDaySelected?.call(selectedDay);
               }
@@ -426,6 +435,10 @@ class EnhancedCalendarWidget extends StatelessWidget {
       dayRadius: 8,
     );
 
-    return EnhancedCalendar(config: config);
+    // 为 EnhancedCalendar 添加独立 key，确保每个月份有独立的状态
+    return EnhancedCalendar(
+      key: ValueKey('calendar_state_${focusedMonth.year}_${focusedMonth.month}'),
+      config: config,
+    );
   }
 }

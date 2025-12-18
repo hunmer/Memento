@@ -130,7 +130,7 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     while (!jsBridge.isSupported && retryCount < 50) {
       await Future.delayed(Duration(milliseconds: 100));
       retryCount++;
-      print('[WebViewPlugin] 等待初始化... (${retryCount}/50)');
+      print('[WebViewPlugin] 等待初始化... ($retryCount/50)');
     }
 
     if (jsBridge.isSupported) {
@@ -581,7 +581,7 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     if (success) {
       debugPrint(
-        '[WebViewPlugin] 本地 HTTP 服务器启动成功: ${localHttpServer.serverUrl} www路径：${rootDir}',
+        '[WebViewPlugin] 本地 HTTP 服务器启动成功: ${localHttpServer.serverUrl} www路径：$rootDir',
       );
     } else {
       debugPrint('[WebViewPlugin] 本地 HTTP 服务器启动失败');
