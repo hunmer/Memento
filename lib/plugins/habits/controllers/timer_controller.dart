@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/services/timer/unified_timer_controller.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
+import 'package:Memento/core/services/timer/events/timer_events.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 
 class HabitTimerEventArgs extends EventArgs {
@@ -30,35 +31,83 @@ class TimerController {
     return _instance ??= TimerController._internal();
   }
 
-  TimerController._internal();
+  TimerController._internal() {
+    // 订阅统一计时器更新事件
+    _setupEventListeners();
+  }
+
+  /// 存储每个习惯的回调函数
+  final Map<String, TimerUpdateCallback> _callbacks = {};
+
+  /// 设置事件监听器
+  void _setupEventListeners() {
+    // 监听统一计时器的更新事件（每秒触发）
+    EventManager.instance.subscribe(TimerEventNames.timerUpdated, _onTimerUpdated);
+  }
+
+  /// 处理计时器更新事件
+  void _onTimerUpdated(EventArgs args) {
+    print('[HabitTimerController] Received event: ${args.runtimeType}');
+    if (args is UnifiedTimerEventArgs) {
+      final state = args.timerState as TimerState;
+      print('[HabitTimerController] Timer update: id=${state.id}, pluginId=${state.pluginId}, elapsed=${state.elapsed.inSeconds}s');
+      // 只处理 habits 插件的计时器
+      if (state.pluginId == 'habits') {
+        final callback = _callbacks[state.id];
+        print('[HabitTimerController] Callback for ${state.id}: ${callback != null ? "found" : "NOT FOUND"}');
+        print('[HabitTimerController] All registered callbacks: ${_callbacks.keys.toList()}');
+        if (callback != null) {
+          callback(state.elapsed.inSeconds);
+        }
+      }
+    }
+  }
 
   /// 启动计时器（委托给统一控制器）
+  ///
+  /// [habit] 习惯对象
+  /// [onUpdate] 每秒更新回调，参数为已过秒数
   void startTimer(
     Habit habit,
-    TimerUpdateCallback onUpdate, {
-    Duration? initialDuration,
-  }) {
-    // 停止旧计时器
-    stopTimer(habit.id);
+    TimerUpdateCallback onUpdate,
+  ) {
+    print('[HabitTimerController] startTimer called for habit: ${habit.id} (${habit.title})');
 
-    // 使用统一计时器控制器启动
+    // 先注册回调，确保能接收到启动后的第一次更新
+    _setupTimerCallback(habit.id, onUpdate);
+    print('[HabitTimerController] Callback registered. All callbacks: ${_callbacks.keys.toList()}');
+
+    // 检查是否已有计时器在运行
+    final existingState = unifiedTimerController.getTimer(habit.id);
+    if (existingState != null) {
+      print('[HabitTimerController] Existing timer found, status: ${existingState.status}');
+      // 已存在计时器，恢复运行即可
+      if (existingState.status == TimerStatus.paused) {
+        unifiedTimerController.resumeTimer(habit.id);
+      }
+      return;
+    }
+
+    print('[HabitTimerController] Starting new timer via UnifiedTimerController');
+    // 使用统一计时器控制器启动新计时器
+    // 注意: targetDuration 应该是习惯的目标时长，不是已过时间
+    final targetDuration = Duration(minutes: habit.durationMinutes);
+    print('[HabitTimerController] targetDuration: $targetDuration');
     unifiedTimerController.startTimer(
       id: habit.id,
       name: habit.title,
       type: TimerType.countUp,
       color: Colors.green,
       icon: Icons.check_circle,
-      targetDuration:
-          initialDuration ?? Duration(minutes: habit.durationMinutes),
+      targetDuration: targetDuration,
       pluginId: 'habits',
     );
-
-    // 设置回调（通过事件监听）
-    _setupTimerCallback(habit.id, onUpdate);
   }
 
   /// 停止计时器（委托给统一控制器）
   void stopTimer(String habitId) {
+    // 移除回调
+    _removeTimerCallback(habitId);
     // 停止统一控制器中的计时器
     unifiedTimerController.stopTimer(habitId);
   }
@@ -135,10 +184,18 @@ class TimerController {
 
   /// 设置计时器回调
   void _setupTimerCallback(String habitId, TimerUpdateCallback callback) {
+    // 注册回调，用于接收每秒的更新
+    _callbacks[habitId] = callback;
+
     // 启动时立即调用一次
     final state = unifiedTimerController.getTimer(habitId);
     if (state != null) {
       callback(state.elapsed.inSeconds);
     }
+  }
+
+  /// 移除计时器回调
+  void _removeTimerCallback(String habitId) {
+    _callbacks.remove(habitId);
   }
 }

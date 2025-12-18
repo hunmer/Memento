@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:Memento/utils/image_utils.dart';
@@ -106,11 +108,7 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
                   color: Colors.black.withOpacity(0.5),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 16,
-                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 16),
               ),
             ),
           ),
@@ -135,14 +133,16 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
                 ),
           );
           if (results != null && results.isNotEmpty) {
-            for (final result in results) {
-              if (result['url'] != null) {
-                widget.onImageAdded(
-                  result['url'] as String,
-                  result['thumbUrl'] as String?,
-                );
+            setState(() {
+              for (final result in results) {
+                if (result['url'] != null) {
+                  widget.onImageAdded(
+                    result['url'] as String,
+                    result['thumbUrl'] as String?,
+                  );
+                }
               }
-            }
+            });
           }
         },
         child: Container(
@@ -153,7 +153,9 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: Colors.grey.shade300,
-              style: BorderStyle.none, // Custom dashed border implementation would be complex here, simplifying with standard border or dashed effect via CustomPainter if needed.
+              style:
+                  BorderStyle
+                      .none, // Custom dashed border implementation would be complex here, simplifying with standard border or dashed effect via CustomPainter if needed.
               // For simplicity and standard Flutter widgets, we'll use a standard border for now or a plugin if strict adherence is needed.
               // Re-reading instruction: "dashed border". Flutter doesn't have a simple dashed border property for Container.
               // I will use a custom painter or just a solid border that looks clean.
@@ -162,11 +164,19 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
             ),
           ),
           child: CustomPaint(
-            painter: _DashedBorderPainter(color: Colors.grey.shade300, strokeWidth: 1.5, radius: 12),
+            painter: _DashedBorderPainter(
+              color: Colors.grey.shade300,
+              strokeWidth: 1.5,
+              radius: 12,
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.add_a_photo_outlined, size: 30, color: Colors.grey.shade400),
+                Icon(
+                  Icons.add_a_photo_outlined,
+                  size: 30,
+                  color: Colors.grey.shade400,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'Add Photos',
@@ -212,27 +222,40 @@ class _DashedBorderPainter extends CustomPainter {
   final double strokeWidth;
   final double radius;
 
-  _DashedBorderPainter({required this.color, required this.strokeWidth, required this.radius});
+  _DashedBorderPainter({
+    required this.color,
+    required this.strokeWidth,
+    required this.radius,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke;
+    final paint =
+        Paint()
+          ..color = color
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke;
 
-    final path = Path()
-      ..addRRect(RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        Radius.circular(radius),
-      ));
+    final path =
+        Path()..addRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(0, 0, size.width, size.height),
+            Radius.circular(radius),
+          ),
+        );
 
-    final dashPath = _dashPath(path, dashArray: CircularIntervalList<double>([5.0, 5.0]));
+    final dashPath = _dashPath(
+      path,
+      dashArray: CircularIntervalList<double>([5.0, 5.0]),
+    );
     canvas.drawPath(dashPath, paint);
   }
-  
+
   // Simple dash path implementation
-  Path _dashPath(Path source, {required CircularIntervalList<double> dashArray}) {
+  Path _dashPath(
+    Path source, {
+    required CircularIntervalList<double> dashArray,
+  }) {
     final Path dest = Path();
     for (final PathMetric metric in source.computeMetrics()) {
       double distance = 0.0;
@@ -240,7 +263,10 @@ class _DashedBorderPainter extends CustomPainter {
       while (distance < metric.length) {
         final double len = dashArray.next;
         if (draw) {
-          dest.addPath(metric.extractPath(distance, distance + len), Offset.zero);
+          dest.addPath(
+            metric.extractPath(distance, distance + len),
+            Offset.zero,
+          );
         }
         distance += len;
         draw = !draw;

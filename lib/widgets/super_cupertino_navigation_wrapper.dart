@@ -318,6 +318,21 @@ class _SuperCupertinoNavigationWrapperState
     return widget.largeTitle.isNotEmpty ? widget.largeTitle : '';
   }
 
+  /// 退出搜索模式
+  void _exitSearchMode() {
+    _searchController.clear();
+    _searchFocusNode.unfocus();
+    setState(() {
+      _isSearchFocused = false;
+      _isTextFieldFocused = false;
+    });
+    // 通知外部搜索已清空
+    widget.onSearchChanged?.call('');
+  }
+
+  /// 检查是否为移动端
+  bool get _isMobile => Platform.isAndroid || Platform.isIOS;
+
   @override
   Widget build(BuildContext context) {
     // 根据搜索状态选择显示哪个body - 使用 setState 保证实时更新
@@ -325,7 +340,15 @@ class _SuperCupertinoNavigationWrapperState
         widget.enableSearchBar && widget.searchBody != null && _isSearchFocused;
     final currentBody = shouldShowSearchBody ? widget.searchBody! : widget.body;
 
-    return Scaffold(
+    // 移动端：搜索模式下拦截返回键
+    return PopScope(
+      canPop: !(_isMobile && _isSearchFocused),
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _isMobile && _isSearchFocused) {
+          _exitSearchMode();
+        }
+      },
+      child: Scaffold(
       backgroundColor:
           widget.backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       body: SuperScaffold(
@@ -365,6 +388,7 @@ class _SuperCupertinoNavigationWrapperState
             Expanded(child: currentBody),
           ],
         ),
+      ),
       ),
     );
   }

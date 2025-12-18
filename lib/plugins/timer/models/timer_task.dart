@@ -129,6 +129,8 @@ class TimerTask {
     if (!isRunning) {
       // 使用统一计时器控制器启动
       _startUnifiedTimer();
+      // 同时启动 TimerItem 的内部计时器，确保事件广播正常
+      _startNextTimer();
     }
   }
 
@@ -275,6 +277,8 @@ class TimerTask {
         _startUnifiedTimer();
       }
       isRunning = true;
+      // 同时恢复 TimerItem 的内部计时器，确保事件广播正常
+      _startNextTimer();
     }
   }
 

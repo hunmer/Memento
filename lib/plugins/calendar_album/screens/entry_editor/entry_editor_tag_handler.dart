@@ -4,19 +4,117 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
 import 'entry_editor_controller.dart';
 
-class EntryEditorTagHandler extends StatelessWidget {
-  final EntryEditorController controller;
-  late final TagController tagController;
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
+import 'entry_editor_controller.dart';
 
-  EntryEditorTagHandler({
+class EntryEditorTagHandler extends StatefulWidget {
+  final EntryEditorController controller;
+
+  const EntryEditorTagHandler({
     super.key,
     required this.controller,
-  }) {
+  });
+
+  @override
+  State<EntryEditorTagHandler> createState() => _EntryEditorTagHandlerState();
+}
+
+class _EntryEditorTagHandlerState extends State<EntryEditorTagHandler> {
+  late final TagController tagController;
+
+  final List<({Color bg, Color text, Color border})> _colorStyles = [
+    (bg: Colors.blue.shade50, text: Colors.blue.shade700, border: Colors.blue.shade100),
+    (bg: Colors.purple.shade50, text: Colors.purple.shade700, border: Colors.purple.shade100),
+    (bg: Colors.orange.shade50, text: Colors.orange.shade800, border: Colors.orange.shade100),
+    (bg: Colors.green.shade50, text: Colors.green.shade800, border: Colors.green.shade100),
+    (bg: Colors.pink.shade50, text: Colors.pink.shade700, border: Colors.pink.shade100),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
     final plugin = PluginManager.instance.getPlugin('calendar_album');
     tagController = (plugin as dynamic).tagController;
-    if (controller.selectedTags.isEmpty && controller.entry != null) {
-      controller.selectedTags = List.from(controller.entry!.tags);
+    if (widget.controller.selectedTags.isEmpty && widget.controller.entry != null) {
+      widget.controller.selectedTags = List.from(widget.controller.entry!.tags);
     }
+  }
+
+  Widget _buildTagChip(String tag, int index) {
+    final style = _colorStyles[index % _colorStyles.length];
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: style.bg,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: style.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '#$tag',
+            style: TextStyle(
+              color: style.text,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                widget.controller.selectedTags.remove(tag);
+              });
+            },
+            child: Icon(
+              Icons.close,
+              size: 14,
+              color: style.text.withOpacity(0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddTagButton() {
+    return GestureDetector(
+      onTap: () async {
+        final result = await tagController.showTagManagerDialog(context);
+        if (result != null && mounted) {
+          setState(() {
+            widget.controller.selectedTags = List.from(result);
+          });
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid), // Simulating dashed with solid light grey for simplicity, or use CustomPaint if strict. The previous image handler used standard border, so consistent here.
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.add, size: 16, color: Colors.grey.shade600),
+            const SizedBox(width: 4),
+            Text(
+              'Add Tag',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -24,90 +122,28 @@ class EntryEditorTagHandler extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextField(
-          decoration: InputDecoration(
-            labelText: 'calendar_album_tags'.tr,
-            hintText: 'calendar_album_tags_hint'.tr,
-            border: const OutlineInputBorder(),
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.label),
-              onPressed: () async {
-                final result = await tagController.showTagManagerDialog(
-                  context,
-                );
-                if (result != null && context.mounted) {
-                  controller.selectedTags = List.from(result);
-                  (context as Element).markNeedsBuild();
-                }
-              },
-              tooltip: 'calendar_album_tag_management'.tr,
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            'TAGS',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade500,
+              letterSpacing: 0.5,
             ),
-          ),
-          readOnly: true,
-          controller: TextEditingController(
-            text: controller.selectedTags.join(', '),
           ),
         ),
-        if (tagController.recentTags.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          const Padding(
-            padding: EdgeInsets.only(left: 4.0, bottom: 4.0),
-            child: Text(
-              '最近使用的标签',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children:
-                tagController.recentTags.map((tag) {
-                  final isSelected = controller.selectedTags.any(
-                    (t) => t == tag,
-                  );
-                  return GestureDetector(
-                    onTap: () {
-                      if (isSelected) {
-                        controller.selectedTags.removeWhere((t) => t == tag);
-                      } else {
-                        controller.selectedTags.add(tag);
-                      }
-                      if (context.mounted) {
-                        (context as Element).markNeedsBuild();
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            isSelected
-                                ? Theme.of(context).primaryColor.withAlpha(50)
-                                : Colors.grey.withAlpha(30),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color:
-                              isSelected
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.transparent,
-                        ),
-                      ),
-                      child: Text(
-                        tag,
-                        style: TextStyle(
-                          color:
-                              isSelected
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.grey[700],
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-          ),
-        ],
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ...widget.controller.selectedTags.asMap().entries.map((entry) {
+              return _buildTagChip(entry.value, entry.key);
+            }),
+            _buildAddTagButton(),
+          ],
+        ),
       ],
     );
   }
