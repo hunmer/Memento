@@ -131,8 +131,7 @@ class _SyncfusionCalendarWidgetState extends State<SyncfusionCalendarWidget> {
     final backgroundImage = dayData?.backgroundImage;
     final count = dayData?.count;
     final isSelected =
-        _selectedDate != null &&
-        _isSameDay(details.date, _selectedDate!);
+        _selectedDate != null && _isSameDay(details.date, _selectedDate!);
     final isToday = _isSameDay(details.date, DateTime.now());
     final isCurrentMonth =
         details.date.month == widget.focusedMonth.month &&
@@ -246,7 +245,10 @@ class _SyncfusionCalendarWidgetState extends State<SyncfusionCalendarWidget> {
                       ),
                     ],
                   ),
-                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
                   child: Center(
                     child: Text(
                       count > 99 ? '99+' : count.toString(),
@@ -317,8 +319,11 @@ class _SyncfusionCalendarWidgetState extends State<SyncfusionCalendarWidget> {
       showNavigationArrow: false,
       showDatePickerButton: false,
       showTodayButton: false,
-      // 禁用触摸滑动
+      // 禁用触摸滑动切换月份
       allowedViews: const [CalendarView.month],
+      // 完全禁用滑动手势
+      minDate: widget.focusedMonth,
+      maxDate: DateTime(widget.focusedMonth.year, widget.focusedMonth.month + 1, 0),
     );
   }
 }
