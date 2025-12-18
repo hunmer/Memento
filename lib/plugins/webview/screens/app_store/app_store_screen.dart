@@ -115,7 +115,7 @@ class _AppStoreScreenState extends State<AppStoreScreen> {
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
-                            childAspectRatio: 1.2,
+                            childAspectRatio: 1.1,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
                           ),
@@ -447,13 +447,14 @@ class _AppStoreScreenState extends State<AppStoreScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       useRootNavigator: false,
-      builder: (sheetContext) => MultiProvider(
-        providers: [
-          ChangeNotifierProvider.value(value: appStoreManager),
-          ChangeNotifierProvider.value(value: downloadManager),
-        ],
-        child: AppDetailSheet(app: app),
-      ),
+      builder:
+          (sheetContext) => MultiProvider(
+            providers: [
+              ChangeNotifierProvider.value(value: appStoreManager),
+              ChangeNotifierProvider.value(value: downloadManager),
+            ],
+            child: AppDetailSheet(app: app),
+          ),
     );
   }
 
@@ -481,7 +482,8 @@ class _AppStoreScreenState extends State<AppStoreScreen> {
   /// 构建应用图标（支持网络图片、emoji文本、默认图标）
   Widget _buildAppIcon(String? icon, {double size = 48}) {
     // 判断是否为网络图片 URL
-    final bool isNetworkImage = icon != null &&
+    final bool isNetworkImage =
+        icon != null &&
         (icon.startsWith('http://') || icon.startsWith('https://'));
 
     return ClipRRect(
@@ -493,29 +495,30 @@ class _AppStoreScreenState extends State<AppStoreScreen> {
           color: isNetworkImage ? null : Colors.grey[300],
           borderRadius: BorderRadius.circular(8),
         ),
-        child: isNetworkImage
-            ? Image.network(
-                icon,
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: size,
-                    height: size,
-                    color: Colors.grey[300],
-                    child: Icon(Icons.apps, size: size / 2),
-                  );
-                },
-              )
-            : icon != null && icon.isNotEmpty
+        child:
+            isNetworkImage
+                ? Image.network(
+                  icon,
+                  width: size,
+                  height: size,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: size,
+                      height: size,
+                      color: Colors.grey[300],
+                      child: Icon(Icons.apps, size: size / 2),
+                    );
+                  },
+                )
+                : icon != null && icon.isNotEmpty
                 ? Center(
-                    child: Text(
-                      icon,
-                      style: TextStyle(fontSize: size * 0.6),
-                      textAlign: TextAlign.center,
-                    ),
-                  )
+                  child: Text(
+                    icon,
+                    style: TextStyle(fontSize: size * 0.6),
+                    textAlign: TextAlign.center,
+                  ),
+                )
                 : Icon(Icons.apps, size: size / 2),
       ),
     );

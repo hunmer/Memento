@@ -650,30 +650,21 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: habitId'});
     }
 
-    // 可选参数
-    final int? initialSeconds = params['initialSeconds'];
-
     // 确保习惯数据已加载完成
     final habits = await _habitController.loadHabits();
     try {
       final habit = habits.firstWhere((h) => h.id == habitId);
 
-      final initialDuration =
-          initialSeconds != null
-              ? Duration(seconds: initialSeconds)
-              : Duration(minutes: habit.durationMinutes);
-
       // 启动计时器（使用空回调，因为 JS API 不需要实时更新）
       _timerController.startTimer(
         habit,
         (elapsedSeconds) {}, // 空回调
-        initialDuration: initialDuration,
       );
 
       return jsonEncode({
         'habitId': habitId,
         'status': 'started',
-        'initialSeconds': initialDuration.inSeconds,
+        'durationMinutes': habit.durationMinutes,
       });
     } catch (e) {
       return jsonEncode({'error': 'Habit not found: $habitId'});

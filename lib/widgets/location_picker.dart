@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -46,11 +45,13 @@ class _LocationPickerState extends State<LocationPicker> {
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _searchResults = [];
   bool _isLoading = false;
-  String? _selectedLocation;
+  // String? _selectedLocation; // No longer needed for single tap select
 
   @override
   void initState() {
     super.initState();
+    // Auto-load current location or recent? maybe not to save data/permissions
+    // _getCurrentLocation();
   }
 
   Future<Position> _getCurrentPosition() async {
@@ -128,8 +129,7 @@ class _LocationPickerState extends State<LocationPicker> {
             for (var poi in regeocode['pois']) {
               pois.add({
                 'name': poi['name'],
-                'address':
-                    poi['address'] ?? 'location_picker_noAddressInfo'.tr,
+                'address': poi['address'] ?? 'location_picker_noAddressInfo'.tr,
                 'location': poi['location'],
                 'isCurrent': false,
               });
@@ -193,88 +193,119 @@ class _LocationPickerState extends State<LocationPicker> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('app_selectLocation'.tr),
-      content: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      labelText: 'location_picker_searchLocation'.tr,
-                      suffixIcon: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.search),
-                            onPressed:
-                                () => _searchLocation(_searchController.text),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.my_location),
-                            onPressed: _getCurrentLocation,
-                            tooltip: 'location_picker_getCurrentLocation'.tr,
-                          ),
-                        ],
-                      ),
-                    ),
-                    onSubmitted: _searchLocation,
-                  ),
-                ),
-              ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 拖拽指示器
+        Center(
+          child: Container(
+            margin: const EdgeInsets.only(top: 12, bottom: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
             ),
-            if (_isLoading)
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
-              ),
-            if (_searchResults.isNotEmpty)
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _searchResults.length,
-                  itemBuilder: (context, index) {
-                    final result = _searchResults[index];
-                    return ListTile(
-                      leading:
-                          result['isCurrent']
-                              ? const Icon(Icons.my_location)
-                              : null,
-                      title: Text(result['name']),
-                      subtitle: Text(result['address']),
-                      selected: _selectedLocation == result['address'],
-                      onTap: () {
-                        setState(() {
-                          _selectedLocation = result['address'];
-                          _searchController.text = result['address'];
-                        });
-                      },
-                    );
-                  },
+          ),
+        ),
+        // 标题栏
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'app_cancel'.tr,
+                  style: const TextStyle(color: Colors.grey, fontSize: 16),
                 ),
               ),
-          ],
+              Text(
+                'app_selectLocation'.tr,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                ),
+              ),
+              const SizedBox(width: 40), // 占位保持标题居中
+            ],
+          ),
         ),
-      ),
-      actions: [
-        TextButton(
-          child: Text('app_cancel'.tr),
-          onPressed: () => Navigator.of(context).pop(),
+        // 搜索框
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'location_picker_searchLocation'.tr,
+              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.my_location, color: Colors.blue),
+                onPressed: _getCurrentLocation,
+                tooltip: 'location_picker_getCurrentLocation'.tr,
+              ),
+              filled: true,
+              fillColor: Colors.grey[100],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+            ),
+            onSubmitted: _searchLocation,
+          ),
         ),
-        TextButton(
-          child: Text('app_ok'.tr),
-          onPressed: () {
-            if (_selectedLocation != null) {
-              widget.onLocationSelected(_selectedLocation!);
-              Navigator.of(context).pop();
-            }
-          },
+        // 内容区域
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.5,
+          child:
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _searchResults.isNotEmpty
+                  ? ListView.separated(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: _searchResults.length,
+                    separatorBuilder:
+                        (context, index) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final result = _searchResults[index];
+                      return ListTile(
+                        leading:
+                            result['isCurrent'] == true
+                                ? const Icon(
+                                  Icons.my_location,
+                                  color: Colors.blue,
+                                )
+                                : const Icon(Icons.place, color: Colors.grey),
+                        title: Text(
+                          result['name'],
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        subtitle: Text(
+                          result['address'],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                        onTap: () {
+                          widget.onLocationSelected(result['address']);
+                          Navigator.of(context).pop();
+                        },
+                      );
+                    },
+                  )
+                  : Center(
+                    child: Text(
+                      '暂无搜索结果',
+                      style: TextStyle(color: Colors.grey[400]),
+                    ),
+                  ),
         ),
       ],
     );

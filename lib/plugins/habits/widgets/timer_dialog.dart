@@ -111,9 +111,9 @@ class _TimerDialogState extends State<TimerDialog> {
                 child: Icon(
                   widget.habit.icon != null
                       ? IconData(
-                          int.parse(widget.habit.icon!),
-                          fontFamily: 'MaterialIcons',
-                        )
+                        int.parse(widget.habit.icon!),
+                        fontFamily: 'MaterialIcons',
+                      )
                       : Icons.auto_stories, // Fallback
                   color: _themeColor,
                   size: 48,
@@ -139,7 +139,8 @@ class _TimerDialogState extends State<TimerDialog> {
                 onTap: _toggleTimerMode,
                 child: Text(
                   _formatDuration(
-                      _isCountdown ? _duration - _elapsed : _elapsed),
+                    _isCountdown ? _duration - _elapsed : _elapsed,
+                  ),
                   style: TextStyle(
                     fontSize: 64,
                     fontWeight: FontWeight.w600,
@@ -198,9 +199,10 @@ class _TimerDialogState extends State<TimerDialog> {
                     child: ElevatedButton(
                       onPressed: _resetTimer,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isDark
-                            ? Colors.white.withOpacity(0.1)
-                            : Colors.grey[200],
+                        backgroundColor:
+                            isDark
+                                ? Colors.white.withOpacity(0.1)
+                                : Colors.grey[200],
                         foregroundColor: subTextColor,
                         elevation: 0,
                         shape: const CircleBorder(),
@@ -231,26 +233,31 @@ class _TimerDialogState extends State<TimerDialog> {
                 decoration: BoxDecoration(
                   color: isDark ? Colors.black26 : Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: isDark
-                      ? null
-                      : [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                  boxShadow:
+                      isDark
+                          ? null
+                          : [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 child: Row(
                   children: [
                     Container(
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.white.withOpacity(0.1)
-                            : Colors.grey[100],
+                        color:
+                            isDark
+                                ? Colors.white.withOpacity(0.1)
+                                : Colors.grey[100],
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(Icons.add, size: 20, color: subTextColor),
@@ -263,7 +270,9 @@ class _TimerDialogState extends State<TimerDialog> {
                           hintText: 'Add a quick note...',
                           hintStyle: TextStyle(color: subTextColor),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                          ),
                         ),
                         style: TextStyle(color: textColor),
                         maxLines: 1,
@@ -285,7 +294,8 @@ class _TimerDialogState extends State<TimerDialog> {
                       child: OutlinedButton(
                         onPressed: () => _cancelTimer(context),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: isDark ? Colors.white70 : Colors.grey[700],
+                          foregroundColor:
+                              isDark ? Colors.white70 : Colors.grey[700],
                           side: BorderSide(
                             color: isDark ? Colors.white24 : Colors.grey[300]!,
                             width: 1.5,
@@ -297,14 +307,19 @@ class _TimerDialogState extends State<TimerDialog> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.cancel_outlined, size: 22, color: isDark ? Colors.white70 : Colors.grey[700]),
+                            Icon(
+                              Icons.cancel_outlined,
+                              size: 22,
+                              color: isDark ? Colors.white70 : Colors.grey[700],
+                            ),
                             const SizedBox(width: 8),
                             Text(
                               'Cancel',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: isDark ? Colors.white70 : Colors.grey[700],
+                                color:
+                                    isDark ? Colors.white70 : Colors.grey[700],
                               ),
                             ),
                           ],
@@ -383,7 +398,7 @@ class _TimerDialogState extends State<TimerDialog> {
               'notes': _notesController.text,
             });
           }
-        }, initialDuration: _elapsed);
+        });
       } else {
         widget.controller.timerController.pauseTimer(widget.habit.id);
         widget.controller.timerController.updateTimerData(widget.habit.id, {
@@ -435,27 +450,26 @@ class _TimerDialogState extends State<TimerDialog> {
   Future<void> _cancelTimer(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('habits_cancelTimer'.tr),
-        content: Text(
-          '确定要取消计时吗？\n'
-          '已计时: ${_formatDuration(_elapsed)}\n\n'
-          '⚠️ 本次计时记录将不会保存',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('habits_continueTimer'.tr),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+      builder:
+          (context) => AlertDialog(
+            title: Text('habits_cancelTimer'.tr),
+            content: Text(
+              '确定要取消计时吗？\n'
+              '已计时: ${_formatDuration(_elapsed)}\n\n'
+              '⚠️ 本次计时记录将不会保存',
             ),
-            child: Text('habits_confirmCancel'.tr),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text('habits_continueTimer'.tr),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: Text('habits_confirmCancel'.tr),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -475,28 +489,27 @@ class _TimerDialogState extends State<TimerDialog> {
   Future<void> _completeTimer(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('habits_completeTimer'.tr),
-        content: Text(
-          '确定要完成计时并保存记录吗？\n'
-          '已计时: ${_formatDuration(_elapsed)}\n'
-          '${_notesController.text.isNotEmpty ? '备注: ${_notesController.text}\n' : ''}\n'
-          '✅ 本次计时将保存到历史记录',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('habits_continueAdjust'.tr),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(
-              foregroundColor: _themeColor,
+      builder:
+          (context) => AlertDialog(
+            title: Text('habits_completeTimer'.tr),
+            content: Text(
+              '确定要完成计时并保存记录吗？\n'
+              '已计时: ${_formatDuration(_elapsed)}\n'
+              '${_notesController.text.isNotEmpty ? '备注: ${_notesController.text}\n' : ''}\n'
+              '✅ 本次计时将保存到历史记录',
             ),
-            child: Text('habits_confirmComplete'.tr),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text('habits_continueAdjust'.tr),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(foregroundColor: _themeColor),
+                child: Text('habits_confirmComplete'.tr),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
