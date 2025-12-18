@@ -274,26 +274,38 @@ class _HomeCardState extends State<HomeCard> {
   }
 
   /// 构建加载中卡片
+  /// 占满小组件的实际尺寸，并带有渐显和加载动画效果
   Widget _buildLoadingCard(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 32,
-            height: 32,
-            child: CircularProgressIndicator(
-              strokeWidth: 3,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                theme.colorScheme.primary.withValues(alpha: 0.6),
+    return SizedBox.expand(
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.cardColor.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 600),
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, opacity, child) {
+              return Opacity(
+                opacity: opacity,
+                child: child,
+              );
+            },
+            child: SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  theme.colorScheme.primary.withValues(alpha: 0.6),
+                ),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

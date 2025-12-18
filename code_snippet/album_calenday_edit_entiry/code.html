@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Create New Post</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#607AFB",
+                        "background-light": "#F2F2F7",
+                        "card-light": "#FFFFFF",
+                        "text-primary-light": "#000000",
+                        "text-secondary-light": "#8E8E93"
+                    },
+                    fontFamily: {
+                        display: "Spline Sans"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem", // 8px
+                        lg: "0.625rem",    // 10px
+                        xl: "0.75rem",     // 12px
+                        '2xl': "1rem",     // 16px
+                        full: "9999px"
+                    }
+                }
+            }
+        };
+    </script>
+<style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light font-display min-h-screen text-text-primary-light antialiased selection:bg-primary selection:text-white transition-colors duration-300">
+<div class="max-w-md mx-auto min-h-screen relative p-4 flex flex-col">
+<header class="flex items-center justify-between mb-6 pt-2 sticky top-0 bg-background-light/95 backdrop-blur-sm z-20 pb-2">
+<button class="text-blue-500 text-[17px] leading-none hover:text-blue-600 transition-colors">Cancel</button>
+<h1 class="text-black font-semibold text-[17px] leading-none">New Post</h1>
+<button class="text-blue-500 text-[17px] font-semibold leading-none hover:text-blue-600 transition-colors">Save</button>
+</header>
+<main class="space-y-5 flex-grow pb-10">
+<div class="flex space-x-3 overflow-x-auto hide-scrollbar pb-1 -mx-4 px-4">
+<button class="flex-shrink-0 w-28 h-36 bg-white border border-gray-300 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 text-gray-400 hover:bg-gray-50 hover:border-primary hover:text-primary transition-all active:scale-95 group">
+<span class="material-symbols-outlined text-3xl group-hover:scale-110 transition-transform">add_a_photo</span>
+<span class="text-xs font-medium">Add Photos</span>
+</button>
+<div class="flex-shrink-0 w-28 h-36 relative rounded-xl overflow-hidden shadow-sm group">
+<img alt="Preview" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTStPXc_6aCzNvWtqVd0vJJKMIVlnzfa9aIuhnkPcwIvITUOVPnyf_TOI6lSPOJzK4oQ_XKlcsKKtj5pEsziyteykWNMmlJY9fYr360O9CrAKxAj9Y1Q-zuJ2dWOqGV4RYkfiwFvh6HMnU1BPSV2fC50pg0XSMR3mseFL0ig--CS-Fcavt52DGelITt5dIQRZHmAYPcg9FJ1mU8EmrP4wOCL_ASxxIu38vQhwdfPrahS5LP0bW6Kfe44e7Jn52EhbnxQiTUlaPOf4"/>
+<button class="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-md">
+<span class="material-symbols-outlined text-[16px] block">close</span>
+</button>
+</div>
+<div class="flex-shrink-0 w-28 h-36 relative rounded-xl overflow-hidden shadow-sm group">
+<img alt="Preview" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzdleTk2B9HSHDm1_7fY8D6IZWPYxaAXqqf2dVvnzXinu4Phg6YOsOwlrEgZXrSP2BW5sDzlnciVjLoXRbXZXVulPoYKTVRUiocmQFpwhoSegywD5ZOI203UWVAjjwR_kYOLpqcjWGPNSBvbgUOeq2Ok_ZE5WwiFmzZM1P6KhmdJumkDHtIuhE_uyYcjuGWArbxo5gC1i6JlX-wVKcpNb67Plmi5vs8cajD-U6tZabiz_Mv4dnvMSP-uXyDFbYeQqO1aSEQkU4LeM"/>
+<button class="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-md">
+<span class="material-symbols-outlined text-[16px] block">close</span>
+</button>
+</div>
+</div>
+<div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
+<div class="border-b border-gray-100 flex items-center pl-3 pr-2 py-2">
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors flex-shrink-0">
+<span class="material-symbols-outlined text-[20px] fill-1">sentiment_satisfied</span>
+<span class="text-[15px] font-medium">Excited</span>
+</button>
+<input class="w-full bg-transparent border-none text-black focus:ring-0 px-3 py-1.5 text-[17px] font-semibold placeholder-gray-400 h-full" placeholder="Title" type="text"/>
+</div>
+<div>
+<textarea class="w-full bg-transparent border-none text-black focus:ring-0 px-4 py-3 text-[16px] min-h-[160px] resize-none placeholder-gray-400 leading-relaxed" placeholder="What's on your mind?"></textarea>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-semibold text-gray-500 uppercase tracking-wide ml-1">Tags</label>
+<div class="flex flex-wrap gap-2">
+<span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-50 text-blue-600 border border-blue-100">
+                        #Travel
+                        <button class="ml-1.5 hover:text-blue-800"><span class="material-symbols-outlined text-[14px] align-middle">close</span></button>
+</span>
+<span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-purple-50 text-purple-600 border border-purple-100">
+                        #Venice
+                        <button class="ml-1.5 hover:text-purple-800"><span class="material-symbols-outlined text-[14px] align-middle">close</span></button>
+</span>
+<button class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-white text-gray-500 border border-gray-200 border-dashed hover:border-gray-300 hover:text-gray-700 hover:bg-gray-50 transition-colors">
+<span class="material-symbols-outlined text-[16px] mr-1">add</span> Add Tag
+                    </button>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex flex-col items-start gap-3 active:scale-[0.98] transition-all group h-full">
+<div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-red-500 group-hover:bg-red-100 transition-colors">
+<span class="material-symbols-outlined text-[22px]">location_on</span>
+</div>
+<div class="text-left w-full">
+<div class="text-[13px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Location</div>
+<div class="text-[15px] font-medium text-black group-hover:text-primary transition-colors truncate">Venice, Italy</div>
+</div>
+</button>
+<button class="bg-white rounded-xl p-4 shadow-sm border border-gray-200 flex flex-col items-start gap-3 active:scale-[0.98] transition-all group h-full">
+<div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-100 transition-colors">
+<span class="material-symbols-outlined text-[22px]">sunny</span>
+</div>
+<div class="text-left w-full">
+<div class="text-[13px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Weather</div>
+<div class="text-[15px] font-medium text-black group-hover:text-primary transition-colors">Sunny, 24°C</div>
+</div>
+</button>
+</div>
+</main>
+</div>
+
+</body></html>

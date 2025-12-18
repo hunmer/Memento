@@ -344,9 +344,9 @@ class _ImagePickerDialogState extends State<ImagePickerDialog> {
                             debugPrint('准备返回结果，results数量: ${results.length}');
                             if (context.mounted) {
                               debugPrint('上下文已挂载，关闭对话框');
-                              // 单张图片时返回单个结果，与相册选择一致
-                              final result = results.first;
-                              debugPrint('返回单个结果: ${result.keys}');
+                              // 与相册选择保持一致：multiple=true 返回数组，否则返回单个对象
+                              final result = widget.multiple ? results : results.first;
+                              debugPrint('返回结果，类型: ${widget.multiple ? "多张" : "单张"}');
                               Navigator.of(context).pop(result);
                             } else {
                               debugPrint('警告: 上下文未挂载，无法关闭对话框');
