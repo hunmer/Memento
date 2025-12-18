@@ -83,7 +83,7 @@ class AppStoreManager extends ChangeNotifier {
       url:
           'https://gitee.com/neysummer2000/memento/raw/master/mini_apps_store/apps.json',
       baseUrl:
-          'https://gitee.com/neysummer2000/memento/raw/master/mini_apps_store0',
+          'https://gitee.com/neysummer2000/memento/raw/master/mini_apps_store',
       isDefault: true,
       createdAt: DateTime.now(),
     );
