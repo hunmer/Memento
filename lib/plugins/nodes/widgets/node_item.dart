@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:get/get.dart' hide Node;
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -169,111 +170,125 @@ class NodeItem extends StatelessWidget {
               }
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Status Bar
-                    Container(
-                      width: 4,
-                      decoration: BoxDecoration(
-                        color: statusInfo.color,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Status Bar
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: statusInfo.color,
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    const SizedBox(width: 12),
-                    // Content
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Header: Title + Icon + Badge
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        node.title,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: isDark ? Colors.grey.shade50 : Colors.grey.shade900,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(width: 12),
+                  // Content
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Header: Title + Icon + Badge
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      node.title,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color:
+                                            isDark
+                                                ? Colors.grey.shade50
+                                                : Colors.grey.shade900,
                                       ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    if (node.children.isNotEmpty) ...[
-                                      const SizedBox(width: 4),
-                                      Icon(
-                                        node.isExpanded
-                                            ? Icons.expand_more
-                                            : Icons.chevron_right,
-                                        size: 20,
-                                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-                                      ),
-                                    ],
+                                  ),
+                                  if (node.children.isNotEmpty) ...[
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      node.isExpanded
+                                          ? Icons.expand_more
+                                          : Icons.chevron_right,
+                                      size: 20,
+                                      color:
+                                          isDark
+                                              ? Colors.grey.shade400
+                                              : Colors.grey.shade500,
+                                    ),
                                   ],
-                                ),
+                                ],
                               ),
-                              if (node.status != NodeStatus.none) ...[
-                                const SizedBox(width: 8),
-                                _buildStatusBadge(context, node.status),
-                              ],
+                            ),
+                            if (node.status != NodeStatus.none) ...[
+                              const SizedBox(width: 8),
+                              _buildStatusBadge(context, node.status),
                             ],
-                          ),
-                          
-                          // Tags
-                          if (node.tags.isNotEmpty) ...[
-                            const SizedBox(height: 6),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 4,
-                              children: node.tags.map((tag) {
-                                return Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isDark ? Colors.grey.shade800.withOpacity(0.5) : Colors.grey.shade200.withOpacity(0.7),
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: Text(
-                                    tag,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
                           ],
+                        ),
 
-                          // Notes (Description)
-                          if (node.notes.isNotEmpty) ...[
-                            const SizedBox(height: 6),
-                            Container(
-                              height: 36,
-                              padding: const EdgeInsets.only(right: 8),
-                              child: ClipRect(
-                                child: QuillViewer(
-                                  data: node.notes,
-                                  selectable: false,
-                                ),
+                        // Tags
+                        if (node.tags.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children:
+                                node.tags.map((tag) {
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          isDark
+                                              ? Colors.grey.shade800
+                                                  .withOpacity(0.5)
+                                              : Colors.grey.shade200
+                                                  .withOpacity(0.7),
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      tag,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color:
+                                            isDark
+                                                ? Colors.grey.shade300
+                                                : Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                          ),
+                        ],
+
+                        // Notes (Description)
+                        if (node.notes.isNotEmpty && _hasActualContent(node.notes)) ...[
+                          const SizedBox(height: 6),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ClipRect(
+                              child: QuillViewer(
+                                data: node.notes,
+                                selectable: false,
                               ),
                             ),
-                          ],
+                          ),
                         ],
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -529,5 +544,23 @@ class NodeItem extends StatelessWidget {
             ],
           ),
     );
+  }
+
+  bool _hasActualContent(String notes) {
+    try {
+      final List<dynamic> delta = json.decode(notes);
+      for (var item in delta) {
+        if (item is Map<String, dynamic> && item.containsKey('insert')) {
+          final insert = item['insert'].toString();
+          if (insert.trim().isNotEmpty) {
+            return true;
+          }
+        }
+      }
+      return false;
+    } catch (e) {
+      // 如果解析失败，回退到简单判断
+      return notes.trim().isNotEmpty;
+    }
   }
 }
