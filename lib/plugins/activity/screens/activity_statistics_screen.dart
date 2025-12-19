@@ -23,15 +23,33 @@ Future<StatisticsData> loadStatisticsData(
   ) {
     final dailyActivities = await activityService.getActivitiesForDate(date);
     for (var activity in dailyActivities) {
-      allActivities.add({
-        'title': activity.title,
-        'startTime': activity.startTime.toIso8601String(),
-        'endTime': activity.endTime.toIso8601String(),
-        'duration': activity.durationInMinutes.toDouble(),
-        'tags': activity.tags,
-        'description': activity.description ?? '',
-        'mood': activity.mood ?? '',
-      });
+      // 如果活动有标签，为每个标签创建一条记录用于统计
+      if (activity.tags.isNotEmpty) {
+        // 将时长平分到每个标签
+        final durationPerTag = activity.durationInMinutes.toDouble() / activity.tags.length;
+        for (var tag in activity.tags) {
+          allActivities.add({
+            'title': activity.title,
+            'startTime': activity.startTime.toIso8601String(),
+            'endTime': activity.endTime.toIso8601String(),
+            'duration': durationPerTag, // 平分后的时长
+            'tags': tag, // 单个标签字符串
+            'description': activity.description ?? '',
+            'mood': activity.mood ?? '',
+          });
+        }
+      } else {
+        // 如果活动没有标签，创建一条记录标记为"未分类"
+        allActivities.add({
+          'title': activity.title,
+          'startTime': activity.startTime.toIso8601String(),
+          'endTime': activity.endTime.toIso8601String(),
+          'duration': activity.durationInMinutes.toDouble(),
+          'tags': '未分类',
+          'description': activity.description ?? '',
+          'mood': activity.mood ?? '',
+        });
+      }
     }
   }
 
@@ -58,14 +76,15 @@ Future<StatisticsData> loadStatisticsData(
     ],
   );
 
-  // 计算排行榜数据
-  final rankingData = StatisticsCalculator.calculateRanking(
-    allActivities,
-    labelField: 'tags',
-    valueField: 'duration',
-  );
+  // 基于已聚合的分布数据生成排行榜数据
+  final rankingData = coloredDistributionData.map((item) => RankingData(
+    label: item.label,
+    value: item.value,
+    color: item.color,
+    icon: item.icon,
+  )).toList();
 
-  // 为排行榜数据分配颜色
+  // 为排行榜数据分配颜色和排序
   final coloredRankingData = StatisticsCalculator.assignColorsToRanking(
     rankingData,
     const [
