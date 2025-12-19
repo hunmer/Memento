@@ -51,6 +51,10 @@ class ChannelsView extends StatelessWidget {
       ),
       builder: (context, snapshot) {
         final messageItems = snapshot.data ?? [];
+        final messageIndexMap = <String, int>{};
+        for (var i = 0; i < controller.messages.length; i++) {
+          messageIndexMap[controller.messages[i].id] = i;
+        }
 
         return Column(
           children: [
@@ -74,6 +78,7 @@ class ChannelsView extends StatelessWidget {
                 currentUserId: currentUserId,
                 highlightedMessage: highlightedMessage,
                 shouldHighlight: shouldHighlight,
+                messageIndexMap: messageIndexMap,
               ),
             ),
             MessageInput(

@@ -41,6 +41,8 @@ class _TagsScreenState extends State<TagsScreen> {
   Future<void> _loadTags() async {
     setState(() => _isLoading = true);
     try {
+      // 清除缓存，确保获取最新的标签数据
+      widget.chatPlugin.tagService.invalidateCache();
       final tags = await widget.chatPlugin.tagService.getAllTags();
       if (mounted) {
         setState(() {

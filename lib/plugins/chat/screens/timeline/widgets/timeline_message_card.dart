@@ -14,6 +14,8 @@ import 'package:Memento/plugins/chat/services/settings_service.dart';
 import 'package:Memento/plugins/chat/screens/timeline/utils/text_highlight.dart';
 import 'package:Memento/plugins/chat/screens/timeline/controllers/timeline_controller.dart';
 import 'package:Memento/plugins/chat/utils/message_options_handler.dart';
+import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 
 /// Timeline 中显示的消息卡片组件
 class TimelineMessageCard extends StatelessWidget {
@@ -62,16 +64,20 @@ class TimelineMessageCard extends StatelessWidget {
           );
         },
         onTap: () async {
+          // 设置当前活跃频道，这是关键步骤！
+          ChatPlugin.instance.channelService.setCurrentChannel(channel);
+
           // 导航到频道页面并定位到消息
-          await Navigator.pushNamed(
-            context,
-            '/channel/${channel.id}',
-            arguments: {
-              'channel': channel,
-              'initialMessage': message, // 用于初始滚动定位
-              'highlightMessage': message, // 用于高亮显示
-              'autoScroll': true, // 明确指示需要自动滚动
-            },
+          // 使用 MaterialPageRoute 直接构建 ChatScreen 页面
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ChatScreen(
+                channel: channel,
+                initialMessage: message, // 用于初始滚动定位
+                highlightMessage: message, // 用于高亮显示
+                autoScroll: true, // 明确指示需要自动滚动
+              ),
+            ),
           );
         },
         child: Padding(

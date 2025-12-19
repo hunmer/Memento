@@ -424,6 +424,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   builder: (context, snapshot) {
                     final messageItems = snapshot.data ?? [];
+                    final messageIndexMap = <String, int>{};
+                    for (var i = 0; i < _controller.messages.length; i++) {
+                      messageIndexMap[_controller.messages[i].id] = i;
+                    }
 
                     // 根据是否有背景图片决定内容层Scaffold的背景颜色
                     return Scaffold(
@@ -539,6 +543,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                       .id,
                               highlightedMessage: widget.highlightMessage,
                               shouldHighlight: widget.highlightMessage != null,
+                              messageIndexMap: messageIndexMap,
                               onAvatarTap: (message) async {
                                 // 检查是否为AI消息
                                 final metadata = message.metadata;
