@@ -260,6 +260,7 @@ class _MessageInputState extends State<MessageInput> {
                           actions: MessageInputActionsBuilder.getDefaultActions(
                             context,
                             onFileSelected: _handleFileSelected,
+                            onSendMessage: widget.onSendMessage,
                             textController: widget.controller,
                           ),
                           onFileSelected: _handleFileSelected,

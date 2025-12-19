@@ -12,6 +12,7 @@ import 'package:uuid/uuid.dart';
 class ContactForm extends StatefulWidget {
   final Contact? contact;
   final Function(Contact) onSave;
+  final Function()? onDelete;
   final ContactController controller;
   final GlobalKey<ContactFormState>? formStateKey;
 
@@ -19,6 +20,7 @@ class ContactForm extends StatefulWidget {
     super.key,
     this.contact,
     required this.onSave,
+    this.onDelete,
     required this.controller,
     this.formStateKey,
   });
@@ -198,6 +200,12 @@ class ContactFormState extends State<ContactForm> {
           isEditing ? 'contact_editContact'.tr : 'contact_addContact'.tr,
         ),
         actions: [
+          if (isEditing) ...[
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () => _showDeleteConfirmation(context),
+            ),
+          ],
           TextButton(
             onPressed: _handleSave,
             child: Text(
@@ -262,6 +270,44 @@ class ContactFormState extends State<ContactForm> {
     if (mounted) {
       Navigator.of(context).pop();
     }
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    final contact = widget.contact;
+    if (contact == null) return;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          title: const Text('确认删除'),
+          content: Text('确定要删除联系人 "${contact.name}" 吗？\n此操作不可撤销。'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                // 调用 onDelete 回调，由父组件处理删除逻辑
+                widget.onDelete?.call();
+                // 延迟等待删除完成后导航返回
+                await Future.delayed(const Duration(milliseconds: 100));
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: const Text('删除'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildAvatarSection() {

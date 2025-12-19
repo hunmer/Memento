@@ -886,6 +886,12 @@ class ContactMainViewState extends State<ContactMainView> {
             ToastService.instance.showToast('contact_saveFailedMessage'.tr);
           }
         },
+        onDelete: () async {
+          // 删除联系人，导航由 ContactForm 处理
+          if (contact != null) {
+            await _controller.deleteContact(contact.id);
+          }
+        },
       ),
     );
   }

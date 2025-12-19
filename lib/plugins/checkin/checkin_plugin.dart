@@ -164,7 +164,6 @@ class _CheckinMainViewState extends State<CheckinMainView>
                         builder: (BuildContext context, StateSetter setState) {
                           final listController = CheckinListController(
                             context: context,
-                            checkinItems: CheckinPlugin.instance.checkinItems,
                             onStateChanged: () {
                               setState(() {});
                               CheckinPlugin.instance.triggerSave();
@@ -323,7 +322,10 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
     // 从 UseCase 加载保存的打卡项目
     final itemsResult = await _checkinUseCase.getItems({});
     if (itemsResult.isSuccess) {
-      final items = itemsResult.dataOrNull as List<CheckinItemDto>;
+      final jsonList = itemsResult.dataOrNull as List<dynamic>;
+      final items = jsonList
+          .map((json) => CheckinItemDto.fromJson(json as Map<String, dynamic>))
+          .toList();
       _checkinItems = items
           .map((dto) => _dtoToCheckinItem(dto))
           .toList();
@@ -507,7 +509,10 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
     // 重新从 UseCase 加载数据
     final itemsResult = await _checkinUseCase.getItems({});
     if (itemsResult.isSuccess) {
-      final items = itemsResult.dataOrNull as List<CheckinItemDto>;
+      final jsonList = itemsResult.dataOrNull as List<dynamic>;
+      final items = jsonList
+          .map((json) => CheckinItemDto.fromJson(json as Map<String, dynamic>))
+          .toList();
       _checkinItems = items.map((dto) => _dtoToCheckinItem(dto)).toList();
     }
     // 同步到小组件
@@ -767,7 +772,10 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
         return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
       }
 
-      final items = result.dataOrNull as List<CheckinItemDto>;
+      final jsonDataList = result.dataOrNull as List<dynamic>;
+      final items = jsonDataList
+          .map((json) => CheckinItemDto.fromJson(json as Map<String, dynamic>))
+          .toList();
 
       // 转换为前端需要的格式
       final jsonList = items.map((dto) {
@@ -859,7 +867,8 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
         return jsonEncode({'error': '签到项目不存在: $itemId'});
       }
 
-      final itemDto = itemResult.dataOrNull as CheckinItemDto;
+      final json = itemResult.dataOrNull as Map<String, dynamic>;
+      final itemDto = CheckinItemDto.fromJson(json);
       final item = _dtoToCheckinItem(itemDto);
 
       // 可选参数
@@ -945,7 +954,9 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
           return jsonEncode({'error': '签到项目不存在: $itemId'});
         }
 
-        final item = _dtoToCheckinItem(itemResult.dataOrNull as CheckinItemDto);
+        final json = itemResult.dataOrNull as Map<String, dynamic>;
+        final itemDto = CheckinItemDto.fromJson(json);
+        final item = _dtoToCheckinItem(itemDto);
 
         return jsonEncode({
           'itemId': itemId,
@@ -1012,7 +1023,9 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
       // 更新本地列表
       await _saveCheckinItems();
 
-      final item = _dtoToCheckinItem(result.dataOrNull as CheckinItemDto);
+      final json = result.dataOrNull as Map<String, dynamic>;
+      final itemDto = CheckinItemDto.fromJson(json);
+      final item = _dtoToCheckinItem(itemDto);
 
       return jsonEncode({
         'success': true,

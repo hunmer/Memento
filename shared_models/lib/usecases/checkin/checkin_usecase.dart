@@ -45,7 +45,7 @@ class CheckinUseCase {
 
       final result = await repository.getItems(pagination: pagination);
 
-      return result.map((items) {
+      return result.map<dynamic>((items) {
         final jsonList = items.map((i) => i.toJson()).toList();
 
         if (pagination != null && pagination.hasPagination) {
@@ -73,7 +73,7 @@ class CheckinUseCase {
 
     try {
       final result = await repository.getItemById(id);
-      return result.map((i) => i?.toJson());
+      return result.map<Map<String, dynamic>?>((i) => i?.toJson());
     } catch (e) {
       return Result.failure('获取打卡项目失败: $e', code: ErrorCodes.serverError);
     }
@@ -127,7 +127,7 @@ class CheckinUseCase {
       );
 
       final result = await repository.createItem(item);
-      return result.map((i) => i.toJson());
+      return result.map<Map<String, dynamic>>((i) => i.toJson());
     } catch (e) {
       return Result.failure('创建打卡项目失败: $e', code: ErrorCodes.serverError);
     }
@@ -187,7 +187,7 @@ class CheckinUseCase {
       );
 
       final result = await repository.updateItem(id, updated);
-      return result.map((i) => i.toJson());
+      return result.map<Map<String, dynamic>>((i) => i.toJson());
     } catch (e) {
       return Result.failure('更新打卡项目失败: $e', code: ErrorCodes.serverError);
     }
@@ -206,7 +206,7 @@ class CheckinUseCase {
 
     try {
       final result = await repository.deleteItem(id);
-      return result.map((success) => {
+      return result.map<Map<String, dynamic>>((success) => {
             'deleted': success,
             'id': id,
           });
@@ -282,7 +282,7 @@ class CheckinUseCase {
         params['itemId'] as String,
         record,
       );
-      return result.map((i) => i.toJson());
+      return result.map<Map<String, dynamic>>((i) => i.toJson());
     } catch (e) {
       return Result.failure('添加打卡记录失败: $e', code: ErrorCodes.serverError);
     }
@@ -317,7 +317,7 @@ class CheckinUseCase {
         date,
         recordIndex,
       );
-      return result.map((i) => i.toJson());
+      return result.map<Map<String, dynamic>>((i) => i.toJson());
     } catch (e) {
       return Result.failure('删除打卡记录失败: $e', code: ErrorCodes.serverError);
     }
@@ -330,7 +330,7 @@ class CheckinUseCase {
       Map<String, dynamic> params) async {
     try {
       final result = await repository.getStats();
-      return result.map((stats) => stats.toJson());
+      return result.map<Map<String, dynamic>>((stats) => stats.toJson());
     } catch (e) {
       return Result.failure('获取统计信息失败: $e', code: ErrorCodes.serverError);
     }
