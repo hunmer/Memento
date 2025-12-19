@@ -7,12 +7,14 @@ import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/event_args.dart' as event_args;
 import 'package:Memento/core/event/item_event_args.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'services/script_loader.dart';
 import 'services/script_manager.dart';
 import 'services/script_executor.dart';
 import 'models/script_folder.dart';
 import 'screens/scripts_list_screen.dart';
+import 'screens/script_edit_screen.dart';
 import 'package:get/get.dart';
 
 /// 深度序列化对象为 JSON 兼容的 Map/List/基本类型（异步版本）
@@ -418,6 +420,7 @@ class ScriptsCenterMainView extends StatefulWidget {
 
 class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
   late ScriptsCenterPlugin _plugin;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -427,15 +430,50 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
             as ScriptsCenterPlugin;
   }
 
+  void _setSearchQuery(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
       title: Text('scripts_center_scriptCenter'.tr),
+      largeTitle: 'scripts_center_scriptCenter'.tr,
+      enableLargeTitle: true,
+      enableSearchBar: true,
+      searchPlaceholder: 'scripts_center_search'.tr,
+      onSearchChanged: _setSearchQuery,
+      onSearchSubmitted: _setSearchQuery,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add_circle_outline, size: 24),
+          tooltip: 'scripts_center_newScript'.tr,
+          onPressed: () => _showCreateScriptDialog(context),
+        ),
+      ],
       body: ScriptsListScreen(
         scriptManager: _plugin.scriptManager,
         scriptExecutor: _plugin.scriptExecutor,
+        searchQuery: _searchQuery,
       ),
     );
+  }
+
+  Future<void> _showCreateScriptDialog(BuildContext context) async {
+    final result = await NavigationHelper.push<Map<String, dynamic>>(
+      context,
+      ScriptEditScreen(
+        script: null,
+        scriptManager: _plugin.scriptManager,
+      ),
+    );
+
+    if (result != null && result['success'] == true) {
+      // 刷新列表
+      await _plugin.scriptManager.loadScripts();
+    }
   }
 }

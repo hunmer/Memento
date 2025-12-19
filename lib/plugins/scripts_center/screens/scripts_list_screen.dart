@@ -17,11 +17,13 @@ import 'script_edit_screen.dart';
 class ScriptsListScreen extends StatefulWidget {
   final ScriptManager scriptManager;
   final ScriptExecutor? scriptExecutor;
+  final String? searchQuery;
 
   const ScriptsListScreen({
     super.key,
     required this.scriptManager,
     this.scriptExecutor,
+    this.searchQuery,
   });
 
   @override
@@ -36,11 +38,22 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
   @override
   void initState() {
     super.initState();
+    _searchQuery = widget.searchQuery ?? '';
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text;
       });
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant ScriptsListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.searchQuery != oldWidget.searchQuery) {
+      setState(() {
+        _searchQuery = widget.searchQuery ?? '';
+      });
+    }
   }
 
   @override
