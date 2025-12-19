@@ -1,6 +1,7 @@
 import 'package:Memento/plugins/chat/screens/channel_list/channel_list_screen.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/screens/timeline/timeline_screen.dart';
+import 'package:Memento/plugins/chat/screens/tags/tags_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -32,9 +33,11 @@ class _ChatBottomBarState extends State<ChatBottomBar>
   List<Color> _getColors(BuildContext context) {
     final Color pluginColor = widget.plugin.color;
     final Color secondaryColor = Theme.of(context).colorScheme.secondary;
+    final Color tertiaryColor = Theme.of(context).colorScheme.tertiary;
     return [
       pluginColor, // Tab0 - 频道列表 (插件主色)
       secondaryColor, // Tab1 - 时间线
+      tertiaryColor, // Tab2 - 标签
     ];
   }
 
@@ -42,7 +45,7 @@ class _ChatBottomBarState extends State<ChatBottomBar>
   void initState() {
     super.initState();
     _currentPage = 0;
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _channelListController = ChannelListController(
       channels: widget.plugin.channelService.channels,
       chatPlugin: widget.plugin,
@@ -206,6 +209,8 @@ class _ChatBottomBarState extends State<ChatBottomBar>
                       ),
                       // Tab1: 时间线
                       TimelineScreen(chatPlugin: widget.plugin),
+                      // Tab2: 标签
+                      TagsScreen(chatPlugin: widget.plugin),
                     ],
                   ),
                 ),
@@ -245,6 +250,10 @@ class _ChatBottomBarState extends State<ChatBottomBar>
               Tab(
                 icon: const Icon(Icons.timeline),
                 text: 'chat_timelineTab'.tr,
+              ),
+              Tab(
+                icon: const Icon(Icons.tag),
+                text: 'chat_tagsTab'.tr,
               ),
             ],
           ),
