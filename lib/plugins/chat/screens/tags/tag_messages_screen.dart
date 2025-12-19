@@ -69,6 +69,9 @@ class _TagMessagesScreenState extends State<TagMessagesScreen> {
         (c) => c.id == message.channelId,
       );
 
+      // 设置当前活跃频道，这是关键步骤！
+      widget.chatPlugin.channelService.setCurrentChannel(channel);
+
       // 导航到聊天页面并高亮消息
       // 使用 initialMessage 和 autoScroll 来定位到消息
       Navigator.of(context).push(

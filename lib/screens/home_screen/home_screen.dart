@@ -53,6 +53,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   static bool _hasInitialized = false;
   // 是否正在打开插件
   bool _isOpeningPlugin = false;
+  // 是否已经尝试过打开插件（无论成功与否）
+  bool _triedToOpenPlugin = false;
 
   // 当前布局名称
   String _currentLayoutName = '';
@@ -94,9 +96,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         // 显示悬浮球（如果启用的话）
         FloatingBallService().show(context);
         // 首次加载时打开最后使用的插件（仅在无参数启动且插件已加载时）
-        if (!_hasInitialized && !_launchedWithParameters) {
+        if (!_triedToOpenPlugin && !_launchedWithParameters) {
           _tryOpenLastUsedPlugin();
-          _hasInitialized = true;
         }
       }
     });
@@ -104,10 +105,18 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   /// 尝试打开最后使用的插件（等待插件加载完成）
   void _tryOpenLastUsedPlugin() {
+    _triedToOpenPlugin = true;  // 标记为已尝试
+
     if (AppStartupState.instance.pluginsReady) {
       _openLastUsedPlugin();
+    } else {
+      // 如果插件还没加载完，会通过 _onStartupStateChanged 监听器处理
     }
-    // 如果插件还没加载完，会通过 _onStartupStateChanged 监听器处理
+  }
+
+  /// 标记为已初始化
+  void _markInitialized() {
+    _hasInitialized = true;
   }
 
   /// 启动状态变化回调
@@ -118,9 +127,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       // 当插件加载完成时，尝试打开最后使用的插件
       if (AppStartupState.instance.pluginsReady &&
           !_hasInitialized &&
-          !_launchedWithParameters) {
+          !_launchedWithParameters &&
+          _triedToOpenPlugin) {
         _openLastUsedPlugin();
-        _hasInitialized = true;
       }
     }
   }
@@ -362,8 +371,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     // 可以在这里添加更多的参数检测逻辑
     // 例如：检查是否通过 Intent、URI Scheme 等方式启动
     // 目前主要检查路由参数，后续可根据需要扩展
-
-    debugPrint('应用正常启动，无启动参数');
   }
 
   /// 打开最后使用的插件
@@ -372,22 +379,26 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     if (_isOpeningPlugin) {
       return;
     }
+
     _isOpeningPlugin = true;
 
     // 检查是否启用了自动打开功能
     if (!globalPluginManager.autoOpenLastPlugin) {
+      _markInitialized();
+      _isOpeningPlugin = false;
       return;
     }
 
     // 检查是否通过参数启动
     if (_launchedWithParameters) {
-      debugPrint('应用通过参数启动，跳过自动打开最后插件');
+      _markInitialized();
       _isOpeningPlugin = false;
       return;
     }
 
     // 获取最后一次使用的插件
     final lastPlugin = globalPluginManager.getLastOpenedPlugin();
+
     if (lastPlugin != null) {
       // 使用延迟确保不会与初始动画冲突
       await Future.delayed(const Duration(milliseconds: 100));
@@ -395,6 +406,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         globalPluginManager.openPlugin(context, lastPlugin);
       }
     }
+
+    // 无论是否打开插件，都标记为已初始化
+    _markInitialized();
     _isOpeningPlugin = false;
   }
 

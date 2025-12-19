@@ -259,6 +259,10 @@ class _ChatBottomBarState extends State<ChatBottomBar>
           ),
           Positioned(
             top: -25,
+            right:
+                MediaQuery.of(context).size.width *
+                0.15 *
+                0.25, // 向右偏移底部栏宽度的1/4
             child:
                 _currentPage == 0
                     ? _buildCreateChannelFAB()

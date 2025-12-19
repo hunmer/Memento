@@ -43,7 +43,7 @@ class TagCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      '#${tag.name}',
+                      tag.name,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
