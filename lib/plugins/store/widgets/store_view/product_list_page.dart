@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 /// 商品列表内容组件（不包含 Scaffold，用于 TabBarView）
 class ProductListContent extends StatefulWidget {
@@ -53,14 +54,11 @@ class _ProductListContentState extends State<ProductListContent> {
       );
     }
 
-    return GridView.builder(
+    return MasonryGridView.count(
       padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.6,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
+      crossAxisCount: 2,
+      crossAxisSpacing: 8,
+      mainAxisSpacing: 8,
       itemCount: uniqueProducts.length,
       itemBuilder: (context, index) {
         final product = uniqueProducts[index];

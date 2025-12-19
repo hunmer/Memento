@@ -7,6 +7,7 @@ import 'package:Memento/plugins/store/widgets/product_card.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class ProductList extends StatefulWidget {
   final StoreController controller;
@@ -98,14 +99,11 @@ class _ProductListState extends State<ProductList> {
                 ],
               ),
             )
-          : GridView.builder(
+          : MasonryGridView.count(
               padding: const EdgeInsets.all(8),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.82,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
               itemCount: products.length,
               itemBuilder: (context, index) {
                 final product = products[index];

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 /// 我的物品内容组件（不包含 Scaffold，用于 TabBarView）
 class UserItemsContent extends StatefulWidget {
@@ -68,14 +69,11 @@ class _UserItemsContentState extends State<UserItemsContent> {
       );
     }
 
-    return GridView.builder(
+    return MasonryGridView.count(
       padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 1.6,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
+      crossAxisCount: 2,
+      crossAxisSpacing: 8,
+      mainAxisSpacing: 8,
       itemCount: groupedItems.length,
       itemBuilder: (context, index) {
         final group = groupedItems[index];
