@@ -59,17 +59,21 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     
     _activityController = ActivityController(
       activityService: _activityService,
-      onActivitiesChanged: () => setState(() {}),
+      onActivitiesChanged: () {
+        if (mounted) setState(() {});
+      },
     );
-    
+
     _tagController = TagController(
       activityService: _activityService,
-      onTagsChanged: () => setState(() {}),
+      onTagsChanged: () {
+        if (mounted) setState(() {});
+      },
     );
-    
+
     _viewModeController = ViewModeController();
     _viewModeController.addListener(() {
-      setState(() {});
+      if (mounted) setState(() {});
     });
 
     await _tagController.initialize();
@@ -102,7 +106,9 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     if (!_isInitialized) {
       // 如果还没初始化完成，延迟处理
       Future.delayed(const Duration(milliseconds: 500), () {
-        _showActivityFormFromNotification();
+        if (mounted) {
+          _showActivityFormFromNotification();
+        }
       });
     } else {
       _showActivityFormFromNotification();

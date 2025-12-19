@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/widgets/statistics/models/statistics_models.dart';
 import 'date_range_selector.dart';
@@ -32,6 +33,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   );
   StatisticsData? _data;
   bool _isLoading = false;
+  bool _isFirstLoad = true; // 追踪是否首次加载
 
   @override
   void initState() {
@@ -41,8 +43,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Future<void> _loadData() async {
+    // 更新 loading 状态,但不清空现有数据
     setState(() {
       _isLoading = true;
+      _state = _state.copyWith(isLoading: true);
     });
 
     try {
@@ -78,36 +82,89 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
       final data = await widget.dataLoader(_state.selectedRange, startDate, endDate);
 
-      setState(() {
-        _isLoading = false;
-        _data = StatisticsData(
-          title: widget.config.title,
-          subtitle: widget.config.subtitle,
-          startDate: startDate,
-          endDate: endDate,
-          totalValue: data.totalValue,
-          totalValueLabel: data.totalValueLabel,
-          distributionData: data.distributionData,
-          rankingData: data.rankingData,
-          timeSeriesData: data.timeSeriesData,
-          hourlyDistribution: data.hourlyDistribution,
-          extraData: data.extraData,
-        );
-        _state = _state.copyWith(
-          startDate: startDate,
-          endDate: endDate,
-          isLoading: false,
-        );
-      });
+      // 如果是首次加载，先设置数值为 0，然后在下一帧更新为实际值以触发动画
+      if (_isFirstLoad && mounted) {
+        setState(() {
+          _isLoading = false;
+          _data = StatisticsData(
+            title: widget.config.title,
+            subtitle: widget.config.subtitle,
+            startDate: startDate,
+            endDate: endDate,
+            totalValue: 0, // 首次加载先设为 0
+            totalValueLabel: data.totalValueLabel,
+            distributionData: data.distributionData?.map((item) =>
+              DistributionData(label: item.label, value: 0, color: item.color)
+            ).toList(),
+            rankingData: data.rankingData?.map((item) =>
+              RankingData(label: item.label, value: 0, icon: item.icon, color: item.color, extraData: item.extraData)
+            ).toList(),
+            timeSeriesData: data.timeSeriesData,
+            hourlyDistribution: data.hourlyDistribution,
+            extraData: data.extraData,
+          );
+          _state = _state.copyWith(
+            startDate: startDate,
+            endDate: endDate,
+            isLoading: false,
+          );
+        });
+
+        // 在下一帧更新为实际值，触发动画
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _data = StatisticsData(
+                title: widget.config.title,
+                subtitle: widget.config.subtitle,
+                startDate: startDate,
+                endDate: endDate,
+                totalValue: data.totalValue,
+                totalValueLabel: data.totalValueLabel,
+                distributionData: data.distributionData,
+                rankingData: data.rankingData,
+                timeSeriesData: data.timeSeriesData,
+                hourlyDistribution: data.hourlyDistribution,
+                extraData: data.extraData,
+              );
+              _isFirstLoad = false;
+            });
+          }
+        });
+      } else {
+        // 非首次加载:直接更新数据,AnimatedFlipCounter 会自动处理动画
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _data = StatisticsData(
+              title: widget.config.title,
+              subtitle: widget.config.subtitle,
+              startDate: startDate,
+              endDate: endDate,
+              totalValue: data.totalValue,
+              totalValueLabel: data.totalValueLabel,
+              distributionData: data.distributionData,
+              rankingData: data.rankingData,
+              timeSeriesData: data.timeSeriesData,
+              hourlyDistribution: data.hourlyDistribution,
+              extraData: data.extraData,
+            );
+            _state = _state.copyWith(
+              startDate: startDate,
+              endDate: endDate,
+              isLoading: false,
+            );
+          });
+        }
+      }
 
       widget.onDateRangeChanged?.call(_state);
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _state = _state.copyWith(isLoading: false);
-      });
-
       if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _state = _state.copyWith(isLoading: false);
+        });
         Toast.error('Failed to load data: $e');
       }
     }
@@ -157,13 +214,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               endDate: _state.endDate,
             ),
           ],
-          if (_isLoading)
-            widget.config.loadingWidget ??
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-          else if (_data == null)
+          // 移除全屏 loading 状态,保持内容区域始终显示以避免闪烁和动画失效
+          if (_data == null)
             widget.config.emptyWidget ??
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -189,9 +241,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           children: [
                             Column(
                               children: [
-                                Text(
-                                  _data!.totalValue!.toStringAsFixed(0),
-                                  style: const TextStyle(
+                                AnimatedFlipCounter(
+                                  value: _data!.totalValue!,
+                                  duration: const Duration(milliseconds: 500),
+                                  textStyle: const TextStyle(
                                     fontSize: 32,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -232,7 +285,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         child: DistributionPieChart(
                           data: _data!.distributionData!,
                           colorPalette: widget.config.chartColors,
-                          centerText: _data!.totalValue?.toStringAsFixed(0),
+                          centerValue: _data!.totalValue,
                           centerSubtext: _data!.totalValueLabel,
                         ),
                       ),

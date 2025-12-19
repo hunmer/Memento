@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
+import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:Memento/widgets/statistics/models/statistics_models.dart';
 
 /// 通用卡片构建器
@@ -54,7 +55,7 @@ class DistributionPieChart extends StatelessWidget {
   final List<Color> colorPalette;
   final String? centerText;
   final String? centerSubtext;
-  final double? totalValue;
+  final double? centerValue; // 用于动画显示的数值
   final int maxSegments;
   final Function(int)? onSectionSelected;
 
@@ -64,7 +65,7 @@ class DistributionPieChart extends StatelessWidget {
     required this.colorPalette,
     this.centerText,
     this.centerSubtext,
-    this.totalValue,
+    this.centerValue,
     this.maxSegments = 5,
     this.onSectionSelected,
   });
@@ -129,12 +130,21 @@ class DistributionPieChart extends StatelessWidget {
                     }),
                   ),
                 ),
-                if (centerText != null)
+                if (centerValue != null || centerText != null)
                   Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (centerText != null)
+                        if (centerValue != null)
+                          AnimatedFlipCounter(
+                            value: centerValue!,
+                            duration: const Duration(milliseconds: 500),
+                            textStyle: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        else if (centerText != null)
                           Text(
                             centerText!,
                             style: const TextStyle(
@@ -233,13 +243,6 @@ class RankingList extends StatelessWidget {
     return colorPalette[index % colorPalette.length];
   }
 
-  String _formatValue(double value) {
-    if (valueLabel != null) {
-      return '$value ${valueLabel!.toLowerCase()}';
-    }
-    return value.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
     if (data.isEmpty) {
@@ -303,24 +306,47 @@ class RankingList extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          Text(
-                            _formatValue(item.value),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context).textTheme.bodySmall?.color,
-                            ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AnimatedFlipCounter(
+                                value: item.value,
+                                duration: const Duration(milliseconds: 500),
+                                textStyle: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context).textTheme.bodySmall?.color,
+                                ),
+                              ),
+                              if (valueLabel != null) ...[
+                                const SizedBox(width: 4),
+                                Text(
+                                  valueLabel!.toLowerCase(),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Theme.of(context).textTheme.bodySmall?.color,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ],
                       ),
                       const SizedBox(height: 6),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          backgroundColor: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                          color: color,
-                          minHeight: 6,
-                        ),
+                      TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 500),
+                        tween: Tween<double>(begin: 0.0, end: progress),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, value, child) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: value,
+                              backgroundColor: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                              color: color,
+                              minHeight: 6,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
