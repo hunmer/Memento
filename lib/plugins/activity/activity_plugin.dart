@@ -844,6 +844,7 @@ class _ActivityMainViewState extends State<ActivityMainView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late int _currentPage;
+  final Set<int> _visitedTabs = {0}; // 记录已访问的 tab，默认第一个已访问
   final List<Color> _colors = [
     Colors.pink,
     Colors.purple,
@@ -859,13 +860,39 @@ class _ActivityMainViewState extends State<ActivityMainView>
     super.initState();
     _currentPage = 0;
     _tabController = TabController(length: 2, vsync: this);
+
+    // 监听 tab 切换动画
     _tabController.animation?.addListener(() {
       final value = _tabController.animation!.value.round();
       if (value != _currentPage && mounted) {
         setState(() {
           _currentPage = value;
+          _visitedTabs.add(value); // 记录已访问的 tab
         });
       }
+    });
+
+    // 监听 tab 点击事件，立即预加载目标页面
+    _tabController.addListener(() {
+      if (mounted && _tabController.indexIsChanging) {
+        final targetIndex = _tabController.index;
+        if (!_visitedTabs.contains(targetIndex)) {
+          setState(() {
+            _visitedTabs.add(targetIndex); // 立即标记为已访问，触发预加载
+          });
+        }
+      }
+    });
+
+    // 预加载统计页面：在首页加载完成后延迟加载统计页面，作为备用方案
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (mounted && !_visitedTabs.contains(1)) {
+          setState(() {
+            _visitedTabs.add(1); // 预加载统计页面
+          });
+        }
+      });
     });
   }
 
@@ -971,10 +998,13 @@ class _ActivityMainViewState extends State<ActivityMainView>
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
                       const ActivityTimelineScreen(),
-                      ActivityStatisticsScreen(
-                        activityService:
-                            ActivityPlugin.instance.activityService,
-                      ),
+                      // 懒加载统计页面：只在访问过后才初始化
+                      _visitedTabs.contains(1)
+                          ? ActivityStatisticsScreen(
+                              activityService:
+                                  ActivityPlugin.instance.activityService,
+                            )
+                          : const Center(child: CircularProgressIndicator()),
                     ],
                   ),
                 ),

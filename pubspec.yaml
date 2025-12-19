@@ -56,6 +56,7 @@ dependencies:
   flutter_colorpicker: ^1.1.0
   provider: ^6.1.1
   reorderable_grid_view: ^2.0.0
+  animated_flip_counter: ^0.3.4
   url_launcher: ^6.2.5
   crop_your_image: ^2.0.0
   fl_chart: ^0.66.2
