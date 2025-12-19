@@ -1,13 +1,13 @@
 import 'package:Memento/plugins/chat/screens/channel_list/channel_list_screen.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/screens/timeline/timeline_screen.dart';
-import 'package:Memento/plugins/chat/screens/create_channel/create_channel_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:smooth_sheets/smooth_sheets.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
+import 'package:Memento/plugins/chat/screens/channel_list/controllers/channel_list_controller.dart';
+import 'package:Memento/plugins/chat/screens/channel_list/widgets/channel_dialogs/channel_dialog.dart';
 
 /// Chat 插件的底部栏组件
 /// 提供频道列表和时间线两个 Tab 的切换功能
@@ -26,6 +26,7 @@ class _ChatBottomBarState extends State<ChatBottomBar>
   late int _currentPage;
   double _bottomBarHeight = 60; // 默认底部栏高度
   final GlobalKey _bottomBarKey = GlobalKey();
+  late ChannelListController _channelListController;
 
   // 使用插件主题色和辅助色（动态计算）
   List<Color> _getColors(BuildContext context) {
@@ -42,6 +43,10 @@ class _ChatBottomBarState extends State<ChatBottomBar>
     super.initState();
     _currentPage = 0;
     _tabController = TabController(length: 2, vsync: this);
+    _channelListController = ChannelListController(
+      channels: widget.plugin.channelService.channels,
+      chatPlugin: widget.plugin,
+    );
     _tabController.animation?.addListener(() {
       final value = _tabController.animation!.value.round();
       if (value != _currentPage && mounted) {
@@ -55,6 +60,7 @@ class _ChatBottomBarState extends State<ChatBottomBar>
   @override
   void dispose() {
     _tabController.dispose();
+    _channelListController.dispose();
     super.dispose();
   }
 
@@ -74,30 +80,22 @@ class _ChatBottomBarState extends State<ChatBottomBar>
     });
   }
 
-  /// 新建聊天（时间线 Tab 的 FAB 操作）
-  Future<void> _createNewChat() async {
-    // 切换到频道列表 Tab
-    if (_currentPage != 0) {
-      _tabController.animateTo(0);
+  /// 显示创建频道的对话框
+  void _showAddChannelDialog() {
+    // 获取当前激活的频道分类，排除"全部"和"未分组"
+    String? defaultGroup = _channelListController.selectedGroup;
+    if (defaultGroup == "all" || defaultGroup == "ungrouped") {
+      defaultGroup = null;
     }
-  }
 
-  /// 显示创建频道的 Sheet
-  void _showCreateChannelSheet() {
-    Navigator.of(context).push(
-      ModalSheetRoute(
-        swipeDismissible: true,
-        builder:
-            (context) => Sheet(
-              decoration: MaterialSheetDecoration(
-                size: SheetSize.fit,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
-                ),
-                clipBehavior: Clip.antiAlias,
-              ),
-              child: CreateChannelSheet(plugin: widget.plugin),
-            ),
+    showDialog(
+      context: context,
+      builder:
+          (context) => ChannelDialog(
+            onAddChannel: (channel) async {
+              await _channelListController.addChannel(channel);
+            },
+            defaultGroup: defaultGroup,
       ),
     );
   }
@@ -108,26 +106,9 @@ class _ChatBottomBarState extends State<ChatBottomBar>
       backgroundColor: widget.plugin.color,
       elevation: 4,
       shape: const CircleBorder(),
-      onPressed: _showCreateChannelSheet,
+      onPressed: _showAddChannelDialog,
       child: Icon(
         Icons.add_comment,
-        color: widget.plugin.color.computeLuminance() < 0.5
-            ? Colors.white
-            : Colors.black,
-        size: 32,
-      ),
-    );
-  }
-
-  /// 构建新建聊天的 FAB（时间线 Tab）
-  Widget _buildNewChatFAB() {
-    return FloatingActionButton(
-      backgroundColor: widget.plugin.color,
-      elevation: 4,
-      shape: const CircleBorder(),
-      onPressed: _createNewChat,
-      child: Icon(
-        Icons.chat,
         color: widget.plugin.color.computeLuminance() < 0.5
             ? Colors.white
             : Colors.black,
@@ -220,6 +201,8 @@ class _ChatBottomBarState extends State<ChatBottomBar>
                       ChannelListScreen(
                         channels: widget.plugin.channelService.channels,
                         chatPlugin: widget.plugin,
+                        controller: _channelListController,
+                        onAddChannel: _showAddChannelDialog,
                       ),
                       // Tab1: 时间线
                       TimelineScreen(chatPlugin: widget.plugin),
@@ -270,7 +253,7 @@ class _ChatBottomBarState extends State<ChatBottomBar>
             child:
                 _currentPage == 0
                     ? _buildCreateChannelFAB()
-                    : _buildNewChatFAB(),
+                    : SizedBox(),
           ),
         ],
       ),

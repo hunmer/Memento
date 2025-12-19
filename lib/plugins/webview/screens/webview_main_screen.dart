@@ -38,8 +38,6 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final plugin = WebViewPlugin.instance;
-
     return Scaffold(
       appBar: AppBar(
         title: Text('webview_name'.tr),

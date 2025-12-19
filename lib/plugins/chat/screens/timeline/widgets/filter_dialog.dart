@@ -247,9 +247,6 @@ class _FilterDialogState extends State<FilterDialog> {
                         user.id,
                       );
                       return FilterChip(
-                        avatar: CircleAvatar(
-                          child: Text(user.username[0].toUpperCase()),
-                        ),
                         label: Text(user.username),
                         selected: isSelected,
                         onSelected: (selected) {

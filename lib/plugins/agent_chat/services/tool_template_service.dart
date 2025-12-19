@@ -10,8 +10,6 @@ import 'package:Memento/core/storage/storage_manager.dart';
 /// 管理保存的工具模板，包括保存、加载、删除等操作
 /// 每个模板存储为独立的 JSON 文件
 class ToolTemplateService extends ChangeNotifier {
-  /// 旧存储键（用于迁移）
-  static const String _oldStorageKey = 'agent_chat_tool_templates';
 
   /// 模板存储目录
   static const String _templatesDir = 'agent_chat/tool_templates';

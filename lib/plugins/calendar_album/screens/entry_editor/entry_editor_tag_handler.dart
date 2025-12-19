@@ -1,15 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
 import 'entry_editor_controller.dart';
-
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
-import 'entry_editor_controller.dart';
-
 class EntryEditorTagHandler extends StatefulWidget {
   final EntryEditorController controller;
 
