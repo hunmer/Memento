@@ -1,5 +1,6 @@
 import 'package:Memento/widgets/statistics/statistics.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'tag_statistics_screen.dart';
 
@@ -101,6 +102,7 @@ Future<StatisticsData> loadStatisticsData(
 
   // 计算24小时分布（仅单日有效）
   List<TimeSeriesPoint>? hourlyDistribution;
+  Map<int, String>? hourlyMainTags;
   final isSingleDay = startDate!.year == endDate!.year &&
       startDate.month == endDate.month &&
       startDate.day == endDate.day;
@@ -111,20 +113,27 @@ Future<StatisticsData> loadStatisticsData(
       dateField: 'startTime',
       valueField: 'duration',
     );
+    hourlyMainTags = StatisticsCalculator.calculateHourlyMainTags(
+      allActivities,
+      dateField: 'startTime',
+      valueField: 'duration',
+      tagField: 'tags',
+    );
   }
 
   // 计算总时长
   final totalDuration = allActivities.fold(0.0, (sum, activity) => sum + activity['duration']);
 
   return StatisticsData(
-    title: 'Activity Statistics',
+    title: 'activity_activityStatistics'.tr,
     startDate: startDate!,
     endDate: endDate!,
     totalValue: totalDuration / 60, // 转换为小时
-    totalValueLabel: 'hours',
+    totalValueLabel: 'activity_hours'.tr,
     distributionData: coloredDistributionData,
     rankingData: coloredRankingData,
     hourlyDistribution: hourlyDistribution,
+    hourlyMainTags: hourlyMainTags,
     extraData: {
       'totalActivities': allActivities.length,
       'averageDuration': allActivities.isNotEmpty
@@ -143,9 +152,9 @@ class ActivityStatisticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StatisticsScreen(
-      config: const StatisticsConfig(
+      config: StatisticsConfig(
         type: StatisticsType.activities,
-        title: 'Activity Statistics',
+        title: 'activity_activityStatistics'.tr,
         show24hDistribution: true,
         availableRanges: [
           DateRangeOption.today,

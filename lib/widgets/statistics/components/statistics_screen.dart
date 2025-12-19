@@ -101,6 +101,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             ).toList(),
             timeSeriesData: data.timeSeriesData,
             hourlyDistribution: data.hourlyDistribution,
+            hourlyMainTags: data.hourlyMainTags,
             extraData: data.extraData,
           );
           _state = _state.copyWith(
@@ -125,6 +126,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 rankingData: data.rankingData,
                 timeSeriesData: data.timeSeriesData,
                 hourlyDistribution: data.hourlyDistribution,
+                hourlyMainTags: data.hourlyMainTags,
                 extraData: data.extraData,
               );
               _isFirstLoad = false;
@@ -147,6 +149,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               rankingData: data.rankingData,
               timeSeriesData: data.timeSeriesData,
               hourlyDistribution: data.hourlyDistribution,
+              hourlyMainTags: data.hourlyMainTags,
               extraData: data.extraData,
             );
             _state = _state.copyWith(
@@ -268,7 +271,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     if (_data!.timeSeriesData != null && _data!.timeSeriesData!.isNotEmpty)
                       buildStatisticsCard(
                         context: context,
-                        title: 'Trends',
+                        title: 'widget_statisticsTrends'.tr,
                         child: TimeSeriesChart(
                           series: _data!.timeSeriesData!,
                           colorPalette: widget.config.chartColors,
@@ -281,7 +284,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     if (_data!.distributionData != null && _data!.distributionData!.isNotEmpty)
                       buildStatisticsCard(
                         context: context,
-                        title: 'Distribution',
+                        title: 'widget_statisticsDistribution'.tr,
                         child: DistributionPieChart(
                           data: _data!.distributionData!,
                           colorPalette: widget.config.chartColors,
@@ -299,10 +302,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         _data!.hourlyDistribution!.isNotEmpty)
                       buildStatisticsCard(
                         context: context,
-                        title: '24 Hours Distribution',
+                        title: 'widget_statisticsHourlyDistribution'.tr,
                         child: HourlyDistributionBar(
                           hourlyData: _data!.hourlyDistribution!,
                           colorPalette: widget.config.chartColors,
+                          hourlyMainTags: _data!.hourlyMainTags,
                         ),
                       ),
                     if (widget.config.show24hDistribution &&
@@ -315,7 +319,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     if (_data!.rankingData != null && _data!.rankingData!.isNotEmpty)
                       buildStatisticsCard(
                         context: context,
-                        title: 'Ranking',
+                        title: 'widget_statisticsRanking'.tr,
                         child: RankingList(
                           data: _data!.rankingData!,
                           colorPalette: widget.config.chartColors,

@@ -135,6 +135,49 @@ class StatisticsCalculator {
         .toList();
   }
 
+  /// 计算每个小时的主要标签（用于24小时分布图显示）
+  static Map<int, String> calculateHourlyMainTags(
+    List<Map<String, dynamic>> records, {
+    required String dateField,
+    required String valueField,
+    required String tagField,
+  }) {
+    // 按标签和小时分组
+    final Map<int, Map<String, double>> hourlyTagMap = {};
+
+    for (int i = 0; i < 24; i++) {
+      hourlyTagMap[i] = {};
+    }
+
+    for (var record in records) {
+      final dateStr = record[dateField]?.toString() ?? '';
+      final date = DateTime.tryParse(dateStr);
+      if (date == null) continue;
+
+      final value = (record[valueField] ?? 0.0).toDouble();
+      final hour = date.hour;
+      final tag = record[tagField]?.toString() ?? '';
+
+      if (tag.isNotEmpty) {
+        hourlyTagMap[hour]![tag] = (hourlyTagMap[hour]![tag] ?? 0.0) + value;
+      }
+    }
+
+    // 找到每个小时的主要标签（时长最长的标签）
+    final Map<int, String> hourlyMainTags = {};
+    for (int hour = 0; hour < 24; hour++) {
+      final tagValues = hourlyTagMap[hour]!;
+      if (tagValues.isNotEmpty) {
+        final topTag = tagValues.entries.reduce((a, b) => a.value > b.value ? a : b);
+        hourlyMainTags[hour] = topTag.key;
+      } else {
+        hourlyMainTags[hour] = '';
+      }
+    }
+
+    return hourlyMainTags;
+  }
+
   /// 根据颜色获取哈希颜色
   static Color getColorForLabel(String label, List<Color> colorPalette) {
     if (label.isEmpty) return Colors.grey;

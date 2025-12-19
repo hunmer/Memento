@@ -163,6 +163,9 @@ class StatisticsData {
   /// 24小时分布数据（仅单日有效）
   final List<TimeSeriesPoint>? hourlyDistribution;
 
+  /// 24小时分布的主要标签（可选，用于显示标签名称）
+  final Map<int, String>? hourlyMainTags;
+
   /// 额外数据
   final Map<String, dynamic>? extraData;
 
@@ -177,6 +180,7 @@ class StatisticsData {
     this.rankingData,
     this.timeSeriesData,
     this.hourlyDistribution,
+    this.hourlyMainTags,
     this.extraData,
   });
 
