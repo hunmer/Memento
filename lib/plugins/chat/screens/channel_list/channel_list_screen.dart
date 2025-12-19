@@ -14,11 +14,15 @@ import 'widgets/channel_dialogs/delete_channel_dialog.dart';
 class ChannelListScreen extends StatefulWidget {
   final List<Channel> channels;
   final ChatPlugin chatPlugin;
+  final ChannelListController? controller;
+  final VoidCallback? onAddChannel;
 
   const ChannelListScreen({
     super.key,
     required this.channels,
     required this.chatPlugin,
+    this.controller,
+    this.onAddChannel,
   });
 
   @override
@@ -27,14 +31,23 @@ class ChannelListScreen extends StatefulWidget {
 
 class _ChannelListScreenState extends State<ChannelListScreen> {
   late final ChannelListController _controller;
+  late final bool _shouldDisposeController;
 
   @override
   void initState() {
     super.initState();
-    _controller = ChannelListController(
-      channels: widget.channels,
-      chatPlugin: widget.chatPlugin,
-    );
+    // 如果传入了控制器，使用它；否则创建新的
+    if (widget.controller != null) {
+      _controller = widget.controller!;
+      _shouldDisposeController = false;
+    } else {
+      _controller = ChannelListController(
+        channels: widget.channels,
+        chatPlugin: widget.chatPlugin,
+      );
+      _shouldDisposeController = true;
+    }
+
     _controller.addListener(() {
       if (mounted) {
         // 使用 postFrameCallback 确保在构建完成后调用 setState
@@ -49,7 +62,10 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    // 只有当自己创建控制器时才释放它
+    if (_shouldDisposeController) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -77,7 +93,7 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
           ),
           Expanded(
             child: _controller.filteredChannels.isEmpty
-                ? EmptyChannelView(onAddChannel: _showAddChannelDialog)
+                ? EmptyChannelView(onAddChannel: widget.onAddChannel ?? () {})
                 : ReorderableListView.builder(
                     padding: EdgeInsets.zero,
                     itemCount: _controller.filteredChannels.length,
@@ -109,31 +125,6 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
       enableLargeTitle: true,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       previousPageTitle: '返回',
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: _showAddChannelDialog,
-        ),
-      ],
-    );
-  }
-
-  void _showAddChannelDialog() {
-    // 获取当前激活的频道分类，排除"全部"和"未分组"
-    String? defaultGroup = _controller.selectedGroup;
-    if (defaultGroup == "all" || defaultGroup == "ungrouped") {
-      defaultGroup = null;
-    }
-
-    showDialog(
-      context: context,
-      builder:
-          (context) => ChannelDialog(
-            onAddChannel: (channel) async {
-              await _controller.addChannel(channel);
-            },
-            defaultGroup: defaultGroup,
-          ),
     );
   }
 
