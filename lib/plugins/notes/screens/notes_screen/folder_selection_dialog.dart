@@ -1,102 +1,35 @@
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
+import 'package:Memento/plugins/notes/models/folder_tree_node.dart';
+import 'package:Memento/plugins/notes/widgets/folder_selection_sheet.dart';
 import 'notes_screen_state.dart';
 import '../../../../../../core/services/toast_service.dart';
 
 mixin FolderSelectionDialog on NotesMainViewState {
-  // 递归构建文件夹树形结构
-  Widget _buildFolderTree(Folder folder, {bool isRoot = false}) {
-    final children = plugin.controller.getFolderChildren(folder.id);
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (!isRoot) // 根文件夹不显示自身
-          ListTile(
-            leading: Icon(folder.icon),
-            title: Text(folder.name),
-            trailing:
-                children.isNotEmpty ? const Icon(Icons.arrow_right) : null,
-            onTap: () async {
-              if (children.isEmpty) {
-                // 如果没有子文件夹，直接选择当前文件夹
-                Navigator.pop(context, folder);
-              } else {
-                // 如果有子文件夹，显示子文件夹选择对话框
-                final selectedFolder = await showFolderSelectionDialog(
-                  null,
-                  parentFolder: folder,
-                );
-                if (selectedFolder != null && mounted) {
-                  Navigator.pop(context, selectedFolder);
-                }
-              }
-            },
-          ),
-        if (children.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children:
-                  children.map((child) => _buildFolderTree(child)).toList(),
-            ),
-          ),
-      ],
-    );
-  }
-
-  // 显示文件夹选择对话框
+  // 显示文件夹选择底部抽屉
   Future<Folder?> showFolderSelectionDialog(
     Note? note, {
     Folder? parentFolder,
   }) async {
     final rootFolder = plugin.controller.getFolder('root')!;
+    final allFolders = plugin.controller.getAllFolders();
 
-    // 如果指定了父文件夹，则只显示该文件夹的子文件夹
-    final startFolder = parentFolder ?? rootFolder;
+    // 构建文件夹树
+    final folderMap = <String, Folder>{};
+    for (var folder in allFolders) {
+      folderMap[folder.id] = folder;
+    }
 
-    // 获取当前笔记所在的文件夹ID
-    final currentFolderId = note?.folderId ?? currentFolder?.id;
+    // 从根文件夹开始构建树
+    final rootNode = FolderTreeNode.buildTree(rootFolder, folderMap);
 
-    return showDialog<Folder>(
+    // 显示底部抽屉
+    return FolderSelectionSheet.show(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text(
-              parentFolder != null
-                  ? 'notes_selectSubfolder'.tr
-                  : 'notes_moveTo'.tr,
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildFolderTree(
-                    startFolder,
-                    isRoot: startFolder.id == 'root',
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('app_cancel'.tr),
-              ),
-              if (parentFolder != null && parentFolder.id != currentFolderId)
-                TextButton(
-                  onPressed: () => Navigator.pop(context, parentFolder),
-                  child: Text(
-                    'notes_selectCurrentFolder'.tr,
-                  ),
-                ),
-            ],
-          ),
+      rootNode: rootNode,
+      note: note,
+      parentFolder: parentFolder,
     );
   }
 

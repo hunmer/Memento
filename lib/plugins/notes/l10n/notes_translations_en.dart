@@ -41,6 +41,12 @@ final Map<String, String> notesTranslationsEn = {
   // Input hints
   'notes_folderNameHint': 'Folder name',
 
+  // Folder related
+  'notes_root': 'Root',
+  'notes_createIn': 'Create in',
+  'notes_selectCurrentFolder': 'Select Current Folder',
+  'notes_selectRoot': 'Select Root',
+
   // Additional text
   'notes_createNew': 'Create new',
   'notes_movedTo': 'Moved to @folderName',
@@ -71,4 +77,7 @@ final Map<String, String> notesTranslationsEn = {
   'notes_myNotes': 'My Notes',
   'notes_searchPlaceholder': 'Search notes, tags, content...',
   'notes_defaultFolderName': 'Notes',
+
+  // Navigation
+  'notes_backToParent': 'Back to Parent',
 };

@@ -41,6 +41,12 @@ final Map<String, String> notesTranslationsZh = {
   // 输入提示
   'notes_folderNameHint': '文件夹名称',
 
+  // 文件夹相关
+  'notes_root': '根目录',
+  'notes_createIn': '创建在',
+  'notes_selectCurrentFolder': '选择当前文件夹',
+  'notes_selectRoot': '选择根目录',
+
   // 新增文本
   'notes_createNew': '新建',
   'notes_movedTo': '已移动到 @folderName',
@@ -71,4 +77,7 @@ final Map<String, String> notesTranslationsZh = {
   'notes_myNotes': '我的笔记',
   'notes_searchPlaceholder': '搜索笔记、标签、内容...',
   'notes_defaultFolderName': '笔记',
+
+  // 导航
+  'notes_backToParent': '返回上一级',
 };

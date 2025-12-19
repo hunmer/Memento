@@ -6,6 +6,10 @@ import 'notes_screen_state.dart';
 mixin FolderOperations on NotesMainViewState {
   Future<void> createNewFolder() async {
     final TextEditingController folderNameController = TextEditingController();
+
+    // 获取当前文件夹名称用于提示
+    final parentFolderName = currentFolder?.name ?? 'notes_root'.tr;
+
     final result = await showDialog<String>(
       context: context,
       builder:
@@ -13,14 +17,29 @@ mixin FolderOperations on NotesMainViewState {
             title: Text(
               'notes_newFolder'.tr,
             ),
-            content: TextField(
-              controller: folderNameController,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText:
-                    'notes_folderNameHint'.tr,
-              ),
-              onSubmitted: (value) => Navigator.pop(context, value),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 显示将在哪个文件夹下创建
+                Text(
+                  '${'notes_createIn'.tr}: $parentFolderName',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: folderNameController,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText:
+                        'notes_folderNameHint'.tr,
+                  ),
+                  onSubmitted: (value) => Navigator.pop(context, value),
+                ),
+              ],
             ),
             actions: [
               TextButton(
@@ -41,6 +60,7 @@ mixin FolderOperations on NotesMainViewState {
           ),
     );
     if (result != null && result.isNotEmpty) {
+      // 使用 currentFolderId 作为父文件夹 ID
       await plugin.controller.createFolder(result, currentFolderId);
       loadCurrentFolder();
     }
