@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selectable_item.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_definition.dart';
 
@@ -28,8 +28,8 @@ class CalendarSelectionView extends StatefulWidget {
   /// 空状态文本
   final String? emptyText;
 
-  /// 日历格式
-  final CalendarFormat initialFormat;
+  /// 日历视图
+  final CalendarView initialView;
 
   /// 初始聚焦日期
   final DateTime? focusedDay;
@@ -43,7 +43,7 @@ class CalendarSelectionView extends StatefulWidget {
     this.themeColor,
     this.emptyWidget,
     this.emptyText,
-    this.initialFormat = CalendarFormat.month,
+    this.initialView = CalendarView.month,
     this.focusedDay,
   });
 
@@ -52,9 +52,8 @@ class CalendarSelectionView extends StatefulWidget {
 }
 
 class _CalendarSelectionViewState extends State<CalendarSelectionView> {
-  late DateTime _focusedDay;
+  late CalendarController _calendarController;
   DateTime? _selectedDay;
-  late CalendarFormat _calendarFormat;
 
   // 日期 -> 项目列表 映射
   late Map<DateTime, List<SelectableItem>> _dateItemsMap;
@@ -62,8 +61,8 @@ class _CalendarSelectionViewState extends State<CalendarSelectionView> {
   @override
   void initState() {
     super.initState();
-    _focusedDay = widget.focusedDay ?? DateTime.now();
-    _calendarFormat = widget.initialFormat;
+    _calendarController = CalendarController();
+    _calendarController.displayDate = widget.focusedDay ?? DateTime.now();
     _buildDateItemsMap();
   }
 
@@ -73,6 +72,12 @@ class _CalendarSelectionViewState extends State<CalendarSelectionView> {
     if (widget.items != oldWidget.items) {
       _buildDateItemsMap();
     }
+  }
+
+  @override
+  void dispose() {
+    _calendarController.dispose();
+    super.dispose();
   }
 
   void _buildDateItemsMap() {
@@ -116,6 +121,64 @@ class _CalendarSelectionViewState extends State<CalendarSelectionView> {
     return _dateItemsMap[normalizedDay] ?? [];
   }
 
+  bool _isSameDay(DateTime? a, DateTime b) {
+    if (a == null) return false;
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  Widget _monthCellBuilder(BuildContext context, MonthCellDetails details) {
+    final theme = Theme.of(context);
+    final effectiveColor = widget.themeColor ?? theme.colorScheme.primary;
+    final day = details.date;
+    final items = _getItemsForDay(day);
+    final hasItems = items.isNotEmpty;
+    final isSelected = _isSameDay(_selectedDay, day);
+    final isToday = _isSameDay(DateTime.now(), day);
+
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color:
+            isSelected
+                ? effectiveColor
+                : (isToday ? effectiveColor.withOpacity(0.3) : null),
+      ),
+      child: Stack(
+        children: [
+          Center(
+            child: Text(
+              '${day.day}',
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+              ),
+            ),
+          ),
+          if (hasItems)
+            Positioned(
+              bottom: 4,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  items.length > 3 ? 3 : items.length,
+                  (index) => Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 0.5),
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: effectiveColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -124,54 +187,37 @@ class _CalendarSelectionViewState extends State<CalendarSelectionView> {
     return Column(
       children: [
         // 日历组件
-        TableCalendar(
-          firstDay: DateTime(2020, 1, 1),
-          lastDay: DateTime(2030, 12, 31),
-          focusedDay: _focusedDay,
-          calendarFormat: _calendarFormat,
-          selectedDayPredicate: (day) {
-            return _selectedDay != null && isSameDay(_selectedDay, day);
-          },
-          eventLoader: _getItemsForDay,
-          onDaySelected: (selectedDay, focusedDay) {
-            setState(() {
-              _selectedDay = selectedDay;
-              _focusedDay = focusedDay;
-            });
-          },
-          onFormatChanged: (format) {
-            setState(() {
-              _calendarFormat = format;
-            });
-          },
-          onPageChanged: (focusedDay) {
-            _focusedDay = focusedDay;
-          },
-          calendarStyle: CalendarStyle(
-            selectedDecoration: BoxDecoration(
-              color: effectiveColor,
-              shape: BoxShape.circle,
-            ),
-            todayDecoration: BoxDecoration(
-              color: effectiveColor.withOpacity(0.3),
-              shape: BoxShape.circle,
-            ),
-            markerDecoration: BoxDecoration(
-              color: effectiveColor,
-              shape: BoxShape.circle,
-            ),
-            markersMaxCount: 3,
-            markerSize: 6,
-            markerMargin: const EdgeInsets.symmetric(horizontal: 0.5),
+        SfCalendar(
+          controller: _calendarController,
+          view: widget.initialView,
+          initialDisplayDate: widget.focusedDay ?? DateTime.now(),
+          minDate: DateTime(2020, 1, 1),
+          maxDate: DateTime(2030, 12, 31),
+          headerStyle: CalendarHeaderStyle(
+            textAlign: TextAlign.center,
+            backgroundColor: Colors.transparent,
           ),
-          headerStyle: HeaderStyle(
-            titleCentered: true,
-            formatButtonDecoration: BoxDecoration(
-              border: Border.all(color: effectiveColor),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            formatButtonTextStyle: TextStyle(color: effectiveColor),
+          monthViewSettings: MonthViewSettings(
+            appointmentDisplayMode: MonthAppointmentDisplayMode.indicator,
           ),
+          cellBorderColor: Colors.transparent,
+          selectionDecoration: BoxDecoration(
+            color: effectiveColor,
+            shape: BoxShape.circle,
+          ),
+          todayHighlightColor: effectiveColor.withOpacity(0.3),
+          monthCellBuilder: _monthCellBuilder,
+          onTap: (CalendarTapDetails details) {
+            if (details.date != null) {
+              setState(() {
+                _selectedDay = details.date;
+                _calendarController.selectedDate = details.date;
+              });
+            }
+          },
+          onViewChanged: (ViewChangedDetails details) {
+            // 页面切换时不需要特殊处理
+          },
         ),
 
         const Divider(height: 1),

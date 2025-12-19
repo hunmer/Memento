@@ -202,8 +202,8 @@ class _ChannelDialogState extends State<ChannelDialog> {
           },
           child: Text(
             widget.isEditMode
-                ? 'common_save'.tr
-                : 'common_ok'.tr,
+                ? 'save'.tr
+                : 'ok'.tr,
           ),
         ),
       ],

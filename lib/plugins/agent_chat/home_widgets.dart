@@ -7,6 +7,7 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'agent_chat_plugin.dart';
+import 'controllers/conversation_controller.dart';
 
 /// Agent Chat插件的主页小组件注册
 class AgentChatHomeWidgets {
@@ -85,14 +86,24 @@ class AgentChatHomeWidgets {
         StatItemData(
           id: 'total_groups',
           label: 'agent_chat_totalGroups'.tr,
-          value: '${controller.groups.length}',
-          highlight: controller.groups.isNotEmpty,
+          value: '${_getUniqueGroupsCount(controller)}',
+          highlight: _getUniqueGroupsCount(controller) > 0,
           color: Colors.purple,
         ),
       ];
     } catch (e) {
       return [];
     }
+  }
+
+  /// 获取唯一分组的数量
+  static int _getUniqueGroupsCount(ConversationController controller) {
+    final allGroupNames = <String>{};
+    // 重要：使用 allConversations 而不是 conversations，以确保分组计数准确
+    for (final conv in controller.allConversations) {
+      allGroupNames.addAll(conv.groups);
+    }
+    return allGroupNames.length;
   }
 
   /// 构建 2x2 详细卡片组件

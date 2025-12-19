@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class CalendarDatePickerDialog extends StatefulWidget {
   final List<DateTime> availableDates;
@@ -22,7 +22,7 @@ class CalendarDatePickerDialog extends StatefulWidget {
 }
 
 class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
-  late DateTime _focusedDay;
+  late CalendarController _calendarController;
   DateTime? _selectedDay;
   late Set<DateTime> _availableDatesSet;
   late Map<DateTime, int> _dateCountMap;
@@ -31,7 +31,10 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
   void initState() {
     super.initState();
     _selectedDay = widget.selectedDate;
-    _focusedDay = widget.selectedDate ?? widget.availableDates.first;
+    _calendarController = CalendarController();
+    _calendarController.selectedDate = widget.selectedDate;
+    _calendarController.displayDate =
+        widget.selectedDate ?? widget.availableDates.first;
 
     // 将可用日期转换为Set以便快速查找
     _availableDatesSet =
@@ -50,8 +53,88 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
     }
   }
 
+  @override
+  void dispose() {
+    _calendarController.dispose();
+    super.dispose();
+  }
+
   bool _isDateAvailable(DateTime day) {
     return _availableDatesSet.contains(DateTime(day.year, day.month, day.day));
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  Widget _monthCellBuilder(BuildContext context, MonthCellDetails details) {
+    final date = details.date;
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    final isAvailable = _isDateAvailable(date);
+    final isSelected = _selectedDay != null && _isSameDay(date, _selectedDay!);
+    final isToday = _isSameDay(date, DateTime.now());
+    final count = _dateCountMap[normalizedDate];
+
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color:
+            isSelected
+                ? Colors.blue
+                : (isToday ? Colors.blue.withValues(alpha: 0.3) : null),
+      ),
+      child: Stack(
+        children: [
+          Center(
+            child: Text(
+              '${date.day}',
+              style: TextStyle(
+                color:
+                    !isAvailable
+                        ? Colors.grey[400]
+                        : (isSelected
+                            ? Colors.white
+                            : (date.weekday == DateTime.saturday ||
+                                    date.weekday == DateTime.sunday
+                                ? Colors.red[300]
+                                : Colors.black)),
+                fontWeight:
+                    (date.weekday == DateTime.saturday ||
+                                date.weekday == DateTime.sunday) &&
+                            isAvailable
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+              ),
+            ),
+          ),
+          if (count != null && count > 0)
+            Positioned(
+              right: 1,
+              top: 1,
+              child: Container(
+                padding: const EdgeInsets.all(2.0),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(
+                  minWidth: 16,
+                  minHeight: 16,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '$count',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -85,92 +168,41 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
               ],
             ),
           ),
-          TableCalendar(
-            firstDay: widget.availableDates.last,
-            lastDay: widget.availableDates.first,
-            focusedDay: _focusedDay,
-            selectedDayPredicate:
-                (day) => _selectedDay != null && isSameDay(_selectedDay!, day),
-            enabledDayPredicate: _isDateAvailable,
-            calendarFormat: CalendarFormat.month,
-            startingDayOfWeek: StartingDayOfWeek.monday,
-            headerStyle: const HeaderStyle(
-              formatButtonVisible: false,
-              titleCentered: true,
-              titleTextStyle: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
+          SizedBox(
+            height: 350,
+            child: SfCalendar(
+              controller: _calendarController,
+              view: CalendarView.month,
+              initialDisplayDate:
+                  widget.selectedDate ?? widget.availableDates.first,
+              minDate: widget.availableDates.last,
+              maxDate: widget.availableDates.first,
+              headerStyle: const CalendarHeaderStyle(
+                textAlign: TextAlign.center,
+                textStyle: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            calendarStyle: CalendarStyle(
-              outsideDaysVisible: false,
-              disabledTextStyle: TextStyle(
-                color: Colors.grey[400],
-                decoration: TextDecoration.none,
+              monthViewSettings: const MonthViewSettings(
+                showTrailingAndLeadingDates: false,
+                dayFormat: 'EEE',
               ),
-              weekendTextStyle: TextStyle(color: Colors.red[300]),
-              selectedDecoration: BoxDecoration(
-                color: Colors.blue,
-                shape: BoxShape.circle,
-              ),
-              todayDecoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.3),
-                shape: BoxShape.circle,
-              ),
-              markersMaxCount: 1,
-            ),
-            calendarBuilders: CalendarBuilders(
-              markerBuilder: (context, date, events) {
-                final normalizedDate = DateTime(
-                  date.year,
-                  date.month,
-                  date.day,
-                );
-                if (_dateCountMap.containsKey(normalizedDate) &&
-                    _dateCountMap[normalizedDate]! > 0) {
-                  return Positioned(
-                    right: 1,
-                    top: 1,
-                    child: Container(
-                      padding: const EdgeInsets.all(2.0),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${_dateCountMap[normalizedDate]}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  );
+              cellBorderColor: Colors.transparent,
+              selectionDecoration: const BoxDecoration(),
+              todayHighlightColor: Colors.transparent,
+              monthCellBuilder: _monthCellBuilder,
+              onTap: (CalendarTapDetails details) {
+                if (details.date != null && _isDateAvailable(details.date!)) {
+                  setState(() {
+                    _selectedDay = details.date;
+                    _calendarController.selectedDate = details.date;
+                  });
+                  widget.onDateSelected(details.date);
+                  Navigator.of(context).pop();
                 }
-                return null;
               },
             ),
-            daysOfWeekStyle: const DaysOfWeekStyle(
-              weekdayStyle: TextStyle(fontWeight: FontWeight.bold),
-              weekendStyle: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.red,
-              ),
-            ),
-            onDaySelected: (selectedDay, focusedDay) {
-              setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
-              });
-              widget.onDateSelected(selectedDay);
-              Navigator.of(context).pop();
-            },
           ),
           Padding(
             padding: const EdgeInsets.symmetric(

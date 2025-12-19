@@ -4,7 +4,6 @@ import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/agent_chat/services/conversation_service.dart';
 import 'package:Memento/plugins/agent_chat/services/message_service.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
-import 'package:Memento/plugins/agent_chat/models/conversation_group.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
 
 /// 会话控制器
@@ -33,9 +32,6 @@ class ConversationController extends ChangeNotifier {
   /// 默认上下文消息数量（全局设置）
   int _defaultContextMessageCount = 10;
 
-  /// 缓存的分组列表，确保UI稳定性
-  List<ConversationGroup> _cachedGroups = [];
-
   ConversationController({required this.storage}) {
     conversationService = ConversationService(storage: storage);
     messageService = MessageService(storage: storage);
@@ -51,9 +47,6 @@ class ConversationController extends ChangeNotifier {
   bool get isLoading => conversationService.isLoading;
 
   List<Conversation> get conversations => _getFilteredConversations();
-  List<ConversationGroup> get groups =>
-      _cachedGroups.isNotEmpty ? _cachedGroups : conversationService.groups;
-  int get groupsCount => groups.length;
 
   String? get currentConversationId => _currentConversationId;
   Conversation? get currentConversation =>
@@ -62,6 +55,9 @@ class ConversationController extends ChangeNotifier {
           : null;
 
   List<ChatMessage> get currentMessages => messageService.currentMessages;
+
+  /// 获取所有会话（包括未过滤的），用于提取分组名称
+  List<Conversation> get allConversations => conversationService.conversations;
 
   String get searchQuery => _searchQuery;
   List<String> get selectedGroupFilters => _selectedGroupFilters;
@@ -76,22 +72,11 @@ class ConversationController extends ChangeNotifier {
 
     await conversationService.initialize();
 
-    // 缓存分组列表，确保UI稳定性
-    _updateCachedGroups();
-
     // 加载全局配置
     await _loadGlobalConfig();
 
     _isInitialized = true;
     notifyListeners();
-  }
-
-  /// 更新缓存的分组列表
-  void _updateCachedGroups() {
-    final serviceGroups = conversationService.groups;
-    if (serviceGroups.isNotEmpty || _cachedGroups.isEmpty) {
-      _cachedGroups = List.from(serviceGroups);
-    }
   }
 
   /// 加载全局配置
@@ -122,8 +107,6 @@ class ConversationController extends ChangeNotifier {
 
   /// 服务变化回调
   void _onServiceChanged() {
-    // 更新缓存的分组列表，确保UI稳定性
-    _updateCachedGroups();
     notifyListeners();
   }
 
@@ -183,48 +166,6 @@ class ConversationController extends ChangeNotifier {
     await conversationService.togglePin(conversationId);
   }
 
-  // ========== 分组操作 ==========
-
-  /// 创建分组
-  Future<ConversationGroup> createGroup({
-    required String name,
-    String? icon,
-    String? color,
-  }) async {
-    try {
-      final group = await conversationService.createGroup(
-        name: name,
-        icon: icon,
-        color: color,
-      );
-      // 立即更新缓存
-      _updateCachedGroups();
-      notifyListeners();
-      return group;
-    } catch (e) {
-      debugPrint('创建分组失败: $e');
-      rethrow; // 重新抛出异常，让UI层知道
-    }
-  }
-
-  /// 更新分组
-  Future<void> updateGroup(ConversationGroup group) async {
-    await conversationService.updateGroup(group);
-    // 立即更新缓存
-    _updateCachedGroups();
-    notifyListeners();
-  }
-
-  /// 删除分组
-  Future<void> deleteGroup(String groupId) async {
-    // 从筛选器中移除
-    _selectedGroupFilters.remove(groupId);
-    await conversationService.deleteGroup(groupId);
-    // 立即更新缓存
-    _updateCachedGroups();
-    notifyListeners();
-  }
-
   // ========== 筛选和搜索 ==========
 
   /// 设置搜索关键词
@@ -234,22 +175,18 @@ class ConversationController extends ChangeNotifier {
   }
 
   /// 切换分组过滤器
-  void toggleGroupFilter(String groupId) {
-    if (_selectedGroupFilters.contains(groupId)) {
-      _selectedGroupFilters.remove(groupId);
+  void toggleGroupFilter(String groupName) {
+    if (_selectedGroupFilters.contains(groupName)) {
+      _selectedGroupFilters.remove(groupName);
     } else {
-      _selectedGroupFilters.add(groupId);
+      _selectedGroupFilters.add(groupName);
     }
-    // 确保分组列表保持稳定
-    _updateCachedGroups();
     notifyListeners();
   }
 
   /// 清除分组过滤器
   void clearGroupFilters() {
     _selectedGroupFilters.clear();
-    // 确保分组列表保持稳定
-    _updateCachedGroups();
     notifyListeners();
   }
 

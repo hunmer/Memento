@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
+import 'package:shared_models/shared_models.dart';
 
 enum CheckinCardStyle {
   weekly,
@@ -87,38 +88,62 @@ class CheckinItem {
 
   // 添加打卡记录
   Future<void> addCheckinRecord(CheckinRecord record) async {
-    final dateStr = _dateToString(record.checkinTime);
-    if (!checkInRecords.containsKey(dateStr)) {
-      checkInRecords[dateStr] = [];
+    try {
+      // 通过 UseCase 保存到数据库
+      final result = await CheckinPlugin.instance.checkinUseCase.addCheckinRecord({
+        'itemId': id,
+        'startTime': record.startTime.toIso8601String(),
+        'endTime': record.endTime.toIso8601String(),
+        'checkinTime': record.checkinTime.toIso8601String(),
+        'note': record.note,
+      });
+
+      if (result.isSuccess) {
+        // 保存成功后，重新加载数据以确保本地和数据库一致
+        await CheckinPlugin.shared.triggerSave();
+      } else {
+        final error = result.errorOrNull;
+        final message = error != null ? error.message : '添加打卡记录失败';
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('添加打卡记录失败: $e');
     }
-    checkInRecords[dateStr]!.add(record);
-    checkInRecords[dateStr]!.sort((a, b) => b.checkinTime.compareTo(a.checkinTime));
-    await CheckinPlugin.shared.triggerSave();
   }
 
   // 取消打卡
   Future<void> cancelCheckinRecord(DateTime recordTime, {int? recordIndex}) async {
     final dateStr = _dateToString(recordTime);
-    if (checkInRecords.containsKey(dateStr)) {
-      if (recordIndex != null && recordIndex >= 0 && recordIndex < checkInRecords[dateStr]!.length) {
-        // 如果提供了索引，只删除指定索引的记录
-        checkInRecords[dateStr]!.removeAt(recordIndex);
-      } else {
-        // 如果没有提供索引，找到第一个匹配的记录删除
-        final index = checkInRecords[dateStr]!.indexWhere(
-          (record) => record.checkinTime.isAtSameMomentAs(recordTime)
-        );
-        if (index >= 0) {
-          checkInRecords[dateStr]!.removeAt(index);
+    int? indexToDelete = recordIndex;
+
+    // 如果没有提供索引，找到第一个匹配的记录
+    if (indexToDelete == null && checkInRecords.containsKey(dateStr)) {
+      indexToDelete = checkInRecords[dateStr]!.indexWhere(
+        (record) => record.checkinTime.isAtSameMomentAs(recordTime)
+      );
+    }
+
+    if (indexToDelete != null && indexToDelete >= 0) {
+      try {
+        // 通过 UseCase 删除记录
+        final result = await CheckinPlugin.instance.checkinUseCase.deleteCheckinRecord({
+          'itemId': id,
+          'date': dateStr,
+          'recordIndex': indexToDelete,
+        });
+
+        if (result.isSuccess) {
+          // 删除成功后，重新加载数据
+          await CheckinPlugin.shared.triggerSave();
+        } else {
+          final error = result.errorOrNull;
+          final message = error != null ? error.message : '删除打卡记录失败';
+          throw Exception(message);
         }
-      }
-      
-      // 如果该日期下没有记录了，移除该日期
-      if (checkInRecords[dateStr]!.isEmpty) {
-        checkInRecords.remove(dateStr);
+      } catch (e) {
+        throw Exception('删除打卡记录失败: $e');
       }
     }
-    await CheckinPlugin.shared.triggerSave();
   }
 
   // 获取指定月份的打卡记录
@@ -155,8 +180,27 @@ class CheckinItem {
 
   // 重置所有打卡记录
   Future<void> resetRecords() async {
-    checkInRecords.clear();
-    await CheckinPlugin.shared.triggerSave();
+    try {
+      // 通过 UseCase 更新项目，清空所有打卡记录
+      final updatedCheckInRecords = <String, List<CheckinRecordDto>>{};
+
+      // 转换为 DTO 格式（空地图）
+      final result = await CheckinPlugin.instance.checkinUseCase.updateItem({
+        'id': id,
+        'checkInRecords': updatedCheckInRecords,
+      });
+
+      if (result.isSuccess) {
+        // 更新成功后，重新加载数据
+        await CheckinPlugin.shared.triggerSave();
+      } else {
+        final error = result.errorOrNull;
+        final message = error != null ? error.message : '重置打卡记录失败';
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('重置打卡记录失败: $e');
+    }
   }
 
   // 将对象转换为可序列化的Map

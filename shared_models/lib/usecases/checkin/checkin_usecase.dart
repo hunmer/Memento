@@ -260,12 +260,13 @@ class CheckinUseCase {
       final endTime = DateTime.parse(params['endTime'] as String);
       final checkinTime = DateTime.parse(params['checkinTime'] as String);
 
-      // 验证时间逻辑
+      // 验证时间逻辑 - 使用毫秒精度比较
       if (endTime.isBefore(startTime)) {
         return Result.failure('结束时间必须晚于开始时间', code: ErrorCodes.validationError);
       }
 
-      if (checkinTime.isBefore(startTime) || checkinTime.isAfter(endTime)) {
+      if (startTime != endTime && checkinTime.isBefore(startTime) ||
+          checkinTime.isAfter(endTime)) {
         return Result.failure('打卡时间必须在开始和结束时间之间',
             code: ErrorCodes.validationError);
       }

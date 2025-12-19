@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
@@ -6,6 +8,7 @@ import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/save_t
 import 'components/template_execution_dialog.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 /// 工具模板管理界面
 class ToolTemplateScreen extends StatefulWidget {
   final ToolTemplateService templateService;
@@ -64,125 +67,119 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
 
     final allTags = widget.templateService.getAllTags();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('agent_chat_toolTemplate'.tr),
-        actions: [
-          // 标签过滤按钮
-          if (allTags.isNotEmpty)
-            IconButton(
-              icon: Badge(
-                isLabelVisible: _selectedTags.isNotEmpty,
-                label: Text(_selectedTags.length.toString()),
-                child: Icon(
-                  Icons.filter_list,
-                  color: _selectedTags.isNotEmpty ? Colors.blue : null,
-                ),
-              ),
-              tooltip: '按标签过滤',
-              onPressed: () => _showTagFilterDialog(allTags),
-            ),
-          // 重置默认模板按钮
+    return SuperCupertinoNavigationWrapper(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      title: Text('agent_chat_toolTemplate'.tr),
+      largeTitle: 'agent_chat_toolTemplate'.tr,
+      enableLargeTitle: true,
+      enableSearchBar: true,
+      searchPlaceholder: 'agent_chat_searchPlaceholder'.tr,
+      onSearchChanged: (query) {
+        setState(() {
+          _searchQuery = query;
+        });
+      },
+      onSearchSubmitted: (query) {
+        setState(() {
+          _searchQuery = query;
+        });
+      },
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      actions: [
+        // 标签过滤按钮
+        if (allTags.isNotEmpty)
           IconButton(
-            icon: const Icon(Icons.restore),
-            tooltip: '重置默认模板',
-            onPressed: _resetToDefaultTemplates,
+            icon: Badge(
+              isLabelVisible: _selectedTags.isNotEmpty,
+              label: Text(_selectedTags.length.toString()),
+              child: Icon(
+                Icons.filter_list,
+                color: _selectedTags.isNotEmpty ? Colors.blue : null,
+              ),
+            ),
+            tooltip: '按标签过滤',
+            onPressed: () => _showTagFilterDialog(allTags),
           ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(_selectedTags.isNotEmpty ? 100 : 60),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: '搜索工具模板...',
-                    prefixIcon: const Icon(Icons.search),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none,
+        // 重置默认模板按钮
+        IconButton(
+          icon: const Icon(Icons.restore),
+          tooltip: '重置默认模板',
+          onPressed: _resetToDefaultTemplates,
+        ),
+      ],
+      body: Column(
+        children: [
+          // 当前选中的标签
+          if (_selectedTags.isNotEmpty)
+            Container(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              padding: const EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 8),
+              child: Row(
+                children: [
+                  const Text(
+                    '当前过滤：',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Scrollbar(
+                      controller: _tagsScrollController,
+                      thumbVisibility: true,
+                      child: SingleChildScrollView(
+                        controller: _tagsScrollController,
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: _selectedTags.map((tag) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: Chip(
+                                avatar: const Icon(Icons.label, size: 16),
+                                label: Text(tag),
+                                onDeleted: () {
+                                  setState(() {
+                                    _selectedTags.remove(tag);
+                                  });
+                                },
+                                deleteIcon: const Icon(Icons.close, size: 16),
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
-                  },
-                ),
-              ),
-              // 当前选中的标签
-              if (_selectedTags.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                  child: Row(
-                    children: [
-                      const Text(
-                        '当前过滤：',
+                  if (_selectedTags.length > 1)
+                    TextButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _selectedTags.clear();
+                        });
+                      },
+                      icon: const Icon(Icons.clear_all, size: 16),
+                      label: Text(
+                        'agent_chat_clear'.tr,
                         style: TextStyle(fontSize: 12),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Scrollbar(
-                          controller: _tagsScrollController,
-                          thumbVisibility: true,
-                          child: SingleChildScrollView(
-                            controller: _tagsScrollController,
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children:
-                                  _selectedTags.map((tag) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(right: 6),
-                                      child: Chip(
-                                        avatar: const Icon(Icons.label, size: 16),
-                                        label: Text(tag),
-                                        onDeleted: () {
-                                          setState(() {
-                                            _selectedTags.remove(tag);
-                                          });
-                                        },
-                                        deleteIcon: const Icon(Icons.close, size: 16),
-                                        visualDensity: VisualDensity.compact,
-                                      ),
-                                    );
-                                  }).toList(),
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (_selectedTags.length > 1)
-                        TextButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              _selectedTags.clear();
-                            });
-                          },
-                          icon: const Icon(Icons.clear_all, size: 16),
-                          label: Text(
-                            'agent_chat_clear'.tr,
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-      body: templates.isEmpty
-          ? _buildEmptyState()
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: templates.length,
-              itemBuilder: (context, index) {
-                final template = templates[index];
-                return _buildTemplateCard(template);
-              },
+                    ),
+                ],
+              ),
             ),
+          // 模板列表
+          Expanded(
+            child: templates.isEmpty
+                ? _buildEmptyState()
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: templates.length,
+                    itemBuilder: (context, index) {
+                      final template = templates[index];
+                      return _buildTemplateCard(template);
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 

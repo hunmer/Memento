@@ -7,7 +7,6 @@ library;
 import 'package:Memento/plugins/agent_chat/services/conversation_service.dart';
 import 'package:Memento/plugins/agent_chat/services/message_service.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
-import 'package:Memento/plugins/agent_chat/models/conversation_group.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
 import 'package:Memento/plugins/agent_chat/models/file_attachment.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
@@ -205,11 +204,28 @@ class ClientAgentChatRepository extends IAgentChatRepository {
 
   // ============ 分组操作 ============
 
+  /// 获取分组列表
+  /// 由于分组现在是动态的（存储在会话中），返回空列表
   @override
   Future<Result<List<AgentChatGroupDto>>> getGroups() async {
     try {
-      final groups = conversationService.groups;
-      return Result.success(groups.map(_groupToDto).toList());
+      // 从会话中动态提取分组名称
+      final uniqueGroupNames = <String>{};
+      for (final conv in conversationService.conversations) {
+        uniqueGroupNames.addAll(conv.groups);
+      }
+
+      // 转换为 DTO
+      final groupDtos = uniqueGroupNames.map((name) => AgentChatGroupDto(
+        id: name, // 使用名称作为 ID
+        name: name,
+        icon: null,
+        color: null,
+        order: 0,
+        createdAt: DateTime.now(),
+      )).toList();
+
+      return Result.success(groupDtos);
     } catch (e) {
       return Result.failure('获取分组列表失败: $e', code: ErrorCodes.serverError);
     }
@@ -218,12 +234,24 @@ class ClientAgentChatRepository extends IAgentChatRepository {
   @override
   Future<Result<AgentChatGroupDto?>> getGroupById(String id) async {
     try {
-      final group =
-          conversationService.groups.where((g) => g.id == id).firstOrNull;
-      if (group == null) {
-        return Result.success(null);
+      // 从会话中查找分组
+      final uniqueGroupNames = <String>{};
+      for (final conv in conversationService.conversations) {
+        uniqueGroupNames.addAll(conv.groups);
       }
-      return Result.success(_groupToDto(group));
+
+      if (uniqueGroupNames.contains(id)) {
+        return Result.success(AgentChatGroupDto(
+          id: id,
+          name: id,
+          icon: null,
+          color: null,
+          order: 0,
+          createdAt: DateTime.now(),
+        ));
+      }
+
+      return Result.success(null);
     } catch (e) {
       return Result.failure('获取分组失败: $e', code: ErrorCodes.serverError);
     }
@@ -232,22 +260,9 @@ class ClientAgentChatRepository extends IAgentChatRepository {
   @override
   Future<Result<AgentChatGroupDto>> createGroup(AgentChatGroupDto dto) async {
     try {
-      final group = ConversationGroup(
-        id: dto.id,
-        name: dto.name,
-        icon: dto.icon,
-        color: dto.color,
-        order: dto.order,
-        createdAt: dto.createdAt,
-      );
-
-      await conversationService.createGroup(
-        name: group.name,
-        icon: group.icon,
-        color: group.color,
-      );
-
-      return Result.success(_groupToDto(group));
+      // 分组现在是通过会话的 groups 字段动态管理的
+      // 不需要显式创建，直接返回成功
+      return Result.success(dto);
     } catch (e) {
       return Result.failure('创建分组失败: $e', code: ErrorCodes.serverError);
     }
@@ -259,21 +274,9 @@ class ClientAgentChatRepository extends IAgentChatRepository {
     AgentChatGroupDto dto,
   ) async {
     try {
-      final group =
-          conversationService.groups.where((g) => g.id == id).firstOrNull;
-      if (group == null) {
-        return Result.failure('分组不存在', code: ErrorCodes.notFound);
-      }
-
-      // 更新字段
-      group.name = dto.name;
-      group.icon = dto.icon;
-      group.color = dto.color;
-      group.order = dto.order;
-
-      await conversationService.updateGroup(group);
-
-      return Result.success(_groupToDto(group));
+      // 分组现在是通过会话的 groups 字段动态管理的
+      // 不需要显式更新，直接返回成功
+      return Result.success(dto);
     } catch (e) {
       return Result.failure('更新分组失败: $e', code: ErrorCodes.serverError);
     }
@@ -282,7 +285,8 @@ class ClientAgentChatRepository extends IAgentChatRepository {
   @override
   Future<Result<bool>> deleteGroup(String id) async {
     try {
-      await conversationService.deleteGroup(id);
+      // 分组现在是通过会话的 groups 字段动态管理的
+      // 不需要显式删除，直接返回成功
       return Result.success(true);
     } catch (e) {
       return Result.failure('删除分组失败: $e', code: ErrorCodes.serverError);
@@ -630,17 +634,6 @@ class ClientAgentChatRepository extends IAgentChatRepository {
       lastMessagePreview: conversation.lastMessagePreview,
       unreadCount: conversation.unreadCount,
       metadata: conversation.metadata,
-    );
-  }
-
-  AgentChatGroupDto _groupToDto(ConversationGroup group) {
-    return AgentChatGroupDto(
-      id: group.id,
-      name: group.name,
-      icon: group.icon,
-      color: group.color,
-      order: group.order,
-      createdAt: group.createdAt,
     );
   }
 

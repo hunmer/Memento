@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/widgets/quill_viewer/index.dart';
@@ -25,7 +25,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   late DateTime _focusedDay;
   DateTime? _selectedDay;
   Map<DateTime, DiaryEntry> _diaryEntries = {};
-  CalendarFormat _calendarFormat = CalendarFormat.month;
+  late CalendarController _calendarController;
 
   // 搜索相关状态
   String _searchQuery = '';
@@ -49,7 +49,16 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       DateTime.now().month,
       DateTime.now().day,
     );
+    _calendarController = CalendarController();
+    _calendarController.displayDate = DateTime.now();
+    _calendarController.selectedDate = _selectedDay;
     _loadDiaryEntries();
+  }
+
+  @override
+  void dispose() {
+    _calendarController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDiaryEntries() async {
@@ -96,6 +105,11 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       _focusedDay = focusedDay;
     });
     // 只选中日期，不直接打开编辑器
+  }
+
+  bool _isSameDay(DateTime? a, DateTime b) {
+    if (a == null) return false;
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   List<String> _extractImagesFromContent(String content) {
@@ -312,6 +326,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                 // Month Selector
                 MonthSelector(
                   selectedMonth: _focusedDay,
+                  maxDate: DateTime.now(), // 限制不能选择未来月份
                   onMonthSelected: (month) {
                     setState(() {
                       _focusedDay = DateTime(
@@ -319,6 +334,8 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                         month.month,
                         _focusedDay.day,
                       );
+                      // 同步更新日历控制器的显示日期
+                      _calendarController.displayDate = _focusedDay;
                     });
                   },
                   getMonthStats: (month) {
@@ -373,115 +390,66 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                 ),
 
                 // Calendar
-                TableCalendar<DiaryEntry>(
-                  firstDay: DateTime.utc(2020, 1, 1),
-                  lastDay: DateTime.now(),
-                  focusedDay: _focusedDay,
-                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                  onDaySelected: _onDayClicked,
-                  calendarFormat: _calendarFormat,
-                  onFormatChanged: (format) {
-                    setState(() {
-                      _calendarFormat = format;
-                    });
-                  },
-                  onPageChanged: (focusedDay) {
-                    _focusedDay = focusedDay;
-                  },
-                  eventLoader: (day) {
+                SfCalendar(
+                  controller: _calendarController,
+                  view: CalendarView.month,
+                  initialDisplayDate: _focusedDay,
+                  minDate: DateTime.utc(2020, 1, 1),
+                  maxDate: DateTime.now(),
+                  headerHeight: 0,
+                  viewHeaderHeight: 40,
+                  showNavigationArrow: false,
+                  monthViewSettings: MonthViewSettings(
+                    showTrailingAndLeadingDates: false,
+                    dayFormat: 'EEE',
+                    monthCellStyle: MonthCellStyle(
+                      textStyle: TextStyle(
+                        color: textColor.withValues(alpha: 0.6),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  cellBorderColor: Colors.transparent,
+                  selectionDecoration: const BoxDecoration(),
+                  todayHighlightColor: Colors.transparent,
+                  monthCellBuilder: (BuildContext context, MonthCellDetails details) {
+                    final day = details.date;
                     final normalizedDay = DateTime(day.year, day.month, day.day);
-                    if (_diaryEntries.containsKey(normalizedDay)) {
-                      return [_diaryEntries[normalizedDay]!];
-                    }
-                    return [];
+                    final entry = _diaryEntries[normalizedDay];
+                    final isToday = _isSameDay(DateTime.now(), day);
+                    final isSelected = _isSameDay(_selectedDay, day);
+
+                    return _buildCalendarCellWithMood(
+                      day,
+                      textColor,
+                      isToday || isSelected ? primaryColor : null,
+                      isDark,
+                      entry,
+                      isToday: isToday,
+                      isSelected: isSelected,
+                    );
                   },
-                  rowHeight: 70, // Matches h-16 (approx 64px) + gap
-                  daysOfWeekHeight: 40,
-                  headerVisible: false, // We use custom header
-                  daysOfWeekStyle: DaysOfWeekStyle(
-                    weekdayStyle: TextStyle(
-                      color: textColor.withValues(alpha: 0.6),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                    weekendStyle: TextStyle(
-                      color: textColor.withValues(alpha: 0.6),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                    dowTextFormatter:
-                        (date, locale) =>
-                            DateFormat.E(locale).format(date)[0], // S M T ...
-                  ),
-                  calendarStyle: CalendarStyle(
-                    outsideDaysVisible: false,
-                    cellMargin: const EdgeInsets.all(4),
-                    todayDecoration: BoxDecoration(
-                      color: Colors.transparent,
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: primaryColor, width: 2),
-                    ),
-                    selectedDecoration: BoxDecoration(
-                      color: Colors.transparent,
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: primaryColor, width: 2),
-                    ),
-                    defaultDecoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    weekendDecoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  calendarBuilders: CalendarBuilders<DiaryEntry>(
-                    defaultBuilder: (context, day, focusedDay) {
-                      return _buildCalendarCell(day, textColor, null, isDark);
-                    },
-                    todayBuilder: (context, day, focusedDay) {
-                      return _buildCalendarCell(
-                        day,
-                        textColor,
-                        primaryColor,
-                        isDark,
-                        isToday: true,
-                      );
-                    },
-                    selectedBuilder: (context, day, focusedDay) {
-                      return _buildCalendarCell(
-                        day,
-                        textColor,
-                        primaryColor,
-                        isDark,
-                        isSelected: true,
-                      );
-                    },
-                    markerBuilder: (context, date, events) {
-                      if (events.isEmpty) return null;
-                      final entry = events.first;
-                      return Positioned(
-                        top: 4,
-                        right: 4,
-                        child:
-                            entry.mood != null
-                                ? Text(
-                                  entry.mood!,
-                                  style: const TextStyle(fontSize: 14),
-                                )
-                                : Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: BoxDecoration(
-                                    color: primaryColor,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                      );
-                    },
-                  ),
+                  onTap: (CalendarTapDetails details) {
+                    if (details.date != null) {
+                      _onDayClicked(details.date!, details.date!);
+                      setState(() {
+                        _calendarController.selectedDate = details.date;
+                      });
+                    }
+                  },
+                  onViewChanged: (ViewChangedDetails details) {
+                    if (details.visibleDates.isNotEmpty) {
+                      final newFocusedDay = details.visibleDates[details.visibleDates.length ~/ 2];
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          setState(() {
+                            _focusedDay = newFocusedDay;
+                          });
+                        }
+                      });
+                    }
+                  },
                 ),
 
                 const SizedBox(height: 16),
@@ -602,7 +570,7 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                             },
                           ),
                           Container(
-                            constraints: BoxConstraints(
+                            constraints: const BoxConstraints(
                               minHeight: 200, // Minimum height for better UX
                             ),
                             child: QuillViewer(
@@ -690,19 +658,15 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
     );
   }
 
-  Widget _buildCalendarCell(
+  Widget _buildCalendarCellWithMood(
     DateTime day,
     Color textColor,
     Color? borderColor,
-    bool isDark, {
+    bool isDark,
+    DiaryEntry? entry, {
     bool isToday = false,
     bool isSelected = false,
   }) {
-    final normalizedDay = DateTime(day.year, day.month, day.day);
-    final entry = _diaryEntries[normalizedDay];
-
-    // Simulate random-ish background for demo matching the design's visual interest
-    // In a real app, maybe we use a specific color or pattern based on mood/content
     final hasEntry = entry != null;
 
     return Container(
@@ -730,6 +694,25 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
               ),
             ),
           ),
+          if (entry != null)
+            Positioned(
+              top: 4,
+              right: 4,
+              child:
+                  entry.mood != null
+                      ? Text(
+                        entry.mood!,
+                        style: const TextStyle(fontSize: 14),
+                      )
+                      : Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: borderColor ?? textColor,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+            ),
         ],
       ),
     );
