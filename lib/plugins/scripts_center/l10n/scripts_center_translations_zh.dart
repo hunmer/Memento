@@ -4,6 +4,10 @@ const Map<String, String> scriptsCenterTranslationsZh = {
   'scripts_center_name': '脚本中心',
   'scripts_center_scriptCenter': '脚本中心',
 
+  // 搜索和操作
+  'scripts_center_search': '搜索脚本',
+  'scripts_center_newScript': '新增脚本',
+
   // 脚本编辑
   'scripts_center_format': '格式化',
   'scripts_center_addTrigger': '添加触发器',

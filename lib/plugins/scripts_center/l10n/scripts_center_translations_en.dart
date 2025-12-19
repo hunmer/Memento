@@ -4,6 +4,10 @@ const Map<String, String> scriptsCenterTranslationsEn = {
   'scripts_center_name': 'Script Center',
   'scripts_center_scriptCenter': 'Script Center',
 
+  // Search and actions
+  'scripts_center_search': 'Search scripts',
+  'scripts_center_newScript': 'New Script',
+
   // Script editing
   'scripts_center_format': 'Format',
   'scripts_center_addTrigger': 'Add Trigger',
