@@ -186,7 +186,7 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
           child: Text('app_cancel'.tr),
         ),
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             if (_formKey.currentState!.validate()) {
               final now = DateTime.now();
               // 标准化时间，保留到秒级别（忽略毫秒）
@@ -224,10 +224,25 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
                         ? _noteController.text.trim()
                         : null,
               );
-              widget.item.addCheckinRecord(record);
-              widget.onCheckinCompleted();
-              widget.controller.notifyEvent('completed', widget.item);
-              Navigator.of(context).pop();
+
+              try {
+                // 等待打卡记录保存完成
+                await widget.item.addCheckinRecord(record);
+
+                // 保存成功后才触发回调和关闭对话框
+                if (mounted) {
+                  widget.onCheckinCompleted();
+                  widget.controller.notifyEvent('completed', widget.item);
+                  Navigator.of(context).pop();
+                }
+              } catch (e) {
+                // 显示错误提示
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('打卡失败: $e')),
+                  );
+                }
+              }
             }
           },
           child: Text('checkin_checkinButton'.tr),

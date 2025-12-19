@@ -32,7 +32,7 @@ class CheckinRecordDto {
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    return <String, dynamic>{
       'startTime': startTime.toIso8601String(),
       'endTime': endTime.toIso8601String(),
       'checkinTime': checkinTime.toIso8601String(),
@@ -87,12 +87,12 @@ class ReminderSettingsDto {
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    return <String, dynamic>{
       'type': type,
       'weekdays': weekdays,
       'dayOfMonth': dayOfMonth,
       'specificDate': specificDate?.toIso8601String(),
-      'timeOfDay': {
+      'timeOfDay': <String, dynamic>{
         'hour': hour,
         'minute': minute,
       },
@@ -168,7 +168,7 @@ class CheckinItemDto {
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    return <String, dynamic>{
       'id': id,
       'name': name,
       'icon': icon,
@@ -177,7 +177,7 @@ class CheckinItemDto {
       'description': description,
       'cardStyle': cardStyle,
       'reminderSettings': reminderSettings?.toJson(),
-      'checkInRecords': checkInRecords.map(
+      'checkInRecords': checkInRecords.map<String, dynamic>(
         (key, value) => MapEntry(key, value.map((r) => r.toJson()).toList()),
       ),
     };
@@ -240,7 +240,7 @@ class CheckinStatsDto {
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    return <String, dynamic>{
       'totalCheckins': totalCheckins,
       'todayCheckins': todayCheckins,
       'totalItems': totalItems,

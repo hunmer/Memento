@@ -15,7 +15,9 @@ class ClientCheckinRepository extends ICheckinRepository {
   // ============ 内部辅助方法 ============
 
   Future<Map<String, dynamic>?> _readItemsData() async {
-    return await storage.read('$pluginId/items.json');
+    final data = await storage.read('$pluginId/items.json');
+    if (data == null) return null;
+    return Map<String, dynamic>.from(data as Map);
   }
 
   Future<void> _writeItemsData(Map<String, dynamic> data) async {
@@ -74,7 +76,7 @@ class ClientCheckinRepository extends ICheckinRepository {
       final data = await _readItemsData();
       final items = _parseItemsList(data);
       items.add(item);
-      await _writeItemsData({'items': items.map((i) => i.toJson()).toList()});
+      await _writeItemsData(<String, dynamic>{'items': items.map((i) => i.toJson()).toList()});
       return Result.success(item);
     } catch (e) {
       return Result.failure('创建打卡项目失败: $e', code: ErrorCodes.serverError);
@@ -96,7 +98,7 @@ class ClientCheckinRepository extends ICheckinRepository {
       }
 
       items[index] = item;
-      await _writeItemsData({'items': items.map((i) => i.toJson()).toList()});
+      await _writeItemsData(<String, dynamic>{'items': items.map((i) => i.toJson()).toList()});
       return Result.success(item);
     } catch (e) {
       return Result.failure('更新打卡项目失败: $e', code: ErrorCodes.serverError);
@@ -115,7 +117,7 @@ class ClientCheckinRepository extends ICheckinRepository {
         return Result.failure('打卡项目不存在', code: ErrorCodes.notFound);
       }
 
-      await _writeItemsData({'items': items.map((i) => i.toJson()).toList()});
+      await _writeItemsData(<String, dynamic>{'items': items.map((i) => i.toJson()).toList()});
       return Result.success(true);
     } catch (e) {
       return Result.failure('删除打卡项目失败: $e', code: ErrorCodes.serverError);
@@ -150,7 +152,7 @@ class ClientCheckinRepository extends ICheckinRepository {
 
       final updatedItem = item.copyWith(checkInRecords: updatedRecords);
       items[index] = updatedItem;
-      await _writeItemsData({'items': items.map((i) => i.toJson()).toList()});
+      await _writeItemsData(<String, dynamic>{'items': items.map((i) => i.toJson()).toList()});
 
       return Result.success(updatedItem);
     } catch (e) {
@@ -193,7 +195,7 @@ class ClientCheckinRepository extends ICheckinRepository {
 
       final updatedItem = item.copyWith(checkInRecords: updatedRecords);
       items[index] = updatedItem;
-      await _writeItemsData({'items': items.map((i) => i.toJson()).toList()});
+      await _writeItemsData(<String, dynamic>{'items': items.map((i) => i.toJson()).toList()});
 
       return Result.success(updatedItem);
     } catch (e) {

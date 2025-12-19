@@ -16,7 +16,6 @@ import 'package:Memento/core/services/toast_service.dart';
 
 class CheckinListController {
   final BuildContext context;
-  final List<CheckinItem> checkinItems;
   final Function() onStateChanged;
 
   GroupSortType currentSortType = GroupSortType.upcoming;
@@ -28,9 +27,11 @@ class CheckinListController {
   String searchQuery = ''; // 搜索文本
   bool get isSearching => searchQuery.isNotEmpty;
 
+  // 动态获取最新的 checkinItems
+  List<CheckinItem> get checkinItems => CheckinPlugin.instance.checkinItems;
+
   CheckinListController({
     required this.context,
-    required this.checkinItems,
     required this.onStateChanged,
     // required this.expandedGroups, // Remove this parameter
   });
