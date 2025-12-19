@@ -480,12 +480,14 @@ class HourlyDistributionBar extends StatelessWidget {
   final List<TimeSeriesPoint> hourlyData;
   final List<Color> colorPalette;
   final double height;
+  final Map<int, String>? hourlyMainTags; // 每个小时的主要标签
 
   const HourlyDistributionBar({
     super.key,
     required this.hourlyData,
     required this.colorPalette,
     this.height = 32,
+    this.hourlyMainTags,
   });
 
   @override
@@ -494,6 +496,17 @@ class HourlyDistributionBar extends StatelessWidget {
       return Center(
         child: Text('widget_noDataAvailable'.tr),
       );
+    }
+
+    // 获取显示文本（标签或时间）
+    String getDisplayText(int hour) {
+      if (hourlyMainTags != null && hourlyMainTags!.containsKey(hour)) {
+        final tag = hourlyMainTags![hour];
+        if (tag != null && tag.isNotEmpty) {
+          return tag; // 显示标签
+        }
+      }
+      return hour.toString().padLeft(2, '0'); // 显示时间
     }
 
     // 转换为 24 小时的分布
@@ -529,12 +542,13 @@ class HourlyDistributionBar extends StatelessWidget {
                     alignment: Alignment.center,
                     child: value > 0 && flex > 10
                         ? Text(
-                              index.toString().padLeft(2, '0'),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                            ),
-                          )
+                              // 如果有标签信息，显示标签；否则显示时间
+                              getDisplayText(index),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                              ),
+                            )
                         : null,
                   ),
                 );

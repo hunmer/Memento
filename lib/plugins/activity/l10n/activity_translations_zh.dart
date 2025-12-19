@@ -65,6 +65,8 @@ class ActivityTranslationsZh {
     'activity_activityDistributionTitle': '活动占比统计',
     'activity_totalDuration': '总时长',
     'activity_activityRecords': '活动记录',
+    'activity_activityStatistics': '活动统计',
+    'activity_hours': '小时',
 
     'activity_to': '至',
     'activity_hour': '时',

@@ -65,6 +65,8 @@ class ActivityTranslationsEn {
     'activity_activityDistributionTitle': 'Activity Distribution',
     'activity_totalDuration': 'Total Duration',
     'activity_activityRecords': 'Activity Records',
+    'activity_activityStatistics': 'Activity Statistics',
+    'activity_hours': 'hours',
 
     'activity_to': 'to',
     'activity_hour': 'h',

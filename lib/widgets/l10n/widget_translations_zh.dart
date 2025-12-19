@@ -50,11 +50,44 @@ const Map<String, String> zhCN = {
   'widget_noDataPoints': 'No data points',
   'widget_noData': 'No data',
 
+  // 统计页面相关
+  'widget_statisticsTrends': '趋势',
+  'widget_statisticsDistribution': '分布',
+  'widget_statisticsHourlyDistribution': '24小时分布',
+  'widget_statisticsRanking': '排行榜',
+
+  // 日期范围选择器
+  'widget_dateRangeToday': '今天',
+  'widget_dateRangeThisWeek': '本周',
+  'widget_dateRangeThisMonth': '本月',
+  'widget_dateRangeThisYear': '本年',
+  'widget_dateRangeCustom': '自定义',
+
   // 时间相关文本
   'widget_time0000': '00:00',
+  'widget_time0100': '01:00',
+  'widget_time0200': '02:00',
+  'widget_time0300': '03:00',
+  'widget_time0400': '04:00',
+  'widget_time0500': '05:00',
   'widget_time0600': '06:00',
+  'widget_time0700': '07:00',
+  'widget_time0800': '08:00',
+  'widget_time0900': '09:00',
+  'widget_time1000': '10:00',
+  'widget_time1100': '11:00',
   'widget_time1200': '12:00',
+  'widget_time1300': '13:00',
+  'widget_time1400': '14:00',
+  'widget_time1500': '15:00',
+  'widget_time1600': '16:00',
+  'widget_time1700': '17:00',
   'widget_time1800': '18:00',
+  'widget_time1900': '19:00',
+  'widget_time2000': '20:00',
+  'widget_time2100': '21:00',
+  'widget_time2200': '22:00',
+  'widget_time2300': '23:00',
   'widget_time2400': '24:00',
 
   // 确认操作文本

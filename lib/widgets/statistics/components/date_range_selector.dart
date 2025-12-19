@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/widgets/statistics/models/statistics_models.dart';
 
@@ -61,15 +62,15 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
   String _getRangeText(DateRangeOption range) {
     switch (range) {
       case DateRangeOption.today:
-        return 'Today';
+        return 'widget_dateRangeToday'.tr;
       case DateRangeOption.thisWeek:
-        return 'This Week';
+        return 'widget_dateRangeThisWeek'.tr;
       case DateRangeOption.thisMonth:
-        return 'This Month';
+        return 'widget_dateRangeThisMonth'.tr;
       case DateRangeOption.thisYear:
-        return 'This Year';
+        return 'widget_dateRangeThisYear'.tr;
       case DateRangeOption.custom:
-        return 'Custom Range';
+        return 'widget_dateRangeCustom'.tr;
     }
   }
 
