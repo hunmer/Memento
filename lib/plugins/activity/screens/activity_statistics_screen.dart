@@ -10,16 +10,15 @@ Future<StatisticsData> loadStatisticsData(
   DateTime? startDate,
   DateTime? endDate,
 ) async {
-  if (startDate == null || endDate == null) {
-    throw Exception('Start date and end date are required');
-  }
+  // 由于 StatisticsScreen 总是会传入有效的日期，这里进行断言检查
+  assert(startDate != null && endDate != null, 'Start date and end date must not be null');
 
   // 收集指定日期范围内的所有活动
   final allActivities = <Map<String, dynamic>>[];
 
   for (
-    var date = DateTime(startDate.year, startDate.month, startDate.day);
-    date.isBefore(DateTime(endDate.year, endDate.month, endDate.day).add(const Duration(days: 1)));
+    var date = DateTime(startDate!.year, startDate.month, startDate.day);
+    date.isBefore(DateTime(endDate!.year, endDate.month, endDate.day).add(const Duration(days: 1)));
     date = date.add(const Duration(days: 1))
   ) {
     final dailyActivities = await activityService.getActivitiesForDate(date);
@@ -83,7 +82,7 @@ Future<StatisticsData> loadStatisticsData(
 
   // 计算24小时分布（仅单日有效）
   List<TimeSeriesPoint>? hourlyDistribution;
-  final isSingleDay = startDate.year == endDate.year &&
+  final isSingleDay = startDate!.year == endDate!.year &&
       startDate.month == endDate.month &&
       startDate.day == endDate.day;
 
@@ -100,8 +99,8 @@ Future<StatisticsData> loadStatisticsData(
 
   return StatisticsData(
     title: 'Activity Statistics',
-    startDate: startDate,
-    endDate: endDate,
+    startDate: startDate!,
+    endDate: endDate!,
     totalValue: totalDuration / 60, // 转换为小时
     totalValueLabel: 'hours',
     distributionData: coloredDistributionData,

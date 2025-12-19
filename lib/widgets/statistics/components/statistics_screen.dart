@@ -79,6 +79,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       final data = await widget.dataLoader(_state.selectedRange, startDate, endDate);
 
       setState(() {
+        _isLoading = false;
         _data = StatisticsData(
           title: widget.config.title,
           subtitle: widget.config.subtitle,

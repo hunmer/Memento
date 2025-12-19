@@ -119,6 +119,9 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     await storage.createDirectory('activity');
     _activityService = ActivityService(storage, 'activity');
 
+    // 初始化默认数据（如果是首次使用）
+    await _activityService.initializeDefaultData();
+
     // 创建 Repository 和 UseCase 实例
     final repository = ClientActivityRepository(activityService: _activityService);
     _activityUseCase = ActivityUseCase(repository);

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
+import 'package:Memento/plugins/activity/sample_data.dart';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
 
 class ActivityService {
@@ -283,6 +284,60 @@ class ActivityService {
     } catch (e) {
       // 静默处理小组件同步错误，不影响主要功能
       debugPrint('Failed to sync activity widget: $e');
+    }
+  }
+
+  /// 初始化默认数据
+  /// 当插件首次使用时（没有任何JSON文件存在），自动插入示例数据
+  Future<void> initializeDefaultData() async {
+    try {
+      // 检查是否已存在任何数据文件
+      final tagGroupsExists = await _storage.fileExists(_tagGroupsFilePath);
+      final recentTagsExists = await _storage.fileExists(_recentTagsFilePath);
+      final recentMoodsExists = await _storage.fileExists(_recentMoodsFilePath);
+
+      // 如果标签相关文件都不存在，说明是首次使用，插入默认数据
+      final isFirstTime = !tagGroupsExists && !recentTagsExists && !recentMoodsExists;
+
+      if (isFirstTime) {
+        debugPrint('[ActivityService] 检测到首次使用，正在插入默认数据...');
+
+        // 1. 插入默认标签分组
+        final defaultTagGroups = ActivitySampleData.defaultTagGroups;
+        await saveTagGroups(defaultTagGroups);
+        debugPrint('[ActivityService] 已插入 ${defaultTagGroups.length} 个默认标签分组');
+
+        // 2. 插入默认最近使用标签
+        final defaultRecentTags = ActivitySampleData.defaultRecentTags;
+        await saveRecentTags(defaultRecentTags);
+        debugPrint('[ActivityService] 已插入 ${defaultRecentTags.length} 个默认最近标签');
+
+        // 3. 插入默认最近使用心情
+        final defaultRecentMoods = ActivitySampleData.defaultRecentMoods;
+        await saveRecentMoods(defaultRecentMoods);
+        debugPrint('[ActivityService] 已插入 ${defaultRecentMoods.length} 个默认最近心情');
+
+        // 4. 插入今日示例活动
+        final todaySampleActivities = ActivitySampleData.getSampleActivities();
+        for (final activity in todaySampleActivities) {
+          await saveActivity(activity);
+        }
+        debugPrint('[ActivityService] 已插入 ${todaySampleActivities.length} 个今日示例活动');
+
+        // 5. 插入昨日示例活动
+        final yesterdaySampleActivities = ActivitySampleData.getYesterdaySampleActivities();
+        for (final activity in yesterdaySampleActivities) {
+          await saveActivity(activity);
+        }
+        debugPrint('[ActivityService] 已插入 ${yesterdaySampleActivities.length} 个昨日示例活动');
+
+        debugPrint('[ActivityService] 默认数据初始化完成！');
+      } else {
+        debugPrint('[ActivityService] 检测到已有数据，跳过默认数据插入');
+      }
+    } catch (e) {
+      debugPrint('[ActivityService] 初始化默认数据失败: $e');
+      // 不抛出异常，避免影响插件正常初始化
     }
   }
 }
