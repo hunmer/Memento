@@ -16,7 +16,7 @@ class ActivityDto {
   final String title;
   final List<String> tags;
   final String? description;
-  final int? mood;
+  final String? mood;
   final Map<String, dynamic>? metadata;
 
   const ActivityDto({
@@ -38,7 +38,7 @@ class ActivityDto {
       title: json['title'] as String,
       tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       description: json['description'] as String?,
-      mood: json['mood'] as int?,
+      mood: json['mood'] as String?,
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
   }
@@ -63,7 +63,7 @@ class ActivityDto {
     String? title,
     List<String>? tags,
     String? description,
-    int? mood,
+    String? mood,
     Map<String, dynamic>? metadata,
   }) {
     return ActivityDto(

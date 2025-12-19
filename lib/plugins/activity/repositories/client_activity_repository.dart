@@ -254,7 +254,7 @@ class ClientActivityRepository implements IActivityRepository {
       title: activity.title,
       tags: activity.tags,
       description: activity.description,
-      mood: activity.mood != null ? int.parse(activity.mood!) : null,
+      mood: activity.mood,
       metadata:
           activity.color != null
               ? {'color': activity.color!.value.toString()}
@@ -275,7 +275,7 @@ class ClientActivityRepository implements IActivityRepository {
       title: dto.title,
       tags: dto.tags,
       description: dto.description,
-      mood: dto.mood?.toString(),
+      mood: dto.mood,
       color: colorValue != null ? Color(colorValue) : null,
     );
   }
