@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
-import 'package:Memento/plugins/agent_chat/models/conversation_group.dart';
 
 /// 会话服务
 ///
@@ -14,9 +13,6 @@ class ConversationService extends ChangeNotifier {
   /// 所有会话列表
   List<Conversation> _conversations = [];
 
-  /// 所有分组列表
-  List<ConversationGroup> _groups = [];
-
   /// 是否正在加载
   bool _isLoading = false;
 
@@ -24,7 +20,6 @@ class ConversationService extends ChangeNotifier {
 
   // Getters
   List<Conversation> get conversations => _conversations;
-  List<ConversationGroup> get groups => _groups;
   bool get isLoading => _isLoading;
 
   /// 初始化服务
@@ -32,10 +27,7 @@ class ConversationService extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    await Future.wait([
-      _loadConversations(),
-      _loadGroups(),
-    ]);
+    await _loadConversations();
 
     _isLoading = false;
     notifyListeners();
@@ -52,33 +44,12 @@ class ConversationService extends ChangeNotifier {
             .toList();
         _conversations.sort(Conversation.compare);
       } else {
-        // 没有数据，可能是首次使用，已在_loadGroups中处理
-        _conversations = [];
-      }
-    } catch (e) {
-      debugPrint('加载会话失败: $e');
-      _conversations = [];
-    }
-  }
-
-  /// 加载所有分组
-  Future<void> _loadGroups() async {
-    try {
-      final data = await storage.read('agent_chat/groups');
-      if (data is List && data.isNotEmpty) {
-        // 有数据，正常加载
-        _groups = data
-            .map((json) =>
-                ConversationGroup.fromJson(json as Map<String, dynamic>))
-            .toList();
-        _groups.sort(ConversationGroup.compare);
-      } else {
-        // 首次使用，加载示例数据
+        // 没有数据，首次使用，加载示例数据
         debugPrint('AgentChat插件: 首次初始化，正在加载示例数据...');
         await _loadSampleData();
       }
     } catch (e) {
-      debugPrint('加载分组失败: $e');
+      debugPrint('加载会话失败: $e');
       // 加载失败时，加载示例数据
       await _loadSampleData();
     }
@@ -89,10 +60,6 @@ class ConversationService extends ChangeNotifier {
     try {
       // 获取示例数据
       final sampleData = AgentChatSampleData.getFullSampleData();
-
-      // 保存分组数据
-      final groupsJson = sampleData['groups'] as List;
-      await storage.write('agent_chat/groups', groupsJson);
 
       // 保存会话数据
       final conversationsJson = sampleData['conversations'] as List;
@@ -106,60 +73,30 @@ class ConversationService extends ChangeNotifier {
         await storage.write('agent_chat/messages/$conversationId', messages);
       }
 
+      // 提取唯一分组数量
+      final uniqueGroups = <String>{};
+      for (final convJson in conversationsJson) {
+        final conv = Conversation.fromJson(convJson as Map<String, dynamic>);
+        uniqueGroups.addAll(conv.groups);
+      }
+
       debugPrint(
-        'AgentChat插件: 示例数据加载完成！共加载 ${groupsJson.length} 个分组，${conversationsJson.length} 个会话',
+        'AgentChat插件: 示例数据加载完成！共加载 ${uniqueGroups.length} 个分组，${conversationsJson.length} 个会话',
       );
 
       // 直接加载数据到内存，避免递归调用
-      _groups =
-          groupsJson
-              .map(
-                (json) =>
-                    ConversationGroup.fromJson(json as Map<String, dynamic>),
-              )
-              .toList();
-      _groups.sort(ConversationGroup.compare);
-
-      _conversations =
-          conversationsJson
-              .map(
-                (json) => Conversation.fromJson(json as Map<String, dynamic>),
-              )
-              .toList();
+      _conversations = conversationsJson
+          .map((json) => Conversation.fromJson(json as Map<String, dynamic>))
+          .toList();
       _conversations.sort(Conversation.compare);
 
       notifyListeners();
     } catch (e) {
       debugPrint('AgentChat插件: 加载示例数据失败: $e');
-      // 如果加载示例数据失败，至少创建一个默认分组
-      await _createDefaultGroup();
-    }
-  }
-
-  /// 创建默认分组（作为示例数据加载失败时的备用方案）
-  Future<void> _createDefaultGroup() async {
-    try {
-      final defaultGroup = ConversationGroup.create(
-        name: '默认分组',
-        icon: 'folder',
-        color: '#9E9E9E',
-        order: 0,
-      );
-
-      // 保存分组
-      await storage.write('agent_chat/groups', [defaultGroup.toJson()]);
-
-      // 保存空会话列表
-      await storage.write('agent_chat/conversations', []);
-
-      // 直接加载到内存
-      _groups = [defaultGroup];
+      // 如果加载示例数据失败，创建空数据
       _conversations = [];
-
-      debugPrint('AgentChat插件: 已创建默认分组');
+      await storage.write('agent_chat/conversations', []);
       notifyListeners();
-    } catch (e) {
-      debugPrint('AgentChat插件: 创建默认分组失败: $e');
     }
   }
 
@@ -170,17 +107,6 @@ class ConversationService extends ChangeNotifier {
       await storage.write('agent_chat/conversations', data);
     } catch (e) {
       debugPrint('保存会话失败: $e');
-      rethrow; // 重新抛出异常，让调用者知道保存失败
-    }
-  }
-
-  /// 保存所有分组
-  Future<void> _saveGroups() async {
-    try {
-      final data = _groups.map((g) => g.toJson()).toList();
-      await storage.write('agent_chat/groups', data);
-    } catch (e) {
-      debugPrint('保存分组失败: $e');
       rethrow; // 重新抛出异常，让调用者知道保存失败
     }
   }
@@ -287,72 +213,11 @@ class ConversationService extends ChangeNotifier {
     await updateUnreadCount(conversationId, 0);
   }
 
-  // ========== 分组操作 ==========
-
-  /// 创建新分组
-  Future<ConversationGroup> createGroup({
-    required String name,
-    String? icon,
-    String? color,
-  }) async {
-    final group = ConversationGroup.create(
-      name: name,
-      icon: icon,
-      color: color,
-      order: _groups.length,
-    );
-
-    _groups.add(group);
-    _groups.sort(ConversationGroup.compare);
-
-    await _saveGroups();
-    notifyListeners();
-
-    return group;
-  }
-
-  /// 获取分组
-  ConversationGroup? getGroup(String id) {
-    try {
-      return _groups.firstWhere((g) => g.id == id);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// 更新分组
-  Future<void> updateGroup(ConversationGroup group) async {
-    final index = _groups.indexWhere((g) => g.id == group.id);
-    if (index != -1) {
-      _groups[index] = group;
-      await _saveGroups();
-      notifyListeners();
-    }
-  }
-
-  /// 删除分组
-  Future<void> deleteGroup(String id) async {
-    _groups.removeWhere((g) => g.id == id);
-    await _saveGroups();
-
-    // 从所有会话中移除该分组
-    for (var conversation in _conversations) {
-      if (conversation.groups.contains(id)) {
-        final updated = conversation.copyWith(
-          groups: conversation.groups.where((g) => g != id).toList(),
-        );
-        await updateConversation(updated);
-      }
-    }
-
-    notifyListeners();
-  }
-
   // ========== 查询操作 ==========
 
   /// 按分组筛选会话
-  List<Conversation> getConversationsByGroup(String groupId) {
-    return _conversations.where((c) => c.groups.contains(groupId)).toList();
+  List<Conversation> getConversationsByGroup(String groupName) {
+    return _conversations.where((c) => c.groups.contains(groupName)).toList();
   }
 
   /// 按Agent筛选会话
@@ -374,14 +239,8 @@ class ConversationService extends ChangeNotifier {
           c.lastMessagePreview?.toLowerCase().contains(lowerQuery) ?? false;
 
       // 搜索所属分组的名称
-      final groupMatch = c.groups.any((groupId) {
-        try {
-          final group = _groups.firstWhere((g) => g.id == groupId);
-          return group.name.toLowerCase().contains(lowerQuery);
-        } catch (e) {
-          // 如果分组不存在，跳过
-          return false;
-        }
+      final groupMatch = c.groups.any((groupName) {
+        return groupName.toLowerCase().contains(lowerQuery);
       });
 
       return titleMatch || messagePreviewMatch || groupMatch;

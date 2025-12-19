@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:Memento/utils/image_utils.dart';
 
 /// 日历数据模型，包含背景图片路径
@@ -44,7 +44,7 @@ class EnhancedCalendarConfig {
   final Map<DateTime, CalendarDayData> dayData;
   final DateTime focusedDay;
   final DateTime? selectedDay;
-  final CalendarFormat calendarFormat;
+  final CalendarView calendarView;
   final bool enableNavigation;
   final bool enableTodayButton;
   final bool enableDateSelection;
@@ -65,7 +65,7 @@ class EnhancedCalendarConfig {
     required this.dayData,
     required this.focusedDay,
     this.selectedDay,
-    this.calendarFormat = CalendarFormat.month,
+    this.calendarView = CalendarView.month,
     this.enableNavigation = true,
     this.enableTodayButton = true,
     this.enableDateSelection = true,
@@ -95,41 +95,52 @@ class EnhancedCalendar extends StatefulWidget {
 }
 
 class _EnhancedCalendarState extends State<EnhancedCalendar> {
-  // 只保留 selectedDay 作为内部状态（用于用户点击选择）
-  // focusedDay 直接使用 widget.config.focusedDay，确保每个日历显示正确的月份
   late DateTime? _selectedDay;
+  late CalendarController _calendarController;
 
   @override
   void initState() {
     super.initState();
     _selectedDay = widget.config.selectedDay;
+    _calendarController = CalendarController();
+    _calendarController.displayDate = widget.config.focusedDay;
+    _calendarController.selectedDate = widget.config.selectedDay;
   }
 
   @override
   void didUpdateWidget(EnhancedCalendar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // 只同步 selectedDay 状态
     if (oldWidget.config.selectedDay != widget.config.selectedDay) {
       setState(() {
         _selectedDay = widget.config.selectedDay;
+        _calendarController.selectedDate = widget.config.selectedDay;
       });
+    }
+    if (oldWidget.config.focusedDay != widget.config.focusedDay) {
+      _calendarController.displayDate = widget.config.focusedDay;
     }
   }
 
-  /// 获取当前要显示的月份 - 直接使用配置中的值
+  @override
+  void dispose() {
+    _calendarController.dispose();
+    super.dispose();
+  }
+
   DateTime get _focusedDay => widget.config.focusedDay;
 
-  /// 自定义日期单元格构建器
-  Widget _dayBuilder(BuildContext context, DateTime day, DateTime focusedDay) {
+  /// 自定义月份单元格构建器
+  Widget _monthCellBuilder(BuildContext context, MonthCellDetails details) {
+    final day = details.date;
     final dayKey = DateTime(day.year, day.month, day.day);
     final dayData = widget.config.dayData[dayKey];
 
     final backgroundImage = dayData?.backgroundImage;
     final count = dayData?.count;
-    final isSelected = _selectedDay != null && isSameDay(day, _selectedDay!);
-    final isToday = isSameDay(day, DateTime.now());
-    // 使用传入的 focusedDay 参数判断当前月份，避免初始化时状态不同步
-    final isCurrentMonth = day.month == focusedDay.month && day.year == focusedDay.year;
+    final isSelected = _selectedDay != null && _isSameDay(day, _selectedDay!);
+    final isToday = _isSameDay(day, DateTime.now());
+    final isCurrentMonth =
+        day.month == _focusedDay.month && day.year == _focusedDay.year;
 
     // 默认文本样式
     TextStyle textStyle =
@@ -164,7 +175,7 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
       );
     }
 
-    // 选中日期样式（不改变背景，只改变文字）
+    // 选中日期样式
     if (isSelected) {
       textStyle =
           widget.config.selectedDayTextStyle ??
@@ -183,7 +194,6 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
       margin: widget.config.dayMargin,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(widget.config.dayRadius),
-        // 优先级：背景图片 > 今天高亮 > 默认（移除选中状态的背景颜色）
         color:
             backgroundImage == null && isToday
                 ? (widget.config.todayDecoration?.color ??
@@ -195,10 +205,6 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
                   image: ImageUtils.createImageProvider(backgroundImage),
                   fit: BoxFit.cover,
                   opacity: 1,
-                  // colorFilter: ColorFilter.mode(
-                  //   Colors.black.withValues(alpha: 0.2),
-                  //   BlendMode.darken,
-                  // ),
                 )
                 : null,
         border:
@@ -221,6 +227,7 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
                   ? () {
                     setState(() {
                       _selectedDay = day;
+                      _calendarController.selectedDate = day;
                     });
                     widget.config.onDaySelected?.call(day);
                   }
@@ -231,10 +238,7 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
                   : null,
           child: Stack(
             children: [
-              // 日期数字
               Center(child: Text(day.day.toString(), style: textStyle)),
-
-              // 计数徽章
               if (count != null && count > 1)
                 Positioned(
                   top: 2,
@@ -281,122 +285,72 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
     );
   }
 
-  // 预留方法：未来可以扩展头部右侧按钮功能
-  // List<Widget> _buildRightActions(BuildContext context) {
-  //   final actions = <Widget>[];
-  //
-  //   if (widget.config.enableTodayButton) {
-  //     actions.add(
-  //       IconButton(
-  //         icon: const Icon(Icons.today),
-  //         onPressed: () {
-  //           final today = DateTime.now();
-  //           setState(() {
-  //             _focusedDay = today;
-  //             _selectedDay = today;
-  //           });
-  //           widget.config.onDaySelected?.call(today);
-  //         },
-  //         tooltip: '回到今天',
-  //       ),
-  //     );
-  //   }
-  //
-  //   return actions;
-  // }
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
 
   @override
   Widget build(BuildContext context) {
-    // 使用 key 强制 TableCalendar 在月份变化时完全重建
-    // 这确保每个月份的日历完全独立，不受内部状态影响
-    return TableCalendar(
-      key: ValueKey('table_calendar_${_focusedDay.year}_${_focusedDay.month}'),
-      firstDay: DateTime(2010),
-      lastDay: DateTime(2030),
-      focusedDay: _focusedDay,
-      selectedDayPredicate:
-          (day) => _selectedDay != null && isSameDay(day, _selectedDay!),
-      calendarFormat: widget.config.calendarFormat,
-      locale: widget.config.locale,
-      pageAnimationEnabled: false,
-      // 禁用水平滑动切换月份
-      pageJumpingEnabled: false,
-      availableGestures: AvailableGestures.none,
-
-      // 样式配置
-      calendarStyle: const CalendarStyle(
-        outsideDaysVisible: true,
-        markersAutoAligned: true,
+    return SfCalendar(
+      key: ValueKey(
+        'syncfusion_calendar_${_focusedDay.year}_${_focusedDay.month}',
       ),
-
-      // 头部配置 - 隐藏默认头部
-      headerStyle: const HeaderStyle(
-        formatButtonVisible: false,
-        titleCentered: true,
-        titleTextStyle: TextStyle(fontSize: 0), // 隐藏标题
-        leftChevronVisible: false, // 隐藏左侧导航
-        rightChevronVisible: false, // 隐藏右侧导航
-        headerPadding: EdgeInsets.zero, // 移除头部padding
-        decoration: BoxDecoration(), // 移除默认装饰
+      controller: _calendarController,
+      view: widget.config.calendarView,
+      initialDisplayDate: _focusedDay,
+      minDate: DateTime(2010),
+      maxDate: DateTime(2030),
+      showNavigationArrow: false,
+      showDatePickerButton: false,
+      headerHeight: 0,
+      viewHeaderHeight: 40,
+      monthViewSettings: MonthViewSettings(
+        showTrailingAndLeadingDates: true,
+        monthCellStyle: MonthCellStyle(
+          backgroundColor: Colors.transparent,
+          trailingDatesBackgroundColor: Colors.transparent,
+          leadingDatesBackgroundColor: Colors.transparent,
+        ),
       ),
-
-      // 事件处理
-      onDaySelected:
-          widget.config.enableDateSelection
-              ? (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  // 不更新 _focusedDay，因为每个日历只显示固定的月份
-                });
-                widget.config.onDaySelected?.call(selectedDay);
-              }
-              : null,
-      onHeaderTapped: widget.config.onHeaderTapped,
-      onFormatChanged:
-          widget.config.onFormatChanged != null
-              ? (format) => widget.config.onFormatChanged!(_focusedDay)
-              : null,
-
-      // 自定义构建器
-      calendarBuilders: CalendarBuilders(
-        defaultBuilder: _dayBuilder,
-        selectedBuilder: _dayBuilder,
-        todayBuilder: _dayBuilder,
-        outsideBuilder: _dayBuilder,
-        disabledBuilder: _dayBuilder,
-        holidayBuilder: _dayBuilder,
-        singleMarkerBuilder: _dayBuilder,
-        withinRangeBuilder: _dayBuilder,
-        rangeStartBuilder: _dayBuilder,
-        rangeEndBuilder: _dayBuilder,
-        prioritizedBuilder: _dayBuilder,
-      ),
+      cellBorderColor: Colors.transparent,
+      selectionDecoration: const BoxDecoration(),
+      todayHighlightColor: Colors.transparent,
+      monthCellBuilder: _monthCellBuilder,
+      onTap: (CalendarTapDetails details) {
+        if (widget.config.enableDateSelection && details.date != null) {
+          setState(() {
+            _selectedDay = details.date;
+            _calendarController.selectedDate = details.date;
+          });
+          widget.config.onDaySelected?.call(details.date!);
+        }
+      },
+      onLongPress: (CalendarLongPressDetails details) {
+        if (details.date != null) {
+          widget.config.onDayLongPressed?.call(details.date!);
+        }
+      },
+      onViewChanged: (ViewChangedDetails details) {
+        if (details.visibleDates.isNotEmpty) {
+          final midDate = details
+              .visibleDates[details.visibleDates.length ~/ 2];
+          widget.config.onFormatChanged?.call(midDate);
+        }
+      },
+      allowViewNavigation: widget.config.enableNavigation,
     );
   }
 }
 
 /// 增强日历组件的简化构造函数
 class EnhancedCalendarWidget extends StatelessWidget {
-  /// 日期数据映射，key为日期(年月日)，value为日期数据
   final Map<DateTime, CalendarDayData> dayData;
-
-  /// 当前聚焦的月份
   final DateTime focusedMonth;
-
-  /// 选中的日期
   final DateTime? selectedDate;
-
-  /// 日期选择回调
   final Function(DateTime)? onDaySelected;
-
-  /// 日期长按回调
   final Function(DateTime)? onDayLongPressed;
-
-  /// 头部点击回调
   final Function(DateTime)? onHeaderTapped;
-
-  /// 其他配置
-  final CalendarFormat calendarFormat;
+  final CalendarView calendarView;
   final bool enableNavigation;
   final bool enableTodayButton;
   final bool enableDateSelection;
@@ -410,7 +364,7 @@ class EnhancedCalendarWidget extends StatelessWidget {
     this.onDaySelected,
     this.onDayLongPressed,
     this.onHeaderTapped,
-    this.calendarFormat = CalendarFormat.month,
+    this.calendarView = CalendarView.month,
     this.enableNavigation = true,
     this.enableTodayButton = true,
     this.enableDateSelection = true,
@@ -423,7 +377,7 @@ class EnhancedCalendarWidget extends StatelessWidget {
       dayData: dayData,
       focusedDay: focusedMonth,
       selectedDay: selectedDate,
-      calendarFormat: calendarFormat,
+      calendarView: calendarView,
       enableNavigation: enableNavigation,
       enableTodayButton: enableTodayButton,
       enableDateSelection: enableDateSelection,
@@ -435,7 +389,6 @@ class EnhancedCalendarWidget extends StatelessWidget {
       dayRadius: 8,
     );
 
-    // 为 EnhancedCalendar 添加独立 key，确保每个月份有独立的状态
     return EnhancedCalendar(
       key: ValueKey('calendar_state_${focusedMonth.year}_${focusedMonth.month}'),
       config: config,

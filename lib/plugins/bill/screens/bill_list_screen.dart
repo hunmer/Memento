@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:Memento/plugins/bill/models/bill_model.dart';
 import 'package:Memento/plugins/bill/models/bill.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
@@ -24,9 +24,9 @@ class BillListScreen extends StatefulWidget {
 
 class _BillListScreenState extends State<BillListScreen> {
   late final void Function() _billPluginListener;
+  late CalendarController _calendarController;
 
   // Calendar State
-  final CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
@@ -48,6 +48,10 @@ class _BillListScreenState extends State<BillListScreen> {
     // 确保默认选中今天
     _selectedDay = DateTime.now();
     _focusedDay = DateTime.now();
+    _calendarController = CalendarController();
+    _calendarController.displayDate = DateTime.now();
+    _calendarController.selectedDate = DateTime.now();
+
     _billPluginListener = () {
       if (mounted) {
         _loadMonthBills();
@@ -68,6 +72,7 @@ class _BillListScreenState extends State<BillListScreen> {
 
   @override
   void dispose() {
+    _calendarController.dispose();
     if (mounted) {
       widget.billPlugin.removeListener(_billPluginListener);
     }
@@ -326,55 +331,50 @@ class _BillListScreenState extends State<BillListScreen> {
             ),
 
             // Calendar
-            TableCalendar(
-              firstDay: DateTime(2020),
-              lastDay: DateTime(2030),
-              focusedDay: _focusedDay,
-              calendarFormat: _calendarFormat,
-              selectedDayPredicate: (day) {
-                // 确保选中判断正确，即使 _selectedDay 为 null 也选中今天
-                if (_selectedDay == null) {
-                  return isSameDay(DateTime.now(), day);
+            SfCalendar(
+              controller: _calendarController,
+              view: CalendarView.month,
+              initialDisplayDate: _focusedDay,
+              minDate: DateTime(2020),
+              maxDate: DateTime(2030),
+              headerHeight: 0,
+              viewHeaderHeight: 40,
+              showNavigationArrow: false,
+              monthViewSettings: MonthViewSettings(
+                showTrailingAndLeadingDates: false,
+                dayFormat: 'EEE',
+                monthCellStyle: MonthCellStyle(
+                  textStyle: TextStyle(
+                    color: Colors.grey[500],
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+              cellBorderColor: Colors.transparent,
+              selectionDecoration: const BoxDecoration(),
+              todayHighlightColor: Colors.transparent,
+              monthCellBuilder: (BuildContext context, MonthCellDetails details) {
+                final day = details.date;
+                final isSelected = _selectedDay != null && _isSameDay(day, _selectedDay!);
+                return _buildCalendarCell(day, isSelected);
+              },
+              onTap: (CalendarTapDetails details) {
+                if (details.date != null) {
+                  setState(() {
+                    _selectedDay = details.date;
+                    _focusedDay = details.date!;
+                    _calendarController.selectedDate = details.date;
+                  });
                 }
-                return isSameDay(_selectedDay!, day);
               },
-              headerVisible: false,
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
+              onViewChanged: (ViewChangedDetails details) {
+                if (details.visibleDates.isNotEmpty) {
+                  final newFocusedDay = details.visibleDates[details.visibleDates.length ~/ 2];
+                  _focusedDay = newFocusedDay;
+                  _loadMonthBills();
+                }
               },
-              onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
-                _loadMonthBills();
-              },
-              calendarBuilders: CalendarBuilders(
-                defaultBuilder:
-                    (context, day, focusedDay) => _buildCalendarCell(day, false),
-                selectedBuilder:
-                    (context, day, focusedDay) => _buildCalendarCell(day, true),
-                todayBuilder:
-                    (context, day, focusedDay) =>
-                        _buildCalendarCell(day, isSameDay(_selectedDay, day)),
-              ),
-              daysOfWeekHeight: 40,
-              rowHeight: 64,
-              daysOfWeekStyle: DaysOfWeekStyle(
-                weekdayStyle: TextStyle(
-                  color: Colors.grey[500],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-                weekendStyle: TextStyle(
-                  color: Colors.grey[500],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-                dowTextFormatter:
-                    (date, locale) =>
-                        DateFormat.E(locale).format(date)[0], // S M T W T F S
-              ),
             ),
 
             // Date Header
@@ -401,6 +401,10 @@ class _BillListScreenState extends State<BillListScreen> {
         ),
       ),
     );
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   Widget _buildCalendarCell(DateTime day, bool isSelected) {

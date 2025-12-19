@@ -7,7 +7,6 @@ import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/agent_chat/controllers/conversation_controller.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
-import 'package:Memento/plugins/agent_chat/models/conversation_group.dart';
 import 'package:Memento/plugins/agent_chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/agent_chat/screens/agent_chat_settings_screen.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
@@ -28,9 +27,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   late ConversationController _controller;
   late ToolTemplateService _templateService;
 
-  /// 缓存的分组列表，确保UI稳定性
-  List<ConversationGroup> _cachedGroups = [];
-
   /// 缓存的会话数量，用于检测实际变化
   int _cachedConversationCount = 0;
 
@@ -50,12 +46,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _controller.addListener(_onControllerChanged);
-
-        // 初始化缓存的分组列表
-        final initialGroups = _controller.groups;
-        if (initialGroups.isNotEmpty) {
-          _cachedGroups = List.from(initialGroups);
-        }
 
         // 初始化会话缓存，避免首次触发不必要的重建
         final initialConversations = _controller.conversations;
@@ -80,12 +70,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
 
   void _onControllerChanged() {
     if (mounted) {
-      // 更新缓存的分组列表，确保UI稳定性
-      final currentGroups = _controller.groups;
-      if (currentGroups.isNotEmpty || _cachedGroups.isEmpty) {
-        _cachedGroups = List.from(currentGroups);
-      }
-
       // 检查会话列表是否有实际变化，避免不必要的重建导致闪烁
       final conversations = _controller.conversations;
       final newCount = conversations.length;
@@ -159,203 +143,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     );
   }
 
-  /// 打开分组管理对话框
-  Future<void> _openGroupManagement() async {
-    final groups = _controller.groups;
-
-    if (groups.isEmpty) {
-      ToastService.instance.showToast('还没有创建任何分组');
-      return;
-    }
-
-    await showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('agent_chat_groupManagement'.tr),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: groups.length,
-                itemBuilder: (context, index) {
-                  final group = groups[index];
-                  return ListTile(
-                    leading: const Icon(Icons.folder),
-                    title: Text(group.name),
-                    trailing: PopupMenuButton<String>(
-                      onSelected: (value) => _onGroupMenuSelected(value, group),
-                      itemBuilder:
-                          (context) => [
-                            PopupMenuItem(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.edit),
-                                  const SizedBox(width: 8),
-                                  Text('agent_chat_edit'.tr),
-                                ],
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.delete, color: Colors.red),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'agent_chat_delete'.tr,
-                                    style: const TextStyle(color: Colors.red),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('agent_chat_close'.tr),
-              ),
-            ],
-          ),
-    );
-  }
-
-  /// 分组菜单选择
-  Future<void> _onGroupMenuSelected(
-    String value,
-    ConversationGroup group,
-  ) async {
-    switch (value) {
-      case 'edit':
-        _showEditGroupDialog(group);
-        break;
-
-      case 'delete':
-        _showDeleteGroupConfirmDialog(group);
-        break;
-    }
-  }
-
-  /// 显示编辑分组对话框
-  Future<void> _showEditGroupDialog(ConversationGroup group) async {
-    final nameController = TextEditingController(text: group.name);
-
-    try {
-      final result = await showDialog<bool>(
-        context: context,
-        builder:
-            (context) => AlertDialog(
-              title: Text('agent_chat_editGroup'.tr),
-              content: TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: '分组名称'),
-                autofocus: true,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text('agent_chat_cancel'.tr),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text('agent_chat_save'.tr),
-                ),
-              ],
-            ),
-      );
-
-      if (result == true && nameController.text.isNotEmpty) {
-        final updated = group.copyWith(name: nameController.text);
-        await _controller.updateGroup(updated);
-
-        if (mounted) {
-          ToastService.instance.showToast('分组已更新');
-        }
-      }
-    } finally {
-      nameController.dispose();
-    }
-  }
-
-  /// 显示删除分组确认对话框
-  Future<void> _showDeleteGroupConfirmDialog(ConversationGroup group) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('agent_chat_confirmDelete'.tr),
-            content: Text(
-              'agent_chat_confirmDeleteGroup'.trParams({
-                'groupName': group.name,
-              }),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text('agent_chat_cancel'.tr),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: Text('agent_chat_delete'.tr),
-              ),
-            ],
-          ),
-    );
-
-    if (result == true) {
-      await _controller.deleteGroup(group.id);
-
-      if (mounted) {
-        ToastService.instance.showToast('分组已删除');
-      }
-    }
-  }
-
-  /// 打开添加对话框
-  void _openAddDialog() {
-    _showAddDialog();
-  }
-
-  /// 显示添加对话框（频道或分组）
-  Future<void> _showAddDialog() async {
-    final type = await showDialog<String>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('agent_chat_selectTypeToCreate'.tr),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.chat),
-                  title: Text('agent_chat_channel'.tr),
-                  subtitle: Text('agent_chat_createNewConversationChannel'.tr),
-                  onTap: () => Navigator.pop(context, 'channel'),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.folder),
-                  title: Text('agent_chat_group'.tr),
-                  subtitle: Text('agent_chat_createNewGroupCategory'.tr),
-                  onTap: () => Navigator.pop(context, 'group'),
-                ),
-              ],
-            ),
-          ),
-    );
-
-    if (type == 'channel') {
-      _showAddChannelDialog();
-    } else if (type == 'group') {
-      _showAddGroupDialog();
-    }
-  }
 
   /// 显示添加频道对话框
   Future<void> _showAddChannelDialog() async {
@@ -407,55 +194,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     }
   }
 
-  /// 显示添加分组对话框
-  Future<void> _showAddGroupDialog() async {
-    final nameController = TextEditingController();
-
-    try {
-      final result = await showDialog<bool>(
-        context: context,
-        builder:
-            (context) => AlertDialog(
-              title: Text('agent_chat_addGroup'.tr),
-              content: TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: '分组名称',
-                  hintText: '请输入分组名称',
-                ),
-                autofocus: true,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text('agent_chat_cancel'.tr),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text('agent_chat_create'.tr),
-                ),
-              ],
-            ),
-      );
-
-      if (result == true && nameController.text.isNotEmpty) {
-        try {
-          await _controller.createGroup(name: nameController.text);
-
-          if (mounted) {
-            ToastService.instance.showToast('分组已创建');
-          }
-        } catch (e) {
-          if (mounted) {
-            ToastService.instance.showToast('创建分组失败: $e');
-          }
-          debugPrint('创建分组失败: $e');
-        }
-      }
-    } finally {
-      nameController.dispose();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -477,17 +215,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       },
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
-        // 添加按钮（频道或分组）
+        // 添加按钮
         IconButton(
           icon: const Icon(Icons.add_circle_outline, size: 24),
-          tooltip: '添加',
-          onPressed: _openAddDialog,
-        ),
-        // 分组管理按钮
-        IconButton(
-          icon: const Icon(Icons.folder_outlined, size: 24),
-          tooltip: 'agent_chat_groupManagement'.tr,
-          onPressed: _openGroupManagement,
+          tooltip: '添加频道',
+          onPressed: _showAddChannelDialog,
         ),
         // 工具管理按钮
         IconButton(
@@ -541,9 +273,14 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   /// 会话列表
   Widget _buildConversationList() {
     final conversations = _controller.conversations;
-    // 使用缓存的groups列表确保UI稳定性
-    final groups =
-        _cachedGroups.isNotEmpty ? _cachedGroups : _controller.groups;
+
+    // 从所有会话（未过滤）的groups字段中提取唯一的分组名称
+    // 重要：使用 allConversations 而不是 conversations，以确保分组列表不会随着过滤而变化
+    final allGroupNames = <String>{};
+    for (final conv in _controller.allConversations) {
+      allGroupNames.addAll(conv.groups);
+    }
+    final groups = allGroupNames.toList()..sort();
 
     // 使用更稳定的分组判断逻辑
     final hasGroups = groups.isNotEmpty;
@@ -613,9 +350,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   }
 
   /// 分组过滤器
-  Widget _buildGroupFilters(List<ConversationGroup> groups) {
+  Widget _buildGroupFilters(List<String> groupNames) {
     // 额外的安全检查，确保groups列表不为空
-    if (groups.isEmpty) {
+    if (groupNames.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -668,15 +405,15 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                   },
                 ),
                 // 分组按钮
-                ...groups.map((group) {
+                ...groupNames.map((groupName) {
                   final isSelected = _controller.selectedGroupFilters.contains(
-                    group.id,
+                    groupName,
                   );
                   return _animatedFilterChip(
-                    label: group.name,
+                    label: groupName,
                     isSelected: isSelected,
                     onSelected: (selected) {
-                      _controller.toggleGroupFilter(group.id);
+                      _controller.toggleGroupFilter(groupName);
                     },
                   );
                 }),
@@ -892,6 +629,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   /// 显示编辑会话对话框
   Future<void> _showEditConversationDialog(Conversation conversation) async {
     final titleController = TextEditingController(text: conversation.title);
+    final groupsController = TextEditingController(
+      text: conversation.groups.join(', '),
+    );
 
     try {
       final result = await showDialog<bool>(
@@ -899,10 +639,23 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
         builder:
             (context) => AlertDialog(
               title: Text('agent_chat_editConversation'.tr),
-              content: TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: '会话标题'),
-                autofocus: true,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: titleController,
+                    decoration: const InputDecoration(labelText: '会话标题'),
+                    autofocus: true,
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: groupsController,
+                    decoration: const InputDecoration(
+                      labelText: '分组',
+                      hintText: '用逗号分隔多个分组，例如：工作, 生活',
+                    ),
+                  ),
+                ],
               ),
               actions: [
                 TextButton(
@@ -918,7 +671,20 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       );
 
       if (result == true && titleController.text.isNotEmpty) {
-        final updated = conversation.copyWith(title: titleController.text);
+        // 解析分组字符串
+        final groupsText = groupsController.text.trim();
+        final groups = groupsText.isEmpty
+            ? <String>[]
+            : groupsText
+                .split(',')
+                .map((g) => g.trim())
+                .where((g) => g.isNotEmpty)
+                .toList();
+
+        final updated = conversation.copyWith(
+          title: titleController.text,
+          groups: groups,
+        );
         await _controller.updateConversation(updated);
 
         if (mounted) {
@@ -928,6 +694,7 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     } finally {
       // 确保无论如何都会 dispose controller
       titleController.dispose();
+      groupsController.dispose();
     }
   }
 

@@ -21,6 +21,9 @@ class MonthSelector extends StatefulWidget {
   /// 如果提供此参数，将覆盖默认的收入/支出显示
   final Widget Function(Map<String, double> stats)? customStatsBuilder;
 
+  /// 最大可选日期（限制未来月份）
+  final DateTime? maxDate;
+
   const MonthSelector({
     super.key,
     this.selectedMonth,
@@ -28,6 +31,7 @@ class MonthSelector extends StatefulWidget {
     required this.getMonthStats,
     this.primaryColor = const Color(0xFF3498DB),
     this.customStatsBuilder,
+    this.maxDate,
   });
 
   @override
@@ -85,6 +89,11 @@ class _MonthSelectorState extends State<MonthSelector> {
     final now = DateTime.now();
     final months = <DateTime>[];
 
+    // 确定最大月份（如果设置了 maxDate）
+    final maxMonth = widget.maxDate != null
+        ? DateTime(widget.maxDate!.year, widget.maxDate!.month)
+        : null;
+
     // 确保 _selectedMonth 在列表范围内
     final selectedMonth = widget.selectedMonth ?? DateTime.now();
     final monthDiff = (selectedMonth.year - now.year) * 12 + (selectedMonth.month - now.month);
@@ -92,8 +101,14 @@ class _MonthSelectorState extends State<MonthSelector> {
     // 如果选中月份超出初始范围，调整加载范围
     final startOffset = monthDiff > _loadCount ? monthDiff - _loadCount :
                        monthDiff < -_loadCount ? monthDiff + _loadCount : -_loadCount;
-    final endOffset = monthDiff > _loadCount ? _loadCount :
+    var endOffset = monthDiff > _loadCount ? _loadCount :
                       monthDiff < -_loadCount ? -monthDiff - _loadCount : _loadCount;
+
+    // 如果设置了最大日期，限制结束偏移量
+    if (maxMonth != null) {
+      final maxOffset = (maxMonth.year - now.year) * 12 + (maxMonth.month - now.month);
+      endOffset = endOffset > maxOffset ? maxOffset : endOffset;
+    }
 
     // 生成月份列表，确保选中月份在中间位置
     for (int i = startOffset; i <= endOffset; i++) {
@@ -143,10 +158,38 @@ class _MonthSelectorState extends State<MonthSelector> {
     } else {
       // 向右加载（更晚的月份）
       final lastMonth = _allMonths.last;
+
+      // 检查是否设置了最大日期限制
+      final maxMonth = widget.maxDate != null
+          ? DateTime(widget.maxDate!.year, widget.maxDate!.month)
+          : null;
+
       for (int i = 1; i <= loadCount; i++) {
-        newMonths.add(DateTime(lastMonth.year, lastMonth.month + i));
+        final newMonth = DateTime(lastMonth.year, lastMonth.month + i);
+
+        // 如果设置了最大日期，检查是否超出范围
+        if (maxMonth != null) {
+          if (newMonth.year > maxMonth.year ||
+              (newMonth.year == maxMonth.year && newMonth.month > maxMonth.month)) {
+            break; // 停止加载未来月份
+          }
+        }
+
+        newMonths.add(newMonth);
       }
+
+      // 如果没有新月份可加载，直接返回
+      if (newMonths.isEmpty) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
       _allMonths.addAll(newMonths);
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 

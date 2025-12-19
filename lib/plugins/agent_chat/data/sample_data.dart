@@ -1,5 +1,4 @@
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
-import 'package:Memento/plugins/agent_chat/models/conversation_group.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
 
 /// Agent Chat 插件示例数据
@@ -10,42 +9,6 @@ class AgentChatSampleData {
   static Map<String, dynamic> getFullSampleData() {
     final now = DateTime.now();
 
-    // ========== 分组数据 ==========
-    final groups = [
-      ConversationGroup(
-        id: 'group-work-001',
-        name: '💼 工作助手',
-        icon: 'work',
-        color: '#2196F3',
-        order: 0,
-        createdAt: now.subtract(const Duration(days: 30)),
-      ),
-      ConversationGroup(
-        id: 'group-study-001',
-        name: '📚 学习伙伴',
-        icon: 'school',
-        color: '#4CAF50',
-        order: 1,
-        createdAt: now.subtract(const Duration(days: 25)),
-      ),
-      ConversationGroup(
-        id: 'group-creative-001',
-        name: '🎨 创意激发',
-        icon: 'palette',
-        color: '#FF9800',
-        order: 2,
-        createdAt: now.subtract(const Duration(days: 20)),
-      ),
-      ConversationGroup(
-        id: 'group-daily-001',
-        name: '🌟 生活助手',
-        icon: 'home',
-        color: '#9C27B0',
-        order: 3,
-        createdAt: now.subtract(const Duration(days: 15)),
-      ),
-    ];
-
     // ========== 会话数据 ==========
     final conversations = [
       // 工作助手分组
@@ -53,7 +16,7 @@ class AgentChatSampleData {
         id: 'conv-work-001',
         title: '代码审查助手',
         agentId: 'agent-code-review',
-        groups: ['group-work-001'],
+        groups: ['💼 工作助手'],
         contextMessageCount: 20,
         createdAt: now.subtract(const Duration(days: 20)),
         lastMessageAt: now.subtract(const Duration(hours: 2)),
@@ -66,7 +29,7 @@ class AgentChatSampleData {
         id: 'conv-work-002',
         title: '项目规划顾问',
         agentId: 'agent-project-manager',
-        groups: ['group-work-001'],
+        groups: ['💼 工作助手'],
         contextMessageCount: 15,
         createdAt: now.subtract(const Duration(days: 15)),
         lastMessageAt: now.subtract(const Duration(days: 1)),
@@ -81,7 +44,7 @@ class AgentChatSampleData {
         id: 'conv-study-001',
         title: 'Flutter 进阶学习',
         agentId: 'agent-tutor',
-        groups: ['group-study-001'],
+        groups: ['📚 学习伙伴'],
         contextMessageCount: 30,
         createdAt: now.subtract(const Duration(days: 25)),
         lastMessageAt: now.subtract(const Duration(hours: 5)),
@@ -94,7 +57,7 @@ class AgentChatSampleData {
         id: 'conv-study-002',
         title: 'AI 原理探索',
         agentId: 'agent-researcher',
-        groups: ['group-study-001'],
+        groups: ['📚 学习伙伴'],
         contextMessageCount: 25,
         createdAt: now.subtract(const Duration(days: 10)),
         lastMessageAt: now.subtract(const Duration(days: 2)),
@@ -109,7 +72,7 @@ class AgentChatSampleData {
         id: 'conv-creative-001',
         title: '产品创意头脑风暴',
         agentId: 'agent-ideator',
-        groups: ['group-creative-001'],
+        groups: ['🎨 创意激发'],
         contextMessageCount: 10,
         createdAt: now.subtract(const Duration(days: 12)),
         lastMessageAt: now.subtract(const Duration(hours: 8)),
@@ -122,7 +85,7 @@ class AgentChatSampleData {
         id: 'conv-creative-002',
         title: '文案创作助手',
         agentId: 'agent-writer',
-        groups: ['group-creative-001'],
+        groups: ['🎨 创意激发'],
         contextMessageCount: 15,
         createdAt: now.subtract(const Duration(days: 8)),
         lastMessageAt: now.subtract(const Duration(days: 3)),
@@ -137,7 +100,7 @@ class AgentChatSampleData {
         id: 'conv-daily-001',
         title: '健康饮食规划',
         agentId: 'agent-nutritionist',
-        groups: ['group-daily-001'],
+        groups: ['🌟 生活助手'],
         contextMessageCount: 12,
         createdAt: now.subtract(const Duration(days: 18)),
         lastMessageAt: now.subtract(const Duration(days: 1, hours: 3)),
@@ -150,7 +113,7 @@ class AgentChatSampleData {
         id: 'conv-daily-002',
         title: '旅行规划顾问',
         agentId: 'agent-travel-planner',
-        groups: ['group-daily-001'],
+        groups: ['🌟 生活助手'],
         contextMessageCount: 20,
         createdAt: now.subtract(const Duration(days: 5)),
         lastMessageAt: now.subtract(const Duration(days: 4)),
@@ -682,20 +645,24 @@ final userDataProvider = FutureProvider<UserData>((ref) async {
     ];
 
     // 转换数据格式
-    final groupsJson = groups.map((g) => g.toJson()).toList();
     final conversationsJson = conversations.map((c) => c.toJson()).toList();
     final messagesJson = messages.map(
       (key, value) => MapEntry(key, value.map((m) => m.toJson()).toList()),
     );
 
+    // 提取唯一分组名称
+    final uniqueGroups = <String>{};
+    for (final conv in conversations) {
+      uniqueGroups.addAll(conv.groups);
+    }
+
     return {
-      'groups': groupsJson,
       'conversations': conversationsJson,
       'messages': messagesJson,
       'metadata': {
-        'version': '1.0.0',
-        'description': 'Agent Chat Plugin 完整示例数据',
-        'totalGroups': groups.length,
+        'version': '2.0.0',
+        'description': 'Agent Chat Plugin 完整示例数据（重构版）',
+        'totalGroups': uniqueGroups.length,
         'totalConversations': conversations.length,
         'totalMessageThreads': messages.length,
         'createdAt': now.toIso8601String(),
@@ -708,23 +675,12 @@ final userDataProvider = FutureProvider<UserData>((ref) async {
   static Map<String, dynamic> getSimplifiedSampleData() {
     final now = DateTime.now();
 
-    final groups = [
-      ConversationGroup(
-        id: 'group-simple-001',
-        name: '🤖 AI 助手',
-        icon: 'smart_toy',
-        color: '#2196F3',
-        order: 0,
-        createdAt: now.subtract(const Duration(days: 7)),
-      ),
-    ];
-
     final conversations = [
       Conversation(
         id: 'conv-simple-001',
         title: '日常问答',
         agentId: 'agent-general',
-        groups: ['group-simple-001'],
+        groups: ['🤖 AI 助手'],
         createdAt: now.subtract(const Duration(days: 5)),
         lastMessageAt: now.subtract(const Duration(hours: 1)),
         lastMessagePreview: '好的，我来帮你解答这个问题',
@@ -734,7 +690,7 @@ final userDataProvider = FutureProvider<UserData>((ref) async {
         id: 'conv-simple-002',
         title: '学习笔记',
         agentId: 'agent-tutor',
-        groups: ['group-simple-001'],
+        groups: ['🤖 AI 助手'],
         createdAt: now.subtract(const Duration(days: 3)),
         lastMessageAt: now.subtract(const Duration(hours: 3)),
         lastMessagePreview: 'Flutter 是一种跨平台开发框架',
@@ -836,14 +792,13 @@ final userDataProvider = FutureProvider<UserData>((ref) async {
     };
 
     return {
-      'groups': groups.map((g) => g.toJson()).toList(),
       'conversations': conversations.map((c) => c.toJson()).toList(),
       'messages': messages.map(
         (key, value) => MapEntry(key, value.map((m) => m.toJson()).toList()),
       ),
       'metadata': {
-        'version': '1.0.0',
-        'description': 'Agent Chat Plugin 简化示例数据',
+        'version': '2.0.0',
+        'description': 'Agent Chat Plugin 简化示例数据（重构版）',
         'totalGroups': 1,
         'totalConversations': 2,
         'totalMessageThreads': 2,
@@ -851,29 +806,21 @@ final userDataProvider = FutureProvider<UserData>((ref) async {
     };
   }
 
-  /// 获取空白数据（仅创建默认分组，无会话）
+  /// 获取空白数据（空会话列表和空消息列表）
+  /// 用于首次启动时无示例数据的场景
   static Map<String, dynamic> getEmptyData() {
     final now = DateTime.now();
 
-    final emptyGroup = ConversationGroup(
-      id: 'group-empty-001',
-      name: '默认分组',
-      icon: 'folder',
-      color: '#9E9E9E',
-      order: 0,
-      createdAt: now,
-    );
-
     return {
-      'groups': [emptyGroup.toJson()],
       'conversations': [],
       'messages': {},
       'metadata': {
-        'version': '1.0.0',
-        'description': 'Agent Chat Plugin 空白数据',
-        'totalGroups': 1,
+        'version': '2.0.0',
+        'description': 'Agent Chat Plugin 空白数据（重构版）',
+        'totalGroups': 0,
         'totalConversations': 0,
         'totalMessageThreads': 0,
+        'createdAt': now.toIso8601String(),
       },
     };
   }

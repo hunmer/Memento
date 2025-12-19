@@ -125,8 +125,13 @@ class _CalendarStripDatePickerState extends State<CalendarStripDatePicker> {
     _initializeDates();
 
     // 延迟滚动到选中日期位置
+    // 使用双重延迟确保 ListView 完全渲染
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToSelectedDate();
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          _scrollToSelectedDate(animate: false); // 初始化时使用 jumpTo，更快
+        }
+      });
     });
   }
 
@@ -365,8 +370,17 @@ class _CalendarStripDatePickerState extends State<CalendarStripDatePicker> {
   }
 
   /// 滚动到选中日期位置
-  void _scrollToSelectedDate() {
+  ///
+  /// [animate] 是否使用动画，默认 true
+  void _scrollToSelectedDate({bool animate = true}) {
+    // 增强检查：确保 ScrollController 完全就绪
     if (!_scrollController.hasClients || _dates.isEmpty) return;
+
+    // 检查 position 是否已完全初始化
+    if (!_scrollController.position.hasContentDimensions ||
+        _scrollController.position.viewportDimension == 0) {
+      return; // 未就绪时直接返回
+    }
 
     final selectedDate = widget.selectedDate;
     final selectedIndex = _dates.indexWhere(
@@ -384,11 +398,21 @@ class _CalendarStripDatePickerState extends State<CalendarStripDatePicker> {
     final targetOffset =
         (selectedIndex * itemSize) - (viewportWidth / 2) + (widget.itemWidth / 2);
 
-    _scrollController.animateTo(
-      targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
+    final clampedOffset = targetOffset.clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
     );
+
+    if (animate) {
+      _scrollController.animateTo(
+        clampedOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      // 初始化时直接跳转，无动画
+      _scrollController.jumpTo(clampedOffset);
+    }
   }
 
   /// 判断是否为今天

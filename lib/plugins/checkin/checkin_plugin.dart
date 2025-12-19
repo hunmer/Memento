@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
+import 'package:uuid/uuid.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
@@ -421,14 +422,51 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
 
   // 添加打卡项目
   Future<void> addCheckinItem(CheckinItem item) async {
-    _checkinItems.add(item);
-    await _saveCheckinItems();
+    try {
+      // 通过 UseCase 创建项目
+      final params = {
+        'id': item.id,
+        'name': item.name,
+        'icon': item.icon.codePoint,
+        'color': item.color.value,
+        'group': item.group,
+        'description': item.description,
+        'cardStyle': item.cardStyle.index,
+        'reminderSettings': item.reminderSettings?.toJson(),
+      };
+
+      final result = await _checkinUseCase.createItem(params);
+
+      if (result.isSuccess) {
+        // 创建成功后，重新加载数据
+        await _saveCheckinItems();
+      } else {
+        final error = result.errorOrNull;
+        final message = error != null ? error.message : '创建打卡项目失败';
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('创建打卡项目失败: $e');
+    }
   }
 
   // 删除打卡项目
   Future<void> removeCheckinItem(CheckinItem item) async {
-    _checkinItems.remove(item);
-    await _saveCheckinItems();
+    try {
+      // 通过 UseCase 删除项目
+      final result = await _checkinUseCase.deleteItem({'id': item.id});
+
+      if (result.isSuccess) {
+        // 删除成功后，重新加载数据
+        await _saveCheckinItems();
+      } else {
+        final error = result.errorOrNull;
+        final message = error != null ? error.message : '删除打卡项目失败';
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('删除打卡项目失败: $e');
+    }
   }
 
   // 更新打卡项目
@@ -436,10 +474,31 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
     CheckinItem oldItem,
     CheckinItem newItem,
   ) async {
-    final index = _checkinItems.indexOf(oldItem);
-    if (index != -1) {
-      _checkinItems[index] = newItem;
-      await _saveCheckinItems();
+    try {
+      // 通过 UseCase 更新项目
+      final params = {
+        'id': oldItem.id,
+        'name': newItem.name,
+        'icon': newItem.icon.codePoint,
+        'color': newItem.color.value,
+        'group': newItem.group,
+        'description': newItem.description,
+        'cardStyle': newItem.cardStyle.index,
+        'reminderSettings': newItem.reminderSettings?.toJson(),
+      };
+
+      final result = await _checkinUseCase.updateItem(params);
+
+      if (result.isSuccess) {
+        // 更新成功后，重新加载数据
+        await _saveCheckinItems();
+      } else {
+        final error = result.errorOrNull;
+        final message = error != null ? error.message : '更新打卡项目失败';
+        throw Exception(message);
+      }
+    } catch (e) {
+      throw Exception('更新打卡项目失败: $e');
     }
   }
 
@@ -468,8 +527,12 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
 
   /// 将 Map 参数转换为 CheckinItemDto
   CheckinItemDto _paramsToDto(Map<String, dynamic> params) {
+    // 如果没有提供 id 或 id 为空，生成一个新的 UUID
+    final id = params['id'] as String?;
+    final itemId = (id != null && id.isNotEmpty) ? id : const Uuid().v4();
+
     return CheckinItemDto(
-      id: params['id'] as String? ?? '',
+      id: itemId,
       name: params['name'] as String,
       icon: params['icon'] as int,
       color: params['color'] as int,

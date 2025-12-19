@@ -189,10 +189,36 @@ class _CheckinRecordDialogState extends State<CheckinRecordDialog> {
           onPressed: () {
             if (_formKey.currentState!.validate()) {
               final now = DateTime.now();
+              // 标准化时间，保留到秒级别（忽略毫秒）
+              final normalizedStartTime = DateTime(
+                _startTime.year,
+                _startTime.month,
+                _startTime.day,
+                _startTime.hour,
+                _startTime.minute,
+                _startTime.second,
+              );
+              final normalizedEndTime = DateTime(
+                _endTime.year,
+                _endTime.month,
+                _endTime.day,
+                _endTime.hour,
+                _endTime.minute,
+                _endTime.second,
+              );
+              final normalizedCheckinTime = DateTime(
+                (widget.selectedDate ?? now).year,
+                (widget.selectedDate ?? now).month,
+                (widget.selectedDate ?? now).day,
+                (widget.selectedDate ?? now).hour,
+                (widget.selectedDate ?? now).minute,
+                (widget.selectedDate ?? now).second,
+              );
+
               final record = CheckinRecord(
-                startTime: _startTime,
-                endTime: _endTime,
-                checkinTime: widget.selectedDate != null ? _selectedDate : now,
+                startTime: normalizedStartTime,
+                endTime: normalizedEndTime,
+                checkinTime: normalizedCheckinTime,
                 note:
                     _noteController.text.trim().isNotEmpty
                         ? _noteController.text.trim()
