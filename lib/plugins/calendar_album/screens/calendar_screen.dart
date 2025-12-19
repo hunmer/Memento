@@ -576,7 +576,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text('common_cancel'.tr),
+                      child: Text('chat_cancel'.tr),
                     ),
                     TextButton(
                       onPressed: () {

@@ -110,7 +110,7 @@ class ChatTranslationsZh {
 
     // UI服务相关
     'chat_channelCount': '频道数量',
-    'chat_totalMessages': '总消息数量',
+    'chat_totalMessagesCount': '总消息数量',
     'chat_todayMessages': '今日新增消息',
     'chat_profileTitle': '个人资料',
     'chat_chatSettings': '聊天设置',
@@ -170,5 +170,23 @@ class ChatTranslationsZh {
     // 界面搜索
     'chat_channelListTitle': '频道列表',
     'chat_searchPlaceholder': '搜索频道名称',
+
+    // 标签功能
+    'chat_tagsTab': '标签',
+    'chat_tagList': '标签列表',
+    'chat_messageCount': '@count 条消息',
+    'chat_searchTags': '搜索标签',
+    'chat_sortByTime': '按时间排序',
+    'chat_sortByCount': '按数量排序',
+    'chat_noTagsFound': '暂无标签',
+    'chat_noMatchingTags': '未找到匹配的标签',
+    'chat_totalMessages': '共 @count 条消息',
+    'chat_unknownChannel': '未知频道',
+    'chat_error': '错误',
+    'chat_messageNoChannel': '消息没有关联频道',
+    'chat_channelNotFound': '频道不存在',
+    'chat_searchMessages': '搜索消息',
+    'chat_noMatchingMessages': '未找到匹配的消息',
+    'chat_refresh': '刷新',
   };
 }

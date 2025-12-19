@@ -127,7 +127,7 @@ class _ChannelDialogState extends State<ChannelDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('common_cancel'.tr),
+          child: Text('chat_cancel'.tr),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -203,7 +203,7 @@ class _ChannelDialogState extends State<ChannelDialog> {
           child: Text(
             widget.isEditMode
                 ? 'save'.tr
-                : 'ok'.tr,
+                : 'chat_create'.tr,
           ),
         ),
       ],

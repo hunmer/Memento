@@ -19,6 +19,7 @@ import 'services/settings_service.dart';
 import 'services/ui_service.dart';
 import 'services/user_service.dart';
 import 'services/widget_service.dart';
+import 'services/tag_service.dart';
 import 'package:shared_models/usecases/chat/chat_usecase.dart';
 
 class ChatMainView extends StatefulWidget {
@@ -92,6 +93,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   late final SettingsService settingsService;
   late final UIService uiService;
   late final UserService userService;
+  late final TagService tagService;
 
   // UseCase
   late final ChatUseCase chatUseCase;
@@ -113,6 +115,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     userService = UserService(this);
     channelService = ChannelService(this);
     messageService = MessageService(this);
+    tagService = TagService(messageService: messageService);
     uiService = UIService(settingsService, userService, this);
 
     // Initialize all services

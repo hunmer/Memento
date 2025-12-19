@@ -115,7 +115,7 @@ class ChatTranslationsEn {
 
     // UI service related
     'chat_channelCount': 'Channels',
-    'chat_totalMessages': 'Messages',
+    'chat_totalMessagesCount': 'Messages',
     'chat_todayMessages': 'Today',
     'chat_profileTitle': 'Profile',
     'chat_chatSettings': 'Chat Settings',
@@ -175,5 +175,23 @@ class ChatTranslationsEn {
     // Interface search
     'chat_channelListTitle': 'Channel List',
     'chat_searchPlaceholder': 'Search channel name',
+
+    // Tags feature
+    'chat_tagsTab': 'Tags',
+    'chat_tagList': 'Tag List',
+    'chat_messageCount': '@count messages',
+    'chat_searchTags': 'Search tags',
+    'chat_sortByTime': 'Sort by Time',
+    'chat_sortByCount': 'Sort by Count',
+    'chat_noTagsFound': 'No Tags Found',
+    'chat_noMatchingTags': 'No Matching Tags',
+    'chat_totalMessages': 'Total @count messages',
+    'chat_unknownChannel': 'Unknown Channel',
+    'chat_error': 'Error',
+    'chat_messageNoChannel': 'Message has no associated channel',
+    'chat_channelNotFound': 'Channel not found',
+    'chat_searchMessages': 'Search messages',
+    'chat_noMatchingMessages': 'No matching messages',
+    'chat_refresh': 'Refresh',
   };
 }

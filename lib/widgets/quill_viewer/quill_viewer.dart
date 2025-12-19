@@ -48,8 +48,15 @@ class QuillViewer extends StatelessWidget {
         readOnly: true,
       );
 
-      return quill.QuillEditor.basic(
-        controller: controller,
+      // 使用 IntrinsicWidth 让 QuillEditor 根据内容自适应宽度
+      return IntrinsicWidth(
+        child: quill.QuillEditor.basic(
+          controller: controller,
+          config: quill.QuillEditorConfig(
+            padding: EdgeInsets.zero,
+            customStyles: customStyles,
+          ),
+        ),
       );
     } catch (e) {
       // 如果渲染失败，显示纯文本
