@@ -5,6 +5,9 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/plugins/notes/models/folder.dart';
+import 'package:Memento/plugins/notes/models/folder_tree_node.dart';
+import 'package:Memento/plugins/notes/widgets/folder_selection_sheet.dart';
 import 'notes_screen/folder_item.dart';
 import 'notes_screen/folder_operations.dart';
 import 'notes_screen/folder_selection_dialog.dart';
@@ -305,7 +308,8 @@ class _NotesMainViewState extends NotesMainViewState
         CustomScrollView(
           slivers: [
             // Subfolders Horizontal List (if any)
-            if (subFolders.isNotEmpty)
+            // 如果有子文件夹或不是根目录(需要显示返回按钮),则显示该区域
+            if (subFolders.isNotEmpty || currentFolder?.parentId != null)
               SliverToBoxAdapter(
                 child: Container(
                   height: 50,
@@ -313,11 +317,31 @@ class _NotesMainViewState extends NotesMainViewState
                   child: ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     scrollDirection: Axis.horizontal,
-                    itemCount: subFolders.length,
+                    itemCount:
+                        subFolders.length +
+                        (currentFolder?.parentId != null ? 1 : 0),
                     separatorBuilder:
                         (context, index) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
-                      final folder = subFolders[index];
+                      // 第一个位置显示返回按钮(如果不是根目录)
+                      if (currentFolder?.parentId != null && index == 0) {
+                        return ActionChip(
+                          avatar: const Icon(Icons.arrow_upward, size: 18),
+                          label: Text('notes_backToParent'.tr),
+                          onPressed: () => navigateBack(),
+                          backgroundColor:
+                              Theme.of(context).primaryColor.withOpacity(0.1),
+                          side: BorderSide(
+                            color:
+                                Theme.of(context).primaryColor.withOpacity(0.3),
+                          ),
+                        );
+                      }
+
+                      // 其他位置显示文件夹
+                      final folderIndex =
+                          currentFolder?.parentId != null ? index - 1 : index;
+                      final folder = subFolders[folderIndex];
                       return ActionChip(
                         avatar: const Icon(Icons.folder, size: 18),
                         label: Text(folder.name),
@@ -347,6 +371,7 @@ class _NotesMainViewState extends NotesMainViewState
                     return NoteCard(
                       note: notes[index],
                       onTap: () => editNote(notes[index]),
+                      onDelete: () => deleteNote(notes[index]),
                     );
                   },
                 ),
@@ -434,47 +459,31 @@ class _NotesMainViewState extends NotesMainViewState
     );
   }
 
-  // 显示文件夹选择器
-  void _showFolderPicker() {
+  // 显示文件夹选择器 - 使用树形结构展示
+  Future<void> _showFolderPicker() async {
+    final rootFolder = plugin.controller.getFolder('root')!;
     final allFolders = plugin.controller.getAllFolders();
 
-    showDialog(
+    // 构建文件夹树
+    final folderMap = <String, Folder>{};
+    for (var folder in allFolders) {
+      folderMap[folder.id] = folder;
+    }
+
+    final rootNode = FolderTreeNode.buildTree(rootFolder, folderMap);
+
+    // 显示底部抽屉选择器
+    final selectedFolder = await FolderSelectionSheet.show(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('notes_selectFolder'.tr),
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 300,
-            child: ListView.builder(
-              itemCount: allFolders.length,
-              itemBuilder: (context, index) {
-                final folder = allFolders[index];
-                return ListTile(
-                  leading: Icon(folder.icon, color: folder.color),
-                  title: Text(folder.name),
-                  onTap: () {
-                    setState(() {
-                      // 导航到选中的文件夹
-                      if (folder.id != currentFolder?.id) {
-                        navigateToFolder(folder);
-                      }
-                    });
-                    Navigator.pop(context);
-                  },
-                );
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('notes_cancel'.tr),
-            ),
-          ],
-        );
-      },
+      rootNode: rootNode,
+      note: null, // 不传递笔记，因为这是文件夹导航而不是移动笔记
     );
+
+    if (selectedFolder != null && selectedFolder.id != currentFolder?.id) {
+      setState(() {
+        navigateToFolder(selectedFolder);
+      });
+    }
   }
 
   /// 显示标签选择器

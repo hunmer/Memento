@@ -96,7 +96,7 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
     }
   }
 
-  /// 保存设置
+  /// 保存设置（包含表单验证）
   Future<void> _saveSettings() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -148,6 +148,26 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
     }
   }
 
+  /// 保存开关设置（不需要表单验证）
+  Future<void> _saveSwitchSettings() async {
+    try {
+      // 保留现有的腾讯云配置
+      final currentAsrConfig = widget.plugin.settings['asrConfig'];
+
+      await widget.plugin.updateSettings({
+        if (currentAsrConfig != null) 'asrConfig': currentAsrConfig,
+        'preferToolTemplates': _preferToolTemplates,
+        'enableBackgroundService': _enableBackgroundService,
+        'showTokenInNotification': _showTokenInNotification,
+      });
+
+      debugPrint('🔧 [设置页面] 开关设置已自动保存');
+    } catch (e) {
+      debugPrint('❌ [设置页面] 自动保存失败: $e');
+      _showError('自动保存失败: $e');
+    }
+  }
+
   /// 测试连接
   Future<void> _testConnection() async {
     if (!_formKey.currentState!.validate()) {
@@ -187,13 +207,6 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('agent_chat_agentChatSettings'.tr),
-        actions: [
-          if (_hasChanges)
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _saveSettings,
-            ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -221,8 +234,8 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
                 onChanged: (value) {
                   setState(() {
                     _preferToolTemplates = value;
-                    _hasChanges = true;
                   });
+                  _saveSwitchSettings(); // 自动保存
                 },
               ),
             ),
@@ -257,8 +270,8 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
                       onChanged: (value) {
                         setState(() {
                           _enableBackgroundService = value;
-                          _hasChanges = true;
                         });
+                        _saveSwitchSettings(); // 自动保存
                       },
                     ),
 
@@ -273,8 +286,8 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
                         onChanged: (value) {
                           setState(() {
                             _showTokenInNotification = value;
-                            _hasChanges = true;
                           });
+                          _saveSwitchSettings(); // 自动保存
                         },
                       ),
                     ],

@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
+import 'package:Memento/widgets/quill_viewer/quill_viewer.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class NoteCard extends StatelessWidget {
   final Note note;
   final VoidCallback onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const NoteCard({
     super.key,
     required this.note,
     required this.onTap,
+    this.onEdit,
+    this.onDelete,
   });
 
   // Pastel colors from the HTML reference
@@ -26,21 +34,72 @@ class NoteCard extends StatelessWidget {
     {'light': Color(0xFFFAE8FF), 'dark': Color(0xFF43194A), 'text': Color(0xFF701A75), 'textDark': Color(0xFFF5D0FE)},
   ];
 
+  /// 显示底部抽屉菜单
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.copy),
+            title: Text('app_copy'.tr),
+            onTap: () {
+              Navigator.pop(context);
+              _copyNoteContent();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: Text('app_edit'.tr),
+            onTap: () {
+              Navigator.pop(context);
+              if (onEdit != null) {
+                onEdit!();
+              } else {
+                onTap();
+              }
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete, color: Colors.red),
+            title: Text(
+              'app_delete'.tr,
+              style: const TextStyle(color: Colors.red),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              onDelete?.call();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 复制笔记内容到剪贴板
+  void _copyNoteContent() {
+    final textToCopy = '${note.title}\n\n${note.content}';
+    Clipboard.setData(ClipboardData(text: textToCopy));
+    Toast.success('已复制到剪贴板');
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     // Deterministic color based on note ID hash
     final colorIndex = note.id.hashCode.abs() % _colors.length;
     final colorSet = _colors[colorIndex];
-    
+
     final bgColor = isDark ? colorSet['dark']! : colorSet['light']!;
     final textColor = isDark ? colorSet['textDark']! : colorSet['text']!;
     final subTextColor = isDark ? colorSet['textDark']!.withOpacity(0.7) : colorSet['text']!.withOpacity(0.7);
 
     return GestureDetector(
       onTap: onTap,
+      onLongPress: () => _showBottomSheet(context),
       child: Container(
         decoration: BoxDecoration(
           color: bgColor,
@@ -73,13 +132,23 @@ class NoteCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    note.content,
-                    maxLines: 8, // Allow more lines for masonry feel
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: subTextColor,
+                  // 使用 QuillViewer 只读渲染富文本内容
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxHeight: 200, // 限制最大高度，模拟 maxLines: 8
+                    ),
+                    child: ClipRect(
+                      child: DefaultTextStyle(
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: subTextColor,
+                          height: 1.5,
+                        ),
+                        child: QuillViewer(
+                          data: note.content,
+                          selectable: false,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
