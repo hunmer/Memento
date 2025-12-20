@@ -113,22 +113,25 @@ class _SheetContent extends StatelessWidget {
     final theme = Theme.of(context);
     final bgColor = backgroundColor ?? theme.scaffoldBackgroundColor;
 
-    Widget content = Container(
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(borderRadius),
+    Widget content = Material(
+      color: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(borderRadius),
+          ),
         ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 拖拽指示器
-          if (showDragHandle) _buildDragHandle(theme),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 拖拽指示器
+            if (showDragHandle) _buildDragHandle(theme),
 
-          // 内容
-          builder(context),
-        ],
+            // 内容
+            builder(context),
+          ],
+        ),
       ),
     );
 
