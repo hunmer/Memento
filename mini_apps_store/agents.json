@@ -1,0 +1,71 @@
+{
+  "agents": [
+    {
+      "id": "marketplace_agent_1",
+      "name": "代码助手",
+      "description": "专业的编程助手，擅长多种编程语言",
+      "systemPrompt": "你是一个专业的编程助手，擅长帮助用户解决编程问题、代码审查和优化建议。",
+      "tags": ["编程", "技术", "代码"],
+      "serviceProviderId": "openai",
+      "baseUrl": "https://api.openai.com/v1",
+      "headers": {},
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "model": "gpt-4",
+      "temperature": 0.7,
+      "maxLength": 2000,
+      "topP": 1.0,
+      "frequencyPenalty": 0.0,
+      "presencePenalty": 0.0,
+      "enableFunctionCalling": true,
+      "enableOpeningQuestions": false,
+      "openingQuestions": []
+    },
+    {
+      "id": "marketplace_agent_2",
+      "name": "写作助手",
+      "description": "帮助你创作优质文章、文案和创意内容",
+      "systemPrompt": "你是一个专业的写作助手，擅长帮助用户创作各类文章、文案和创意内容。",
+      "tags": ["写作", "创作", "文案"],
+      "serviceProviderId": "openai",
+      "baseUrl": "https://api.openai.com/v1",
+      "headers": {},
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "model": "gpt-3.5-turbo",
+      "temperature": 0.8,
+      "maxLength": 2000,
+      "topP": 1.0,
+      "frequencyPenalty": 0.0,
+      "presencePenalty": 0.0,
+      "enableFunctionCalling": false,
+      "enableOpeningQuestions": true,
+      "openingQuestions": [
+        "帮我写一篇关于...的文章",
+        "如何改进这段文案？",
+        "给我一些创意灵感"
+      ]
+    },
+    {
+      "id": "marketplace_agent_3",
+      "name": "数据分析专家",
+      "description": "专业的数据分析和可视化助手",
+      "systemPrompt": "你是一个专业的数据分析师，擅长从数据中发现模式和洞察，并提供可视化建议。",
+      "tags": ["数据", "分析", "可视化"],
+      "serviceProviderId": "deepseek",
+      "baseUrl": "https://api.deepseek.com",
+      "headers": {},
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "model": "deepseek-chat",
+      "temperature": 0.5,
+      "maxLength": 2000,
+      "topP": 1.0,
+      "frequencyPenalty": 0.0,
+      "presencePenalty": 0.0,
+      "enableFunctionCalling": true,
+      "enableOpeningQuestions": false,
+      "openingQuestions": []
+    }
+  ]
+}

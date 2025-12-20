@@ -20,17 +20,29 @@ import 'model_search_screen.dart';
 
 class AgentEditScreen extends StatefulWidget {
   final AIAgent? agent;
+  final bool isFromMarketplace; // 是否来自商场
 
-  const AgentEditScreen({super.key, this.agent});
+  const AgentEditScreen({
+    super.key,
+    this.agent,
+    this.isFromMarketplace = false,
+  });
 
   @override
   State<AgentEditScreen> createState() => _AgentEditScreenState();
 
-  static Route<T> route<T>(BuildContext context, {AIAgent? agent}) {
+  static Route<T> route<T>(
+    BuildContext context, {
+    AIAgent? agent,
+    bool isFromMarketplace = false,
+  }) {
     return NavigationHelper.createRoute(
       Localizations.override(
         context: context,
-        child: AgentEditScreen(agent: agent),
+        child: AgentEditScreen(
+          agent: agent,
+          isFromMarketplace: isFromMarketplace,
+        ),
       ),
     );
   }
@@ -73,7 +85,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       _descriptionController.text = widget.agent!.description;
       _promptController.text = widget.agent!.systemPrompt;
       _selectedIcon = widget.agent!.icon ?? Icons.smart_toy;
-      _selectedIconColor = widget.agent!.iconColor ?? Colors.blue;
+      // 如果 iconColor 为 null，使用服务商默认颜色
+      _selectedIconColor = widget.agent!.iconColor ??
+          _getColorForServiceProvider(widget.agent!.serviceProviderId);
       _avatarUrl = widget.agent!.avatarUrl;
       _selectedProviderId = widget.agent!.serviceProviderId;
       _baseUrlController.text = widget.agent!.baseUrl;
@@ -84,6 +98,22 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       _selectedPresetId = widget.agent!.promptPresetId;
       _enableOpeningQuestions = widget.agent!.enableOpeningQuestions;
       _openingQuestions.addAll(widget.agent!.openingQuestions);
+    }
+  }
+
+  /// 获取服务商默认颜色
+  Color _getColorForServiceProvider(String providerId) {
+    switch (providerId) {
+      case 'openai':
+        return Colors.green;
+      case 'azure':
+        return Colors.blue;
+      case 'ollama':
+        return Colors.orange;
+      case 'deepseek':
+        return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -254,12 +284,20 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     try {
       final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
       final controller = plugin.controller;
-      if (widget.agent == null) {
+      if (widget.agent == null || widget.isFromMarketplace) {
+        // 新建或从商场安装时，添加新 Agent
         await controller.addAgent(agent);
       } else {
+        // 编辑现有 Agent
         await controller.updateAgent(agent);
       }
       if (mounted) {
+        // 显示成功提示
+        ToastService.instance.showToast(
+          widget.isFromMarketplace
+              ? '安装成功'
+              : (widget.agent == null ? '创建成功' : '保存成功'),
+        );
         // 返回true表示保存成功
         Navigator.of(context).pop(true);
       }
@@ -381,7 +419,11 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               tooltip: 'openai_deleteAgent'.tr,
             ),
           ],
-          IconButton(icon: const Icon(Icons.save), onPressed: _saveAgent),
+          IconButton(
+            icon: Icon(widget.isFromMarketplace ? Icons.download : Icons.save),
+            onPressed: _saveAgent,
+            tooltip: widget.isFromMarketplace ? '安装' : 'openai_save'.tr,
+          ),
         ],
       ),
       body: Form(
