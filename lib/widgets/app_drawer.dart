@@ -37,12 +37,24 @@ class AppDrawer extends StatelessWidget {
                   itemCount: plugins.length,
                   itemBuilder: (context, index) {
                     final plugin = plugins[index];
+
+                    // 只对有配置页面的插件显示设置按钮
+                    final hasSettings = [
+                      'chat',
+                      'openai',
+                      'agent_chat',
+                      'webview',
+                      'store',
+                    ].contains(plugin.id);
+
                     return ListTile(
                       leading: Icon(plugin.icon),
                       title: Text(
                         plugin.getPluginName(context) ?? plugin.id,
                       ),
-                      trailing: IconButton(
+                      trailing:
+                          hasSettings
+                              ? IconButton(
                         icon: const Icon(Icons.settings),
                         tooltip: 'app_settings'.tr,
                         onPressed: () {
@@ -55,7 +67,8 @@ class AppDrawer extends StatelessWidget {
                             );
                           }
                         },
-                      ),
+                              )
+                              : null,
                       onTap: () {
                         if (context.mounted) {
                           Navigator.pop(context); // 关闭抽屉

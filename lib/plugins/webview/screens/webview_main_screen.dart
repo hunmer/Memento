@@ -16,6 +16,7 @@ import 'components/webview_card_item.dart';
 import 'webview_browser_screen.dart';
 import 'proxy_settings_screen.dart';
 import 'app_store/app_store_screen.dart';
+import '../../../core/navigation/navigation_helper.dart';
 
 /// WebView 主界面 - 网址卡片列表
 class WebViewMainScreen extends StatefulWidget {
@@ -46,11 +47,9 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
           IconButton(
             icon: const Icon(Icons.wifi_tethering),
             onPressed: () {
-              Navigator.push(
+              NavigationHelper.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const ProxySettingsScreen(),
-                ),
+                const ProxySettingsScreen(),
               );
             },
             tooltip: 'webview_proxy_settings'.tr,
@@ -101,16 +100,14 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
               // 先捕获 Provider 实例，避免闭包中 context 失效
               final appStoreManager = context.read<AppStoreManager>();
               final downloadManager = context.read<DownloadManager>();
-              Navigator.push(
+              NavigationHelper.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => MultiProvider(
-                    providers: [
-                      ChangeNotifierProvider.value(value: appStoreManager),
-                      ChangeNotifierProvider.value(value: downloadManager),
-                    ],
-                    child: const AppStoreScreen(),
-                  ),
+                MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider.value(value: appStoreManager),
+                    ChangeNotifierProvider.value(value: downloadManager),
+                  ],
+                  child: const AppStoreScreen(),
                 ),
               );
             },

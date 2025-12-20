@@ -36,7 +36,11 @@ class ConfigManager {
 
   /// 获取默认配置
   Map<String, dynamic> _getDefaultConfig() {
-    return {'themeMode': 'system', 'locale': 'zh_CN'};
+    return {
+      'themeMode': 'system',
+      'locale': 'zh_CN',
+      'permissionsOnboardingCompleted': false,
+    };
   }
 
   /// 保存应用级配置
@@ -68,6 +72,21 @@ class ConfigManager {
     }
 
     _appConfig['locale'] = localeStr;
+    await saveAppConfig();
+  }
+
+  /// èŽ·å–åº”ç”¨çº§é…ç½®å€¼ï¼Œå¦‚æžœä¸å­˜åœ¨åˆ™è¿”å›žé»˜è®¤å€¼
+  T getAppConfigValue<T>(String key, T defaultValue) {
+    final value = _appConfig[key];
+    if (value is T) {
+      return value;
+    }
+    return defaultValue;
+  }
+
+  /// è®¾ç½®åº”ç”¨çº§é…ç½®å¹¶ç«‹å³ä¿å­˜
+  Future<void> setAppConfigValue<T>(String key, T value) async {
+    _appConfig[key] = value;
     await saveAppConfig();
   }
 

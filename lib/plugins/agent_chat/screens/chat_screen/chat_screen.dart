@@ -16,6 +16,7 @@ import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
 import 'package:Memento/widgets/tts_settings_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/openai/widgets/agent_list_drawer.dart';
 import 'components/message_bubble.dart';
 import 'components/message_input.dart';
 import 'components/save_tool_dialog.dart';
@@ -1118,92 +1119,45 @@ class _ChatScreenState extends State<ChatScreen> {
 
   /// 显示Agent选择器
   Future<void> _showAgentSelector() async {
-    try {
-      final agents = await _controller.getAvailableAgents();
+    if (!mounted) return;
 
-      if (!mounted) return;
+    // 准备当前选中的 Agent 信息
+    final currentAgent = _controller.currentAgent;
+    final selectedAgents = currentAgent != null
+        ? [
+            {'id': currentAgent.id, 'name': currentAgent.name}
+          ]
+        : <Map<String, String>>[];
 
-      if (agents.isEmpty) {
-        toastService.showToast('未找到可用的Agent，请先在OpenAI插件中创建');
-        return;
-      }
+    // 使用 showModalBottomSheet 显示 AgentListDrawer
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AgentListDrawer(
+        selectedAgents: selectedAgents,
+        allowMultipleSelection: false, // 单选模式
+        onAgentSelected: (List<Map<String, String>> agents) async {
+          if (agents.isEmpty) return;
 
-      final selectedAgent = await showDialog<String>(
-        context: context,
-        builder:
-            (context) => AlertDialog(
-              title: Text('agent_chat_selectAgent'.tr),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: agents.length,
-                  itemBuilder: (context, index) {
-                    final agent = agents[index];
-                    final isSelected = _controller.currentAgent?.id == agent.id;
+          final selectedAgentId = agents.first['id'];
+          if (selectedAgentId == null) return;
 
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor:
-                            isSelected ? Colors.blue : Colors.grey[300],
-                        child: Icon(
-                          Icons.smart_toy,
-                          color: isSelected ? Colors.white : Colors.grey[600],
-                        ),
-                      ),
-                      title: Text(
-                        agent.name,
-                        style: TextStyle(
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                      subtitle: Text(
-                        agent.description.isEmpty ? '暂无描述' : agent.description,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing:
-                          isSelected
-                              ? const Icon(
-                                Icons.check_circle,
-                                color: Colors.blue,
-                              )
-                              : null,
-                      selected: isSelected,
-                      onTap: () => Navigator.pop(context, agent.id),
-                    );
-                  },
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('agent_chat_cancel'.tr),
-                ),
-              ],
-            ),
-      );
-
-      if (selectedAgent != null && mounted) {
-        try {
-          await _controller.selectAgent(selectedAgent);
-          // 切换 agent 后重新加载建议问题
-          await _loadSuggestedQuestions();
-          if (mounted) {
-            toastService.showToast('已切换到 ${_controller.currentAgent?.name}');
+          try {
+            await _controller.selectAgent(selectedAgentId);
+            // 切换 agent 后重新加载建议问题
+            await _loadSuggestedQuestions();
+            if (mounted) {
+              toastService.showToast('已切换到 ${agents.first['name']}');
+            }
+          } catch (e) {
+            if (mounted) {
+              toastService.showToast('切换Agent失败: $e');
+            }
           }
-        } catch (e) {
-          if (mounted) {
-            toastService.showToast('切换Agent失败: $e');
-          }
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        toastService.showToast('加载Agent列表失败: $e');
-      }
-    }
+        },
+      ),
+    );
   }
 
   /// 显示删除确认对话框

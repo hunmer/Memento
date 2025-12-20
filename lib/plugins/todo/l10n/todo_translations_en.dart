@@ -67,6 +67,8 @@ const Map<String, String> todoTranslationsEn = {
   'todo_low': 'Low',
   'todo_medium': 'Medium',
   'todo_high': 'High',
+  'todo_highPriority': 'High Priority',
+  'todo_overdue': 'Overdue',
 
   // Filter and sort
   'todo_showCompleted': 'Show Completed',
@@ -105,6 +107,8 @@ const Map<String, String> todoTranslationsEn = {
   'todo_noCompletedTasks': 'No completed tasks',
   'todo_noTodoTasks': 'No Todo Tasks',
   'todo_loading': 'Loading...',
+  'todo_addSomeNotesHint': 'Add some notes...',
+  'todo_none': 'None',
 
   // History related
   'todo_clearHistoryMessage':

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -7,171 +5,150 @@ import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 class PermissionController {
-  final BuildContext context;
-  final bool _mounted;
+  PermissionController();
 
-  PermissionController(this.context) : _mounted = true;
+  /// èŽ·å–å½“å‰å¹³å°éœ€è¦çš„æƒé™çŠ¶æ€?
+  Future<List<PermissionStateInfo>> loadPermissionStates() async {
+    final requirements = await _getPermissionRequirements();
+    final states = <PermissionStateInfo>[];
 
-  // 获取所需的权限列表
-  List<Permission> _getRequiredPermissions() {
-    if (!UniversalPlatform.isAndroid) {
-      return [];
+    for (final requirement in requirements) {
+      final status = await requirement.permission.status;
+      states.add(PermissionStateInfo(requirement, status));
     }
-    return [
-      Permission.photos,
-      Permission.videos,
-      Permission.audio,
-      Permission.notification,
-    ];
+
+    return states;
   }
 
-  // 检查单个权限的状态
-  Future<bool> _checkSinglePermission(Permission permission) async {
-    final status = await permission.status;
-    return status.isGranted;
-  }
-
-  // 请求单个权限
-  Future<bool> _requestSinglePermission(Permission permission) async {
+  /// è¯·æ±‚å•ä¸ªæƒé™
+  Future<bool> requestPermission(Permission permission) async {
     try {
       final result = await permission.request();
+      if (result.isPermanentlyDenied) {
+        Toast.error(
+          'app_permissionRequiredInSettings'.trParams({
+            'permission': _getPermissionName(permission),
+          }),
+        );
+      }
       return result.isGranted;
     } catch (e) {
-      debugPrint('请求权限失败: $e');
+      debugPrint('è¯·æ±‚æƒé™å¤±è´¥: $e');
       return false;
     }
   }
 
-  // 显示权限说明对话框
-  Future<bool> _showPermissionDialog(String permissionName) async {
-    if (!_mounted) return false;
+  /// éžç©ºåˆ—è¡¨ç”¨äºŽæ‰¹é‡è¯·æ±‚æƒé™?
+  Future<bool> requestPermissions(
+    List<PermissionRequirement> requirements,
+  ) async {
+    bool allGranted = true;
+    for (final requirement in requirements) {
+      final status = await requirement.permission.status;
+      if (status.isGranted) continue;
 
-    return await showDialog<bool>(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('app_permissionRequired'
-                  .tr
-                  .replaceFirst('{permissionName}', permissionName)),
-              content: Text('app_permissionRequiredForApp'
-                  .tr
-                  .replaceFirst('{permissionName}', permissionName)),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('app_notNow'.tr),
-                  onPressed: () => Navigator.of(context).pop(false),
-                ),
-                TextButton(
-                  child: Text('app_grantPermission'.tr),
-                  onPressed: () => Navigator.of(context).pop(true),
-                ),
-              ],
-            );
-          },
-        ) ??
-        false;
-  }
-
-  // 获取权限的显示名称
-  String _getPermissionName(Permission permission) {
-    switch (permission) {
-      case Permission.photos:
-        return '照片';
-      case Permission.videos:
-        return '视频';
-      case Permission.audio:
-        return '音频';
-      case Permission.storage:
-        return '存储';
-      case Permission.notification:
-        return '通知';
-      default:
-        return '未知';
-    }
-  }
-
-  // 检查并逐个请求必要的权限
-  Future<bool> checkAndRequestPermissions() async {
-    if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
-      return true; // 非移动平台，无需请求权限
-    }
-
-    if (UniversalPlatform.isAndroid) {
-      // 获取 Android SDK 版本
-      final sdkInt = await _getAndroidSdkVersion();
-
-      if (sdkInt >= 33) {
-        // Android 13 及以上版本需要单独请求媒体权限
-        final permissions = _getRequiredPermissions();
-
-        for (final permission in permissions) {
-          // 检查权限状态
-          final isGranted = await _checkSinglePermission(permission);
-          if (!isGranted) {
-            // 显示权限说明对话框
-            final permissionName = _getPermissionName(permission);
-            final shouldRequest = await _showPermissionDialog(permissionName);
-
-            if (!shouldRequest || !_mounted) {
-              // 用户拒绝显示权限对话框
-              return false;
-            }
-
-            // 请求单个权限
-            final granted = await _requestSinglePermission(permission);
-            if (!granted) {
-              if (!_mounted) return false;
-
-              Toast.error('app_permissionRequiredInSettings'
-                  .tr
-                  .replaceFirst('{permissionName}', permissionName));
-              return false;
-            }
-          }
-        }
-      } else {
-        // Android 12 及以下版本
-        final isGranted = await _checkSinglePermission(Permission.storage);
-        if (!isGranted) {
-          // 显示权限说明对话框
-          final shouldRequest = await _showPermissionDialog('存储');
-
-          if (!shouldRequest || !_mounted) {
-            return false;
-          }
-
-          // 请求存储权限
-          final granted = await _requestSinglePermission(Permission.storage);
-          if (!granted) {
-            if (!_mounted) return false;
-
-            Toast.error('app_storagePermissionRequired'.tr);
-            return false;
-          }
-        }
+      final granted = await requestPermission(requirement.permission);
+      if (!granted) {
+        allGranted = false;
       }
     }
-
-    // iOS 的文件访问权限通过 file_picker 自动处理
-    return true;
+    return allGranted;
   }
 
-  // 获取 Android SDK 版本
+  /// èŽ·å– Android SDK ç‰ˆæœ¬
   Future<int> _getAndroidSdkVersion() async {
     try {
       if (!UniversalPlatform.isAndroid) return 0;
-
-      final sdkInt = await Permission.storage.status.then((_) async {
-        // 通过 platform channel 获取 SDK 版本
-        // 这里简单返回一个固定值，假设是 Android 13
-        return 33;
-      });
-
+      final sdkInt = await Permission.storage.status.then((_) async => 33);
       return sdkInt;
     } catch (e) {
-      // 如果获取失败，假设是较低版本
       return 29;
     }
   }
+
+  Future<List<PermissionRequirement>> _getPermissionRequirements() async {
+    if (!UniversalPlatform.isAndroid) {
+      return [];
+    }
+
+    final sdkInt = await _getAndroidSdkVersion();
+    if (sdkInt >= 33) {
+      return [
+        PermissionRequirement(
+          permission: Permission.photos,
+          titleKey: 'app_permission_photosTitle',
+          descriptionKey: 'app_permission_photosDescription',
+          icon: Icons.photo_outlined,
+        ),
+        PermissionRequirement(
+          permission: Permission.videos,
+          titleKey: 'app_permission_videosTitle',
+          descriptionKey: 'app_permission_videosDescription',
+          icon: Icons.video_library_outlined,
+        ),
+        PermissionRequirement(
+          permission: Permission.audio,
+          titleKey: 'app_permission_audioTitle',
+          descriptionKey: 'app_permission_audioDescription',
+          icon: Icons.audiotrack,
+        ),
+        PermissionRequirement(
+          permission: Permission.notification,
+          titleKey: 'app_permission_notificationsTitle',
+          descriptionKey: 'app_permission_notificationsDescription',
+          icon: Icons.notifications_active_outlined,
+        ),
+      ];
+    }
+
+    return [
+      PermissionRequirement(
+        permission: Permission.storage,
+        titleKey: 'app_permission_storageTitle',
+        descriptionKey: 'app_permission_storageDescription',
+        icon: Icons.sd_storage,
+      ),
+    ];
+  }
+
+  String _getPermissionName(Permission permission) {
+    switch (permission) {
+      case Permission.photos:
+        return 'app_permission_photosTitle'.tr;
+      case Permission.videos:
+        return 'app_permission_videosTitle'.tr;
+      case Permission.audio:
+        return 'app_permission_audioTitle'.tr;
+      case Permission.notification:
+        return 'app_permission_notificationsTitle'.tr;
+      case Permission.storage:
+        return 'app_permission_storageTitle'.tr;
+      default:
+        return permission.toString();
+    }
+  }
+}
+
+class PermissionRequirement {
+  PermissionRequirement({
+    required this.permission,
+    required this.titleKey,
+    required this.descriptionKey,
+    required this.icon,
+  });
+
+  final Permission permission;
+  final String titleKey;
+  final String descriptionKey;
+  final IconData icon;
+}
+
+class PermissionStateInfo {
+  PermissionStateInfo(this.requirement, this.status);
+
+  final PermissionRequirement requirement;
+  final PermissionStatus status;
+
+  bool get isGranted => status.isGranted;
+  bool get isPermanentlyDenied => status.isPermanentlyDenied;
 }
