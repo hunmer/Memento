@@ -16,6 +16,7 @@ import 'package:Memento/screens/settings_screen/models/server_sync_config.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
 import 'package:Memento/screens/settings_screen/widgets/permission_request_dialog.dart';
 import 'package:get/get.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -139,8 +140,71 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await _checkServerSyncConfig();
   }
 
+  // 显示定位 API Key 设置对话框
+  Future<void> _showLocationApiKeyDialog() async {
+    final TextEditingController apiKeyController = TextEditingController(
+      text: _controller.locationApiKey,
+    );
+
+    final result = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('screens_setLocationApiKey'.tr),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'screens_locationApiKeyHint'.tr,
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: apiKeyController,
+                  decoration: InputDecoration(
+                    labelText: 'screens_apiKeyLabel'.tr,
+                    hintText: 'screens_apiKeyInputHint'.tr,
+                    border: const OutlineInputBorder(),
+                  ),
+                  maxLines: 1,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'screens_locationApiKeyGuide'.tr,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('screens_cancel'.tr),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop(apiKeyController.text);
+                },
+                child: Text('app_save'.tr),
+              ),
+            ],
+          ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      await _controller.setLocationApiKey(result);
+      if (mounted) {
+        setState(() {});
+      }
+    }
+
+    apiKeyController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bool showPermissionEntry =
+        UniversalPlatform.isAndroid || UniversalPlatform.isIOS;
     if (!_controller.isInitialized() || _backupService == null) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -319,19 +383,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.privacy_tip),
-            title: Text('app_permissionsTitle'.tr),
-            subtitle: Text('app_permissionsManageDescription'.tr),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () async {
-              await showPermissionRequestDialog(
-                context: context,
-                controller: PermissionController(),
-                barrierDismissible: true,
-                showSkipButton: false,
-              );
-            },
+            leading: const Icon(Icons.location_on),
+            title: Text('screens_locationApiKey'.tr),
+            subtitle: Text(
+              _controller.locationApiKey.isEmpty
+                ? 'screens_locationApiKeyNotSet'.tr
+                : 'screens_locationApiKeyPartial'.trParams({'key': _controller.locationApiKey.substring(0, 8)}),
+            ),
+            trailing: const Icon(Icons.edit),
+            onTap: () => _showLocationApiKeyDialog(),
           ),
+          if (showPermissionEntry)
+            ListTile(
+              leading: const Icon(Icons.privacy_tip),
+              title: Text('app_permissionsTitle'.tr),
+              subtitle: Text('app_permissionsManageDescription'.tr),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () async {
+                await showPermissionRequestDialog(
+                  context: context,
+                  controller: PermissionController(),
+                  barrierDismissible: true,
+                  showSkipButton: false,
+                );
+              },
+            ),
           ListTile(
             leading: const Icon(Icons.system_update),
             title: Text('settings_screen_autoCheckUpdateTitle'.tr),
@@ -387,15 +463,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/json_dynamic_test');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.navigation),
-            title: Text('screens_superCupertinoNavigationTest'.tr),
-            subtitle: Text('screens_testIOSStyleNavigation'.tr),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.pushNamed(context, '/super_cupertino_test');
             },
           ),
           ListTile(

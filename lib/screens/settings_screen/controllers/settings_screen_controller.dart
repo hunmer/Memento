@@ -44,6 +44,7 @@ class SettingsScreenController extends ChangeNotifier {
     await _loadBackupSchedule();
     await _loadLastBackupCheckDate();
     enableLogging = _prefs.getBool('enable_logging') ?? false;
+    _locationApiKey = _prefs.getString('location_api_key') ?? 'dad6a772bf826842c3049e9c7198115c';
   }
 
   Future<void> _loadBackupSchedule() async {
@@ -143,6 +144,15 @@ class SettingsScreenController extends ChangeNotifier {
   set enableLogging(bool value) {
     _enableLogging = value;
     _prefs.setBool('enable_logging', value);
+    notifyListeners();
+  }
+
+  // 定位 API Key 设置
+  String _locationApiKey = 'dad6a772bf826842c3049e9c7198115c';
+  String get locationApiKey => _locationApiKey;
+  Future<void> setLocationApiKey(String value) async {
+    _locationApiKey = value;
+    await _prefs.setString('location_api_key', value);
     notifyListeners();
   }
 

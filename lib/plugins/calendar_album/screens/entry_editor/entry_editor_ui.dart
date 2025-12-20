@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'package:Memento/widgets/location_picker.dart';
 import 'package:smooth_sheets/smooth_sheets.dart';
 import 'entry_editor_controller.dart';
@@ -98,9 +99,9 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
         children: [
           GestureDetector(
             onTap: () => Navigator.of(context).pop(),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
+            child: Text(
+              'calendar_album_cancel'.tr,
+              style: const TextStyle(
                 color: Colors.blue,
                 fontSize: 17,
                 fontWeight: FontWeight.w400,
@@ -108,7 +109,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
             ),
           ),
           Text(
-            isEditing ? 'Edit Post' : 'New Post',
+            isEditing ? 'calendar_album_edit_post'.tr : 'calendar_album_new_post'.tr,
             style: const TextStyle(
               color: Colors.black,
               fontSize: 17,
@@ -122,9 +123,9 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
                 Navigator.of(context).pop();
               }
             },
-            child: const Text(
-              'Save',
-              style: TextStyle(
+            child: Text(
+              'calendar_album_save'.tr,
+              style: const TextStyle(
                 color: Colors.blue,
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
@@ -161,11 +162,11 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
                 Expanded(
                   child: TextField(
                     controller: controller.titleController,
-                    decoration: const InputDecoration(
-                      hintText: 'Title',
+                    decoration: InputDecoration(
+                      hintText: 'calendar_album_title'.tr,
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.zero,
-                      hintStyle: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
+                      hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
                     ),
                     style: const TextStyle(
                       fontSize: 17,
@@ -182,8 +183,8 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
             padding: const EdgeInsets.all(16),
             child: TextField(
               controller: controller.contentController,
-              decoration: const InputDecoration(
-                hintText: "What's on your mind?",
+              decoration: InputDecoration(
+                hintText: 'calendar_album_whats_on_mind'.tr,
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
               ),
@@ -199,6 +200,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
 
   Widget _buildMoodButton() {
     final mood = controller.mood ?? 'Happy';
+    final moodTranslationKey = 'calendar_album_mood_${mood.toLowerCase()}';
     return GestureDetector(
       onTap: _showMoodPicker,
       child: Container(
@@ -213,7 +215,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
             Icon(Icons.sentiment_satisfied, size: 20, color: Colors.orange.shade600),
             const SizedBox(width: 8),
             Text(
-              mood,
+              moodTranslationKey.tr,
               style: TextStyle(
                 color: Colors.orange.shade600,
                 fontWeight: FontWeight.w500,
@@ -235,13 +237,13 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-             const Text('Select Mood', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+             Text('calendar_album_select_mood'.tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
              const SizedBox(height: 16),
              Wrap(
                spacing: 8,
                runSpacing: 8,
                children: moods.map((m) => ActionChip(
-                 label: Text(m),
+                 label: Text('calendar_album_mood_${m.toLowerCase()}'.tr),
                  backgroundColor: controller.mood == m ? Colors.orange.shade100 : null,
                  onPressed: () {
                    setState(() {
@@ -265,10 +267,10 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
           icon: Icons.location_on,
           iconColor: Colors.red.shade500,
           iconBg: Colors.red.shade50,
-          label: 'LOCATION',
-          value: controller.locationController.text.isNotEmpty 
-              ? controller.locationController.text 
-              : 'Add Location',
+          label: 'calendar_album_location'.tr.toUpperCase(),
+          value: controller.locationController.text.isNotEmpty
+              ? controller.locationController.text
+              : 'calendar_album_add_location'.tr,
           onTap: () => _handleLocationSelection(widget.parentContext),
         )),
         const SizedBox(width: 12),
@@ -276,8 +278,10 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
           icon: Icons.sunny,
           iconColor: Colors.blue.shade500,
           iconBg: Colors.blue.shade50,
-          label: 'WEATHER',
-          value: controller.weather ?? 'Add Weather',
+          label: 'calendar_album_weather'.tr.toUpperCase(),
+          value: controller.weather != null
+              ? 'calendar_album_weather_${controller.weather!.toLowerCase()}'.tr
+              : 'calendar_album_add_weather'.tr,
           onTap: _showWeatherPicker,
         )),
       ],
@@ -386,13 +390,13 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-             const Text('Select Weather', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+             Text('calendar_album_select_weather'.tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
              const SizedBox(height: 16),
              Wrap(
                spacing: 8,
                runSpacing: 8,
                children: weathers.map((w) => ActionChip(
-                 label: Text(w),
+                 label: Text('calendar_album_weather_${w.toLowerCase()}'.tr),
                  backgroundColor: controller.weather == w ? Colors.blue.shade100 : null,
                  onPressed: () {
                    setState(() {

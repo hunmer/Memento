@@ -11,6 +11,7 @@ class CalendarAlbumTranslationsEn {
     'calendar_album_delete_album': 'Delete Album',
     'calendar_album_album_list': 'Album List',
     'calendar_album_add_photos': 'Add Photos',
+    'calendar_album_add_tag': 'Add Tag',
     'calendar_album_select_date': 'Select Date',
     'calendar_album_no_photos_yet': 'No photos yet',
     'calendar_album_photo_count': 'Photos: ',
@@ -70,6 +71,36 @@ class CalendarAlbumTranslationsEn {
     'calendar_album_title': 'Title',
     'calendar_album_weather': 'Weather',
     'calendar_album_word_count': 'Word Count',
+
+    // Entry Editor
+    'calendar_album_edit_post': 'Edit Post',
+    'calendar_album_new_post': 'New Post',
+    'calendar_album_save': 'Save',
+    'calendar_album_whats_on_mind': "What's on your mind?",
+    'calendar_album_select_mood': 'Select Mood',
+    'calendar_album_add_location': 'Add Location',
+    'calendar_album_add_weather': 'Add Weather',
+    'calendar_album_select_weather': 'Select Weather',
+
+    // Mood Options
+    'calendar_album_mood_happy': 'Happy',
+    'calendar_album_mood_sad': 'Sad',
+    'calendar_album_mood_excited': 'Excited',
+    'calendar_album_mood_tired': 'Tired',
+    'calendar_album_mood_calm': 'Calm',
+    'calendar_album_mood_anxious': 'Anxious',
+    'calendar_album_mood_angry': 'Angry',
+    'calendar_album_mood_content': 'Content',
+
+    // Weather Options
+    'calendar_album_weather_sunny': 'Sunny',
+    'calendar_album_weather_cloudy': 'Cloudy',
+    'calendar_album_weather_rainy': 'Rainy',
+    'calendar_album_weather_snowy': 'Snowy',
+    'calendar_album_weather_windy': 'Windy',
+    'calendar_album_weather_foggy': 'Foggy',
+    'calendar_album_weather_stormy': 'Stormy',
+    'calendar_album_weather_clear': 'Clear',
 
     // Widget Configuration
     'calendar_album_config_weekly_widget': 'Configure Weekly Album Widget',

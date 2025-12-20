@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
 import 'entry_editor_controller.dart';
@@ -96,7 +97,7 @@ class _EntryEditorTagHandlerState extends State<EntryEditorTagHandler> {
             Icon(Icons.add, size: 16, color: Colors.grey.shade600),
             const SizedBox(width: 4),
             Text(
-              'Add Tag',
+              'calendar_album_add_tag'.tr,
               style: TextStyle(
                 color: Colors.grey.shade600,
                 fontSize: 14,

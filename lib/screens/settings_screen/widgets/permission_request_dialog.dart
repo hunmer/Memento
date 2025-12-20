@@ -50,18 +50,36 @@ class _PermissionRequestDialogState extends State<PermissionRequestDialog> {
   }
 
   Future<void> _loadStates() async {
-    final states = await widget.controller.loadPermissionStates();
-    if (!mounted) return;
-
-    if (states.isEmpty) {
-      Navigator.of(context).pop(true);
-      return;
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
     }
 
-    setState(() {
-      _permissionStates = states;
-      _isLoading = false;
-    });
+    try {
+      final states = await widget.controller.loadPermissionStates();
+      if (!mounted) return;
+
+      if (states.isEmpty) {
+        setState(() {
+          _isLoading = false;
+        });
+        Navigator.of(context).pop(true);
+        return;
+      }
+
+      setState(() {
+        _permissionStates = states;
+        _isLoading = false;
+      });
+    } catch (e, stack) {
+      debugPrint('Failed to load permission states: $e');
+      debugPrint('$stack');
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _handleRequestSingle(Permission permission) async {

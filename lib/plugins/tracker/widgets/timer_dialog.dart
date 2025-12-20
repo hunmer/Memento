@@ -53,6 +53,9 @@ class _TimerDialogState extends State<TimerDialog> {
     EventManager.instance.subscribe('unified_timer_updated', (args) {
       if (args is UnifiedTimerEventArgs) {
         final state = args.timerState as TimerState;
+        // 只处理 tracker 插件的计时器
+        if (state.pluginId != 'tracker') return;
+
         if (state.id == widget.goal.id) {
           setState(() {
             _seconds = state.elapsed.inSeconds;
