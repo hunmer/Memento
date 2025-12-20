@@ -87,23 +87,27 @@ class DialogService {
               decoration: InputDecoration(hintText: hintText),
             ),
             actions: [
-              TextButton(
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                onPressed:
-                    () => Navigator.of(context).pop({'action': 'delete'}),
-                child: Text('tagManager_deleteGroup'.tr),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('tagManager_cancel'.tr),
-              ),
-              TextButton(
-                onPressed:
-                    () => Navigator.of(
-                      context,
-                    ).pop({'action': 'rename', 'name': textController.text}),
-                child: Text('tagManager_confirm'.tr),
+              Row(
+                children: [
+                  TextButton(
+                    style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    onPressed:
+                        () => Navigator.of(context).pop({'action': 'delete'}),
+                    child: Text('tagManager_deleteGroup'.tr),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text('tagManager_cancel'.tr),
+                  ),
+                  TextButton(
+                    onPressed:
+                        () => Navigator.of(
+                          context,
+                        ).pop({'action': 'rename', 'name': textController.text}),
+                    child: Text('tagManager_confirm'.tr),
+                  ),
+                ],
               ),
             ],
           ),

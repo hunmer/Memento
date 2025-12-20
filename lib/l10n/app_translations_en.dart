@@ -121,6 +121,30 @@ const Map<String, String> appTranslationsEn = {
       '@permission permission is required to continue. Please grant permission in system settings.',
   'app_storagePermissionRequired':
       'Storage permission is required to continue. Please grant permission in system settings.',
+  'app_permissionsTitle': 'Permission access',
+  'app_permissionsDescription':
+      'Grant these permissions to ensure backups, imports, and reminders continue to work properly.',
+  'app_permissionsGrantAll': 'Grant all permissions',
+  'app_permissionsGranted': 'Granted',
+  'app_permissionsRequest': 'Allow',
+  'app_permissionsOpenSettings': 'Open settings',
+  'app_permissionsManageDescription':
+      'Review and manage multimedia and notification permissions.',
+  'app_permission_photosTitle': 'Photos',
+  'app_permission_photosDescription':
+      'Required to pick and back up images inside diary, check-in, and other plugins.',
+  'app_permission_videosTitle': 'Videos',
+  'app_permission_videosDescription':
+      'Required to attach and export recorded videos.',
+  'app_permission_audioTitle': 'Audio',
+  'app_permission_audioDescription':
+      'Required to capture voice notes and attach audio files.',
+  'app_permission_notificationsTitle': 'Notifications',
+  'app_permission_notificationsDescription':
+      'Required to deliver reminders and scheduled alerts.',
+  'app_permission_storageTitle': 'Storage',
+  'app_permission_storageDescription':
+      'Required to read and write backup files on your device.',
 
   // File operations
   'app_downloadCancelled': 'Download cancelled',

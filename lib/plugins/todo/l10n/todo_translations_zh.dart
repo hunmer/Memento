@@ -67,6 +67,8 @@ const Map<String, String> todoTranslationsZh = {
   'todo_low': '低',
   'todo_medium': '中',
   'todo_high': '高',
+  'todo_highPriority': '高优先级',
+  'todo_overdue': '已逾期',
 
   // 筛选与排序
   'todo_showCompleted': '显示已完成',
@@ -105,6 +107,8 @@ const Map<String, String> todoTranslationsZh = {
   'todo_noCompletedTasks': '暂无已完成任务',
   'todo_noTodoTasks': '暂无待办任务',
   'todo_loading': '加载中...',
+  'todo_addSomeNotesHint': '添加一些备注...',
+  'todo_none': '无',
 
   // 历史记录相关
   'todo_clearHistoryMessage': '确定要清空所有历史记录吗？此操作不可撤销。',

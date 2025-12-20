@@ -454,12 +454,12 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
                                 ),
                                 if (widget.task.priority == TaskPriority.high)
                                   _buildTag(
-                                    'High Priority',
+                                    'todo_highPriority'.tr,
                                     isDark,
                                     isHighPriority: true,
                                   ),
                                 if (isOverdue)
-                                  _buildTag('Overdue', isDark, isOverdue: true),
+                                  _buildTag('todo_overdue'.tr, isDark, isOverdue: true),
                               ],
                             ),
                             const SizedBox(height: 8),

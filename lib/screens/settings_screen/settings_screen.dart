@@ -13,6 +13,8 @@ import 'package:Memento/core/floating_ball/floating_ball_manager.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_screen.dart';
 import 'package:Memento/screens/about_screen/about_screen.dart';
 import 'package:Memento/screens/settings_screen/models/server_sync_config.dart';
+import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
+import 'package:Memento/screens/settings_screen/widgets/permission_request_dialog.dart';
 import 'package:get/get.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -114,21 +116,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) => SingleChildScrollView(
-          controller: scrollController,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: const ServerSyncSettingsSection(),
+      builder:
+          (context) => DraggableScrollableSheet(
+            initialChildSize: 0.9,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            expand: false,
+            builder:
+                (context, scrollController) => SingleChildScrollView(
+                  controller: scrollController,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: const ServerSyncSettingsSection(),
+                  ),
+                ),
           ),
-        ),
-      ),
     );
 
     // 重新检查服务器同步状态
@@ -315,6 +319,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           ListTile(
+            leading: const Icon(Icons.privacy_tip),
+            title: Text('app_permissionsTitle'.tr),
+            subtitle: Text('app_permissionsManageDescription'.tr),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () async {
+              await showPermissionRequestDialog(
+                context: context,
+                controller: PermissionController(),
+                barrierDismissible: true,
+                showSkipButton: false,
+              );
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.system_update),
             title: Text('settings_screen_autoCheckUpdateTitle'.tr),
             subtitle: Text('settings_screen_autoCheckUpdateSubtitle'.tr),
@@ -365,9 +383,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.widgets),
             title: Text('screens_jsonDynamicWidgetTest'.tr),
-            subtitle: Text(
-              'screens_testAndPreviewDynamicUI'.tr,
-            ),
+            subtitle: Text('screens_testAndPreviewDynamicUI'.tr),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/json_dynamic_test');
@@ -375,12 +391,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.navigation),
-            title: Text(
-              'screens_superCupertinoNavigationTest'.tr,
-            ),
-            subtitle: Text(
-              'screens_testIOSStyleNavigation'.tr,
-            ),
+            title: Text('screens_superCupertinoNavigationTest'.tr),
+            subtitle: Text('screens_testIOSStyleNavigation'.tr),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/super_cupertino_test');

@@ -40,6 +40,7 @@ import 'package:Memento/plugins/nfc/nfc_plugin.dart';
 import 'package:Memento/plugins/webview/webview_plugin.dart';
 import 'package:Memento/screens/settings_screen/controllers/auto_update_controller.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
+import 'package:Memento/screens/settings_screen/widgets/permission_request_dialog.dart';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/action/action_manager.dart';
 import 'package:Memento/core/floating_ball/floating_ball_service.dart';
@@ -106,6 +107,8 @@ class AppStartupState extends ChangeNotifier {
   }
 }
 
+const String _permissionOnboardingKey = 'permissionsOnboardingCompleted';
+
 /// 应用初始化函数 - 快速启动版本
 /// 只执行最小必要的同步初始化，其他功能后台加载
 Future<void> initializeApp() async {
@@ -127,15 +130,19 @@ Future<void> initializeApp() async {
   });
 
   // 设置首选方向为竖屏（快速操作）
-  unawaited(SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]));
+  unawaited(
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]),
+  );
 
   // 异步获取主题，不阻塞启动
-  unawaited(AdaptiveTheme.getThemeMode().then((mode) {
-    savedThemeMode = mode;
-  }));
+  unawaited(
+    AdaptiveTheme.getThemeMode().then((mode) {
+      savedThemeMode = mode;
+    }),
+  );
 
   try {
     // === 核心初始化（必须同步完成） ===
@@ -182,9 +189,11 @@ Future<void> _initializeBackgroundServices() async {
   try {
     // 初始化通知控制器（后台执行）
     startupState._setLoadingMessage('正在初始化通知服务...');
-    unawaited(NotificationController.initialize().then((_) {
-      NotificationController.requestPermission();
-    }));
+    unawaited(
+      NotificationController.initialize().then((_) {
+        NotificationController.requestPermission();
+      }),
+    );
 
     // 初始化 ImageUtils
     unawaited(ImageUtils.initializeSync());
@@ -197,11 +206,16 @@ Future<void> _initializeBackgroundServices() async {
     globalShortcutManager.initialize();
 
     // 初始化 JS Bridge
-    unawaited(JSBridgeManager.instance.initialize().then((_) {
-      debugPrint('JS Bridge 初始化成功');
-    }).catchError((e) {
-      debugPrint('JS Bridge 初始化失败: $e');
-    }));
+    unawaited(
+      JSBridgeManager.instance
+          .initialize()
+          .then((_) {
+            debugPrint('JS Bridge 初始化成功');
+          })
+          .catchError((e) {
+            debugPrint('JS Bridge 初始化失败: $e');
+          }),
+    );
 
     // === 注册插件（核心功能） ===
     startupState._setLoadingMessage('正在加载插件...');
@@ -225,9 +239,11 @@ Future<void> _initializeBackgroundServices() async {
     unawaited(setupWidgetClickListener());
 
     // 初始化系统桌面小组件服务并同步数据
-    unawaited(SystemWidgetService.instance.initialize().then((_) {
-      PluginWidgetSyncHelper.instance.syncAllPlugins();
-    }));
+    unawaited(
+      SystemWidgetService.instance.initialize().then((_) {
+        PluginWidgetSyncHelper.instance.syncAllPlugins();
+      }),
+    );
 
     // 恢复悬浮球状态
     unawaited(restoreFloatingBallState());
@@ -239,8 +255,22 @@ Future<void> _initializeBackgroundServices() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final context = navigatorKey.currentContext;
       if (context != null) {
-        _permissionController = PermissionController(context);
-        await _permissionController.checkAndRequestPermissions();
+        _permissionController = PermissionController();
+        final hasCompletedPermissions = globalConfigManager
+            .getAppConfigValue<bool>(_permissionOnboardingKey, false);
+
+        if (!hasCompletedPermissions) {
+          await showPermissionRequestDialog(
+            context: context,
+            controller: _permissionController,
+            barrierDismissible: false,
+            showSkipButton: true,
+          );
+          await globalConfigManager.setAppConfigValue(
+            _permissionOnboardingKey,
+            true,
+          );
+        }
       }
 
       // 发布插件初始化完成事件

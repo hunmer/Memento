@@ -355,7 +355,7 @@ class _TaskFormState extends State<TaskForm> {
         minLines: 4,
         style: TextStyle(color: isDark ? Colors.white : Colors.grey[900]),
         decoration: InputDecoration(
-          hintText: 'Add some notes...',
+          hintText: 'todo_addSomeNotesHint'.tr,
           hintStyle: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[400]),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -584,8 +584,8 @@ class _TaskFormState extends State<TaskForm> {
             child: _buildInputBox(
               label: 'todo_startDate'.tr,
               icon: Icons.calendar_today_outlined,
-              value: _startDate != null ? DateFormat.yMMMEd().format(_startDate!) : '',
-              placeholder: DateFormat.yMMMEd().format(DateTime.now()),
+              value: _startDate != null ? DateFormat.yMMMEd(Localizations.localeOf(context).toString()).format(_startDate!) : '',
+              placeholder: DateFormat.yMMMEd(Localizations.localeOf(context).toString()).format(DateTime.now()),
               onTap: () => _selectStartDate(context),
             ),
           ),
@@ -594,8 +594,8 @@ class _TaskFormState extends State<TaskForm> {
             child: _buildInputBox(
               label: 'todo_dueDate'.tr,
               icon: Icons.calendar_today_outlined,
-              value: _dueDate != null ? DateFormat.yMMMEd().format(_dueDate!) : '',
-              placeholder: DateFormat.yMMMEd().format(DateTime.now().add(const Duration(days: 1))),
+              value: _dueDate != null ? DateFormat.yMMMEd(Localizations.localeOf(context).toString()).format(_dueDate!) : '',
+              placeholder: DateFormat.yMMMEd(Localizations.localeOf(context).toString()).format(DateTime.now().add(const Duration(days: 1))),
               onTap: () => _selectDueDate(context),
             ),
           ),
@@ -679,7 +679,7 @@ class _TaskFormState extends State<TaskForm> {
 
   Widget _buildReminderDropdown() {
      final isDark = Theme.of(context).brightness == Brightness.dark;
-     String text = 'None';
+     String text = 'todo_none'.tr;
      if (_reminders.isNotEmpty) {
        final r = _reminders.first;
        text = '${r.month}/${r.day} ${r.hour}:${r.minute.toString().padLeft(2,'0')}';
@@ -877,7 +877,7 @@ class _TaskFormState extends State<TaskForm> {
                        final r = _reminders[index];
                        return ListTile(
                          leading: const Icon(Icons.alarm),
-                         title: Text(DateFormat.yMMMEd().add_jm().format(r)),
+                         title: Text(DateFormat.yMMMEd(Localizations.localeOf(context).toString()).add_jm().format(r)),
                          trailing: IconButton(
                            icon: const Icon(Icons.delete),
                            onPressed: () {

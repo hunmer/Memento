@@ -262,12 +262,12 @@ class CheckinListController {
                 child: Text('app_cancel'.tr),
               ),
               TextButton(
-                onPressed: () {
+                onPressed: () async {
                   Navigator.pop(context);
-                  checkinItems.removeWhere((i) => i.id == item.id);
                   // 发送删除事件
                   notifyEvent('deleted', item);
-                  CheckinPlugin.shared.triggerSave();
+                  // 使用正确的删除方法
+                  await CheckinPlugin.instance.removeCheckinItem(item);
                   onStateChanged();
                 },
                 child: Text(
@@ -443,10 +443,10 @@ class CheckinListController {
               TextButton(
                 onPressed: () async {
                   Navigator.pop(context);
-                  checkinItems.remove(item);
                   // 发送删除事件
                   notifyEvent('deleted', item);
-                  await CheckinPlugin.shared.triggerSave();
+                  // 使用正确的删除方法
+                  await CheckinPlugin.instance.removeCheckinItem(item);
                   onStateChanged();
                   ToastService.instance.showToast(
                     'checkin_deleteSuccessMessage'.trParams({'name': item.name}),
