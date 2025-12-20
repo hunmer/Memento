@@ -16,22 +16,27 @@ class MessageInputActionsDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 计算网格高度:根据 actions 数量动态计算
+    final rows = (actions.length / 4).ceil();
+    final gridHeight = rows * (60.0 / 0.8 + 24.0) - 24.0; // 每项高度 + 间距
+
     return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.only(
-        top: 16.0 + MediaQuery.of(context).padding.top,
-        bottom: 16.0 + MediaQuery.of(context).padding.bottom,
-        left: 16.0,
-        right: 16.0,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.6, // 最大高度为屏幕的 60%
+            ),
             child: GridView.builder(
+              shrinkWrap: true,
+              physics: actions.length > 8
+                  ? const AlwaysScrollableScrollPhysics()
+                  : const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 childAspectRatio: 0.8,

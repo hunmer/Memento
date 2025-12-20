@@ -445,14 +445,16 @@ class _AppStoreScreenState extends State<AppStoreScreen> {
 
     SmoothBottomSheet.show(
       context: context,
-      builder:
-          (sheetContext) => MultiProvider(
-            providers: [
-              ChangeNotifierProvider.value(value: appStoreManager),
-              ChangeNotifierProvider.value(value: downloadManager),
-            ],
-            child: AppDetailSheet(app: app),
-          ),
+      builder: (sheetContext) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.7,
+        child: MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: appStoreManager),
+            ChangeNotifierProvider.value(value: downloadManager),
+          ],
+          child: AppDetailSheet(app: app),
+        ),
+      ),
     );
   }
 
