@@ -12,18 +12,39 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
-    
+
+    - name: Free up disk space
+      uses: jlumbroso/free-disk-space@main
+      with:
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
+
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'temurin'
-        
+
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          gradle-${{ runner.os }}-
+          gradle-
+
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
-        
+
     - name: Install dependencies
       run: flutter pub get
       
@@ -39,18 +60,22 @@ jobs:
         keyAlias=upload
         storeFile=upload-keystore.jks
         EOF
-        
-    - name: Build signed APK
-      run: flutter build apk --release --no-tree-shake-icons --split-per-abi
+
+    - name: Build signed APK (arm64 only)
+      run: |
+        echo "=== Starting build for arm64-v8a ==="
+        flutter build apk --release --target-platform android-arm64 --no-tree-shake-icons
+      env:
+        ANDROID_GRADLE_OPTS: "-Xmx2048m -XX:MaxMetaspaceSize=512m"
 
     - name: Get current date
       id: date
       run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-      
+
     - name: Get commit SHA
       id: commit_sha
       run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-        
+
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v2
       env:
@@ -60,17 +85,8 @@ jobs:
         tag_name: release-${{ steps.date.outputs.date }}-${{ steps.commit_sha.outputs.sha }}
         generate_release_notes: false
 
-    - name: Upload Release Asset
-      uses: softprops/action-gh-release@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.SECERT }}
-      with:
-        files: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-        tag_name: release-${{ steps.date.outputs.date }}-${{ steps.commit_sha.outputs.sha }}
-        generate_release_notes: false
-
     - name: Upload APK as Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: android-release-apk
+        name: android-release-apk-arm64
         path: build/app/outputs/flutter-apk/
