@@ -3,12 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/goods/models/warehouse.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/plugins/goods/widgets/warehouse_action_sheet.dart';
 
 class WarehouseCard extends StatelessWidget {
   final Warehouse warehouse;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
-  const WarehouseCard({super.key, required this.warehouse, this.onTap});
+  const WarehouseCard({
+    super.key,
+    required this.warehouse,
+    this.onTap,
+    this.onEdit,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +34,15 @@ class WarehouseCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: onTap,
+        onLongPress: () {
+          if (onEdit != null || onDelete != null) {
+            WarehouseActionSheet.show(
+              context: context,
+              onEdit: onEdit ?? () {},
+              onDelete: onDelete ?? () {},
+            );
+          }
+        },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(12.0),

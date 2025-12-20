@@ -61,6 +61,8 @@ const Map<String, String> todoTranslationsZh = {
   'todo_ok': '确定',
   'todo_clear': '清除',
   'todo_clearHistoryAction': '清空',
+  'todo_taskActions': '任务操作',
+  'todo_resetTimer': '重置计时器',
 
   // 优先级
   'todo_priority': '优先级:',

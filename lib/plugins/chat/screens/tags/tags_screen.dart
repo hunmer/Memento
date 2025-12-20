@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/models/tag.dart';
 import 'package:Memento/plugins/chat/screens/tags/widgets/tag_card.dart';
 import 'package:Memento/plugins/chat/screens/tags/tag_messages_screen.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 
 /// 排序类型枚举
 enum SortType {
@@ -91,30 +93,6 @@ class _TagsScreenState extends State<TagsScreen> {
     );
   }
 
-  /// 构建搜索栏
-  Widget _buildSearchBar() {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: 'chat_searchTags'.tr,
-        prefixIcon: const Icon(Icons.search),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        suffixIcon: _searchQuery.isNotEmpty
-            ? IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  setState(() => _searchQuery = '');
-                },
-              )
-            : null,
-      ),
-      onChanged: (value) {
-        setState(() => _searchQuery = value);
-      },
-    );
-  }
 
   /// 构建排序按钮
   Widget _buildSortButton() {
@@ -209,37 +187,33 @@ class _TagsScreenState extends State<TagsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // 顶部工具栏
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // 搜索框
-              Expanded(child: _buildSearchBar()),
-              const SizedBox(width: 12),
-              // 排序按钮
-              _buildSortButton(),
-              // 刷新按钮
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: _loadTags,
-                tooltip: 'chat_refresh'.tr,
-              ),
-            ],
-          ),
-        ),
-
-        // 标签网格或空状态或加载中
-        Expanded(
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _filteredTags.isEmpty
-                  ? _buildEmptyState()
-                  : _buildTagsGrid(),
+    return SuperCupertinoNavigationWrapper(
+      title: Text('chat_tagsTab'.tr),
+      largeTitle: 'chat_tagsTab'.tr,
+      enableSearchBar: true,
+      searchPlaceholder: 'chat_searchTags'.tr,
+      onSearchChanged: (query) {
+        setState(() => _searchQuery = query);
+      },
+      onSearchSubmitted: (query) {
+        setState(() => _searchQuery = query);
+      },
+      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      actions: [
+        // 排序按钮
+        _buildSortButton(),
+        // 刷新按钮
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: _loadTags,
+          tooltip: 'chat_refresh'.tr,
         ),
       ],
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _filteredTags.isEmpty
+              ? _buildEmptyState()
+              : _buildTagsGrid(),
     );
   }
 }
