@@ -4,6 +4,7 @@ import 'package:animated_tree_view/animated_tree_view.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
 import 'package:Memento/plugins/notes/models/folder_tree_node.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 /// 文件夹选择底部抽屉
 class FolderSelectionSheet extends StatefulWidget {
@@ -30,27 +31,13 @@ class FolderSelectionSheet extends StatefulWidget {
     Note? note,
     Folder? parentFolder,
   }) async {
-    return showModalBottomSheet<Folder>(
+    return SmoothBottomSheet.show<Folder>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.3,
-        maxChildSize: 0.9,
-        builder: (context, scrollController) => Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
-          ),
-          child: FolderSelectionSheet(
-            rootNode: rootNode,
-            note: note,
-            parentFolder: parentFolder,
-          ),
-        ),
+      builder: (context) => FolderSelectionSheet(
+        rootNode: rootNode,
+        note: note,
+        parentFolder: parentFolder,
       ),
     );
   }
@@ -101,9 +88,6 @@ class _FolderSelectionSheetState extends State<FolderSelectionSheet> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // 拖动手柄
-        _buildDragHandle(),
-
         // 标题栏
         _buildHeader(),
 
@@ -139,19 +123,6 @@ class _FolderSelectionSheetState extends State<FolderSelectionSheet> {
         // 底部操作栏
         _buildBottomActions(),
       ],
-    );
-  }
-
-  /// 构建拖动手柄
-  Widget _buildDragHandle() {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      width: 40,
-      height: 4,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade300,
-        borderRadius: BorderRadius.circular(2),
-      ),
     );
   }
 

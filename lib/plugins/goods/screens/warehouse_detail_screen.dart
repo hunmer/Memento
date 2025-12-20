@@ -9,6 +9,7 @@ import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_card.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_list_tile.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/goods_item_form.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class WarehouseDetailScreen extends StatefulWidget {
   final Warehouse warehouse;
@@ -76,7 +77,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
   }
 
   void _showMoreOptions() {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       builder:
           (context) => Column(

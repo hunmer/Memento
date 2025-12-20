@@ -36,4 +36,13 @@ const Map<String, String> nfcTranslationsZh = {
   'nfc_widgetDescription': '快速打开NFC控制器',
   'nfc_overviewName': 'NFC概览',
   'nfc_overviewDescription': '显示NFC功能状态',
+
+  // Data Preview Dialog
+  'nfc_dataPreviewDescription': '以下是将要写入的NFC数据，您可以复制到其他NFC写入软件使用',
+  'nfc_fieldType': '字段类型',
+  'nfc_fieldData': '字段数据',
+  'nfc_copyAllRecords': '复制全部记录',
+  'nfc_copiedToClipboard': '已复制到剪贴板',
+  'nfc_allRecordsCopied': '已复制全部记录',
+  'nfc_previewData': '预览数据',
 };

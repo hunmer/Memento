@@ -6,6 +6,7 @@ import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'package:Memento/plugins/goods/dialogs/add_usage_record_dialog.dart';
 import 'package:Memento/plugins/goods/screens/goods_item_history_page.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class GoodsItemCard extends StatefulWidget {
   final GoodsItem item;
@@ -67,7 +68,7 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
   void _showMenu() {
     if (widget.warehouseId == null) return;
 
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,

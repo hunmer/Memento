@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'note_operations.dart';
 
 class NoteListTile extends StatelessWidget {
@@ -34,7 +35,7 @@ class NoteListTile extends StatelessWidget {
       trailing: IconButton(
         icon: const Icon(Icons.more_vert),
         onPressed: () {
-          showModalBottomSheet(
+          SmoothBottomSheet.show(
             context: context,
             builder:
                 (context) => Column(

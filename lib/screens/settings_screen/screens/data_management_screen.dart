@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:file_picker/file_picker.dart';
 import 'package:get/get.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class DataManagementScreen extends StatefulWidget {
   const DataManagementScreen({super.key});
@@ -208,7 +209,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
   }
 
   void _showContextMenu(String itemPath, bool isDirectory) {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       builder:
           (context) => Column(

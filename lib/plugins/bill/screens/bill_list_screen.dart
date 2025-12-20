@@ -7,6 +7,7 @@ import 'package:Memento/plugins/bill/models/bill.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
 import 'bill_edit_screen.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class BillListScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -222,33 +223,14 @@ class _BillListScreenState extends State<BillListScreen> {
       );
     }
 
-    await showModalBottomSheet(
+    await SmoothBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder:
-          (context) => DraggableScrollableSheet(
-            initialChildSize: 0.9,
-            minChildSize: 0.5,
-            maxChildSize: 0.95,
-            builder:
-                (context, scrollController) => Container(
-                  decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFF101622)
-                            : const Color(0xFFF6F6F8),
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                  ),
-                  child: BillEditScreen(
-                    billPlugin: widget.billPlugin,
-                    accountId: widget.accountId,
-                    bill: bill,
-                    initialDate: _selectedDay ?? DateTime.now(),
-                  ),
-                ),
+          (context) => BillEditScreen(
+            billPlugin: widget.billPlugin,
+            accountId: widget.accountId,
+            bill: bill,
+            initialDate: _selectedDay ?? DateTime.now(),
           ),
     );
   }

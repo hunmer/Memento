@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/agent_chat/services/suggested_questions_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 /// 预设问题选择对话框
 class SuggestedQuestionsDialog extends StatefulWidget {
@@ -262,9 +263,8 @@ Future<String?> showSuggestedQuestionsDialog(
   BuildContext context,
   StorageManager storage,
 ) {
-  return showModalBottomSheet<String>(
+  return SmoothBottomSheet.show<String>(
     context: context,
-    backgroundColor: Colors.transparent,
     isScrollControlled: true,
     builder: (context) => SuggestedQuestionsDialog(storage: storage),
   );

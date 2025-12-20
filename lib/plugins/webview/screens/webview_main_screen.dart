@@ -17,6 +17,7 @@ import 'webview_browser_screen.dart';
 import 'proxy_settings_screen.dart';
 import 'app_store/app_store_screen.dart';
 import '../../../core/navigation/navigation_helper.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 /// WebView 主界面 - 网址卡片列表
 class WebViewMainScreen extends StatefulWidget {
@@ -346,76 +347,74 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
   }
 
   void _showCardOptions(WebViewCard card) {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       builder:
-          (context) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+          (context) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.open_in_new),
+                title: Text('webview_new_tab'.tr),
+                onTap: () {
+                  Navigator.pop(context);
+                  _openCard(card);
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  card.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                ),
+                title: Text(
+                  card.isPinned ? 'webview_unpin'.tr : 'webview_pin'.tr,
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  WebViewPlugin.instance.cardManager.togglePinned(card.id);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.copy),
+                title: Text('webview_copy_url'.tr),
+                onTap: () {
+                  Navigator.pop(context);
+                  Clipboard.setData(ClipboardData(text: card.url));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('webview_url_copied'.tr)),
+                  );
+                },
+              ),
+              // 同步复制（仅本地文件且有原始路径）
+              if (card.type == CardType.localFile && card.sourcePath != null)
                 ListTile(
-                  leading: const Icon(Icons.open_in_new),
-                  title: Text('webview_new_tab'.tr),
+                  leading: const Icon(Icons.sync),
+                  title: const Text('同步复制'),
+                  subtitle: const Text('从原始路径重新复制文件'),
                   onTap: () {
                     Navigator.pop(context);
-                    _openCard(card);
+                    _syncCopyCard(card);
                   },
                 ),
-                ListTile(
-                  leading: Icon(
-                    card.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                  ),
-                  title: Text(
-                    card.isPinned ? 'webview_unpin'.tr : 'webview_pin'.tr,
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    WebViewPlugin.instance.cardManager.togglePinned(card.id);
-                  },
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: Text('webview_edit_card'.tr),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showEditCardDialog(card);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: Text(
+                  'webview_delete_card'.tr,
+                  style: const TextStyle(color: Colors.red),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.copy),
-                  title: Text('webview_copy_url'.tr),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Clipboard.setData(ClipboardData(text: card.url));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('webview_url_copied'.tr)),
-                    );
-                  },
-                ),
-                // 同步复制（仅本地文件且有原始路径）
-                if (card.type == CardType.localFile && card.sourcePath != null)
-                  ListTile(
-                    leading: const Icon(Icons.sync),
-                    title: const Text('同步复制'),
-                    subtitle: const Text('从原始路径重新复制文件'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _syncCopyCard(card);
-                    },
-                  ),
-                ListTile(
-                  leading: const Icon(Icons.edit),
-                  title: Text('webview_edit_card'.tr),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showEditCardDialog(card);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
-                  title: Text(
-                    'webview_delete_card'.tr,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _confirmDeleteCard(card);
-                  },
-                ),
-              ],
-            ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmDeleteCard(card);
+                },
+              ),
+            ],
           ),
     );
   }

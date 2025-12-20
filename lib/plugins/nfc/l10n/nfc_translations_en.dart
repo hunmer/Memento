@@ -36,4 +36,13 @@ const Map<String, String> nfcTranslationsEn = {
   'nfc_widgetDescription': 'Quick access to NFC Controller',
   'nfc_overviewName': 'NFC Overview',
   'nfc_overviewDescription': 'Display NFC feature status',
+
+  // Data Preview Dialog
+  'nfc_dataPreviewDescription': 'Below is the NFC data to be written. You can copy it to other NFC writing software',
+  'nfc_fieldType': 'Type',
+  'nfc_fieldData': 'Data',
+  'nfc_copyAllRecords': 'Copy All Records',
+  'nfc_copiedToClipboard': 'Copied to clipboard',
+  'nfc_allRecordsCopied': 'All records copied',
+  'nfc_previewData': 'Preview Data',
 };

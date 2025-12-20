@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:Memento/plugins/database/widgets/record_edit_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:Memento/plugins/database/controllers/database_controller.dart';
 import 'package:Memento/plugins/database/models/database_model.dart';
 import 'package:Memento/plugins/database/widgets/database_edit_widget.dart';
@@ -227,7 +228,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
   }
 
   void _showRecordMenu(BuildContext context, record_model.Record record) {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       builder: (context) {
         return Column(

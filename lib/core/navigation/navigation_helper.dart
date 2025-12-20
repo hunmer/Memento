@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:full_swipe_back_gesture/full_swipe_back_gesture.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 import 'open_container_route.dart';
 export 'open_container_route.dart';
@@ -257,9 +258,9 @@ class NavigationHelper {
     WidgetBuilder builder, {
     bool isScrollControlled = false,
   }) {
-    return showModalBottomSheet<T>(
-      context,
-      builder,
+    return SmoothBottomSheet.show<T>(
+      context: context,
+      builder: builder,
       isScrollControlled: isScrollControlled,
     );
   }
@@ -574,9 +575,9 @@ extension NavigationExtensions on BuildContext {
     WidgetBuilder builder, {
     bool isScrollControlled = false,
   }) {
-    return NavigationHelper.showModalBottomSheet<T>(
-      this,
-      builder,
+    return SmoothBottomSheet.show<T>(
+      context: this,
+      builder: builder,
       isScrollControlled: isScrollControlled,
     );
   }

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:Memento/plugins/agent_chat/controllers/chat_controller.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_command.dart';
 import 'package:Memento/plugins/agent_chat/models/saved_tool_template.dart';
@@ -535,7 +536,7 @@ class _MessageInputState extends State<MessageInput> {
 
   /// 显示附件菜单
   void _showAttachmentMenu() {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       builder:
           (context) => SafeArea(

@@ -20,7 +20,7 @@ class GoodsUsageCardHandler extends BaseCardHandler {
   Color get color => Colors.orange;
 
   @override
-  Future<void> executeWrite(BuildContext context) async {
+  Future<List<Map<String, String>>?> getRecordsForPreview(BuildContext context) async {
     // 打开物品选择器
     final result = await pluginDataSelectorService.showSelector(
       context,
@@ -28,20 +28,40 @@ class GoodsUsageCardHandler extends BaseCardHandler {
     );
 
     if (result == null || result.cancelled) {
-      return;
+      return null;
     }
 
-    // 获取选择的物品 ID 和名称
+    // 获取选择的物品 ID
     final itemId = result.path.isNotEmpty ? result.path.last.selectedItem.id : null;
-    final itemName = result.path.isNotEmpty ? result.path.last.selectedItem.title : null;
 
     if (itemId == null) {
       Toast.error('未能获取物品 ID');
-      return;
+      return null;
     }
 
     // 构建深度链接 URL
     final deepLinkUrl = 'memento://goods/usage?itemId=$itemId&action=add_usage';
+
+    // 返回NFC记录数据
+    return [
+      {'type': 'URI', 'data': deepLinkUrl},
+      {'type': 'AAR', 'data': 'github.hunmer.memento'},
+    ];
+  }
+
+  @override
+  Future<void> executeWrite(BuildContext context) async {
+    // 获取NFC记录数据
+    final records = await getRecordsForPreview(context);
+
+    if (records == null || records.isEmpty) {
+      return;
+    }
+
+    // 提取itemName用于提示
+    final deepLinkUrl = records[0]['data'] ?? '';
+    final itemNameMatch = RegExp(r'itemId=([^&]+)').firstMatch(deepLinkUrl);
+    final itemName = itemNameMatch?.group(1) ?? '未知物品';
 
     // 显示等待对话框
     if (!context.mounted) return;
@@ -72,11 +92,8 @@ class GoodsUsageCardHandler extends BaseCardHandler {
 
     try {
       final nfc = MementoNfc();
-      // 同时写入 URI 和 AAR 记录，确保扫描时打开正确的应用
-      final writeResult = await nfc.writeNfcRecords([
-        {'type': 'URI', 'data': deepLinkUrl},
-        {'type': 'AAR', 'data': 'github.hunmer.memento'},
-      ]);
+      // 使用已构建的records进行写入
+      final writeResult = await nfc.writeNfcRecords(records);
 
       // 关闭等待对话框
       if (context.mounted) {
@@ -145,6 +162,18 @@ class GoodsUsageCardHandler extends BaseCardHandler {
                   ],
                 ),
               ),
+              // 预览数据按钮
+              IconButton(
+                icon: const Icon(Icons.visibility_outlined, size: 20),
+                onPressed: isWriting ? null : () => showDataPreview(context),
+                tooltip: 'nfc_previewData'.tr,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(
+                  minWidth: 40,
+                  minHeight: 40,
+                ),
+              ),
+              const SizedBox(width: 8),
               Icon(
                 Icons.chevron_right,
                 color: isEnabled ? color : Colors.grey,

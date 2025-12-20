@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../models/app_store_models.dart';
 import '../../services/app_store_manager.dart';
 import '../../services/download_manager.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 /// 小应用商场主界面
 class AppStoreScreen extends StatefulWidget {
@@ -442,11 +443,8 @@ class _AppStoreScreenState extends State<AppStoreScreen> {
     final appStoreManager = context.read<AppStoreManager>();
     final downloadManager = context.read<DownloadManager>();
 
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      useRootNavigator: false,
       builder:
           (sheetContext) => MultiProvider(
             providers: [

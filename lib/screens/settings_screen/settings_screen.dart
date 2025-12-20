@@ -17,6 +17,7 @@ import 'package:Memento/screens/settings_screen/controllers/permission_controlle
 import 'package:Memento/screens/settings_screen/widgets/permission_request_dialog.dart';
 import 'package:get/get.dart';
 import 'package:universal_platform/universal_platform.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -114,7 +115,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // 显示服务器同步设置对话框
   Future<void> _showServerSyncSettings() async {
-    await showModalBottomSheet(
+    await SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
       builder:

@@ -18,6 +18,7 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/widgets/app_drawer.dart';
 import 'package:Memento/core/floating_ball/floating_ball_service.dart';
 import 'package:Memento/core/global_flags.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'managers/home_layout_manager.dart';
 import 'widgets/home_grid.dart';
 import 'widgets/add_widget_dialog.dart';
@@ -422,40 +423,39 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   /// 显示操作菜单
   void _showOptionsMenu() {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      builder: (context) => SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+      builder: (context) => SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
             ListTile(
-                  leading: Icon(_isEditMode ? Icons.check : Icons.edit),
-                  title: Text(_isEditMode ? '完成排序' : '自定义排序'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    setState(() {
-                      _isEditMode = !_isEditMode;
-                    });
-                    Toast.info(
-                      _isEditMode ? '长按拖拽可调整顺序' : '已退出编辑模式',
-                      duration: const Duration(seconds: 1),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.check_box_outline_blank),
-                  title: const Text('批量编辑'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _toggleBatchMode();
-                  },
-                ),
-                const Divider(),
-                ListTile(
+              leading: Icon(_isEditMode ? Icons.check : Icons.edit),
+              title: Text(_isEditMode ? '完成排序' : '自定义排序'),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() {
+                  _isEditMode = !_isEditMode;
+                });
+                Toast.info(
+                  _isEditMode ? '长按拖拽可调整顺序' : '已退出编辑模式',
+                  duration: const Duration(seconds: 1),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.check_box_outline_blank),
+              title: const Text('批量编辑'),
+              onTap: () {
+                Navigator.pop(context);
+                _toggleBatchMode();
+              },
+            ),
+            const Divider(),
+            ListTile(
               leading: const Icon(Icons.create_new_folder),
-                  title: Text('screens_createNewFolder'.tr),
+              title: Text('screens_createNewFolder'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _showCreateFolderDialog();
@@ -463,7 +463,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ),
             ListTile(
               leading: const Icon(Icons.add_box),
-                  title: Text('screens_addWidget'.tr),
+              title: Text('screens_addWidget'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _showAddWidgetDialog();
@@ -472,7 +472,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.save),
-                  title: Text('screens_saveCurrentLayout'.tr),
+              title: Text('screens_saveCurrentLayout'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _showSaveLayoutDialog();
@@ -480,27 +480,27 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ),
             ListTile(
               leading: const Icon(Icons.layers),
-                  title: Text('screens_manageLayouts'.tr),
+              title: Text('screens_manageLayouts'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _showLayoutManagerDialog();
               },
             ),
-                ListTile(
-                  leading: const Icon(Icons.palette),
-                  title: Text('screens_themeSettings'.tr),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showThemeSettings();
-                  },
-                ),
+            ListTile(
+              leading: const Icon(Icons.palette),
+              title: Text('screens_themeSettings'.tr),
+              onTap: () {
+                Navigator.pop(context);
+                _showThemeSettings();
+              },
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.grid_view),
-                  title: Text('screens_gridSettings'.tr),
-                  subtitle: Text(
-                    '${_layoutManager.gridCrossAxisCount} 列 · ${_layoutManager.gridAlignment == "top" ? 'screens_topDisplay'.tr : 'screens_centerDisplay'.tr}',
-                  ),
+              title: Text('screens_gridSettings'.tr),
+              subtitle: Text(
+                '${_layoutManager.gridCrossAxisCount} 列 · ${_layoutManager.gridAlignment == "top" ? 'screens_topDisplay'.tr : 'screens_centerDisplay'.tr}',
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _showGridSizeDialog();
@@ -508,14 +508,13 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ),
             ListTile(
               leading: const Icon(Icons.delete_sweep),
-                  title: Text('screens_clearLayout'.tr),
+              title: Text('screens_clearLayout'.tr),
               onTap: () {
                 Navigator.pop(context);
                 _confirmClearLayout();
               },
             ),
           ],
-          ),
         ),
       ),
     );
@@ -715,47 +714,45 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     }
 
     // 非编辑模式下显示操作菜单
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       builder:
-          (context) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (item is HomeWidgetItem)
-                  ListTile(
-                    leading: const Icon(Icons.settings),
-                    title: Text(
-                      'screens_widgetSettings'.tr,
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showWidgetSettings(item);
-                    },
-                  ),
-                if (item is HomeWidgetItem)
-                  ListTile(
-                    leading: const Icon(Icons.aspect_ratio),
-                    title: Text('screens_adjustSize'.tr),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showSizeAdjuster(item);
-                    },
-                  ),
-                const Divider(),
+          (context) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (item is HomeWidgetItem)
                 ListTile(
-                  leading: const Icon(Icons.delete, color: Colors.red),
+                  leading: const Icon(Icons.settings),
                   title: Text(
-                    'screens_delete'.tr,
-                    style: const TextStyle(color: Colors.red),
+                    'screens_widgetSettings'.tr,
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    _confirmDeleteItem(item);
+                    _showWidgetSettings(item);
                   },
                 ),
-              ],
-            ),
+              if (item is HomeWidgetItem)
+                ListTile(
+                  leading: const Icon(Icons.aspect_ratio),
+                  title: Text('screens_adjustSize'.tr),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showSizeAdjuster(item);
+                  },
+                ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: Text(
+                  'screens_delete'.tr,
+                  style: const TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _confirmDeleteItem(item);
+                },
+              ),
+            ],
           ),
     );
   }

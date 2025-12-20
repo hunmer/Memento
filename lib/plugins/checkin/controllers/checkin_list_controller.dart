@@ -13,6 +13,7 @@ import 'package:Memento/plugins/checkin/widgets/group_sort_dialog.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/item_event_args.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class CheckinListController {
   final BuildContext context;
@@ -282,14 +283,10 @@ class CheckinListController {
 
   // 显示打卡项目操作菜单
   void showItemOptionsDialog(CheckinItem item) {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder:
-          (context) => SafeArea(
-            child: Column(
+          (context) => Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
@@ -332,7 +329,6 @@ class CheckinListController {
                 const SizedBox(height: 8),
               ],
             ),
-          ),
     );
   }
 

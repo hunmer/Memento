@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
 import 'package:Memento/widgets/quill_viewer/quill_viewer.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class NoteCard extends StatelessWidget {
   final Note note;
@@ -36,7 +37,7 @@ class NoteCard extends StatelessWidget {
 
   /// 显示底部抽屉菜单
   void _showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,

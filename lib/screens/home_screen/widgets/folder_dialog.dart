@@ -8,6 +8,7 @@ import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'home_grid.dart';
 import 'add_widget_dialog.dart';
 
@@ -111,30 +112,29 @@ class _FolderDialogState extends State<FolderDialog> {
   }
 
   /// 显示添加到文件夹选项
-  void _showAddToFolderOptions() {    showModalBottomSheet(
+  void _showAddToFolderOptions() {
+    SmoothBottomSheet.show(
       context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.add_box),
-              title: Text('screens_addWidget'.tr),
-              onTap: () {
-                Navigator.pop(context);
-                _showAddWidgetToFolder();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.move_down),
-              title: Text('screens_moveFromHomePage'.tr),
-              onTap: () {
-                Navigator.pop(context);
-                _showMoveFromHomeOptions();
-              },
-            ),
-          ],
-        ),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.add_box),
+            title: Text('screens_addWidget'.tr),
+            onTap: () {
+              Navigator.pop(context);
+              _showAddWidgetToFolder();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.move_down),
+            title: Text('screens_moveFromHomePage'.tr),
+            onTap: () {
+              Navigator.pop(context);
+              _showMoveFromHomeOptions();
+            },
+          ),
+        ],
       ),
     );
   }
@@ -180,31 +180,30 @@ class _FolderDialogState extends State<FolderDialog> {
   }
 
   /// 显示项目选项
-  void _showItemOptions(HomeItem item) {    showModalBottomSheet(
+  void _showItemOptions(HomeItem item) {
+    SmoothBottomSheet.show(
       context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.drive_file_move),
-              title: Text('screens_moveOutOfFolder'.tr),
-              onTap: () {
-                Navigator.pop(context);
-                _layoutManager.removeFromFolder(item.id, widget.folder.id);
-                              Toast.success('screens_movedToHomePage'.tr);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: Text('screens_delete'.tr, style: const TextStyle(color: Colors.red)),
-              onTap: () {
-                Navigator.pop(context);
-                _confirmDeleteItem(item);
-              },
-            ),
-          ],
-        ),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.drive_file_move),
+            title: Text('screens_moveOutOfFolder'.tr),
+            onTap: () {
+              Navigator.pop(context);
+              _layoutManager.removeFromFolder(item.id, widget.folder.id);
+              Toast.success('screens_movedToHomePage'.tr);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete, color: Colors.red),
+            title: Text('screens_delete'.tr, style: const TextStyle(color: Colors.red)),
+            onTap: () {
+              Navigator.pop(context);
+              _confirmDeleteItem(item);
+            },
+          ),
+        ],
       ),
     );
   }

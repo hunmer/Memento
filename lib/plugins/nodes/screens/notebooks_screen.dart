@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
 import 'package:Memento/plugins/nodes/models/notebook.dart';
 import 'nodes_screen.dart';
@@ -300,12 +301,11 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
 
   void _showNotebookActions(BuildContext parentContext, Notebook notebook) {
 
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: parentContext,
       builder:
-          (BuildContext context) => SafeArea(
-            child: Wrap(
-              children: [
+          (BuildContext context) => Wrap(
+            children: [
                 ListTile(
                   leading: const Icon(Icons.edit),
                   title: Text('nodes_editNotebook'.tr),
@@ -322,8 +322,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                     _showDeleteNotebookDialog(parentContext, notebook);
                   },
                 ),
-              ],
-            ),
+            ],
           ),
     );
   }

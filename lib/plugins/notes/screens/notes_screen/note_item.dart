@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'folder_selection_dialog.dart';
 import 'note_operations.dart';
 import 'notes_screen_state.dart';
@@ -19,7 +20,7 @@ mixin NoteItem on NotesMainViewState, NoteOperations, FolderSelectionDialog {
       trailing: IconButton(
         icon: const Icon(Icons.more_vert),
         onPressed: () {
-          showModalBottomSheet(
+          SmoothBottomSheet.show(
             context: context,
             builder:
                 (context) => Column(
