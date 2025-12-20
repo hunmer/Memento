@@ -9,9 +9,11 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_inappwebview_windows
   flutter_js
   flutter_tts
+  irondash_engine_context
   permission_handler_windows
   record_windows
   share_plus
+  super_native_extensions
   url_launcher_windows
   video_player_win
 )

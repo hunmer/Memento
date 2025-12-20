@@ -292,8 +292,8 @@ class _SyncfusionCalendarWidgetState extends State<SyncfusionCalendarWidget> {
       viewHeaderHeight: 40,
       // 月视图设置
       monthViewSettings: MonthViewSettings(
-        // 禁用滑动切换月份（由外层列表控制）
-        navigationDirection: MonthNavigationDirection.vertical,
+        // Force horizontal swipe so vertical gestures bubble up to the outer ListView
+        navigationDirection: MonthNavigationDirection.horizontal,
         showTrailingAndLeadingDates: true,
         dayFormat: 'EEE',
         numberOfWeeksInView: 6,

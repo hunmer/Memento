@@ -12,6 +12,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 
 import 'package:flutter/material.dart';
 import 'core/services/plugin_widget_sync_helper.dart';
+import 'core/services/clipboard_service.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'screens/route.dart';
 import 'screens/settings_screen/controllers/auto_update_controller.dart';
@@ -107,6 +108,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       PluginWidgetSyncHelper.instance.syncPendingCalendarEventsOnStartup();
       PluginWidgetSyncHelper.instance.syncPendingGoalChangesOnStartup();
       PluginWidgetSyncHelper.instance.syncPendingHabitTimerChangesOnStartup();
+      // 检查剪贴板数据
+      ClipboardService.instance.processClipboard();
     }
   }
 

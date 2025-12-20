@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/clipboard_service.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
@@ -354,6 +355,55 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     }
   }
 
+  Future<void> _shareAgent() async {
+    if (widget.agent == null) return;
+
+    final agentJson = widget.agent!.toJson();
+    final hasHeaders = widget.agent!.headers.isNotEmpty;
+
+    // 如果有 headers，询问用户是否包含
+    if (hasHeaders) {
+      final choice = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('openai_shareAgent'.tr),
+          content: Text('openai_shareHeadersWarning'.tr),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('cancel'),
+              child: Text('openai_cancel'.tr),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('remove'),
+              child: Text('openai_removeHeaders'.tr),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('keep'),
+              child: Text('openai_keepHeaders'.tr),
+            ),
+          ],
+        ),
+      );
+
+      if (choice == 'cancel' || choice == null) return;
+      if (choice == 'remove') {
+        agentJson.remove('headers');
+      }
+    }
+
+    // 使用 ClipboardService 复制
+    final success = await ClipboardService.instance.copyToClipboard(
+      method: 'openai_agent_import',
+      args: agentJson,
+    );
+
+    if (success) {
+      Toast.success('openai_agentCopied'.tr);
+    } else {
+      Toast.error('openai_copyFailed'.tr);
+    }
+  }
+
   Future<void> _cloneAgent() async {
     if (widget.agent == null) return;
 
@@ -406,8 +456,13 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               : 'openai_editAgent'.tr,
         ),
         actions: [
-          // 只有在编辑现有智能体时才显示删除和克隆按钮
+          // 只有在编辑现有智能体时才显示分享、删除和克隆按钮
           if (widget.agent != null) ...[
+            IconButton(
+              icon: const Icon(Icons.share),
+              onPressed: _shareAgent,
+              tooltip: 'openai_shareAgent'.tr,
+            ),
             IconButton(
               icon: const Icon(Icons.copy),
               onPressed: _cloneAgent,

@@ -209,4 +209,19 @@ final Map<String, String> openaiTranslationsZh = {
   'openai_promptPresetActiveHint': '已选择预设,此字段内容将被忽略',
   'openai_promptContent': 'Prompt 内容',
   'openai_searchAgent': '搜索智能体',
+
+  // Clipboard Share & Import
+  'openai_shareAgent': '分享智能体',
+  'openai_shareHeadersWarning': '此智能体包含请求头配置（可能含 API Key），是否包含？',
+  'openai_removeHeaders': '移除敏感信息',
+  'openai_keepHeaders': '保留完整配置',
+  'openai_agentCopied': '智能体配置已复制到剪贴板',
+  'openai_copyFailed': '复制失败',
+  'openai_importAgent': '导入智能体',
+  'openai_importAgentConfirm': '检测到剪贴板中有智能体配置，是否导入？',
+  'openai_import': '导入',
+  'openai_agentImported': '智能体已导入',
+  'openai_importFailed': '导入失败',
+  'openai_nameLabel': '名称',
+  'openai_descriptionLabel': '描述',
 };
