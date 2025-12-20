@@ -1,10 +1,10 @@
 name: Android
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+# on:
+#   push:
+#     branches: [ master ]
+#   pull_request:
+#     branches: [ master ]
 
 jobs:
   build:
@@ -16,12 +16,19 @@ jobs:
     - name: Free up disk space
       uses: jlumbroso/free-disk-space@main
       with:
-        android: true
         dotnet: true
         haskell: true
         large-packages: true
         docker-images: true
         swap-storage: true
+
+    - name: Verify Android SDK
+      run: |
+        echo "=== Checking Android SDK ==="
+        echo "ANDROID_HOME: $ANDROID_HOME"
+        echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+        ls -la $ANDROID_HOME 2>/dev/null || echo "Android SDK not found at $ANDROID_HOME"
+        which adb 2>/dev/null || echo "ADB not found"
 
     - name: Set up JDK
       uses: actions/setup-java@v3
