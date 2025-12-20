@@ -112,6 +112,7 @@ const Map<String, String> goodsTranslationsEn = {
   'goods_dateTime': 'Date Time',
   'goods_usageHistory': 'Usage History',
   'goods_totalGoods': 'Total Items',
+  'goods_warehouseActions': 'Warehouse Actions',
 
   // Home Widget Strings
   'goods_widgetName': 'Goods',

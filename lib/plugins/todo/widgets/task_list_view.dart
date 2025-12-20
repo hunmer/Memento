@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
+import 'package:Memento/plugins/todo/widgets/task_action_sheet.dart';
 
 class TaskListView extends StatefulWidget {
   final List<Task> tasks;
@@ -55,6 +56,18 @@ class _TaskListViewState extends State<TaskListView> {
                           onDismissed: () => widget.onTaskDismissed(task),
                           onTaskEdit: widget.onTaskEdit,
                           onSubtaskStatusChanged: widget.onSubtaskStatusChanged,
+                          onResetTimer: () {
+                            // 重置计时器：清除已记录的时间，但保持任务状态
+                            task.duration = null;
+                            task.startTime = null;
+                            // 如果任务正在进行中，停止并重新开始计时
+                            if (task.status == TaskStatus.inProgress) {
+                              task.stopTimer();
+                              task.startTimer();
+                            }
+                            // 触发状态更新以保存数据
+                            widget.onTaskStatusChanged(task, task.status);
+                          },
                         );
                       },
                     ),
@@ -89,6 +102,7 @@ class _TaskCard extends StatefulWidget {
   final Function(Task)? onTaskEdit;
   final Function(String taskId, String subtaskId, bool isCompleted)?
   onSubtaskStatusChanged;
+  final VoidCallback? onResetTimer;
 
   const _TaskCard({
     super.key,
@@ -98,6 +112,7 @@ class _TaskCard extends StatefulWidget {
     required this.onDismissed,
     this.onTaskEdit,
     this.onSubtaskStatusChanged,
+    this.onResetTimer,
   });
 
   @override
@@ -245,22 +260,66 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
       borderColor = Colors.transparent;
     }
 
-    return Dismissible(
-      key: widget.key!,
-      direction: DismissDirection.horizontal,
-      background: Container(
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 20.0),
-        color: Colors.blue,
-        child: const Icon(Icons.edit, color: Colors.white),
-      ),
-      secondaryBackground: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20.0),
-        color: Colors.red,
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      confirmDismiss: (direction) async {
+    return GestureDetector(
+      onLongPress: () {
+        // 长按显示操作抽屉
+        TaskActionSheet.show(
+          context: context,
+          onEdit: () {
+            if (widget.onTaskEdit != null) {
+              widget.onTaskEdit!(widget.task);
+            }
+          },
+          onResetTimer: () {
+            if (widget.onResetTimer != null) {
+              widget.onResetTimer!();
+            }
+          },
+          onDelete: () async {
+            // 显示删除确认对话框
+            final confirmed = await showDialog<bool>(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('todo_deleteTaskTitle'.tr),
+                  content: Text('${'todo_deleteTaskMessage'.tr.replaceFirst('此任务', '')}"${widget.task.title}" 吗？'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text('todo_cancel'.tr),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      child: Text('todo_delete'.tr),
+                    ),
+                  ],
+                );
+              },
+            ) ?? false;
+
+            if (confirmed) {
+              widget.onDismissed();
+            }
+          },
+        );
+      },
+      child: Dismissible(
+        key: widget.key!,
+        direction: DismissDirection.horizontal,
+        background: Container(
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.only(left: 20.0),
+          color: Colors.blue,
+          child: const Icon(Icons.edit, color: Colors.white),
+        ),
+        secondaryBackground: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20.0),
+          color: Colors.red,
+          child: const Icon(Icons.delete, color: Colors.white),
+        ),
+        confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
           // 左滑进入编辑页面 - 不移除任务
           if (widget.onTaskEdit != null) {
@@ -756,6 +815,7 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
           ),
         ),
       ),
+    ),
     );
   }
 

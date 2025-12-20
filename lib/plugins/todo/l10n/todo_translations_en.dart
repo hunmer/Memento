@@ -61,6 +61,8 @@ const Map<String, String> todoTranslationsEn = {
   'todo_ok': 'OK',
   'todo_clear': 'Clear',
   'todo_clearHistoryAction': 'Clear',
+  'todo_taskActions': 'Task Actions',
+  'todo_resetTimer': 'Reset Timer',
 
   // Priority
   'todo_priority': 'Priority:',

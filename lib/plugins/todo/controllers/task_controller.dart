@@ -417,9 +417,10 @@ class TaskController extends ChangeNotifier {
     if (index != -1) {
       final task = _tasks[index];
       final oldStatus = task.status;
+      final isCompleting = status == TaskStatus.done;
 
-      // 如果任务正在进行中，先停止计时
-      if (oldStatus == TaskStatus.inProgress) {
+      // 如果任务正在进行中，先停止计时（完成状态由 completeTask 统一停止）
+      if (oldStatus == TaskStatus.inProgress && !isCompleting) {
         task.stopTimer();
       }
 
@@ -431,7 +432,7 @@ class TaskController extends ChangeNotifier {
       }
 
       // 如果任务标记为完成，停止计时并自动标记所有子任务为完成
-      if (status == TaskStatus.done) {
+      if (isCompleting) {
         task.completeTask();
         for (var subtask in task.subtasks) {
           subtask.isCompleted = true;
