@@ -8,6 +8,8 @@ import 'package:Memento/plugins/openai/widgets/agent_list_view.dart';
 import 'package:Memento/plugins/openai/widgets/agent_grid_view.dart';
 import 'package:Memento/plugins/openai/widgets/filter_dialog.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
+import 'package:Memento/plugins/openai/screens/agent_marketplace_screen.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 
 class AgentListScreen extends StatefulWidget {
   const AgentListScreen({super.key});
@@ -21,6 +23,7 @@ class _AgentListScreenState extends State<AgentListScreen> {
   bool _isGridView = true;
   Set<String> _selectedProviders = {};
   Set<String> _selectedTags = {};
+  List<String> _allTags = []; // 所有可用的类别
 
   // 搜索相关状态
   final TextEditingController _searchController = TextEditingController();
@@ -70,6 +73,11 @@ class _AgentListScreenState extends State<AgentListScreen> {
 
   Future<void> _loadAgents() async {
     await _agentController.loadAgents();
+    // 加载所有类别
+    _allTags = await _agentController.getAllTags();
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _showFilterDialog() {
@@ -86,6 +94,13 @@ class _AgentListScreenState extends State<AgentListScreen> {
               });
             },
           ),
+    );
+  }
+
+  void _openMarketplace() {
+    NavigationHelper.push(
+      context,
+      const AgentMarketplaceScreen(),
     );
   }
 
@@ -135,14 +150,69 @@ class _AgentListScreenState extends State<AgentListScreen> {
     }).toList();
   }
 
+  /// 构建类别过滤器
+  Widget _buildCategoryFilter() {
+    if (_allTags.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'openai_tags'.tr,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: _allTags.map((tag) {
+                final isSelected = _selectedTags.contains(tag);
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(tag),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          _selectedTags.add(tag);
+                        } else {
+                          _selectedTags.remove(tag);
+                        }
+                      });
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
       title: Text('openai_agentListTitle'.tr),
       largeTitle: 'openai_agentListTitle'.tr,
-      body: _isGridView
-          ? AgentGridView(agents: _getFilteredAgents())
-          : AgentListView(agents: _getFilteredAgents()),
+      body: Column(
+        children: [
+          _buildCategoryFilter(),
+          Expanded(
+            child: _isGridView
+                ? AgentGridView(agents: _getFilteredAgents())
+                : AgentListView(agents: _getFilteredAgents()),
+          ),
+        ],
+      ),
       enableLargeTitle: false,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
 
@@ -161,6 +231,11 @@ class _AgentListScreenState extends State<AgentListScreen> {
       onSearchFilterChanged: _onSearchFilterChanged,
 
       actions: [
+        IconButton(
+          icon: const Icon(Icons.store),
+          onPressed: _openMarketplace,
+          tooltip: '商场',
+        ),
         IconButton(
           icon: const Icon(Icons.filter_list),
           onPressed: _showFilterDialog,
