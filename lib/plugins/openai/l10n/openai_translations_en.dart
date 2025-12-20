@@ -209,4 +209,19 @@ final Map<String, String> openaiTranslationsEn = {
   'openai_promptPresetActiveHint': 'Preset selected, this field will be ignored',
   'openai_promptContent': 'Prompt Content',
   'openai_searchAgent': 'Search agents',
+
+  // Clipboard Share & Import
+  'openai_shareAgent': 'Share Agent',
+  'openai_shareHeadersWarning': 'This agent contains header configuration (may include API Key). Include it?',
+  'openai_removeHeaders': 'Remove Sensitive Info',
+  'openai_keepHeaders': 'Keep Full Config',
+  'openai_agentCopied': 'Agent config copied to clipboard',
+  'openai_copyFailed': 'Copy failed',
+  'openai_importAgent': 'Import Agent',
+  'openai_importAgentConfirm': 'Agent configuration detected in clipboard. Import it?',
+  'openai_import': 'Import',
+  'openai_agentImported': 'Agent imported',
+  'openai_importFailed': 'Import failed',
+  'openai_nameLabel': 'Name',
+  'openai_descriptionLabel': 'Description',
 };

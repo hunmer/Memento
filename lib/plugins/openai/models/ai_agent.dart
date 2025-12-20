@@ -97,18 +97,23 @@ class AIAgent {
     name: json['name'] as String,
     description: json['description'] as String,
     systemPrompt: json['systemPrompt'] as String,
-    tags: (json['tags'] as List).cast<String>(),
+    tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? const [],
     serviceProviderId: json['serviceProviderId'] as String,
     baseUrl: json['baseUrl'] as String,
-    headers: Map<String, String>.from(json['headers'] as Map),
-    createdAt: DateTime.parse(json['createdAt'] as String),
+    headers: (json['headers'] as Map<dynamic, dynamic>?)
+        ?.map((key, value) => MapEntry(key.toString(), value.toString())) ?? {},
+    createdAt: json['createdAt'] != null
+        ? DateTime.parse(json['createdAt'] as String)
+        : DateTime.now(),
     temperature: (json['temperature'] as num?)?.toDouble() ?? 0.7,
     maxLength: json['maxLength'] as int? ?? 2000,
     topP: (json['topP'] as num?)?.toDouble() ?? 1.0,
     frequencyPenalty: (json['frequencyPenalty'] as num?)?.toDouble() ?? 0.0,
     presencePenalty: (json['presencePenalty'] as num?)?.toDouble() ?? 0.0,
     stop: (json['stop'] as List<dynamic>?)?.cast<String>(),
-    updatedAt: DateTime.parse(json['updatedAt'] as String),
+    updatedAt: json['updatedAt'] != null
+        ? DateTime.parse(json['updatedAt'] as String)
+        : DateTime.now(),
     model: json['model'] as String? ?? 'gpt-3.5-turbo',
     icon: json['icon'] != null ? IconData(json['icon'] as int, fontFamily: 'MaterialIcons') : null,
     iconColor: json['iconColor'] != null ? Color(json['iconColor'] as int) : null,

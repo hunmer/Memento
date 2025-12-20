@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
+import 'package:Memento/core/services/clipboard_service.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
@@ -24,6 +25,7 @@ import 'controllers/service_provider_controller.dart';
 import 'controllers/model_controller.dart';
 import 'services/request_service.dart';
 import 'models/prompt_preset.dart';
+import 'models/ai_agent.dart';
 import 'services/prompt_preset_service.dart';
 import 'sample_data.dart';
 
@@ -66,6 +68,9 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
 
     // 注册数据选择器
     _registerDataSelectors();
+
+    // 注册剪贴板处理器
+    _registerClipboardHandler();
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
@@ -199,6 +204,97 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
         ],
       ),
     );
+  }
+
+  /// 注册剪贴板处理器
+  void _registerClipboardHandler() {
+    ClipboardService.instance.registerHandler(
+      'openai_agent_import',
+      _handleAgentImport,
+    );
+  }
+
+  /// 处理 Agent 导入
+  Future<void> _handleAgentImport(Map<String, dynamic> args) async {
+    try {
+      // 验证必需字段
+      if (args['id'] == null || args['name'] == null) {
+        debugPrint('[OpenAIPlugin] 导入失败：缺少必需字段');
+        return;
+      }
+
+      final agent = AIAgent.fromJson(args);
+
+      // 获取当前 context
+      final context = Get.context;
+      if (context == null) {
+        debugPrint('[OpenAIPlugin] 无法获取 context');
+        return;
+      }
+
+      // 显示导入确认对话框
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('openai_importAgent'.tr),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('openai_importAgentConfirm'.tr),
+              const SizedBox(height: 16),
+              Text('${'openai_nameLabel'.tr}: ${agent.name}',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              if (agent.description.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text('${'openai_descriptionLabel'.tr}: ${agent.description}'),
+              ],
+              if (agent.tags.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 4,
+                  children: agent.tags
+                      .map((tag) => Chip(
+                            label: Text(tag, style: const TextStyle(fontSize: 12)),
+                            padding: EdgeInsets.zero,
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ))
+                      .toList(),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('openai_cancel'.tr),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('openai_import'.tr),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true) return;
+
+      // 生成新的 ID 避免冲突
+      final newAgent = agent.copyWith(
+        id: const Uuid().v4(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      // 保存 Agent
+      final agentController = AgentController();
+      await agentController.saveAgent(newAgent);
+
+      Toast.success('openai_agentImported'.tr);
+    } catch (e) {
+      debugPrint('[OpenAIPlugin] 导入 Agent 失败: $e');
+      Toast.error('openai_importFailed'.tr);
+    }
   }
 
   @override

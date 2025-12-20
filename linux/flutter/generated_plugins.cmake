@@ -7,7 +7,9 @@ list(APPEND FLUTTER_PLUGIN_LIST
   awesome_notifications
   file_selector_linux
   flutter_js
+  irondash_engine_context
   record_linux
+  super_native_extensions
   url_launcher_linux
 )
 
