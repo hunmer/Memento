@@ -6,6 +6,7 @@ import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:Memento/plugins/timer/views/timer_task_details_page.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class TimerTaskCard extends StatefulWidget {
   final TimerTask task;
@@ -303,39 +304,37 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
   }
 
   void _showContextMenu(BuildContext context, TimerTask task) {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       builder: (BuildContext context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.edit),
-                title: Text('app_edit'.tr),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onEdit(task);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.refresh),
-                title: Text('timer_reset'.tr),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onReset(task);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete),
-                title: Text('app_delete'.tr),
-                onTap: () {
-                  Navigator.pop(context);
-                  widget.onDelete(task);
-                },
-              ),
-            ],
-          ),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: Text('app_edit'.tr),
+              onTap: () {
+                Navigator.pop(context);
+                widget.onEdit(task);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.refresh),
+              title: Text('timer_reset'.tr),
+              onTap: () {
+                Navigator.pop(context);
+                widget.onReset(task);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete),
+              title: Text('app_delete'.tr),
+              onTap: () {
+                Navigator.pop(context);
+                widget.onDelete(task);
+              },
+            ),
+          ],
         );
       },
     );

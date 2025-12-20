@@ -8,6 +8,7 @@ import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/database/models/database_model.dart';
@@ -201,7 +202,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
     BuildContext context,
     DatabaseModel database,
   ) async {
-    await showModalBottomSheet(
+    await SmoothBottomSheet.show(
       context: context,
       builder:
           (context) => Column(

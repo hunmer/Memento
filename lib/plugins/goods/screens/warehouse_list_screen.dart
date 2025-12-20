@@ -6,6 +6,7 @@ import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'warehouse_detail_screen.dart';
 import 'package:Memento/plugins/goods/widgets/warehouse_card.dart';
+import 'package:Memento/plugins/goods/widgets/warehouse_form.dart';
 
 class WarehouseListScreen extends StatefulWidget {
   const WarehouseListScreen({super.key, this.onWarehouseTap});
@@ -76,6 +77,12 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
                       );
                     }
                   },
+                  onEdit: () {
+                    _showEditWarehouse(context, warehouse);
+                  },
+                  onDelete: () {
+                    _showDeleteWarehouseDialog(context, warehouse);
+                  },
                 );
               },
             ),
@@ -88,6 +95,63 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
         });
       },
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+    );
+  }
+
+  /// 显示编辑仓库表单
+  void _showEditWarehouse(BuildContext context, dynamic warehouse) {
+    NavigationHelper.push(
+      context,
+      WarehouseForm(
+        warehouse: warehouse,
+        onSave: (updatedWarehouse) async {
+          await GoodsPlugin.instance.saveWarehouse(updatedWarehouse);
+          if (context.mounted) {
+            setState(() {});
+          }
+        },
+        onDelete: () async {
+          await GoodsPlugin.instance.deleteWarehouse(warehouse.id);
+          if (context.mounted) {
+            Navigator.pop(context); // 关闭表单
+            setState(() {});
+          }
+        },
+      ),
+    );
+  }
+
+  /// 显示删除仓库确认对话框
+  void _showDeleteWarehouseDialog(BuildContext context, dynamic warehouse) {
+    showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('goods_confirmDelete'.tr),
+        content: Text(
+          'goods_confirmDeleteWarehouseMessage'.trParams(
+            {'warehouseName': warehouse.title},
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: Text('goods_cancel'.tr),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            onPressed: () async {
+              Navigator.pop(context, true);
+              await GoodsPlugin.instance.deleteWarehouse(warehouse.id);
+              if (context.mounted) {
+                setState(() {});
+              }
+            },
+            child: Text('goods_delete'.tr),
+          ),
+        ],
+      ),
     );
   }
 

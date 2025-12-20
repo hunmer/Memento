@@ -10,6 +10,7 @@ import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
 import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
 import 'package:Memento/plugins/calendar_album/widgets/entry_list.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'entry_editor_screen.dart';
 import 'entry_detail_screen.dart';
 import 'package:intl/intl.dart';
@@ -428,13 +429,12 @@ class _CalendarScreenState extends State<CalendarScreen>
     CalendarController calendarController,
     DateTime selectedDate,
   ) {
-    // 在 showModalBottomSheet 之前获取 TagController 实例
+    // 在 SmoothBottomSheet.show 之前获取 TagController 实例
     final tagController = Provider.of<TagController>(context, listen: false);
 
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder:
           (context) => MultiProvider(
             providers: [
@@ -446,26 +446,8 @@ class _CalendarScreenState extends State<CalendarScreen>
               minChildSize: 0.3,
               maxChildSize: 0.9,
               builder:
-                  (context, scrollController) => Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(16),
-                      ),
-                    ),
-                    child: Column(
+                  (context, scrollController) => Column(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).dividerColor,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
                         Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
@@ -525,7 +507,6 @@ class _CalendarScreenState extends State<CalendarScreen>
                         ),
                       ],
                     ),
-                  ),
             ),
           ),
     );

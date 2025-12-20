@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/notes/controllers/notes_controller.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'folder_operations.dart';
 
 class FolderListTile extends StatelessWidget {
@@ -27,7 +28,7 @@ class FolderListTile extends StatelessWidget {
       trailing: IconButton(
         icon: const Icon(Icons.more_vert),
         onPressed: () {
-          showModalBottomSheet(
+          SmoothBottomSheet.show(
             context: context,
             builder:
                 (context) => Column(

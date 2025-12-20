@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:Memento/plugins/todo/models/task.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
@@ -444,10 +445,9 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   // 显示任务详情对话框
   void _showTaskDetailDialog(BuildContext context, Task task) {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (context) => TodoItemDetail(
         task: task,
         taskController: _plugin.taskController,

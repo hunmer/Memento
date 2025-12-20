@@ -6,6 +6,7 @@ import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 import '../models/subscription.dart';
 import '../bill_plugin.dart';
 import 'subscription_edit_screen.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class SubscriptionListScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -318,46 +319,41 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
   }
 
   void _showMenuDialog(Subscription subscription) {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder:
-          (context) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+          (context) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: Text('bill_edit'.tr),
+                onTap: () {
+                  Navigator.pop(context);
+                  _navigateToEdit(subscription: subscription);
+                },
+              ),
+              if (subscription.isActive)
                 ListTile(
-                  leading: const Icon(Icons.edit),
-                  title: Text('bill_edit'.tr),
+                  leading: const Icon(Icons.stop_circle_outlined),
+                  title: Text('bill_terminateSubscription'.tr),
                   onTap: () {
                     Navigator.pop(context);
-                    _navigateToEdit(subscription: subscription);
+                    _showTerminateDialog(subscription);
                   },
                 ),
-                if (subscription.isActive)
-                  ListTile(
-                    leading: const Icon(Icons.stop_circle_outlined),
-                    title: Text('bill_terminateSubscription'.tr),
-                    onTap: () {
-                      Navigator.pop(context);
-                      _showTerminateDialog(subscription);
-                    },
-                  ),
-                ListTile(
-                  leading: const Icon(Icons.delete_outline, color: Colors.red),
-                  title: Text(
-                    'bill_delete'.tr,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _showDeleteDialog(subscription);
-                  },
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                title: Text(
+                  'bill_delete'.tr,
+                  style: const TextStyle(color: Colors.red),
                 ),
-              ],
-            ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showDeleteDialog(subscription);
+                },
+              ),
+            ],
           ),
     );
   }

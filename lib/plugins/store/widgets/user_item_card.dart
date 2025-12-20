@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class UserItemCard extends StatelessWidget {
   final UserItem item;
@@ -380,65 +381,48 @@ class UserItemCard extends StatelessWidget {
   }
 
   void _showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 拖拽指示器
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 标题
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              item.productName,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 8),
-            // 标题
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                item.productName,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+          ),
+          const Divider(),
+          // 查看商品信息
+          if (onViewProduct != null)
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: Text('store_viewProductInfo'.tr),
+              onTap: () {
+                Navigator.pop(context);
+                onViewProduct!();
+              },
             ),
-            const Divider(),
-            // 查看商品信息
-            if (onViewProduct != null)
-              ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: Text('store_viewProductInfo'.tr),
-                onTap: () {
-                  Navigator.pop(context);
-                  onViewProduct!();
-                },
+          // 删除
+          if (onDelete != null)
+            ListTile(
+              leading: const Icon(Icons.delete_outline, color: Colors.red),
+              title: Text(
+                'app_delete'.tr,
+                style: const TextStyle(color: Colors.red),
               ),
-            // 删除
-            if (onDelete != null)
-              ListTile(
-                leading: const Icon(Icons.delete_outline, color: Colors.red),
-                title: Text(
-                  'app_delete'.tr,
-                  style: const TextStyle(color: Colors.red),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _confirmDelete(context);
-                },
-              ),
-            const SizedBox(height: 8),
-          ],
-        ),
+              onTap: () {
+                Navigator.pop(context);
+                _confirmDelete(context);
+              },
+            ),
+        ],
       ),
     );
   }

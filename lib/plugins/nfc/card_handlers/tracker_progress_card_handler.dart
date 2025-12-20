@@ -20,7 +20,7 @@ class TrackerProgressCardHandler extends BaseCardHandler {
   Color get color => Colors.red;
 
   @override
-  Future<void> executeWrite(BuildContext context) async {
+  Future<List<Map<String, String>>?> getRecordsForPreview(BuildContext context) async {
     // 打开目标选择器
     final result = await pluginDataSelectorService.showSelector(
       context,
@@ -28,7 +28,7 @@ class TrackerProgressCardHandler extends BaseCardHandler {
     );
 
     if (result == null || result.cancelled) {
-      return;
+      return null;
     }
 
     // 获取选择的目标 ID 和名称
@@ -37,11 +37,11 @@ class TrackerProgressCardHandler extends BaseCardHandler {
 
     if (goalId == null) {
       Toast.error('未能获取目标 ID');
-      return;
+      return null;
     }
 
     // 显示对话框让用户输入增加的值
-    if (!context.mounted) return;
+    if (!context.mounted) return null;
 
     final valueController = TextEditingController();
     final value = await showDialog<double>(
@@ -101,11 +101,34 @@ class TrackerProgressCardHandler extends BaseCardHandler {
 
     // 用户取消或未输入有效值
     if (value == null) {
-      return;
+      return null;
     }
 
     // 构建深度链接 URL
     final deepLinkUrl = 'memento://tracker/progress?goalId=$goalId&value=$value';
+
+    // 返回NFC记录数据
+    return [
+      {'type': 'URI', 'data': deepLinkUrl},
+      {'type': 'AAR', 'data': 'github.hunmer.memento'},
+    ];
+  }
+
+  @override
+  Future<void> executeWrite(BuildContext context) async {
+    // 获取NFC记录数据
+    final records = await getRecordsForPreview(context);
+
+    if (records == null || records.isEmpty) {
+      return;
+    }
+
+    // 提取goalName和value用于提示
+    final deepLinkUrl = records[0]['data'] ?? '';
+    final goalNameMatch = RegExp(r'goalId=([^&]+)').firstMatch(deepLinkUrl);
+    final goalName = goalNameMatch?.group(1) ?? '未知目标';
+    final valueMatch = RegExp(r'value=([^&]+)').firstMatch(deepLinkUrl);
+    final value = valueMatch?.group(1) ?? '0';
 
     // 显示等待对话框
     if (!context.mounted) return;
@@ -136,11 +159,8 @@ class TrackerProgressCardHandler extends BaseCardHandler {
 
     try {
       final nfc = MementoNfc();
-      // 同时写入 URI 和 AAR 记录，确保扫描时打开正确的应用
-      final writeResult = await nfc.writeNfcRecords([
-        {'type': 'URI', 'data': deepLinkUrl},
-        {'type': 'AAR', 'data': 'github.hunmer.memento'},
-      ]);
+      // 使用已构建的records进行写入
+      final writeResult = await nfc.writeNfcRecords(records);
 
       // 关闭等待对话框
       if (context.mounted) {
@@ -209,6 +229,18 @@ class TrackerProgressCardHandler extends BaseCardHandler {
                   ],
                 ),
               ),
+              // 预览数据按钮
+              IconButton(
+                icon: const Icon(Icons.visibility_outlined, size: 20),
+                onPressed: isWriting ? null : () => showDataPreview(context),
+                tooltip: 'nfc_previewData'.tr,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(
+                  minWidth: 40,
+                  minHeight: 40,
+                ),
+              ),
+              const SizedBox(width: 8),
               Icon(
                 Icons.chevron_right,
                 color: isEnabled ? color : Colors.grey,

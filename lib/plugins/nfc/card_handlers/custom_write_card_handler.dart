@@ -21,6 +21,12 @@ class CustomWriteCardHandler extends BaseCardHandler {
   Color get color => Colors.orange;
 
   @override
+  Future<List<Map<String, String>>?> getRecordsForPreview(BuildContext context) async {
+    // 自定义写入通过对话框输入数据，不需要单独的预览功能
+    return null;
+  }
+
+  @override
   Future<void> executeWrite(BuildContext context) async {
     showDialog(
       context: context,

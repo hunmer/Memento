@@ -6,6 +6,7 @@ import 'package:Memento/plugins/contact/models/contact_model.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/plugins/contact/screens/contact_records_screen.dart';
 import 'package:Memento/plugins/contact/widgets/contact_form.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class ContactCard extends StatelessWidget {
   final Contact contact;
@@ -94,36 +95,29 @@ class ContactCard extends StatelessWidget {
   }
 
   void _showBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
-      showDragHandle: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
       builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: Icon(
-                  Icons.delete,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                title: Text(
-                  '删除联系人',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showDeleteConfirmation(context);
-                },
+        return Wrap(
+          children: [
+            ListTile(
+              leading: Icon(
+                Icons.delete,
+                color: Theme.of(context).colorScheme.error,
               ),
-            ],
-          ),
+              title: Text(
+                '删除联系人',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _showDeleteConfirmation(context);
+              },
+            ),
+          ],
         );
       },
     );

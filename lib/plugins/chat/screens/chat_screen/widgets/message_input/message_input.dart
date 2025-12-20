@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'message_input_types.dart';
 import 'message_input_state.dart';
 import 'package:Memento/plugins/openai/widgets/agent_list_drawer.dart';
@@ -100,7 +101,7 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   void _showAgentListDrawer() {
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
       builder:
@@ -253,7 +254,7 @@ class _MessageInputState extends State<MessageInput> {
               IconButton(
                 icon: const Icon(Icons.add),
                 onPressed: () {
-                  showModalBottomSheet(
+                  SmoothBottomSheet.show(
                     context: context,
                     builder:
                         (context) => MessageInputActionsDrawer(

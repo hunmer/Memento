@@ -20,6 +20,12 @@ class ReadCardHandler extends BaseCardHandler {
   Color get color => Colors.blue;
 
   @override
+  Future<List<Map<String, String>>?> getRecordsForPreview(BuildContext context) async {
+    // 读取操作不需要预览功能
+    return null;
+  }
+
+  @override
   Future<void> executeWrite(BuildContext context) async {
     onRead();
   }

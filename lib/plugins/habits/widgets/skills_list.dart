@@ -10,6 +10,7 @@ import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/plugins/habits/widgets/skill_detail_page.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class SkillsList extends StatefulWidget {
   final SkillController skillController;
@@ -190,7 +191,7 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
   /// 显示排序菜单
   void _showSortMenu() {
 
-    showModalBottomSheet(
+    SmoothBottomSheet.show(
       context: context,
       builder:
           (context) => Column(

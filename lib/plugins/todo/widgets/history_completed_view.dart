@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:Memento/plugins/todo/views/todo_item_detail.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/plugins/todo/models/task.dart';
@@ -86,10 +87,9 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          showModalBottomSheet(
+          SmoothBottomSheet.show(
             context: context,
             isScrollControlled: true,
-            backgroundColor: Colors.transparent,
             builder: (context) => TodoItemDetail(
               task: task,
               taskController: widget.taskController,

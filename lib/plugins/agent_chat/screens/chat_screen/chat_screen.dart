@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/agent_chat/controllers/chat_controller.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
@@ -1129,11 +1130,10 @@ class _ChatScreenState extends State<ChatScreen> {
           ]
         : <Map<String, String>>[];
 
-    // 使用 showModalBottomSheet 显示 AgentListDrawer
-    await showModalBottomSheet<void>(
+    // 使用 SmoothBottomSheet 显示 AgentListDrawer
+    await SmoothBottomSheet.show<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (context) => AgentListDrawer(
         selectedAgents: selectedAgents,
         allowMultipleSelection: false, // 单选模式

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'models/index.dart';
 import 'package:Memento/widgets/data_selector_sheet/data_selector_sheet.dart';
 
@@ -134,12 +135,11 @@ class PluginDataSelectorService {
     SelectorDefinition definition,
     SelectorConfig config,
   ) async {
-    return await showModalBottomSheet<SelectorResult>(
+    return await SmoothBottomSheet.show<SelectorResult>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      isDismissible: config.swipeDismissible,
-      enableDrag: config.swipeDismissible,
+      swipeDismissible: config.swipeDismissible,
+      barrierDismissible: config.swipeDismissible,
       builder: (context) => DataSelectorSheet(
         definition: definition,
         config: config,
@@ -171,7 +171,7 @@ class PluginDataSelectorService {
     }
 
     // 显示选择器列表供用户选择
-    final selectedSelector = await showModalBottomSheet<SelectorDefinition>(
+    final selectedSelector = await SmoothBottomSheet.show<SelectorDefinition>(
       context: context,
       builder: (context) => _SelectorPickerSheet(
         selectors: availableSelectors,
@@ -204,43 +204,36 @@ class _SelectorPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              '选择数据类型',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            '选择数据类型',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
-          const Divider(height: 1),
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: selectors.length,
-            itemBuilder: (context, index) {
-              final selector = selectors[index];
-              return ListTile(
-                leading: Icon(
-                  selector.icon ?? Icons.folder,
-                  color: selector.color,
-                ),
-                title: Text(selector.name),
-                subtitle: selector.description != null
-                    ? Text(selector.description!)
-                    : null,
-                onTap: () => Navigator.pop(context, selector),
-              );
-            },
-          ),
-          SizedBox(height: MediaQuery.of(context).viewPadding.bottom),
-        ],
-      ),
+        ),
+        const Divider(height: 1),
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: selectors.length,
+          itemBuilder: (context, index) {
+            final selector = selectors[index];
+            return ListTile(
+              leading: Icon(
+                selector.icon ?? Icons.folder,
+                color: selector.color,
+              ),
+              title: Text(selector.name),
+              subtitle: selector.description != null
+                  ? Text(selector.description!)
+                  : null,
+              onTap: () => Navigator.pop(context, selector),
+            );
+          },
+        ),
+      ],
     );
   }
 }

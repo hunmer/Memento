@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/plugins/activity/widgets/activity_form.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/item_event_args.dart';
 
@@ -191,10 +192,9 @@ class ActivityController {
     // 加载最近使用的心情和标签
     await loadRecentMoodsAndTags();
 
-    return showModalBottomSheet(
+    return SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder:
           (context) => DraggableScrollableSheet(
             initialChildSize: 0.9, // 初始高度为屏幕高度的90%
@@ -202,35 +202,26 @@ class ActivityController {
             minChildSize: 0.5, // 最小高度为屏幕高度的50%
             expand: false,
             builder:
-                (context, scrollController) => Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                  ),
-                  child: ActivityForm(
-                    selectedDate: selectedDate,
-                    initialStartTime: initialStartTime,
-                    initialEndTime: initialEndTime,
-                    lastActivityEndTime: lastActivityEndTime,
-                    recentMoods: recentMoods,
-                    recentTags: recentTags,
-                    onSave: (ActivityRecord activity) async {
-                      await activityService.saveActivity(activity);
-                      if (activity.tags.isNotEmpty) {
-                        onTagsUpdated(activity.tags);
-                        await _updateRecentTags(activity.tags);
-                      }
-                      if (activity.mood != null && activity.mood!.isNotEmpty) {
-                        await _updateRecentMood(activity.mood!);
-                      }
-                      // 发送活动添加事件
-                      _notifyEvent('added', activity);
-                      await loadActivities(selectedDate);
-                    },
-                  ),
+                (context, scrollController) => ActivityForm(
+                  selectedDate: selectedDate,
+                  initialStartTime: initialStartTime,
+                  initialEndTime: initialEndTime,
+                  lastActivityEndTime: lastActivityEndTime,
+                  recentMoods: recentMoods,
+                  recentTags: recentTags,
+                  onSave: (ActivityRecord activity) async {
+                    await activityService.saveActivity(activity);
+                    if (activity.tags.isNotEmpty) {
+                      onTagsUpdated(activity.tags);
+                      await _updateRecentTags(activity.tags);
+                    }
+                    if (activity.mood != null && activity.mood!.isNotEmpty) {
+                      await _updateRecentMood(activity.mood!);
+                    }
+                    // 发送活动添加事件
+                    _notifyEvent('added', activity);
+                    await loadActivities(selectedDate);
+                  },
                 ),
           ),
     );
@@ -240,10 +231,9 @@ class ActivityController {
     // 加载最近使用的心情和标签
     loadRecentMoodsAndTags().then((_) {
       if (!context.mounted) return;
-      showModalBottomSheet(
+      SmoothBottomSheet.show(
         context: context,
         isScrollControlled: true,
-        backgroundColor: Colors.transparent,
         builder:
             (context) => DraggableScrollableSheet(
               initialChildSize: 0.9, // 初始高度为屏幕高度的90%
@@ -251,34 +241,25 @@ class ActivityController {
               minChildSize: 0.5, // 最小高度为屏幕高度的50%
               expand: false,
               builder:
-                  (context, scrollController) => Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20),
-                      ),
-                    ),
-                    child: ActivityForm(
-                      activity: activity,
-                      recentMoods: recentMoods,
-                      recentTags: recentTags,
-                      onSave: (ActivityRecord updatedActivity) async {
-                        await activityService.updateActivity(
-                          activity,
-                          updatedActivity,
-                        );
-                        if (updatedActivity.tags.isNotEmpty) {
-                          await _updateRecentTags(updatedActivity.tags);
-                        }
-                        if (updatedActivity.mood != null &&
-                            updatedActivity.mood!.isNotEmpty) {
-                          await _updateRecentMood(updatedActivity.mood!);
-                        }
-                        await loadActivities(activity.startTime);
-                      },
-                      selectedDate: activity.startTime,
-                    ),
+                  (context, scrollController) => ActivityForm(
+                    activity: activity,
+                    recentMoods: recentMoods,
+                    recentTags: recentTags,
+                    onSave: (ActivityRecord updatedActivity) async {
+                      await activityService.updateActivity(
+                        activity,
+                        updatedActivity,
+                      );
+                      if (updatedActivity.tags.isNotEmpty) {
+                        await _updateRecentTags(updatedActivity.tags);
+                      }
+                      if (updatedActivity.mood != null &&
+                          updatedActivity.mood!.isNotEmpty) {
+                        await _updateRecentMood(updatedActivity.mood!);
+                      }
+                      await loadActivities(activity.startTime);
+                    },
+                    selectedDate: activity.startTime,
                   ),
             ),
       );

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:Memento/widgets/icon_picker_dialog.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -842,12 +843,8 @@ class _TaskFormState extends State<TaskForm> {
   }
 
   void _showRemindersModal() {
-     showModalBottomSheet(
-       context: context, 
-       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-       shape: const RoundedRectangleBorder(
-         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-       ),
+     SmoothBottomSheet.show(
+       context: context,
        builder: (context) => StatefulBuilder(
          builder: (context, setModalState) {
            return Container(
