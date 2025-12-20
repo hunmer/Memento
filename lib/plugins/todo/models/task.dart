@@ -160,6 +160,14 @@ class Task {
   
   // 启动任务计时（委托给统一控制器）
   void startTimer() {
+    // 检查是否已有运行中的计时器
+    final existingTimer = unifiedTimerController.getTimer(id);
+    if (existingTimer != null && existingTimer.status == TimerStatus.running) {
+      // 计时器已在运行，不重复启动
+      print('[Task] Timer already running for task: $id');
+      return;
+    }
+
     // 使用统一计时器控制器启动
     unifiedTimerController.startTimer(
       id: id,
@@ -173,26 +181,27 @@ class Task {
     if (status != TaskStatus.inProgress) {
       status = TaskStatus.inProgress;
     }
+
+    // 保留 startTime 用于向后兼容（但不在计时中使用）
     startTime = DateTime.now();
-    duration = null; // 重置持续时间
   }
 
-  // 停止任务计时并计算持续时间（委托给统一控制器）
+  // 停止任务计时并保存持续时间（委托给统一控制器）
   void stopTimer() {
-    // 委托给统一控制器停止
-    unifiedTimerController.stopTimer(id);
-
-    if (startTime != null) {
-      final now = DateTime.now();
-      final currentDuration = now.difference(startTime!);
-
-      // 如果已有记录的持续时间，则累加
+    // 从统一控制器获取计时器状态
+    final timerState = unifiedTimerController.getTimer(id);
+    if (timerState != null) {
+      // 保存统一计时器的累计时间
+      final elapsed = timerState.elapsed;
       if (duration != null) {
-        duration = duration! + currentDuration;
+        duration = duration! + elapsed;
       } else {
-        duration = currentDuration;
+        duration = elapsed;
       }
     }
+
+    // 停止统一控制器中的计时器
+    unifiedTimerController.stopTimer(id);
   }
 
   // 完成任务，停止计时（委托给统一控制器）
@@ -200,18 +209,23 @@ class Task {
     stopTimer();
     status = TaskStatus.done;
   }
-  
+
   // 格式化显示持续时间
   String get formattedDuration {
-    if (duration == null) {
-      if (startTime != null && status == TaskStatus.inProgress) {
-        // 计算当前进行中的时间
-        final currentDuration = DateTime.now().difference(startTime!);
-        return _formatDuration(currentDuration);
-      }
-      return '00:00:00';
+    // 优先从统一计时器获取实时时间
+    final timerState = unifiedTimerController.getTimer(id);
+    if (timerState != null && timerState.status == TimerStatus.running) {
+      // 计时器正在运行，显示实时时间
+      final totalDuration = (duration ?? Duration.zero) + timerState.elapsed;
+      return _formatDuration(totalDuration);
     }
-    return _formatDuration(duration!);
+
+    // 计时器未运行，显示已保存的时间
+    if (duration != null) {
+      return _formatDuration(duration!);
+    }
+
+    return '00:00:00';
   }
   
   // 格式化时间为 HH:MM:SS 格式

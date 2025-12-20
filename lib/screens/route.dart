@@ -9,7 +9,6 @@ import 'package:Memento/screens/settings_screen/settings_screen.dart';
 import 'package:Memento/screens/js_console/js_console_screen.dart';
 import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart';
 import 'package:Memento/screens/notification_test/notification_test_page.dart';
-import 'package:Memento/screens/super_cupertino_test_screen/super_cupertino_test_screen.dart';
 import 'package:Memento/screens/floating_widget_screen/floating_widget_screen.dart';
 import 'package:Memento/screens/data_selector_test/data_selector_test_screen.dart';
 import 'package:Memento/core/services/toast_service.dart';
@@ -372,9 +371,6 @@ class AppRoutes extends NavigatorObserver {
       case '/notification_test':
       case 'notification_test':
         return _createRoute(const NotificationTestPage());
-      case '/super_cupertino_test':
-      case 'super_cupertino_test':
-        return _createRoute(const SuperCupertinoTestScreen());
       case '/data_selector_test':
       case 'data_selector_test':
         return _createRoute(const DataSelectorTestScreen());
@@ -891,7 +887,6 @@ class AppRoutes extends NavigatorObserver {
     jsConsole: (context) => const JSConsoleScreen(),
     jsonDynamicTest: (context) => const JsonDynamicTestScreen(),
     notificationTest: (context) => const NotificationTestPage(),
-    superCupertinoTest: (context) => const SuperCupertinoTestScreen(),
   };
 
   static String get initialRoute => home;

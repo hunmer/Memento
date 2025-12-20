@@ -41,6 +41,7 @@ import 'package:Memento/plugins/webview/webview_plugin.dart';
 import 'package:Memento/screens/settings_screen/controllers/auto_update_controller.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
 import 'package:Memento/screens/settings_screen/widgets/permission_request_dialog.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/action/action_manager.dart';
 import 'package:Memento/core/floating_ball/floating_ball_service.dart';
@@ -108,6 +109,10 @@ class AppStartupState extends ChangeNotifier {
 }
 
 const String _permissionOnboardingKey = 'permissionsOnboardingCompleted';
+
+bool _shouldHandlePermissionsForPlatform() {
+  return UniversalPlatform.isAndroid || UniversalPlatform.isIOS;
+}
 
 /// 应用初始化函数 - 快速启动版本
 /// 只执行最小必要的同步初始化，其他功能后台加载
@@ -254,7 +259,7 @@ Future<void> _initializeBackgroundServices() async {
     // 延迟执行权限检查和小组件同步
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final context = navigatorKey.currentContext;
-      if (context != null) {
+      if (context != null && _shouldHandlePermissionsForPlatform()) {
         _permissionController = PermissionController();
         final hasCompletedPermissions = globalConfigManager
             .getAppConfigValue<bool>(_permissionOnboardingKey, false);

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:location/location.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // 定义Position类
 class Position {
@@ -45,13 +46,22 @@ class _LocationPickerState extends State<LocationPicker> {
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _searchResults = [];
   bool _isLoading = false;
+  String _apiKey = 'dad6a772bf826842c3049e9c7198115c'; // 默认 API Key
   // String? _selectedLocation; // No longer needed for single tap select
 
   @override
   void initState() {
     super.initState();
+    _loadApiKey();
     // Auto-load current location or recent? maybe not to save data/permissions
     // _getCurrentLocation();
+  }
+
+  Future<void> _loadApiKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _apiKey = prefs.getString('location_api_key') ?? 'dad6a772bf826842c3049e9c7198115c';
+    });
   }
 
   Future<Position> _getCurrentPosition() async {
@@ -108,7 +118,7 @@ class _LocationPickerState extends State<LocationPicker> {
       final position = await _getCurrentPosition();
       final response = await http.get(
         Uri.parse(
-          'http://restapi.amap.com/v3/geocode/regeo?key=dad6a772bf826842c3049e9c7198115c&location=${position.longitude},${position.latitude}&poitype=&radius=1000&extensions=all&batch=false&roadlevel=0',
+          'http://restapi.amap.com/v3/geocode/regeo?key=$_apiKey&location=${position.longitude},${position.latitude}&poitype=&radius=1000&extensions=all&batch=false&roadlevel=0',
         ),
       );
 
@@ -161,7 +171,7 @@ class _LocationPickerState extends State<LocationPicker> {
     try {
       final response = await http.get(
         Uri.parse(
-          'https://restapi.amap.com/v3/place/text?key=dad6a772bf826842c3049e9c7198115c&keywords=$query&types=&city=&children=&offset=20&page=1&extensions=base',
+          'https://restapi.amap.com/v3/place/text?key=$_apiKey&keywords=$query&types=&city=&children=&offset=20&page=1&extensions=base',
         ),
       );
 

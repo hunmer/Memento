@@ -147,7 +147,6 @@ final Map<String, String> screensTranslationsEn = {
   'screens_testJavaScriptAPI': 'Test JavaScript API functionality',
   'screens_jsonDynamicWidgetTest': 'JSON Dynamic Widget Test',
   'screens_testAndPreviewDynamicUI': 'Test and preview dynamic UI components',
-  'screens_superCupertinoNavigationTest': 'Super Cupertino Navigation Test',
   'screens_testIOSStyleNavigation': 'Test iOS style navigation bar component',
   'screens_notificationTest': 'Notification Test',
   'screens_manageSystemFloatingBall': 'Manage system-level floating ball functionality',
@@ -276,4 +275,14 @@ final Map<String, String> screensTranslationsEn = {
 
   'screens_presetColors': 'Preset Colors',
   'screens_quickSelectPresetColors': 'Quick Select Preset Colors',
+
+  // location_api_key_settings
+  'screens_locationApiKey': 'Location API Key',
+  'screens_locationApiKeyNotSet': 'Not Set',
+  'screens_locationApiKeyPartial': '@key...',
+  'screens_setLocationApiKey': 'Set Location API Key',
+  'screens_locationApiKeyHint': 'Please enter Amap API Key',
+  'screens_apiKeyLabel': 'API Key',
+  'screens_apiKeyInputHint': 'Enter API Key',
+  'screens_locationApiKeyGuide': 'How to get API Key:\n1. Visit Amap Open Platform\n2. Register and create application\n3. Get Web Service API Key',
 };

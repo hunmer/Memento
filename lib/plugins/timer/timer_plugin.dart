@@ -105,6 +105,9 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     EventManager.instance.subscribe(TimerEventNames.timerStarted, (args) {
       if (args is UnifiedTimerEventArgs) {
         final state = args.timerState as TimerState;
+        // 只处理 timer 插件的计时器
+        if (state.pluginId != 'timer') return;
+
         // 转换为 TimerTask 并广播
         final task = _convertTimerStateToTimerTask(state);
         if (task != null) {
@@ -119,6 +122,9 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     EventManager.instance.subscribe(TimerEventNames.timerUpdated, (args) {
       if (args is UnifiedTimerEventArgs) {
         final state = args.timerState as TimerState;
+        // 只处理 timer 插件的计时器
+        if (state.pluginId != 'timer') return;
+
         final task = _convertTimerStateToTimerTask(state);
         if (task != null) {
           EventManager.instance.broadcast(
@@ -132,6 +138,9 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
     EventManager.instance.subscribe(TimerEventNames.timerCompleted, (args) {
       if (args is UnifiedTimerEventArgs) {
         final state = args.timerState as TimerState;
+        // 只处理 timer 插件的计时器
+        if (state.pluginId != 'timer') return;
+
         final task = _convertTimerStateToTimerTask(state);
         if (task != null) {
           // 广播计时器完成事件
@@ -173,21 +182,17 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   /// 将 TimerState 转换为 TimerTask
   TimerTask? _convertTimerStateToTimerTask(TimerState state) {
     // 查找现有任务
-    final existingTask = _tasks.firstWhere(
-      (t) => t.id == state.id,
-      // ignore: cast_from_null_always_fails
-      orElse: () => null as TimerTask,
-    );
+    try {
+      final existingTask = _tasks.firstWhere((t) => t.id == state.id);
 
-    if (existingTask != null) {
       // 更新运行状态和时长
       existingTask.isRunning = state.status == TimerStatus.running;
       existingTask.updateElapsedDuration(state.elapsed);
       return existingTask;
+    } catch (e) {
+      // 任务不存在，返回 null
+      return null;
     }
-
-    // 如果任务不存在，尝试从 JSON 重建
-    return null;
   }
 
   @override

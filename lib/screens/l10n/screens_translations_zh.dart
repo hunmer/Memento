@@ -147,7 +147,6 @@ final Map<String, String> screensTranslationsZh = {
   'screens_testJavaScriptAPI': '测试 JavaScript API 功能',
   'screens_jsonDynamicWidgetTest': 'JSON Dynamic Widget 测试',
   'screens_testAndPreviewDynamicUI': '测试和预览动态 UI 组件',
-  'screens_superCupertinoNavigationTest': 'Super Cupertino Navigation 测试',
   'screens_testIOSStyleNavigation': '测试 iOS 风格导航栏组件',
   'screens_notificationTest': '通知测试',
   'screens_manageSystemFloatingBall': '管理系统级悬浮球功能',
@@ -276,4 +275,14 @@ final Map<String, String> screensTranslationsZh = {
 
   'screens_presetColors': '预设颜色',
   'screens_quickSelectPresetColors': '快速选择预设颜色',
+
+  // location_api_key_settings
+  'screens_locationApiKey': '定位 API Key',
+  'screens_locationApiKeyNotSet': '未设置',
+  'screens_locationApiKeyPartial': '@key...',
+  'screens_setLocationApiKey': '设置定位 API Key',
+  'screens_locationApiKeyHint': '请输入高德地图 API Key',
+  'screens_apiKeyLabel': 'API Key',
+  'screens_apiKeyInputHint': '请输入 API Key',
+  'screens_locationApiKeyGuide': '如何获取 API Key：\n1. 访问高德开放平台\n2. 注册并创建应用\n3. 获取 Web 服务 API Key',
 };

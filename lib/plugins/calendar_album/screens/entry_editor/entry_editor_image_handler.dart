@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'dart:io';
@@ -179,7 +180,7 @@ class _EntryEditorImageHandlerState extends State<EntryEditorImageHandler> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Add Photos',
+                  'calendar_album_add_photos'.tr,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,

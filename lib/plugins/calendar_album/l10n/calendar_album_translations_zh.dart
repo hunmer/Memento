@@ -11,6 +11,7 @@ class CalendarAlbumTranslationsZh {
     'calendar_album_delete_album': '删除相册',
     'calendar_album_album_list': '相册列表',
     'calendar_album_add_photos': '添加照片',
+    'calendar_album_add_tag': '添加标签',
     'calendar_album_select_date': '选择日期',
     'calendar_album_no_photos_yet': '暂无照片',
     'calendar_album_photo_count': '照片数量：',
@@ -69,6 +70,36 @@ class CalendarAlbumTranslationsZh {
     'calendar_album_title': '标题',
     'calendar_album_weather': '天气',
     'calendar_album_word_count': '字数统计',
+
+    // 日记编辑器
+    'calendar_album_edit_post': '编辑帖子',
+    'calendar_album_new_post': '新帖子',
+    'calendar_album_save': '保存',
+    'calendar_album_whats_on_mind': '你在想什么？',
+    'calendar_album_select_mood': '选择心情',
+    'calendar_album_add_location': '添加位置',
+    'calendar_album_add_weather': '添加天气',
+    'calendar_album_select_weather': '选择天气',
+
+    // 心情选项
+    'calendar_album_mood_happy': '开心',
+    'calendar_album_mood_sad': '悲伤',
+    'calendar_album_mood_excited': '兴奋',
+    'calendar_album_mood_tired': '疲惫',
+    'calendar_album_mood_calm': '平静',
+    'calendar_album_mood_anxious': '焦虑',
+    'calendar_album_mood_angry': '生气',
+    'calendar_album_mood_content': '满足',
+
+    // 天气选项
+    'calendar_album_weather_sunny': '晴天',
+    'calendar_album_weather_cloudy': '多云',
+    'calendar_album_weather_rainy': '雨天',
+    'calendar_album_weather_snowy': '雪天',
+    'calendar_album_weather_windy': '大风',
+    'calendar_album_weather_foggy': '雾天',
+    'calendar_album_weather_stormy': '暴雨',
+    'calendar_album_weather_clear': '晴朗',
 
     // 小组件配置
     'calendar_album_config_weekly_widget': '配置每周相册小组件',
