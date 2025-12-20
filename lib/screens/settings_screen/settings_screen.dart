@@ -118,23 +118,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      builder:
-          (context) => DraggableScrollableSheet(
-            initialChildSize: 0.9,
-            minChildSize: 0.5,
-            maxChildSize: 0.95,
-            expand: false,
-            builder:
-                (context, scrollController) => SingleChildScrollView(
-                  controller: scrollController,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).viewInsets.bottom,
-                    ),
-                    child: const ServerSyncSettingsSection(),
-                  ),
-                ),
+      builder: (context) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.85,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: const ServerSyncSettingsSection(),
           ),
+        ),
+      ),
     );
 
     // 重新检查服务器同步状态

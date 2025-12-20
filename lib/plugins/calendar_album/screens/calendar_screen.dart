@@ -435,80 +435,80 @@ class _CalendarScreenState extends State<CalendarScreen>
     SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      builder:
-          (context) => MultiProvider(
-            providers: [
-              ChangeNotifierProvider.value(value: calendarController),
-              ChangeNotifierProvider.value(value: tagController),
-            ],
-            child: DraggableScrollableSheet(
-              initialChildSize: 0.5,
-              minChildSize: 0.3,
-              maxChildSize: 0.9,
-              builder:
-                  (context, scrollController) => Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  ' ${DateFormat('yyyy年MM月dd日').format(selectedDate)}${'calendar_album_diary_for_date'.tr}',
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                ),
+      builder: (context) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.6,
+        child: MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: calendarController),
+            ChangeNotifierProvider.value(value: tagController),
+          ],
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        ' ${DateFormat('yyyy年MM月dd日').format(selectedDate)}${'calendar_album_diary_for_date'.tr}',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pop(context); // 关闭抽屉
+                        NavigationHelper.push(
+                          context,
+                          MultiProvider(
+                            providers: [
+                              ChangeNotifierProvider.value(
+                                value: calendarController,
                               ),
-                              IconButton(
-                                onPressed: () {
-                                  Navigator.pop(context); // 关闭抽屉
-                                  NavigationHelper.push(context, MultiProvider(
-                                            providers: [
-                                              ChangeNotifierProvider.value(
-                                                value: calendarController,
-                                              ),
-                                              ChangeNotifierProvider.value(
-                                                value: tagController,
-                                              ),
-                                            ],
-                                            child: EntryEditorScreen(
-                                              initialDate: selectedDate,
-                                              isEditing: false,),
-                                    ),
-                                  ).then((_) {
-                                    if (mounted) setState(() {});
-                                  });
-                                },
-                                icon: const Icon(Icons.add),
-                                tooltip: 'calendar_album_new_diary'.tr,
-                              ),
-                              IconButton(
-                                onPressed: () => Navigator.pop(context),
-                                icon: const Icon(Icons.close),
+                              ChangeNotifierProvider.value(
+                                value: tagController,
                               ),
                             ],
+                            child: EntryEditorScreen(
+                              initialDate: selectedDate,
+                              isEditing: false,
+                            ),
                           ),
-                        ),
-                        const Divider(height: 1),
-                        Expanded(
-                          child: Consumer<TagController>(
-                            builder: (context, tagController, child) {
-                              return _buildDrawerEntryList(
-                                context,
-                                calendarController,
-                                tagController,
-                                selectedDate,
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+                        ).then((_) {
+                          if (mounted) setState(() {});
+                        });
+                      },
+                      icon: const Icon(Icons.add),
+                      tooltip: 'calendar_album_new_diary'.tr,
                     ),
-            ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: Consumer<TagController>(
+                  builder: (context, tagController, child) {
+                    return _buildDrawerEntryList(
+                      context,
+                      calendarController,
+                      tagController,
+                      selectedDate,
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
     );
   }
 
