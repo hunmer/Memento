@@ -52,6 +52,9 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     taskController = TaskController(storageManager, storageDir);
     reminderController = ReminderController();
 
+    // 初始化提醒控制器（使用系统日历）
+    await reminderController.initialize();
+
     // 创建 Repository 和 UseCase 实例
     _repository = ClientTodoRepository(taskController);
     _todoUseCase = TodoUseCase(_repository);
