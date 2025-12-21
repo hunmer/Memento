@@ -8,6 +8,7 @@ import 'package:Memento/plugins/webview/services/js_tool_service.dart';
 enum TemplateStrategy {
   /// 关键词替换 - 简单的字符串替换
   replace,
+
   /// 重写代码 - AI 根据需求重新生成代码
   rewrite,
 }
@@ -33,15 +34,16 @@ class TemplateMatch {
 
     return TemplateMatch(
       id: json['id'] as String,
-      strategy: strategyStr == 'rewrite'
-          ? TemplateStrategy.rewrite
-          : TemplateStrategy.replace,
-      replacements: replacementsList
-          ?.map((r) => ReplacementRule.fromJson(r as Map<String, dynamic>))
-          .toList(),
-      rewrittenSteps: rewrittenStepsList
-          ?.map((s) => s as Map<String, dynamic>)
-          .toList(),
+      strategy:
+          strategyStr == 'rewrite'
+              ? TemplateStrategy.rewrite
+              : TemplateStrategy.replace,
+      replacements:
+          replacementsList
+              ?.map((r) => ReplacementRule.fromJson(r as Map<String, dynamic>))
+              .toList(),
+      rewrittenSteps:
+          rewrittenStepsList?.map((s) => s as Map<String, dynamic>).toList(),
     );
   }
 }
@@ -77,10 +79,7 @@ class ToolService {
         'items': {
           'type': 'object',
           'properties': {
-            'id': {
-              'type': 'string',
-              'description': '模版ID',
-            },
+            'id': {'type': 'string', 'description': '模版ID'},
             'strategy': {
               'type': 'string',
               'enum': ['replace', 'rewrite'],
@@ -92,14 +91,8 @@ class ToolService {
               'items': {
                 'type': 'object',
                 'properties': {
-                  'from': {
-                    'type': 'string',
-                    'description': '要替换的原始字符串',
-                  },
-                  'to': {
-                    'type': 'string',
-                    'description': '替换后的新字符串',
-                  },
+                  'from': {'type': 'string', 'description': '要替换的原始字符串'},
+                  'to': {'type': 'string', 'description': '替换后的新字符串'},
                 },
                 'required': ['from', 'to'],
                 'additionalProperties': false,
@@ -116,18 +109,9 @@ class ToolService {
                     'enum': ['run_js'],
                     'description': '执行方法',
                   },
-                  'title': {
-                    'type': 'string',
-                    'description': '步骤标题',
-                  },
-                  'desc': {
-                    'type': 'string',
-                    'description': '步骤描述',
-                  },
-                  'data': {
-                    'type': 'string',
-                    'description': 'JavaScript 代码',
-                  },
+                  'title': {'type': 'string', 'description': '步骤标题'},
+                  'desc': {'type': 'string', 'description': '步骤描述'},
+                  'data': {'type': 'string', 'description': 'JavaScript 代码'},
                 },
                 'required': ['method', 'title', 'desc', 'data'],
                 'additionalProperties': false,
@@ -172,18 +156,9 @@ class ToolService {
               'description': '执行方法,固定为 run_js',
               'enum': ['run_js'],
             },
-            'title': {
-              'type': 'string',
-              'description': '步骤标题',
-            },
-            'desc': {
-              'type': 'string',
-              'description': '步骤描述',
-            },
-            'data': {
-              'type': 'string',
-              'description': 'JavaScript 代码字符串',
-            },
+            'title': {'type': 'string', 'description': '步骤标题'},
+            'desc': {'type': 'string', 'description': '步骤描述'},
+            'data': {'type': 'string', 'description': 'JavaScript 代码字符串'},
           },
           'required': ['method', 'title', 'desc', 'data'],
           'additionalProperties': false,
@@ -207,7 +182,9 @@ class ToolService {
       _cachedToolListPrompt = await _generateToolListPrompt();
 
       _initialized = true;
-      print('[ToolService] 初始化成功，加载了 ${_cachedToolBriefPrompt?.length ?? 0} 字符的简要索引');
+      print(
+        '[ToolService] 初始化成功，加载了 ${_cachedToolBriefPrompt?.length ?? 0} 字符的简要索引',
+      );
     } catch (e) {
       print('[ToolService] 初始化失败: $e');
       _cachedToolBriefPrompt = _getFallbackBriefPrompt();
@@ -229,7 +206,9 @@ class ToolService {
       _cachedToolBriefPrompt = _generateToolBriefPrompt();
       _cachedToolListPrompt = await _generateToolListPrompt();
 
-      print('[ToolService] 缓存已刷新，当前加载了 ${_cachedToolBriefPrompt?.length ?? 0} 字符的简要索引');
+      print(
+        '[ToolService] 缓存已刷新，当前加载了 ${_cachedToolBriefPrompt?.length ?? 0} 字符的简要索引',
+      );
     } catch (e) {
       print('[ToolService] 刷新缓存失败: $e');
     }
@@ -265,7 +244,6 @@ class ToolService {
 
       print('[ToolService] 成功解析工具调用，包含 ${toolCall.steps.length} 个步骤');
       return toolCall;
-
     } catch (e, stack) {
       print('[ToolService] 解析工具调用失败: $e');
       print(stack);
@@ -300,7 +278,6 @@ class ToolService {
         // 如果是对象或数组，转为 JSON 字符串
         return json.encode(resultValue);
       }
-
     } catch (e) {
       print('[ToolService] JS 执行失败: $e');
       rethrow;
@@ -365,25 +342,41 @@ class ToolService {
     buffer.writeln('\n## 🛠️ 可用工具列表');
     buffer.writeln('\n### ⚠️ 重要提示');
     buffer.writeln('\n作为 AI 助手，你**无法直接获取**以下类型的信息：');
-    buffer.writeln('1. **当前时间**：你无法感知时间流逝，**绝对禁止**硬编码日期时间字符串（如 "2025-01-15"、"今天是1月15日"）');
+    buffer.writeln(
+      '1. **当前时间**：你无法感知时间流逝，**绝对禁止**硬编码日期时间字符串（如 "2025-01-15"、"今天是1月15日"）',
+    );
     buffer.writeln('2. **用户数据**：所有用户的任务、笔记、日记等数据都存储在本地，必须使用插件工具获取');
     buffer.writeln('\n### 🚫 严格禁止的行为');
     buffer.writeln('1. **禁止硬编码日期时间**：');
-    buffer.writeln('   - ❌ 错误：`const date = "2025-01-15"` 或 `const content = "今天是2025年1月15日"`');
-    buffer.writeln('   - ✅ 正确：`const date = await Memento.system.getCustomDate({format: "yyyy-MM-dd"})`');
+    buffer.writeln(
+      '   - ❌ 错误：`const date = "2025-01-15"` 或 `const content = "今天是2025年1月15日"`',
+    );
+    buffer.writeln(
+      '   - ✅ 正确：`const date = await Memento.system.getCustomDate({format: "yyyy-MM-dd"})`',
+    );
     buffer.writeln('2. **禁止使用占位符变量**：');
-    buffer.writeln('   - ❌ 错误：`const channelId = "your_channel_id"` 或 `accountId: "请填入账户ID"`');
+    buffer.writeln(
+      '   - ❌ 错误：`const channelId = "your_channel_id"` 或 `accountId: "请填入账户ID"`',
+    );
     buffer.writeln('   - ✅ 正确：先查询获取真实数据，然后使用实际的ID');
-    buffer.writeln('   - ✅ 示例：`const channels = await Memento.plugins.chat.getChannels(); const firstChannel = channels[0]; await Memento.plugins.chat.sendMessage({channelId: firstChannel.id, content: "消息内容"})`');
+    buffer.writeln(
+      '   - ✅ 示例：`const channels = await Memento.plugins.chat.getChannels(); const firstChannel = channels[0]; await Memento.plugins.chat.sendMessage({channelId: firstChannel.id, content: "消息内容"})`',
+    );
     buffer.writeln('\n### 系统 API（在 JavaScript 代码中直接调用）');
     buffer.writeln('\n当需要时间或设备信息时，**必须在 JavaScript 代码中调用系统API**，不要作为单独的步骤：');
     buffer.writeln('\n#### 🌟 推荐：getCustomDate（解决时区问题）');
-    buffer.writeln('- `await Memento.system.getCustomDate(options)` - **推荐使用**，一次调用解决所有日期需求');
+    buffer.writeln(
+      '- `await Memento.system.getCustomDate(options)` - **推荐使用**，一次调用解决所有日期需求',
+    );
     buffer.writeln('  - **options 参数**：');
     buffer.writeln('    - `baseDate`: 基准日期（时间戳或ISO字符串），默认当前时间');
     buffer.writeln('    - `timezone`: "local"（默认）或 "UTC"');
-    buffer.writeln('    - `add`: 增加时间 `{days, hours, minutes, seconds, milliseconds}`');
-    buffer.writeln('    - `subtract`: 减少时间 `{days, hours, minutes, seconds, milliseconds}`');
+    buffer.writeln(
+      '    - `add`: 增加时间 `{days, hours, minutes, seconds, milliseconds}`',
+    );
+    buffer.writeln(
+      '    - `subtract`: 减少时间 `{days, hours, minutes, seconds, milliseconds}`',
+    );
     buffer.writeln('    - `relativePosition`: 相对位置，可选值：');
     buffer.writeln('      - `startOfDay` / `endOfDay` - 当天凌晨/结束');
     buffer.writeln('      - `startOfHour` / `endOfHour` - 小时开始/结束');
@@ -391,7 +384,9 @@ class ToolService {
     buffer.writeln('      - `startOfWeek` / `endOfWeek` - 周一/周日');
     buffer.writeln('      - `startOfYear` / `endOfYear` - 年初/年末');
     buffer.writeln('    - `format`: 返回格式');
-    buffer.writeln('      - `"object"`（默认）: 返回完整对象 `{timestamp, datetime, year, month, day, ...}`');
+    buffer.writeln(
+      '      - `"object"`（默认）: 返回完整对象 `{timestamp, datetime, year, month, day, ...}`',
+    );
     buffer.writeln('      - `"timestamp"`: 仅返回时间戳');
     buffer.writeln('      - `"iso"`: 返回 ISO 8601 字符串');
     buffer.writeln('      - `"text"`: 返回相对时间（如"3天前"）');
@@ -399,28 +394,40 @@ class ToolService {
     buffer.writeln('\n  **使用示例**：');
     buffer.writeln('  ```javascript');
     buffer.writeln('  // 获取今天凌晨（解决时区问题）');
-    buffer.writeln('  const todayStart = await Memento.system.getCustomDate({relativePosition: "startOfDay"});');
+    buffer.writeln(
+      '  const todayStart = await Memento.system.getCustomDate({relativePosition: "startOfDay"});',
+    );
     buffer.writeln('  ');
     buffer.writeln('  // 获取明天凌晨的时间戳');
-    buffer.writeln('  const tomorrowStart = await Memento.system.getCustomDate({');
+    buffer.writeln(
+      '  const tomorrowStart = await Memento.system.getCustomDate({',
+    );
     buffer.writeln('    add: {days: 1},');
     buffer.writeln('    relativePosition: "startOfDay",');
     buffer.writeln('    format: "timestamp"');
     buffer.writeln('  });');
     buffer.writeln('  ');
     buffer.writeln('  // 获取本周一凌晨');
-    buffer.writeln('  const weekStart = await Memento.system.getCustomDate({relativePosition: "startOfWeek"});');
+    buffer.writeln(
+      '  const weekStart = await Memento.system.getCustomDate({relativePosition: "startOfWeek"});',
+    );
     buffer.writeln('  ');
     buffer.writeln('  // 获取3天前的日期，格式化输出');
-    buffer.writeln('  const threeDaysAgo = await Memento.system.getCustomDate({');
+    buffer.writeln(
+      '  const threeDaysAgo = await Memento.system.getCustomDate({',
+    );
     buffer.writeln('    subtract: {days: 3},');
     buffer.writeln('    format: "yyyy-MM-dd"');
     buffer.writeln('  });');
     buffer.writeln('  ```');
     buffer.writeln('\n#### 其他时间 API');
-    buffer.writeln('- `await Memento.system.getCurrentTime()` - 获取当前时间，返回 `{timestamp, datetime, year, month, day, hour, minute, second, weekday, weekdayName}`');
+    buffer.writeln(
+      '- `await Memento.system.getCurrentTime()` - 获取当前时间，返回 `{timestamp, datetime, year, month, day, hour, minute, second, weekday, weekdayName}`',
+    );
     buffer.writeln('- `await Memento.system.getTimestamp()` - 获取当前时间戳（毫秒）');
-    buffer.writeln('- `await Memento.system.formatDate(dateInput, format)` - 格式化日期');
+    buffer.writeln(
+      '- `await Memento.system.formatDate(dateInput, format)` - 格式化日期',
+    );
     buffer.writeln('\n#### 设备与应用信息');
     buffer.writeln('- `await Memento.system.getDeviceInfo()` - 获取设备信息');
     buffer.writeln('- `await Memento.system.getAppInfo()` - 获取应用信息');
@@ -430,10 +437,14 @@ class ToolService {
     buffer.writeln('- **setResult 必须传入对象**：value 参数必须是对象类型 `{}`，不能是原始值或数组');
     buffer.writeln('- **getResult 返回对象**：返回值永远是对象类型，通过属性访问数据\n');
     buffer.writeln('#### API 说明\n');
-    buffer.writeln('- `await Memento.toolCall.setResult({id?, value})` - 保存结果供后续步骤使用');
+    buffer.writeln(
+      '- `await Memento.toolCall.setResult({id?, value})` - 保存结果供后续步骤使用',
+    );
     buffer.writeln('  - `id` (可选): 自定义结果 ID，如 "userData"、"taskList"');
     buffer.writeln('  - `value` (必需): **必须是对象** `{key: value}`，不能是数组或原始值');
-    buffer.writeln('- `await Memento.toolCall.getResult({id?, step?, default?})` - 获取之前步骤的结果');
+    buffer.writeln(
+      '- `await Memento.toolCall.getResult({id?, step?, default?})` - 获取之前步骤的结果',
+    );
     buffer.writeln('  - `id` (可选): 结果 ID');
     buffer.writeln('  - `step` (可选): 步骤索引（从 0 开始），如 `{step: 0}` 获取第一个步骤的结果');
     buffer.writeln('  - `default` (可选): 默认值，结果不存在时返回');
@@ -443,21 +454,31 @@ class ToolService {
     buffer.writeln('```javascript');
     buffer.writeln('// ❌ 错误：setResult 传入数组');
     buffer.writeln('const tasks = await Memento.plugins.todo.getTasks();');
-    buffer.writeln('await Memento.toolCall.setResult({value: tasks}); // 错误！tasks 是数组');
+    buffer.writeln(
+      'await Memento.toolCall.setResult({value: tasks}); // 错误！tasks 是数组',
+    );
     buffer.writeln('');
     buffer.writeln('// ❌ 错误：getResult 当作数组使用');
-    buffer.writeln('const tasks = await Memento.toolCall.getResult({step: 0});');
+    buffer.writeln(
+      'const tasks = await Memento.toolCall.getResult({step: 0});',
+    );
     buffer.writeln('if (tasks.length > 0) { ... } // 错误！tasks 是对象不是数组');
     buffer.writeln('```\n');
     buffer.writeln('**✅ 正确示例（必须遵循）**:');
     buffer.writeln('```javascript');
     buffer.writeln('// ✅ 正确：setResult 传入对象，用属性包装数据');
     buffer.writeln('const tasks = await Memento.plugins.todo.getTasks();');
-    buffer.writeln('await Memento.toolCall.setResult({value: {tasks, count: tasks.length}}); // 正确！');
+    buffer.writeln(
+      'await Memento.toolCall.setResult({value: {tasks, count: tasks.length}}); // 正确！',
+    );
     buffer.writeln('');
     buffer.writeln('// ✅ 正确：getResult 返回对象，通过属性访问');
-    buffer.writeln('const result = await Memento.toolCall.getResult({step: 0});');
-    buffer.writeln('if (result.tasks && result.tasks.length > 0) { ... } // 正确！');
+    buffer.writeln(
+      'const result = await Memento.toolCall.getResult({step: 0});',
+    );
+    buffer.writeln(
+      'if (result.tasks && result.tasks.length > 0) { ... } // 正确！',
+    );
     buffer.writeln('```');
     buffer.writeln('\n你可以调用以下插件功能来获取数据或执行操作。');
     buffer.writeln('\n### 🎯 run_js 工具用途说明\n');
@@ -499,9 +520,8 @@ class ToolService {
       buffer.writeln('### 📚 可用工具\n');
 
       allPluginTools.forEach((pluginId, toolSet) {
-        final enabledTools = toolSet.tools.entries
-            .where((e) => e.value.enabled)
-            .toList();
+        final enabledTools =
+            toolSet.tools.entries.where((e) => e.value.enabled).toList();
 
         if (enabledTools.isEmpty) return;
 
@@ -528,7 +548,9 @@ class ToolService {
     buffer.writeln('      "method": "run_js",');
     buffer.writeln('      "title": "获取今日任务",');
     buffer.writeln('      "desc": "查询今天的所有待办任务",');
-    buffer.writeln(r'      "data": "const today = await Memento.system.getCustomDate(); const tasks = await Memento.plugins.todo.getTodayTasks(); const result = `今天是${today.month}月${today.day}日，有 ${tasks.length} 个任务`; setResult(result); return result;"');
+    buffer.writeln(
+      r'      "data": "const today = await Memento.system.getCustomDate(); const tasks = await Memento.plugins.todo.getTodayTasks(); const result = `今天是${today.month}月${today.day}日，有 ${tasks.length} 个任务`; setResult(result); return result;"',
+    );
     buffer.writeln('    }');
     buffer.writeln('  ]');
     buffer.writeln('}');
@@ -541,7 +563,9 @@ class ToolService {
     buffer.writeln('      "method": "run_js",');
     buffer.writeln('      "title": "统计任务情况",');
     buffer.writeln('      "desc": "获取并统计今日任务",');
-    buffer.writeln(r'      "data": "const tasks = await Memento.plugins.todo.getTodayTasks(); const result = { total: tasks.length, completed: tasks.filter(t => t.completed).length }; setResult(result); return result;"');
+    buffer.writeln(
+      r'      "data": "const tasks = await Memento.plugins.todo.getTodayTasks(); const result = { total: tasks.length, completed: tasks.filter(t => t.completed).length }; setResult(result); return result;"',
+    );
     buffer.writeln('    }');
     buffer.writeln('  ]');
     buffer.writeln('}');
@@ -571,14 +595,16 @@ class ToolService {
     buffer.writeln('      "method": "run_js",');
     buffer.writeln('      "title": "查询今日任务",');
     buffer.writeln('      "desc": "获取今天的任务列表",');
-    final step1Example = '''const tasks = await Memento.plugins.todo.getTodayTasks(); await Memento.toolCall.setResult({id: 'todayTasks', value: {tasks, count: tasks.length}}); return `已获取 \${tasks.length} 个任务`;''';
+    final step1Example =
+        '''const tasks = await Memento.plugins.todo.getTodayTasks(); await Memento.toolCall.setResult({id: 'todayTasks', value: {tasks, count: tasks.length}}); return `已获取 \${tasks.length} 个任务`;''';
     buffer.writeln('      "data": "${step1Example.replaceAll('"', '\\"')}"');
     buffer.writeln('    },');
     buffer.writeln('    {');
     buffer.writeln('      "method": "run_js",');
     buffer.writeln('      "title": "统计任务情况",');
     buffer.writeln('      "desc": "分析任务完成情况",');
-    final step2Example = '''const result = await Memento.toolCall.getResult({id: 'todayTasks'}); const tasks = result.tasks; const completed = tasks.filter(t => t.completed).length; const rate = (completed / tasks.length * 100).toFixed(1); return `完成率: \${rate}%`;''';
+    final step2Example =
+        '''const result = await Memento.toolCall.getResult({id: 'todayTasks'}); const tasks = result.tasks; const completed = tasks.filter(t => t.completed).length; const rate = (completed / tasks.length * 100).toFixed(1); return `完成率: \${rate}%`;''';
     buffer.writeln('      "data": "${step2Example.replaceAll('"', '\\"')}"');
     buffer.writeln('    }');
     buffer.writeln('  ]');
@@ -593,22 +619,31 @@ class ToolService {
     buffer.writeln('      "method": "run_js",');
     buffer.writeln('      "title": "创建明天的任务",');
     buffer.writeln('      "desc": "获取明天日期并创建任务",');
-    final createTaskExample = '''const tomorrow = await Memento.system.getCustomDate({add: {days: 1}, relativePosition: 'startOfDay', format: 'timestamp'}); const result = await Memento.plugins.todo.createTask('New Task', { dueDate: tomorrow }); const msg = result.success ? 'Task created successfully' : 'Failed to create task'; setResult(msg); return msg;''';
-    buffer.writeln('      "data": "${createTaskExample.replaceAll('"', '\\"')}"');
+    final createTaskExample =
+        '''const tomorrow = await Memento.system.getCustomDate({add: {days: 1}, relativePosition: 'startOfDay', format: 'timestamp'}); const result = await Memento.plugins.todo.createTask('New Task', { dueDate: tomorrow }); const msg = result.success ? 'Task created successfully' : 'Failed to create task'; setResult(msg); return msg;''';
+    buffer.writeln(
+      '      "data": "${createTaskExample.replaceAll('"', '\\"')}"',
+    );
     buffer.writeln('    }');
     buffer.writeln('  ]');
     buffer.writeln('}');
     buffer.writeln('```\n');
 
     buffer.writeln('### ⚠️ 注意事项\n');
-    buffer.writeln('1. **🚫 绝对禁止硬编码日期时间**：任何涉及日期时间的代码，推荐使用 `await Memento.system.getCustomDate(options)` 获取和处理时间');
+    buffer.writeln(
+      '1. **🚫 绝对禁止硬编码日期时间**：任何涉及日期时间的代码，推荐使用 `await Memento.system.getCustomDate(options)` 获取和处理时间',
+    );
     buffer.writeln('   - 生成日记内容时，使用系统API获取的真实日期，不要使用你知识中的日期');
     buffer.writeln('   - 创建任务、账单等需要日期的操作，都必须先调用系统API');
     buffer.writeln('2. **🚫 绝对禁止使用占位符**：不允许使用 "your_xxx_id"、"请填入xxx" 等占位符');
     buffer.writeln('   - 如果用户未指定ID，优先遍历已有数据选择合适的（第一个、最近的、符合条件的）');
     buffer.writeln('   - 如果没有数据，应该先创建数据再执行操作，或者返回明确的错误提示');
-    buffer.writeln('3. **系统 API 直接调用**: `Memento.system.*` API 不需要作为单独的工具步骤，直接在代码中调用');
-    buffer.writeln('4. **返回结果**: JavaScript 代码必须先调用 `setResult(result)` 设置返回值，然后 `return result`');
+    buffer.writeln(
+      '3. **系统 API 直接调用**: `Memento.system.*` API 不需要作为单独的工具步骤，直接在代码中调用',
+    );
+    buffer.writeln(
+      '4. **返回结果**: JavaScript 代码必须先调用 `setResult(result)` 设置返回值，然后 `return result`',
+    );
     buffer.writeln('5. **JSON 字符串转义**: data 字段中的 JavaScript 代码需要正确转义引号');
     buffer.writeln('6. **异步操作**: 所有插件方法都是异步的，必须使用 `await`\n');
 
@@ -754,7 +789,9 @@ return result;
 
   /// 生成工具简要索引 Prompt（第一阶段）
   static String _generateToolBriefPrompt() {
-    final toolIndex = ToolConfigManager.instance.getToolIndex(enabledOnly: true);
+    final toolIndex = ToolConfigManager.instance.getToolIndex(
+      enabledOnly: true,
+    );
 
     final buffer = StringBuffer();
     buffer.writeln('\n## 🛠️ 可用工具');
@@ -767,7 +804,7 @@ return result;
     for (final item in toolIndex) {
       // 跳过系统工具，因为它们不作为独立步骤
       if (item[0].startsWith('system_')) continue;
-      buffer.writeln('- **${item[0]}**: ${item[1]}');
+      buffer.writeln('- ${item[0]}: ${item[1]}');
     }
 
     return buffer.toString();
@@ -806,7 +843,9 @@ return result;
       return '';
     }
 
-    final toolsDetails = await ToolConfigManager.instance.getToolsDetails(toolIds);
+    final toolsDetails = await ToolConfigManager.instance.getToolsDetails(
+      toolIds,
+    );
 
     final buffer = StringBuffer();
     buffer.writeln('\n## 📚 工具详细文档\n');
@@ -831,17 +870,23 @@ return result;
     buffer.writeln('#### 使用示例\n');
     buffer.writeln('```javascript');
     buffer.writeln('// 示例1: 使用 mode 参数获取摘要数据（最省 Token）');
-    buffer.writeln('const summary = await Memento.plugins.activity.getActivities({');
+    buffer.writeln(
+      'const summary = await Memento.plugins.activity.getActivities({',
+    );
     buffer.writeln('  startDate: "2025-01-01",');
     buffer.writeln('  endDate: "2025-01-31",');
     buffer.writeln('  mode: "summary"  // 仅返回统计数据');
     buffer.writeln('});');
     buffer.writeln('// 返回: { sum: { total: 50, dur: 3600, avg: 72 } }\n');
     buffer.writeln('// 示例2: 使用 fields 参数指定返回字段');
-    buffer.writeln('const compactData = await Memento.plugins.activity.getActivities({');
+    buffer.writeln(
+      'const compactData = await Memento.plugins.activity.getActivities({',
+    );
     buffer.writeln('  startDate: "2025-01-01",');
     buffer.writeln('  endDate: "2025-01-31",');
-    buffer.writeln('  fields: ["id", "title", "start", "end", "dur"]  // 只返回这些字段');
+    buffer.writeln(
+      '  fields: ["id", "title", "start", "end", "dur"]  // 只返回这些字段',
+    );
     buffer.writeln('});');
     buffer.writeln('// 返回: { recs: [{ id, title, start, end, dur }, ...] }');
     buffer.writeln('```\n');
@@ -849,27 +894,49 @@ return result;
 
     buffer.writeln('### 🚫 严格禁止的行为\n');
     buffer.writeln('1. **绝对禁止硬编码日期时间**：');
-    buffer.writeln('   - ❌ 错误：`const date = "2025-01-15"` 或 `const content = "今天是2025年1月15日"`');
+    buffer.writeln(
+      '   - ❌ 错误：`const date = "2025-01-15"` 或 `const content = "今天是2025年1月15日"`',
+    );
     buffer.writeln('   - ❌ 错误：在生成日记内容、任务标题等地方使用你知识中的日期');
-    buffer.writeln('   - ✅ 正确：`const date = await Memento.system.getCustomDate({format: "yyyy-MM-dd"})`');
+    buffer.writeln(
+      '   - ✅ 正确：`const date = await Memento.system.getCustomDate({format: "yyyy-MM-dd"})`',
+    );
     buffer.writeln('   - ✅ 正确：在生成的内容中使用系统API返回的真实日期');
     buffer.writeln('2. **绝对禁止使用占位符变量**：');
-    buffer.writeln('   - ❌ 错误：`const channelId = "your_channel_id"` 或 `accountId: "请填入账户ID"`');
-    buffer.writeln('   - ✅ 正确：`const channels = await Memento.plugins.chat.getChannels(); if (channels.length > 0) { const channelId = channels[0].id; ... }`');
+    buffer.writeln(
+      '   - ❌ 错误：`const channelId = "your_channel_id"` 或 `accountId: "请填入账户ID"`',
+    );
+    buffer.writeln(
+      '   - ✅ 正确：`const channels = await Memento.plugins.chat.getChannels(); if (channels.length > 0) { const channelId = channels[0].id; ... }`',
+    );
     buffer.writeln('   - ✅ 策略：用户未指定时，优先选择第一个、最近的、或符合条件的数据');
     buffer.writeln('   - ✅ 策略：如果没有可用数据，先创建数据再执行操作，或返回明确错误\n');
 
     buffer.writeln('### 系统 API（始终可用）\n');
     buffer.writeln('在生成的 JavaScript 代码中，你**必须使用**以下系统 API 获取时间信息：\n');
-    buffer.writeln('- `await Memento.system.getCustomDate(options)` - **推荐使用，解决时区问题**');
-    buffer.writeln('  - options: `{baseDate?, timezone?, add?, subtract?, relativePosition?, format?}`');
-    buffer.writeln('  - relativePosition: "startOfDay"、"endOfDay"、"startOfWeek"、"startOfMonth" 等');
-    buffer.writeln('  - format: "object"、"timestamp"、"iso"、"text" 或自定义格式如 "yyyy-MM-dd"');
-    buffer.writeln('  - 示例：`await Memento.system.getCustomDate({relativePosition: "startOfDay", format: "timestamp"})`');
+    buffer.writeln(
+      '- `await Memento.system.getCustomDate(options)` - **推荐使用，解决时区问题**',
+    );
+    buffer.writeln(
+      '  - options: `{baseDate?, timezone?, add?, subtract?, relativePosition?, format?}`',
+    );
+    buffer.writeln(
+      '  - relativePosition: "startOfDay"、"endOfDay"、"startOfWeek"、"startOfMonth" 等',
+    );
+    buffer.writeln(
+      '  - format: "object"、"timestamp"、"iso"、"text" 或自定义格式如 "yyyy-MM-dd"',
+    );
+    buffer.writeln(
+      '  - 示例：`await Memento.system.getCustomDate({relativePosition: "startOfDay", format: "timestamp"})`',
+    );
     buffer.writeln('- `await Memento.system.getCurrentTime()` - 获取当前时间');
-    buffer.writeln('  - 返回：`{ timestamp, datetime, year, month, day, hour, minute, second, weekday, weekdayName }`');
+    buffer.writeln(
+      '  - 返回：`{ timestamp, datetime, year, month, day, hour, minute, second, weekday, weekdayName }`',
+    );
     buffer.writeln('- `await Memento.system.getTimestamp()` - 获取当前时间戳（毫秒）');
-    buffer.writeln('- `await Memento.system.formatDate(dateInput, format)` - 格式化日期');
+    buffer.writeln(
+      '- `await Memento.system.formatDate(dateInput, format)` - 格式化日期',
+    );
     buffer.writeln('  - dateInput: 时间戳（毫秒）或 ISO 字符串');
     buffer.writeln('  - format: 格式模板，如 "yyyy-MM-dd HH:mm:ss"');
     buffer.writeln('- `await Memento.system.getDeviceInfo()` - 获取设备信息');
@@ -890,11 +957,15 @@ return result;
     buffer.writeln('**获取结果**：');
     buffer.writeln('```javascript');
     buffer.writeln('// 方式1: 通过自定义 ID');
-    buffer.writeln('const result = await Memento.toolCall.getResult({id: "myData"});');
+    buffer.writeln(
+      'const result = await Memento.toolCall.getResult({id: "myData"});',
+    );
     buffer.writeln('const data = result.data; // 通过属性访问');
     buffer.writeln('');
     buffer.writeln('// 方式2: 通过步骤索引（0 = 第一个步骤）');
-    buffer.writeln('const prevResult = await Memento.toolCall.getResult({step: 0});');
+    buffer.writeln(
+      'const prevResult = await Memento.toolCall.getResult({step: 0});',
+    );
     buffer.writeln('const tasks = prevResult.tasks; // 通过属性访问数组');
     buffer.writeln('');
     buffer.writeln('// 方式3: 带默认值（防止获取失败）');
@@ -907,21 +978,31 @@ return result;
     buffer.writeln('```javascript');
     buffer.writeln('// ❌ 错误：setResult 传入数组');
     buffer.writeln('const tasks = await Memento.plugins.todo.getTasks();');
-    buffer.writeln('await Memento.toolCall.setResult({id: "tasks", value: tasks}); // 错误！tasks 是数组');
+    buffer.writeln(
+      'await Memento.toolCall.setResult({id: "tasks", value: tasks}); // 错误！tasks 是数组',
+    );
     buffer.writeln('');
     buffer.writeln('// ❌ 错误：getResult 当作数组使用');
-    buffer.writeln('const tasks = await Memento.toolCall.getResult({id: "tasks"});');
+    buffer.writeln(
+      'const tasks = await Memento.toolCall.getResult({id: "tasks"});',
+    );
     buffer.writeln('if (tasks.length > 0) { ... } // 错误！tasks 是对象不是数组');
     buffer.writeln('```\n');
     buffer.writeln('**✅ 正确示例（必须遵循）**:');
     buffer.writeln('```javascript');
     buffer.writeln('// ✅ 正确：setResult 传入对象，用属性包装数据');
     buffer.writeln('const tasks = await Memento.plugins.todo.getTasks();');
-    buffer.writeln('await Memento.toolCall.setResult({id: "taskData", value: {tasks, count: tasks.length}}); // 正确！');
+    buffer.writeln(
+      'await Memento.toolCall.setResult({id: "taskData", value: {tasks, count: tasks.length}}); // 正确！',
+    );
     buffer.writeln('');
     buffer.writeln('// ✅ 正确：getResult 返回对象，通过属性访问');
-    buffer.writeln('const result = await Memento.toolCall.getResult({id: "taskData"});');
-    buffer.writeln('if (result.tasks && result.tasks.length > 0) { ... } // 正确！');
+    buffer.writeln(
+      'const result = await Memento.toolCall.getResult({id: "taskData"});',
+    );
+    buffer.writeln(
+      'if (result.tasks && result.tasks.length > 0) { ... } // 正确！',
+    );
     buffer.writeln('```\n');
     buffer.writeln('**自动保存**：每个步骤的结果会自动保存到 `step_N`，可直接通过索引获取。\n');
 
@@ -940,13 +1021,17 @@ return result;
         buffer.writeln('**参数**:');
         for (final param in config.parameters) {
           final optionalMark = param.optional ? '(可选)' : '(必需)';
-          buffer.writeln('- `${param.name}` $optionalMark: ${param.type} - ${param.description}');
+          buffer.writeln(
+            '- `${param.name}` $optionalMark: ${param.type} - ${param.description}',
+          );
         }
         buffer.writeln();
       }
 
       // 返回值
-      buffer.writeln('**返回值**: ${config.returns.type} - ${config.returns.description}\n');
+      buffer.writeln(
+        '**返回值**: ${config.returns.type} - ${config.returns.description}\n',
+      );
 
       // 示例代码
       if (config.examples.isNotEmpty) {
@@ -1014,7 +1099,10 @@ return result;
   static List<String>? parseToolRequest(String response) {
     try {
       // 使用通用JSON解析方法
-      final json = parseJsonFromResponse(response, requiredField: 'needed_tools');
+      final json = parseJsonFromResponse(
+        response,
+        requiredField: 'needed_tools',
+      );
 
       if (json == null || !json.containsKey('needed_tools')) {
         return null;
@@ -1049,11 +1137,15 @@ return result;
     buffer.writeln('**策略1: `replace` - 关键词替换**（优先选择）');
     buffer.writeln('- 适用场景：功能相同，只是参数/名称不同');
     buffer.writeln('- 示例：模版"签到早起"→用户输入"签到早睡"，只需替换"早起"→"早睡"');
-    buffer.writeln('- 返回：`{"id": "xxx", "strategy": "replace", "replacements": [{"from": "早起", "to": "早睡"}]}`\n');
+    buffer.writeln(
+      '- 返回：`{"id": "xxx", "strategy": "replace", "replacements": [{"from": "早起", "to": "早睡"}]}`\n',
+    );
     buffer.writeln('**策略2: `rewrite` - 重写代码**');
     buffer.writeln('- 适用场景：逻辑需要修改，简单替换无法满足');
     buffer.writeln('- 示例：模版"记录跑步5公里"→用户输入"记录游泳30分钟"（单位和逻辑都不同）');
-    buffer.writeln('- 返回：`{"id": "xxx", "strategy": "rewrite", "rewritten_steps": [...]}`\n');
+    buffer.writeln(
+      '- 返回：`{"id": "xxx", "strategy": "rewrite", "rewritten_steps": [...]}`\n',
+    );
     buffer.writeln('### 📝 返回格式\n');
     buffer.writeln('```json');
     buffer.writeln('{');
@@ -1061,7 +1153,9 @@ return result;
     buffer.writeln('    {');
     buffer.writeln('      "id": "template_id",');
     buffer.writeln('      "strategy": "replace",  // 或 "rewrite"');
-    buffer.writeln('      "replacements": [{"from": "原字符串", "to": "新字符串"}],  // strategy=replace时');
+    buffer.writeln(
+      '      "replacements": [{"from": "原字符串", "to": "新字符串"}],  // strategy=replace时',
+    );
     buffer.writeln('      "rewritten_steps": [...]  // strategy=rewrite时');
     buffer.writeln('    }');
     buffer.writeln('  ]');
@@ -1096,13 +1190,12 @@ return result;
         buffer.writeln('  代码预览:');
         for (int i = 0; i < template.steps.length && i < 2; i++) {
           final step = template.steps[i];
-          final code = step.data.length > 200
-              ? '${step.data.substring(0, 200)}...'
-              : step.data;
+          final code =
+              step.data.length > 200
+                  ? '${step.data.substring(0, 200)}...'
+                  : step.data;
           // 转义代码中的特殊字符，避免破坏 Markdown 格式
-          final escapedCode = code
-              .replaceAll('`', '\\`')
-              .replaceAll('\n', ' ');
+          final escapedCode = code.replaceAll('`', '\\`').replaceAll('\n', ' ');
           buffer.writeln('    - ${step.title}: `$escapedCode`');
         }
       }
@@ -1112,13 +1205,19 @@ return result;
 
     buffer.writeln('### 匹配规则\n');
     buffer.writeln('1. **完全匹配**：用户需求与模版完全一致');
-    buffer.writeln('   → `{"id": "xxx", "strategy": "replace", "replacements": []}`\n');
+    buffer.writeln(
+      '   → `{"id": "xxx", "strategy": "replace", "replacements": []}`\n',
+    );
     buffer.writeln('2. **参数化匹配**：功能相同但参数不同（优先使用 replace 策略）');
     buffer.writeln('   - 示例：模版"签到早起"，代码中有 `i.name === "早起"`，用户输入"签到早睡"');
-    buffer.writeln('   → `{"id": "xxx", "strategy": "replace", "replacements": [{"from": "早起", "to": "早睡"}]}`\n');
+    buffer.writeln(
+      '   → `{"id": "xxx", "strategy": "replace", "replacements": [{"from": "早起", "to": "早睡"}]}`\n',
+    );
     buffer.writeln('3. **逻辑变更**：需要修改代码逻辑（使用 rewrite 策略）');
     buffer.writeln('   - 示例：原模版记录"个数"，用户想改成记录"时长"');
-    buffer.writeln('   → `{"id": "xxx", "strategy": "rewrite", "rewritten_steps": [...]}`\n');
+    buffer.writeln(
+      '   → `{"id": "xxx", "strategy": "rewrite", "rewritten_steps": [...]}`\n',
+    );
     buffer.writeln('4. **多模版**：可以返回多个模版（如果用户需求可以拆分为多个任务）');
     buffer.writeln('5. **无匹配**：不确定或没有合适的模版 → 返回空数组');
     buffer.writeln('6. **优先级**：replace > rewrite（能用替换解决的就不要重写）\n');
@@ -1142,7 +1241,10 @@ return result;
   /// - [requiredField]: 用于匹配直接JSON的必填字段名（如 "use_tool_temps", "strategy", "steps"）
   ///
   /// 返回提取的JSON字符串，如果提取失败返回null
-  static String? extractJsonFromResponse(String response, {String? requiredField}) {
+  static String? extractJsonFromResponse(
+    String response, {
+    String? requiredField,
+  }) {
     // 1. 尝试从 ```json ... ``` 代码块中提取
     final jsonBlockMatch = RegExp(
       r'```json\s*(\{[\s\S]*?\})\s*```',
@@ -1156,15 +1258,22 @@ return result;
     // 2. 如果提供了必填字段名，尝试提取直接的JSON对象
     if (requiredField != null) {
       // 构建正则表达式匹配包含必填字段的JSON对象
-      final pattern = r'\{\s*"' + RegExp.escape(requiredField) + r'\s*:[\s\S]*?\}';
-      final directJsonMatch = RegExp(pattern, multiLine: true).firstMatch(response);
+      final pattern =
+          r'\{\s*"' + RegExp.escape(requiredField) + r'\s*:[\s\S]*?\}';
+      final directJsonMatch = RegExp(
+        pattern,
+        multiLine: true,
+      ).firstMatch(response);
       if (directJsonMatch != null) {
         return directJsonMatch.group(0);
       }
     }
 
     // 3. 尝试提取第一个JSON对象（通用匹配）
-    final genericJsonMatch = RegExp(r'\{[\s\S]*?\}', multiLine: true).firstMatch(response);
+    final genericJsonMatch = RegExp(
+      r'\{[\s\S]*?\}',
+      multiLine: true,
+    ).firstMatch(response);
     if (genericJsonMatch != null) {
       return genericJsonMatch.group(0);
     }
@@ -1223,7 +1332,10 @@ return result;
   static List<TemplateMatch>? parseToolTemplateMatch(String response) {
     try {
       // 使用通用JSON提取方法
-      final jsonStr = extractJsonFromResponse(response, requiredField: 'use_tool_temps');
+      final jsonStr = extractJsonFromResponse(
+        response,
+        requiredField: 'use_tool_temps',
+      );
 
       if (jsonStr == null) {
         print('[ToolService] 未找到工具模版匹配 JSON');
@@ -1239,26 +1351,28 @@ return result;
       }
 
       final templates = json['use_tool_temps'] as List<dynamic>;
-      final matches = templates.map((e) {
-        if (e is String) {
-          // 兼容旧格式（只有ID）
-          return TemplateMatch(id: e);
-        } else if (e is Map<String, dynamic>) {
-          // 新格式（包含replacements）
-          return TemplateMatch.fromJson(e);
-        } else {
-          throw Exception('无效的模版匹配格式');
-        }
-      }).toList();
+      final matches =
+          templates.map((e) {
+            if (e is String) {
+              // 兼容旧格式（只有ID）
+              return TemplateMatch(id: e);
+            } else if (e is Map<String, dynamic>) {
+              // 新格式（包含replacements）
+              return TemplateMatch.fromJson(e);
+            } else {
+              throw Exception('无效的模版匹配格式');
+            }
+          }).toList();
 
       print('[ToolService] 成功解析工具模版匹配，匹配到 ${matches.length} 个模版');
       for (var match in matches) {
         if (match.replacements != null && match.replacements!.isNotEmpty) {
-          print('[ToolService]   - ${match.id}: ${match.replacements!.length} 个参数替换');
+          print(
+            '[ToolService]   - ${match.id}: ${match.replacements!.length} 个参数替换',
+          );
         }
       }
       return matches;
-
     } catch (e) {
       print('[ToolService] 解析工具模版匹配失败: $e');
       return null;
@@ -1301,10 +1415,16 @@ return result;
   /// - [requiredField]: 用于匹配的必填字段名
   ///
   /// 返回解析后的JSON对象，解析失败返回null
-  static Map<String, dynamic>? parseJsonFromResponse(String response, {String? requiredField}) {
+  static Map<String, dynamic>? parseJsonFromResponse(
+    String response, {
+    String? requiredField,
+  }) {
     try {
       // 使用通用JSON提取方法
-      final jsonStr = extractJsonFromResponse(response, requiredField: requiredField);
+      final jsonStr = extractJsonFromResponse(
+        response,
+        requiredField: requiredField,
+      );
 
       if (jsonStr == null) {
         print('[ToolService] 未找到JSON');
