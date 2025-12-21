@@ -795,7 +795,8 @@ return result;
 
     final buffer = StringBuffer();
     buffer.writeln('\n## 🛠️ 可用工具');
-    buffer.writeln('\n当用户询问需要数据查询的问题时，分析需求并返回：');
+    buffer.writeln('\n**严格遵循：仅返回 JSON，不要任何额外文本或解释**');
+    buffer.writeln('\n返回格式：');
     buffer.writeln('```json');
     buffer.writeln('{"needed_tools": ["tool_id1", "tool_id2"]}');
     buffer.writeln('```\n');
@@ -816,7 +817,9 @@ return result;
 
 ## 🛠️ 可用工具
 
-当用户询问需要数据查询的问题时，分析需求并返回：
+**严格遵循：仅返回 JSON，不要任何额外文本或解释**
+
+返回格式：
 ```json
 {"needed_tools": ["tool_id1", "tool_id2"]}
 ```
@@ -1071,7 +1074,8 @@ return result;
     buffer.writeln('1. JavaScript 返回结构化数据(如数组、对象)');
     buffer.writeln('2. AI 基于这些数据进行自然语言分析和建议\n');
     buffer.writeln('## 📝 生成工具调用\n');
-    buffer.writeln('请根据以上文档生成 JavaScript 代码，格式如下：\n');
+    buffer.writeln('**严格遵循：仅返回 JSON，不要任何额外文本或解释**');
+    buffer.writeln('\n请根据以上文档生成 JavaScript 代码，格式如下：\n');
     buffer.writeln('```json');
     buffer.writeln('{');
     buffer.writeln('  "steps": [');
@@ -1245,14 +1249,23 @@ return result;
     String response, {
     String? requiredField,
   }) {
-    // 1. 尝试从 ```json ... ``` 代码块中提取
+    // 1. 尝试从 ```json ... ``` 代码块中提取（支持缩进和多行）
+    // 修复：匹配整个代码块内容，然后使用 _extractCompleteJsonObject 提取完整JSON
     final jsonBlockMatch = RegExp(
-      r'```json\s*(\{[\s\S]*?\})\s*```',
+      r'```json[\s\S]*?```',
       multiLine: true,
     ).firstMatch(response);
 
     if (jsonBlockMatch != null) {
-      return jsonBlockMatch.group(1);
+      // 提取代码块内的内容（去掉 ```json 和 ```）
+      final blockContent = jsonBlockMatch.group(0)!;
+      final jsonStart = blockContent.indexOf('{');
+      final jsonEnd = blockContent.lastIndexOf('}');
+      if (jsonStart != -1 && jsonEnd != -1 && jsonEnd > jsonStart) {
+        final jsonText = blockContent.substring(jsonStart, jsonEnd + 1);
+        // 使用完整JSON提取方法确保提取完整的对象
+        return _extractCompleteJsonObject(jsonText);
+      }
     }
 
     // 2. 如果提供了必填字段名，尝试提取直接的JSON对象
@@ -1265,7 +1278,7 @@ return result;
         multiLine: true,
       ).firstMatch(response);
       if (directJsonMatch != null) {
-        return directJsonMatch.group(0);
+        return _extractCompleteJsonObject(directJsonMatch.group(0)!);
       }
     }
 
@@ -1275,7 +1288,49 @@ return result;
       multiLine: true,
     ).firstMatch(response);
     if (genericJsonMatch != null) {
-      return genericJsonMatch.group(0);
+      return _extractCompleteJsonObject(genericJsonMatch.group(0)!);
+    }
+
+    return null;
+  }
+
+  /// 从文本中提取完整的JSON对象（处理嵌套括号）
+  static String? _extractCompleteJsonObject(String text) {
+    int braceCount = 0;
+    int startIndex = -1;
+    bool inString = false;
+    bool escaped = false;
+
+    for (int i = 0; i < text.length; i++) {
+      final char = text[i];
+
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+
+      if (char == '\\') {
+        escaped = true;
+        continue;
+      }
+
+      if (char == '"') {
+        inString = !inString;
+      }
+
+      if (!inString) {
+        if (char == '{') {
+          if (braceCount == 0) {
+            startIndex = i;
+          }
+          braceCount++;
+        } else if (char == '}') {
+          braceCount--;
+          if (braceCount == 0 && startIndex != -1) {
+            return text.substring(startIndex, i + 1);
+          }
+        }
+      }
     }
 
     return null;
@@ -1302,14 +1357,37 @@ return result;
       final char = jsonStr[i];
 
       if (escaped) {
-        buffer.write(char);
+        // 处理转义字符
+        switch (char) {
+          case 'n':
+            buffer.write('\n'); // 换行符
+            break;
+          case 'r':
+            buffer.write('\r'); // 回车符
+            break;
+          case 't':
+            buffer.write('\t'); // 制表符
+            break;
+          case '\\':
+            buffer.write('\\'); // 反斜杠
+            break;
+          case '"':
+            buffer.write('"'); // 双引号
+            break;
+          case "'":
+            buffer.write("'"); // 单引号
+            break;
+          default:
+            // 未知转义序列，保留原样
+            buffer.write('\\');
+            buffer.write(char);
+        }
         escaped = false;
         continue;
       }
 
       if (char == '\\') {
         escaped = true;
-        buffer.write(char);
         continue;
       }
 
@@ -1338,7 +1416,6 @@ return result;
       );
 
       if (jsonStr == null) {
-        print('[ToolService] 未找到工具模版匹配 JSON');
         return null;
       }
 
@@ -1427,15 +1504,18 @@ return result;
       );
 
       if (jsonStr == null) {
-        print('[ToolService] 未找到JSON');
         return null;
       }
 
       // 修复JSON格式错误并解析
       final fixedJsonStr = _fixInvalidJson(jsonStr);
-      return jsonDecode(fixedJsonStr) as Map<String, dynamic>;
+      final result = jsonDecode(fixedJsonStr) as Map<String, dynamic>;
+      return result;
     } catch (e) {
-      print('[ToolService] JSON解析失败: $e');
+      final errorPreviewLength = response.length < 200 ? response.length : 200;
+      print(
+        '[ToolService] 响应内容前$errorPreviewLength字符: ${response.substring(0, errorPreviewLength)}',
+      );
       return null;
     }
   }

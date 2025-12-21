@@ -32,7 +32,22 @@ class AgentManager {
   // ========== Getters ==========
 
   AIAgent? get currentAgent => _currentAgent;
-  List<AIAgent> get agentChain => _agentChain ?? [];
+
+  /// 获取 Agent 链
+  /// 单agent模式下返回包含当前agent的数组,统一处理逻辑
+  List<AIAgent> get agentChain {
+    // 如果是链式模式，返回完整的链
+    if (_agentChain != null && _agentChain!.isNotEmpty) {
+      return _agentChain!;
+    }
+    // 单agent模式：将当前agent包装成长度为1的链
+    if (_currentAgent != null) {
+      return [_currentAgent!];
+    }
+    // 都没有，返回空列表
+    return [];
+  }
+
   bool get isChainMode => _currentConversation?.isChainMode ?? false;
   Conversation? get currentConversation => _currentConversation;
 
@@ -107,13 +122,13 @@ class AgentManager {
 
   /// 配置工具调用专用 Agent (适用于单 Agent 和 Agent 链模式)
   Future<void> configureToolAgents({
-    String? toolDetectionAgentId,
-    String? toolExecutionAgentId,
+    ToolAgentConfig? toolDetectionConfig,
+    ToolAgentConfig? toolExecutionConfig,
   }) async {
     try {
       final updatedConversation = _currentConversation!.copyWith(
-        toolDetectionAgentId: toolDetectionAgentId,
-        toolExecutionAgentId: toolExecutionAgentId,
+        toolDetectionConfig: toolDetectionConfig,
+        toolExecutionConfig: toolExecutionConfig,
       );
       await conversationService.updateConversation(updatedConversation);
 
@@ -121,13 +136,17 @@ class AgentManager {
       context.notify();
 
       debugPrint('✅ 工具 Agent 配置成功');
-      if (toolDetectionAgentId != null) {
-        debugPrint('  工具需求识别 Agent: $toolDetectionAgentId');
+      if (toolDetectionConfig != null) {
+        debugPrint(
+          '  工具需求识别: ${toolDetectionConfig.providerId}/${toolDetectionConfig.modelId}',
+        );
       } else {
         debugPrint('  工具需求识别：使用默认 prompt');
       }
-      if (toolExecutionAgentId != null) {
-        debugPrint('  工具执行 Agent: $toolExecutionAgentId');
+      if (toolExecutionConfig != null) {
+        debugPrint(
+          '  工具执行: ${toolExecutionConfig.providerId}/${toolExecutionConfig.modelId}',
+        );
       } else {
         debugPrint('  工具执行：使用默认 prompt');
       }
@@ -179,19 +198,63 @@ class AgentManager {
     }
   }
 
-  /// 获取工具调用专用 Agent
-  /// 如果配置了专用 Agent 则返回，否则返回 null
-  Future<AIAgent?> getToolAgent(String? agentId) async {
-    if (agentId == null) return null;
+  /// 获取工具调用专用 Agent（临时创建）
+  /// 如果配置了专用 Agent 则返回临时创建的 Agent，否则返回 null
+  ///
+  /// [config] - Agent 配置
+  /// [enableFunctionCalling] - 是否启用工具调用（第一阶段需要，第二阶段不需要）
+  Future<AIAgent?> getToolAgent(
+    ToolAgentConfig? config, {
+    bool enableFunctionCalling = false,
+  }) async {
+    if (config == null) return null;
 
     try {
+      // 获取实际保存的服务商配置
       final openAIPlugin =
           PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
-      if (openAIPlugin == null) return null;
+      if (openAIPlugin == null) {
+        throw Exception('OpenAI 插件未找到');
+      }
 
-      return await openAIPlugin.controller.getAgent(agentId);
+      // 使用 UseCase 获取服务商列表
+      final result = await openAIPlugin.useCase.getServiceProviders({});
+      if (result.isFailure || result.dataOrNull == null) {
+        throw Exception('获取服务商配置失败: ${result.errorOrNull?.message}');
+      }
+
+      // 查找匹配的服务商
+      final providers = result.dataOrNull!;
+      final provider = providers.firstWhere(
+        (p) => p['id'] == config.providerId,
+        orElse: () => throw Exception('未找到服务商: ${config.providerId}'),
+      );
+
+      // 临时创建一个 AIAgent 对象，使用真实的服务商配置
+      // 使用占位符，RequestService 会根据阶段自动替换：
+      // - toolDetectionConfig（第一阶段）：只替换 {tool_brief}，{tool_detail} 为空
+      // - toolExecutionConfig（第二阶段）：只替换 {tool_detail}，{tool_brief} 为空
+      final agent = AIAgent(
+        id: 'temp_tool_${config.providerId}_${config.modelId}',
+        name: '工具调用 Agent (${config.modelName ?? config.modelId})',
+        description: '临时创建的工具调用专用 Agent',
+        systemPrompt: '{tool_brief}{tool_detail}', // 两个阶段的占位符，根据 additionalPrompts 替换
+        tags: const [],
+        serviceProviderId: config.providerId,
+        baseUrl: provider['baseUrl'] as String,
+        headers: Map<String, String>.from(provider['headers'] as Map),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        model: config.modelId,
+        temperature: 0.3,
+        maxLength: 4096,
+        enableFunctionCalling: enableFunctionCalling, // 根据阶段设置
+        promptPresetId: null, // 不使用预设，使用原始 systemPrompt
+      );
+
+      return agent;
     } catch (e) {
-      debugPrint('⚠️ 加载工具 Agent 失败: $e');
+      debugPrint('⚠️ 创建工具 Agent 失败: $e');
       return null;
     }
   }

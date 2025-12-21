@@ -222,8 +222,10 @@ class ChatController extends ChangeNotifier {
         context: _context,
         conversation: conversation,
         getAgentChain: () => _agentManager.agentChain,
+        getToolAgent: _agentManager.getToolAgent,
         isCancelling: () => _isCancelling,
         onHandleToolCall: _toolExecutor.handleToolCall,
+        onContinueWithToolResult: _continueWithToolResult,
       );
 
       _foregroundServiceManager = ChatForegroundServiceManager(
@@ -350,12 +352,10 @@ class ChatController extends ChangeNotifier {
       return;
     }
 
-    // 检查是否配置了 agent（单个或链式）
-    if (!isChainMode && _agentManager.currentAgent == null) {
+    // 检查是否配置了 agent
+    // agentChain getter 会在单agent模式下返回 [currentAgent]，统一处理
+    if (_agentManager.agentChain.isEmpty) {
       throw Exception('未选择 Agent');
-    }
-    if (isChainMode && (_agentManager.agentChain.isEmpty)) {
-      throw Exception('Agent 链为空');
     }
 
     _isSending = true;
@@ -406,21 +406,15 @@ class ChatController extends ChangeNotifier {
           settings['enableBackgroundService'] as bool? ?? true;
 
       if (!kIsWeb && Platform.isAndroid && enableBackgroundService) {
-        // 链式模式下，使用第一个 agent 的消息 ID
+        // 使用第一个 agent 的消息 ID
         final firstMessageId = '${conversation.id}_chain_0';
         await _startAIChatService(conversation.id, firstMessageId);
       }
 
-      // 判断是单 agent 还是链式调用
-      if (isChainMode) {
-        // 链式调用所有 agent
-        await _agentChainExecutor.executeChain(
-          userInput: userInput,
-          files: files,
-          selectedTemplate: selectedTemplate,
-        );
-      } else {
-        // 单 agent 模式
+      // 工具模板是特殊的执行路径
+      // 如果用户选择了工具模板，需要单独处理
+      if (selectedTemplate != null) {
+        // 创建 AI 消息占位符
         final aiMessage = ChatMessage.ai(
           conversationId: conversation.id,
           content: '',
@@ -428,20 +422,20 @@ class ChatController extends ChangeNotifier {
         );
         await messageService.addMessage(aiMessage);
 
-        if (selectedTemplate != null) {
-          await _executeToolTemplateAndRespond(
-            aiMessageId: aiMessage.id,
-            userMessage: userMessage,
-            template: selectedTemplate,
-          );
-        } else {
-          await _aiRequestHandler.request(
-            aiMessageId: aiMessage.id,
-            userInput: userInput,
-            files: files,
-            enableToolCalling: true,
-          );
-        }
+        // 执行工具模板并回复
+        await _executeToolTemplateAndRespond(
+          aiMessageId: aiMessage.id,
+          userMessage: userMessage,
+          template: selectedTemplate,
+        );
+      } else {
+        // 统一使用链式调用逻辑
+        // 单agent会被 AgentManager 包装成长度为1的链，确保工具调用正常触发
+        await _agentChainExecutor.executeChain(
+          userInput: userInput,
+          files: files,
+          selectedTemplate: null, // 工具模板已单独处理
+        );
       }
     } catch (e) {
       debugPrint('❌ 发送消息失败: $e');
@@ -629,12 +623,12 @@ class ChatController extends ChangeNotifier {
 
   /// 配置工具调用专用 Agent
   Future<void> configureToolAgents({
-    String? toolDetectionAgentId,
-    String? toolExecutionAgentId,
+    ToolAgentConfig? toolDetectionConfig,
+    ToolAgentConfig? toolExecutionConfig,
   }) async {
     await _agentManager.configureToolAgents(
-      toolDetectionAgentId: toolDetectionAgentId,
-      toolExecutionAgentId: toolExecutionAgentId,
+      toolDetectionConfig: toolDetectionConfig,
+      toolExecutionConfig: toolExecutionConfig,
     );
   }
 

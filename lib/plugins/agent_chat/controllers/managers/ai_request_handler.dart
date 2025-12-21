@@ -28,8 +28,8 @@ class AIRequestHandler {
   /// 当前 Agent getter
   final AIAgent? Function() getCurrentAgent;
 
-  /// 获取工具 Agent
-  final Future<AIAgent?> Function(String?) getToolAgent;
+  /// 获取工具 Agent（临时创建）
+  final Future<AIAgent?> Function(ToolAgentConfig?) getToolAgent;
 
   /// 是否正在取消
   final bool Function() isCancelling;
@@ -282,7 +282,7 @@ class AIRequestHandler {
       if (enableToolCalling && currentAgent.enableFunctionCalling) {
         // 尝试加载工具需求识别专用 Agent
         toolDetectionAgent = await getToolAgent(
-          conversation.toolDetectionAgentId,
+          conversation.toolDetectionConfig,
         );
 
         // 获取工具简要列表（用于工具需求识别）
@@ -354,6 +354,7 @@ class AIRequestHandler {
                   ),
                 )
                 : null,
+        additionalPrompts: {'tool_brief': toolBriefPrompt},
         shouldCancel: isCancelling,
         onToken: (token) {
           buffer.write(token);
@@ -428,7 +429,7 @@ class AIRequestHandler {
 
               // 准备工具执行阶段的 Agent 和 Context Messages
               AIAgent? toolExecutionAgent = await getToolAgent(
-                conversation.toolExecutionAgentId,
+                conversation.toolExecutionConfig,
               );
 
               List<ChatCompletionMessage> toolExecutionMessages;
@@ -492,6 +493,7 @@ class AIRequestHandler {
                     schema: ToolService.toolCallSchema,
                   ),
                 ),
+                additionalPrompts: {'tool_detail': detailPrompt},
                 shouldCancel: isCancelling,
                 onToken: (token) {
                   buffer.write(token);
