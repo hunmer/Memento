@@ -224,8 +224,6 @@ class ChatController extends ChangeNotifier {
         getAgentChain: () => _agentManager.agentChain,
         getToolAgent: _agentManager.getToolAgent,
         isCancelling: () => _isCancelling,
-        onHandleToolCall: _toolExecutor.handleToolCall,
-        onContinueWithToolResult: _continueWithToolResult,
       );
 
       _foregroundServiceManager = ChatForegroundServiceManager(
