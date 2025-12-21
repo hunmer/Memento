@@ -46,7 +46,24 @@ class AgentChainExecutor {
     required List<File> files,
     SavedToolTemplate? selectedTemplate,
   }) async {
-    final chainNodes = conversation.agentChain!;
+    // 从服务中获取最新的会话数据，避免使用过时的快照
+    final latestConversation = context.conversationService.getConversation(conversation.id);
+    if (latestConversation == null) {
+      debugPrint('❌ 未找到会话: ${conversation.id}');
+      return;
+    }
+
+    // 检查是否为链式模式
+    if (latestConversation.agentChain == null || latestConversation.agentChain!.isEmpty) {
+      debugPrint('⚠️ 当前会话未配置 Agent 链，无法执行链式调用');
+      debugPrint('🔍 调试信息: conversation.id=${latestConversation.id}, '
+          'isChainMode=${latestConversation.isChainMode}, '
+          'agentChain=${latestConversation.agentChain}');
+      debugPrint('⚠️ 请检查会话配置，可能存在数据不一致问题');
+      return;
+    }
+
+    final chainNodes = latestConversation.agentChain!;
     final sortedNodes = List<AgentChainNode>.from(chainNodes)
       ..sort((a, b) => a.order.compareTo(b.order));
 
@@ -70,7 +87,7 @@ class AgentChainExecutor {
 
       // 创建此 agent 的 AI 消息占位符
       final aiMessage = ChatMessage.ai(
-        conversationId: conversation.id,
+        conversationId: latestConversation.id,
         content: '',
         isGenerating: true,
         generatedByAgentId: agent.id,
@@ -87,6 +104,7 @@ class AgentChainExecutor {
           userInput: userInput,
           previousMessages: chainMessages,
           enableToolCalling: agent.enableFunctionCalling,
+          conv: latestConversation,
         );
 
         // 调用当前 agent
@@ -107,7 +125,7 @@ class AgentChainExecutor {
 
         // 更新 chainMessages 中的消息为最新版本
         final updatedMessage = context.messageService.getMessage(
-          conversation.id,
+          latestConversation.id,
           aiMessage.id,
         );
         if (updatedMessage != null) {
@@ -124,7 +142,7 @@ class AgentChainExecutor {
 
         // 错误处理：标记消息并停止链式调用
         final errorMessage = context.messageService.getMessage(
-          conversation.id,
+          latestConversation.id,
           aiMessage.id,
         );
         if (errorMessage != null) {
@@ -150,7 +168,11 @@ class AgentChainExecutor {
     required String userInput,
     required List<ChatMessage> previousMessages,
     bool enableToolCalling = false,
+    Conversation? conv,
   }) {
+    // 使用传入的会话或默认的 conversation
+    final targetConversation = conv ?? conversation;
+
     final messages = <ChatCompletionMessage>[];
 
     final agentChain = getAgentChain();
@@ -162,30 +184,12 @@ class AgentChainExecutor {
     // 获取对应的 agent
     final agent = agentChain[stepIndex];
 
-    // 构建 system prompt（包括工具列表，如果启用工具调用）
+    // 构建 system prompt（工具列表不再在这里添加，改为通过 additionalPrompts 传递）
     String systemPrompt = agent.systemPrompt;
 
     debugPrint(
       '🔧 [链式调用] Agent ${agent.name}: enableToolCalling=$enableToolCalling, agent.enableFunctionCalling=${agent.enableFunctionCalling}',
     );
-
-    if (enableToolCalling && agent.enableFunctionCalling) {
-      // 获取工具简要列表（用于工具需求识别）
-      final toolBriefPrompt = ToolService.getToolBriefPrompt();
-      debugPrint('🔧 [链式调用] 工具列表长度: ${toolBriefPrompt.length}');
-      if (toolBriefPrompt.isNotEmpty) {
-        systemPrompt = systemPrompt.isNotEmpty
-            ? '$systemPrompt\n\n$toolBriefPrompt'
-            : toolBriefPrompt;
-        debugPrint(
-          '🔧 [链式调用] Agent ${agent.name} 已添加工具列表到 system prompt，总长度: ${systemPrompt.length}',
-        );
-      } else {
-        debugPrint('⚠️ [链式调用] 工具列表为空！请检查 ToolService 是否已初始化');
-      }
-    } else {
-      debugPrint('ℹ️ [链式调用] Agent ${agent.name} 未启用工具调用');
-    }
 
     // 添加系统提示词
     if (systemPrompt.isNotEmpty) {
@@ -195,7 +199,7 @@ class AgentChainExecutor {
     switch (node.contextMode) {
       case AgentContextMode.conversationContext:
         // 使用会话的历史上下文（遵循 contextMessageCount）
-        final historyMessages = _buildConversationContextMessages(userInput);
+        final historyMessages = _buildConversationContextMessages(userInput, targetConversation);
         messages.addAll(historyMessages);
         break;
 
@@ -255,6 +259,16 @@ class AgentChainExecutor {
       final imageFiles =
           files.where((f) => FilePickerHelper.isImageFile(f)).toList();
 
+      // 准备 additionalPrompts（工具列表通过占位符传递，避免被 RequestService 覆盖）
+      Map<String, String>? additionalPrompts;
+      if (enableToolCalling && agent.enableFunctionCalling) {
+        final toolBriefPrompt = ToolService.getToolBriefPrompt();
+        if (toolBriefPrompt.isNotEmpty) {
+          additionalPrompts = {'tool_brief': toolBriefPrompt};
+          debugPrint('🔧 [链式调用] 通过 additionalPrompts 传递工具列表，长度: ${toolBriefPrompt.length}');
+        }
+      }
+
       // 流式请求 AI 回复（第一阶段：工具需求识别）
       await RequestService.streamResponse(
         agent: agent,
@@ -262,6 +276,7 @@ class AgentChainExecutor {
         contextMessages: contextMessages,
         vision: imageFiles.isNotEmpty,
         filePath: imageFiles.isNotEmpty ? imageFiles.first.path : null,
+        additionalPrompts: additionalPrompts,
         // 如果启用工具调用，使用 JSON Schema 强制返回工具请求格式
         responseFormat: enableToolCalling && agent.enableFunctionCalling
             ? ResponseFormat.jsonSchema(
@@ -590,8 +605,12 @@ class AgentChainExecutor {
 
   /// 构建会话历史上下文消息
   List<ChatCompletionMessage> _buildConversationContextMessages(
-    String userInput,
-  ) {
+    String userInput, [
+    Conversation? conv,
+  ]) {
+    // 使用传入的会话或默认的 conversation
+    final targetConversation = conv ?? conversation;
+
     // 这里复用 AIRequestHandler 的逻辑
     // 为了避免循环依赖，暂时简化实现
     final messages = <ChatCompletionMessage>[];
@@ -616,7 +635,7 @@ class AgentChainExecutor {
         : historyMessages;
 
     // 获取最后 N 条消息（从分隔符之后的消息中选取）
-    final contextMessageCount = conversation.contextMessageCount ?? 10;
+    final contextMessageCount = targetConversation.contextMessageCount ?? 10;
     final contextMessages = messagesAfterDivider.length > contextMessageCount
         ? messagesAfterDivider
             .sublist(messagesAfterDivider.length - contextMessageCount)

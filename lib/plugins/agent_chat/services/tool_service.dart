@@ -1186,19 +1186,19 @@ return result;
       }
 
       // 🔍 添加代码预览（前2个步骤，每个步骤最多200字符）
-      if (template.steps != null && template.steps.isNotEmpty) {
-        buffer.writeln('  代码预览:');
-        for (int i = 0; i < template.steps.length && i < 2; i++) {
-          final step = template.steps[i];
-          final code =
-              step.data.length > 200
-                  ? '${step.data.substring(0, 200)}...'
-                  : step.data;
-          // 转义代码中的特殊字符，避免破坏 Markdown 格式
-          final escapedCode = code.replaceAll('`', '\\`').replaceAll('\n', ' ');
-          buffer.writeln('    - ${step.title}: `$escapedCode`');
-        }
-      }
+      // if (template.steps != null && template.steps.isNotEmpty) {
+      //   buffer.writeln('  代码预览:');
+      //   for (int i = 0; i < template.steps.length && i < 2; i++) {
+      //     final step = template.steps[i];
+      //     final code =
+      //         step.data.length > 200
+      //             ? '${step.data.substring(0, 200)}...'
+      //             : step.data;
+      //     // 转义代码中的特殊字符，避免破坏 Markdown 格式
+      //     final escapedCode = code.replaceAll('`', '\\`').replaceAll('\n', ' ');
+      //     buffer.writeln('    - ${step.title}: `$escapedCode`');
+      //   }
+      // }
 
       buffer.writeln();
     }
