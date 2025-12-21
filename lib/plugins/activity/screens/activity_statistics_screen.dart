@@ -12,14 +12,23 @@ Future<StatisticsData> loadStatisticsData(
   DateTime? endDate,
 ) async {
   // 由于 StatisticsScreen 总是会传入有效的日期，这里进行断言检查
-  assert(startDate != null && endDate != null, 'Start date and end date must not be null');
+  assert(
+    startDate != null && endDate != null,
+    'Start date and end date must not be null',
+  );
 
   // 收集指定日期范围内的所有活动
   final allActivities = <Map<String, dynamic>>[];
 
   for (
     var date = DateTime(startDate!.year, startDate.month, startDate.day);
-    date.isBefore(DateTime(endDate!.year, endDate.month, endDate.day).add(const Duration(days: 1)));
+    date.isBefore(
+      DateTime(
+        endDate!.year,
+        endDate.month,
+        endDate.day,
+      ).add(const Duration(days: 1)),
+    );
     date = date.add(const Duration(days: 1))
   ) {
     final dailyActivities = await activityService.getActivitiesForDate(date);
@@ -27,7 +36,8 @@ Future<StatisticsData> loadStatisticsData(
       // 如果活动有标签，为每个标签创建一条记录用于统计
       if (activity.tags.isNotEmpty) {
         // 将时长平分到每个标签
-        final durationPerTag = activity.durationInMinutes.toDouble() / activity.tags.length;
+        final durationPerTag =
+            activity.durationInMinutes.toDouble() / activity.tags.length;
         for (var tag in activity.tags) {
           allActivities.add({
             'title': activity.title,
@@ -63,27 +73,30 @@ Future<StatisticsData> loadStatisticsData(
   );
 
   // 为分布数据分配颜色
-  final coloredDistributionData = StatisticsCalculator.assignColorsToDistribution(
-    distributionData,
-    const [
-      Color(0xFF60A5FA), // blue-400
-      Color(0xFF4ADE80), // green-400
-      Color(0xFF818CF8), // indigo-400
-      Color(0xFFFB923C), // orange-400
-      Color(0xFFF87171), // red-400
-      Color(0xFFFACC15), // yellow-400
-      Color(0xFF2DD4BF), // teal-400
-      Color(0xFFA78BFA), // purple-400
-    ],
-  );
+  final coloredDistributionData =
+      StatisticsCalculator.assignColorsToDistribution(distributionData, const [
+        Color(0xFF60A5FA), // blue-400
+        Color(0xFF4ADE80), // green-400
+        Color(0xFF818CF8), // indigo-400
+        Color(0xFFFB923C), // orange-400
+        Color(0xFFF87171), // red-400
+        Color(0xFFFACC15), // yellow-400
+        Color(0xFF2DD4BF), // teal-400
+        Color(0xFFA78BFA), // purple-400
+      ]);
 
   // 基于已聚合的分布数据生成排行榜数据
-  final rankingData = coloredDistributionData.map((item) => RankingData(
-    label: item.label,
-    value: item.value,
-    color: item.color,
-    icon: item.icon,
-  )).toList();
+  final rankingData =
+      coloredDistributionData
+          .map(
+            (item) => RankingData(
+              label: item.label,
+              value: item.value,
+              color: item.color,
+              icon: item.icon,
+            ),
+          )
+          .toList();
 
   // 为排行榜数据分配颜色和排序
   final coloredRankingData = StatisticsCalculator.assignColorsToRanking(
@@ -103,7 +116,8 @@ Future<StatisticsData> loadStatisticsData(
   // 计算24小时分布（仅单日有效）
   List<TimeSeriesPoint>? hourlyDistribution;
   Map<int, String>? hourlyMainTags;
-  final isSingleDay = startDate!.year == endDate!.year &&
+  final isSingleDay =
+      startDate.year == endDate.year &&
       startDate.month == endDate.month &&
       startDate.day == endDate.day;
 
@@ -122,12 +136,15 @@ Future<StatisticsData> loadStatisticsData(
   }
 
   // 计算总时长
-  final totalDuration = allActivities.fold(0.0, (sum, activity) => sum + activity['duration']);
+  final totalDuration = allActivities.fold(
+    0.0,
+    (sum, activity) => sum + activity['duration'],
+  );
 
   return StatisticsData(
     title: 'activity_activityStatistics'.tr,
-    startDate: startDate!,
-    endDate: endDate!,
+    startDate: startDate,
+    endDate: endDate,
     totalValue: totalDuration / 60, // 转换为小时
     totalValueLabel: 'activity_hours'.tr,
     distributionData: coloredDistributionData,
@@ -136,9 +153,12 @@ Future<StatisticsData> loadStatisticsData(
     hourlyMainTags: hourlyMainTags,
     extraData: {
       'totalActivities': allActivities.length,
-      'averageDuration': allActivities.isNotEmpty
-          ? allActivities.fold(0.0, (sum, a) => sum + a['duration']) / allActivities.length / 60
-          : 0,
+      'averageDuration':
+          allActivities.isNotEmpty
+              ? allActivities.fold(0.0, (sum, a) => sum + a['duration']) /
+                  allActivities.length /
+                  60
+              : 0,
     },
   );
 }
@@ -166,7 +186,12 @@ class ActivityStatisticsScreen extends StatelessWidget {
         defaultRange: DateRangeOption.thisWeek,
       ),
       dataLoader: (range, startDate, endDate) async {
-        return await loadStatisticsData(activityService, range, startDate, endDate);
+        return await loadStatisticsData(
+          activityService,
+          range,
+          startDate,
+          endDate,
+        );
       },
       onDateRangeChanged: (state) {
         // 可以在这里处理日期范围变化事件
@@ -178,10 +203,11 @@ class ActivityStatisticsScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TagStatisticsScreen(
-                tagName: data.label,
-                activityService: activityService,
-              ),
+              builder:
+                  (context) => TagStatisticsScreen(
+                    tagName: data.label,
+                    activityService: activityService,
+                  ),
             ),
           );
         }

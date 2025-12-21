@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
 import 'package:Memento/plugins/agent_chat/services/message_service.dart';

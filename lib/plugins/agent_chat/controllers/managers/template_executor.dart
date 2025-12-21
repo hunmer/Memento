@@ -5,7 +5,6 @@ import '../../models/saved_tool_template.dart';
 import '../../models/tool_call_step.dart';
 import '../../models/chat_message.dart';
 import '../../services/tool_service.dart';
-import '../../services/tool_template_service.dart';
 import 'package:Memento/plugins/openai/services/request_service.dart';
 import 'shared/manager_context.dart';
 
