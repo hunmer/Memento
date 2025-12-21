@@ -25,7 +25,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
   // 搜索相关状态
   String _searchQuery = '';
   final Map<String, bool> _searchFilters = {
-    'name': true,     // 是否搜索名称
+    'name': true, // 是否搜索名称
     'category': true, // 是否搜索分类
   };
 
@@ -67,11 +67,13 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
     final query = _searchQuery.toLowerCase();
     return subscriptions.where((subscription) {
       // 按名称搜索
-      final matchName = _searchFilters['name'] == true &&
+      final matchName =
+          _searchFilters['name'] == true &&
           subscription.name.toLowerCase().contains(query);
 
       // 按分类搜索
-      final matchCategory = _searchFilters['category'] == true &&
+      final matchCategory =
+          _searchFilters['category'] == true &&
           subscription.category.toLowerCase().contains(query);
 
       return matchName || matchCategory;
@@ -106,10 +108,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
         });
       },
       enableSearchFilter: true,
-      filterLabels: const {
-        'name': '名称',
-        'category': '分类',
-      },
+      filterLabels: const {'name': '名称', 'category': '分类'},
       onSearchFilterChanged: (filters) {
         setState(() {
           _searchFilters.addAll(filters);
@@ -122,9 +121,10 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
           icon: Icon(
             _isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
           ),
-          tooltip: _isGridView
-              ? 'bill_switchToListView'.tr
-              : 'bill_switchToGridView'.tr,
+          tooltip:
+              _isGridView
+                  ? 'bill_switchToListView'.tr
+                  : 'bill_switchToGridView'.tr,
           onPressed: _toggleViewMode,
         ),
         IconButton(
@@ -139,10 +139,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
     List<Subscription> activeSubscriptions,
     List<Subscription> inactiveSubscriptions,
   ) {
-    final allSubscriptions = [
-      ...activeSubscriptions,
-      ...inactiveSubscriptions,
-    ];
+    final allSubscriptions = [...activeSubscriptions, ...inactiveSubscriptions];
 
     if (allSubscriptions.isEmpty) {
       return _buildEmptyState();
@@ -161,10 +158,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
           _buildSectionHeader(
             '${"bill_inactiveSubscriptions".tr} (${inactiveSubscriptions.length})',
           ),
-          _buildSubscriptionList(
-            inactiveSubscriptions,
-            isInactive: true,
-          ),
+          _buildSubscriptionList(inactiveSubscriptions, isInactive: true),
         ],
         const SliverToBoxAdapter(
           child: SizedBox(height: 80),
@@ -174,7 +168,8 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
   }
 
   Widget _buildSearchBody() {
-    final subscriptions = widget.billPlugin.controller.subscriptions.subscriptions;
+    final subscriptions =
+        widget.billPlugin.controller.subscriptions.subscriptions;
     final filteredSubscriptions = _filterSubscriptions(subscriptions);
 
     if (_searchQuery.isNotEmpty && filteredSubscriptions.isEmpty) {
@@ -182,18 +177,11 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               '未找到匹配的订阅服务',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
           ],
         ),
@@ -208,9 +196,7 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
       physics: const BouncingScrollPhysics(),
       slivers: [
         _buildSubscriptionList(filteredSubscriptions),
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 80),
-        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 80)),
       ],
     );
   }
