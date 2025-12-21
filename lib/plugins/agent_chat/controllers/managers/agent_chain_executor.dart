@@ -1,0 +1,649 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:openai_dart/openai_dart.dart';
+import '../../models/conversation.dart';
+import '../../models/agent_chain_node.dart';
+import '../../models/chat_message.dart';
+import '../../models/saved_tool_template.dart';
+import 'package:Memento/plugins/openai/models/ai_agent.dart';
+import '../../services/tool_service.dart';
+import 'package:Memento/utils/file_picker_helper.dart';
+import 'package:Memento/plugins/openai/services/request_service.dart';
+import 'shared/manager_context.dart';
+
+/// Agent 链执行管理器
+///
+/// 负责 Agent 链式调用的编排和执行
+/// 支持三种上下文模式：conversationContext / chainContext / previousOnly
+/// 遵循单一职责原则 (SRP)
+class AgentChainExecutor {
+  final ManagerContext context;
+  final Conversation conversation;
+
+  /// Agent 链 getter
+  final List<AIAgent> Function() getAgentChain;
+
+  /// 是否正在取消
+  final bool Function() isCancelling;
+
+  /// 工具调用处理回调
+  final Future<void> Function(String messageId, String aiResponse)? onHandleToolCall;
+
+  AgentChainExecutor({
+    required this.context,
+    required this.conversation,
+    required this.getAgentChain,
+    required this.isCancelling,
+    this.onHandleToolCall,
+  });
+
+  // ========== 核心方法 ==========
+
+  /// 执行 Agent 链式调用
+  Future<void> executeChain({
+    required String userInput,
+    required List<File> files,
+    SavedToolTemplate? selectedTemplate,
+  }) async {
+    final chainNodes = conversation.agentChain!;
+    final sortedNodes = List<AgentChainNode>.from(chainNodes)
+      ..sort((a, b) => a.order.compareTo(b.order));
+
+    final agentChain = getAgentChain();
+    if (agentChain.isEmpty) {
+      debugPrint('❌ Agent 链为空');
+      return;
+    }
+
+    // 存储每个 agent 的输出消息
+    final chainMessages = <ChatMessage>[];
+
+    // 遍历执行每个 agent
+    for (int i = 0; i < sortedNodes.length; i++) {
+      final node = sortedNodes[i];
+      final agent = agentChain[i];
+
+      debugPrint(
+        '🔗 [链式调用 ${i + 1}/${sortedNodes.length}] 开始执行 Agent: ${agent.name}',
+      );
+
+      // 创建此 agent 的 AI 消息占位符
+      final aiMessage = ChatMessage.ai(
+        conversationId: conversation.id,
+        content: '',
+        isGenerating: true,
+        generatedByAgentId: agent.id,
+        chainStepIndex: i,
+      );
+      await context.messageService.addMessage(aiMessage);
+      chainMessages.add(aiMessage);
+
+      try {
+        // 根据上下文模式构建消息列表（包含工具列表，如果启用）
+        final contextMessages = buildChainContextMessages(
+          node: node,
+          stepIndex: i,
+          userInput: userInput,
+          previousMessages: chainMessages,
+          enableToolCalling: agent.enableFunctionCalling,
+        );
+
+        // 调用当前 agent
+        await _requestAgentInChain(
+          agent: agent,
+          aiMessageId: aiMessage.id,
+          contextMessages: contextMessages,
+          files: i == 0 ? files : [], // 只有第一个 agent 处理文件
+          enableToolCalling: agent.enableFunctionCalling,
+          userInput: userInput, // 传递用户输入用于工具调用第二阶段
+        );
+
+        // 检查是否被取消
+        if (isCancelling()) {
+          debugPrint('🛑 链式调用被用户取消');
+          break;
+        }
+
+        // 更新 chainMessages 中的消息为最新版本
+        final updatedMessage = context.messageService.getMessage(
+          conversation.id,
+          aiMessage.id,
+        );
+        if (updatedMessage != null) {
+          chainMessages[i] = updatedMessage;
+        }
+
+        debugPrint(
+          '✅ [链式调用 ${i + 1}/${sortedNodes.length}] Agent ${agent.name} 执行完成',
+        );
+      } catch (e) {
+        debugPrint(
+          '❌ [链式调用 ${i + 1}/${sortedNodes.length}] Agent ${agent.name} 执行失败: $e',
+        );
+
+        // 错误处理：标记消息并停止链式调用
+        final errorMessage = context.messageService.getMessage(
+          conversation.id,
+          aiMessage.id,
+        );
+        if (errorMessage != null) {
+          final updated = errorMessage.copyWith(
+            content: '❌ 执行失败: $e',
+            isGenerating: false,
+          );
+          await context.messageService.updateMessage(updated);
+        }
+
+        // 停止后续 agent 的执行
+        break;
+      }
+    }
+
+    debugPrint('🏁 链式调用完成');
+  }
+
+  /// 根据节点的上下文模式构建消息列表
+  List<ChatCompletionMessage> buildChainContextMessages({
+    required AgentChainNode node,
+    required int stepIndex,
+    required String userInput,
+    required List<ChatMessage> previousMessages,
+    bool enableToolCalling = false,
+  }) {
+    final messages = <ChatCompletionMessage>[];
+
+    final agentChain = getAgentChain();
+    if (stepIndex >= agentChain.length) {
+      debugPrint('⚠️ 步骤索引超出范围');
+      return messages;
+    }
+
+    // 获取对应的 agent
+    final agent = agentChain[stepIndex];
+
+    // 构建 system prompt（包括工具列表，如果启用工具调用）
+    String systemPrompt = agent.systemPrompt;
+
+    debugPrint(
+      '🔧 [链式调用] Agent ${agent.name}: enableToolCalling=$enableToolCalling, agent.enableFunctionCalling=${agent.enableFunctionCalling}',
+    );
+
+    if (enableToolCalling && agent.enableFunctionCalling) {
+      // 获取工具简要列表（用于工具需求识别）
+      final toolBriefPrompt = ToolService.getToolBriefPrompt();
+      debugPrint('🔧 [链式调用] 工具列表长度: ${toolBriefPrompt.length}');
+      if (toolBriefPrompt.isNotEmpty) {
+        systemPrompt = systemPrompt.isNotEmpty
+            ? '$systemPrompt\n\n$toolBriefPrompt'
+            : toolBriefPrompt;
+        debugPrint(
+          '🔧 [链式调用] Agent ${agent.name} 已添加工具列表到 system prompt，总长度: ${systemPrompt.length}',
+        );
+      } else {
+        debugPrint('⚠️ [链式调用] 工具列表为空！请检查 ToolService 是否已初始化');
+      }
+    } else {
+      debugPrint('ℹ️ [链式调用] Agent ${agent.name} 未启用工具调用');
+    }
+
+    // 添加系统提示词
+    if (systemPrompt.isNotEmpty) {
+      messages.add(ChatCompletionMessage.system(content: systemPrompt));
+    }
+
+    switch (node.contextMode) {
+      case AgentContextMode.conversationContext:
+        // 使用会话的历史上下文（遵循 contextMessageCount）
+        final historyMessages = _buildConversationContextMessages(userInput);
+        messages.addAll(historyMessages);
+        break;
+
+      case AgentContextMode.chainContext:
+        // 传递链中所有前序 agent 的输出
+        messages.add(ChatCompletionMessage.user(
+          content: ChatCompletionUserMessageContent.string(userInput),
+        ));
+
+        for (int i = 0; i < stepIndex; i++) {
+          final prevMsg = previousMessages[i];
+          if (prevMsg.content.isNotEmpty) {
+            final prevAgent = agentChain[i];
+            messages.add(ChatCompletionMessage.assistant(
+              content: '[${prevAgent.name}]: ${prevMsg.content}',
+            ));
+          }
+        }
+        break;
+
+      case AgentContextMode.previousOnly:
+        // 仅传递上一个 agent 的输出
+        final inputContent = stepIndex == 0
+            ? userInput
+            : previousMessages[stepIndex - 1].content;
+
+        messages.add(ChatCompletionMessage.user(
+          content: ChatCompletionUserMessageContent.string(inputContent),
+        ));
+        break;
+    }
+
+    return messages;
+  }
+
+  // ========== 私有方法 ==========
+
+  /// 在链式调用中请求单个 Agent 的响应
+  /// 使用 Completer 确保等待所有异步操作（包括工具调用）完成
+  Future<void> _requestAgentInChain({
+    required AIAgent agent,
+    required String aiMessageId,
+    required List<ChatCompletionMessage> contextMessages,
+    required List<File> files,
+    required bool enableToolCalling,
+    String? userInput,
+  }) async {
+    final buffer = StringBuffer();
+    int tokenCount = 0;
+    bool isCollectingToolCall = false;
+
+    // 使用 Completer 确保等待所有操作完成（包括 onComplete 中的异步操作）
+    final operationCompleter = Completer<void>();
+
+    try {
+      // 处理图片文件
+      final imageFiles =
+          files.where((f) => FilePickerHelper.isImageFile(f)).toList();
+
+      // 流式请求 AI 回复（第一阶段：工具需求识别）
+      await RequestService.streamResponse(
+        agent: agent,
+        prompt: null,
+        contextMessages: contextMessages,
+        vision: imageFiles.isNotEmpty,
+        filePath: imageFiles.isNotEmpty ? imageFiles.first.path : null,
+        // 如果启用工具调用，使用 JSON Schema 强制返回工具请求格式
+        responseFormat: enableToolCalling && agent.enableFunctionCalling
+            ? ResponseFormat.jsonSchema(
+                jsonSchema: JsonSchemaObject(
+                  name: 'ToolRequest',
+                  description: '工具需求请求',
+                  strict: true,
+                  schema: ToolService.toolRequestSchema,
+                ),
+              )
+            : null,
+        shouldCancel: isCancelling,
+        onToken: (token) {
+          buffer.write(token);
+          tokenCount++;
+
+          final content = buffer.toString();
+
+          // 检测是否为工具需求
+          if (enableToolCalling && agent.enableFunctionCalling) {
+            final toolRequest = ToolService.parseToolRequest(content);
+            final containsToolCall = ToolService.containsToolCall(content);
+
+            if (toolRequest != null || containsToolCall) {
+              isCollectingToolCall = true;
+              final displayContent = '$content\n\n⚙️ 正在准备工具调用...';
+              context.messageService.updateAIMessageContent(
+                context.conversationId,
+                aiMessageId,
+                displayContent,
+                tokenCount,
+              );
+            } else if (!isCollectingToolCall) {
+              context.messageService.updateAIMessageContent(
+                context.conversationId,
+                aiMessageId,
+                content,
+                tokenCount,
+              );
+            }
+          } else {
+            // 实时更新 UI
+            context.messageService.updateAIMessageContent(
+              context.conversationId,
+              aiMessageId,
+              content,
+              tokenCount,
+            );
+          }
+        },
+        onComplete: () {
+          // 注意：这里不能是 async，需要在内部处理异步逻辑
+          _handleChainAgentComplete(
+            agent: agent,
+            aiMessageId: aiMessageId,
+            contextMessages: contextMessages,
+            firstResponse: buffer.toString(),
+            enableToolCalling: enableToolCalling,
+            userInput: userInput,
+            operationCompleter: operationCompleter,
+          );
+        },
+        onError: (error) {
+          debugPrint('❌ Agent ${agent.name} 响应错误: $error');
+
+          if (error == '已取消发送') {
+            context.messageService.updateAIMessageContent(
+              context.conversationId,
+              aiMessageId,
+              '🛑 用户已取消操作',
+              0,
+            );
+          } else {
+            context.messageService.updateAIMessageContent(
+              context.conversationId,
+              aiMessageId,
+              '❌ 错误: $error',
+              0,
+            );
+          }
+
+          context.messageService.completeAIMessage(
+            context.conversationId,
+            aiMessageId,
+          );
+          if (!operationCompleter.isCompleted) {
+            operationCompleter.complete();
+          }
+        },
+      );
+
+      // 等待所有操作完成（包括工具调用）
+      await operationCompleter.future;
+    } catch (e) {
+      debugPrint('❌ 请求 Agent 响应失败: $e');
+      if (!operationCompleter.isCompleted) {
+        operationCompleter.completeError(e);
+      }
+      rethrow;
+    }
+  }
+
+  /// 处理链式调用中 Agent 完成后的逻辑（工具识别 → 工具执行）
+  void _handleChainAgentComplete({
+    required AIAgent agent,
+    required String aiMessageId,
+    required List<ChatCompletionMessage> contextMessages,
+    required String firstResponse,
+    required bool enableToolCalling,
+    String? userInput,
+    required Completer<void> operationCompleter,
+  }) async {
+    try {
+      // ========== 检测工具需求（第一阶段响应）==========
+      final toolRequest = ToolService.parseToolRequest(firstResponse);
+
+      if (enableToolCalling &&
+          agent.enableFunctionCalling &&
+          toolRequest != null &&
+          toolRequest.isNotEmpty) {
+        debugPrint(
+          '🔍 [链式调用] Agent ${agent.name} 请求工具: ${toolRequest.join(", ")}',
+        );
+
+        // ========== 第二阶段：追加详细文档，生成工具调用代码 ==========
+        final detailPrompt = await ToolService.getToolDetailPrompt(toolRequest);
+
+        // 获取用户输入（从 contextMessages 中提取最后一个 user 消息）
+        final effectiveUserInput = userInput ?? _extractUserInput(contextMessages);
+
+        // 构建第二阶段的 context messages
+        List<ChatCompletionMessage> toolExecutionMessages = [
+          ChatCompletionMessage.system(content: detailPrompt),
+          ChatCompletionMessage.user(
+            content: ChatCompletionUserMessageContent.string(
+              '原始用户输入：\n$effectiveUserInput\n\n第一阶段识别的工具：${toolRequest.join(", ")}\n\n请根据文档生成工具调用代码。',
+            ),
+          ),
+        ];
+
+        // 用于第二阶段的 buffer
+        final secondBuffer = StringBuffer();
+        int secondTokenCount = 0;
+        bool secondIsCollecting = false;
+
+        // 使用 Completer 等待第二阶段完成
+        final secondPhaseCompleter = Completer<void>();
+
+        // 第二阶段：请求生成工具调用代码
+        await RequestService.streamResponse(
+          agent: agent,
+          prompt: null,
+          contextMessages: toolExecutionMessages,
+          vision: false,
+          responseFormat: ResponseFormat.jsonSchema(
+            jsonSchema: JsonSchemaObject(
+              name: 'ToolCall',
+              description: '工具调用步骤',
+              strict: true,
+              schema: ToolService.toolCallSchema,
+            ),
+          ),
+          shouldCancel: isCancelling,
+          onToken: (token) {
+            secondBuffer.write(token);
+            secondTokenCount++;
+
+            final content = secondBuffer.toString();
+            if (ToolService.containsToolCall(content)) {
+              secondIsCollecting = true;
+              final displayContent = '$content\n\n⚙️ 正在准备执行工具...';
+              context.messageService.updateAIMessageContent(
+                context.conversationId,
+                aiMessageId,
+                displayContent,
+                secondTokenCount,
+              );
+            } else if (!secondIsCollecting) {
+              context.messageService.updateAIMessageContent(
+                context.conversationId,
+                aiMessageId,
+                content,
+                secondTokenCount,
+              );
+            }
+          },
+          onError: (error) {
+            debugPrint('❌ [链式调用] 第二阶段 Agent ${agent.name} 响应错误: $error');
+            final errorMessage = error == '已取消发送'
+                ? '🛑 用户已取消操作'
+                : '❌ 生成工具调用时出错: $error';
+            context.messageService.updateAIMessageContent(
+              context.conversationId,
+              aiMessageId,
+              errorMessage,
+              0,
+            );
+            context.messageService.completeAIMessage(
+              context.conversationId,
+              aiMessageId,
+            );
+            if (!secondPhaseCompleter.isCompleted) {
+              secondPhaseCompleter.complete();
+            }
+          },
+          onComplete: () {
+            // 处理第二阶段完成
+            _handleSecondPhaseComplete(
+              aiMessageId: aiMessageId,
+              secondResponse: secondBuffer.toString(),
+              completer: secondPhaseCompleter,
+            );
+          },
+        );
+
+        // 等待第二阶段完成
+        await secondPhaseCompleter.future;
+      } else if (enableToolCalling &&
+          agent.enableFunctionCalling &&
+          ToolService.containsToolCall(firstResponse)) {
+        // 直接包含工具调用（跳过第一阶段）
+        if (onHandleToolCall != null) {
+          await onHandleToolCall!(aiMessageId, firstResponse);
+        }
+      } else {
+        // 无需工具，直接完成
+        context.messageService.completeAIMessage(
+          context.conversationId,
+          aiMessageId,
+        );
+        debugPrint('✅ Agent ${agent.name} 生成完成');
+      }
+
+      // 完成整个操作
+      if (!operationCompleter.isCompleted) {
+        operationCompleter.complete();
+      }
+    } catch (e) {
+      debugPrint('❌ [链式调用] 处理 Agent 完成逻辑失败: $e');
+      context.messageService.updateAIMessageContent(
+        context.conversationId,
+        aiMessageId,
+        '❌ 处理失败: $e',
+        0,
+      );
+      context.messageService.completeAIMessage(
+        context.conversationId,
+        aiMessageId,
+      );
+      if (!operationCompleter.isCompleted) {
+        operationCompleter.completeError(e);
+      }
+    }
+  }
+
+  /// 处理第二阶段（工具执行）完成
+  void _handleSecondPhaseComplete({
+    required String aiMessageId,
+    required String secondResponse,
+    required Completer<void> completer,
+  }) async {
+    try {
+      // 执行工具调用
+      if (ToolService.containsToolCall(secondResponse)) {
+        if (onHandleToolCall != null) {
+          await onHandleToolCall!(aiMessageId, secondResponse);
+        }
+      } else {
+        // 没有生成工具调用，直接完成
+        _processNormalResponse(aiMessageId, secondResponse);
+      }
+    } catch (e) {
+      debugPrint('❌ [链式调用] 第二阶段处理失败: $e');
+      context.messageService.updateAIMessageContent(
+        context.conversationId,
+        aiMessageId,
+        '❌ 工具执行失败: $e',
+        0,
+      );
+      context.messageService.completeAIMessage(
+        context.conversationId,
+        aiMessageId,
+      );
+    } finally {
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    }
+  }
+
+  /// 处理正常响应
+  void _processNormalResponse(String messageId, String content) {
+    final processedContent = RequestService.processThinkingContent(content);
+
+    context.messageService.updateAIMessageContent(
+      context.conversationId,
+      messageId,
+      processedContent,
+      0,
+    );
+
+    context.messageService.completeAIMessage(
+      context.conversationId,
+      messageId,
+    );
+  }
+
+  /// 从 contextMessages 中提取用户输入
+  String _extractUserInput(List<ChatCompletionMessage> messages) {
+    for (int i = messages.length - 1; i >= 0; i--) {
+      final msg = messages[i];
+      if (msg.role == ChatCompletionMessageRole.user) {
+        // 尝试从 content 中提取文本
+        final content = msg.content;
+        if (content != null) {
+          // content 可能是 String 或 ChatCompletionUserMessageContent
+          final contentStr = content.toString();
+          if (contentStr.isNotEmpty) {
+            return contentStr;
+          }
+        }
+      }
+    }
+    return '';
+  }
+
+  /// 构建会话历史上下文消息
+  List<ChatCompletionMessage> _buildConversationContextMessages(
+    String userInput,
+  ) {
+    // 这里复用 AIRequestHandler 的逻辑
+    // 为了避免循环依赖，暂时简化实现
+    final messages = <ChatCompletionMessage>[];
+
+    // 获取历史消息（排除正在生成的消息）
+    final allMessages = context.messageService.currentMessages;
+    final historyMessages =
+        allMessages.where((msg) => !msg.isGenerating).toList();
+
+    // 找到最后一个会话分隔符的索引
+    int lastDividerIndex = -1;
+    for (int i = historyMessages.length - 1; i >= 0; i--) {
+      if (historyMessages[i].isSessionDivider) {
+        lastDividerIndex = i;
+        break;
+      }
+    }
+
+    // 如果找到分隔符，只获取分隔符之后的消息
+    final messagesAfterDivider = lastDividerIndex >= 0
+        ? historyMessages.sublist(lastDividerIndex + 1)
+        : historyMessages;
+
+    // 获取最后 N 条消息（从分隔符之后的消息中选取）
+    final contextMessageCount = conversation.contextMessageCount ?? 10;
+    final contextMessages = messagesAfterDivider.length > contextMessageCount
+        ? messagesAfterDivider
+            .sublist(messagesAfterDivider.length - contextMessageCount)
+        : messagesAfterDivider;
+
+    // 转换历史消息为 API 格式（排除会话分隔符）
+    for (var msg in contextMessages) {
+      if (msg.isSessionDivider) continue; // 跳过会话分隔符
+
+      if (msg.isUser) {
+        messages.add(
+          ChatCompletionMessage.user(
+            content: ChatCompletionUserMessageContent.string(msg.content),
+          ),
+        );
+      } else {
+        messages.add(ChatCompletionMessage.assistant(content: msg.content));
+      }
+    }
+
+    // 添加当前输入
+    messages.add(
+      ChatCompletionMessage.user(
+        content: ChatCompletionUserMessageContent.string(userInput),
+      ),
+    );
+
+    return messages;
+  }
+}
