@@ -1,5 +1,7 @@
 import 'package:uuid/uuid.dart';
 
+import 'agent_chain_node.dart';
+
 const _uuid = Uuid();
 
 /// 会话模型
@@ -12,8 +14,23 @@ class Conversation {
   /// 会话标题
   String title;
 
-  /// 绑定的Agent ID（可选，可在聊天时选择）
+  /// 绑定的Agent ID（可选，单 agent 模式）
+  /// 向后兼容：如果 agentChain 为空，则使用此字段
   final String? agentId;
+
+  /// Agent 链配置（多 agent 链式调用模式）
+  /// 如果非空，则忽略 agentId 字段
+  final List<AgentChainNode>? agentChain;
+
+  /// 工具需求识别专用 Agent ID（第一阶段）
+  /// 用于识别用户需求并返回 needed_tools
+  /// 如果未配置，则使用默认 prompt 替换当前 agent 的 system prompt
+  final String? toolDetectionAgentId;
+
+  /// 工具执行专用 Agent ID（第二阶段）
+  /// 用于生成工具调用的 JavaScript 代码
+  /// 如果未配置，则使用默认 prompt 替换当前 agent 的 system prompt
+  final String? toolExecutionAgentId;
 
   /// 所属分组（支持多个分组）
   List<String> groups;
@@ -43,7 +60,10 @@ class Conversation {
   Conversation({
     required this.id,
     required this.title,
-    required this.agentId,
+    this.agentId,
+    this.agentChain,
+    this.toolDetectionAgentId,
+    this.toolExecutionAgentId,
     this.groups = const [],
     this.contextMessageCount,
     required this.createdAt,
@@ -54,10 +74,26 @@ class Conversation {
     this.metadata,
   });
 
+  /// 判断是否为链式模式
+  bool get isChainMode => agentChain != null && agentChain!.isNotEmpty;
+
+  /// 获取有效的 agent 列表（兼容单 agent 和链式模式）
+  List<String> get effectiveAgentIds {
+    if (isChainMode) {
+      return agentChain!.map((node) => node.agentId).toList();
+    } else if (agentId != null) {
+      return [agentId!];
+    }
+    return [];
+  }
+
   /// 创建新会话的工厂方法
   factory Conversation.create({
     required String title,
     String? agentId,
+    List<AgentChainNode>? agentChain,
+    String? toolDetectionAgentId,
+    String? toolExecutionAgentId,
     List<String>? groups,
     int? contextMessageCount,
   }) {
@@ -66,6 +102,9 @@ class Conversation {
       id: _uuid.v4(),
       title: title,
       agentId: agentId,
+      agentChain: agentChain,
+      toolDetectionAgentId: toolDetectionAgentId,
+      toolExecutionAgentId: toolExecutionAgentId,
       groups: groups ?? [],
       contextMessageCount: contextMessageCount,
       createdAt: now,
@@ -79,6 +118,11 @@ class Conversation {
       id: json['id'] as String,
       title: json['title'] as String,
       agentId: json['agentId'] as String?,
+      agentChain: (json['agentChain'] as List<dynamic>?)
+          ?.map((e) => AgentChainNode.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      toolDetectionAgentId: json['toolDetectionAgentId'] as String?,
+      toolExecutionAgentId: json['toolExecutionAgentId'] as String?,
       groups: (json['groups'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
@@ -99,6 +143,10 @@ class Conversation {
       'id': id,
       'title': title,
       'agentId': agentId,
+      if (agentChain != null && agentChain!.isNotEmpty)
+        'agentChain': agentChain!.map((node) => node.toJson()).toList(),
+      'toolDetectionAgentId': toolDetectionAgentId,
+      'toolExecutionAgentId': toolExecutionAgentId,
       'groups': groups,
       'contextMessageCount': contextMessageCount,
       'createdAt': createdAt.toIso8601String(),
@@ -114,6 +162,11 @@ class Conversation {
   Conversation copyWith({
     String? title,
     String? agentId,
+    List<AgentChainNode>? agentChain,
+    bool clearAgentChain = false, // 用于清除链配置
+    String? toolDetectionAgentId,
+    String? toolExecutionAgentId,
+    bool clearToolAgents = false, // 用于清除工具 Agent 配置
     List<String>? groups,
     int? contextMessageCount,
     DateTime? lastMessageAt,
@@ -126,6 +179,13 @@ class Conversation {
       id: id,
       title: title ?? this.title,
       agentId: agentId ?? this.agentId,
+      agentChain: clearAgentChain ? null : (agentChain ?? this.agentChain),
+      toolDetectionAgentId: clearToolAgents
+          ? null
+          : (toolDetectionAgentId ?? this.toolDetectionAgentId),
+      toolExecutionAgentId: clearToolAgents
+          ? null
+          : (toolExecutionAgentId ?? this.toolExecutionAgentId),
       groups: groups ?? this.groups,
       contextMessageCount: contextMessageCount ?? this.contextMessageCount,
       createdAt: createdAt,
