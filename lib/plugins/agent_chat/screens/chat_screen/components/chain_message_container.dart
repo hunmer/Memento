@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
 import 'package:Memento/plugins/agent_chat/services/message_service.dart';
@@ -98,12 +99,28 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
       _lastSummaryGeneratingState = isNowGenerating;
 
       // 如果是首次加载且有完成的最终结果，默认选中
-      if (wasGenerating == null && summaryMsg != null && !summaryMsg.isGenerating) {
+      if (wasGenerating == null &&
+          summaryMsg != null &&
+          !summaryMsg.isGenerating) {
         _selectedTabIndex = regularMessages.length; // 选中最终结果tab
       }
       // 如果最终总结刚刚完成生成，自动切换到该tab
-      else if (wasGenerating == true && isNowGenerating == false && summaryMsg != null) {
+      else if (wasGenerating == true &&
+          isNowGenerating == false &&
+          summaryMsg != null) {
         _selectedTabIndex = regularMessages.length; // 选中最终结果tab
+      }
+      // 如果没有常规消息但有最终总结，优先显示最终总结
+      else if (regularMessages.isEmpty && summaryMsg != null) {
+        _selectedTabIndex = 0; // 选中最终结果tab (在单tab模式下会直接显示)
+      }
+      // 如果没有最终总结但有常规消息，且当前没有选中任何tab，选中最后一个消息
+      else if (summaryMsg == null &&
+          regularMessages.isNotEmpty &&
+          _selectedTabIndex == 0 &&
+          wasGenerating == null) {
+        _selectedTabIndex = regularMessages.length - 1; // 选中最后一个常规消息
+        debugPrint('✅ [ChainMessageContainer] 链式调用完成，自动选中最后一个步骤tab');
       }
       // 计算总的tab数量（包括最终结果tab）
       else {
@@ -123,7 +140,8 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
     }
 
     // 如果只有一个步骤且没有最终结果，直接显示内容，不显示tab栏
-    final shouldShowTabs = _chainMessages.length > 1 || _finalSummaryMessage != null;
+    final shouldShowTabs =
+        _chainMessages.length > 1 || _finalSummaryMessage != null;
 
     if (!shouldShowTabs) {
       return _buildMessageContent(context, _chainMessages[0]);
@@ -154,9 +172,8 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
     for (int index = 0; index < _chainMessages.length; index++) {
       final message = _chainMessages[index];
       final isSelected = index == _selectedTabIndex;
-      final agentName = widget.getAgentName?.call(
-            message.generatedByAgentId ?? '',
-          ) ??
+      final agentName =
+          widget.getAgentName?.call(message.generatedByAgentId ?? '') ??
           'Agent';
       final stepIndex = message.chainStepIndex ?? index;
 
@@ -194,9 +211,10 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
             isSelected: isSelected,
             isGenerating: _finalSummaryMessage!.isGenerating,
             hasError: _finalSummaryMessage!.content.contains('❌'),
-            tokenCount: _finalSummaryMessage!.isGenerating
-                ? _finalSummaryMessage!.tokenCount
-                : null,
+            tokenCount:
+                _finalSummaryMessage!.isGenerating
+                    ? _finalSummaryMessage!.tokenCount
+                    : null,
             onTap: () {
               setState(() {
                 _selectedTabIndex = summaryIndex;
@@ -229,16 +247,18 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
     Widget? statusWidget; // 使用Widget替代IconData，支持动画
 
     if (hasError) {
-      backgroundColor = isSelected
-          ? Theme.of(context).colorScheme.errorContainer
-          : Theme.of(context).colorScheme.errorContainer.withOpacity(0.3);
+      backgroundColor =
+          isSelected
+              ? Theme.of(context).colorScheme.errorContainer
+              : Theme.of(context).colorScheme.errorContainer.withOpacity(0.3);
       borderColor = Theme.of(context).colorScheme.error;
       textColor = Theme.of(context).colorScheme.onErrorContainer;
       statusWidget = Icon(Icons.error_outline, size: 16, color: textColor);
     } else if (isGenerating) {
-      backgroundColor = isSelected
-          ? Theme.of(context).colorScheme.primaryContainer
-          : Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3);
+      backgroundColor =
+          isSelected
+              ? Theme.of(context).colorScheme.primaryContainer
+              : Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3);
       borderColor = Theme.of(context).colorScheme.primary;
       textColor = Theme.of(context).colorScheme.onPrimaryContainer;
       // 使用旋转动画的加载图标
@@ -251,12 +271,19 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
         ),
       );
     } else {
-      backgroundColor = isSelected
-          ? Theme.of(context).colorScheme.tertiaryContainer
-          : Theme.of(context).colorScheme.tertiaryContainer.withOpacity(0.3);
+      backgroundColor =
+          isSelected
+              ? Theme.of(context).colorScheme.tertiaryContainer
+              : Theme.of(
+                context,
+              ).colorScheme.tertiaryContainer.withOpacity(0.3);
       borderColor = Theme.of(context).colorScheme.tertiary;
       textColor = Theme.of(context).colorScheme.onTertiaryContainer;
-      statusWidget = Icon(Icons.check_circle_outline, size: 16, color: textColor);
+      statusWidget = Icon(
+        Icons.check_circle_outline,
+        size: 16,
+        color: textColor,
+      );
     }
 
     return GestureDetector(
@@ -266,10 +293,7 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: borderColor,
-            width: isSelected ? 2 : 1,
-          ),
+          border: Border.all(color: borderColor, width: isSelected ? 2 : 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -330,9 +354,10 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
           ToolCallSteps(
             steps: message.toolCall!.steps,
             isGenerating: message.isGenerating,
-            onRerunStep: widget.onRerunStep != null
-                ? (stepIndex) => widget.onRerunStep!(message.id, stepIndex)
-                : null,
+            onRerunStep:
+                widget.onRerunStep != null
+                    ? (stepIndex) => widget.onRerunStep!(message.id, stepIndex)
+                    : null,
           ),
         ]
         // 如果正在生成普通消息

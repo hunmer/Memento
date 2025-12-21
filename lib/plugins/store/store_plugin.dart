@@ -9,6 +9,7 @@ import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/widgets/point_settings_view.dart';
+import 'package:Memento/plugins/store/screens/store_settings_screen.dart';
 import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/events/point_award_event.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
@@ -251,25 +252,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Widget buildSettingsView(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            title: Text('store_pointSettingsTitle'.tr),
-            subtitle: Text(
-              'store_pointSettingsSubtitle'.tr,
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () {
-              NavigationHelper.push(context, PointSettingsView(plugin: this),
-              );
-            },
-          ),
-        ],
-      ),
-    );
+    return StoreSettingsScreen(plugin: this);
   }
 
   /// 获取事件显示名称
@@ -348,7 +331,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.getProducts(params);
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode(result.dataOrNull ?? []);
@@ -361,7 +346,8 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   Future<String> _jsGetProduct(Map<String, dynamic> params) async {
     try {
       // 支持 productId 或 id 参数
-      final productId = params['productId'] as String? ?? params['id'] as String?;
+      final productId =
+          params['productId'] as String? ?? params['id'] as String?;
       if (productId == null || productId.isEmpty) {
         return jsonEncode({'error': '缺少必需参数: productId 或 id'});
       }
@@ -369,7 +355,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.getProductById({'id': productId});
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       final product = result.dataOrNull;
@@ -389,7 +377,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.createProduct(params);
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode(result.dataOrNull ?? {});
@@ -404,7 +394,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.updateProduct(params);
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode(result.dataOrNull ?? {});
@@ -418,13 +410,19 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     try {
       final String? productId = params['productId'] ?? params['id'];
       if (productId == null || productId.isEmpty) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: productId 或 id'});
+        return jsonEncode({
+          'success': false,
+          'error': '缺少必需参数: productId 或 id',
+        });
       }
 
       final result = await useCase.deleteProduct({'id': productId});
 
       if (result.isFailure) {
-        return jsonEncode({'success': false, 'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'success': false,
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode({'success': true, 'productId': productId});
@@ -444,7 +442,10 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.exchangeProduct({'productId': productId});
 
       if (result.isFailure) {
-        return jsonEncode({'success': false, 'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'success': false,
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode({
@@ -464,11 +465,17 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.getPointsInfo(params);
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       final pointsInfo = result.dataOrNull;
-      return jsonEncode(pointsInfo != null ? pointsInfo['currentPoints'] : controller.currentPoints);
+      return jsonEncode(
+        pointsInfo != null
+            ? pointsInfo['currentPoints']
+            : controller.currentPoints,
+      );
     } catch (e) {
       return jsonEncode(controller.currentPoints);
     }
@@ -493,13 +500,18 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       });
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       final pointsInfo = result.dataOrNull;
       return jsonEncode({
         'success': true,
-        'currentPoints': pointsInfo != null ? pointsInfo['currentPoints'] : controller.currentPoints,
+        'currentPoints':
+            pointsInfo != null
+                ? pointsInfo['currentPoints']
+                : controller.currentPoints,
         'message': '积分已${points > 0 ? "增加" : "减少"}: $points',
       });
     } catch (e) {
@@ -514,7 +526,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.getUserItems(params);
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode(result.dataOrNull ?? []);
@@ -530,7 +544,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.searchPointsLogs(params);
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode(result.dataOrNull ?? []);
@@ -546,7 +562,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.getUserItems(params);
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode(result.dataOrNull ?? []);
@@ -566,13 +584,13 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.useItem({'itemId': itemId});
 
       if (result.isFailure) {
-        return jsonEncode({'success': false, 'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'success': false,
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
-      return jsonEncode({
-        'success': true,
-        'message': '使用成功',
-      });
+      return jsonEncode({'success': true, 'message': '使用成功'});
     } catch (e) {
       return jsonEncode({'success': false, 'error': '使用物品失败: $e'});
     }
@@ -583,13 +601,19 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     try {
       final String? productId = params['productId'] ?? params['id'];
       if (productId == null || productId.isEmpty) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: productId 或 id'});
+        return jsonEncode({
+          'success': false,
+          'error': '缺少必需参数: productId 或 id',
+        });
       }
 
       final result = await useCase.archiveProduct({'id': productId});
 
       if (result.isFailure) {
-        return jsonEncode({'success': false, 'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'success': false,
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode({'success': true, 'productId': productId});
@@ -603,13 +627,19 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     try {
       final String? productId = params['productId'] ?? params['id'];
       if (productId == null || productId.isEmpty) {
-        return jsonEncode({'success': false, 'error': '缺少必需参数: productId 或 id'});
+        return jsonEncode({
+          'success': false,
+          'error': '缺少必需参数: productId 或 id',
+        });
       }
 
       final result = await useCase.restoreProduct({'id': productId});
 
       if (result.isFailure) {
-        return jsonEncode({'success': false, 'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'success': false,
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode({'success': true, 'productId': productId});
@@ -625,7 +655,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.getArchivedProducts(params);
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode(result.dataOrNull ?? []);
@@ -661,7 +693,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
         });
 
         if (result.isFailure) {
-          return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+          return jsonEncode({
+            'error': result.errorOrNull?.message ?? 'Unknown error',
+          });
         }
 
         final products = result.dataOrNull as List? ?? [];
@@ -675,11 +709,15 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
         final result = await useCase.getProductById({'id': value.toString()});
 
         if (result.isFailure) {
-          return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+          return jsonEncode({
+            'error': result.errorOrNull?.message ?? 'Unknown error',
+          });
         }
 
         final product = result.dataOrNull;
-        return jsonEncode(findAll ? (product != null ? [product] : []) : product);
+        return jsonEncode(
+          findAll ? (product != null ? [product] : []) : product,
+        );
       }
 
       return jsonEncode(findAll ? [] : null);
@@ -699,7 +737,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.getProductById({'id': id});
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode(result.dataOrNull);
@@ -728,7 +768,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       });
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       final products = result.dataOrNull as List? ?? [];
@@ -774,7 +816,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
         });
 
         if (result.isFailure) {
-          return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+          return jsonEncode({
+            'error': result.errorOrNull?.message ?? 'Unknown error',
+          });
         }
 
         final items = result.dataOrNull as List? ?? [];
@@ -788,7 +832,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
         final result = await useCase.getUserItemById({'id': value.toString()});
 
         if (result.isFailure) {
-          return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+          return jsonEncode({
+            'error': result.errorOrNull?.message ?? 'Unknown error',
+          });
         }
 
         final item = result.dataOrNull;
@@ -812,7 +858,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       final result = await useCase.getUserItemById({'id': id});
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message ?? 'Unknown error'});
+        return jsonEncode({
+          'error': result.errorOrNull?.message ?? 'Unknown error',
+        });
       }
 
       return jsonEncode(result.dataOrNull);
@@ -828,46 +876,52 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
     final selectorService = pluginDataSelectorService;
 
     // 注册商品选择器
-    selectorService.registerSelector(SelectorDefinition(
-      id: 'store.product',
-      pluginId: id,
-      name: '选择商品',
-      icon: icon,
-      color: color,
-      searchable: true,
-      selectionMode: SelectionMode.single,
-      steps: [
-        SelectorStep(
-          id: 'product',
-          title: '选择商品',
-          viewType: SelectorViewType.grid,
-          isFinalStep: true,
-          dataLoader: (_) async {
-            return controller.products.map((product) {
-              // 构建副标题：价格 + 库存
-              final subtitle = '${product.price} 积分 · 库存: ${product.stock}';
+    selectorService.registerSelector(
+      SelectorDefinition(
+        id: 'store.product',
+        pluginId: id,
+        name: '选择商品',
+        icon: icon,
+        color: color,
+        searchable: true,
+        selectionMode: SelectionMode.single,
+        steps: [
+          SelectorStep(
+            id: 'product',
+            title: '选择商品',
+            viewType: SelectorViewType.grid,
+            isFinalStep: true,
+            dataLoader: (_) async {
+              return controller.products.map((product) {
+                // 构建副标题：价格 + 库存
+                final subtitle = '${product.price} 积分 · 库存: ${product.stock}';
 
-              return SelectableItem(
-                id: product.id,
-                title: product.name,
-                subtitle: subtitle,
-                icon: Icons.shopping_bag,
-                rawData: product,
-              );
-            }).toList();
-          },
-          searchFilter: (items, query) {
-            if (query.isEmpty) return items;
-            final lowerQuery = query.toLowerCase();
-            return items.where((item) {
-              final matchesTitle = item.title.toLowerCase().contains(lowerQuery);
-              final product = item.rawData as Product;
-              final matchesDescription = product.description.toLowerCase().contains(lowerQuery);
-              return matchesTitle || matchesDescription;
-            }).toList();
-          },
-        ),
-      ],
-    ));
+                return SelectableItem(
+                  id: product.id,
+                  title: product.name,
+                  subtitle: subtitle,
+                  icon: Icons.shopping_bag,
+                  rawData: product,
+                );
+              }).toList();
+            },
+            searchFilter: (items, query) {
+              if (query.isEmpty) return items;
+              final lowerQuery = query.toLowerCase();
+              return items.where((item) {
+                final matchesTitle = item.title.toLowerCase().contains(
+                  lowerQuery,
+                );
+                final product = item.rawData as Product;
+                final matchesDescription = product.description
+                    .toLowerCase()
+                    .contains(lowerQuery);
+                return matchesTitle || matchesDescription;
+              }).toList();
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

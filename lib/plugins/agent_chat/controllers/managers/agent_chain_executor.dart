@@ -267,11 +267,14 @@ class AgentChainExecutor {
           final prevMsg = previousMessages[i];
           if (prevMsg.content.isNotEmpty) {
             final prevAgent = agentChain[i];
-            messages.add(
-              ChatCompletionMessage.assistant(
-                content: '[${prevAgent.name}]: ${prevMsg.content}',
-              ),
-            );
+            // 防护：确保 prevAgent 是有效的 AIAgent 对象
+            if (prevAgent != null && prevAgent.name.isNotEmpty) {
+              messages.add(
+                ChatCompletionMessage.assistant(
+                  content: '[${prevAgent.name}]: ${prevMsg.content}',
+                ),
+              );
+            }
           }
         }
 
@@ -297,10 +300,15 @@ class AgentChainExecutor {
           final prevAgent = agentChain[stepIndex - 1];
           final prevContent = previousMessages[stepIndex - 1].content;
 
+          // 防护：确保 prevAgent 是有效的 AIAgent 对象
+          final agentName = prevAgent != null && prevAgent.name.isNotEmpty
+              ? prevAgent.name
+              : '未知 Agent';
+
           messages.add(
             ChatCompletionMessage.user(
               content: ChatCompletionUserMessageContent.string(
-                '来自前一步骤 [$prevAgent.name] 的输出：\n\n$prevContent\n\n请基于以上内容继续处理。',
+                '来自前一步骤 [$agentName] 的输出：\n\n$prevContent\n\n请基于以上内容继续处理。',
               ),
             ),
           );
