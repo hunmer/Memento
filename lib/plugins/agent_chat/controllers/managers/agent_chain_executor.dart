@@ -11,6 +11,7 @@ import '../../services/tool_service.dart';
 import 'package:Memento/utils/file_picker_helper.dart';
 import 'package:Memento/plugins/openai/services/request_service.dart';
 import 'shared/manager_context.dart';
+import 'tool_executor.dart';
 
 /// Agent 链执行管理器
 ///
@@ -31,17 +32,8 @@ class AgentChainExecutor {
   /// 是否正在取消
   final bool Function() isCancelling;
 
-  /// 工具调用处理回调
-  final Future<void> Function(String messageId, String aiResponse)?
-  onHandleToolCall;
-
-  /// 工具结果续写回调
-  final Future<void> Function(
-    String messageId,
-    String toolResult,
-    String currentContent,
-  )?
-  onContinueWithToolResult;
+  /// 工具执行器（链式调用专用，不调用续写回调）
+  late final ToolExecutor _toolExecutor;
 
   AgentChainExecutor({
     required this.context,
@@ -49,9 +41,14 @@ class AgentChainExecutor {
     required this.getAgentChain,
     this.getToolAgent,
     required this.isCancelling,
-    this.onHandleToolCall,
-    this.onContinueWithToolResult,
-  });
+  }) {
+    // 创建专用的工具执行器，不传递续写回调
+    // 链式调用有自己的逻辑来处理工具执行后的总结
+    _toolExecutor = ToolExecutor(
+      context: context,
+      onContinueWithToolResult: null, // 不调用续写回调
+    );
+  }
 
   // ========== 核心方法 ==========
 
@@ -106,7 +103,9 @@ class AgentChainExecutor {
     final chainMessages = <ChatMessage>[];
 
     // 遍历执行每个 agent
-    for (int i = 0; i < sortedNodes.length; i++) {
+    // 注意：在执行过程中，链可能会动态扩展（插入工具调用agent）
+    int i = 0;
+    while (i < sortedNodes.length) {
       final node = sortedNodes[i];
       final agent = agentChain[i];
 
@@ -126,7 +125,7 @@ class AgentChainExecutor {
       chainMessages.add(aiMessage);
 
       try {
-        // 根据上下文模式构建消息列表（包含工具列表，如果启用）
+        // 根据上下文模式构建消息列表
         final contextMessages = buildChainContextMessages(
           node: node,
           stepIndex: i,
@@ -143,7 +142,7 @@ class AgentChainExecutor {
           contextMessages: contextMessages,
           files: i == 0 ? files : [], // 只有第一个 agent 处理文件
           enableToolCalling: agent.enableFunctionCalling,
-          userInput: userInput, // 传递用户输入用于工具调用第二阶段
+          userInput: userInput,
         );
 
         // 检查是否被取消
@@ -185,6 +184,8 @@ class AgentChainExecutor {
         // 停止后续 agent 的执行
         break;
       }
+
+      i++;
     }
 
     debugPrint('🏁 链式调用完成');
@@ -592,6 +593,7 @@ class AgentChainExecutor {
           onComplete: () {
             // 处理第二阶段完成
             _handleSecondPhaseComplete(
+              agent: agent,
               aiMessageId: aiMessageId,
               secondResponse: secondBuffer.toString(),
               completer: secondPhaseCompleter,
@@ -605,9 +607,7 @@ class AgentChainExecutor {
           agent.enableFunctionCalling &&
           ToolService.containsToolCall(firstResponse)) {
         // 直接包含工具调用（跳过第一阶段）
-        if (onHandleToolCall != null) {
-          await onHandleToolCall!(aiMessageId, firstResponse);
-        }
+        await _toolExecutor.handleToolCall(aiMessageId, firstResponse);
       } else {
         // 无需工具，直接完成
         context.messageService.completeAIMessage(
@@ -640,7 +640,12 @@ class AgentChainExecutor {
   }
 
   /// 处理第二阶段（工具执行）完成
+  /// [agent] - 当前执行的agent
+  /// [aiMessageId] - 消息ID
+  /// [secondResponse] - 第二阶段响应
+  /// [completer] - 完成器
   void _handleSecondPhaseComplete({
+    required AIAgent agent,
     required String aiMessageId,
     required String secondResponse,
     required Completer<void> completer,
@@ -648,18 +653,48 @@ class AgentChainExecutor {
     try {
       // 执行工具调用
       if (ToolService.containsToolCall(secondResponse)) {
-        if (onHandleToolCall != null) {
-          // 执行工具调用
-          await onHandleToolCall!(aiMessageId, secondResponse);
+        // 使用内部的工具执行器（不会调用续写回调）
+        await _toolExecutor.handleToolCall(aiMessageId, secondResponse);
 
-          // 链式调用模式下，工具执行完成后直接标记消息为完成状态
-          // 不需要继续生成，因为工具结果已经追加到消息内容中
-          context.messageService.completeAIMessage(
+        // 工具执行完成后，创建一个临时的"总结agent"（关闭工具调用）
+        // 来基于工具结果生成最终回复
+        if (agent.enableFunctionCalling) {
+          debugPrint('🔧 [链式调用] 创建总结Agent（关闭工具调用）');
+
+          // 克隆agent并关闭工具调用
+          final summaryAgent = agent.copyWith(enableFunctionCalling: false);
+
+          // 创建新的AI消息用于总结
+          final summaryMessage = ChatMessage.ai(
+            conversationId: context.conversationId,
+            content: '',
+            isGenerating: true,
+            generatedByAgentId: summaryAgent.id,
+          );
+          await context.messageService.addMessage(summaryMessage);
+
+          // 获取当前消息（包含工具执行结果）
+          final currentMessage = context.messageService.getMessage(
             context.conversationId,
             aiMessageId,
           );
-          debugPrint('✅ [链式调用] 工具执行完成');
+
+          if (currentMessage != null) {
+            // 使用总结agent基于工具结果生成回复
+            await _generateSummaryResponse(
+              agent: summaryAgent,
+              summaryMessageId: summaryMessage.id,
+              toolResultMessage: currentMessage,
+            );
+          }
         }
+
+        // 标记原消息为完成状态
+        context.messageService.completeAIMessage(
+          context.conversationId,
+          aiMessageId,
+        );
+        debugPrint('✅ [链式调用] 工具执行完成');
       } else {
         // 没有生成工具调用，直接完成
         _processNormalResponse(aiMessageId, secondResponse);
@@ -695,6 +730,79 @@ class AgentChainExecutor {
     );
 
     context.messageService.completeAIMessage(context.conversationId, messageId);
+  }
+
+  /// 生成总结回复
+  /// [agent] - 总结agent（已关闭工具调用）
+  /// [summaryMessageId] - 总结消息ID
+  /// [toolResultMessage] - 包含工具执行结果的消息
+  Future<void> _generateSummaryResponse({
+    required AIAgent agent,
+    required String summaryMessageId,
+    required ChatMessage toolResultMessage,
+  }) async {
+    try {
+      debugPrint('🤖 [链式调用] 开始生成总结回复');
+
+      // 构建context messages：用户输入 + 工具执行结果
+      final summaryContextMessages = <ChatCompletionMessage>[
+        ChatCompletionMessage.user(
+          content: ChatCompletionUserMessageContent.string(
+            '工具执行结果：\n${toolResultMessage.content}\n\n请基于以上工具执行结果，给出简洁明了的总结和建议。',
+          ),
+        ),
+      ];
+
+      final buffer = StringBuffer();
+      int tokenCount = 0;
+
+      // 流式请求总结回复
+      await RequestService.streamResponse(
+        agent: agent,
+        prompt: null,
+        contextMessages: summaryContextMessages,
+        vision: false,
+        shouldCancel: isCancelling,
+        onToken: (token) {
+          buffer.write(token);
+          tokenCount++;
+
+          // 实时更新 UI
+          context.messageService.updateAIMessageContent(
+            context.conversationId,
+            summaryMessageId,
+            buffer.toString(),
+            tokenCount,
+          );
+        },
+        onComplete: () {
+          // 标记消息为完成状态
+          context.messageService.completeAIMessage(
+            context.conversationId,
+            summaryMessageId,
+          );
+          debugPrint('✅ [链式调用] 总结回复生成完成');
+        },
+        onError: (error) {
+          debugPrint('❌ [链式调用] 总结回复生成失败: $error');
+
+          final errorMessage = error == '已取消发送' ? '🛑 用户已取消操作' : '❌ 生成总结时出错: $error';
+          context.messageService.updateAIMessageContent(
+            context.conversationId,
+            summaryMessageId,
+            errorMessage,
+            0,
+          );
+          context.messageService.completeAIMessage(
+            context.conversationId,
+            summaryMessageId,
+          );
+        },
+      );
+    } catch (e) {
+      debugPrint('❌ [链式调用] 生成总结回复失败: $e');
+      rethrow;
+    }
   }
 
   /// 从 contextMessages 中提取用户输入

@@ -480,7 +480,7 @@ class AIRequestHandler {
 
               // 第二阶段：请求生成工具调用代码
               await RequestService.streamResponse(
-                agent: toolExecutionAgent!,
+                agent: toolExecutionAgent,
                 prompt: null,
                 contextMessages: toolExecutionMessages,
                 vision: false,
