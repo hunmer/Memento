@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
@@ -21,8 +20,7 @@ class AgentMarketplaceScreen extends StatefulWidget {
 }
 
 class _AgentMarketplaceScreenState extends State<AgentMarketplaceScreen> {
-  final AgentMarketplaceService _marketplaceService =
-      AgentMarketplaceService();
+  final AgentMarketplaceService _marketplaceService = AgentMarketplaceService();
   final AgentController _agentController = AgentController();
 
   bool _isGridView = true;
@@ -71,15 +69,13 @@ class _AgentMarketplaceScreenState extends State<AgentMarketplaceScreen> {
         _agentController.loadAgents(),
       ]);
 
-      _marketplaceAgents = results[0] as List<AIAgent>;
-      _localAgents = results[1] as List<AIAgent>;
+      _marketplaceAgents = results[0];
+      _localAgents = results[1];
 
       // 提取所有标签
-      _allTags = _marketplaceAgents
-          .expand((agent) => agent.tags)
-          .toSet()
-          .toList()
-        ..sort();
+      _allTags =
+          _marketplaceAgents.expand((agent) => agent.tags).toSet().toList()
+            ..sort();
 
       setState(() {
         _isLoading = false;
@@ -119,16 +115,17 @@ class _AgentMarketplaceScreenState extends State<AgentMarketplaceScreen> {
   void _showFilterDialog() {
     showDialog(
       context: context,
-      builder: (context) => FilterDialog(
-        selectedProviders: _selectedProviders,
-        selectedTags: _selectedTags,
-        onApply: (providers, tags) {
-          setState(() {
-            _selectedProviders = providers;
-            _selectedTags = tags;
-          });
-        },
-      ),
+      builder:
+          (context) => FilterDialog(
+            selectedProviders: _selectedProviders,
+            selectedTags: _selectedTags,
+            onApply: (providers, tags) {
+              setState(() {
+                _selectedProviders = providers;
+                _selectedTags = tags;
+              });
+            },
+          ),
     );
   }
 
@@ -150,15 +147,19 @@ class _AgentMarketplaceScreenState extends State<AgentMarketplaceScreen> {
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
         final nameMatch = agent.name.toLowerCase().contains(query);
-        final descriptionMatch = agent.description.toLowerCase().contains(query);
-        final tagsMatch =
-            agent.tags.any((tag) => tag.toLowerCase().contains(query));
+        final descriptionMatch = agent.description.toLowerCase().contains(
+          query,
+        );
+        final tagsMatch = agent.tags.any(
+          (tag) => tag.toLowerCase().contains(query),
+        );
 
         // 根据启用的搜索过滤器进行匹配
-        final enabledFilters = _searchFilters.entries
-            .where((entry) => entry.value)
-            .map((entry) => entry.key)
-            .toList();
+        final enabledFilters =
+            _searchFilters.entries
+                .where((entry) => entry.value)
+                .map((entry) => entry.key)
+                .toList();
 
         final matches = <bool>[];
         if (enabledFilters.contains('name')) {
@@ -192,34 +193,32 @@ class _AgentMarketplaceScreenState extends State<AgentMarketplaceScreen> {
         children: [
           Text(
             'openai_tags'.tr,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: _allTags.map((tag) {
-                final isSelected = _selectedTags.contains(tag);
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(tag),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          _selectedTags.add(tag);
-                        } else {
-                          _selectedTags.remove(tag);
-                        }
-                      });
-                    },
-                  ),
-                );
-              }).toList(),
+              children:
+                  _allTags.map((tag) {
+                    final isSelected = _selectedTags.contains(tag);
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        label: Text(tag),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedTags.add(tag);
+                            } else {
+                              _selectedTags.remove(tag);
+                            }
+                          });
+                        },
+                      ),
+                    );
+                  }).toList(),
             ),
           ),
         ],
@@ -243,11 +242,7 @@ class _AgentMarketplaceScreenState extends State<AgentMarketplaceScreen> {
 
       // 启用搜索过滤器
       enableSearchFilter: true,
-      filterLabels: const {
-        'name': '名称',
-        'description': '描述',
-        'tags': '标签',
-      },
+      filterLabels: const {'name': '名称', 'description': '描述', 'tags': '标签'},
       onSearchFilterChanged: _onSearchFilterChanged,
 
       actions: [
@@ -276,9 +271,7 @@ class _AgentMarketplaceScreenState extends State<AgentMarketplaceScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_errorMessage != null) {
@@ -286,18 +279,11 @@ class _AgentMarketplaceScreenState extends State<AgentMarketplaceScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               _errorMessage!,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -316,18 +302,11 @@ class _AgentMarketplaceScreenState extends State<AgentMarketplaceScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.store_outlined,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.store_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               '商场暂无可用 Agent',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
           ],
         ),
@@ -338,17 +317,18 @@ class _AgentMarketplaceScreenState extends State<AgentMarketplaceScreen> {
       children: [
         _buildCategoryFilter(),
         Expanded(
-          child: _isGridView
-              ? MarketplaceAgentGridView(
-                  marketplaceAgents: _getFilteredAgents(),
-                  localAgents: _localAgents,
-                  onAgentChanged: _refreshLocalAgents,
-                )
-              : MarketplaceAgentListView(
-                  marketplaceAgents: _getFilteredAgents(),
-                  localAgents: _localAgents,
-                  onAgentChanged: _refreshLocalAgents,
-                ),
+          child:
+              _isGridView
+                  ? MarketplaceAgentGridView(
+                    marketplaceAgents: _getFilteredAgents(),
+                    localAgents: _localAgents,
+                    onAgentChanged: _refreshLocalAgents,
+                  )
+                  : MarketplaceAgentListView(
+                    marketplaceAgents: _getFilteredAgents(),
+                    localAgents: _localAgents,
+                    onAgentChanged: _refreshLocalAgents,
+                  ),
         ),
       ],
     );

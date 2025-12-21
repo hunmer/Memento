@@ -1,8 +1,6 @@
-import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:path/path.dart' as path;
 
 class AudioPlayerWidget extends StatefulWidget {
   final String audioPath;

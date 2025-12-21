@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart';
-import '../../models/chat_message.dart';
 import '../../models/tool_call_step.dart';
 import '../../services/tool_service.dart';
 import '../../services/token_counter_service.dart';
@@ -19,10 +17,7 @@ class ToolExecutor {
   /// 参数: (messageId, toolResult, currentContent)
   final Future<void> Function(String, String, String)? onContinueWithToolResult;
 
-  ToolExecutor({
-    required this.context,
-    this.onContinueWithToolResult,
-  });
+  ToolExecutor({required this.context, this.onContinueWithToolResult});
 
   // ========== 核心方法 ==========
 
@@ -159,7 +154,9 @@ class ToolExecutor {
         // 4. 将工具结果追加到 content
         final contentWithToolResult =
             '$thinkingContent\n\n[工具执行结果]\n${toolResultsBuffer.toString()}';
-        updatedMessage = updatedMessage.copyWith(content: contentWithToolResult);
+        updatedMessage = updatedMessage.copyWith(
+          content: contentWithToolResult,
+        );
         await context.messageService.updateMessage(updatedMessage);
         debugPrint(
           '📝 已将工具结果追加到 content, 总长度: ${contentWithToolResult.length}',
@@ -205,10 +202,7 @@ class ToolExecutor {
   /// 执行工具调用步骤
   ///
   /// 用于模板执行场景，不包含 AI 续写逻辑
-  Future<void> executeSteps(
-    String messageId,
-    List<ToolCallStep> steps,
-  ) async {
+  Future<void> executeSteps(String messageId, List<ToolCallStep> steps) async {
     // 初始化工具调用上下文（用于步骤间结果传递）
     final jsBridge = JSBridgeManager.instance;
     jsBridge.initToolCallContext(messageId);
@@ -277,9 +271,10 @@ class ToolExecutor {
       debugPrint('🔄 开始重新执行工具调用, messageId=${messageId.substring(0, 8)}');
 
       // 重置所有步骤状态
-      final resetSteps = message.toolCall!.steps.map((step) {
-        return step.withoutRuntimeState(state: ToolCallStatus.pending);
-      }).toList();
+      final resetSteps =
+          message.toolCall!.steps.map((step) {
+            return step.withoutRuntimeState(state: ToolCallStatus.pending);
+          }).toList();
 
       // 更新消息
       var updatedMessage = message.copyWith(

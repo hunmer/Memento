@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import '../../models/conversation.dart';
 import '../../models/chat_message.dart';
 import '../../models/file_attachment.dart';
@@ -25,10 +24,7 @@ class MessageSender {
   /// 选中的工具模板
   SavedToolTemplate? _selectedToolTemplate;
 
-  MessageSender({
-    required this.context,
-    required this.conversation,
-  });
+  MessageSender({required this.context, required this.conversation});
 
   // ========== Getters ==========
 
@@ -103,12 +99,15 @@ class MessageSender {
   /// 准备发送消息（创建用户消息并清空输入）
   ///
   /// 返回: (userMessage, userInput, files, template)
-  Future<({
-    ChatMessage userMessage,
-    String userInput,
-    List<File> files,
-    SavedToolTemplate? template,
-  })> prepareSend() async {
+  Future<
+    ({
+      ChatMessage userMessage,
+      String userInput,
+      List<File> files,
+      SavedToolTemplate? template,
+    })
+  >
+  prepareSend() async {
     // 构建 metadata
     final metadata = <String, dynamic>{};
     if (_selectedToolTemplate != null) {
@@ -220,10 +219,14 @@ class MessageSender {
         'toolName': toolName,
       });
 
-      final metadata = Map<String, dynamic>.from(currentConversation.metadata ?? {});
+      final metadata = Map<String, dynamic>.from(
+        currentConversation.metadata ?? {},
+      );
       metadata['selectedTools'] = currentTools;
 
-      final updatedConversation = currentConversation.copyWith(metadata: metadata);
+      final updatedConversation = currentConversation.copyWith(
+        metadata: metadata,
+      );
       await context.conversationService.updateConversation(updatedConversation);
 
       context.notify();
@@ -244,10 +247,14 @@ class MessageSender {
       (tool) => tool['pluginId'] == pluginId && tool['toolId'] == toolId,
     );
 
-    final metadata = Map<String, dynamic>.from(currentConversation.metadata ?? {});
+    final metadata = Map<String, dynamic>.from(
+      currentConversation.metadata ?? {},
+    );
     metadata['selectedTools'] = currentTools;
 
-    final updatedConversation = currentConversation.copyWith(metadata: metadata);
+    final updatedConversation = currentConversation.copyWith(
+      metadata: metadata,
+    );
     await context.conversationService.updateConversation(updatedConversation);
 
     context.notify();
@@ -255,11 +262,17 @@ class MessageSender {
   }
 
   /// 清空选中的工具
-  Future<Conversation> clearSelectedTools(Conversation currentConversation) async {
-    final metadata = Map<String, dynamic>.from(currentConversation.metadata ?? {});
+  Future<Conversation> clearSelectedTools(
+    Conversation currentConversation,
+  ) async {
+    final metadata = Map<String, dynamic>.from(
+      currentConversation.metadata ?? {},
+    );
     metadata.remove('selectedTools');
 
-    final updatedConversation = currentConversation.copyWith(metadata: metadata);
+    final updatedConversation = currentConversation.copyWith(
+      metadata: metadata,
+    );
     await context.conversationService.updateConversation(updatedConversation);
 
     context.notify();
