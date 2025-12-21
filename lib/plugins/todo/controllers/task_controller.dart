@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/calendar/models/event.dart';
 import 'package:Memento/plugins/calendar/services/system_calendar_manager.dart';
+import 'package:Memento/plugins/calendar/services/calendar_mapping_manager.dart';
 
 // 排序方式枚举，移到类外部
 enum SortBy { dueDate, priority, custom }
@@ -580,6 +581,7 @@ class TaskController extends ChangeNotifier {
   Future<void> _syncTaskToSystemCalendar(Task task) async {
     try {
       final systemCalendar = SystemCalendarManager.instance;
+      final mappingManager = CalendarMappingManager.instance;
 
       // 初始化系统日历管理器（如果需要）
       if (!systemCalendar.isInitialized) {
@@ -588,6 +590,13 @@ class TaskController extends ChangeNotifier {
           debugPrint('TaskController: 系统日历管理器初始化失败，跳过同步');
           return;
         }
+      }
+
+      // ✅ 检查是否已存在映射关系，避免重复同步
+      final existingSystemId = mappingManager.getSystemEventId('todo_${task.id}');
+      if (existingSystemId != null) {
+        debugPrint('TaskController: 任务 "${task.title}" 已存在映射关系，跳过同步');
+        return;
       }
 
       // 将任务转换为日历事件
@@ -604,11 +613,23 @@ class TaskController extends ChangeNotifier {
 
       // 同步到系统日历
       final result = await systemCalendar.addEventToSystem(calendarEvent);
-      if (result.key) {
-        debugPrint('TaskController: 任务 "${task.title}" 已同步到系统日历，系统ID: ${result.value}');
-
-        // 注意：systemEventId 已自动保存到 CalendarEvent 对象中
-        // 在实际使用中，如果需要删除或更新事件，可以使用 calendarEvent.systemEventId
+      if (result.key && result.value != null) {
+        // 保存映射关系
+        await mappingManager.addMapping(
+          localId: 'todo_${task.id}',
+          from: 'todo',
+          data: {
+            'title': task.title,
+            'description': task.description ?? '',
+            'startTime': task.startDate?.toIso8601String(),
+            'endTime': task.dueDate?.toIso8601String(),
+            'icon': task.icon?.codePoint,
+            'color': task.priorityColor.value,
+            'reminderMinutes': null,
+          },
+          systemId: result.value!,
+        );
+        debugPrint('TaskController: 任务 "${task.title}" 同步到系统日历成功，系统ID: ${result.value}');
       } else {
         debugPrint('TaskController: 任务 "${task.title}" 同步到系统日历失败');
       }
@@ -645,12 +666,17 @@ class TaskController extends ChangeNotifier {
   Future<void> _syncUpdateToSystemCalendar(Task oldTask, Task newTask) async {
     try {
       final systemCalendar = SystemCalendarManager.instance;
+      final mappingManager = CalendarMappingManager.instance;
       if (!systemCalendar.isInitialized) {
         return;
       }
 
-      // 删除旧事件
-      await systemCalendar.deleteEventFromSystem('todo_${oldTask.id}');
+      // 通过映射关系删除旧事件
+      final oldSystemEventId = mappingManager.getSystemEventId('todo_${oldTask.id}');
+      if (oldSystemEventId != null) {
+        await systemCalendar.deleteEventFromSystem(oldSystemEventId);
+        await mappingManager.removeMapping('todo_${oldTask.id}');
+      }
 
       // 如果新任务有日期，同步新事件
       if (newTask.startDate != null || newTask.dueDate != null) {
@@ -665,15 +691,25 @@ class TaskController extends ChangeNotifier {
   Future<void> _syncDeleteFromSystemCalendar(Task task) async {
     try {
       final systemCalendar = SystemCalendarManager.instance;
+      final mappingManager = CalendarMappingManager.instance;
       if (!systemCalendar.isInitialized) {
         return;
       }
 
-      final success = await systemCalendar.deleteEventFromSystem('todo_${task.id}');
-      if (success) {
-        debugPrint('TaskController: 任务 "${task.title}" 已从系统日历删除');
+      // 通过映射关系获取系统日历ID
+      final systemEventId = mappingManager.getSystemEventId('todo_${task.id}');
+      if (systemEventId != null) {
+        final success = await systemCalendar.deleteEventFromSystem(systemEventId);
+        if (success) {
+          debugPrint('TaskController: 任务 "${task.title}" 已从系统日历删除');
+
+          // 删除映射关系
+          await mappingManager.removeMapping('todo_${task.id}');
+        } else {
+          debugPrint('TaskController: 任务 "${task.title}" 从系统日历删除失败');
+        }
       } else {
-        debugPrint('TaskController: 任务 "${task.title}" 从系统日历删除失败');
+        debugPrint('TaskController: 未找到任务 "${task.title}" 的映射关系');
       }
     } catch (e) {
       debugPrint('TaskController: 从系统日历删除任务异常: $e');

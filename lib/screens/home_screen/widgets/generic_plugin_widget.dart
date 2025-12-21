@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/utils/image_utils.dart';
 
@@ -66,6 +68,9 @@ class GenericIconWidget extends StatelessWidget {
 /// - 图标颜色
 /// - 背景颜色
 class GenericPluginWidget extends StatelessWidget {
+  /// 插件唯一ID
+  final String pluginId;
+
   /// 插件名称
   final String pluginName;
 
@@ -83,6 +88,7 @@ class GenericPluginWidget extends StatelessWidget {
 
   const GenericPluginWidget({
     super.key,
+    required this.pluginId,
     required this.pluginName,
     required this.pluginIcon,
     required this.pluginDefaultColor,
@@ -93,6 +99,10 @@ class GenericPluginWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final bool enabledByConfig = globalConfigManager.isPluginEnabled(pluginId);
+    final bool pluginRegistered =
+        globalPluginManager.getPlugin(pluginId) != null;
+    final bool isEnabled = enabledByConfig && pluginRegistered;
 
     // 计算最终的图标颜色和背景颜色
     final finalIconColor = config.iconColor ?? pluginDefaultColor;
@@ -109,6 +119,16 @@ class GenericPluginWidget extends StatelessWidget {
         final iconSize = _calculateIconSize(availableWidth, availableHeight);
         final fontSize = _calculateFontSize(availableWidth, availableHeight);
         final padding = _calculatePadding(availableWidth, availableHeight);
+
+        if (!isEnabled) {
+          return Container(
+            decoration: BoxDecoration(
+              color: finalBackgroundColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: _buildDisabledContent(theme, finalIconColor, iconSize),
+          );
+        }
 
         return Container(
           decoration: BoxDecoration(
@@ -335,6 +355,29 @@ class GenericPluginWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: rows,
+      ),
+    );
+  }
+
+  /// 插件被禁用时的占位内容
+  Widget _buildDisabledContent(
+    ThemeData theme,
+    Color iconColor,
+    double iconSize,
+  ) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.block, size: iconSize, color: iconColor.withOpacity(0.6)),
+          const SizedBox(height: 12),
+          Text(
+            'screens_pluginDisabled'.tr,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

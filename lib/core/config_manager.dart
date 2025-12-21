@@ -40,6 +40,7 @@ class ConfigManager {
       'themeMode': 'system',
       'locale': 'zh_CN',
       'permissionsOnboardingCompleted': false,
+      'pluginStates': <String, dynamic>{},
     };
   }
 
@@ -87,6 +88,32 @@ class ConfigManager {
   /// è®¾ç½®åº”ç”¨çº§é…ç½®å¹¶ç«‹å³ä¿å­˜
   Future<void> setAppConfigValue<T>(String key, T value) async {
     _appConfig[key] = value;
+    await saveAppConfig();
+  }
+
+  Map<String, bool> getPluginEnabledStates() {
+    final states = _appConfig['pluginStates'];
+    if (states is Map) {
+      final Map<String, bool> result = {};
+      states.forEach((key, value) {
+        result[key.toString()] = value is bool ? value : value == true;
+      });
+      return result;
+    }
+    return {};
+  }
+
+  bool isPluginEnabled(String pluginId) {
+    final states = getPluginEnabledStates();
+    return states[pluginId] ?? true;
+  }
+
+  Future<void> setPluginEnabledState(String pluginId, bool enabled) async {
+    final Map<String, dynamic> states = Map<String, dynamic>.from(
+      (_appConfig['pluginStates'] as Map?) ?? {},
+    );
+    states[pluginId] = enabled;
+    _appConfig['pluginStates'] = states;
     await saveAppConfig();
   }
 

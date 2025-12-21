@@ -76,6 +76,7 @@ final Map<String, String> screensTranslationsZh = {
 
   // home_card
   'screens_cannotOpenPlugin': '无法打开插件',
+  'screens_pluginDisabled': '插件已禁用',
 
   // home_grid
   'screens_quickCreateLayout': '快速创建布局',

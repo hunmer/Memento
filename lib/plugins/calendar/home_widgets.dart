@@ -121,6 +121,7 @@ class CalendarHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'calendar',
         pluginName: 'calendar_name'.tr,
         pluginIcon: Icons.calendar_month,
         pluginDefaultColor: const Color.fromARGB(255, 211, 91, 91),

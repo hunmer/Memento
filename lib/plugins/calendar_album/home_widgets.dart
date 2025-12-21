@@ -118,6 +118,7 @@ class CalendarAlbumHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'calendar_album',
         pluginName: 'calendar_album_name'.tr,
         pluginIcon: Icons.notes_rounded,
         pluginDefaultColor: _pluginColor,

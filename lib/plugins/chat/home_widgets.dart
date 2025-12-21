@@ -108,6 +108,7 @@ class ChatHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'chat',
         pluginName: 'chat_widgetName'.tr,
         pluginIcon: Icons.chat_bubble,
         pluginDefaultColor: Colors.indigoAccent,
