@@ -35,12 +35,14 @@ class ChatScreenController extends ChangeNotifier {
   List<Message> messages = [];
   List<Message> allMessages = []; // 完整消息列表
   bool isMultiSelectMode = false;
-  final ValueNotifier<Set<String>> selectedMessageIds = ValueNotifier(<String>{});
+  final ValueNotifier<Set<String>> selectedMessageIds = ValueNotifier(
+    <String>{},
+  );
   DateTime? selectedDate;
   bool isLoading = false;
   static const int pageSize = 50;
   int currentStartIndex = 0; // 当前显示的消息起始索引
-  int currentEndIndex = 0;   // 当前显示的消息结束索引
+  int currentEndIndex = 0; // 当前显示的消息结束索引
 
   Message? messageBeingEdited;
   final TextEditingController editingController = TextEditingController();
@@ -78,7 +80,9 @@ class ChatScreenController extends ChangeNotifier {
     }
 
     // 获取完整消息列表
-    final channelMessages = await chatPlugin.channelService.getChannelMessages(channel.id);
+    final channelMessages = await chatPlugin.channelService.getChannelMessages(
+      channel.id,
+    );
     if (channelMessages == null) {
       debugPrint('Channel messages not found');
       return;
@@ -93,20 +97,33 @@ class ChatScreenController extends ChangeNotifier {
     // 如果需要定位到特定消息
     if (initialMessage != null && autoScroll) {
       _isLocatingMessage = true; // 设置定位标志
-      final targetIndex = allMessages.indexWhere((m) => m.id == initialMessage!.id);
+      final targetIndex = allMessages.indexWhere(
+        (m) => m.id == initialMessage!.id,
+      );
       if (targetIndex != -1) {
         // 计算显示范围：目标消息前后各 pageSize/2 条消息
         final halfPageSize = (pageSize / 2).floor();
-        currentStartIndex = (targetIndex - halfPageSize).clamp(0, allMessages.length);
-        currentEndIndex = (targetIndex + halfPageSize).clamp(0, allMessages.length);
+        currentStartIndex = (targetIndex - halfPageSize).clamp(
+          0,
+          allMessages.length,
+        );
+        currentEndIndex = (targetIndex + halfPageSize).clamp(
+          0,
+          allMessages.length,
+        );
 
         // 如果目标消息接近列表末尾，调整显示范围
         if (targetIndex > allMessages.length - halfPageSize) {
-          currentStartIndex = (allMessages.length - pageSize).clamp(0, allMessages.length);
+          currentStartIndex = (allMessages.length - pageSize).clamp(
+            0,
+            allMessages.length,
+          );
           currentEndIndex = allMessages.length;
         }
 
-        debugPrint('Target message index: $targetIndex, display range: $currentStartIndex-$currentEndIndex');
+        debugPrint(
+          'Target message index: $targetIndex, display range: $currentStartIndex-$currentEndIndex',
+        );
 
         // 加载显示范围内的消息
         _loadMessagesInRange();
@@ -117,7 +134,10 @@ class ChatScreenController extends ChangeNotifier {
           final displayIndex = targetIndex - currentStartIndex;
           if (displayIndex >= 0 && displayIndex < messages.length) {
             _isNavigatingToMessage = true; // 设置导航标志防止滚动监听干扰
-            scrollToMessageAtDisplayIndex(displayIndex, preferBeforePosition: false);
+            scrollToMessageAtDisplayIndex(
+              displayIndex,
+              preferBeforePosition: false,
+            );
 
             // 延迟重置标志，等待滚动动画完成
             Future.delayed(const Duration(milliseconds: 500), () {
@@ -173,7 +193,9 @@ class ChatScreenController extends ChangeNotifier {
 
       if (startIndex < endIndex) {
         messages.addAll(allMessages.sublist(startIndex, endIndex));
-        debugPrint('Loaded messages range: $startIndex-$endIndex (${messages.length} messages)');
+        debugPrint(
+          'Loaded messages range: $startIndex-$endIndex (${messages.length} messages)',
+        );
       }
 
       _updateDatesWithMessages();
@@ -198,13 +220,19 @@ class ChatScreenController extends ChangeNotifier {
   }
 
   /// 在显示列表中滚动到指定索引（使用scroll_to_index）
-  Future<void> scrollToMessageAtDisplayIndex(int displayIndex, {bool preferBeforePosition = false}) async {
+  Future<void> scrollToMessageAtDisplayIndex(
+    int displayIndex, {
+    bool preferBeforePosition = false,
+  }) async {
     if (displayIndex >= 0 && displayIndex < messages.length) {
       try {
         await scrollController.scrollToIndex(
           displayIndex,
           duration: const Duration(milliseconds: 300),
-          preferPosition: preferBeforePosition ? AutoScrollPosition.begin : AutoScrollPosition.end,
+          preferPosition:
+              preferBeforePosition
+                  ? AutoScrollPosition.begin
+                  : AutoScrollPosition.end,
         );
       } catch (e) {
         debugPrint('滚动到消息索引时发生错误: $e');
@@ -224,15 +252,15 @@ class ChatScreenController extends ChangeNotifier {
 
     // 如果已经到达列表开头，不加载更多
     if (currentStartIndex <= 0) {
-      debugPrint('Already at the beginning of messages');
       return;
     }
 
     // 计算新的起始索引
-    final newStartIndex = (currentStartIndex - pageSize).clamp(0, allMessages.length);
+    final newStartIndex = (currentStartIndex - pageSize).clamp(
+      0,
+      allMessages.length,
+    );
     currentStartIndex = newStartIndex;
-
-    debugPrint('Loading more messages at beginning, new start index: $currentStartIndex');
 
     _loadMessagesInRange();
   }
@@ -248,7 +276,10 @@ class ChatScreenController extends ChangeNotifier {
     }
 
     // 计算新的结束索引
-    final newEndIndex = (currentEndIndex + pageSize).clamp(0, allMessages.length);
+    final newEndIndex = (currentEndIndex + pageSize).clamp(
+      0,
+      allMessages.length,
+    );
     currentEndIndex = newEndIndex;
 
     debugPrint('Loading more messages at end, new end index: $currentEndIndex');
@@ -288,11 +319,13 @@ class ChatScreenController extends ChangeNotifier {
   }
 
   // 滚动到指定消息
-  Future<void> scrollToMessage(Message message, {bool preferBeforePosition = false}) async {
+  Future<void> scrollToMessage(
+    Message message, {
+    bool preferBeforePosition = false,
+  }) async {
     // 在完整消息列表中查找消息
     final targetIndex = allMessages.indexWhere((m) => m.id == message.id);
     if (targetIndex == -1) {
-      debugPrint('Message not found in all messages list');
       return;
     }
 
@@ -304,20 +337,30 @@ class ChatScreenController extends ChangeNotifier {
 
       if (displayIndex >= 0 && displayIndex < messages.length) {
         // 消息在当前显示范围内，直接滚动
-        scrollToMessageAtDisplayIndex(displayIndex, preferBeforePosition: preferBeforePosition);
+        scrollToMessageAtDisplayIndex(
+          displayIndex,
+          preferBeforePosition: preferBeforePosition,
+        );
       } else {
         // 消息不在当前显示范围内，调整显示范围
         final halfPageSize = (pageSize / 2).floor();
-        currentStartIndex = (targetIndex - halfPageSize).clamp(0, allMessages.length);
-        currentEndIndex = (targetIndex + halfPageSize).clamp(0, allMessages.length);
+        currentStartIndex = (targetIndex - halfPageSize).clamp(
+          0,
+          allMessages.length,
+        );
+        currentEndIndex = (targetIndex + halfPageSize).clamp(
+          0,
+          allMessages.length,
+        );
 
         // 如果目标消息接近列表末尾，调整显示范围
         if (targetIndex > allMessages.length - halfPageSize) {
-          currentStartIndex = (allMessages.length - pageSize).clamp(0, allMessages.length);
+          currentStartIndex = (allMessages.length - pageSize).clamp(
+            0,
+            allMessages.length,
+          );
           currentEndIndex = allMessages.length;
         }
-
-        debugPrint('Adjusting display range to: $currentStartIndex-$currentEndIndex');
 
         // 重新加载消息
         _loadMessagesInRange();
@@ -325,7 +368,10 @@ class ChatScreenController extends ChangeNotifier {
         // 等待布局完成后滚动
         Future.delayed(const Duration(milliseconds: 100), () {
           final newDisplayIndex = targetIndex - currentStartIndex;
-          scrollToMessageAtDisplayIndex(newDisplayIndex, preferBeforePosition: preferBeforePosition);
+          scrollToMessageAtDisplayIndex(
+            newDisplayIndex,
+            preferBeforePosition: preferBeforePosition,
+          );
         });
       }
     } catch (e) {
@@ -360,8 +406,6 @@ class ChatScreenController extends ChangeNotifier {
         // 同步更新控制器中的消息列表
         messages.removeWhere((m) => m.id == message.id);
         notifyListeners();
-      } else {
-        debugPrint('Failed to delete message: ${message.id}');
       }
     } catch (e) {
       // Handle error
@@ -373,7 +417,6 @@ class ChatScreenController extends ChangeNotifier {
   void requestScrollToLatest() {
     // 如果正在定位消息，不执行自动滚动
     if (_isLocatingMessage) {
-      debugPrint('Skipping auto scroll to latest because message is being located');
       return;
     }
 
@@ -388,7 +431,6 @@ class ChatScreenController extends ChangeNotifier {
 
     // 如果正在定位消息，取消滚动
     if (_isLocatingMessage) {
-      debugPrint('Cancelling scroll to latest because message is being located');
       _needsScroll = false;
       return;
     }
@@ -511,8 +553,6 @@ class ChatScreenController extends ChangeNotifier {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         notifyListeners();
       });
-
-      debugPrint('Messages cleared successfully');
     } catch (e) {
       debugPrint('Error clearing messages: $e');
       // 如果清空失败，重新加载最新消息

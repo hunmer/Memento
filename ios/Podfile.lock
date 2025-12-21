@@ -256,7 +256,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   audioplayers_darwin: 4f9ca89d92d3d21cec7ec580e78ca888e5fb68bd
-  awesome_notifications: 39018490fa46bf3d1427e350cc6b977dcd08c3d6
+  awesome_notifications: 0f432b28098d193920b11a44cfa9d2d9313a3888
   device_calendar: b55b2c5406cfba45c95a59f9059156daee1f74ed
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
