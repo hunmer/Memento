@@ -24,6 +24,11 @@ const Map<String, String> storeTranslationsZh = {
   // 积分设置
   'store_pointSettingsTitle': '积分奖励设置',
   'store_pointSettingsSubtitle': '设置各项行为的积分奖励',
+  'store_storeSettings': '商店设置',
+  'store_enablePointsNotification': '积分变动通知',
+  'store_enablePointsNotificationDescription': '当积分发生变化时显示通知',
+  'store_enableExpiringReminder': '到期提醒',
+  'store_enableExpiringReminderDescription': '在物品即将过期时发送提醒',
   'store_addPointsTitle': '添加积分',
   'store_addPointsDialogTitle': '添加积分',
   'store_pointsAmountLabel': '积分数量',
@@ -35,6 +40,8 @@ const Map<String, String> storeTranslationsZh = {
   'store_points': '积分',
   'store_pointsAdded': '积分已添加',
   'store_earnPointsTip': '完成应用内活动即可获得积分',
+  'store_resetToDefault': '重置默认',
+  'store_saveSettings': '保存设置',
 
   // 数量统计
   'store_productQuantity': '商品数量',

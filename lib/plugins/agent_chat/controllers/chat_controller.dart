@@ -345,7 +345,9 @@ class ChatController extends ChangeNotifier {
 
     // 检查输入内容
     final text = _messageSender.inputText.trim();
-    if (text.isEmpty && _messageSender.selectedToolTemplate == null) {
+    if (text.isEmpty &&
+        _messageSender.selectedToolTemplate == null &&
+        _messageSender.selectedFiles.isEmpty) {
       debugPrint('⚠️ 消息内容为空');
       return;
     }

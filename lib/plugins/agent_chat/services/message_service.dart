@@ -13,6 +13,9 @@ class MessageService extends ChangeNotifier {
   /// 会话ID -> 消息列表的缓存
   final Map<String, List<ChatMessage>> _messageCache = {};
 
+  /// 每个会话独立的保存任务队列，避免并发写入破坏JSON结构
+  final Map<String, Future<void>> _messageSaveChains = {};
+
   /// 当前正在查看的会话ID
   String? _currentConversationId;
 
@@ -54,14 +57,30 @@ class MessageService extends ChangeNotifier {
   }
 
   /// 保存指定会话的消息
-  Future<void> _saveMessages(String conversationId) async {
-    try {
-      final messages = _messageCache[conversationId] ?? [];
-      final data = messages.map((m) => m.toJson()).toList();
-      await storage.write('agent_chat/messages/$conversationId', data);
-    } catch (e) {
-      debugPrint('❌ [MessageService] 保存消息失败: $e');
-    }
+  Future<void> _saveMessages(String conversationId) {
+    final previousTask = _messageSaveChains[conversationId] ?? Future.value();
+
+    final saveTask = previousTask
+        .catchError((_, __) {})
+        .then((_) async {
+          try {
+            final messages = _messageCache[conversationId] ?? [];
+            final data = messages.map((m) => m.toJson()).toList();
+            await storage.write('agent_chat/messages/$conversationId', data);
+          } catch (e) {
+            debugPrint('❌ [MessageService] 保存消息失败: $e');
+          }
+        });
+
+    _messageSaveChains[conversationId] = saveTask;
+    saveTask.whenComplete(() {
+      // 仅在任务链指针仍指向当前任务时移除，避免新的任务被误删
+      if (identical(_messageSaveChains[conversationId], saveTask)) {
+        _messageSaveChains.remove(conversationId);
+      }
+    });
+
+    return saveTask;
   }
 
   // ========== 消息操作 ==========

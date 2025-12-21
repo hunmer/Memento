@@ -24,6 +24,11 @@ const Map<String, String> storeTranslationsEn = {
   // Points settings
   'store_pointSettingsTitle': 'Point Reward Settings',
   'store_pointSettingsSubtitle': 'Set point rewards for various actions',
+  'store_storeSettings': 'Store Settings',
+  'store_enablePointsNotification': 'Points Change Notification',
+  'store_enablePointsNotificationDescription': 'Show notification when points change',
+  'store_enableExpiringReminder': 'Expiry Reminder',
+  'store_enableExpiringReminderDescription': 'Send reminder when items are about to expire',
   'store_addPointsTitle': 'Add Points',
   'store_addPointsDialogTitle': 'Add Points',
   'store_pointsAmountLabel': 'Points Amount',
@@ -35,6 +40,8 @@ const Map<String, String> storeTranslationsEn = {
   'store_points': 'Points',
   'store_pointsAdded': 'Points added',
   'store_earnPointsTip': 'Complete activities in the app to earn points',
+  'store_resetToDefault': 'Reset to Default',
+  'store_saveSettings': 'Save Settings',
 
   // Quantity stats
   'store_productQuantity': 'Products',
