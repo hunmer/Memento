@@ -13,7 +13,10 @@ import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/core/services/system_widget_service.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/core/services/timer/unified_timer_controller.dart';
 import 'package:Memento/utils/image_utils.dart';
+import 'package:memento_foreground_service/memento_foreground_service.dart';
+import 'package:memento_notifications/memento_notifications.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/diary/diary_plugin.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
@@ -171,6 +174,37 @@ Future<void> initializeApp() async {
     // 初始化 Toast 服务
     Toast.setNavigatorKey(navigatorKey);
 
+    // 在初始化通知服务之前先清理历史通知和计时器状态
+    // 这是防止应用重启后通知自动复原的关键步骤
+    AppStartupState.instance._setLoadingMessage('正在清理历史通知...');
+    await MementoNotifications.instance.cancelAll();
+
+    // 同时清理统一计时器控制器的活动计时器，防止插件重新创建通知
+    try {
+      final timerController = UnifiedTimerController();
+      await timerController.clearAll();
+      debugPrint('[AppInitializer] 已清理所有活动计时器');
+    } catch (e) {
+      debugPrint('[AppInitializer] 清理计时器状态失败（可能尚未初始化）: $e');
+    }
+
+    // 停止前台服务（防止系统重启后自动启动）
+    try {
+      final foregroundService = MementoForegroundService.instance;
+      if (await foregroundService.isRunning) {
+        await foregroundService.stopService();
+        debugPrint('[AppInitializer] 已停止前台服务');
+      }
+    } catch (e) {
+      debugPrint('[AppInitializer] 停止前台服务失败: $e');
+    }
+
+    debugPrint('[AppInitializer] 已清理所有历史通知、计时器状态和前台服务');
+
+    // 初始化通知控制器（设置监听器和配置）
+    AppStartupState.instance._setLoadingMessage('正在初始化通知服务...');
+    await NotificationController.initialize();
+
     // 核心服务就绪，可以显示UI
     AppStartupState.instance._setCoreReady();
 
@@ -192,13 +226,8 @@ Future<void> _initializeBackgroundServices() async {
   final startupState = AppStartupState.instance;
 
   try {
-    // 初始化通知控制器（后台执行）
-    startupState._setLoadingMessage('正在初始化通知服务...');
-    unawaited(
-      NotificationController.initialize().then((_) {
-        NotificationController.requestPermission();
-      }),
-    );
+    // 请求通知权限（在后台执行，不阻塞启动）
+    unawaited(NotificationController.requestPermission());
 
     // 初始化 ImageUtils
     unawaited(ImageUtils.initializeSync());

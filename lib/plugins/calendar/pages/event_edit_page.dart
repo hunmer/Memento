@@ -144,7 +144,6 @@ class _EventEditPageState extends State<EventEditPage> {
         _reminderMinutes = result;
       });
     }
-
   }
 
   Future<void> _selectEndTime() async {

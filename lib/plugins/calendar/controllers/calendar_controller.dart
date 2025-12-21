@@ -3,6 +3,7 @@ import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/calendar/models/event.dart';
 import 'package:Memento/plugins/calendar/services/todo_event_service.dart';
+import 'package:Memento/plugins/calendar/services/system_calendar_manager.dart';
 
 /// 日历总控制器，负责管理日历的所有状态和服务
 class CalendarController extends ChangeNotifier {
@@ -52,22 +53,29 @@ class CalendarController extends ChangeNotifier {
   }
 
   // 添加事件
-  void addEvent(CalendarEvent event) {
+  void addEvent(CalendarEvent event) async {
     _events.add(event);
-    _saveEvents();
+    await _saveEvents();
     notifyListeners();
+
+    // 同步到系统日历
+    _syncToSystemCalendar(event);
 
     // 同步小组件数据
     PluginWidgetSyncHelper.instance.syncCalendar();
   }
 
   // 更新事件
-  void updateEvent(CalendarEvent updatedEvent) {
+  void updateEvent(CalendarEvent updatedEvent) async {
     final index = _events.indexWhere((e) => e.id == updatedEvent.id);
     if (index != -1) {
+      final oldEvent = _events[index];
       _events[index] = updatedEvent;
-      _saveEvents();
+      await _saveEvents();
       notifyListeners();
+
+      // 同步到系统日历
+      await _syncUpdateToSystemCalendar(oldEvent, updatedEvent);
 
       // 同步小组件数据
       PluginWidgetSyncHelper.instance.syncCalendar();
@@ -75,22 +83,28 @@ class CalendarController extends ChangeNotifier {
   }
 
   // 删除事件
-  void deleteEvent(CalendarEvent event) {
+  void deleteEvent(CalendarEvent event) async {
     _events.removeWhere((e) => e.id == event.id);
-    _saveEvents();
+    await _saveEvents();
     notifyListeners();
+
+    // 从系统日历删除
+    await _syncDeleteFromSystemCalendar(event);
 
     // 同步小组件数据
     PluginWidgetSyncHelper.instance.syncCalendar();
   }
 
   // 完成事件
-  void completeEvent(CalendarEvent event) {
+  void completeEvent(CalendarEvent event) async {
     final completedEvent = event.copyWith(completedTime: DateTime.now());
     _events.removeWhere((e) => e.id == event.id);
     _completedEvents.add(completedEvent);
-    _saveEvents();
+    await _saveEvents();
     notifyListeners();
+
+    // 从系统日历删除（已完成的事件不再显示在日历中）
+    await _syncDeleteFromSystemCalendar(event);
 
     // 同步小组件数据
     PluginWidgetSyncHelper.instance.syncCalendar();
@@ -198,5 +212,80 @@ class CalendarController extends ChangeNotifier {
   // 手动触发刷新（用于外部事件变化时通知监听者）
   void refresh() {
     notifyListeners();
+  }
+
+  // ========== 系统日历同步方法 ==========
+
+  /// 同步事件到系统日历
+  Future<void> _syncToSystemCalendar(CalendarEvent event) async {
+    try {
+      final systemCalendar = SystemCalendarManager.instance;
+      if (!systemCalendar.isInitialized) {
+        final initialized = await systemCalendar.initialize();
+        if (!initialized) {
+          debugPrint('CalendarController: 系统日历管理器初始化失败，跳过同步');
+          return;
+        }
+      }
+
+      // 只有默认来源的事件才同步到系统日历
+      if (event.source == 'default') {
+        final success = await systemCalendar.addEventToSystem(event);
+        if (success) {
+          debugPrint('CalendarController: 事件 "${event.title}" 已同步到系统日历');
+        } else {
+          debugPrint('CalendarController: 事件 "${event.title}" 同步到系统日历失败');
+        }
+      }
+    } catch (e) {
+      debugPrint('CalendarController: 同步事件到系统日历异常: $e');
+    }
+  }
+
+  /// 从系统日历删除事件
+  Future<void> _syncDeleteFromSystemCalendar(CalendarEvent event) async {
+    try {
+      final systemCalendar = SystemCalendarManager.instance;
+      if (!systemCalendar.isInitialized) {
+        return;
+      }
+
+      // 只有默认来源的事件才从系统日历删除
+      if (event.source == 'default') {
+        final success = await systemCalendar.deleteEventFromSystem(event.id);
+        if (success) {
+          debugPrint('CalendarController: 事件 "${event.title}" 已从系统日历删除');
+        } else {
+          debugPrint('CalendarController: 事件 "${event.title}" 从系统日历删除失败');
+        }
+      }
+    } catch (e) {
+      debugPrint('CalendarController: 从系统日历删除事件异常: $e');
+    }
+  }
+
+  /// 更新系统日历中的事件
+  Future<void> _syncUpdateToSystemCalendar(
+    CalendarEvent oldEvent,
+    CalendarEvent newEvent,
+  ) async {
+    try {
+      final systemCalendar = SystemCalendarManager.instance;
+      if (!systemCalendar.isInitialized) {
+        return;
+      }
+
+      // 只有默认来源的事件才更新到系统日历
+      if (newEvent.source == 'default') {
+        final success = await systemCalendar.updateEventInSystem(newEvent);
+        if (success) {
+          debugPrint('CalendarController: 事件 "${newEvent.title}" 已更新到系统日历');
+        } else {
+          debugPrint('CalendarController: 事件 "${newEvent.title}" 更新到系统日历失败');
+        }
+      }
+    } catch (e) {
+      debugPrint('CalendarController: 更新系统日历事件异常: $e');
+    }
   }
 }
