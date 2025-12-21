@@ -486,6 +486,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pushNamed(context, '/intent_test');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.notifications_active),
+            title: const Text('Live Activities 测试'),
+            subtitle: const Text('测试实时活动通知'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/live_activities_test');
+            },
+          ),
           const Divider(),
 
           // 关于
