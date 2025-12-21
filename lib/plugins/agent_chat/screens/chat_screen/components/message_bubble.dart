@@ -30,6 +30,7 @@ class MessageBubble extends StatelessWidget {
   final Future<void> Function(String messageId, String templateId)?
   onExecuteTemplate; // 执行匹配的模版
   final String? Function(String templateId)? getTemplateName; // 获取模版名称
+  final String? Function(String agentId)? getAgentName; // 获取 Agent 名称（链式模式）
   final VoidCallback? onCancel; // 取消生成的回调
   final bool hasAgent;
   final StorageManager? storage;
@@ -45,6 +46,7 @@ class MessageBubble extends StatelessWidget {
     this.onRerunStep,
     this.onExecuteTemplate,
     this.getTemplateName,
+    this.getAgentName,
     this.onCancel,
     this.hasAgent = true,
     this.storage,
@@ -89,6 +91,12 @@ class MessageBubble extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Agent 标签（链式模式下显示）
+                      if (!isUser &&
+                          message.generatedByAgentId != null &&
+                          message.chainStepIndex != null)
+                        _buildAgentLabel(context),
+
                       // 消息内容 - 优先检查是否有工具调用
                       if (isToolCallMessage)
                         // 如果是工具调用消息，显示工具调用步骤（内部处理加载状态）
@@ -1246,6 +1254,45 @@ class MessageBubble extends StatelessWidget {
           ),
         ],
       ),
+      ),
+    );
+  }
+
+  /// 构建 Agent 标签（链式模式）
+  Widget _buildAgentLabel(BuildContext context) {
+    final agentName = getAgentName?.call(message.generatedByAgentId!) ?? 'Agent';
+    final stepIndex = message.chainStepIndex!;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.link,
+              size: 14,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '步骤 ${stepIndex + 1}: $agentName',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

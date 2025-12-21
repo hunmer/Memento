@@ -13,6 +13,7 @@ import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:Memento/plugins/openai/services/request_service.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
+import 'package:Memento/plugins/agent_chat/models/agent_chain_node.dart';
 import 'package:Memento/plugins/agent_chat/models/file_attachment.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_call_step.dart';
 import 'package:Memento/plugins/agent_chat/models/saved_tool_template.dart';
@@ -45,8 +46,11 @@ class ChatController extends ChangeNotifier {
   /// 当前会话（可变，用于存储最新的会话数据）
   Conversation? _currentConversation;
 
-  /// 当前Agent
+  /// 当前Agent（单 agent 模式）
   AIAgent? _currentAgent;
+
+  /// Agent 链（链式模式）
+  List<AIAgent>? _agentChain;
 
   /// 是否正在加载
   bool _isLoading = false;
@@ -84,6 +88,8 @@ class ChatController extends ChangeNotifier {
   bool get isSending => _isSending;
   bool get isCancelling => _isCancelling;
   AIAgent? get currentAgent => _currentAgent;
+  List<AIAgent> get agentChain => _agentChain ?? [];
+  bool get isChainMode => conversation.isChainMode;
   List<File> get selectedFiles => _selectedFiles;
   String get inputText => _inputText;
   SavedToolTemplate? get selectedToolTemplate => _selectedToolTemplate;
@@ -129,8 +135,11 @@ class ChatController extends ChangeNotifier {
         '📝 初始化会话: ${conversation.id}, AgentID: ${conversation.agentId}',
       );
 
-      // 先加载agent（如果有）
-      if (conversation.agentId != null) {
+      // 先加载 agent（单个或链式）
+      if (conversation.isChainMode) {
+        await _loadAgentChain(conversation.agentChain!);
+        debugPrint('📝 Agent链加载完成，共 ${_agentChain?.length ?? 0} 个 agent');
+      } else if (conversation.agentId != null) {
         await _loadAgentInBackground(conversation.agentId!);
         debugPrint('📝 Agent加载完成，当前Agent: ${_currentAgent?.name}');
       } else {
@@ -179,6 +188,60 @@ class ChatController extends ChangeNotifier {
     }
   }
 
+  /// 加载 Agent 链
+  Future<void> _loadAgentChain(List<AgentChainNode> chainNodes) async {
+    try {
+      final openAIPlugin =
+          PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+      if (openAIPlugin == null) {
+        debugPrint('❌ OpenAI插件未找到');
+        return;
+      }
+
+      _agentChain = [];
+      // 按 order 排序
+      final sortedNodes = List<AgentChainNode>.from(chainNodes)
+        ..sort((a, b) => a.order.compareTo(b.order));
+
+      for (final node in sortedNodes) {
+        final agent = await openAIPlugin.controller.getAgent(node.agentId);
+        if (agent != null) {
+          _agentChain!.add(agent);
+          debugPrint('✅ 加载 Agent 链节点 ${node.order}: ${agent.name}');
+        } else {
+          debugPrint('⚠️ Agent ${node.agentId} 未找到');
+        }
+      }
+
+      // 设置当前 agent 为第一个
+      if (_agentChain!.isNotEmpty) {
+        _currentAgent = _agentChain!.first;
+      }
+
+      debugPrint('✅ Agent链加载完成，共 ${_agentChain!.length} 个 agent');
+      notifyListeners();
+    } catch (e) {
+      debugPrint('❌ 加载Agent链失败: $e');
+    }
+  }
+
+  /// 获取工具调用专用 Agent
+  /// 如果配置了专用 Agent 则返回，否则返回 null
+  Future<AIAgent?> _getToolAgent(String? agentId) async {
+    if (agentId == null) return null;
+
+    try {
+      final openAIPlugin =
+          PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+      if (openAIPlugin == null) return null;
+
+      return await openAIPlugin.controller.getAgent(agentId);
+    } catch (e) {
+      debugPrint('⚠️ 加载工具 Agent 失败: $e');
+      return null;
+    }
+  }
+
   /// 选择并加载Agent
   Future<void> selectAgent(String agentId) async {
     try {
@@ -201,6 +264,96 @@ class ChatController extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('加载Agent失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 选择并配置 Agent 链
+  Future<void> selectAgentChain(List<AgentChainNode> chainNodes) async {
+    try {
+      await _ensureConversationServiceReady();
+
+      // 加载所有 agent
+      await _loadAgentChain(chainNodes);
+
+      // 更新会话配置
+      final currentConv = _currentConversation ?? conversation;
+      final updatedConversation = currentConv.copyWith(
+        agentChain: chainNodes,
+        clearAgentChain: false,
+      );
+      await conversationService.updateConversation(updatedConversation);
+
+      _currentConversation = updatedConversation;
+      notifyListeners();
+
+      debugPrint('✅ Agent链配置成功，共 ${chainNodes.length} 个节点');
+    } catch (e) {
+      debugPrint('❌ 配置Agent链失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 配置工具调用专用 Agent（适用于单 Agent 和 Agent 链模式）
+  Future<void> configureToolAgents({
+    String? toolDetectionAgentId,
+    String? toolExecutionAgentId,
+  }) async {
+    try {
+      await _ensureConversationServiceReady();
+
+      final currentConv = _currentConversation ?? conversation;
+      final updatedConversation = currentConv.copyWith(
+        toolDetectionAgentId: toolDetectionAgentId,
+        toolExecutionAgentId: toolExecutionAgentId,
+      );
+      await conversationService.updateConversation(updatedConversation);
+
+      _currentConversation = updatedConversation;
+      notifyListeners();
+
+      debugPrint('✅ 工具 Agent 配置成功');
+      if (toolDetectionAgentId != null) {
+        debugPrint('  工具需求识别 Agent: $toolDetectionAgentId');
+      } else {
+        debugPrint('  工具需求识别：使用默认 prompt');
+      }
+      if (toolExecutionAgentId != null) {
+        debugPrint('  工具执行 Agent: $toolExecutionAgentId');
+      } else {
+        debugPrint('  工具执行：使用默认 prompt');
+      }
+    } catch (e) {
+      debugPrint('❌ 配置工具 Agent 失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 切换回单 Agent 模式
+  Future<void> switchToSingleAgent(String agentId) async {
+    try {
+      await _ensureConversationServiceReady();
+
+      final openAIPlugin =
+          PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+      if (openAIPlugin != null) {
+        _currentAgent = await openAIPlugin.controller.getAgent(agentId);
+        _agentChain = null;
+
+        final currentConv = _currentConversation ?? conversation;
+        final updatedConversation = currentConv.copyWith(
+          agentId: agentId,
+          clearAgentChain: true, // 清除链配置
+        );
+        await conversationService.updateConversation(updatedConversation);
+
+        _currentConversation = updatedConversation;
+        notifyListeners();
+
+        debugPrint('✅ 已切换到单Agent模式: ${_currentAgent?.name}');
+      }
+    } catch (e) {
+      debugPrint('❌ 切换单Agent失败: $e');
       rethrow;
     }
   }
@@ -240,8 +393,12 @@ class ChatController extends ChangeNotifier {
     // 如果没有工具模板且输入为空，则返回
     if (_inputText.trim().isEmpty && _selectedToolTemplate == null) return;
 
-    if (_currentAgent == null) {
+    // 检查是否配置了 agent（单个或链式）
+    if (!isChainMode && _currentAgent == null) {
       throw Exception('未选择Agent');
+    }
+    if (isChainMode && (_agentChain == null || _agentChain!.isEmpty)) {
+      throw Exception('Agent链为空');
     }
 
     _isSending = true;
@@ -286,38 +443,44 @@ class ChatController extends ChangeNotifier {
       _selectedToolTemplate = null;
       notifyListeners();
 
-      // 创建AI消息占位符
-      final aiMessage = ChatMessage.ai(
-        conversationId: conversation.id,
-        content: '',
-        isGenerating: true,
-      );
-      await messageService.addMessage(aiMessage);
-
       // 启动前台服务（仅 Android，且用户启用了后台服务）
       final settings = getSettings?.call() ?? {};
       final enableBackgroundService =
           settings['enableBackgroundService'] as bool? ?? true;
 
       if (!kIsWeb && Platform.isAndroid && enableBackgroundService) {
-        await _startAIChatService(conversation.id, aiMessage.id);
+        // 链式模式下，使用第一个 agent 的消息 ID
+        final firstMessageId = '${conversation.id}_chain_0';
+        await _startAIChatService(conversation.id, firstMessageId);
       }
 
-      // 如果选择了工具模板，先执行工具，然后让 AI 基于结果回复
-      if (selectedTemplate != null) {
-        await _executeToolTemplateAndRespond(
-          aiMessageId: aiMessage.id,
-          userMessage: userMessage,
-          template: selectedTemplate,
-        );
+      // 判断是单 agent 还是链式调用
+      if (isChainMode) {
+        // 链式调用所有 agent
+        await _executeAgentChain(userInput, files, selectedTemplate);
       } else {
-        // 流式请求AI回复
-        await _requestAIResponse(
-          aiMessage.id,
-          userInput,
-          files,
-          enableToolCalling: true,
+        // 单 agent 模式（现有逻辑）
+        final aiMessage = ChatMessage.ai(
+          conversationId: conversation.id,
+          content: '',
+          isGenerating: true,
         );
+        await messageService.addMessage(aiMessage);
+
+        if (selectedTemplate != null) {
+          await _executeToolTemplateAndRespond(
+            aiMessageId: aiMessage.id,
+            userMessage: userMessage,
+            template: selectedTemplate,
+          );
+        } else {
+          await _requestAIResponse(
+            aiMessage.id,
+            userInput,
+            files,
+            enableToolCalling: true,
+          );
+        }
       }
     } catch (e) {
       debugPrint('发送消息失败: $e');
@@ -358,6 +521,223 @@ class ChatController extends ChangeNotifier {
 
     return attachments;
   }
+
+  // ========== Agent 链式执行 ==========
+
+  /// 执行 Agent 链式调用
+  Future<void> _executeAgentChain(
+    String userInput,
+    List<File> files,
+    SavedToolTemplate? selectedTemplate,
+  ) async {
+    final chainNodes = conversation.agentChain!;
+    final sortedNodes = List<AgentChainNode>.from(chainNodes)
+      ..sort((a, b) => a.order.compareTo(b.order));
+
+    // 存储每个 agent 的输出消息
+    final chainMessages = <ChatMessage>[];
+
+    // 遍历执行每个 agent
+    for (int i = 0; i < sortedNodes.length; i++) {
+      final node = sortedNodes[i];
+      final agent = _agentChain![i];
+
+      debugPrint('🔗 [链式调用 ${i + 1}/${sortedNodes.length}] 开始执行 Agent: ${agent.name}');
+
+      // 创建此 agent 的 AI 消息占位符
+      final aiMessage = ChatMessage.ai(
+        conversationId: conversation.id,
+        content: '',
+        isGenerating: true,
+        generatedByAgentId: agent.id,
+        chainStepIndex: i,
+      );
+      await messageService.addMessage(aiMessage);
+      chainMessages.add(aiMessage);
+
+      try {
+        // 根据上下文模式构建消息列表
+        final contextMessages = _buildChainContextMessages(
+          node: node,
+          stepIndex: i,
+          userInput: userInput,
+          previousMessages: chainMessages,
+        );
+
+        // 调用当前 agent
+        await _requestAgentInChain(
+          agent: agent,
+          aiMessageId: aiMessage.id,
+          contextMessages: contextMessages,
+          files: i == 0 ? files : [], // 只有第一个 agent 处理文件
+          enableToolCalling: agent.enableFunctionCalling,
+        );
+
+        // 检查是否被取消
+        if (_isCancelling) {
+          debugPrint('🛑 链式调用被用户取消');
+          break;
+        }
+
+        // 更新 chainMessages 中的消息为最新版本
+        final updatedMessage =
+            messageService.getMessage(conversation.id, aiMessage.id);
+        if (updatedMessage != null) {
+          chainMessages[i] = updatedMessage;
+        }
+
+        debugPrint('✅ [链式调用 ${i + 1}/${sortedNodes.length}] Agent ${agent.name} 执行完成');
+      } catch (e) {
+        debugPrint('❌ [链式调用 ${i + 1}/${sortedNodes.length}] Agent ${agent.name} 执行失败: $e');
+
+        // 错误处理：标记消息并停止链式调用
+        final errorMessage =
+            messageService.getMessage(conversation.id, aiMessage.id);
+        if (errorMessage != null) {
+          final updated = errorMessage.copyWith(
+            content: '❌ 执行失败: $e',
+            isGenerating: false,
+          );
+          await messageService.updateMessage(updated);
+        }
+
+        // 停止后续 agent 的执行
+        break;
+      }
+    }
+
+    debugPrint('🏁 链式调用完成');
+  }
+
+  /// 根据节点的上下文模式构建消息列表
+  List<ChatCompletionMessage> _buildChainContextMessages({
+    required AgentChainNode node,
+    required int stepIndex,
+    required String userInput,
+    required List<ChatMessage> previousMessages,
+  }) {
+    final messages = <ChatCompletionMessage>[];
+
+    // 获取对应的 agent
+    final agent = _agentChain![stepIndex];
+
+    // 添加系统提示词
+    if (agent.systemPrompt.isNotEmpty) {
+      messages.add(ChatCompletionMessage.system(content: agent.systemPrompt));
+    }
+
+    switch (node.contextMode) {
+      case AgentContextMode.conversationContext:
+        // 使用会话的历史上下文（遵循 contextMessageCount）
+        final historyMessages = _buildContextMessages(userInput);
+        messages.addAll(historyMessages);
+        break;
+
+      case AgentContextMode.chainContext:
+        // 传递链中所有前序 agent 的输出
+        messages.add(ChatCompletionMessage.user(
+          content: ChatCompletionUserMessageContent.string(userInput),
+        ));
+
+        for (int i = 0; i < stepIndex; i++) {
+          final prevMsg = previousMessages[i];
+          if (prevMsg.content.isNotEmpty) {
+            final prevAgent = _agentChain![i];
+            messages.add(ChatCompletionMessage.assistant(
+              content: '[${prevAgent.name}]: ${prevMsg.content}',
+            ));
+          }
+        }
+        break;
+
+      case AgentContextMode.previousOnly:
+        // 仅传递上一个 agent 的输出
+        final inputContent = stepIndex == 0
+            ? userInput
+            : previousMessages[stepIndex - 1].content;
+
+        messages.add(ChatCompletionMessage.user(
+          content: ChatCompletionUserMessageContent.string(inputContent),
+        ));
+        break;
+    }
+
+    return messages;
+  }
+
+  /// 在链式调用中请求单个 Agent 的响应
+  Future<void> _requestAgentInChain({
+    required AIAgent agent,
+    required String aiMessageId,
+    required List<ChatCompletionMessage> contextMessages,
+    required List<File> files,
+    required bool enableToolCalling,
+  }) async {
+    final buffer = StringBuffer();
+    int tokenCount = 0;
+
+    try {
+      // 处理图片文件
+      final imageFiles =
+          files.where((f) => FilePickerHelper.isImageFile(f)).toList();
+
+      // 流式请求 AI 回复
+      await RequestService.streamResponse(
+        agent: agent,
+        prompt: null,
+        contextMessages: contextMessages,
+        vision: imageFiles.isNotEmpty,
+        filePath: imageFiles.isNotEmpty ? imageFiles.first.path : null,
+        shouldCancel: () => _isCancelling,
+        onToken: (token) {
+          buffer.write(token);
+          tokenCount++;
+
+          // 实时更新 UI
+          messageService.updateAIMessageContent(
+            conversation.id,
+            aiMessageId,
+            buffer.toString(),
+            tokenCount,
+          );
+        },
+        onComplete: () async {
+          // 完成生成
+          messageService.completeAIMessage(conversation.id, aiMessageId);
+          debugPrint('✅ Agent ${agent.name} 生成完成，Token: $tokenCount');
+        },
+        onError: (error) {
+          debugPrint('❌ Agent ${agent.name} 响应错误: $error');
+
+          if (error == '已取消发送') {
+            messageService.updateAIMessageContent(
+              conversation.id,
+              aiMessageId,
+              '🛑 用户已取消操作',
+              0,
+            );
+          } else {
+            messageService.updateAIMessageContent(
+              conversation.id,
+              aiMessageId,
+              '❌ 错误: $error',
+              0,
+            );
+          }
+
+          messageService.completeAIMessage(conversation.id, aiMessageId);
+        },
+      );
+
+      // 保存上下文消息（用于详情查看）
+      _contextMessagesCache[aiMessageId] = List.from(contextMessages);
+    } catch (e) {
+      debugPrint('❌ 请求Agent响应失败: $e');
+      rethrow;
+    }
+  }
+
+  // ========== 单 Agent 模式 ==========
 
   /// 请求AI回复（三阶段工具调用：模版匹配 → 工具需求 → 工具调用）
   Future<void> _requestAIResponse(
@@ -568,17 +948,47 @@ class ChatController extends ChangeNotifier {
       final imageFiles =
           files.where((f) => FilePickerHelper.isImageFile(f)).toList();
 
-      // 准备工具简要索引 Prompt（用于第一阶段）
-      final toolBriefPrompt =
-          (enableToolCalling && _currentAgent!.enableFunctionCalling)
-              ? ToolService.getToolBriefPrompt()
-              : '';
+      // 准备工具需求识别阶段的 Agent 和 Prompt
+      AIAgent? toolDetectionAgent;
+      List<ChatCompletionMessage> toolDetectionMessages = contextMessages;
+      String toolBriefPrompt = '';
 
-      // 第一阶段：流式接收 AI 回复（使用占位符方式）
+      if (enableToolCalling && _currentAgent!.enableFunctionCalling) {
+        // 尝试加载工具需求识别专用 Agent
+        toolDetectionAgent = await _getToolAgent(
+          conversation.toolDetectionAgentId,
+        );
+
+        if (toolDetectionAgent != null) {
+          // 使用专用 Agent，它有自己的 system prompt
+          debugPrint('🔧 [工具需求识别] 使用专用 Agent: ${toolDetectionAgent.name}');
+        } else {
+          // 未配置专用 Agent，使用默认 prompt 替换当前 agent 的 system prompt
+          toolDetectionAgent = _currentAgent;
+          toolBriefPrompt = ToolService.getToolBriefPrompt();
+
+          // 构建新的 context messages，替换 system prompt
+          final messagesWithoutSystem = contextMessages
+              .where((m) => m.role != ChatCompletionMessageRole.system)
+              .toList();
+
+          toolDetectionMessages = [
+            // 使用工具 brief prompt 作为 system prompt
+            ChatCompletionMessage.system(content: toolBriefPrompt),
+            ...messagesWithoutSystem,
+          ];
+
+          debugPrint('🔧 [工具需求识别] 使用默认 prompt 替换 system prompt');
+        }
+      } else {
+        toolDetectionAgent = _currentAgent;
+      }
+
+      // 第一阶段：流式接收 AI 回复（工具需求识别）
       await RequestService.streamResponse(
-        agent: _currentAgent!,
+        agent: toolDetectionAgent!,
         prompt: null,
-        contextMessages: contextMessages,
+        contextMessages: toolDetectionMessages,
         vision: imageFiles.isNotEmpty,
         filePath: imageFiles.isNotEmpty ? imageFiles.first.path : null,
         // 如果启用工具调用,使用 JSON Schema 强制返回工具请求格式
@@ -593,8 +1003,8 @@ class ChatController extends ChangeNotifier {
                   ),
                 )
                 : null,
-        additionalPrompts:
-            toolBriefPrompt.isNotEmpty ? {'tool_brief': toolBriefPrompt} : null,
+        // 不再使用 additionalPrompts，因为已经在 contextMessages 中替换了 system prompt
+        additionalPrompts: null,
         shouldCancel: () => _isCancelling, // 传递取消检查函数
         onToken: (token) {
           buffer.write(token);
@@ -678,32 +1088,62 @@ class ChatController extends ChangeNotifier {
                 toolRequest,
               );
 
-              // 添加 AI 第一次回复到上下文
-              contextMessages.add(
-                ChatCompletionMessage.assistant(content: firstResponse),
+              // 准备工具执行阶段的 Agent 和 Context Messages
+              AIAgent? toolExecutionAgent = await _getToolAgent(
+                conversation.toolExecutionAgentId,
               );
 
-              // 添加用户请求
-              contextMessages.add(
-                ChatCompletionMessage.user(
-                  content: ChatCompletionUserMessageContent.string(
-                    '请根据文档生成工具调用代码。',
+              List<ChatCompletionMessage> toolExecutionMessages;
+
+              if (toolExecutionAgent != null) {
+                // 使用专用 Agent，它有自己的 system prompt
+                debugPrint('🔧 [工具执行] 使用专用 Agent: ${toolExecutionAgent.name}');
+
+                // 构建新的 context，使用专用 agent 的 system prompt
+                toolExecutionMessages = [
+                  // 专用 agent 的 system prompt 会自动添加
+                  ChatCompletionMessage.user(
+                    content: ChatCompletionUserMessageContent.string(
+                      '原始用户输入：\n$userInput\n\n第一阶段识别的工具：${toolRequest.join(", ")}\n\n工具详细文档：\n$detailPrompt\n\n请根据文档生成工具调用代码。',
+                    ),
                   ),
-                ),
-              );
+                ];
+              } else {
+                // 未配置专用 Agent，使用默认 prompt 替换 system prompt
+                toolExecutionAgent = _currentAgent;
+                debugPrint('🔧 [工具执行] 使用默认 prompt 替换 system prompt');
+
+                // 移除 system prompt，用 tool detail prompt 替换
+                final messagesWithoutSystem = contextMessages
+                    .where((m) => m.role != ChatCompletionMessageRole.system)
+                    .toList();
+
+                toolExecutionMessages = [
+                  // 使用工具详细文档作为 system prompt
+                  ChatCompletionMessage.system(content: detailPrompt),
+                  ...messagesWithoutSystem,
+                  ChatCompletionMessage.assistant(content: firstResponse),
+                  ChatCompletionMessage.user(
+                    content: ChatCompletionUserMessageContent.string(
+                      '请根据文档生成工具调用代码。',
+                    ),
+                  ),
+                ];
+              }
 
               // 清空 buffer，准备接收第二阶段响应
               buffer.clear();
               tokenCount = 0;
               isCollectingToolCall = false;
 
-              // 第二阶段：请求生成工具调用代码（使用占位符方式）
+              // 第二阶段：请求生成工具调用代码
               await RequestService.streamResponse(
-                agent: _currentAgent!,
+                agent: toolExecutionAgent!,
                 prompt: null,
-                contextMessages: contextMessages,
+                contextMessages: toolExecutionMessages,
                 vision: false,
-                additionalPrompts: {'tool_detail': detailPrompt},
+                // 不再使用 additionalPrompts，已在 contextMessages 中处理
+                additionalPrompts: null,
                 // 使用 JSON Schema 强制返回工具调用格式
                 responseFormat: ResponseFormat.jsonSchema(
                   jsonSchema: JsonSchemaObject(

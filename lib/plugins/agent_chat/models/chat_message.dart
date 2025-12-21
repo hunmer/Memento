@@ -48,6 +48,12 @@ class ChatMessage {
   /// 是否为会话分隔符（用于标记新会话的开始）
   bool isSessionDivider;
 
+  /// 生成此消息的 Agent ID（仅 AI 消息，链式模式下使用）
+  String? generatedByAgentId;
+
+  /// 在链式调用中的步骤索引（仅 AI 消息，链式模式下使用）
+  int? chainStepIndex;
+
   ChatMessage({
     required this.id,
     required this.conversationId,
@@ -63,6 +69,8 @@ class ChatMessage {
     this.matchedTemplateIds,
     this.parentId,
     this.isSessionDivider = false,
+    this.generatedByAgentId,
+    this.chainStepIndex,
   });
 
   /// 创建用户消息
@@ -92,6 +100,8 @@ class ChatMessage {
     int tokenCount = 0,
     bool isGenerating = true,
     Map<String, dynamic>? metadata,
+    String? generatedByAgentId,
+    int? chainStepIndex,
   }) {
     return ChatMessage(
       id: _uuid.v4(),
@@ -102,6 +112,8 @@ class ChatMessage {
       tokenCount: tokenCount,
       isGenerating: isGenerating,
       metadata: metadata,
+      generatedByAgentId: generatedByAgentId,
+      chainStepIndex: chainStepIndex,
     );
   }
 
@@ -146,6 +158,8 @@ class ChatMessage {
               .toList(),
       parentId: json['parentId'] as String?,
       isSessionDivider: json['isSessionDivider'] as bool? ?? false,
+      generatedByAgentId: json['generatedByAgentId'] as String?,
+      chainStepIndex: json['chainStepIndex'] as int?,
     );
   }
 
@@ -167,6 +181,8 @@ class ChatMessage {
         'matchedTemplateIds': matchedTemplateIds,
       if (parentId != null) 'parentId': parentId,
       'isSessionDivider': isSessionDivider,
+      if (generatedByAgentId != null) 'generatedByAgentId': generatedByAgentId,
+      if (chainStepIndex != null) 'chainStepIndex': chainStepIndex,
     };
   }
 
@@ -182,6 +198,8 @@ class ChatMessage {
     List<String>? matchedTemplateIds,
     String? parentId,
     bool? isSessionDivider,
+    String? generatedByAgentId,
+    int? chainStepIndex,
   }) {
     return ChatMessage(
       id: id,
@@ -198,6 +216,8 @@ class ChatMessage {
       matchedTemplateIds: matchedTemplateIds ?? this.matchedTemplateIds,
       parentId: parentId ?? this.parentId,
       isSessionDivider: isSessionDivider ?? this.isSessionDivider,
+      generatedByAgentId: generatedByAgentId ?? this.generatedByAgentId,
+      chainStepIndex: chainStepIndex ?? this.chainStepIndex,
     );
   }
 
