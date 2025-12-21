@@ -132,6 +132,7 @@ class AgentChatHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'agent_chat',
         pluginName: 'agent_chat_name'.tr,
         pluginIcon: Icons.chat_bubble_outline,
         pluginDefaultColor: const Color(0xFF2196F3),

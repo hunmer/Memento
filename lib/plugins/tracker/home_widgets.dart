@@ -101,6 +101,7 @@ class TrackerHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'tracker',
         pluginName: 'tracker_name'.tr,
         pluginIcon: Icons.track_changes,
         pluginDefaultColor: Colors.red,

@@ -36,11 +36,17 @@ class AppDrawer extends StatelessWidget {
                 }
 
                 final plugins = snapshot.data ?? [];
+                final visiblePlugins = plugins
+                    .where(
+                      (plugin) =>
+                          globalConfigManager.isPluginEnabled(plugin.id),
+                    )
+                    .toList();
 
                 return ListView.builder(
-                  itemCount: plugins.length,
+                  itemCount: visiblePlugins.length,
                   itemBuilder: (context, index) {
-                    final plugin = plugins[index];
+                    final plugin = visiblePlugins[index];
 
                     // 只对有配置页面的插件显示设置按钮
                     final hasSettings = [

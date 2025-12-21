@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:device_calendar/device_calendar.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/event.dart';
 
 /// 系统日历管理器
@@ -18,12 +16,6 @@ class SystemCalendarManager {
   late DeviceCalendarPlugin _deviceCalendar;
   String? _calendarId;
   bool _isInitialized = false;
-
-  // 映射：本地事件ID -> 系统日历中的实际事件ID
-  Map<String, String> _localEventIdToSystemEventId = {};
-
-  // 存储键名
-  static const String _mappingStorageKey = 'calendar_event_id_mapping';
 
   /// 初始化系统日历管理器
   Future<bool> initialize() async {
@@ -49,9 +41,6 @@ class SystemCalendarManager {
 
       _isInitialized = true;
       debugPrint('SystemCalendarManager: 初始化成功，日历ID: $_calendarId');
-
-      // 加载持久化的映射关系
-      await _loadMapping();
 
       return true;
     } catch (e) {
@@ -136,8 +125,6 @@ class SystemCalendarManager {
 
       if (result != null && result.isSuccess && result.data != null) {
         debugPrint('SystemCalendarManager: 事件添加到系统日历成功，实际ID: ${result.data}');
-        // 保存映射关系：本地事件ID -> 系统事件ID
-        _localEventIdToSystemEventId[event.id] = result.data!;
         return MapEntry(true, result.data);
       }
 
@@ -159,27 +146,20 @@ class SystemCalendarManager {
     }
 
     try {
-      // 查找系统日历中的真实事件ID
-      final systemEventId = _localEventIdToSystemEventId[eventId] ?? eventId;
-
-      // 如果既不是本地映射的ID，也不是直接可用的ID，尝试作为真实ID使用
-      final actualEventId = systemEventId;
-
-      if (actualEventId == null || actualEventId.isEmpty) {
-        debugPrint('SystemCalendarManager: 无法找到事件ID: $eventId 对应的系统事件ID');
+      // 直接使用传入的 eventId（假设它已经是系统日历中的真实ID）
+      if (eventId.isEmpty) {
+        debugPrint('SystemCalendarManager: 事件ID为空');
         return false;
       }
 
-      debugPrint('SystemCalendarManager: 尝试删除系统事件，实际ID: $actualEventId');
+      debugPrint('SystemCalendarManager: 尝试删除系统事件，ID: $eventId');
       final result = await _deviceCalendar.deleteEvent(
         _calendarId!,
-        actualEventId,
+        eventId,
       );
 
       if (result != null && result.isSuccess) {
         debugPrint('SystemCalendarManager: 从系统日历删除事件成功');
-        // 从映射中移除
-        _localEventIdToSystemEventId.remove(eventId);
         return true;
       }
 
@@ -218,35 +198,6 @@ class SystemCalendarManager {
   /// 获取日历 ID
   String? get calendarId => _calendarId;
 
-  /// 加载持久化的映射关系
-  Future<void> _loadMapping() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final mappingJson = prefs.getString(_mappingStorageKey);
-      if (mappingJson != null) {
-        final mappingData = jsonDecode(mappingJson) as Map<String, dynamic>;
-        _localEventIdToSystemEventId = mappingData.map(
-          (key, value) => MapEntry(key, value.toString()),
-        );
-        debugPrint('SystemCalendarManager: 加载映射关系完成，共 ${_localEventIdToSystemEventId.length} 条');
-      }
-    } catch (e) {
-      debugPrint('SystemCalendarManager: 加载映射关系失败: $e');
-    }
-  }
-
-  /// 保存映射关系到持久化存储
-  Future<void> _saveMapping() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final mappingJson = jsonEncode(_localEventIdToSystemEventId);
-      await prefs.setString(_mappingStorageKey, mappingJson);
-      debugPrint('SystemCalendarManager: 保存映射关系完成，共 ${_localEventIdToSystemEventId.length} 条');
-    } catch (e) {
-      debugPrint('SystemCalendarManager: 保存映射关系失败: $e');
-    }
-  }
-
   /// 检查权限状态
   Future<bool> checkPermissions() async {
     try {
@@ -263,11 +214,10 @@ class SystemCalendarManager {
   }
 
   /// 获取系统日历中的所有事件（包括 Memento 日历）
-  /// 但是会标记来源：来自 Memento 日历的标记为 'memento'，其他的标记为 'system'
+  /// 注意：调用方需要自行处理去重逻辑，避免与本地事件重复
   Future<List<CalendarEvent>> getSystemEvents({
     DateTime? startDate,
     DateTime? endDate,
-    bool includeMementoCalendar = false, // 是否包含 Memento 日历
   }) async {
     if (!_isInitialized) {
       final initialized = await initialize();
@@ -293,15 +243,12 @@ class SystemCalendarManager {
       final start = startDate ?? now.subtract(const Duration(days: 365));
       final end = endDate ?? now.add(const Duration(days: 365));
 
-      // 遍历所有日历
+      // 遍历所有日历（包括 Memento 日历）
       for (final calendar in calendars) {
         debugPrint(
           "SystemCalendarManager: 正在处理日历: ${calendar.name} (ID: ${calendar.id})",
         );
-        // 如果不包含 Memento 日历，则跳过
-        if (!includeMementoCalendar && (calendar.name == 'Memento' || calendar.id == _calendarId)) {
-          continue;
-        }
+        // 不再排除任何日历，包括 Memento 日历
 
         try {
           final eventsResult = await _deviceCalendar.retrieveEvents(
@@ -311,12 +258,8 @@ class SystemCalendarManager {
 
           if (eventsResult.isSuccess && eventsResult.data != null) {
             for (final event in eventsResult.data!) {
-              // 标记来源：Memento 日历的事件标记为 'memento'，其他标记为 'system'
-              final isFromMemento = calendar.name == 'Memento' || calendar.id == _calendarId;
-              final source = isFromMemento ? 'memento' : 'system';
-
               final calendarEvent = CalendarEvent(
-                id: isFromMemento ? 'memento_${calendar.id}_${event.eventId}' : 'system_${calendar.id}_${event.eventId}',
+                id: 'system_${calendar.id}_${event.eventId}',
                 title: event.title ?? '无标题',
                 description: event.description ?? '',
                 startTime: event.start?.toLocal() ?? now,
@@ -326,7 +269,7 @@ class SystemCalendarManager {
                   fontFamily: 'MaterialIcons',
                 ), // calendar_today
                 color: Color(calendar.color ?? 0xFF2196F3),
-                source: source,
+                source: 'system',
                 systemEventId: event.eventId, // 保存系统事件ID
               );
               allEvents.add(calendarEvent);

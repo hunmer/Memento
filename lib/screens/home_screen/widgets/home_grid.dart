@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
@@ -127,21 +128,31 @@ class _HomeGridState extends State<HomeGrid> {
     final isBeingDragged = _draggingIndex == index;
     final isHovering = _hoveringIndex == index;
 
+    final pluginState = _resolvePluginState(context, item);
+
     // 如果不是编辑模式，返回普通卡片（包括批量选择模式）
     if (!widget.isEditMode) {
       final isSelected = widget.isBatchMode && widget.selectedItemIds.contains(item.id);
+      final bool shouldInterceptTap = pluginState.isPluginItem && pluginState.isDisabled;
+
+      Widget card = HomeCard(
+        key: ValueKey(item.id),
+        item: item,
+        isSelected: isSelected,
+        isBatchMode: widget.isBatchMode,
+        onTap:
+            shouldInterceptTap
+                ? () => _showPluginDisabledToast(context, pluginState)
+                : widget.onItemTap != null ? () => widget.onItemTap!(item) : null,
+        onLongPress: widget.onItemLongPress != null ? () => widget.onItemLongPress!(item) : null,
+      );
+
+      card = _wrapWithDisabledOverlay(context, card, pluginState, isInEditMode: false);
 
       return StaggeredGridTile.count(
         crossAxisCellCount: crossAxisCellCount,
         mainAxisCellCount: mainAxisCellCount,
-        child: HomeCard(
-          key: ValueKey(item.id),
-          item: item,
-          isSelected: isSelected,
-          isBatchMode: widget.isBatchMode,
-          onTap: widget.onItemTap != null ? () => widget.onItemTap!(item) : null,
-          onLongPress: widget.onItemLongPress != null ? () => widget.onItemLongPress!(item) : null,
-        ),
+        child: card,
       );
     }
 
@@ -250,11 +261,16 @@ class _HomeGridState extends State<HomeGrid> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: HomeCard(
-                  key: ValueKey('${item.id}_dragging'),
-                  item: item,
-                  isEditMode: true,
-                  dragHandle: dragHandleWidget,
+                child: _wrapWithDisabledOverlay(
+                  context,
+                  HomeCard(
+                    key: ValueKey('${item.id}_dragging'),
+                    item: item,
+                    isEditMode: true,
+                    dragHandle: dragHandleWidget,
+                  ),
+                  pluginState,
+                  isInEditMode: true,
                 ),
               ),
             ),
@@ -280,18 +296,128 @@ class _HomeGridState extends State<HomeGrid> {
                       )
                     : null,
               ),
-              child: HomeCard(
-                key: ValueKey(item.id),
-                item: item,
-                isSelected: isBeingDragged || isHovering,
-                isEditMode: true,
-                onTap: null,
-                onLongPress: null,
-                dragHandle: dragHandleWidget,
+              child: _wrapWithDisabledOverlay(
+                context,
+                HomeCard(
+                  key: ValueKey(item.id),
+                  item: item,
+                  isSelected: isBeingDragged || isHovering,
+                  isEditMode: true,
+                  onTap: null,
+                  onLongPress: null,
+                  dragHandle: dragHandleWidget,
+                ),
+                pluginState,
+                isInEditMode: true,
               ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  _PluginCardState _resolvePluginState(BuildContext context, HomeItem item) {
+    if (item is! HomeWidgetItem) {
+      return const _PluginCardState(
+        isPluginItem: false,
+        isDisabled: false,
+        displayName: '',
+      );
+    }
+
+    final registry = HomeWidgetRegistry();
+    final widgetDef = registry.getWidget(item.widgetId);
+
+    if (widgetDef == null) {
+      return const _PluginCardState(
+        isPluginItem: false,
+        isDisabled: false,
+        displayName: '',
+      );
+    }
+
+    final pluginId = widgetDef.pluginId;
+    final plugin = globalPluginManager.getPlugin(pluginId);
+    final enabledInConfig = globalConfigManager.isPluginEnabled(pluginId);
+    final isDisabled = !enabledInConfig;
+
+    final displayName =
+        plugin?.getPluginName(context) ?? widgetDef.name ?? pluginId;
+
+    return _PluginCardState(
+      isPluginItem: true,
+      isDisabled: isDisabled,
+      displayName: displayName,
+    );
+  }
+
+  Widget _wrapWithDisabledOverlay(
+    BuildContext context,
+    Widget child,
+    _PluginCardState state, {
+    required bool isInEditMode,
+  }) {
+    if (!state.isPluginItem || !state.isDisabled) {
+      return child;
+    }
+
+    final overlayColor = Colors.black.withOpacity(isInEditMode ? 0.2 : 0.4);
+
+    return Stack(
+      children: [
+        child,
+        Positioned.fill(
+          child: IgnorePointer(
+            ignoring: true,
+            child: Container(
+              decoration: BoxDecoration(
+                color: overlayColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.block, color: Colors.white70, size: 32),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.displayName,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'screens_pluginDisabled'.tr,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showPluginDisabledToast(
+    BuildContext context,
+    _PluginCardState state,
+  ) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          '${state.displayName} ${'screens_pluginDisabled'.tr}',
+        ),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -403,6 +529,18 @@ class _HomeGridState extends State<HomeGrid> {
 
     return result;
   }
+}
+
+class _PluginCardState {
+  final bool isPluginItem;
+  final bool isDisabled;
+  final String displayName;
+
+  const _PluginCardState({
+    required this.isPluginItem,
+    required this.isDisabled,
+    required this.displayName,
+  });
 }
 
 /// 拖拽到文件夹的操作枚举

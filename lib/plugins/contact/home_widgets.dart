@@ -96,6 +96,7 @@ class ContactHomeWidgets {
 
           // 使用通用小组件
           return GenericPluginWidget(
+            pluginId: 'contact',
             pluginName: 'contact_name'.tr,
             pluginIcon: Icons.contacts,
             pluginDefaultColor: Colors.deepPurple,

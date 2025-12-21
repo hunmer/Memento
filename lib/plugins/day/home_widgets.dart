@@ -105,6 +105,7 @@ class DayHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'day',
         pluginName: 'day_name'.tr,
         pluginIcon: Icons.event_outlined,
         pluginDefaultColor: Colors.black87,

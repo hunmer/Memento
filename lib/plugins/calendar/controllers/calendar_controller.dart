@@ -3,6 +3,7 @@ import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/calendar/models/event.dart';
 import 'package:Memento/plugins/calendar/services/system_calendar_manager.dart';
+import 'package:Memento/plugins/calendar/services/calendar_mapping_manager.dart';
 
 /// 日历总控制器，负责管理日历的所有状态和服务
 class CalendarController extends ChangeNotifier {
@@ -15,17 +16,21 @@ class CalendarController extends ChangeNotifier {
 
   CalendarController(this._storage) {
     _loadEvents();
+    // cleanupOrphanedSystemEvents();
   }
 
-  /// 加载系统日历事件
+  /// 加载系统日历事件和映射关系
   Future<void> loadSystemEvents() async {
     try {
       final systemManager = SystemCalendarManager.instance;
-      _systemEvents = await systemManager.getSystemEvents(includeMementoCalendar: true);
-      debugPrint('CalendarController: 加载系统日历事件完成，共 ${_systemEvents.length} 个事件');
-      for (final event in _systemEvents) {
-        debugPrint('CalendarController: 系统事件 - ID: ${event.id}, 标题: ${event.title}, 来源: ${event.source}');
-      }
+      final mappingManager = CalendarMappingManager.instance;
+
+      // 先加载映射关系
+      await mappingManager.loadMapping();
+
+      // 获取系统日历事件（包括 Memento 日历）
+      _systemEvents = await systemManager.getSystemEvents();
+
       notifyListeners();
     } catch (e) {
       debugPrint('CalendarController: 加载系统日历事件失败: $e');
@@ -149,29 +154,38 @@ class CalendarController extends ChangeNotifier {
   Future<void> _createSampleEvents() async {
     final now = DateTime.now();
 
+    // 使用固定的ID前缀，避免重复创建
+    const String sampleIdPrefix = 'sample_event_';
+
     final sampleEvents = [
       CalendarEvent(
-        id: now.millisecondsSinceEpoch.toString(),
+        id: '${sampleIdPrefix}1',
         title: '团队周会',
         description: '每周例会，讨论本周工作进展和下周计划',
         startTime: DateTime(now.year, now.month, now.day, 10, 0),
         endTime: DateTime(now.year, now.month, now.day, 11, 0),
-        icon: const IconData(0xe8df, fontFamily: 'MaterialIcons'), // Icons.groups
+        icon: const IconData(
+          0xe8df,
+          fontFamily: 'MaterialIcons',
+        ), // Icons.groups
         color: Colors.blue,
         reminderMinutes: 15,
       ),
       CalendarEvent(
-        id: (now.millisecondsSinceEpoch + 1).toString(),
+        id: '${sampleIdPrefix}2',
         title: '健身时间',
         description: '下班后去健身房锻炼',
         startTime: DateTime(now.year, now.month, now.day, 18, 30),
         endTime: DateTime(now.year, now.month, now.day, 20, 0),
-        icon: const IconData(0xeb43, fontFamily: 'MaterialIcons'), // Icons.fitness_center
+        icon: const IconData(
+          0xeb43,
+          fontFamily: 'MaterialIcons',
+        ), // Icons.fitness_center
         color: Colors.green,
         reminderMinutes: 30,
       ),
       CalendarEvent(
-        id: (now.millisecondsSinceEpoch + 2).toString(),
+        id: '${sampleIdPrefix}3',
         title: '朋友生日',
         description: '记得准备生日礼物和蛋糕',
         startTime: DateTime(now.year, now.month, now.day + 3, 19, 0),
@@ -181,12 +195,15 @@ class CalendarController extends ChangeNotifier {
         reminderMinutes: 1440, // 提前一天提醒
       ),
       CalendarEvent(
-        id: (now.millisecondsSinceEpoch + 3).toString(),
+        id: '${sampleIdPrefix}4',
         title: '项目截止日期',
         description: '完成项目文档和代码提交',
         startTime: DateTime(now.year, now.month, now.day + 7, 17, 0),
         endTime: DateTime(now.year, now.month, now.day + 7, 18, 0),
-        icon: const IconData(0xe873, fontFamily: 'MaterialIcons'), // Icons.assignment
+        icon: const IconData(
+          0xe873,
+          fontFamily: 'MaterialIcons',
+        ), // Icons.assignment
         color: Colors.orange,
         reminderMinutes: 2880, // 提前两天提醒
       ),
@@ -210,12 +227,76 @@ class CalendarController extends ChangeNotifier {
 
   // 获取所有事件（包括本地事件和系统日历事件）
   List<CalendarEvent> getAllEvents() {
+    final mappingManager = CalendarMappingManager.instance;
+    final allMappings = mappingManager.allMappings;
+
+    // 创建系统事件的副本
+    final List<CalendarEvent> systemEventsCopy = List.from(_systemEvents);
+
+    // 使用映射关系过滤系统事件：
+    // 只排除 calendar 插件自己创建的事件（避免与 _events 重复）
+    // 保留 todo 等其他插件创建的事件
+    systemEventsCopy.removeWhere((systemEvent) {
+      // 方法1：检查映射关系
+      for (final mapping in allMappings.values) {
+        final systemEventId = mapping['systemId'] as String?;
+        final from = mapping['from'] as String?;
+
+        if (systemEventId == systemEvent.systemEventId) {
+          // 只排除 calendar 插件自己创建的事件
+          if (from == 'calendar') {
+            debugPrint(
+              'CalendarController: [映射]过滤重复的系统事件 "${systemEvent.title}" (来源: $from)',
+            );
+            return true; // 排除此事件
+          }
+          // 保留 todo 等其他插件的事件
+          debugPrint(
+            'CalendarController: [映射]保留系统事件 "${systemEvent.title}" (来源: $from)',
+          );
+          return false;
+        }
+      }
+
+      // 方法2：即使没有映射关系，也检查是否与本地事件重复
+      // 这样可以处理映射关系还没保存完成的情况
+      for (final localEvent in _events) {
+        // 检查是否是同一个事件（标题、开始时间、结束时间都匹配）
+        final isSameEvent =
+            systemEvent.title == localEvent.title &&
+            _isSameDateTime(systemEvent.startTime, localEvent.startTime) &&
+            _isSameDateTime(systemEvent.endTime, localEvent.endTime);
+
+        if (isSameEvent) {
+          debugPrint(
+            'CalendarController: [匹配]过滤重复的系统事件 "${systemEvent.title}"',
+          );
+          return true; // 排除此事件
+        }
+      }
+
+      return false; // 保留此事件
+    });
+
+    // 合并事件：系统事件 + 本地事件
     final List<CalendarEvent> allEvents = [
-      ..._events,
-      ..._systemEvents, // 包含来自系统日历的所有事件（包括 Memento 日历中的 todo 任务）
+      ...systemEventsCopy, // 其他来源的系统日历事件（包括 todo）
+      ..._events, // calendar 插件本地事件
     ];
 
     return allEvents;
+  }
+
+  /// 检查两个日期时间是否相同（忽略毫秒和秒）
+  bool _isSameDateTime(DateTime? a, DateTime? b) {
+    if (a == null && b == null) return true;
+    if (a == null || b == null) return false;
+
+    return a.year == b.year &&
+        a.month == b.month &&
+        a.day == b.day &&
+        a.hour == b.hour &&
+        a.minute == b.minute;
   }
 
   // 手动触发刷新（用于外部事件变化时通知监听者）
@@ -229,6 +310,8 @@ class CalendarController extends ChangeNotifier {
   Future<void> _syncAllEventsToSystemCalendar() async {
     try {
       final systemCalendar = SystemCalendarManager.instance;
+      final mappingManager = CalendarMappingManager.instance;
+
       if (!systemCalendar.isInitialized) {
         final initialized = await systemCalendar.initialize();
         if (!initialized) {
@@ -237,6 +320,9 @@ class CalendarController extends ChangeNotifier {
         }
       }
 
+      // ✅ 确保映射关系已加载
+      await mappingManager.loadMapping();
+
       // 获取所有未完成的事件（只同步默认来源的事件）
       final eventsToSync = _events.where((e) => e.source == 'default').toList();
 
@@ -244,14 +330,34 @@ class CalendarController extends ChangeNotifier {
 
       int successCount = 0;
       int failedCount = 0;
+      int skippedCount = 0;
 
       // 遍历所有事件，逐一同步
       for (final event in eventsToSync) {
         try {
+          // 检查是否已经有映射关系
+          final existingSystemId = mappingManager.getSystemEventId(event.id);
+          if (existingSystemId != null) {
+            debugPrint(
+              'CalendarController: 事件 "${event.title}" (ID: ${event.id}) 已存在映射关系，跳过',
+            );
+            skippedCount++;
+            continue;
+          }
+
           final result = await systemCalendar.addEventToSystem(event);
-          if (result.key) {
+          if (result.key && result.value != null) {
+            // ✅ 保存映射关系
+            await mappingManager.addMapping(
+              localId: event.id,
+              from: 'calendar',
+              data: event.toJson(),
+              systemId: result.value!,
+            );
             successCount++;
-            debugPrint('CalendarController: 事件 "${event.title}" 同步成功');
+            debugPrint(
+              'CalendarController: 事件 "${event.title}" 同步成功，系统ID: ${result.value}',
+            );
           } else {
             failedCount++;
             debugPrint('CalendarController: 事件 "${event.title}" 同步失败');
@@ -266,7 +372,7 @@ class CalendarController extends ChangeNotifier {
       }
 
       debugPrint(
-        'CalendarController: 同步完成，成功: $successCount，失败: $failedCount',
+        'CalendarController: 同步完成，成功: $successCount，跳过: $skippedCount，失败: $failedCount',
       );
     } catch (e) {
       debugPrint('CalendarController: 同步所有事件到系统日历异常: $e');
@@ -288,8 +394,22 @@ class CalendarController extends ChangeNotifier {
       // 只有默认来源的事件才同步到系统日历
       if (event.source == 'default') {
         final result = await systemCalendar.addEventToSystem(event);
-        if (result.key) {
-          debugPrint('CalendarController: 事件 "${event.title}" 已同步到系统日历');
+        if (result.key && result.value != null) {
+          debugPrint(
+            'CalendarController: 事件 "${event.title}" 已同步到系统日历，系统ID: ${result.value}',
+          );
+
+          // ✅ 保存映射关系
+          final mappingManager = CalendarMappingManager.instance;
+          await mappingManager.addMapping(
+            localId: event.id,
+            from: 'calendar',
+            data: event.toJson(),
+            systemId: result.value!,
+          );
+          debugPrint(
+            'CalendarController: 映射关系已保存，本地ID: ${event.id} -> 系统ID: ${result.value}',
+          );
         } else {
           debugPrint('CalendarController: 事件 "${event.title}" 同步到系统日历失败');
         }
@@ -303,17 +423,29 @@ class CalendarController extends ChangeNotifier {
   Future<void> _syncDeleteFromSystemCalendar(CalendarEvent event) async {
     try {
       final systemCalendar = SystemCalendarManager.instance;
+      final mappingManager = CalendarMappingManager.instance;
       if (!systemCalendar.isInitialized) {
         return;
       }
 
       // 只有默认来源的事件才从系统日历删除
       if (event.source == 'default') {
-        final success = await systemCalendar.deleteEventFromSystem(event.id);
-        if (success) {
-          debugPrint('CalendarController: 事件 "${event.title}" 已从系统日历删除');
+        // 通过映射关系获取系统日历ID
+        final systemEventId = mappingManager.getSystemEventId(event.id);
+        if (systemEventId != null) {
+          final success = await systemCalendar.deleteEventFromSystem(
+            systemEventId,
+          );
+          if (success) {
+            debugPrint('CalendarController: 事件 "${event.title}" 已从系统日历删除');
+
+            // 删除映射关系
+            await mappingManager.removeMapping(event.id);
+          } else {
+            debugPrint('CalendarController: 事件 "${event.title}" 从系统日历删除失败');
+          }
         } else {
-          debugPrint('CalendarController: 事件 "${event.title}" 从系统日历删除失败');
+          debugPrint('CalendarController: 未找到事件 "${event.title}" 的映射关系');
         }
       }
     } catch (e) {
@@ -328,21 +460,103 @@ class CalendarController extends ChangeNotifier {
   ) async {
     try {
       final systemCalendar = SystemCalendarManager.instance;
+      final mappingManager = CalendarMappingManager.instance;
+
       if (!systemCalendar.isInitialized) {
         return;
       }
 
       // 只有默认来源的事件才更新到系统日历
       if (newEvent.source == 'default') {
-        final success = await systemCalendar.updateEventInSystem(newEvent);
-        if (success) {
-          debugPrint('CalendarController: 事件 "${newEvent.title}" 已更新到系统日历');
+        // 先删除旧的系统事件
+        final oldSystemEventId = mappingManager.getSystemEventId(oldEvent.id);
+        if (oldSystemEventId != null) {
+          await systemCalendar.deleteEventFromSystem(oldSystemEventId);
+          await mappingManager.removeMapping(oldEvent.id);
+          debugPrint('CalendarController: 已删除旧的系统事件，ID: $oldSystemEventId');
+        }
+
+        // 添加新的系统事件
+        final result = await systemCalendar.addEventToSystem(newEvent);
+        if (result.key && result.value != null) {
+          // 保存新的映射关系
+          await mappingManager.addMapping(
+            localId: newEvent.id,
+            from: 'calendar',
+            data: newEvent.toJson(),
+            systemId: result.value!,
+          );
+          debugPrint(
+            'CalendarController: 事件 "${newEvent.title}" 已更新到系统日历，新系统ID: ${result.value}',
+          );
         } else {
           debugPrint('CalendarController: 事件 "${newEvent.title}" 更新到系统日历失败');
         }
       }
     } catch (e) {
       debugPrint('CalendarController: 更新系统日历事件异常: $e');
+    }
+  }
+
+  /// 清理系统日历中的孤立事件（没有对应映射关系的事件）
+  /// 注意：此方法会删除所有在 Memento 日历中但没有映射关系的事件
+  Future<void> cleanupOrphanedSystemEvents() async {
+    try {
+      final systemCalendar = SystemCalendarManager.instance;
+      final mappingManager = CalendarMappingManager.instance;
+
+      if (!systemCalendar.isInitialized) {
+        await systemCalendar.initialize();
+      }
+
+      // 加载映射关系
+      await mappingManager.loadMapping();
+      final allMappings = mappingManager.allMappings;
+
+      // 获取系统日历中的所有事件
+      final systemEvents = await systemCalendar.getSystemEvents();
+
+      int deletedCount = 0;
+      int keptCount = 0;
+
+      // 检查每个系统事件是否有对应的映射关系
+      for (final event in systemEvents) {
+        if (event.systemEventId == null) {
+          keptCount++;
+          continue;
+        }
+
+        // 查找是否有映射关系指向这个系统事件
+        bool hasMapping = false;
+        for (final mapping in allMappings.values) {
+          final systemId = mapping['systemId'] as String?;
+          if (systemId == event.systemEventId) {
+            hasMapping = true;
+            break;
+          }
+        }
+
+        // 如果没有映射关系，且来源是 system，则删除（孤立事件）
+        if (!hasMapping && event.source == 'system') {
+          final success = await systemCalendar.deleteEventFromSystem(
+            event.systemEventId!,
+          );
+          if (success) {
+            deletedCount++;
+            debugPrint(
+              'CalendarController: 删除孤立的系统事件 "${event.title}" (${event.systemEventId})',
+            );
+          }
+        } else {
+          keptCount++;
+        }
+      }
+
+      debugPrint(
+        'CalendarController: 清理完成，删除 $deletedCount 个孤立事件，保留 $keptCount 个事件',
+      );
+    } catch (e) {
+      debugPrint('CalendarController: 清理孤立事件异常: $e');
     }
   }
 }

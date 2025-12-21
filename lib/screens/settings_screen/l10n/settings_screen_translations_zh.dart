@@ -42,6 +42,11 @@ const Map<String, String> settingsScreenTranslationsZh = {
   'settings_screen_autoBackupTitle': '自动备份设置',
   'settings_screen_autoBackupSubtitle': '设置自动备份计划',
 
+  // 插件管理
+  'settings_screen_pluginManagementTitle': '插件管理',
+  'settings_screen_pluginManagementSubtitle': '控制各插件是否在启动时加载',
+  'settings_screen_pluginManagementTip': '关闭的插件将在下次启动时不再加载，重新开启即可恢复',
+
   // 自动打开上次插件
   'settings_screen_autoOpenLastPluginTitle': '自动打开上次使用的插件',
   'settings_screen_autoOpenLastPluginSubtitle': '启动时自动打开最后使用的插件',

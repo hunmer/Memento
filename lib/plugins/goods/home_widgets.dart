@@ -109,6 +109,7 @@ class GoodsHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'goods',
         pluginName: 'goods_name'.tr,
         pluginIcon: Icons.dashboard,
         pluginDefaultColor: _goodsColor,

@@ -76,6 +76,7 @@ final Map<String, String> screensTranslationsEn = {
 
   // home_card
   'screens_cannotOpenPlugin': 'Cannot open plugin',
+  'screens_pluginDisabled': 'Plugin disabled',
 
   // home_grid
   'screens_quickCreateLayout': 'Quick Create Layout',

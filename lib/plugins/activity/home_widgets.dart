@@ -108,6 +108,7 @@ class ActivityHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'activity',
         pluginName: 'activity_name'.tr,
         pluginIcon: Icons.access_time,
         pluginDefaultColor: Colors.pink,

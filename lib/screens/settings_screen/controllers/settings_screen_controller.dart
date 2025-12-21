@@ -1,5 +1,7 @@
 import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/core/theme_controller.dart';
+import 'package:Memento/core/builtin_plugins.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'base_settings_controller.dart';
@@ -22,6 +24,7 @@ class SettingsScreenController extends ChangeNotifier {
   DateTime? _lastBackupCheckDate;
   BuildContext? _context;
   bool _initialized = false;
+  final Map<String, bool> _pluginEnabledStates = {};
 
   bool isInitialized() => _initialized;
 
@@ -35,6 +38,7 @@ class SettingsScreenController extends ChangeNotifier {
     _fullBackupController = FullBackupController(context);
     _webdavSyncController = WebDAVSyncController(context);
     _autoUpdateController = AutoUpdateController(context);
+    await _loadPluginStates();
     _initialized = true;
     notifyListeners();
   }
@@ -157,6 +161,43 @@ class SettingsScreenController extends ChangeNotifier {
   }
 
   Future<void> checkForUpdates() => _autoUpdateController.showUpdateDialog();
+
+  List<PluginBase> get availablePlugins {
+    final installed = globalPluginManager.allPlugins;
+    final installedIds = installed.map((plugin) => plugin.id).toSet();
+    final builtin = BuiltinPlugins.createAll();
+    final additional =
+        builtin.where((plugin) => !installedIds.contains(plugin.id)).toList();
+    return [...installed, ...additional];
+  }
+
+  bool isPluginEnabled(String pluginId) {
+    return _pluginEnabledStates[pluginId] ?? true;
+  }
+
+  Future<void> setPluginEnabled(String pluginId, bool enabled) async {
+    _pluginEnabledStates[pluginId] = enabled;
+    notifyListeners();
+    await globalConfigManager.setPluginEnabledState(pluginId, enabled);
+  }
+
+  Future<void> _loadPluginStates() async {
+    final storedStates = globalConfigManager.getPluginEnabledStates();
+    _pluginEnabledStates
+      ..clear()
+      ..addAll(storedStates);
+
+    final Set<String> knownPluginIds = {};
+    for (final plugin in globalPluginManager.allPlugins) {
+      knownPluginIds.add(plugin.id);
+    }
+    for (final plugin in BuiltinPlugins.createAll()) {
+      knownPluginIds.add(plugin.id);
+    }
+    for (final pluginId in knownPluginIds) {
+      _pluginEnabledStates.putIfAbsent(pluginId, () => true);
+    }
+  }
 
   // 备份相关方法
   Future<void> setBackupSchedule(BackupSchedule schedule) async {

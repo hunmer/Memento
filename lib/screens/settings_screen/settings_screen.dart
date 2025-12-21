@@ -18,6 +18,7 @@ import 'package:Memento/screens/settings_screen/widgets/permission_request_dialo
 import 'package:get/get.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/core/plugin_base.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -196,6 +197,67 @@ class _SettingsScreenState extends State<SettingsScreen> {
     apiKeyController.dispose();
   }
 
+  Future<void> _showPluginManagementSheet() async {
+    await SmoothBottomSheet.show(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        final double sheetHeight = MediaQuery.of(context).size.height * 0.75;
+        return SizedBox(
+          height: sheetHeight,
+          child: StatefulBuilder(
+            builder: (context, setModalState) {
+              final List<PluginBase> plugins = List<PluginBase>.from(
+                _controller.availablePlugins,
+              )
+                ..sort(
+                  (a, b) => (a.getPluginName(context) ?? a.id)
+                      .compareTo(b.getPluginName(context) ?? b.id),
+                );
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      'settings_screen_pluginManagementTip'.tr,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.separated(
+                      itemCount: plugins.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final plugin = plugins[index];
+                        final pluginName =
+                            plugin.getPluginName(context) ?? plugin.id;
+                        final isEnabled =
+                            _controller.isPluginEnabled(plugin.id);
+                        return SwitchListTile(
+                          title: Text(pluginName),
+                          subtitle: Text(plugin.id),
+                          value: isEnabled,
+                          onChanged: (value) async {
+                            await _controller.setPluginEnabled(
+                              plugin.id,
+                              value,
+                            );
+                            setModalState(() {});
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool showPermissionEntry =
@@ -364,6 +426,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text('settings_screen_autoBackupTitle'.tr),
             subtitle: Text('settings_screen_autoBackupSubtitle'.tr),
             onTap: _backupService.showBackupScheduleDialog,
+          ),
+          ListTile(
+            leading: const Icon(Icons.extension),
+            title: Text('settings_screen_pluginManagementTitle'.tr),
+            subtitle: Text('settings_screen_pluginManagementSubtitle'.tr),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: _showPluginManagementSheet,
           ),
           ListTile(
             leading: const Icon(Icons.play_circle),
