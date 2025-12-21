@@ -38,15 +38,17 @@ class MessageService extends ChangeNotifier {
     try {
       final data = await storage.read('agent_chat/messages/$conversationId');
       if (data is List) {
-        final messages = data
-            .map((json) => ChatMessage.fromJson(json as Map<String, dynamic>))
-            .toList();
+        final messages =
+            data
+                .map(
+                  (json) => ChatMessage.fromJson(json as Map<String, dynamic>),
+                )
+                .toList();
         _messageCache[conversationId] = messages;
       } else {
         _messageCache[conversationId] = [];
       }
     } catch (e) {
-      debugPrint('加载消息失败: $e');
       _messageCache[conversationId] = [];
     }
   }
@@ -58,7 +60,7 @@ class MessageService extends ChangeNotifier {
       final data = messages.map((m) => m.toJson()).toList();
       await storage.write('agent_chat/messages/$conversationId', data);
     } catch (e) {
-      debugPrint('保存消息失败: $e');
+      debugPrint('❌ [MessageService] 保存消息失败: $e');
     }
   }
 
@@ -150,6 +152,27 @@ class MessageService extends ChangeNotifier {
     return messages.where((m) => m.parentId == null).toList();
   }
 
+  /// 获取同一链式执行的所有消息（按 chainStepIndex 排序）
+  List<ChatMessage> getChainMessages(
+    String conversationId,
+    String chainExecutionId,
+  ) {
+    final messages = _messageCache[conversationId];
+    if (messages == null) return [];
+
+    final chainMessages =
+        messages.where((m) => m.chainExecutionId == chainExecutionId).toList();
+
+    // 按步骤索引排序
+    chainMessages.sort((a, b) {
+      final aIndex = a.chainStepIndex ?? 0;
+      final bIndex = b.chainStepIndex ?? 0;
+      return aIndex.compareTo(bIndex);
+    });
+
+    return chainMessages;
+  }
+
   /// 获取最后N条消息（用于上下文）
   List<ChatMessage> getLastMessages(String conversationId, int count) {
     final messages = _messageCache[conversationId] ?? [];
@@ -180,9 +203,9 @@ class MessageService extends ChangeNotifier {
     if (message != null && message.isUser) {
       // 只能编辑用户消息
       final tokenCount = TokenCounterService.estimateTokenCount(newContent);
-      final updated = message.markAsEdited(newContent).copyWith(
-            tokenCount: tokenCount,
-          );
+      final updated = message
+          .markAsEdited(newContent)
+          .copyWith(tokenCount: tokenCount);
       await updateMessage(updated);
     }
   }
@@ -210,7 +233,7 @@ class MessageService extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 更新AI消息的生成状态
+  /// 更新AI消息的生成状态（仅更新内存，不保存到磁盘）
   Future<void> updateAIMessageContent(
     String conversationId,
     String messageId,
@@ -219,11 +242,18 @@ class MessageService extends ChangeNotifier {
   ) async {
     final message = getMessage(conversationId, messageId);
     if (message != null && !message.isUser) {
-      final updated = message.copyWith(
-        content: content,
-        tokenCount: tokenCount,
-      );
-      await updateMessage(updated);
+      final messages = _messageCache[conversationId];
+      if (messages != null) {
+        final index = messages.indexWhere((m) => m.id == messageId);
+        if (index != -1) {
+          // 只更新内存，不保存到磁盘（避免频繁I/O）
+          messages[index] = message.copyWith(
+            content: content,
+            tokenCount: tokenCount,
+          );
+          notifyListeners();
+        }
+      }
     }
   }
 
@@ -234,8 +264,9 @@ class MessageService extends ChangeNotifier {
   ) async {
     final message = getMessage(conversationId, messageId);
     if (message != null && !message.isUser) {
-      final finalTokenCount =
-          TokenCounterService.estimateTokenCount(message.content);
+      final finalTokenCount = TokenCounterService.estimateTokenCount(
+        message.content,
+      );
       final updated = message.completeGeneration(finalTokenCount);
       await updateMessage(updated);
     }
