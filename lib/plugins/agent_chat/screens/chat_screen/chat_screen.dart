@@ -1276,15 +1276,15 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder:
           (context) => ToolAgentsConfigDialog(
-            initialToolDetectionAgentId:
-                _controller.conversation.toolDetectionAgentId,
-            initialToolExecutionAgentId:
-                _controller.conversation.toolExecutionAgentId,
-            onSave: (toolDetectionAgentId, toolExecutionAgentId) async {
+            initialToolDetectionConfig:
+                _controller.conversation.toolDetectionConfig,
+            initialToolExecutionConfig:
+                _controller.conversation.toolExecutionConfig,
+            onSave: (toolDetectionConfig, toolExecutionConfig) async {
               try {
                 await _controller.configureToolAgents(
-                  toolDetectionAgentId: toolDetectionAgentId,
-                  toolExecutionAgentId: toolExecutionAgentId,
+                  toolDetectionConfig: toolDetectionConfig,
+                  toolExecutionConfig: toolExecutionConfig,
                 );
                 if (mounted) {
                   toastService.showToast('工具 Agent 配置成功');
