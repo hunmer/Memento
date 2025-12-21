@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/calendar/models/event.dart';
-import 'package:Memento/plugins/calendar/services/todo_event_service.dart';
 import 'package:Memento/plugins/calendar/services/system_calendar_manager.dart';
 
 /// 日历总控制器，负责管理日历的所有状态和服务
@@ -10,7 +9,7 @@ class CalendarController extends ChangeNotifier {
   final StorageManager _storage;
   final List<CalendarEvent> _events = [];
   final List<CalendarEvent> _completedEvents = [];
-  TodoEventService? _todoEventService;
+  List<CalendarEvent> _systemEvents = []; // 系统日历事件缓存
   DateTime _selectedDate = DateTime.now();
   DateTime _focusedMonth = DateTime.now();
 
@@ -18,13 +17,19 @@ class CalendarController extends ChangeNotifier {
     _loadEvents();
   }
 
-  // 获取TodoEventService
-  TodoEventService? get todoEventService => _todoEventService;
-
-  // 设置TodoEventService
-  void setTodoEventService(TodoEventService service) {
-    _todoEventService = service;
-    notifyListeners();
+  /// 加载系统日历事件
+  Future<void> loadSystemEvents() async {
+    try {
+      final systemManager = SystemCalendarManager.instance;
+      _systemEvents = await systemManager.getSystemEvents(includeMementoCalendar: true);
+      debugPrint('CalendarController: 加载系统日历事件完成，共 ${_systemEvents.length} 个事件');
+      for (final event in _systemEvents) {
+        debugPrint('CalendarController: 系统事件 - ID: ${event.id}, 标题: ${event.title}, 来源: ${event.source}');
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('CalendarController: 加载系统日历事件失败: $e');
+    }
   }
 
   // 获取所有事件
@@ -135,6 +140,9 @@ class CalendarController extends ChangeNotifier {
       await _createSampleEvents();
     }
     notifyListeners();
+
+    // 同步所有现有事件到系统日历（异步执行，不阻塞 UI）
+    _syncAllEventsToSystemCalendar();
   }
 
   // 创建示例事件
@@ -200,12 +208,13 @@ class CalendarController extends ChangeNotifier {
     }
   }
 
-  // 获取所有事件（包括Todo任务事件）
+  // 获取所有事件（包括本地事件和系统日历事件）
   List<CalendarEvent> getAllEvents() {
     final List<CalendarEvent> allEvents = [
       ..._events,
-      if (_todoEventService != null) ..._todoEventService!.getTaskEvents(),
+      ..._systemEvents, // 包含来自系统日历的所有事件（包括 Memento 日历中的 todo 任务）
     ];
+
     return allEvents;
   }
 
@@ -215,6 +224,54 @@ class CalendarController extends ChangeNotifier {
   }
 
   // ========== 系统日历同步方法 ==========
+
+  /// 同步所有现有事件到系统日历（初始化时调用）
+  Future<void> _syncAllEventsToSystemCalendar() async {
+    try {
+      final systemCalendar = SystemCalendarManager.instance;
+      if (!systemCalendar.isInitialized) {
+        final initialized = await systemCalendar.initialize();
+        if (!initialized) {
+          debugPrint('CalendarController: 系统日历管理器初始化失败，跳过同步');
+          return;
+        }
+      }
+
+      // 获取所有未完成的事件（只同步默认来源的事件）
+      final eventsToSync = _events.where((e) => e.source == 'default').toList();
+
+      debugPrint('CalendarController: 开始同步 ${eventsToSync.length} 个事件到系统日历');
+
+      int successCount = 0;
+      int failedCount = 0;
+
+      // 遍历所有事件，逐一同步
+      for (final event in eventsToSync) {
+        try {
+          final result = await systemCalendar.addEventToSystem(event);
+          if (result.key) {
+            successCount++;
+            debugPrint('CalendarController: 事件 "${event.title}" 同步成功');
+          } else {
+            failedCount++;
+            debugPrint('CalendarController: 事件 "${event.title}" 同步失败');
+          }
+        } catch (e) {
+          failedCount++;
+          debugPrint('CalendarController: 同步事件 "${event.title}" 异常: $e');
+        }
+
+        // 添加小延迟，避免过于频繁的 API 调用
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+
+      debugPrint(
+        'CalendarController: 同步完成，成功: $successCount，失败: $failedCount',
+      );
+    } catch (e) {
+      debugPrint('CalendarController: 同步所有事件到系统日历异常: $e');
+    }
+  }
 
   /// 同步事件到系统日历
   Future<void> _syncToSystemCalendar(CalendarEvent event) async {
@@ -230,8 +287,8 @@ class CalendarController extends ChangeNotifier {
 
       // 只有默认来源的事件才同步到系统日历
       if (event.source == 'default') {
-        final success = await systemCalendar.addEventToSystem(event);
-        if (success) {
+        final result = await systemCalendar.addEventToSystem(event);
+        if (result.key) {
           debugPrint('CalendarController: 事件 "${event.title}" 已同步到系统日历');
         } else {
           debugPrint('CalendarController: 事件 "${event.title}" 同步到系统日历失败');
