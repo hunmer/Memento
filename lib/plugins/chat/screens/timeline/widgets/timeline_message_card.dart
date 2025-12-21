@@ -257,18 +257,17 @@ class TimelineMessageCard extends StatelessWidget {
                                     color: theme.colorScheme.surface,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Stack(
-                                    alignment: Alignment.center,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Icon(
                                         Icons.video_library,
-                                        size: isGridView ? 32 : 48,
+                                        size: isGridView ? 24 : 32,
                                         color: theme.colorScheme.primary,
                                       ),
-                                      Positioned(
-                                        bottom: 8,
-                                        left: 8,
-                                        right: 8,
+                                      SizedBox(width: 8),
+                                      Expanded(
                                         child: Text(
                                           fileInfo.originalFileName,
                                           style: TextStyle(
@@ -277,9 +276,9 @@ class TimelineMessageCard extends StatelessWidget {
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.center,
                                         ),
                                       ),
+                                      SizedBox(width: 8),
                                     ],
                                   ),
                                 ),

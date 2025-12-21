@@ -179,6 +179,7 @@ final Map<String, String> openaiTranslationsEn = {
   // Provider Settings
   'openai_confirmDeleteProviderTitle': 'Confirm Delete',
   'openai_confirmDeleteProviderMessage': 'Are you sure you want to delete this provider?',
+  'openai_pluginSettingsTitle': 'AI Assistant Settings',
   'openai_providerSettingsTitle': 'Provider Settings',
   'openai_addProviderTooltip': 'Add new AI provider',
   'openai_noProvidersConfigured': 'No providers configured',
