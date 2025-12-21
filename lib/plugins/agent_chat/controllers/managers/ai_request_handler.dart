@@ -4,15 +4,13 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:openai_dart/openai_dart.dart';
 import '../../models/conversation.dart';
-import '../../models/chat_message.dart';
-import '../../models/file_attachment.dart';
-import '../../models/saved_tool_template.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import '../../services/tool_service.dart';
 import '../../services/token_counter_service.dart';
 import 'package:Memento/utils/file_picker_helper.dart';
 import 'package:Memento/plugins/openai/services/request_service.dart';
 import 'shared/manager_context.dart';
+import 'tool_orchestrator.dart';
 
 /// AI 请求处理管理器
 ///
@@ -38,6 +36,9 @@ class AIRequestHandler {
   final Future<void> Function(String messageId, String aiResponse)?
   onHandleToolCall;
 
+  /// 工具调用编排器 - 公共组件
+  late final ToolOrchestrator _toolOrchestrator;
+
   /// 上下文消息缓存（用于保存详细数据）
   final Map<String, List<ChatCompletionMessage>> _contextMessagesCache = {};
 
@@ -48,7 +49,16 @@ class AIRequestHandler {
     required this.getToolAgent,
     required this.isCancelling,
     this.onHandleToolCall,
-  });
+  }) {
+    // 初始化工具调用编排器
+    _toolOrchestrator = ToolOrchestrator(
+      context: context,
+      conversation: conversation,
+      getToolAgent: (config, {enableFunctionCalling = false}) =>
+          getToolAgent(config),
+      isCancelling: isCancelling,
+    );
+  }
 
   // ========== 核心方法 ==========
 
@@ -274,311 +284,60 @@ class AIRequestHandler {
       final imageFiles =
           files.where((f) => FilePickerHelper.isImageFile(f)).toList();
 
-      // 准备工具需求识别阶段的 Agent 和 Prompt
-      AIAgent? toolDetectionAgent;
-      List<ChatCompletionMessage> toolDetectionMessages = contextMessages;
-      String toolBriefPrompt = '';
-
-      if (enableToolCalling && currentAgent.enableFunctionCalling) {
-        // 尝试加载工具需求识别专用 Agent
-        toolDetectionAgent = await getToolAgent(
-          conversation.toolDetectionConfig,
-        );
-
-        // 获取工具简要列表（用于工具需求识别）
-        toolBriefPrompt = ToolService.getToolBriefPrompt();
-
-        if (toolDetectionAgent != null) {
-          // 使用专用 Agent，需要在其 system prompt 后追加工具列表
-          debugPrint('🔧 [工具需求识别] 使用专用 Agent: ${toolDetectionAgent.name}');
-
-          // 获取专用 Agent 的 system prompt
-          final agentSystemPrompt = toolDetectionAgent.systemPrompt;
-
-          // 合并专用 Agent 的 system prompt 和工具列表
-          final combinedSystemPrompt =
-              agentSystemPrompt.isNotEmpty
-                  ? '$agentSystemPrompt\n\n$toolBriefPrompt'
-                  : toolBriefPrompt;
-
-          // 构建新的 context messages
-          final messagesWithoutSystem =
-              contextMessages
-                  .where((m) => m.role != ChatCompletionMessageRole.system)
-                  .toList();
-
-          toolDetectionMessages = [
-            ChatCompletionMessage.system(content: combinedSystemPrompt),
-            ...messagesWithoutSystem,
-          ];
-
-          debugPrint('🔧 [工具需求识别] 已将工具列表追加到专用 Agent 的 system prompt');
-        } else {
-          // 未配置专用 Agent，使用默认 prompt 替换当前 agent 的 system prompt
-          toolDetectionAgent = currentAgent;
-
-          // 构建新的 context messages，替换 system prompt
-          final messagesWithoutSystem =
-              contextMessages
-                  .where((m) => m.role != ChatCompletionMessageRole.system)
-                  .toList();
-
-          toolDetectionMessages = [
-            // 使用工具 brief prompt 作为 system prompt
-            ChatCompletionMessage.system(content: toolBriefPrompt),
-            ...messagesWithoutSystem,
-          ];
-
-          debugPrint('🔧 [工具需求识别] 使用默认 prompt 替换 system prompt');
-        }
-      } else {
-        toolDetectionAgent = currentAgent;
-      }
-
-      // 第一阶段：流式接收 AI 回复（工具需求识别）
-      await RequestService.streamResponse(
-        agent: toolDetectionAgent!,
-        prompt: null,
-        contextMessages: toolDetectionMessages,
-        vision: imageFiles.isNotEmpty,
-        filePath: imageFiles.isNotEmpty ? imageFiles.first.path : null,
-        // 如果启用工具调用,使用 JSON Schema 强制返回工具请求格式
-        responseFormat:
-            enableToolCalling && currentAgent.enableFunctionCalling
-                ? ResponseFormat.jsonSchema(
-                  jsonSchema: JsonSchemaObject(
-                    name: 'ToolRequest',
-                    description: '工具需求请求',
-                    strict: true,
-                    schema: ToolService.toolRequestSchema,
-                  ),
-                )
-                : null,
-        additionalPrompts: {'tool_brief': toolBriefPrompt},
-        shouldCancel: isCancelling,
-        onToken: (token) {
-          buffer.write(token);
-          tokenCount++;
-
-          final content = buffer.toString();
-
-          // 检测是否为工具需求（第一阶段）或工具调用（第二阶段）
-          final toolRequest = ToolService.parseToolRequest(content);
-          final containsToolCall = ToolService.containsToolCall(content);
-
-          if (currentAgent.enableFunctionCalling &&
-              (toolRequest != null || containsToolCall)) {
-            isCollectingToolCall = true;
-            // 显示收集中状态
-            final displayContent = '$content\n\n⚙️ 正在准备工具调用...';
-            context.messageService.updateAIMessageContent(
-              context.conversationId,
-              aiMessageId,
-              displayContent,
-              tokenCount,
-            );
-          } else if (!isCollectingToolCall) {
-            // 正常流式显示
-            final processedContent = RequestService.processThinkingContent(
-              content,
-            );
-
-            context.messageService.updateAIMessageContent(
-              context.conversationId,
-              aiMessageId,
-              processedContent,
-              tokenCount,
-            );
-          }
+      // 使用公共的工具调用编排器处理第一阶段和第二阶段
+      final needsToolCall = await _toolOrchestrator.processTwoPhaseToolCall(
+        agent: currentAgent,
+        aiMessageId: aiMessageId,
+        contextMessages: contextMessages,
+        files: imageFiles,
+        userInput: userInput,
+        enableToolCalling: enableToolCalling,
+        buffer: buffer,
+        tokenCount: tokenCount,
+        isCollectingToolCall: isCollectingToolCall,
+        onUpdateMessage: (content, count) {
+          final processedContent = RequestService.processThinkingContent(content);
+          context.messageService.updateAIMessageContent(
+            context.conversationId,
+            aiMessageId,
+            processedContent,
+            count,
+          );
         },
         onError: (error) {
-          debugPrint('AI 响应错误: $error');
-
-          // 检测是否为用户取消操作
           final errorMessage =
               error == '已取消发送' ? '用户已取消操作' : '抱歉，生成回复时出现错误：$error';
-
           context.messageService.updateAIMessageContent(
             context.conversationId,
             aiMessageId,
             errorMessage,
             0,
           );
-
           context.messageService.completeAIMessage(
             context.conversationId,
             aiMessageId,
           );
         },
-        onComplete: () async {
-          final firstResponse = buffer.toString();
-
-          // ========== 检测工具需求（第一阶段响应）==========
-          final toolRequest = ToolService.parseToolRequest(firstResponse);
-
-          if (currentAgent.enableFunctionCalling &&
-              toolRequest != null &&
-              toolRequest.isNotEmpty) {
-            debugPrint('🔍 AI 请求工具: ${toolRequest.join(", ")}');
-
-            // ========== 第二阶段：追加详细文档 ==========
-            try {
-              final detailPrompt = await ToolService.getToolDetailPrompt(
-                toolRequest,
-              );
-
-              // 准备工具执行阶段的 Agent 和 Context Messages
-              AIAgent? toolExecutionAgent = await getToolAgent(
-                conversation.toolExecutionConfig,
-              );
-
-              List<ChatCompletionMessage> toolExecutionMessages;
-
-              if (toolExecutionAgent != null) {
-                // 使用专用 Agent，它有自己的 system prompt
-                debugPrint('🔧 [工具执行] 使用专用 Agent: ${toolExecutionAgent.name}');
-
-                // 构建新的 context，使用专用 agent 的 system prompt
-                toolExecutionMessages = [
-                  // 专用 agent 的 system prompt 会自动添加
-                  ChatCompletionMessage.user(
-                    content: ChatCompletionUserMessageContent.string(
-                      '原始用户输入：\n$userInput\n\n第一阶段识别的工具：${toolRequest.join(", ")}\n\n工具详细文档：\n$detailPrompt\n\n请根据文档生成工具调用代码。',
-                    ),
-                  ),
-                ];
-              } else {
-                // 未配置专用 Agent，使用默认 prompt 替换 system prompt
-                toolExecutionAgent = currentAgent;
-                debugPrint('🔧 [工具执行] 使用默认 prompt 替换 system prompt');
-
-                // 移除 system prompt，用 tool detail prompt 替换
-                final messagesWithoutSystem =
-                    contextMessages
-                        .where(
-                          (m) => m.role != ChatCompletionMessageRole.system,
-                        )
-                        .toList();
-
-                toolExecutionMessages = [
-                  // 使用工具详细文档作为 system prompt
-                  ChatCompletionMessage.system(content: detailPrompt),
-                  ...messagesWithoutSystem,
-                  ChatCompletionMessage.assistant(content: firstResponse),
-                  ChatCompletionMessage.user(
-                    content: ChatCompletionUserMessageContent.string(
-                      '请根据文档生成工具调用代码。',
-                    ),
-                  ),
-                ];
-              }
-
-              // 清空 buffer，准备接收第二阶段响应
-              buffer.clear();
-              tokenCount = 0;
-              isCollectingToolCall = false;
-
-              // 第二阶段：请求生成工具调用代码
-              await RequestService.streamResponse(
-                agent: toolExecutionAgent,
-                prompt: null,
-                contextMessages: toolExecutionMessages,
-                vision: false,
-                // 使用 JSON Schema 强制返回工具调用格式
-                responseFormat: ResponseFormat.jsonSchema(
-                  jsonSchema: JsonSchemaObject(
-                    name: 'ToolCall',
-                    description: '工具调用步骤',
-                    strict: true,
-                    schema: ToolService.toolCallSchema,
-                  ),
-                ),
-                additionalPrompts: {'tool_detail': detailPrompt},
-                shouldCancel: isCancelling,
-                onToken: (token) {
-                  buffer.write(token);
-                  tokenCount++;
-
-                  final content = buffer.toString();
-
-                  if (currentAgent.enableFunctionCalling &&
-                      ToolService.containsToolCall(content)) {
-                    isCollectingToolCall = true;
-                    final displayContent = '$content\n\n⚙️ 正在准备执行工具...';
-                    context.messageService.updateAIMessageContent(
-                      context.conversationId,
-                      aiMessageId,
-                      displayContent,
-                      tokenCount,
-                    );
-                  } else if (!isCollectingToolCall) {
-                    final processedContent =
-                        RequestService.processThinkingContent(content);
-                    context.messageService.updateAIMessageContent(
-                      context.conversationId,
-                      aiMessageId,
-                      processedContent,
-                      tokenCount,
-                    );
-                  }
-                },
-                onError: (error) {
-                  debugPrint('第二阶段 AI 响应错误: $error');
-
-                  // 检测是否为用户取消操作
-                  final errorMessage =
-                      error == '已取消发送' ? '用户已取消操作' : '抱歉，生成工具调用时出现错误：$error';
-
-                  context.messageService.updateAIMessageContent(
-                    context.conversationId,
-                    aiMessageId,
-                    errorMessage,
-                    0,
-                  );
-                  context.messageService.completeAIMessage(
-                    context.conversationId,
-                    aiMessageId,
-                  );
-                },
-                onComplete: () async {
-                  final secondResponse = buffer.toString();
-
-                  // 执行工具调用
-                  if (ToolService.containsToolCall(secondResponse)) {
-                    if (onHandleToolCall != null) {
-                      await onHandleToolCall!(aiMessageId, secondResponse);
-                    }
-                  } else {
-                    // 没有生成工具调用，直接完成
-                    processNormalResponse(aiMessageId, secondResponse);
-                  }
-                },
-              );
-            } catch (e) {
-              debugPrint('第二阶段请求失败: $e');
-              context.messageService.updateAIMessageContent(
-                context.conversationId,
-                aiMessageId,
-                '抱歉，获取工具文档时出现错误：$e',
-                0,
-              );
-              context.messageService.completeAIMessage(
-                context.conversationId,
-                aiMessageId,
-              );
-            }
-          } else if (currentAgent.enableFunctionCalling &&
-              ToolService.containsToolCall(firstResponse)) {
-            // 直接包含工具调用（跳过第一阶段）
+        onFirstPhaseComplete: (toolCallCode) async {
+          // 执行工具调用
+          if (ToolService.containsToolCall(toolCallCode)) {
             if (onHandleToolCall != null) {
-              await onHandleToolCall!(aiMessageId, firstResponse);
+              await onHandleToolCall!(aiMessageId, toolCallCode);
             }
           } else {
-            // 无需工具，直接完成
-            processNormalResponse(aiMessageId, firstResponse);
+            // 没有生成工具调用，直接完成
+            processNormalResponse(aiMessageId, toolCallCode);
           }
         },
       );
+
+      // 如果不需要工具调用，完成消息
+      if (!needsToolCall) {
+        context.messageService.completeAIMessage(
+          context.conversationId,
+          aiMessageId,
+        );
+      }
     } catch (e) {
       debugPrint('请求 AI 回复失败: $e');
 

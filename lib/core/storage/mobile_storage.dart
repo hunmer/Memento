@@ -136,9 +136,23 @@ class MobileStorage implements StorageInterface {
       if (jsonString == null || jsonString.isEmpty) {
         return defaultValue ?? {};
       }
-      return jsonDecode(jsonString);
+
+      // 尝试解码
+      final decoded = jsonDecode(jsonString);
+      return decoded;
     } catch (e) {
-      debugPrint('移动存储读取JSON失败: $key - $e');
+      debugPrint('❌ [MobileStorage] 读取JSON失败: $key');
+      debugPrint('   错误: $e');
+      if (e is FormatException) {
+        // 如果是格式错误，记录前后100个字符以帮助诊断
+        final jsonString = await loadData(key);
+        if (jsonString != null) {
+          final errorPos = e.offset ?? 0;
+          final start = (errorPos - 100).clamp(0, jsonString.length);
+          final end = (errorPos + 100).clamp(0, jsonString.length);
+          debugPrint('   错误位置附近: ...${jsonString.substring(start, end)}...');
+        }
+      }
       return defaultValue ?? {};
     }
   }

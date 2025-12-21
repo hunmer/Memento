@@ -676,6 +676,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                               ? () =>
                                                   _controller.cancelSending()
                                               : null,
+                                      messageService: _controller.messageService,
                                     ),
                                   );
                                 },
@@ -1166,6 +1167,22 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _showAgentSelector() async {
     if (!mounted) return;
 
+    // 检查当前配置状态
+    final isCurrentlySingleMode = !_controller.isChainMode && _controller.currentAgent != null;
+    final isCurrentlyChainMode = _controller.isChainMode && _controller.agentChain.isNotEmpty;
+
+    // 获取当前配置的agent显示文本
+    String getCurrentAgentDisplayText() {
+      if (isCurrentlySingleMode) {
+        return '当前: ${_controller.currentAgent!.name}';
+      } else if (isCurrentlyChainMode) {
+        final chainLength = _controller.agentChain.length;
+        final agentNames = _controller.agentChain.map((a) => a.name).join(' → ');
+        return '当前 ($chainLength个): $agentNames';
+      }
+      return '未配置';
+    }
+
     // 显示模式选择对话框
     final mode = await showDialog<String>(
       context: context,
@@ -1175,18 +1192,32 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               SimpleDialogOption(
                 onPressed: () => Navigator.pop(context, 'single'),
-                child: const ListTile(
-                  leading: Icon(Icons.smart_toy),
-                  title: Text('单 Agent 模式'),
-                  subtitle: Text('选择一个 Agent 进行对话'),
+                child: ListTile(
+                  leading: Icon(
+                    isCurrentlySingleMode ? Icons.check_circle : Icons.smart_toy,
+                    color: isCurrentlySingleMode ? Colors.green : null,
+                  ),
+                  title: const Text('单 Agent 模式'),
+                  subtitle: Text(
+                    isCurrentlySingleMode
+                        ? '${getCurrentAgentDisplayText()} | 选择一个 Agent 进行对话'
+                        : '选择一个 Agent 进行对话',
+                  ),
                 ),
               ),
               SimpleDialogOption(
                 onPressed: () => Navigator.pop(context, 'chain'),
-                child: const ListTile(
-                  leading: Icon(Icons.link),
-                  title: Text('Agent 链模式'),
-                  subtitle: Text('配置多个 Agent 顺序执行'),
+                child: ListTile(
+                  leading: Icon(
+                    isCurrentlyChainMode ? Icons.check_circle : Icons.link,
+                    color: isCurrentlyChainMode ? Colors.green : null,
+                  ),
+                  title: const Text('Agent 链模式'),
+                  subtitle: Text(
+                    isCurrentlyChainMode
+                        ? '${getCurrentAgentDisplayText()} | 配置多个 Agent 顺序执行'
+                        : '配置多个 Agent 顺序执行',
+                  ),
                 ),
               ),
             ],
