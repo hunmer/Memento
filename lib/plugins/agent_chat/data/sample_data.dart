@@ -25,19 +25,6 @@ class AgentChatSampleData {
         unreadCount: 0,
         metadata: {'type': 'code_review', 'priority': 'high'},
       ),
-      Conversation(
-        id: 'conv-work-002',
-        title: '项目规划顾问',
-        agentId: 'agent-project-manager',
-        groups: ['💼 工作助手'],
-        contextMessageCount: 15,
-        createdAt: now.subtract(const Duration(days: 15)),
-        lastMessageAt: now.subtract(const Duration(days: 1)),
-        isPinned: false,
-        lastMessagePreview: '建议采用敏捷开发方法，分阶段交付...',
-        unreadCount: 2,
-        metadata: {'type': 'planning', 'project': 'Memento'},
-      ),
 
       // 学习伙伴分组
       Conversation(
@@ -53,19 +40,6 @@ class AgentChatSampleData {
         unreadCount: 1,
         metadata: {'subject': 'Flutter', 'level': 'intermediate'},
       ),
-      Conversation(
-        id: 'conv-study-002',
-        title: 'AI 原理探索',
-        agentId: 'agent-researcher',
-        groups: ['📚 学习伙伴'],
-        contextMessageCount: 25,
-        createdAt: now.subtract(const Duration(days: 10)),
-        lastMessageAt: now.subtract(const Duration(days: 2)),
-        isPinned: false,
-        lastMessagePreview: 'Transformer架构的核心创新点是什么？',
-        unreadCount: 0,
-        metadata: {'subject': 'AI/ML', 'level': 'beginner'},
-      ),
 
       // 创意激发分组
       Conversation(
@@ -80,47 +54,6 @@ class AgentChatSampleData {
         lastMessagePreview: '基于用户行为分析的智能提醒系统...',
         unreadCount: 0,
         metadata: {'type': 'brainstorming', 'category': 'product'},
-      ),
-      Conversation(
-        id: 'conv-creative-002',
-        title: '文案创作助手',
-        agentId: 'agent-writer',
-        groups: ['🎨 创意激发'],
-        contextMessageCount: 15,
-        createdAt: now.subtract(const Duration(days: 8)),
-        lastMessageAt: now.subtract(const Duration(days: 3)),
-        isPinned: false,
-        lastMessagePreview: '这个标题更有吸引力：「解锁高效工作...」',
-        unreadCount: 0,
-        metadata: {'type': 'writing', 'category': 'marketing'},
-      ),
-
-      // 生活助手分组
-      Conversation(
-        id: 'conv-daily-001',
-        title: '健康饮食规划',
-        agentId: 'agent-nutritionist',
-        groups: ['🌟 生活助手'],
-        contextMessageCount: 12,
-        createdAt: now.subtract(const Duration(days: 18)),
-        lastMessageAt: now.subtract(const Duration(days: 1, hours: 3)),
-        isPinned: false,
-        lastMessagePreview: '推荐今日晚餐：清蒸鱼+西兰花+糙米饭',
-        unreadCount: 1,
-        metadata: {'type': 'health', 'category': 'nutrition'},
-      ),
-      Conversation(
-        id: 'conv-daily-002',
-        title: '旅行规划顾问',
-        agentId: 'agent-travel-planner',
-        groups: ['🌟 生活助手'],
-        contextMessageCount: 20,
-        createdAt: now.subtract(const Duration(days: 5)),
-        lastMessageAt: now.subtract(const Duration(days: 4)),
-        isPinned: false,
-        lastMessagePreview: '东京5日游的行程安排已优化完成',
-        unreadCount: 0,
-        metadata: {'type': 'travel', 'destination': 'Tokyo'},
       ),
     ];
 
@@ -488,158 +421,6 @@ final userDataProvider = FutureProvider<UserData>((ref) async {
           'targetUsers': 'individual',
           'techStack': 'on_device_ml',
           'keyFeatures': ['behavior_analysis', 'smart_timing', 'context_aware'],
-        },
-      ),
-    ];
-
-    // 健康饮食规划会话消息
-    messages['conv-daily-001'] = [
-      ChatMessage.user(
-        conversationId: 'conv-daily-001',
-        content: '我最近总是感觉很疲惫，工作时容易犯困，饮食上应该怎么调整？',
-        tokenCount: 80,
-      ),
-      ChatMessage.ai(
-        conversationId: 'conv-daily-001',
-        content: '''## 🍎 疲劳缓解饮食指南
-
-### ⚡ 快速能量补给
-
-**早餐优化**:
-- 🥚 **蛋白质+复合碳水**: 鸡蛋 + 燕麦片
-- 🫐 **抗氧化水果**: 蓝莓、草莓
-- 💧 **充足水分**: 起床后500ml温水
-
-**避免食物**:
-- ❌ 油条、包子（血糖快速升高）
-- ❌ 甜豆浆（糖分过高）
-- ❌ 咖啡空腹喝（刺激胃酸）
-
-### 🔋 稳定血糖策略
-
-**3小时原则**:
-```
-早餐 (7:00) → 加餐 (10:00) → 午餐 (13:00) → 加餐 (16:00) → 晚餐 (19:00)
-```
-
-**推荐加餐**:
-- 🌰 坚果10-15颗
-- 🍎 苹果半个
-- 🥒 黄瓜1根
-- 💚 绿茶或柠檬蜂蜜水
-
-### 💊 营养补充
-
-**可能缺乏的营养素**:
-- **B族维生素**: 全谷物、瘦肉、鸡蛋
-- **铁**: 红肉、菠菜、动物肝脏
-- **镁**: 坚果、绿叶蔬菜
-- **维生素D**: 晒太阳15分钟/天
-
-### 🚫 下午茶陷阱
-
-**下午2-4点是最容易犯困的时段**:
-- ☕ 避免过量咖啡（超过400mg/天）
-- 🍰 拒绝甜点（血糖波动）
-- 🍜 少吃精制面条（快速升糖）
-
-**替代方案**: 绿茶 + 少量坚果
-
-需要我为你定制一周的详细菜单吗？''',
-        tokenCount: 520,
-        isGenerating: false,
-        metadata: {
-          'topic': 'nutrition',
-          'symptom': 'fatigue',
-          'adviceType': 'dietary_adjustment',
-          'priority': 'high',
-        },
-      ),
-      ChatMessage.user(
-        conversationId: 'conv-daily-001',
-        content: '可以帮我制定一周的菜单吗？我平时比较忙，希望能简单易做',
-        tokenCount: 60,
-      ),
-      ChatMessage.ai(
-        conversationId: 'conv-daily-001',
-        content: '''## 📅 7天快手营养菜单
-
-### 🗓️ 工作日菜单 (周一-周五)
-
-**周一**:
-- 早餐: 燕麦片 + 牛奶 + 香蕉
-- 午餐: 鸡胸肉沙拉
-- 加餐: 苹果
-- 晚餐: 清蒸鱼 + 西兰花 + 糙米饭
-
-**周二**:
-- 早餐: 全麦吐司 + 鸡蛋 + 牛奶
-- 午餐: 牛肉土豆泥
-- 加餐: 酸奶
-- 晚餐: 番茄鸡蛋面
-
-**周三**:
-- 早餐: 豆浆 + 包子
-- 午餐: 三文鱼炒饭
-- 加餐: 坚果
-- 晚餐: 鸡肉意面
-
-**周四**:
-- 早餐: 煎蛋 + 面包
-- 午餐: 番茄牛腩
-- 加餐: 橙子
-- 晚餐: 蒸蛋羹 + 青菜
-
-**周五**:
-- 早餐: 燕麦 + 蓝莓
-- 午餐: 虾仁豆腐
-- 加餐: 香蕉
-- 晚餐: 宫保鸡丁 + 米饭
-
-### 🍽️ 周末菜单 (周六-周日)
-
-**周六**:
-- 早餐: 周末丰富早餐 (煎蛋 + 培根 + 吐司)
-- 午餐: 红烧肉 + 青菜 + 米饭
-- 晚餐: 火锅 (食材丰富)
-
-**周日**:
-- 早餐: 小馄饨
-- 午餐: 白切鸡 + 蔬菜
-- 晚餐: 砂锅粥
-
-### 🛒 周末备餐清单
-
-**蛋白质**:
-- 鸡胸肉 500g
-- 鱼类 500g
-- 鸡蛋 1打
-
-**碳水化合物**:
-- 燕麦片 500g
-- 米饭 1kg
-- 全麦面包 1袋
-
-**蔬菜水果**:
-- 西兰花 2个
-- 番茄 5个
-- 苹果 7个
-- 香蕉 5根
-
-### ⏰ 时间安排
-
-**备餐时间**: 周日 2-3小时
-**烹饪时间**: 每餐 15-30分钟
-**储存**: 分装冷冻，贴日期标签
-
-**需要我提供具体的烹饪方法吗？''',
-        tokenCount: 550,
-        isGenerating: false,
-        metadata: {
-          'planType': 'weekly_menu',
-          'targetUsers': 'busy_professional',
-          'prepTime': '2-3_hours',
-          'cookTime': '15-30_minutes_per_meal',
         },
       ),
     ];

@@ -179,6 +179,7 @@ final Map<String, String> openaiTranslationsZh = {
   // Provider Settings
   'openai_confirmDeleteProviderTitle': '确认删除',
   'openai_confirmDeleteProviderMessage': '确定要删除此提供商吗?',
+  'openai_pluginSettingsTitle': 'AI 助手设置',
   'openai_providerSettingsTitle': '提供商设置',
   'openai_addProviderTooltip': '添加新的AI提供商',
   'openai_noProvidersConfigured': '未配置任何提供商',
