@@ -9,9 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      ANDROID_SDK_ROOT: ${{ github.workspace }}/.android-sdk
-      ANDROID_HOME: ${{ github.workspace }}/.android-sdk
     
     steps:
     - uses: actions/checkout@v4
@@ -25,19 +22,22 @@ jobs:
         docker-images: true
         swap-storage: true
 
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
     - name: Verify Android SDK
       run: |
         echo "=== Checking Android SDK ==="
         echo "ANDROID_HOME: $ANDROID_HOME"
         echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-        ls -la $ANDROID_HOME 2>/dev/null || echo "Android SDK not found at $ANDROID_HOME"
-        which adb 2>/dev/null || echo "ADB not found"
-
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+        ls -la $ANDROID_HOME
+        which adb || echo "ADB not found"
 
     - name: Cache Gradle packages
       uses: actions/cache@v4
@@ -57,18 +57,19 @@ jobs:
 
     - name: Install dependencies
       run: flutter pub get
-      
+
     - name: Generate signing key
       run: |
         keytool -genkey -v -keystore android/upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload -storepass android -keypass android -dname "CN=hunmer, OU=Your Organization, O=Your Company, L=Your City, S=Your State, C=Your Country"
-        
-    - name: Set up signing
+
+    - name: Set up signing config
       run: |
+        mkdir -p android
         cat > android/key.properties << EOF
         storePassword=android
         keyPassword=android
         keyAlias=upload
-        storeFile=upload-keystore.jks
+        storeFile=../android/upload-keystore.jks
         EOF
 
     - name: Build signed APK (arm64 only)
@@ -99,7 +100,7 @@ jobs:
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v2
       env:
-        GITHUB_TOKEN: ${{ secrets.SECERT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 推荐使用默认的 GITHUB_TOKEN，避免自定义 secret 拼写错误
       with:
         files: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
         tag_name: release-${{ steps.date.outputs.date }}-${{ steps.commit_sha.outputs.sha }}
