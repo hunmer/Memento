@@ -6,6 +6,9 @@ import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:Memento/plugins/openai/services/request_service.dart';
 import 'package:Memento/plugins/openai/widgets/agent_list_drawer.dart';
+import 'package:Memento/plugins/agent_chat/models/agent_chain_node.dart';
+import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/agent_mode_selection_dialog.dart';
+import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/agent_chain_config_dialog.dart';
 import '../models/route_context.dart';
 
 /// 上下文查询抽屉
@@ -26,7 +29,12 @@ class ContextQueryDrawer extends StatefulWidget {
 
 class _ContextQueryDrawerState extends State<ContextQueryDrawer> {
   late TextEditingController _textController;
-  AIAgent? _selectedAgent;
+
+  // Agent 配置状态
+  bool _isChainMode = false; // 是否为链模式
+  AIAgent? _selectedAgent; // 单 Agent 模式选中的 Agent
+  List<AgentChainNode> _agentChain = []; // Agent 链配置
+
   bool _isLoading = false;
   String _responseText = '';
   bool _hasResponse = false;
@@ -45,8 +53,29 @@ class _ContextQueryDrawerState extends State<ContextQueryDrawer> {
     super.dispose();
   }
 
-  /// 显示Agent选择器
-  Future<void> _showAgentSelector() async {
+  /// 显示 Agent 模式选择器
+  Future<void> _showAgentModeSelector() async {
+    final mode = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => AgentModeSelectionDialog(
+            currentAgent: _selectedAgent,
+            agentChain: _agentChain,
+            isChainMode: _isChainMode,
+          ),
+    );
+
+    if (mode == null || !mounted) return;
+
+    if (mode == 'single') {
+      await _showSingleAgentSelector();
+    } else {
+      await _showAgentChainConfig();
+    }
+  }
+
+  /// 显示单 Agent 选择器
+  Future<void> _showSingleAgentSelector() async {
     final result = await showModalBottomSheet<List<Map<String, String>>>(
       context: context,
       isScrollControlled: true,
@@ -57,30 +86,75 @@ class _ContextQueryDrawerState extends State<ContextQueryDrawer> {
               ]
             : [],
         onAgentSelected: (agents) {
-          Navigator.pop(context, agents);
+              // AgentListDrawer 会自己关闭并返回结果
         },
         allowMultipleSelection: false,
       ),
     );
 
-    if (result != null && result.isNotEmpty) {
+    if (result != null && result.isNotEmpty && mounted) {
       try {
         final plugin =
             PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
         final agent = await plugin.controller.getAgent(result.first['id']!);
-        setState(() => _selectedAgent = agent);
+        setState(() {
+          _selectedAgent = agent;
+          _isChainMode = false;
+          _agentChain = [];
+        });
       } catch (e) {
         Toast.error('加载AI助手失败: $e');
       }
     }
   }
 
+  /// 显示 Agent 链配置对话框
+  Future<void> _showAgentChainConfig() async {
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      builder:
+          (context) => AgentChainConfigDialog(
+            initialChain: _agentChain.isNotEmpty ? _agentChain : null,
+            onSave: (chain) {
+              setState(() {
+                _agentChain = chain;
+                _isChainMode = true;
+                _selectedAgent = null;
+              });
+            },
+          ),
+    );
+  }
+
+  /// 获取当前 Agent 配置的显示文本
+  String _getAgentDisplayText() {
+    if (_isChainMode && _agentChain.isNotEmpty) {
+      return '链模式 (${_agentChain.length}个Agent)';
+    } else if (!_isChainMode && _selectedAgent != null) {
+      return _selectedAgent!.name;
+    }
+    return '未选择';
+  }
+
   /// 发送查询
   Future<void> _sendQuery() async {
-    // 验证Agent
-    if (_selectedAgent == null) {
-      Toast.show('请先选择AI助手');
+    // 验证 Agent 配置
+    if (_isChainMode) {
+      if (_agentChain.isEmpty) {
+        Toast.show('请先配置 Agent 链');
+        return;
+      }
+
+      // 链模式需要使用完整的聊天界面
+      Toast.show('链模式功能需要使用聊天界面，当前仅支持单 Agent 查询');
       return;
+    } else {
+      if (_selectedAgent == null) {
+        Toast.show('请先选择AI助手');
+        return;
+      }
     }
 
     // 验证输入
@@ -90,6 +164,12 @@ class _ContextQueryDrawerState extends State<ContextQueryDrawer> {
       return;
     }
 
+    // 单 Agent 模式使用简单的 RequestService 调用
+    await _sendSingleAgentQuery(query);
+  }
+
+  /// 发送单 Agent 查询
+  Future<void> _sendSingleAgentQuery(String query) async {
     // 重置状态
     setState(() {
       _isLoading = true;
@@ -194,11 +274,11 @@ class _ContextQueryDrawerState extends State<ContextQueryDrawer> {
               // Agent选择
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.smart_toy),
+                leading: Icon(_isChainMode ? Icons.link : Icons.smart_toy),
                 title: const Text('选择AI助手'),
-                subtitle: Text(_selectedAgent?.name ?? '未选择'),
+                subtitle: Text(_getAgentDisplayText()),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: _showAgentSelector,
+                onTap: _showAgentModeSelector,
               ),
               const Divider(),
 
