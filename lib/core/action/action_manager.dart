@@ -184,6 +184,19 @@ class ActionManager {
         isBuiltIn: true,
       ),
     );
+
+    // 询问当前上下文
+    registerAction(
+      ActionDefinition(
+        id: BuiltInActions.askContext,
+        title: '询问当前上下文',
+        description: '基于当前页面信息向AI提问',
+        icon: Icons.chat,
+        category: ActionCategory.system,
+        executor: BuiltInActionExecutor(BuiltInActions.askContext),
+        isBuiltIn: true,
+      ),
+    );
   }
 
   /// 注册动作

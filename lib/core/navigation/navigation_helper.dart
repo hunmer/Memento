@@ -61,9 +61,11 @@ class NavigationHelper {
       );
     } else {
       return Navigator.of(context).push<T>(
-        MaterialPageRoute(builder: (context) => page,
+        MaterialPageRoute(
+          builder: (context) => page,
           maintainState: maintainState,
-          fullscreenDialog: fullscreenDialog,),
+          fullscreenDialog: fullscreenDialog,
+        ),
       );
     }
   }
@@ -78,10 +80,7 @@ class NavigationHelper {
     String routeName, {
     Object? arguments,
   }) {
-    return Navigator.of(context).pushNamed<T>(
-      routeName,
-      arguments: arguments,
-    );
+    return Navigator.of(context).pushNamed<T>(routeName, arguments: arguments);
   }
 
   /// 推送到新页面（带命名路由和参数生成器）
@@ -94,10 +93,7 @@ class NavigationHelper {
     String routeName,
     Map<String, dynamic> arguments,
   ) {
-    return Navigator.of(context).pushNamed<T>(
-      routeName,
-      arguments: arguments,
-    );
+    return Navigator.of(context).pushNamed<T>(routeName, arguments: arguments);
   }
 
   // ==================== 替换导航 ====================
@@ -123,8 +119,10 @@ class NavigationHelper {
       );
     } else {
       return Navigator.of(context).pushReplacement<T, TO>(
-        MaterialPageRoute(builder: (context) => newPage,
-          maintainState: maintainState,),
+        MaterialPageRoute(
+          builder: (context) => newPage,
+          maintainState: maintainState,
+        ),
         result: result,
       );
     }
@@ -156,10 +154,7 @@ class NavigationHelper {
   ) {
     return Navigator.of(
       context,
-    ).pushAndRemoveUntil<T>(
-      _createRoute(context, newPage),
-      (route) => false,
-    );
+    ).pushAndRemoveUntil<T>(_createRoute(context, newPage), (route) => false);
   }
 
   /// 弹出当前页面并推送新页面（带命名路由）
@@ -167,10 +162,9 @@ class NavigationHelper {
     BuildContext context,
     String routeName,
   ) {
-    return Navigator.of(context).pushNamedAndRemoveUntil<T>(
-      routeName,
-      (route) => false,
-    );
+    return Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil<T>(routeName, (route) => false);
   }
 
   // ==================== 移除直到导航 ====================
@@ -185,10 +179,9 @@ class NavigationHelper {
     Widget newPage,
     RoutePredicate predicate,
   ) {
-    return Navigator.of(context).pushAndRemoveUntil<T>(
-      _createRoute(context, newPage),
-      predicate,
-    );
+    return Navigator.of(
+      context,
+    ).pushAndRemoveUntil<T>(_createRoute(context, newPage), predicate);
   }
 
   /// 推送新页面并移除栈中的页面（带命名路由）
@@ -198,11 +191,9 @@ class NavigationHelper {
     RoutePredicate predicate, {
     Object? arguments,
   }) {
-    return Navigator.of(context).pushNamedAndRemoveUntil<T>(
-      routeName,
-      predicate,
-      arguments: arguments,
-    );
+    return Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil<T>(routeName, predicate, arguments: arguments);
   }
 
   // ==================== 弹出导航 ====================
@@ -303,8 +294,7 @@ class NavigationHelper {
     BuildContext context,
     Widget actionsSheet,
   ) {
-    return showCupertinoActionSheet<T>(context, actionsSheet,
-    );
+    return showCupertinoActionSheet<T>(context, actionsSheet);
   }
 
   // ==================== Android 专用导航 ====================
@@ -320,8 +310,10 @@ class NavigationHelper {
     bool fullscreenDialog = false,
   }) {
     return Navigator.of(context).push<T>(
-      MaterialPageRoute(builder: (context) => page,
-        fullscreenDialog: fullscreenDialog,),
+      MaterialPageRoute(
+        builder: (context) => page,
+        fullscreenDialog: fullscreenDialog,
+      ),
     );
   }
 
@@ -382,6 +374,38 @@ class NavigationHelper {
     return !Navigator.of(context).canPop();
   }
 
+  // ==================== 路由参数更新 ====================
+
+  /// 更新当前路由的参数（通过替换路由实现）
+  ///
+  /// 用于在不离开当前页面的情况下更新路由信息，常用于：
+  /// - 日记日历切换日期时更新路由，使"询问当前上下文"功能能获取到当前日期
+  /// - 其他需要动态反映页面状态到路由的场景
+  ///
+  /// [context] BuildContext
+  /// [routeName] 新的路由名称
+  /// [arguments] 新的路由参数
+  ///
+  /// 示例：
+  /// ```dart
+  /// // 日记日历切换到2025-12-22
+  /// NavigationHelper.updateRouteWithArguments(
+  ///   context,
+  ///   '/diary_detail',
+  ///   {'date': '2025-12-22'},
+  /// );
+  /// ```
+  static Future<void> updateRouteWithArguments(
+    BuildContext context,
+    String routeName,
+    Map<String, dynamic> arguments,
+  ) {
+    // 调试输出：显示路由切换信息
+    print('NavigationHelper: 切换到路由 "$routeName"，参数: $arguments');
+
+    return pushReplacementNamed(context, routeName, arguments: arguments);
+  }
+
   // ==================== OpenContainer 替代方法 ====================
 
   /// 使用 BackSwipePageRoute 导航到新页面
@@ -408,9 +432,11 @@ class NavigationHelper {
       popCurve: popCurve,
       closedColor: closedColor,
       openColor: openColor,
-      closedShape: closedShape ?? const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-      ),
+      closedShape:
+          closedShape ??
+          const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12.0)),
+          ),
     );
   }
 
@@ -447,7 +473,8 @@ class NavigationHelper {
     void Function(T?)? onClosed,
   }) async {
     // 生成默认的 heroTag
-    final tag = heroTag ?? 'open_container_${DateTime.now().millisecondsSinceEpoch}';
+    final tag =
+        heroTag ?? 'open_container_${DateTime.now().millisecondsSinceEpoch}';
 
     // 如果提供了 sourceKey，使用 OpenContainer 动画
     if (sourceKey != null) {
@@ -636,9 +663,11 @@ extension NavigationExtensions on BuildContext {
       closedBuilder: closedBuilder,
       closedColor: closedColor,
       openColor: openColor,
-      closedShape: closedShape ?? const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-      ),
+      closedShape:
+          closedShape ??
+          const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12.0)),
+          ),
       onClosed: onClosed,
     );
   }

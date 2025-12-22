@@ -38,7 +38,10 @@ class DiaryEntryDeletedEventArgs extends EventArgs {
 
 /// 日记插件主视图
 class DiaryMainView extends StatefulWidget {
-  const DiaryMainView({super.key});
+  final DateTime? initialDate;
+
+  const DiaryMainView({super.key, this.initialDate});
+
   @override
   State<DiaryMainView> createState() => _DiaryMainViewState();
 }
@@ -54,7 +57,10 @@ class _DiaryMainViewState extends State<DiaryMainView> {
 
   @override
   Widget build(BuildContext context) {
-    return DiaryCalendarScreen(storage: _plugin.storage);
+    return DiaryCalendarScreen(
+      storage: _plugin.storage,
+      initialDate: widget.initialDate,
+    );
   }
 }
 
