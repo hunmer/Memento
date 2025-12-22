@@ -22,11 +22,13 @@ import 'model_search_screen.dart';
 class AgentEditScreen extends StatefulWidget {
   final AIAgent? agent;
   final bool isFromMarketplace; // 是否来自商场
+  final String? extraStorageKey; // 如果提供,保存到extra storage;否则保存到临时agents
 
   const AgentEditScreen({
     super.key,
     this.agent,
     this.isFromMarketplace = false,
+    this.extraStorageKey,
   });
 
   @override
@@ -285,13 +287,25 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     try {
       final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
       final controller = plugin.controller;
-      if (widget.agent == null || widget.isFromMarketplace) {
-        // 新建或从商场安装时，添加新 Agent
+
+      // 根据 extraStorageKey 的值决定保存位置
+      if (widget.extraStorageKey != null) {
+        // 保存到 extra storage
+        await controller.saveAgentToExtraStorage(
+          agent,
+          widget.extraStorageKey!,
+        );
+      } else if (widget.isFromMarketplace) {
+        // 从商场安装，添加到正式agents列表
         await controller.addAgent(agent);
+      } else if (widget.agent == null) {
+        // 新建临时agent（不保存到agents.json）
+        controller.addTemporaryAgent(agent);
       } else {
         // 编辑现有 Agent
         await controller.updateAgent(agent);
       }
+
       if (mounted) {
         // 显示成功提示
         ToastService.instance.showToast(

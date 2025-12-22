@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
+import 'package:Memento/plugins/openai/widgets/agent_list_drawer.dart';
 import 'package:Memento/plugins/agent_chat/models/agent_chain_node.dart';
 import 'package:Memento/plugins/agent_chat/models/agent_chain_preset.dart';
 import 'package:Memento/plugins/agent_chat/services/agent_chain_preset_service.dart';
-import 'package:Memento/core/storage/storage_manager.dart';
 
 /// Agent 链配置对话框
 class AgentChainConfigDialog extends StatefulWidget {
@@ -50,7 +50,13 @@ class _AgentChainConfigDialogState extends State<AgentChainConfigDialog> {
       final openAIPlugin =
           PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
       if (openAIPlugin != null) {
-        _availableAgents = await openAIPlugin.controller.loadAgents();
+        // 加载所有agents (包括临时agents)
+        final normalAgents = await openAIPlugin.controller.loadAgents();
+        final temporaryAgents = openAIPlugin.controller.temporaryAgents;
+        // 加载extra storage agents
+        final extraAgents = await openAIPlugin.controller
+            .loadExtraStorageAgents('agent_chain_agents');
+        _availableAgents = [...normalAgents, ...temporaryAgents, ...extraAgents];
       }
     } catch (e) {
       debugPrint('加载Agent列表失败: $e');
@@ -479,26 +485,69 @@ class _AgentChainConfigDialogState extends State<AgentChainConfigDialog> {
                                     const SizedBox(height: 8),
 
                                     // Agent 选择器
-                                    DropdownButtonFormField<String>(
-                                      value: node.agentId,
-                                      decoration: const InputDecoration(
-                                        labelText: 'Agent',
-                                        border: OutlineInputBorder(),
-                                      ),
-                                      items: _availableAgents.map((agent) {
-                                        return DropdownMenuItem(
-                                          value: agent.id,
-                                          child: Text(agent.name),
+                                    InkWell(
+                                      onTap: () async {
+                                        final result =
+                                            await showModalBottomSheet<
+                                              List<Map<String, String>>>(
+                                          context: context,
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                          builder: (context) => AgentListDrawer(
+                                            selectedAgents: [
+                                              {
+                                                'id': node.agentId,
+                                                'name': _availableAgents
+                                                        .firstWhere(
+                                                          (a) =>
+                                                              a.id ==
+                                                              node.agentId,
+                                                          orElse: () =>
+                                                              _availableAgents
+                                                                  .first,
+                                                        )
+                                                        .name,
+                                              },
+                                            ],
+                                            onAgentSelected: (agents) {},
+                                            allowMultipleSelection: false,
+                                            extraStorageKey: 'agent_chain_agents',
+                                          ),
                                         );
-                                      }).toList(),
-                                      onChanged: (value) {
-                                        if (value != null) {
+
+                                        if (result != null && result.isNotEmpty) {
                                           setState(() {
                                             _chain[index] = _chain[index]
-                                                .copyWith(agentId: value);
+                                                .copyWith(agentId: result.first['id']);
+                                            // 重新加载agents以包含可能新增的临时agents
+                                            _loadAgents();
                                           });
                                         }
                                       },
+                                      child: InputDecorator(
+                                        decoration: const InputDecoration(
+                                          labelText: 'Agent',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                _availableAgents
+                                                    .firstWhere(
+                                                      (a) => a.id == node.agentId,
+                                                      orElse: () =>
+                                                          _availableAgents.first,
+                                                    )
+                                                    .name,
+                                              ),
+                                            ),
+                                            const Icon(Icons.arrow_drop_down),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(height: 12),
 
