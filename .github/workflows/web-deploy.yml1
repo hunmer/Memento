@@ -2,7 +2,7 @@ name: Flutter Web Deploy
 
 on:
   push:
-    branches: [ naster ]
+    branches: [ master ]
     paths:
       - 'lib/**'
       - 'web/**'

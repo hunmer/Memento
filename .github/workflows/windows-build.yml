@@ -2,7 +2,7 @@ name: Windows
 
 on:
   push:
-    branches: [ naster ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
