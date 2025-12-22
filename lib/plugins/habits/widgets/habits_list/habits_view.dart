@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/widgets/habit_form.dart';
@@ -87,6 +88,9 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
     EventManager.instance.subscribe('habit_timer_started', _onTimerStarted);
     EventManager.instance.subscribe('habit_timer_stopped', _onTimerStopped);
     _loadHabits();
+
+    // 设置路由上下文
+    _updateRouteContext();
   }
 
   @override
@@ -152,6 +156,15 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
         _filteredHabits = habits; // 初始化时显示所有习惯
       });
     }
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前页面状态
+  void _updateRouteContext() {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/habits_list',
+      title: '习惯列表',
+      params: {},
+    );
   }
 
   /// 根据搜索关键词过滤习惯

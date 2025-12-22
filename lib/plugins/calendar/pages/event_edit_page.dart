@@ -5,6 +5,7 @@ import 'package:Memento/plugins/calendar/models/event.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:Memento/plugins/calendar/utils/calendar_notification_utils.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 
 class EventEditPage extends StatefulWidget {
   final CalendarEvent? event;
@@ -62,6 +63,29 @@ class _EventEditPageState extends State<EventEditPage> {
     _reminderMinutes = event?.reminderMinutes;
     _selectedIcon = event?.icon ?? Icons.event;
     _selectedColor = event?.color ?? Colors.blue;
+
+    // 初始化时设置路由上下文
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRouteContext();
+    });
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前事件编辑状态
+  void _updateRouteContext() {
+    final isEditing = widget.event != null;
+    final dateStr = '${_startDate.year}-${_startDate.month.toString().padLeft(2, '0')}-${_startDate.day.toString().padLeft(2, '0')}';
+    final title = _titleController.text.isEmpty ? '未命名事件' : _titleController.text;
+
+    RouteHistoryManager.updateCurrentContext(
+      pageId: isEditing ? '/calendar_event_edit' : '/calendar_event_new',
+      title: isEditing ? '编辑事件 - $title' : '新建事件',
+      params: {
+        'mode': isEditing ? '编辑' : '新建',
+        'eventTitle': title,
+        'startDate': dateStr,
+        if (isEditing) 'eventId': widget.event!.id,
+      },
+    );
   }
 
   @override

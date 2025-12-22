@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'dart:io';
 
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
@@ -42,6 +43,9 @@ class _SkillFormState extends State<SkillForm> {
             ? IconData(int.parse(skill!.icon!), fontFamily: 'MaterialIcons')
             : null;
     _image = skill?.image;
+
+    // 设置路由上下文
+    _updateRouteContext();
   }
 
   @override
@@ -232,6 +236,23 @@ class _SkillFormState extends State<SkillForm> {
       maxDurationMinutes: int.tryParse(_maxDurationController.text) ?? 0,
     );
     widget.onSave(skill);
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前页面状态
+  void _updateRouteContext() {
+    final isEdit = widget.initialSkill != null;
+    final skillId = widget.initialSkill?.id ?? '';
+    final skillTitle = widget.initialSkill?.title ?? '';
+
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/skill_form',
+      title: isEdit ? '编辑技能 - $skillTitle' : '新建技能',
+      params: {
+        'mode': isEdit ? 'edit' : 'create',
+        if (isEdit) 'skillId': skillId,
+        if (isEdit) 'skillTitle': skillTitle,
+      },
+    );
   }
 
   @override

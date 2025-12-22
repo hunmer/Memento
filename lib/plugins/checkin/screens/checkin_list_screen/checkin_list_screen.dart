@@ -6,6 +6,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
 import 'package:Memento/plugins/checkin/widgets/checkin_record_dialog.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'components/empty_state.dart';
 import 'components/checkin_item_card.dart';
 
@@ -39,6 +40,9 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
       await controller.restoreLastSortSetting();
       if (mounted) setState(() {});
 
+      // 初始化时设置路由上下文
+      _updateRouteContext();
+
       // 如果指定了 initialItemId，则自动打开对应的打卡记录对话框
       if (widget.initialItemId != null && mounted) {
         _showCheckinDialogForItem(widget.initialItemId!, widget.targetDate);
@@ -50,6 +54,16 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前选中的分组
+  void _updateRouteContext() {
+    final group = controller.selectedGroup;
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/checkin_list",
+      title: '打卡列表 - $group',
+      params: {'group': group},
+    );
   }
 
   @override
@@ -213,6 +227,8 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
             onSelected: (selected) {
               if (selected) {
                 controller.selectGroup(group);
+                // 更新路由上下文
+                _updateRouteContext();
               }
             },
             showCheckmark: false,

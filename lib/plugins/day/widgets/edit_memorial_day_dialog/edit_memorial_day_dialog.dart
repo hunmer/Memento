@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/day/models/memorial_day.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'information_tab.dart';
 import 'notes_tab.dart';
 import 'appearance_tab.dart';
@@ -38,6 +39,34 @@ class _EditMemorialDayDialogState extends State<EditMemorialDayDialog>
     _selectedColor = widget.memorialDay?.backgroundColor ?? Colors.blue[300]!;
     _backgroundImageUrl = widget.memorialDay?.backgroundImageUrl;
     _tabController = TabController(length: 3, vsync: this);
+
+    // 设置路由上下文
+    _updateRouteContext();
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前状态
+  void _updateRouteContext() {
+    if (widget.memorialDay == null) {
+      // 新建模式
+      RouteHistoryManager.updateCurrentContext(
+        pageId: "/day_new",
+        title: '新建纪念日',
+        params: {},
+      );
+    } else {
+      // 编辑/查看模式
+      final memorial = widget.memorialDay!;
+      final dateStr = _formatDate(memorial.targetDate);
+      RouteHistoryManager.updateCurrentContext(
+        pageId: "/day_detail",
+        title: '纪念日详情 - ${memorial.title}',
+        params: {
+          'id': memorial.id,
+          'title': memorial.title,
+          'date': dateStr,
+        },
+      );
+    }
   }
 
   @override

@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../models/timer_task.dart' show TimerTask;
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:Memento/widgets/icon_picker_dialog.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 
 class AddTimerTaskDialog extends StatefulWidget {
   final List<String> groups;
@@ -61,6 +62,26 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
       _repeatCount = 1;
       _enableNotification = true;
     }
+
+    // 初始化时设置路由上下文
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRouteContext();
+    });
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前编辑状态
+  void _updateRouteContext() {
+    final isEdit = widget.initialTask != null;
+    final taskName = _nameController.text.isNotEmpty ? _nameController.text : '新计时器';
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/timer_edit",
+      title: isEdit ? '编辑计时器 - $taskName' : '创建新计时器',
+      params: {
+        'mode': isEdit ? 'edit' : 'create',
+        'taskId': isEdit ? _id : '',
+        'taskName': taskName,
+      },
+    );
   }
 
   @override

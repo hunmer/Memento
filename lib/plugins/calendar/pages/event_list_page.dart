@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:Memento/plugins/calendar/models/event.dart';
 import 'package:Memento/plugins/calendar/widgets/event_detail_card.dart';
 import 'package:intl/intl.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 
 class EventListPage extends StatefulWidget {
   final List<CalendarEvent> events;
@@ -61,6 +62,23 @@ class _EventListPageState extends State<EventListPage> {
     // 创建事件列表的副本，按时间排序
     _events = List.from(widget.events)
       ..sort((a, b) => a.startTime.compareTo(b.startTime));
+
+    // 初始化时设置路由上下文
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRouteContext();
+    });
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前页面状态
+  void _updateRouteContext() {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/calendar_event_list',
+      title: '所有日历事件',
+      params: {
+        'totalCount': _events.length.toString(),
+        'listType': '所有事件',
+      },
+    );
   }
 
   void _showEventDetails(CalendarEvent event) {

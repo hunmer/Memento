@@ -5,6 +5,7 @@ import 'package:Memento/plugins/calendar_album/screens/entry_editor_screen.dart'
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
 import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
@@ -33,6 +34,22 @@ class _EntryDetailScreenState extends State<EntryDetailScreen> {
       listen: false,
     );
     _calendarController.addListener(_onCalendarChange);
+    // 初始化时设置路由上下文
+    _updateRouteContext(widget.entry);
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前日记信息
+  void _updateRouteContext(CalendarEntry entry) {
+    final dateStr = '${entry.createdAt.year}-${entry.createdAt.month.toString().padLeft(2, '0')}-${entry.createdAt.day.toString().padLeft(2, '0')}';
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/calendar_album_entry_detail',
+      title: '日记详情 - ${entry.title}',
+      params: {
+        'date': dateStr,
+        'title': entry.title,
+        'entryId': entry.id,
+      },
+    );
   }
 
   @override

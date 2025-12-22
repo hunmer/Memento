@@ -12,6 +12,7 @@ import 'package:Memento/plugins/timer/timer_plugin.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:Memento/plugins/timer/models/timer_task.dart';
 import 'package:collection/collection.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 
 class TimerMainView extends StatefulWidget {
   const TimerMainView({super.key});
@@ -19,12 +20,13 @@ class TimerMainView extends StatefulWidget {
   State<TimerMainView> createState() => _TimerMainViewState();
 }
 
-class _TimerMainViewState extends State<TimerMainView> {
+class _TimerMainViewState extends State<TimerMainView> with SingleTickerProviderStateMixin {
   List<TimerTask> _tasks = [];
   late TimerPlugin _plugin;
   Map<String, List<TimerTask>> _groupedTasks = {};
   List<TimerTask> _searchResults = [];
   String _currentQuery = '';
+  TabController? _tabController;
 
   @override
   void initState() {
@@ -32,6 +34,42 @@ class _TimerMainViewState extends State<TimerMainView> {
     _plugin = PluginManager().getPlugin('timer') as TimerPlugin;
     _updateTasksAndGroups();
     _loadConfig();
+
+    // 初始化 TabController 并监听切换
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _groupedTasks.isNotEmpty) {
+        _tabController = DefaultTabController.of(context);
+        _tabController?.addListener(_onTabChanged);
+        // 初始化时设置路由上下文
+        _updateRouteContext(_groupedTasks.keys.first);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController?.removeListener(_onTabChanged);
+    super.dispose();
+  }
+
+  /// TabBar 切换监听
+  void _onTabChanged() {
+    if (_tabController != null && _groupedTasks.isNotEmpty) {
+      final groups = _groupedTasks.keys.toList();
+      final currentIndex = _tabController!.index;
+      if (currentIndex >= 0 && currentIndex < groups.length) {
+        _updateRouteContext(groups[currentIndex]);
+      }
+    }
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前分组
+  void _updateRouteContext(String group) {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/timer_main",
+      title: '计时器 - $group',
+      params: {'group': group},
+    );
   }
 
   void _updateTasksAndGroups() {

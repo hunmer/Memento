@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'dart:io';
 
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -38,6 +39,9 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
     // 添加生命周期监听
     WidgetsBinding.instance.addObserver(this);
     _loadSkills();
+
+    // 设置路由上下文
+    _updateRouteContext();
   }
 
   @override
@@ -96,6 +100,15 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
         _filteredSkills = skills;
       });
     }
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前页面状态
+  void _updateRouteContext() {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/skills_list',
+      title: '技能列表',
+      params: {},
+    );
   }
 
   /// 搜索过滤技能列表

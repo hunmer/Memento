@@ -2,6 +2,7 @@ import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/timer/models/timer_task.dart';
 import '../../../../core/event/event_manager.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 
 class TimerTaskDetailsPage extends StatefulWidget {
   final TimerTask task;
@@ -37,6 +38,9 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
     EventManager.instance.subscribe('timer_item_progress', onTimerItemProgress);
     // 订阅计时器开始事件
     EventManager.instance.subscribe('timer_item_changed', onTimerItemChanged);
+
+    // 初始化时设置路由上下文
+    _updateRouteContext();
   }
 
   onTimerItemProgress(EventArgs args) {
@@ -52,6 +56,8 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
         _currentTask = args.task;
         _isRunning = _currentTask.isRunning;
       });
+      // 任务状态变化时更新路由上下文
+      _updateRouteContext();
     }
   }
 
@@ -61,7 +67,24 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
       setState(() {
         _currentTimerIndex = _currentTask.timerItems.indexOf(args.timer);
       });
+      // 计时器项变化时更新路由上下文
+      _updateRouteContext();
     }
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前计时器任务信息
+  void _updateRouteContext() {
+    final currentTimer = _currentTask.timerItems[_currentTimerIndex];
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/timer_details",
+      title: '计时器详情 - ${_currentTask.name}',
+      params: {
+        'taskId': _currentTask.id,
+        'taskName': _currentTask.name,
+        'currentTimerName': currentTimer.name,
+        'isRunning': _isRunning.toString(),
+      },
+    );
   }
 
   @override

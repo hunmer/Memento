@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'dart:async';
 
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -52,12 +53,27 @@ class _TimerDialogState extends State<TimerDialog> {
       // 不初始化_isRunning，因为会在_toggleTimer中初始化，此处仅用于判断是否需要启动计时器。
       if (widget.initialTimerData!['isRunning']) _toggleTimer();
     }
+
+    // 设置路由上下文
+    _updateRouteContext();
   }
 
   @override
   void dispose() {
     _notesController.dispose();
     super.dispose();
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前页面状态
+  void _updateRouteContext() {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/habit_timer',
+      title: '习惯计时器 - ${widget.habit.title}',
+      params: {
+        'habitId': widget.habit.id,
+        'habitTitle': widget.habit.title,
+      },
+    );
   }
 
   Color _getColor(String id) {

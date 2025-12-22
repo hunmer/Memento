@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
 import 'package:intl/intl.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 
 class CheckinRecordScreen extends StatefulWidget {
   final CheckinItem checkinItem;
@@ -21,6 +22,25 @@ class CheckinRecordScreen extends StatefulWidget {
 class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
   final _dateFormat = DateFormat('yyyy-MM-dd');
   final _timeFormat = DateFormat('HH:mm');
+
+  @override
+  void initState() {
+    super.initState();
+    // 初始化时设置路由上下文
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRouteContext();
+    });
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前查看的打卡项目
+  void _updateRouteContext() {
+    final itemName = widget.checkinItem.name;
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/checkin_record",
+      title: '打卡记录 - $itemName',
+      params: {'itemName': itemName},
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
