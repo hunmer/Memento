@@ -11,6 +11,10 @@ class AgentController extends ChangeNotifier {
   List<AIAgent> _agents = [];
   List<AIAgent> get agents => List.unmodifiable(_agents);
 
+  // 临时agent列表(仅保存在内存中,不会保存到agents.json)
+  final List<AIAgent> _temporaryAgents = [];
+  List<AIAgent> get temporaryAgents => List.unmodifiable(_temporaryAgents);
+
   Future<List<AIAgent>> loadAgents() async {
     final plugin = PluginManager.instance.getPlugin('openai');
     if (plugin == null) return [];
@@ -119,5 +123,100 @@ class AgentController extends ChangeNotifier {
 
   Future<void> updateAgent(AIAgent agent) async {
     await saveAgent(agent);
+  }
+
+  /// 添加临时agent(仅保存在内存中,不会保存到agents.json)
+  void addTemporaryAgent(AIAgent agent) {
+    final index = _temporaryAgents.indexWhere((a) => a.id == agent.id);
+    if (index >= 0) {
+      _temporaryAgents[index] = agent;
+    } else {
+      _temporaryAgents.add(agent);
+    }
+    notifyListeners();
+  }
+
+  /// 删除临时agent
+  void deleteTemporaryAgent(String agentId) {
+    _temporaryAgents.removeWhere((agent) => agent.id == agentId);
+    notifyListeners();
+  }
+
+  /// 获取所有agents(包括临时agent)
+  Future<List<AIAgent>> getAllAgents() async {
+    await loadAgents();
+    return [..._agents, ..._temporaryAgents];
+  }
+
+  /// 从extra storage加载agents
+  Future<List<AIAgent>> loadExtraStorageAgents(String storageKey) async {
+    final plugin = PluginManager.instance.getPlugin('openai');
+    if (plugin == null) return [];
+
+    try {
+      final storage = plugin.storage;
+      final data =
+          await storage.read('${plugin.storageDir}/$storageKey.json');
+      if (data.isNotEmpty) {
+        final List<dynamic> jsonList = (data['agents'] ?? []) as List<dynamic>;
+        return jsonList
+            .map((item) => AIAgent.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
+    } catch (e) {
+      debugPrint('加载extra storage agents失败: $e');
+    }
+    return [];
+  }
+
+  /// 保存agent到extra storage
+  Future<void> saveAgentToExtraStorage(
+    AIAgent agent,
+    String storageKey,
+  ) async {
+    final plugin = PluginManager.instance.getPlugin('openai');
+    if (plugin == null) return;
+
+    // 加载现有agents
+    final existingAgents = await loadExtraStorageAgents(storageKey);
+
+    // 更新或添加agent
+    final index = existingAgents.indexWhere((a) => a.id == agent.id);
+    if (index >= 0) {
+      existingAgents[index] = agent;
+    } else {
+      existingAgents.add(agent);
+    }
+
+    // 保存
+    final List<Map<String, dynamic>> agentsJson =
+        existingAgents.map((a) => a.toJson()).toList();
+    await plugin.storage.write('${plugin.storageDir}/$storageKey.json', {
+      'agents': agentsJson,
+    });
+    notifyListeners();
+  }
+
+  /// 从extra storage删除agent
+  Future<void> deleteAgentFromExtraStorage(
+    String agentId,
+    String storageKey,
+  ) async {
+    final plugin = PluginManager.instance.getPlugin('openai');
+    if (plugin == null) return;
+
+    // 加载现有agents
+    final existingAgents = await loadExtraStorageAgents(storageKey);
+
+    // 删除agent
+    existingAgents.removeWhere((agent) => agent.id == agentId);
+
+    // 保存
+    final List<Map<String, dynamic>> agentsJson =
+        existingAgents.map((a) => a.toJson()).toList();
+    await plugin.storage.write('${plugin.storageDir}/$storageKey.json', {
+      'agents': agentsJson,
+    });
+    notifyListeners();
   }
 }
