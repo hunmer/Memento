@@ -28,15 +28,13 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-
     - name: Verify Android SDK
       run: |
         echo "=== Checking Android SDK ==="
         echo "ANDROID_HOME: $ANDROID_HOME"
         echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-        ls -la $ANDROID_HOME
+        ls -la $ANDROID_HOME || echo "ANDROID_HOME not set"
+        which sdkmanager || echo "sdkmanager not found"
         which adb || echo "ADB not found"
 
     - name: Cache Gradle packages

@@ -165,8 +165,9 @@ class AppRoutes extends NavigatorObserver {
   static const String tagStatistics = '/tag_statistics';
 
   // 自定义页面过渡动画 - 无动画
-  static Route _createRoute(Widget page) {
+  static Route _createRoute(Widget page, {RouteSettings? settings}) {
     return PageRouteBuilder(
+      settings: settings,
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return child;
@@ -248,7 +249,23 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const TTSServicesScreen());
       case '/diary':
       case 'diary':
-        return _createRoute(const DiaryMainView());
+        return _createRoute(const DiaryMainView(), settings: settings);
+      case '/diary_detail':
+      case 'diary_detail':
+        // 支持通过 date 参数打开指定日期的日记
+        DateTime? selectedDate;
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          final dateStr = args['date'] as String?;
+          if (dateStr != null) {
+            try {
+              selectedDate = DateTime.parse(dateStr);
+            } catch (e) {
+              debugPrint('解析日期失败: $e');
+            }
+          }
+        }
+        return _createRoute(DiaryMainView(initialDate: selectedDate), settings: settings);
       case '/activity':
       case 'activity':
         return _createRoute(const ActivityMainView());

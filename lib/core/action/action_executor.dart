@@ -17,6 +17,9 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'action_manager.dart';
 import 'models/action_definition.dart';
 import 'models/action_group.dart';
+import 'built_in/ask_context_action/route_parser.dart';
+import 'built_in/ask_context_action/widgets/context_query_drawer.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 /// 执行结果
 class ExecutionResult {
@@ -133,6 +136,9 @@ class BuiltInActionExecutor implements ActionExecutor {
 
         case BuiltInActions.selectPlugin:
           return await _executeSelectPlugin(context, data);
+
+        case BuiltInActions.askContext:
+          return await _executeAskContext(context, data);
 
         default:
           return ExecutionResult.failure(
@@ -341,6 +347,42 @@ class BuiltInActionExecutor implements ActionExecutor {
     showPluginListDialog(context);
 
     return ExecutionResult.success(data: {'action': 'selectPlugin'});
+  }
+
+  /// 执行询问当前上下文
+  Future<ExecutionResult> _executeAskContext(
+    BuildContext context,
+    Map<String, dynamic>? data,
+  ) async {
+    if (!context.mounted) {
+      return ExecutionResult.failure(error: 'Context not mounted');
+    }
+
+    try {
+      // 解析当前路由
+      final routeContext = RouteParser.parseRoute(context);
+
+      // 显示上下文查询抽屉
+      await SmoothBottomSheet.show(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => ContextQueryDrawer(
+          routeContext: routeContext,
+        ),
+      );
+
+      return ExecutionResult.success(
+        data: {
+          'action': 'askContext',
+          'route': routeContext.routeName,
+        },
+      );
+    } catch (e, stack) {
+      return ExecutionResult.failure(
+        error: e.toString(),
+        stackTrace: stack.toString(),
+      );
+    }
   }
 }
 

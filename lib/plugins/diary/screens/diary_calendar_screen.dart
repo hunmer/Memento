@@ -14,8 +14,13 @@ import 'package:Memento/plugins/diary/utils/diary_utils.dart';
 
 class DiaryCalendarScreen extends StatefulWidget {
   final StorageManager storage;
+  final DateTime? initialDate;
 
-  const DiaryCalendarScreen({super.key, required this.storage});
+  const DiaryCalendarScreen({
+    super.key,
+    required this.storage,
+    this.initialDate,
+  });
 
   @override
   State<DiaryCalendarScreen> createState() => _DiaryCalendarScreenState();
@@ -43,14 +48,17 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
   @override
   void initState() {
     super.initState();
-    _focusedDay = DateTime.now();
+
+    // 使用 initialDate 或默认为今天
+    final initialDay = widget.initialDate ?? DateTime.now();
+    _focusedDay = initialDay;
     _selectedDay = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      DateTime.now().day,
+      initialDay.year,
+      initialDay.month,
+      initialDay.day,
     );
     _calendarController = CalendarController();
-    _calendarController.displayDate = DateTime.now();
+    _calendarController.displayDate = initialDay;
     _calendarController.selectedDate = _selectedDay;
     _loadDiaryEntries();
   }
@@ -104,7 +112,15 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       _selectedDay = normalizedSelectedDay;
       _focusedDay = focusedDay;
     });
-    // 只选中日期，不直接打开编辑器
+
+    // 更新路由信息，使"询问当前上下文"功能能获取到当前日期
+    final dateStr =
+        '${normalizedSelectedDay.year}-${normalizedSelectedDay.month.toString().padLeft(2, '0')}-${normalizedSelectedDay.day.toString().padLeft(2, '0')}';
+    NavigationHelper.updateRouteWithArguments(
+      context,
+      '/diary_detail',
+      {'date': dateStr},
+    );
   }
 
   bool _isSameDay(DateTime? a, DateTime b) {

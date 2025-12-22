@@ -325,4 +325,5 @@ class BuiltInActions {
   static const String exitApp = 'exitApp';
   static const String lockScreen = 'lockScreen';
   static const String showNotifications = 'showNotifications';
+  static const String askContext = 'askContext';
 }
