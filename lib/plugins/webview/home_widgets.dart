@@ -100,6 +100,7 @@ class WebviewHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'webview',
         pluginName: 'webview_name'.tr,
         pluginIcon: Icons.language,
         pluginDefaultColor: const Color(0xFF4285F4),

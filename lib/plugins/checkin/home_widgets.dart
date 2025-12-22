@@ -102,6 +102,7 @@ class CheckinHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'checkin',
         pluginName: 'checkin_name'.tr,
         pluginIcon: Icons.checklist,
         pluginDefaultColor: Colors.teal,

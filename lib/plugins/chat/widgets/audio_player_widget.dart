@@ -1,7 +1,6 @@
-import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:path/path.dart' as path;
 
 class AudioPlayerWidget extends StatefulWidget {
   final String audioPath;
@@ -52,14 +51,8 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     try {
       // 设置音频文件
       if (widget.isLocalFile) {
-        String filePath = widget.audioPath;
-
-        // 如果是相对路径，转换为绝对路径
-        if (widget.audioPath.startsWith('./')) {
-          final appDir =
-              await StorageManager.getApplicationDocumentsDirectory();
-          filePath = path.join(appDir.path, widget.audioPath.substring(2));
-        }
+        // 使用 ImageUtils.getAbsolutePath 转换相对路径为绝对路径
+        final filePath = await ImageUtils.getAbsolutePath(widget.audioPath);
 
         await _audioPlayer.setSource(DeviceFileSource(filePath));
       } else {
@@ -96,8 +89,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         if (mounted) {
           setState(() {
             _isPlaying = false;
-            _position = Duration.zero;
           });
+          // 播放完成时重置位置，但不在这里 setState，避免冲突
+          _position = Duration.zero;
         }
       });
 
@@ -118,11 +112,37 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     if (_isPlaying) {
       await _audioPlayer.pause();
     } else {
-      // 如果已经播放完成，从头开始播放
-      if (_position >= _duration) {
-        await _audioPlayer.seek(Duration.zero);
+      // 如果已经播放完成，需要重新设置音频源
+      if (_position >= _duration || _position == Duration.zero) {
+        await _replay();
+      } else {
+        await _audioPlayer.resume();
       }
+    }
+  }
+
+  Future<void> _replay() async {
+    try {
+      setState(() => _isLoading = true);
+
+      // 重新设置音频源
+      if (widget.isLocalFile) {
+        final filePath = await ImageUtils.getAbsolutePath(widget.audioPath);
+        await _audioPlayer.setSource(DeviceFileSource(filePath));
+      } else {
+        await _audioPlayer.setSource(UrlSource(widget.audioPath));
+      }
+
+      // 重置播放位置
+      _position = Duration.zero;
+
+      // 开始播放
       await _audioPlayer.resume();
+
+      setState(() => _isLoading = false);
+    } catch (e) {
+      debugPrint('重新播放音频时出错: $e');
+      setState(() => _isLoading = false);
     }
   }
 

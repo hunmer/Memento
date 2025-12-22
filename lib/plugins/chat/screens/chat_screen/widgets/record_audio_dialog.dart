@@ -20,6 +20,7 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
   Duration _duration = Duration.zero;
   DateTime? _startTime;
   bool _isInitialized = false;
+  bool _isStarting = false;
 
   @override
   void initState() {
@@ -28,7 +29,7 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && !_isInitialized) {
         _isInitialized = true;
-        _startRecording();
+        _initializeAndStartRecording();
       }
     });
   }
@@ -39,7 +40,11 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
     super.dispose();
   }
 
-  Future<void> _startRecording() async {
+  Future<void> _initializeAndStartRecording() async {
+    // 防止重复初始化
+    if (_isStarting) return;
+    _isStarting = true;
+
     try {
       // 检查录音权限
       final hasPermission = await _audioRecorder.hasPermission();
@@ -47,29 +52,8 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
         throw '需要录音权限才能录制语音消息';
       }
 
-      // 获取临时目录
-      final tempDir = await getTemporaryDirectory();
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final filePath = path.join(tempDir.path, 'audio_$timestamp.m4a');
-
-      // 配置录音参数
-      await _audioRecorder.start(
-        RecordConfig(
-          encoder: AudioEncoder.aacLc,
-          bitRate: 128000,
-          sampleRate: 44100,
-          numChannels: 2,
-        ),
-        path: filePath,
-      );
-
-      setState(() {
-        _isRecording = true;
-        _startTime = DateTime.now();
-      });
-
-      // 更新录音时长
-      _updateDuration();
+      // 开始录音
+      await _startRecording();
     } catch (e) {
       if (mounted) {
         // 显示错误提示对话框
@@ -88,8 +72,40 @@ class _RecordAudioDialogState extends State<RecordAudioDialog> {
               ),
         );
         // 关闭录音对话框
-        Navigator.of(context).pop();
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
       }
+    } finally {
+      _isStarting = false;
+    }
+  }
+
+  Future<void> _startRecording() async {
+    // 获取临时目录
+    final tempDir = await getTemporaryDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final filePath = path.join(tempDir.path, 'audio_$timestamp.m4a');
+
+    // 配置录音参数
+    await _audioRecorder.start(
+      RecordConfig(
+        encoder: AudioEncoder.aacLc,
+        bitRate: 128000,
+        sampleRate: 44100,
+        numChannels: 2,
+      ),
+      path: filePath,
+    );
+
+    if (mounted) {
+      setState(() {
+        _isRecording = true;
+        _startTime = DateTime.now();
+      });
+
+      // 更新录音时长
+      _updateDuration();
     }
   }
 

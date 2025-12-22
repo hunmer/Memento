@@ -98,10 +98,7 @@ class _AgentListScreenState extends State<AgentListScreen> {
   }
 
   void _openMarketplace() {
-    NavigationHelper.push(
-      context,
-      const AgentMarketplaceScreen(),
-    );
+    NavigationHelper.push(context, const AgentMarketplaceScreen());
   }
 
   List<AIAgent> _getFilteredAgents() {
@@ -121,15 +118,19 @@ class _AgentListScreenState extends State<AgentListScreen> {
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
         final nameMatch = agent.name.toLowerCase().contains(query);
-        final descriptionMatch = agent.description.toLowerCase().contains(query);
-        final tagsMatch = agent.tags.any((tag) =>
-            tag.toLowerCase().contains(query));
+        final descriptionMatch = agent.description.toLowerCase().contains(
+          query,
+        );
+        final tagsMatch = agent.tags.any(
+          (tag) => tag.toLowerCase().contains(query),
+        );
 
         // 根据启用的搜索过滤器进行匹配
-        final enabledFilters = _searchFilters.entries
-            .where((entry) => entry.value)
-            .map((entry) => entry.key)
-            .toList();
+        final enabledFilters =
+            _searchFilters.entries
+                .where((entry) => entry.value)
+                .map((entry) => entry.key)
+                .toList();
 
         final matches = <bool>[];
         if (enabledFilters.contains('name')) {
@@ -161,36 +162,29 @@ class _AgentListScreenState extends State<AgentListScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'openai_tags'.tr,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: _allTags.map((tag) {
-                final isSelected = _selectedTags.contains(tag);
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(tag),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          _selectedTags.add(tag);
-                        } else {
-                          _selectedTags.remove(tag);
-                        }
-                      });
-                    },
-                  ),
-                );
-              }).toList(),
+              children:
+                  _allTags.map((tag) {
+                    final isSelected = _selectedTags.contains(tag);
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        label: Text(tag),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedTags.add(tag);
+                            } else {
+                              _selectedTags.remove(tag);
+                            }
+                          });
+                        },
+                      ),
+                    );
+                  }).toList(),
             ),
           ),
         ],
@@ -207,9 +201,10 @@ class _AgentListScreenState extends State<AgentListScreen> {
         children: [
           _buildCategoryFilter(),
           Expanded(
-            child: _isGridView
-                ? AgentGridView(agents: _getFilteredAgents())
-                : AgentListView(agents: _getFilteredAgents()),
+            child:
+                _isGridView
+                    ? AgentGridView(agents: _getFilteredAgents())
+                    : AgentListView(agents: _getFilteredAgents()),
           ),
         ],
       ),
@@ -223,11 +218,7 @@ class _AgentListScreenState extends State<AgentListScreen> {
 
       // 启用搜索过滤器
       enableSearchFilter: true,
-      filterLabels: const {
-        'name': '名称',
-        'description': '描述',
-        'tags': '标签',
-      },
+      filterLabels: const {'name': '名称', 'description': '描述', 'tags': '标签'},
       onSearchFilterChanged: _onSearchFilterChanged,
 
       actions: [

@@ -297,18 +297,23 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
   @override
   Widget buildSettingsView(BuildContext context) {
-    return StatefulBuilder(
-      builder: (BuildContext context, StateSetter setState) {
-        return Column(
-          children: [
-            uiService.buildUserProfileCard(context, setState),
-            const SizedBox(height: 16),
-            uiService.buildChatSettingsCard(context, setState),
-            const Divider(),
-            super.buildSettingsView(context),
-          ],
-        );
-      },
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('chat_name'.tr),
+      ),
+      body: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Column(
+            children: [
+              uiService.buildUserProfileCard(context, setState),
+              const SizedBox(height: 16),
+              uiService.buildChatSettingsCard(context, setState),
+              const Divider(),
+              super.buildSettingsView(context),
+            ],
+          );
+        },
+      ),
     );
   }
 

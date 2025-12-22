@@ -26,17 +26,27 @@ class AppDrawer extends StatelessWidget {
 
                 if (snapshot.hasError) {
                   return Center(
-                    child: Text('app_failedToLoadPlugins'.tr
-                        .replaceFirst('{error}', snapshot.error.toString())),
+                    child: Text(
+                      'app_failedToLoadPlugins'.tr.replaceFirst(
+                        '{error}',
+                        snapshot.error.toString(),
+                      ),
+                    ),
                   );
                 }
 
                 final plugins = snapshot.data ?? [];
+                final visiblePlugins = plugins
+                    .where(
+                      (plugin) =>
+                          globalConfigManager.isPluginEnabled(plugin.id),
+                    )
+                    .toList();
 
                 return ListView.builder(
-                  itemCount: plugins.length,
+                  itemCount: visiblePlugins.length,
                   itemBuilder: (context, index) {
-                    final plugin = plugins[index];
+                    final plugin = visiblePlugins[index];
 
                     // 只对有配置页面的插件显示设置按钮
                     final hasSettings = [
@@ -49,24 +59,22 @@ class AppDrawer extends StatelessWidget {
 
                     return ListTile(
                       leading: Icon(plugin.icon),
-                      title: Text(
-                        plugin.getPluginName(context) ?? plugin.id,
-                      ),
+                      title: Text(plugin.getPluginName(context) ?? plugin.id),
                       trailing:
                           hasSettings
                               ? IconButton(
-                        icon: const Icon(Icons.settings),
-                        tooltip: 'app_settings'.tr,
-                        onPressed: () {
-                          if (context.mounted) {
-                            Navigator.pop(context); // 关闭抽屉
-                            // 导航到插件设置页面
-                            NavigationHelper.push(
-                              context,
-                              plugin.buildSettingsView(context),
-                            );
-                          }
-                        },
+                                icon: const Icon(Icons.settings),
+                                tooltip: 'app_settings'.tr,
+                                onPressed: () {
+                                  if (context.mounted) {
+                                    Navigator.pop(context); // 关闭抽屉
+                                    // 导航到插件设置页面
+                                    NavigationHelper.push(
+                                      context,
+                                      plugin.buildSettingsView(context),
+                                    );
+                                  }
+                                },
                               )
                               : null,
                       onTap: () {
@@ -88,8 +96,7 @@ class AppDrawer extends StatelessWidget {
             title: Text('app_settings'.tr),
             onTap: () {
               Navigator.pop(context); // 先关闭抽屉
-              NavigationHelper.push(context, const SettingsScreen(),
-              );
+              NavigationHelper.push(context, const SettingsScreen());
             },
           ),
         ],

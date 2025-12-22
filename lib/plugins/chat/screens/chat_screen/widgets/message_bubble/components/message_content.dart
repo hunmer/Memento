@@ -141,9 +141,9 @@ class MessageContent extends StatelessWidget {
           style: TextStyle(color: Colors.red, fontSize: 13),
         );
       }
-      final fileName = fileInfo['name'] as String? ?? '未命名文件';
+      final fileName = fileInfo['fileName'] as String? ?? fileInfo['name'] as String? ?? '未命名文件';
       final mimeType = fileInfo['mimeType'] as String? ?? 'application/octet-stream';
-      final fileSize = fileInfo['size'] as int? ?? 0;
+      final fileSize = fileInfo['fileSize'] as int? ?? fileInfo['size'] as int? ?? 0;
       final type = fileInfo['type'] as String? ?? '';
 
       if (type == 'image') {

@@ -137,6 +137,7 @@ class NodesHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'nodes',
         pluginName: 'nodes_name'.tr,
         pluginIcon: Icons.account_tree,
         pluginDefaultColor: Colors.amber,

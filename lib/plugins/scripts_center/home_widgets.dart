@@ -109,6 +109,7 @@ class ScriptsCenterHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'scripts_center',
         pluginName: 'scripts_center_name'.tr,
         pluginIcon: Icons.code,
         pluginDefaultColor: Colors.deepPurple,

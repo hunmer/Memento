@@ -101,6 +101,7 @@ class OpenAIHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'openai',
         pluginName: 'openai_name'.tr,
         pluginIcon: Icons.smart_toy,
         pluginDefaultColor: Colors.deepOrange,

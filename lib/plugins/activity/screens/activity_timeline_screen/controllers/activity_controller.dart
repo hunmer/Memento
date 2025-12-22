@@ -195,35 +195,30 @@ class ActivityController {
     return SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      builder:
-          (context) => DraggableScrollableSheet(
-            initialChildSize: 0.9, // 初始高度为屏幕高度的90%
-            maxChildSize: 0.95, // 最大高度为屏幕高度的95%
-            minChildSize: 0.5, // 最小高度为屏幕高度的50%
-            expand: false,
-            builder:
-                (context, scrollController) => ActivityForm(
-                  selectedDate: selectedDate,
-                  initialStartTime: initialStartTime,
-                  initialEndTime: initialEndTime,
-                  lastActivityEndTime: lastActivityEndTime,
-                  recentMoods: recentMoods,
-                  recentTags: recentTags,
-                  onSave: (ActivityRecord activity) async {
-                    await activityService.saveActivity(activity);
-                    if (activity.tags.isNotEmpty) {
-                      onTagsUpdated(activity.tags);
-                      await _updateRecentTags(activity.tags);
-                    }
-                    if (activity.mood != null && activity.mood!.isNotEmpty) {
-                      await _updateRecentMood(activity.mood!);
-                    }
-                    // 发送活动添加事件
-                    _notifyEvent('added', activity);
-                    await loadActivities(selectedDate);
-                  },
-                ),
-          ),
+      builder: (context) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.85,
+        child: ActivityForm(
+          selectedDate: selectedDate,
+          initialStartTime: initialStartTime,
+          initialEndTime: initialEndTime,
+          lastActivityEndTime: lastActivityEndTime,
+          recentMoods: recentMoods,
+          recentTags: recentTags,
+          onSave: (ActivityRecord activity) async {
+            await activityService.saveActivity(activity);
+            if (activity.tags.isNotEmpty) {
+              onTagsUpdated(activity.tags);
+              await _updateRecentTags(activity.tags);
+            }
+            if (activity.mood != null && activity.mood!.isNotEmpty) {
+              await _updateRecentMood(activity.mood!);
+            }
+            // 发送活动添加事件
+            _notifyEvent('added', activity);
+            await loadActivities(selectedDate);
+          },
+        ),
+      ),
     );
   }
 
@@ -234,34 +229,29 @@ class ActivityController {
       SmoothBottomSheet.show(
         context: context,
         isScrollControlled: true,
-        builder:
-            (context) => DraggableScrollableSheet(
-              initialChildSize: 0.9, // 初始高度为屏幕高度的90%
-              maxChildSize: 0.95, // 最大高度为屏幕高度的95%
-              minChildSize: 0.5, // 最小高度为屏幕高度的50%
-              expand: false,
-              builder:
-                  (context, scrollController) => ActivityForm(
-                    activity: activity,
-                    recentMoods: recentMoods,
-                    recentTags: recentTags,
-                    onSave: (ActivityRecord updatedActivity) async {
-                      await activityService.updateActivity(
-                        activity,
-                        updatedActivity,
-                      );
-                      if (updatedActivity.tags.isNotEmpty) {
-                        await _updateRecentTags(updatedActivity.tags);
-                      }
-                      if (updatedActivity.mood != null &&
-                          updatedActivity.mood!.isNotEmpty) {
-                        await _updateRecentMood(updatedActivity.mood!);
-                      }
-                      await loadActivities(activity.startTime);
-                    },
-                    selectedDate: activity.startTime,
-                  ),
-            ),
+        builder: (context) => SizedBox(
+          height: MediaQuery.of(context).size.height * 0.85,
+          child: ActivityForm(
+            activity: activity,
+            recentMoods: recentMoods,
+            recentTags: recentTags,
+            onSave: (ActivityRecord updatedActivity) async {
+              await activityService.updateActivity(
+                activity,
+                updatedActivity,
+              );
+              if (updatedActivity.tags.isNotEmpty) {
+                await _updateRecentTags(updatedActivity.tags);
+              }
+              if (updatedActivity.mood != null &&
+                  updatedActivity.mood!.isNotEmpty) {
+                await _updateRecentMood(updatedActivity.mood!);
+              }
+              await loadActivities(activity.startTime);
+            },
+            selectedDate: activity.startTime,
+          ),
+        ),
       );
     });
   }

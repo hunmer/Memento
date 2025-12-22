@@ -82,6 +82,7 @@ class NfcHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'nfc',
         pluginName: 'nfc_pluginName'.tr,
         pluginIcon: Icons.nfc,
         pluginDefaultColor: Colors.orange,

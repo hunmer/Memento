@@ -10,8 +10,10 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import github.hunmer.memento.TimerForegroundService
 import github.hunmer.memento.ActivityForegroundService
+import github.hunmer.memento.CustomLiveActivityManager
 
 import io.flutter.plugin.common.MethodChannel
+import com.example.live_activities.LiveActivityManagerHolder
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "github.hunmer.memento/timer_service"
@@ -139,6 +141,9 @@ class MainActivity: FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         TimerForegroundService.flutterEngine = flutterEngine
         ActivityForegroundService.flutterEngine = flutterEngine
+
+        // 初始化 Live Activities 支持
+        LiveActivityManagerHolder.instance = CustomLiveActivityManager(this)
 
         // 初始化小组件 MethodChannel
         widgetMethodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WIDGET_CHANNEL)

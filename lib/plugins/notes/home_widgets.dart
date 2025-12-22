@@ -102,6 +102,7 @@ class NotesHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'notes',
         pluginName: 'notes_name'.tr,
         pluginIcon: Icons.notes,
         pluginDefaultColor: _notesColor,

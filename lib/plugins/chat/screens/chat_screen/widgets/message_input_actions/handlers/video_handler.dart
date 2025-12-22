@@ -36,7 +36,8 @@ Future<void> handleVideoSelection({
             return;
           }
 
-          final originalFileName = path.basename(video.path);
+          // 拍摄的视频标题固定为"录像视频"
+          final originalFileName = '录像视频';
 
           // 保存视频到应用目录
           final savedFile = await fileService.saveVideo(videoFile);
@@ -51,9 +52,9 @@ Future<void> handleVideoSelection({
             'fileInfo': {
               'id': fileMessage.id,
               'fileName': fileMessage.fileName, // FileMessage.fromJson必需字段
-              'filePath': fileMessage.filePath, // FileMessage.fromJson必需字段
+              'path': fileMessage.filePath, // FileMessage.fromJson必需字段
               'originalFileName': fileMessage.originalFileName,
-              'size': fileMessage.fileSize,
+              'fileSize': fileMessage.fileSize, // 修正字段名
               'extension': fileMessage.extension,
               'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
               'type': 'video',
@@ -70,7 +71,9 @@ Future<void> handleVideoSelection({
           onFileSelected?.call(metadata);
         } catch (processingError) {
           toastService.showToast(
-            'chat_videoProcessingFailed'.trParams({'processingError': processingError.toString()}),
+            'chat_videoProcessingFailed'.trParams({
+              'processingError': processingError.toString(),
+            }),
           );
         }
       }
@@ -99,7 +102,8 @@ Future<void> handleVideoSelection({
           return;
         }
 
-        final originalFileName = path.basename(video.path);
+        // 拍摄的视频标题固定为"录像视频"
+        final originalFileName = '录像视频';
 
         // 保存视频到应用目录
         final savedFile = await fileService.saveVideo(videoFile);
@@ -114,8 +118,8 @@ Future<void> handleVideoSelection({
           'fileInfo': {
             'id': fileMessage.id,
             'fileName': fileMessage.fileName, // 修正字段名
+            'path': fileMessage.filePath, // 修正字段名
             'originalFileName': fileMessage.originalFileName,
-            'filePath': fileMessage.filePath, // 修正字段名
             'fileSize': fileMessage.fileSize, // 修正字段名
             'extension': fileMessage.extension,
             'mimeType': 'video/${fileMessage.extension.replaceAll('.', '')}',
@@ -138,7 +142,9 @@ Future<void> handleVideoSelection({
         );
       } catch (processingError) {
         toastService.showToast(
-          'chat_videoProcessingFailed'.trParams({'processingError': processingError.toString()}),
+          'chat_videoProcessingFailed'.trParams({
+            'processingError': processingError.toString(),
+          }),
         );
       }
     }

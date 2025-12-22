@@ -21,7 +21,7 @@ class SmoothBottomSheet {
   /// [showDragHandle] - 是否显示拖拽指示器，默认 true
   /// [enableDrag] - 是否启用拖拽，默认 true
   /// [isScrollControlled] - 是否使用全屏高度，默认 false
-  /// [useSafeArea] - 是否使用安全区域，默认 true
+  /// [useSafeArea] - 是否使用安全区域，默认 false
   static Future<T?> show<T>({
     required BuildContext context,
     required Widget Function(BuildContext) builder,
@@ -32,7 +32,7 @@ class SmoothBottomSheet {
     bool showDragHandle = true,
     bool enableDrag = true,
     bool isScrollControlled = false,
-    bool useSafeArea = true,
+    bool useSafeArea = false,
   }) {
     return Navigator.of(context).push<T>(
       ModalSheetRoute(
@@ -44,7 +44,6 @@ class SmoothBottomSheet {
             backgroundColor: backgroundColor,
             borderRadius: borderRadius,
             showDragHandle: showDragHandle,
-            useSafeArea: useSafeArea,
           ),
         ),
       ),
@@ -71,7 +70,7 @@ class SmoothBottomSheet {
     double borderRadius = 20,
     bool showDragHandle = true,
     bool enableDrag = true,
-    bool useSafeArea = true,
+    bool useSafeArea = false,
   }) {
     return show<T>(
       context: context,
@@ -98,14 +97,12 @@ class _SheetContent extends StatelessWidget {
   final Color? backgroundColor;
   final double borderRadius;
   final bool showDragHandle;
-  final bool useSafeArea;
 
   const _SheetContent({
     required this.builder,
     this.backgroundColor,
     required this.borderRadius,
     required this.showDragHandle,
-    required this.useSafeArea,
   });
 
   @override
@@ -113,7 +110,7 @@ class _SheetContent extends StatelessWidget {
     final theme = Theme.of(context);
     final bgColor = backgroundColor ?? theme.scaffoldBackgroundColor;
 
-    Widget content = Material(
+    return Material(
       color: Colors.transparent,
       child: Container(
         decoration: BoxDecoration(
@@ -134,13 +131,6 @@ class _SheetContent extends StatelessWidget {
         ),
       ),
     );
-
-    // 是否使用安全区域
-    if (useSafeArea) {
-      content = SafeArea(child: content);
-    }
-
-    return content;
   }
 
   /// 构建拖拽指示器

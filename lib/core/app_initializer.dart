@@ -13,31 +13,11 @@ import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/core/services/system_widget_service.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/core/services/timer/unified_timer_controller.dart';
 import 'package:Memento/utils/image_utils.dart';
-import 'package:Memento/plugins/chat/chat_plugin.dart';
-import 'package:Memento/plugins/diary/diary_plugin.dart';
-import 'package:Memento/plugins/activity/activity_plugin.dart';
-import 'package:Memento/plugins/checkin/checkin_plugin.dart';
-import 'package:Memento/plugins/timer/timer_plugin.dart';
-import 'package:Memento/plugins/todo/todo_plugin.dart';
-import 'package:Memento/plugins/day/day_plugin.dart';
-import 'package:Memento/plugins/nodes/nodes_plugin.dart';
-import 'package:Memento/plugins/notes/notes_plugin.dart';
-import 'package:Memento/plugins/goods/goods_plugin.dart';
-import 'package:Memento/plugins/bill/bill_plugin.dart';
-import 'package:Memento/plugins/calendar/calendar_plugin.dart';
-import 'package:Memento/plugins/openai/openai_plugin.dart';
-import 'package:Memento/plugins/store/store_plugin.dart';
-import 'package:Memento/plugins/tracker/tracker_plugin.dart';
-import 'package:Memento/plugins/database/database_plugin.dart';
-import 'package:Memento/plugins/scripts_center/scripts_center_plugin.dart';
-import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
-import 'package:Memento/plugins/tts/tts_plugin.dart';
-import 'package:Memento/plugins/habits/habits_plugin.dart';
-import 'package:Memento/plugins/contact/contact_plugin.dart';
-import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
-import 'package:Memento/plugins/nfc/nfc_plugin.dart';
-import 'package:Memento/plugins/webview/webview_plugin.dart';
+import 'package:memento_foreground_service/memento_foreground_service.dart';
+import 'package:memento_notifications/memento_notifications.dart';
+import 'package:Memento/core/builtin_plugins.dart';
 import 'package:Memento/screens/settings_screen/controllers/auto_update_controller.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
 import 'package:Memento/screens/settings_screen/widgets/permission_request_dialog.dart';
@@ -171,6 +151,37 @@ Future<void> initializeApp() async {
     // 初始化 Toast 服务
     Toast.setNavigatorKey(navigatorKey);
 
+    // 在初始化通知服务之前先清理历史通知和计时器状态
+    // 这是防止应用重启后通知自动复原的关键步骤
+    AppStartupState.instance._setLoadingMessage('正在清理历史通知...');
+    await MementoNotifications.instance.cancelAll();
+
+    // 同时清理统一计时器控制器的活动计时器，防止插件重新创建通知
+    try {
+      final timerController = UnifiedTimerController();
+      await timerController.clearAll();
+      debugPrint('[AppInitializer] 已清理所有活动计时器');
+    } catch (e) {
+      debugPrint('[AppInitializer] 清理计时器状态失败（可能尚未初始化）: $e');
+    }
+
+    // 停止前台服务（防止系统重启后自动启动）
+    try {
+      final foregroundService = MementoForegroundService.instance;
+      if (await foregroundService.isRunning) {
+        await foregroundService.stopService();
+        debugPrint('[AppInitializer] 已停止前台服务');
+      }
+    } catch (e) {
+      debugPrint('[AppInitializer] 停止前台服务失败: $e');
+    }
+
+    debugPrint('[AppInitializer] 已清理所有历史通知、计时器状态和前台服务');
+
+    // 初始化通知控制器（设置监听器和配置）
+    AppStartupState.instance._setLoadingMessage('正在初始化通知服务...');
+    await NotificationController.initialize();
+
     // 核心服务就绪，可以显示UI
     AppStartupState.instance._setCoreReady();
 
@@ -192,13 +203,8 @@ Future<void> _initializeBackgroundServices() async {
   final startupState = AppStartupState.instance;
 
   try {
-    // 初始化通知控制器（后台执行）
-    startupState._setLoadingMessage('正在初始化通知服务...');
-    unawaited(
-      NotificationController.initialize().then((_) {
-        NotificationController.requestPermission();
-      }),
-    );
+    // 请求通知权限（在后台执行，不阻塞启动）
+    unawaited(NotificationController.requestPermission());
 
     // 初始化 ImageUtils
     unawaited(ImageUtils.initializeSync());
@@ -222,7 +228,7 @@ Future<void> _initializeBackgroundServices() async {
           }),
     );
 
-    // === 注册插件（核心功能） ===
+    // === 注册插件（核心功能，可配置） ===
     startupState._setLoadingMessage('正在加载插件...');
     await _registerPlugins();
     startupState._setPluginsReady();
@@ -447,36 +453,15 @@ Future<void> _initializeFloatingBallActions() async {
 
 /// 注册所有内置插件
 Future<void> _registerPlugins() async {
-  final plugins = [
-    ChatPlugin(),
-    OpenAIPlugin(),
-    AgentChatPlugin(),
-    DiaryPlugin(),
-    ActivityPlugin(),
-    CheckinPlugin(),
-    ContactPlugin(),
-    HabitsPlugin(),
-    DatabasePlugin(),
-    TimerPlugin(),
-    TodoPlugin(),
-    DayPlugin(),
-    TrackerPlugin(),
-    StorePlugin(),
-    NodesPlugin(),
-    NotesPlugin(),
-    GoodsPlugin(),
-    BillPlugin(),
-    CalendarPlugin(),
-    CalendarAlbumPlugin(),
-    ScriptsCenterPlugin(),
-    TTSPlugin(),
-    NfcPlugin(),
-    WebViewPlugin(),
-  ];
+  final plugins = BuiltinPlugins.createAll();
 
-  // 并行注册插件以提高速度
   await Future.wait(
     plugins.map((plugin) async {
+      final isEnabled = globalConfigManager.isPluginEnabled(plugin.id);
+      if (!isEnabled) {
+        debugPrint('插件已禁用，跳过注册: ${plugin.id}');
+        return;
+      }
       try {
         await globalPluginManager.registerPlugin(plugin);
       } catch (e) {

@@ -101,6 +101,7 @@ class TimerHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'timer',
         pluginName: 'timer_name'.tr,
         pluginIcon: Icons.timer,
         pluginDefaultColor: Colors.blueGrey,

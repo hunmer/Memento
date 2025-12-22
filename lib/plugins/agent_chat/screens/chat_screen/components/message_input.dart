@@ -937,6 +937,9 @@ class _MessageInputState extends State<MessageInput> {
     // 如果有选中的工具模板，即使输入框为空也可以发送
     if (widget.controller.selectedToolTemplate != null) return true;
 
+    // 如果有选中的文件，即使输入框为空也可以发送
+    if (widget.controller.selectedFiles.isNotEmpty) return true;
+
     // 否则，输入框不能为空
     return widget.controller.inputText.trim().isNotEmpty;
   }
@@ -945,8 +948,10 @@ class _MessageInputState extends State<MessageInput> {
   Future<void> _sendMessage() async {
     final text = widget.controller.inputText.trim();
 
-    // 如果有工具模板，即使文本为空也可以发送
-    if (text.isEmpty && widget.controller.selectedToolTemplate == null) return;
+    // 如果文本为空且没有工具模板和文件，则不能发送
+    if (text.isEmpty &&
+        widget.controller.selectedToolTemplate == null &&
+        widget.controller.selectedFiles.isEmpty) return;
 
     // 检查是否是命令
     if (text.startsWith('/')) {

@@ -16,6 +16,9 @@ class ConversationService extends ChangeNotifier {
   /// 是否正在加载
   bool _isLoading = false;
 
+  /// 持久化会话列表时的串行任务链，避免并发写导致文件损坏
+  Future<void> _conversationsSaveChain = Future.value();
+
   ConversationService({required this.storage});
 
   // Getters
@@ -39,9 +42,12 @@ class ConversationService extends ChangeNotifier {
       final data = await storage.read('agent_chat/conversations');
       if (data is List && data.isNotEmpty) {
         // 有数据，正常加载
-        _conversations = data
-            .map((json) => Conversation.fromJson(json as Map<String, dynamic>))
-            .toList();
+        _conversations =
+            data
+                .map(
+                  (json) => Conversation.fromJson(json as Map<String, dynamic>),
+                )
+                .toList();
         _conversations.sort(Conversation.compare);
       } else {
         // 没有数据，首次使用，加载示例数据
@@ -85,9 +91,12 @@ class ConversationService extends ChangeNotifier {
       );
 
       // 直接加载数据到内存，避免递归调用
-      _conversations = conversationsJson
-          .map((json) => Conversation.fromJson(json as Map<String, dynamic>))
-          .toList();
+      _conversations =
+          conversationsJson
+              .map(
+                (json) => Conversation.fromJson(json as Map<String, dynamic>),
+              )
+              .toList();
       _conversations.sort(Conversation.compare);
 
       notifyListeners();
@@ -101,14 +110,22 @@ class ConversationService extends ChangeNotifier {
   }
 
   /// 保存所有会话
-  Future<void> _saveConversations() async {
-    try {
-      final data = _conversations.map((c) => c.toJson()).toList();
-      await storage.write('agent_chat/conversations', data);
-    } catch (e) {
-      debugPrint('保存会话失败: $e');
-      rethrow; // 重新抛出异常，让调用者知道保存失败
-    }
+  Future<void> _saveConversations() {
+    // 通过串行化写入，防止多个写操作并发执行造成JSON尾部出现多余字符
+    final saveTask = _conversationsSaveChain
+        .catchError((_, __) {})
+        .then((_) async {
+          try {
+            final data = _conversations.map((c) => c.toJson()).toList();
+            await storage.write('agent_chat/conversations', data);
+          } catch (e) {
+            debugPrint('保存会话失败: $e');
+            rethrow; // 重新抛出异常，让调用者知道保存失败
+          }
+        });
+
+    _conversationsSaveChain = saveTask;
+    return saveTask;
   }
 
   // ========== 会话操作 ==========

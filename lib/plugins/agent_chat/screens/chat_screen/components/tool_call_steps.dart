@@ -49,11 +49,7 @@ class _ToolCallStepsState extends State<ToolCallSteps> {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.construction,
-                  size: 20,
-                  color: Colors.blue[700],
-                ),
+                Icon(Icons.construction, size: 20, color: Colors.blue[700]),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -65,15 +61,6 @@ class _ToolCallStepsState extends State<ToolCallSteps> {
                     ),
                   ),
                 ),
-                if (widget.isGenerating)
-                  SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.blue[700],
-                    ),
-                  ),
               ],
             ),
           ),
@@ -258,10 +245,7 @@ class _ToolCallStepsState extends State<ToolCallSteps> {
                       ),
                       child: SelectableText(
                         step.error!,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.red[900],
-                        ),
+                        style: TextStyle(fontSize: 11, color: Colors.red[900]),
                       ),
                     ),
                   ],
@@ -276,9 +260,7 @@ class _ToolCallStepsState extends State<ToolCallSteps> {
                       child: ElevatedButton.icon(
                         onPressed: () => widget.onRerunStep!(index),
                         icon: const Icon(Icons.replay, size: 16),
-                        label: Text(
-                          'agent_chat_executeAgain'.tr,
-                        ),
+                        label: Text('agent_chat_executeAgain'.tr),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange[50],
                           foregroundColor: Colors.orange[700],
@@ -323,17 +305,9 @@ class _ToolCallStepsState extends State<ToolCallSteps> {
           ),
         );
       case ToolCallStatus.success:
-        return Icon(
-          Icons.check_circle,
-          size: 20,
-          color: Colors.green[600],
-        );
+        return Icon(Icons.check_circle, size: 20, color: Colors.green[600]);
       case ToolCallStatus.failed:
-        return Icon(
-          Icons.error,
-          size: 20,
-          color: Colors.red[600],
-        );
+        return Icon(Icons.error, size: 20, color: Colors.red[600]);
     }
   }
 
@@ -346,19 +320,13 @@ class _ToolCallStepsState extends State<ToolCallSteps> {
           width: 60,
           child: Text(
             '$label:',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[700],
-            ),
+            style: TextStyle(fontSize: 12, color: Colors.grey[700]),
           ),
         ),
       ],

@@ -116,6 +116,7 @@ class StoreHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'store',
         pluginName: 'store_name'.tr,
         pluginIcon: Icons.store,
         pluginDefaultColor: Colors.pinkAccent,
