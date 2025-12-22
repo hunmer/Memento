@@ -72,8 +72,8 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
     };
     widget.billPlugin.addListener(_billPluginListener);
 
-    // 初始化时设置路由上下文
-    _updateRouteContext(_focusedDay);
+    // 初始化时设置路由上下文（包含选中的日期）
+    _updateRouteContext(_focusedDay, selectedDay: _selectedDay);
   }
 
   @override
@@ -169,13 +169,28 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
     }
   }
 
-  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前月份
-  void _updateRouteContext(DateTime month) {
-    final monthStr = '${month.year}-${month.month.toString().padLeft(2, '0')}';
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前月份或具体日期
+  ///
+  /// [date] 当前聚焦的日期（月份）
+  /// [selectedDay] 可选参数，用户选中的具体日期
+  void _updateRouteContext(DateTime date, {DateTime? selectedDay}) {
+    String dateStr;
+    String title;
+
+    if (selectedDay != null) {
+      // 如果有选中的具体日期，显示完整日期（YYYY-MM-DD）
+      dateStr = '${selectedDay.year}-${selectedDay.month.toString().padLeft(2, '0')}-${selectedDay.day.toString().padLeft(2, '0')}';
+      title = '账单列表 - $dateStr';
+    } else {
+      // 否则只显示月份（YYYY-MM）
+      dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}';
+      title = '账单列表 - $dateStr';
+    }
+
     RouteHistoryManager.updateCurrentContext(
       pageId: '/bill_list',
-      title: '账单列表 - $monthStr',
-      params: {'month': monthStr},
+      title: title,
+      params: {'date': dateStr},
     );
   }
 
@@ -397,7 +412,7 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                 _focusedDay = month;
                 _loadMonthBills();
               });
-              // 更新路由上下文
+              // 更新路由上下文（切换月份时清除具体日期）
               _updateRouteContext(month);
             },
             getMonthStats: _getMonthStats,
@@ -433,6 +448,8 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                   _focusedDay = details.date!;
                   _calendarController.selectedDate = details.date;
                 });
+                // 更新路由上下文到具体日期
+                _updateRouteContext(_focusedDay, selectedDay: _selectedDay);
               }
             },
             onViewChanged: (ViewChangedDetails details) {

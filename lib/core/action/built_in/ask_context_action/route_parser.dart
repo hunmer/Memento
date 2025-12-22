@@ -23,16 +23,22 @@ class RouteParser {
 
     // 待办插件
     '/todo': '用户正在查看待办事项',
-    '/todo_task_detail': '用户正在查看待办任务',
-    '/todo_add': '用户正在添加新待办',
+    '/todo_list': '用户正在查看待办事项列表（{taskCount} 个任务，{viewMode} 视图）',
+    '/todo_list_search': '用户正在搜索待办事项：{searchQuery}（找到 {resultCount} 个结果）',
+    '/todo_history': '用户正在查看已完成的待办历史记录（共 {completedCount} 个）',
+    '/todo_detail': '用户正在查看待办任务：{taskTitle}（ID: {taskId}，状态: {taskStatus}）',
+    '/todo_form_new': '用户正在新建待办任务',
+    '/todo_form_edit': '用户正在编辑待办任务：{taskTitle}（ID: {taskId}）',
 
     // 账单插件
     '/bill': '用户正在查看账单',
-    '/bill_list': '用户正在查看 {month} 的账单列表',
+    '/bill_list': '用户正在查看 {date} 的账单列表',
     '/bill_stats': '用户正在分析 {month} 的账单统计',
     '/bill_create': '用户正在新建账单',
     '/bill_edit': '用户正在编辑账单 {billId}',
     '/bill_subscriptions': '用户正在管理订阅服务',
+    '/bill_subscription_create': '用户正在新建订阅',
+    '/bill_subscription_edit': '用户正在编辑订阅 {subscriptionId}',
     '/bill_accounts': '用户正在管理账单账户',
 
     // 日历插件

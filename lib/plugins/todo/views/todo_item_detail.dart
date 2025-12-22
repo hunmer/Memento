@@ -6,6 +6,7 @@ import 'package:Memento/plugins/todo/controllers/task_controller.dart';
 import 'package:Memento/plugins/todo/widgets/task_form.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 
 class TodoItemDetail extends StatefulWidget {
   final Task task;
@@ -34,6 +35,24 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
     if (_task.status == TaskStatus.inProgress) {
       _startTimerUpdate();
     }
+
+    // 更新路由上下文，使"询问当前上下文"功能能获取到当前查看的任务
+    _updateRouteContext();
+  }
+
+  /// 更新路由上下文
+  void _updateRouteContext() {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/todo_detail',
+      title: '待办任务详情 - ${_task.title}',
+      params: {
+        'taskId': _task.id,
+        'taskTitle': _task.title,
+        'taskStatus': _task.status.toString(),
+        'priority': _task.priority.toString(),
+        'isReadOnly': widget.isReadOnly,
+      },
+    );
   }
 
   @override

@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
 import 'package:Memento/plugins/todo/controllers/controllers.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 
 class TaskForm extends StatefulWidget {
   final Task? task; // If null, create new task
@@ -56,6 +57,23 @@ class _TaskFormState extends State<TaskForm> {
     _reminders = widget.task?.reminders.toList() ?? [];
     _subtaskController = TextEditingController();
     _icon = widget.task?.icon ?? Icons.assignment; // 默认使用任务图标
+
+    // 更新路由上下文，使"询问当前上下文"功能能获取到当前页面状态
+    _updateRouteContext();
+  }
+
+  /// 更新路由上下文
+  void _updateRouteContext() {
+    final isEditing = widget.task != null;
+    RouteHistoryManager.updateCurrentContext(
+      pageId: isEditing ? '/todo_form_edit' : '/todo_form_new',
+      title: isEditing ? '编辑待办 - ${widget.task!.title}' : '新建待办',
+      params: {
+        'mode': isEditing ? 'edit' : 'new',
+        if (isEditing) 'taskId': widget.task!.id,
+        if (isEditing) 'taskTitle': widget.task!.title,
+      },
+    );
   }
 
   @override
