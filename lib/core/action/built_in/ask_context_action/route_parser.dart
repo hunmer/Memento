@@ -38,8 +38,11 @@ class RouteParser {
     '/agent_chat': '用户正在使用AI对话',
     '/openai': '用户正在管理AI助手',
 
-    // 其他插件
+    // 活动插件
     '/activity': '用户正在查看活动记录',
+    '/activity_timeline': '用户正在查看 {date} 的活动时间轴',
+
+    // 其他插件
     '/tracker': '用户正在查看目标追踪',
     '/habits': '用户正在查看习惯管理',
     '/notes': '用户正在查看笔记',
