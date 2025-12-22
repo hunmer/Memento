@@ -9,6 +9,7 @@ import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/screens/channel_list/controllers/channel_list_controller.dart';
 import 'package:Memento/plugins/chat/screens/channel_list/widgets/channel_dialogs/channel_dialog.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 
 /// Chat 插件的底部栏组件
 /// 提供频道列表和时间线两个 Tab 的切换功能
@@ -56,7 +57,14 @@ class _ChatBottomBarState extends State<ChatBottomBar>
         setState(() {
           _currentPage = value;
         });
+        // 更新路由上下文
+        _updateRouteContext(value);
       }
+    });
+
+    // 初始化时设置路由上下文
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRouteContext(_currentPage);
     });
   }
 
@@ -65,6 +73,36 @@ class _ChatBottomBarState extends State<ChatBottomBar>
     _tabController.dispose();
     _channelListController.dispose();
     super.dispose();
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前tab状态
+  void _updateRouteContext(int tabIndex) {
+    String pageId;
+    String title;
+
+    switch (tabIndex) {
+      case 0:
+        pageId = '/chat/channels';
+        title = 'chat_channelsTab'.tr;
+        break;
+      case 1:
+        pageId = '/chat/timeline';
+        title = 'chat_timelineTab'.tr;
+        break;
+      case 2:
+        pageId = '/chat/tags';
+        title = 'chat_tagsTab'.tr;
+        break;
+      default:
+        pageId = '/chat';
+        title = 'chat_name'.tr;
+    }
+
+    RouteHistoryManager.updateCurrentContext(
+      pageId: pageId,
+      title: title,
+      params: {'tabIndex': tabIndex},
+    );
   }
 
   /// 调度底部栏高度测量

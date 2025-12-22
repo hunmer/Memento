@@ -11,6 +11,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/services.dart';
 import 'dart:io'; // 添加File类支持
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:Memento/plugins/chat/models/user.dart';
@@ -68,6 +69,11 @@ class _ChatScreenState extends State<ChatScreen> {
     eventManager.subscribe('onMessageUpdated', _handleMessageUpdated);
     _loadBackgroundPath();
     _loadChannelDraft();
+
+    // 初始化时设置路由上下文
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRouteContext();
+    });
   }
 
   @override
@@ -295,6 +301,18 @@ class _ChatScreenState extends State<ChatScreen> {
     if (mounted) {
       _controller.toggleMultiSelectMode();
     }
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前频道信息
+  void _updateRouteContext() {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/chat/channel',
+      title: widget.channel.title,
+      params: {
+        'channelId': widget.channel.id,
+        'channelName': widget.channel.title,
+      },
+    );
   }
 
   // 加载背景图片路径

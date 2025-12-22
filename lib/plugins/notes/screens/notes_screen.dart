@@ -5,6 +5,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
 import 'package:Memento/plugins/notes/models/folder_tree_node.dart';
 import 'package:Memento/plugins/notes/widgets/folder_selection_sheet.dart';
@@ -34,6 +35,72 @@ class _NotesMainViewState extends NotesMainViewState
   bool _fabExpanded = false;
   String? _selectedTag;
   DateTime? _selectedDate;
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前笔记列表的过滤状态
+  void _updateRouteContext() {
+    final folderName = currentFolder?.name ?? 'Root';
+    final params = <String, String>{
+      'folderId': currentFolderId,
+      'folderName': folderName,
+    };
+
+    // 构建标题描述
+    final titleParts = <String>['笔记列表 - $folderName'];
+
+    // 添加标签过滤
+    if (_selectedTag != null) {
+      params['tag'] = _selectedTag!;
+      titleParts.add('标签: $_selectedTag');
+    }
+
+    // 添加日期过滤
+    if (_selectedDate != null) {
+      final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate!);
+      params['date'] = dateStr;
+      titleParts.add('日期: $dateStr');
+    }
+
+    // 添加搜索关键词
+    if (isSearching && searchController.text.isNotEmpty) {
+      params['searchQuery'] = searchController.text;
+      titleParts.add('搜索: ${searchController.text}');
+    }
+
+    final title = titleParts.join(' | ');
+
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/notes_list',
+      title: title,
+      params: params,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // 延迟执行以确保 currentFolder 已初始化
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRouteContext();
+    });
+  }
+
+  @override
+  void loadCurrentFolder() {
+    super.loadCurrentFolder();
+    _updateRouteContext();
+  }
+
+  @override
+  void navigateToFolder(Folder folder) {
+    super.navigateToFolder(folder);
+    _updateRouteContext();
+  }
+
+  @override
+  void navigateBack() {
+    super.navigateBack();
+    _updateRouteContext();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +176,8 @@ class _NotesMainViewState extends NotesMainViewState
         });
       }
     }
+    // 更新路由上下文
+    _updateRouteContext();
   }
 
   /// 处理搜索提交
@@ -181,6 +250,8 @@ class _NotesMainViewState extends NotesMainViewState
           _selectedDate = null;
           loadCurrentFolder();
         });
+        // 更新路由上下文
+        _updateRouteContext();
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -600,5 +671,7 @@ class _NotesMainViewState extends NotesMainViewState
         }
       }
     });
+    // 更新路由上下文
+    _updateRouteContext();
   }
 }
