@@ -3,6 +3,9 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:Memento/plugins/agent_chat/models/agent_chain_node.dart';
+import 'package:Memento/plugins/agent_chat/models/agent_chain_preset.dart';
+import 'package:Memento/plugins/agent_chat/services/agent_chain_preset_service.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
 
 /// Agent 链配置对话框
 class AgentChainConfigDialog extends StatefulWidget {
@@ -25,12 +28,20 @@ class _AgentChainConfigDialogState extends State<AgentChainConfigDialog> {
   List<AIAgent> _availableAgents = [];
   bool _isLoading = true;
 
+  /// Agent 链预设服务
+  late AgentChainPresetService _presetService;
+
   @override
   void initState() {
     super.initState();
     _chain = widget.initialChain != null
         ? List.from(widget.initialChain!)
         : [];
+
+    // 初始化预设服务
+    final storage = PluginManager.instance.storageManager!;
+    _presetService = AgentChainPresetService(storage: storage);
+
     _loadAgents();
   }
 
@@ -112,6 +123,235 @@ class _AgentChainConfigDialogState extends State<AgentChainConfigDialog> {
     }
   }
 
+  /// 保存当前链为预设
+  Future<void> _saveAsPreset() async {
+    if (_chain.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('当前链为空，无法保存')),
+      );
+      return;
+    }
+
+    final nameController = TextEditingController();
+    final descriptionController = TextEditingController();
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('保存为预设'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: '预设名称',
+                hintText: '输入预设名称',
+              ),
+              autofocus: true,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: '描述（可选）',
+                hintText: '简要描述预设用途',
+              ),
+              maxLines: 2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (nameController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('请输入预设名称')),
+                );
+                return;
+              }
+              Navigator.pop(context, true);
+            },
+            child: const Text('保存'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && mounted) {
+      final name = nameController.text.trim();
+      final description = descriptionController.text.trim();
+
+      // 检查名称是否已存在
+      if (_presetService.isNameExists(name)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('预设名称 "$name" 已存在')),
+        );
+        return;
+      }
+
+      try {
+        final preset = AgentChainPreset(
+          name: name,
+          description: description.isEmpty ? null : description,
+          chain: List.from(_chain),
+        );
+
+        await _presetService.savePreset(preset);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('预设 "$name" 已保存')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('保存失败: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  /// 显示预设列表
+  Future<void> _showPresetList() async {
+    // 加载预设
+    await _presetService.loadPresets();
+    final presets = _presetService.presets;
+
+    if (!mounted) return;
+
+    if (presets.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('暂无保存的预设')),
+      );
+      return;
+    }
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('选择预设'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: presets.length,
+            itemBuilder: (context, index) {
+              final preset = presets[index];
+              return Card(
+                child: ListTile(
+                  title: Text(preset.name),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (preset.description != null)
+                        Text(preset.description!),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${preset.chain.length} 个 Agent',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        tooltip: '删除预设',
+                        onPressed: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('确认删除'),
+                              content: Text('确定要删除预设 "${preset.name}" 吗？'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, false),
+                                  child: const Text('取消'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                  ),
+                                  child: const Text('删除'),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm == true && mounted) {
+                            await _deletePreset(preset.id);
+                            Navigator.pop(context); // 关闭预设列表
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    _applyPreset(preset.id);
+                    Navigator.pop(context);
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 应用预设
+  Future<void> _applyPreset(String presetId) async {
+    final preset = _presetService.getPreset(presetId);
+    if (preset == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('预设不存在')),
+      );
+      return;
+    }
+
+    setState(() {
+      _chain = List.from(preset.chain);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('已应用预设 "${preset.name}"')),
+    );
+  }
+
+  /// 删除预设
+  Future<void> _deletePreset(String presetId) async {
+    try {
+      await _presetService.deletePreset(presetId);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('预设已删除')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('删除失败: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -130,9 +370,24 @@ class _AgentChainConfigDialogState extends State<AgentChainConfigDialog> {
                   'Agent 链配置',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.folder_open),
+                      tooltip: '加载预设',
+                      onPressed: _showPresetList,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.save),
+                      tooltip: '保存为预设',
+                      onPressed: _saveAsPreset,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
                 ),
               ],
             ),
