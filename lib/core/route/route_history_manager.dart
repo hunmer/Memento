@@ -30,6 +30,10 @@ class RouteHistoryManager {
   /// 是否已初始化
   bool _initialized = false;
 
+  /// 当前路由上下文（内存中，不持久化）
+  /// 用于"询问当前上下文"功能获取当前页面信息
+  PageVisitRecord? _currentRouteContext;
+
   /// 初始化管理器（从存储加载历史记录）
   Future<void> initialize({StorageManager? storage}) async {
     if (_initialized) return;
@@ -262,5 +266,72 @@ class RouteHistoryManager {
       'totalVisits': totalVisits,
       'mostVisitedPage': mostVisited,
     };
+  }
+
+  // ==================== 当前路由上下文管理 ====================
+
+  /// 更新当前路由上下文（不触发页面刷新）
+  ///
+  /// 用于在页面内部状态变化时更新路由信息，供"询问当前上下文"功能使用。
+  /// 注意：此方法只更新内存中的上下文，不会触发导航或页面重建。
+  ///
+  /// [pageId] 页面唯一标识符（通常是路由名称）
+  /// [title] 页面标题
+  /// [params] 当前页面参数
+  /// [icon] 页面图标（可选）
+  ///
+  /// 示例：
+  /// ```dart
+  /// // 日记日历切换日期时更新上下文
+  /// RouteHistoryManager.updateCurrentContext(
+  ///   pageId: '/diary_detail',
+  ///   title: '日记详情',
+  ///   params: {'date': '2025-12-22'},
+  /// );
+  /// ```
+  static void updateCurrentContext({
+    required String pageId,
+    required String title,
+    Map<String, dynamic>? params,
+    IconData? icon,
+  }) {
+    final manager = instance;
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    manager._currentRouteContext = PageVisitRecord(
+      pageId: pageId,
+      title: title,
+      iconCodePoint: icon?.codePoint,
+      timestamp: now,
+      visitCount: 1,
+      params: params,
+    );
+
+    debugPrint('RouteHistoryManager: 更新当前路由上下文 "$pageId"，参数: $params');
+  }
+
+  /// 获取当前路由上下文
+  ///
+  /// 返回当前页面的路由信息，包括页面ID、标题和参数。
+  /// 如果当前没有路由上下文，则返回 null。
+  static PageVisitRecord? getCurrentContext() {
+    return instance._currentRouteContext;
+  }
+
+  /// 获取当前路由参数
+  ///
+  /// 便捷方法，直接返回当前路由的参数Map。
+  /// 如果没有参数或没有当前上下文，返回空Map。
+  static Map<String, dynamic> getCurrentParams() {
+    return instance._currentRouteContext?.params ?? {};
+  }
+
+  /// 获取当前路由的特定参数
+  ///
+  /// [key] 参数键
+  /// [defaultValue] 默认值（参数不存在时返回）
+  static T? getCurrentParam<T>(String key, {T? defaultValue}) {
+    final params = getCurrentParams();
+    return params[key] as T? ?? defaultValue;
   }
 }

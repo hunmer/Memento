@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
@@ -113,13 +114,13 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
       _focusedDay = focusedDay;
     });
 
-    // 更新路由信息，使"询问当前上下文"功能能获取到当前日期
+    // 更新路由上下文，使"询问当前上下文"功能能获取到当前日期
     final dateStr =
         '${normalizedSelectedDay.year}-${normalizedSelectedDay.month.toString().padLeft(2, '0')}-${normalizedSelectedDay.day.toString().padLeft(2, '0')}';
-    NavigationHelper.updateRouteWithArguments(
-      context,
-      '/diary_detail',
-      {'date': dateStr},
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/diary_detail",
+      title: '日记详情 - $dateStr',
+      params: {'date': dateStr},
     );
   }
 
