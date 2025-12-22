@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/habits/widgets/skill_form.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -28,6 +29,27 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
   int _selectedTabIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    // 设置路由上下文
+    _updateRouteContext();
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前页面状态
+  void _updateRouteContext() {
+    final tabName = _selectedTabIndex == 0 ? '记录' : '统计';
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/skill_detail',
+      title: '技能详情 - ${widget.skill.title} - $tabName',
+      params: {
+        'skillId': widget.skill.id,
+        'skillTitle': widget.skill.title,
+        'tab': tabName,
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
 
     return Scaffold(
@@ -48,7 +70,10 @@ class _SkillDetailPageState extends State<SkillDetailPage> {
       body: _buildTabContent(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedTabIndex,
-        onTap: (index) => setState(() => _selectedTabIndex = index),
+        onTap: (index) {
+          setState(() => _selectedTabIndex = index);
+          _updateRouteContext(); // 切换tab时更新路由上下文
+        },
         items: [
           BottomNavigationBarItem(
             icon: const Icon(Icons.list),

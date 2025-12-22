@@ -9,6 +9,7 @@ import 'package:Memento/plugins/day/widgets/memorial_day_card.dart';
 import 'package:Memento/plugins/day/widgets/memorial_day_list_item.dart';
 import 'package:Memento/plugins/day/widgets/edit_memorial_day_dialog/edit_memorial_day_dialog.dart';
 import 'package:Memento/plugins/day/models/memorial_day.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 
 class DayHomeScreen extends StatefulWidget {
   const DayHomeScreen({super.key});
@@ -103,6 +104,19 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
   Future<void> _initializeController() async {
     await _controller.initialize();
     if (mounted) setState(() {});
+
+    // 初始化时设置路由上下文
+    _updateRouteContext();
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前状态
+  void _updateRouteContext() {
+    final count = _controller.memorialDays.length;
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/day_list",
+      title: '纪念日列表（共 $count 个）',
+      params: {'count': count.toString()},
+    );
   }
 
   @override

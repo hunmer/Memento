@@ -2,6 +2,7 @@ import 'package:Memento/widgets/statistics/statistics.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'widgets/daily_checkin_chart.dart';
 import 'widgets/checkin_streak_ranking.dart';
 import 'widgets/checkin_group_pie_chart.dart';
@@ -130,6 +131,24 @@ class CheckinStatsScreen extends StatefulWidget {
 }
 
 class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // 初始化时设置路由上下文
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRouteContext();
+    });
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能知道用户在查看统计界面
+  void _updateRouteContext() {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/checkin_stats",
+      title: '打卡统计',
+      params: {},
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return StatisticsScreen(

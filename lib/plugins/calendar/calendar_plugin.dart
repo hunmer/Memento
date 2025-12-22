@@ -18,6 +18,7 @@ import './widgets/event_detail_card.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 
 // UseCase 架构导入
 import 'package:shared_models/usecases/calendar/calendar_usecase.dart';
@@ -137,11 +138,16 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     }
   }
 
-  void onViewChanged(syncfusion.ViewChangedDetails details) async {
+  void onViewChanged(syncfusion.ViewChangedDetails details, VoidCallback? updateRouteContext) async {
     // 保存最后使用的视图
     await storageManager.write('calendar/calendar_last_view', {
       'view': _getStringFromCalendarView(sfController.view!),
     });
+
+    // 更新路由上下文
+    if (updateRouteContext != null) {
+      updateRouteContext();
+    }
   }
 
   @override
@@ -253,6 +259,19 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   void showEventDetails(BuildContext context, CalendarEvent event) {
+    // 更新路由上下文
+    final dateStr = '${event.startTime.year}-${event.startTime.month.toString().padLeft(2, '0')}-${event.startTime.day.toString().padLeft(2, '0')}';
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/calendar_event_detail',
+      title: '事件详情 - ${event.title}',
+      params: {
+        'eventId': event.id,
+        'eventTitle': event.title,
+        'startDate': dateStr,
+        'source': event.source,
+      },
+    );
+
     showDialog(
       context: context,
       builder:
@@ -907,6 +926,65 @@ class _CalendarMainViewState extends State<CalendarMainView> {
 
     // ✅ 每次进入日历界面时自动刷新系统事件
     _refreshSystemEvents();
+
+    // 初始化时设置路由上下文
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRouteContext();
+    });
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前日历视图状态
+  void _updateRouteContext() {
+    final displayDate = plugin.sfController.displayDate ?? DateTime.now();
+    final view = plugin.sfController.view ?? syncfusion.CalendarView.month;
+
+    String viewMode;
+    String timeRange;
+
+    switch (view) {
+      case syncfusion.CalendarView.day:
+        viewMode = '日视图';
+        timeRange = '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}-${displayDate.day.toString().padLeft(2, '0')}';
+        break;
+      case syncfusion.CalendarView.week:
+      case syncfusion.CalendarView.workWeek:
+        viewMode = view == syncfusion.CalendarView.week ? '周视图' : '工作周视图';
+        final weekStart = displayDate.subtract(Duration(days: displayDate.weekday - 1));
+        final weekEnd = weekStart.add(const Duration(days: 6));
+        timeRange = '${weekStart.year}-${weekStart.month.toString().padLeft(2, '0')}-${weekStart.day.toString().padLeft(2, '0')} 至 ${weekEnd.year}-${weekEnd.month.toString().padLeft(2, '0')}-${weekEnd.day.toString().padLeft(2, '0')}';
+        break;
+      case syncfusion.CalendarView.month:
+        viewMode = '月视图';
+        timeRange = '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}';
+        break;
+      case syncfusion.CalendarView.schedule:
+        viewMode = '日程视图';
+        timeRange = '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}';
+        break;
+      case syncfusion.CalendarView.timelineDay:
+        viewMode = '时间轴日视图';
+        timeRange = '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}-${displayDate.day.toString().padLeft(2, '0')}';
+        break;
+      case syncfusion.CalendarView.timelineWeek:
+      case syncfusion.CalendarView.timelineWorkWeek:
+        viewMode = view == syncfusion.CalendarView.timelineWeek ? '时间轴周视图' : '时间轴工作周视图';
+        final weekStart = displayDate.subtract(Duration(days: displayDate.weekday - 1));
+        final weekEnd = weekStart.add(const Duration(days: 6));
+        timeRange = '${weekStart.year}-${weekStart.month.toString().padLeft(2, '0')}-${weekStart.day.toString().padLeft(2, '0')} 至 ${weekEnd.year}-${weekEnd.month.toString().padLeft(2, '0')}-${weekEnd.day.toString().padLeft(2, '0')}';
+        break;
+      default:
+        viewMode = '未知视图';
+        timeRange = '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}';
+    }
+
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/calendar_main',
+      title: '日历 - $viewMode',
+      params: {
+        'viewMode': viewMode,
+        'timeRange': timeRange,
+      },
+    );
   }
 
   /// 刷新系统日历事件
@@ -1079,7 +1157,7 @@ class _CalendarMainViewState extends State<CalendarMainView> {
                         plugin.getUserAppointments(),
                       ),
                       initialDisplayDate: plugin.controller.focusedMonth,
-                      onViewChanged: plugin.onViewChanged,
+                      onViewChanged: (details) => plugin.onViewChanged(details, _updateRouteContext),
                       onTap: (details) =>
                           plugin.handleCalendarTap(context, details),
                       monthViewSettings: const syncfusion.MonthViewSettings(
@@ -1159,6 +1237,8 @@ class _CalendarMainViewState extends State<CalendarMainView> {
               tooltip: 'calendar_backToToday'.tr,
               onPressed: () {
                 plugin.sfController.displayDate = DateTime.now();
+                // 更新路由上下文
+                _updateRouteContext();
               },
             ),
             // 查看所有事件按钮

@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
@@ -52,6 +53,9 @@ class _HabitFormState extends State<HabitForm> {
             ? IconData(int.parse(habit!.icon!), fontFamily: 'MaterialIcons')
             : null;
     _image = habit?.image;
+
+    // 设置路由上下文
+    _updateRouteContext();
   }
 
   @override
@@ -302,5 +306,22 @@ class _HabitFormState extends State<HabitForm> {
         _skills = [];
       });
     }
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前页面状态
+  void _updateRouteContext() {
+    final isEdit = widget.initialHabit != null;
+    final habitId = widget.initialHabit?.id ?? '';
+    final habitTitle = widget.initialHabit?.title ?? '';
+
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/habit_form',
+      title: isEdit ? '编辑习惯 - $habitTitle' : '新建习惯',
+      params: {
+        'mode': isEdit ? 'edit' : 'create',
+        if (isEdit) 'habitId': habitId,
+        if (isEdit) 'habitTitle': habitTitle,
+      },
+    );
   }
 }

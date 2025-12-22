@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:Memento/utils/date_time_utils.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 
 class CheckinFormScreen extends StatefulWidget {
   final CheckinItem? initialItem;
@@ -40,6 +41,31 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
 
     // 加载现有分组和名称
     _loadExistingData();
+
+    // 初始化时设置路由上下文
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRouteContext();
+    });
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前编辑的模式和项目
+  void _updateRouteContext() {
+    final isEdit = widget.initialItem != null;
+    final itemName = widget.initialItem?.name ?? '';
+
+    if (isEdit) {
+      RouteHistoryManager.updateCurrentContext(
+        pageId: "/checkin_form_edit",
+        title: '编辑打卡项目 - $itemName',
+        params: {'itemName': itemName},
+      );
+    } else {
+      RouteHistoryManager.updateCurrentContext(
+        pageId: "/checkin_form_new",
+        title: '新建打卡项目',
+        params: {},
+      );
+    }
   }
 
   // 加载现有分组和名称

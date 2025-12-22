@@ -4,6 +4,7 @@ import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/widgets/enhanced_calendar/syncfusion_calendar.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
@@ -51,8 +52,20 @@ class _CalendarScreenState extends State<CalendarScreen>
           context,
           listen: false,
         ).selectDate(DateTime.now());
+        // 初始化时设置路由上下文
+        _updateRouteContext(DateTime.now());
       }
     });
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前日期
+  void _updateRouteContext(DateTime date) {
+    final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/calendar_album_calendar',
+      title: '日历日记 - $dateStr',
+      params: {'date': dateStr},
+    );
   }
 
   /// 获取图片的绝对路径
@@ -180,6 +193,8 @@ class _CalendarScreenState extends State<CalendarScreen>
                   listen: false,
                 ).selectDate(DateTime.now());
               });
+              // 更新路由上下文
+              _updateRouteContext(DateTime.now());
             },
             tooltip: 'calendar_album_back_to_current_month'.tr,
           ),
@@ -397,6 +412,8 @@ class _CalendarScreenState extends State<CalendarScreen>
       onDateSelected: (selectedDay) {
         calendarController.selectDate(selectedDay);
         setState(() => _focusedDay = selectedDay);
+        // 更新路由上下文
+        _updateRouteContext(selectedDay);
         // 选中日期后自动弹出抽屉
         _showEntryDrawer(context, calendarController, selectedDay);
       },
@@ -404,6 +421,8 @@ class _CalendarScreenState extends State<CalendarScreen>
         // 长按可以选择日期并打开编辑器
         calendarController.selectDate(pressedDay);
         setState(() => _focusedDay = pressedDay);
+        // 更新路由上下文
+        _updateRouteContext(pressedDay);
         NavigationHelper.push(context, MultiProvider(
                   providers: [
                     ChangeNotifierProvider.value(value: calendarController),

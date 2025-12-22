@@ -2,6 +2,7 @@ import 'package:Memento/plugins/calendar_album/screens/entry_detail_screen.dart'
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
@@ -34,6 +35,19 @@ class _AlbumScreenState extends State<AlbumScreen> {
       Image.asset('assets/images/image_not_found.jpg', fit: BoxFit.contain),
     );
     _preloadImages();
+    // 初始化时设置路由上下文
+    _updateRouteContext(_images.length);
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到相册信息
+  void _updateRouteContext(int photoCount) {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/calendar_album_album',
+      title: '相册 - 共$photoCount张照片',
+      params: {
+        'photoCount': photoCount.toString(),
+      },
+    );
   }
 
   Future<void> _preloadImages() async {

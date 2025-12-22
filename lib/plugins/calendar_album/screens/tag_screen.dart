@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
@@ -27,6 +28,27 @@ class _TagScreenState extends State<TagScreen> {
   final List<_TagItem> _selectedTags = [];
 
   @override
+  void initState() {
+    super.initState();
+    // 初始化时设置路由上下文
+    _updateRouteContext();
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前选中的标签
+  void _updateRouteContext() {
+    final activeTags = _selectedTags.where((item) => item.active).map((item) => item.tag).toList();
+    final tagsStr = activeTags.isEmpty ? '未选择' : activeTags.join('、');
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/calendar_album_tags',
+      title: '标签管理 - $tagsStr',
+      params: {
+        'tags': activeTags.join(','),
+        'tagCount': activeTags.length.toString(),
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
 
     final tagController = Provider.of<TagController>(context);
@@ -47,6 +69,8 @@ class _TagScreenState extends State<TagScreen> {
                     selectedTags.map((tag) => _TagItem(tag)),
                   );
                 });
+                // 更新路由上下文
+                _updateRouteContext();
               }
             },
             tooltip: 'calendar_album_tag_management'.tr,
@@ -85,6 +109,8 @@ class _TagScreenState extends State<TagScreen> {
                               setState(() {
                                 tagItem.active = selected;
                               });
+                              // 更新路由上下文
+                              _updateRouteContext();
                             },
                             backgroundColor: color.withAlpha(
                               (0.2 * 255).toInt(),
@@ -95,6 +121,8 @@ class _TagScreenState extends State<TagScreen> {
                               setState(() {
                                 _selectedTags.removeAt(index);
                               });
+                              // 更新路由上下文
+                              _updateRouteContext();
                             },
                           ),
                         );
