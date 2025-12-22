@@ -86,43 +86,49 @@ class _FolderSelectionSheetState extends State<FolderSelectionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // 标题栏
-        _buildHeader(),
+    // 计算 bottom sheet 的高度（屏幕高度的 80%）
+    final maxHeight = MediaQuery.of(context).size.height * 0.8;
 
-        const Divider(height: 1),
+    return SizedBox(
+      height: maxHeight,
+      child: Column(
+        children: [
+          // 标题栏
+          _buildHeader(),
 
-        // 文件夹树
-        Expanded(
-          child: TreeView.simple(
-            tree: _displayRootNode,
-            showRootNode: _displayRootNode.key != 'root',
-            expansionIndicatorBuilder: (context, node) {
-              return ChevronIndicator.rightDown(
-                tree: node,
-                color: Theme.of(context).iconTheme.color,
-                padding: const EdgeInsets.all(8),
-              );
-            },
-            indentation: const Indentation(width: 24),
-            // 树准备就绪时展开所有节点
-            onTreeReady: (controller) {
-              controller.expandAllChildren(_displayRootNode);
-            },
-            builder: (context, node) {
-              final folderNode = node as FolderTreeNode;
-              return _buildFolderItem(
-                folderNode.folder,
-                folderNode.childrenAsList.isNotEmpty,
-              );
-            },
+          const Divider(height: 1),
+
+          // 文件夹树
+          Expanded(
+            child: TreeView.simple(
+              tree: _displayRootNode,
+              showRootNode: _displayRootNode.key != 'root',
+              expansionIndicatorBuilder: (context, node) {
+                return ChevronIndicator.rightDown(
+                  tree: node,
+                  color: Theme.of(context).iconTheme.color,
+                  padding: const EdgeInsets.all(8),
+                );
+              },
+              indentation: const Indentation(width: 24),
+              // 树准备就绪时展开所有节点
+              onTreeReady: (controller) {
+                controller.expandAllChildren(_displayRootNode);
+              },
+              builder: (context, node) {
+                final folderNode = node as FolderTreeNode;
+                return _buildFolderItem(
+                  folderNode.folder,
+                  folderNode.childrenAsList.isNotEmpty,
+                );
+              },
+            ),
           ),
-        ),
 
-        // 底部操作栏
-        _buildBottomActions(),
-      ],
+          // 底部操作栏
+          _buildBottomActions(),
+        ],
+      ),
     );
   }
 

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/bill/models/bill_model.dart';
 import 'package:Memento/plugins/bill/models/bill.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
@@ -70,6 +71,9 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
       }
     };
     widget.billPlugin.addListener(_billPluginListener);
+
+    // 初始化时设置路由上下文
+    _updateRouteContext(_focusedDay);
   }
 
   @override
@@ -163,6 +167,16 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
     } catch (e) {
       debugPrint('加载账单失败: $e');
     }
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前月份
+  void _updateRouteContext(DateTime month) {
+    final monthStr = '${month.year}-${month.month.toString().padLeft(2, '0')}';
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/bill_list',
+      title: '账单列表 - $monthStr',
+      params: {'month': monthStr},
+    );
   }
 
   Map<String, double> _getMonthStats(DateTime month) {
@@ -383,6 +397,8 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                 _focusedDay = month;
                 _loadMonthBills();
               });
+              // 更新路由上下文
+              _updateRouteContext(month);
             },
             getMonthStats: _getMonthStats,
             primaryColor: _primaryColor,
@@ -424,6 +440,8 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                 final newFocusedDay = details.visibleDates[details.visibleDates.length ~/ 2];
                 _focusedDay = newFocusedDay;
                 _loadMonthBills();
+                // 更新路由上下文
+                _updateRouteContext(newFocusedDay);
               }
             },
           ),

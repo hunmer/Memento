@@ -3,6 +3,7 @@ import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import '../models/subscription.dart';
 import '../bill_plugin.dart';
 import 'subscription_edit_screen.dart';
@@ -37,6 +38,18 @@ class _SubscriptionListScreenState extends State<SubscriptionListScreen> {
       if (mounted) setState(() {});
     };
     widget.billPlugin.controller.subscriptions.addListener(_listener);
+
+    // 设置路由上下文
+    _updateRouteContext();
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能识别当前页面
+  void _updateRouteContext() {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/bill_subscriptions',
+      title: '订阅服务',
+      params: {},
+    );
   }
 
   Future<void> _loadViewMode() async {

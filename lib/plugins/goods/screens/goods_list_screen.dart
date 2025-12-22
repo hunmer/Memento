@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'package:Memento/plugins/goods/models/warehouse.dart';
@@ -29,6 +30,34 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
     super.initState();
     _filterWarehouseId = widget.initialFilterWarehouseId;
     GoodsPlugin.instance.addListener(_onDataChanged);
+
+    // 设置路由上下文
+    _updateRouteContext();
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前筛选状态
+  void _updateRouteContext() {
+    if (_filterWarehouseId != null) {
+      final warehouse = GoodsPlugin.instance.getWarehouse(_filterWarehouseId!);
+      if (warehouse != null) {
+        RouteHistoryManager.updateCurrentContext(
+          pageId: "/goods/items_filtered",
+          title: '物品 - 仓库: ${warehouse.title}',
+          params: {
+            'warehouseId': _filterWarehouseId!,
+            'warehouseName': warehouse.title,
+          },
+        );
+        return;
+      }
+    }
+
+    // 没有筛选或找不到仓库，显示所有物品
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/goods/items_all",
+      title: '物品 - 所有物品',
+      params: {},
+    );
   }
 
   @override
@@ -49,16 +78,17 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
       // 处理特殊的\"所有仓库\"标记
       if (warehouseId == "all_warehouses") {
         _filterWarehouseId = null;
-        return;
       }
-
       // 如果选择的是当前已选中的仓库，则清除筛选
-      if (_filterWarehouseId == warehouseId) {
+      else if (_filterWarehouseId == warehouseId) {
         _filterWarehouseId = null;
       } else {
         _filterWarehouseId = warehouseId;
       }
     });
+
+    // 更新路由上下文
+    _updateRouteContext();
   }
 
   // 获取所有物品的列表，包含仓库信息

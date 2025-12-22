@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'goods_item_form.dart';
@@ -36,6 +37,8 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
           _item = result.item;
           _isLoading = false;
         });
+        // 加载完成后设置路由上下文
+        _updateRouteContext();
       } else {
         // 如果在所有仓库中都找不到，设置为null
         setState(() {
@@ -49,6 +52,22 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
         _item = null;
         _isLoading = false;
       });
+    }
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前物品信息
+  void _updateRouteContext() {
+    if (_item != null) {
+      final result = GoodsPlugin.instance.findGoodsItemById(_item!.id);
+      RouteHistoryManager.updateCurrentContext(
+        pageId: "/goods/item_form",
+        title: '物品 - 编辑: ${_item!.title}',
+        params: {
+          'itemId': _item!.id,
+          'itemName': _item!.title,
+          'warehouseId': result?.warehouseId ?? '',
+        },
+      );
     }
   }
 
