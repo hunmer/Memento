@@ -67,6 +67,9 @@ class _AgentListDrawerState extends State<AgentListDrawer> {
 
   // 处理智能体选择完成
   void _handleSelectionComplete() {
+    // 调用选择回调
+    widget.onAgentSelected(_selectedAgents);
+
     // 关闭抽屉并返回选中的 Agents
     Navigator.pop(context, _selectedAgents);
 

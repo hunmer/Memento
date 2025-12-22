@@ -529,6 +529,11 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
       'deleteDiaryEntry': _jsDeleteDiaryEntry,
       'hasEntryForDate': _jsHasEntryForDate,
       'getDiaryStats': _jsGetDiaryStats,
+
+      // 日记查找接口
+      'findDiaryBy': _jsFindDiaryBy,
+      'findDiaryByDate': _jsFindDiaryByDate,
+      'findDiaryByTitle': _jsFindDiaryByTitle,
     };
   }
 
@@ -904,5 +909,141 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   ) async {
     final result = await _diaryUseCase.getStats(params);
     return result.dataOrNull ?? {};
+  }
+
+  // ==================== 日记查找接口实现 ====================
+
+  /// 通用日记查找方法
+  /// 参数: {"field": string, "value": any, "findAll": boolean}
+  /// 返回: findAll=false 时返回单个日记对象或 null；findAll=true 时返回日记数组
+  Future<dynamic> _jsFindDiaryBy(Map<String, dynamic> params) async {
+    try {
+      // 验证必需参数
+      if (!params.containsKey('field')) {
+        return {'error': '缺少必需参数: field'};
+      }
+      if (!params.containsKey('value')) {
+        return {'error': '缺少必需参数: value'};
+      }
+
+      final field = params['field'] as String;
+      final value = params['value'];
+      final findAll = params['findAll'] == true;
+
+      // 获取所有日记
+      final now = DateTime.now();
+      final startDate = DateTime(2000, 1, 1); // 足够早的日期
+      final endDate = DateTime(now.year + 1, 12, 31); // 足够晚的日期
+
+      final result = await _diaryUseCase.getEntries({
+        'startDate': DateFormat('yyyy-MM-dd').format(startDate),
+        'endDate': DateFormat('yyyy-MM-dd').format(endDate),
+      });
+
+      if (result.isFailure) {
+        return findAll ? [] : null;
+      }
+
+      final diaries = result.dataOrNull ?? [];
+
+      // 根据字段进行筛选
+      final matches = diaries.where((diary) {
+        if (!diary.containsKey(field)) return false;
+        final fieldValue = diary[field];
+        return fieldValue == value;
+      }).toList();
+
+      // 根据 findAll 参数返回结果
+      if (findAll) {
+        return matches;
+      } else {
+        return matches.isEmpty ? null : matches.first;
+      }
+    } catch (e) {
+      debugPrint('Find diary by field error: $e');
+      return params['findAll'] == true ? [] : null;
+    }
+  }
+
+  /// 根据日期查找日记（findDiaryBy 的便捷方法）
+  /// 参数: {"date": "YYYY-MM-DD"}
+  /// 返回: 日记对象或 null
+  Future<Map<String, dynamic>?> _jsFindDiaryByDate(
+    Map<String, dynamic> params,
+  ) async {
+    try {
+      // 验证必需参数
+      if (!params.containsKey('date')) {
+        return {'error': '缺少必需参数: date'};
+      }
+
+      // 直接调用 getDiary，它返回的格式与 findDiaryByDate 要求一致
+      final result = await _jsGetDiary({'date': params['date']});
+
+      // 如果存在，返回日记对象；否则返回 null
+      if (result['exists'] == true) {
+        // 移除 exists 字段，返回纯日记对象
+        final diary = Map<String, dynamic>.from(result);
+        diary.remove('exists');
+        return diary;
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint('Find diary by date error: $e');
+      return null;
+    }
+  }
+
+  /// 根据标题查找日记
+  /// 参数: {"title": string, "fuzzy": boolean, "findAll": boolean}
+  /// 返回: findAll=false 时返回单个日记或 null；findAll=true 时返回日记数组
+  Future<dynamic> _jsFindDiaryByTitle(Map<String, dynamic> params) async {
+    try {
+      // 验证必需参数
+      if (!params.containsKey('title')) {
+        return {'error': '缺少必需参数: title'};
+      }
+
+      final title = params['title'] as String;
+      final fuzzy = params['fuzzy'] == true;
+      final findAll = params['findAll'] == true;
+
+      // 获取所有日记
+      final now = DateTime.now();
+      final startDate = DateTime(2000, 1, 1);
+      final endDate = DateTime(now.year + 1, 12, 31);
+
+      final result = await _diaryUseCase.getEntries({
+        'startDate': DateFormat('yyyy-MM-dd').format(startDate),
+        'endDate': DateFormat('yyyy-MM-dd').format(endDate),
+      });
+
+      if (result.isFailure) {
+        return findAll ? [] : null;
+      }
+
+      final diaries = result.dataOrNull ?? [];
+
+      // 根据模糊匹配或精确匹配进行筛选
+      final matches = diaries.where((diary) {
+        final diaryTitle = diary['title'] as String? ?? '';
+        if (fuzzy) {
+          return diaryTitle.toLowerCase().contains(title.toLowerCase());
+        } else {
+          return diaryTitle == title;
+        }
+      }).toList();
+
+      // 根据 findAll 参数返回结果
+      if (findAll) {
+        return matches;
+      } else {
+        return matches.isEmpty ? null : matches.first;
+      }
+    } catch (e) {
+      debugPrint('Find diary by title error: $e');
+      return params['findAll'] == true ? [] : null;
+    }
   }
 }
