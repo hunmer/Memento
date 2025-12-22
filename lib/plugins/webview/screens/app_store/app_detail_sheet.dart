@@ -78,32 +78,26 @@ class _AppDetailSheetState extends State<AppDetailSheet> {
 
     final totalSize = _files?.fold<int>(0, (sum, file) => sum + file.size) ?? 0;
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // 顶部指示器
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
-          child: Column(
-            children: [
-              // 顶部指示器
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
 
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
+          Expanded(
+            child: ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
                     // 应用图标和标题
@@ -333,8 +327,6 @@ class _AppDetailSheetState extends State<AppDetailSheet> {
             ],
           ),
         );
-      },
-    );
   }
 
   void _installApp(BuildContext context) async {

@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/.android-sdk
+      ANDROID_HOME: ${{ github.workspace }}/.android-sdk
     
     steps:
     - uses: actions/checkout@v4
@@ -18,7 +21,7 @@ jobs:
       with:
         dotnet: true
         haskell: true
-        large-packages: true
+        large-packages: false
         docker-images: true
         swap-storage: true
 
@@ -74,6 +77,16 @@ jobs:
         flutter build apk --release --target-platform android-arm64 --no-tree-shake-icons
       env:
         ANDROID_GRADLE_OPTS: "-Xmx2048m -XX:MaxMetaspaceSize=512m"
+
+    - name: Normalize release artifact name
+      run: |
+        SRC="build/app/outputs/flutter-apk/app-release.apk"
+        DEST="build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
+        if [ ! -f "$SRC" ]; then
+          echo "Release APK not found at $SRC" >&2
+          exit 1
+        fi
+        cp "$SRC" "$DEST"
 
     - name: Get current date
       id: date

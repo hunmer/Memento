@@ -21,6 +21,8 @@ import 'package:Memento/plugins/openai/widgets/agent_list_drawer.dart';
 import 'components/message_bubble.dart';
 import 'components/message_input.dart';
 import 'components/save_tool_dialog.dart';
+import 'components/agent_chain_config_dialog.dart';
+import 'components/tool_agents_config_dialog.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
 
@@ -320,13 +322,21 @@ class _ChatScreenState extends State<ChatScreen> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // 显示模式图标
+                  Icon(
+                    _controller.isChainMode ? Icons.link : Icons.smart_toy,
+                    size: 14,
+                    color: Colors.grey[600],
+                  ),
+                  const SizedBox(width: 4),
+
+                  // 显示 agent 信息
                   Text(
-                    _controller.currentAgent?.name ??
-                        'agent_chat_selectAgent'.tr,
+                    _getAgentDisplayText(),
                     style: TextStyle(
                       fontSize: 12,
                       color:
-                          _controller.currentAgent != null
+                          _hasValidAgent()
                               ? Colors.grey[600]
                               : Colors.orange[700],
                       fontWeight: FontWeight.normal,
@@ -344,6 +354,12 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
         actions: [
+          // 工具调用 Agent 配置按钮
+          IconButton(
+            icon: const Icon(Icons.build_circle_outlined),
+            onPressed: _showToolAgentsConfig,
+            tooltip: '工具调用 Agent',
+          ),
           // 工具模板管理按钮
           IconButton(
             icon: const Icon(Icons.inventory_2_outlined),
@@ -537,8 +553,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                     onDeleted: () async {
                                       await _controller
                                           .removeToolFromConversation(
-                                            tool['pluginId']!,
-                                            tool['toolId']!,
+                                            tool['id']!,
                                           );
                                     },
                                     materialTapTargetSize:
@@ -574,66 +589,96 @@ class _ChatScreenState extends State<ChatScreen> {
                                     _controller.messages.length +
                                     1, // +1 for new session button
                                 physics: const ClampingScrollPhysics(),
-                              itemBuilder: (context, index) {
-                                // 最后一个 item 显示新会话按钮
-                                if (index == _controller.messages.length) {
-                                  return _buildNewSessionButton();
-                                }
+                                itemBuilder: (context, index) {
+                                  // 最后一个 item 显示新会话按钮
+                                  if (index == _controller.messages.length) {
+                                    return _buildNewSessionButton();
+                                  }
 
-                                final message = _controller.messages[index];
+                                  final message = _controller.messages[index];
 
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: MessageBubble(
-                                    message: message,
-                                    hasAgent: _controller.currentAgent != null,
-                                    storage: widget.storage,
-                                    onEdit: (messageId, newContent) async {
-                                      await _controller.editMessage(
-                                        messageId,
-                                        newContent,
-                                      );
-                                    },
-                                    onDelete: (messageId) async {
-                                      await _showDeleteConfirmation(messageId);
-                                    },
-                                    onRegenerate: (messageId) async {
-                                      await _controller.regenerateResponse(
-                                        messageId,
-                                      );
-                                    },
-                                    onSaveTool: (message) async {
-                                      await _handleSaveTool(message);
-                                    },
-                                    onRerunTool: (messageId) async {
-                                      await _handleRerunTool(messageId);
-                                    },
-                                    onRerunStep: (messageId, stepIndex) async {
-                                      await _handleRerunStep(
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: MessageBubble(
+                                      message: message,
+                                      hasAgent:
+                                          _controller.currentAgent != null,
+                                      storage: widget.storage,
+                                      onEdit: (messageId, newContent) async {
+                                        await _controller.editMessage(
+                                          messageId,
+                                          newContent,
+                                        );
+                                      },
+                                      onDelete: (messageId) async {
+                                        await _showDeleteConfirmation(
+                                          messageId,
+                                        );
+                                      },
+                                      onRegenerate: (messageId) async {
+                                        await _controller.regenerateResponse(
+                                          messageId,
+                                        );
+                                      },
+                                      onSaveTool: (message) async {
+                                        await _handleSaveTool(message);
+                                      },
+                                      onRerunTool: (messageId) async {
+                                        await _handleRerunTool(messageId);
+                                      },
+                                      onRerunStep: (
                                         messageId,
                                         stepIndex,
-                                      );
-                                    },
-                                    onExecuteTemplate: (
-                                      messageId,
-                                      templateId,
-                                    ) async {
-                                      await _controller.executeMatchedTemplate(
+                                      ) async {
+                                        await _handleRerunStep(
+                                          messageId,
+                                          stepIndex,
+                                        );
+                                      },
+                                      onExecuteTemplate: (
                                         messageId,
                                         templateId,
-                                      );
-                                    },
-                                    getTemplateName: (templateId) {
-                                      return _controller.templateService
-                                          ?.getTemplateById(templateId)
-                                          ?.name;
-                                    },
-                                    onCancel:
-                                        message.isGenerating
-                                            ? () => _controller.cancelSending()
-                                            : null,
-                                  ),
-                                );
+                                      ) async {
+                                        final template = _controller
+                                            .templateService
+                                            ?.getTemplateById(templateId);
+                                        if (template != null) {
+                                          await _controller
+                                              .executeMatchedTemplate(
+                                                messageId,
+                                                template,
+                                              );
+                                        }
+                                      },
+                                      getTemplateName: (templateId) {
+                                        return _controller.templateService
+                                            ?.getTemplateById(templateId)
+                                            ?.name;
+                                      },
+                                      getAgentName: (agentId) {
+                                        // 从 agent 链中查找
+                                        if (_controller.isChainMode) {
+                                          final agent = _controller.agentChain
+                                              .firstWhere(
+                                                (a) => a.id == agentId,
+                                                orElse:
+                                                    () =>
+                                                        _controller
+                                                            .agentChain
+                                                            .first,
+                                              );
+                                          return agent.name;
+                                        }
+                                        return _controller.currentAgent?.name;
+                                      },
+                                      onCancel:
+                                          message.isGenerating
+                                              ? () =>
+                                                  _controller.cancelSending()
+                                              : null,
+                                      messageService: _controller.messageService,
+                                    ),
+                                  );
                                 },
                               ),
                             ),
@@ -1118,46 +1163,191 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  /// 显示Agent选择器
+  /// 显示Agent选择器（支持单/链模式选择）
   Future<void> _showAgentSelector() async {
     if (!mounted) return;
 
-    // 准备当前选中的 Agent 信息
-    final currentAgent = _controller.currentAgent;
-    final selectedAgents = currentAgent != null
-        ? [
-            {'id': currentAgent.id, 'name': currentAgent.name}
-          ]
-        : <Map<String, String>>[];
+    // 检查当前配置状态
+    final isCurrentlySingleMode = !_controller.isChainMode && _controller.currentAgent != null;
+    final isCurrentlyChainMode = _controller.isChainMode && _controller.agentChain.isNotEmpty;
 
-    // 使用 SmoothBottomSheet 显示 AgentListDrawer
+    // 获取当前配置的agent显示文本
+    String getCurrentAgentDisplayText() {
+      if (isCurrentlySingleMode) {
+        return '当前: ${_controller.currentAgent!.name}';
+      } else if (isCurrentlyChainMode) {
+        final chainLength = _controller.agentChain.length;
+        final agentNames = _controller.agentChain.map((a) => a.name).join(' → ');
+        return '当前 ($chainLength个): $agentNames';
+      }
+      return '未配置';
+    }
+
+    // 显示模式选择对话框
+    final mode = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => SimpleDialog(
+            title: const Text('选择配置模式'),
+            children: [
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(context, 'single'),
+                child: ListTile(
+                  leading: Icon(
+                    isCurrentlySingleMode ? Icons.check_circle : Icons.smart_toy,
+                    color: isCurrentlySingleMode ? Colors.green : null,
+                  ),
+                  title: const Text('单 Agent 模式'),
+                  subtitle: Text(
+                    isCurrentlySingleMode
+                        ? '${getCurrentAgentDisplayText()} | 选择一个 Agent 进行对话'
+                        : '选择一个 Agent 进行对话',
+                  ),
+                ),
+              ),
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(context, 'chain'),
+                child: ListTile(
+                  leading: Icon(
+                    isCurrentlyChainMode ? Icons.check_circle : Icons.link,
+                    color: isCurrentlyChainMode ? Colors.green : null,
+                  ),
+                  title: const Text('Agent 链模式'),
+                  subtitle: Text(
+                    isCurrentlyChainMode
+                        ? '${getCurrentAgentDisplayText()} | 配置多个 Agent 顺序执行'
+                        : '配置多个 Agent 顺序执行',
+                  ),
+                ),
+              ),
+            ],
+          ),
+    );
+
+    if (mode == null || !mounted) return;
+
+    if (mode == 'single') {
+      await _showSingleAgentSelector();
+    } else {
+      await _showAgentChainConfig();
+    }
+  }
+
+  /// 显示单 Agent 选择器
+  Future<void> _showSingleAgentSelector() async {
+    if (!mounted) return;
+
+    final currentAgent = _controller.currentAgent;
+    final selectedAgents =
+        currentAgent != null
+            ? [
+              {'id': currentAgent.id, 'name': currentAgent.name},
+            ]
+            : <Map<String, String>>[];
+
     await SmoothBottomSheet.show<void>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => AgentListDrawer(
-        selectedAgents: selectedAgents,
-        allowMultipleSelection: false, // 单选模式
-        onAgentSelected: (List<Map<String, String>> agents) async {
-          if (agents.isEmpty) return;
+      builder:
+          (context) => AgentListDrawer(
+            selectedAgents: selectedAgents,
+            allowMultipleSelection: false,
+            onAgentSelected: (List<Map<String, String>> agents) async {
+              if (agents.isEmpty) return;
 
-          final selectedAgentId = agents.first['id'];
-          if (selectedAgentId == null) return;
+              final selectedAgentId = agents.first['id'];
+              if (selectedAgentId == null) return;
 
-          try {
-            await _controller.selectAgent(selectedAgentId);
-            // 切换 agent 后重新加载建议问题
-            await _loadSuggestedQuestions();
-            if (mounted) {
-              toastService.showToast('已切换到 ${agents.first['name']}');
-            }
-          } catch (e) {
-            if (mounted) {
-              toastService.showToast('切换Agent失败: $e');
-            }
-          }
-        },
-      ),
+              try {
+                await _controller.switchToSingleAgent(selectedAgentId);
+                await _loadSuggestedQuestions();
+                if (mounted) {
+                  toastService.showToast('已切换到 ${agents.first['name']}');
+                }
+              } catch (e) {
+                if (mounted) {
+                  toastService.showToast('切换Agent失败: $e');
+                }
+              }
+            },
+          ),
     );
+  }
+
+  /// 显示 Agent 链配置对话框
+  Future<void> _showAgentChainConfig() async {
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      builder:
+          (context) => AgentChainConfigDialog(
+            initialChain: _controller.conversation.agentChain,
+            onSave: (chain) async {
+              try {
+                await _controller.selectAgentChain(chain);
+                if (mounted) {
+                  toastService.showToast('Agent 链配置成功');
+                }
+              } catch (e) {
+                if (mounted) {
+                  toastService.showToast('配置失败: $e');
+                }
+              }
+            },
+          ),
+    );
+  }
+
+  /// 显示工具调用 Agent 配置对话框
+  Future<void> _showToolAgentsConfig() async {
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      builder:
+          (context) => ToolAgentsConfigDialog(
+            initialToolDetectionConfig:
+                _controller.conversation.toolDetectionConfig,
+            initialToolExecutionConfig:
+                _controller.conversation.toolExecutionConfig,
+            onSave: (toolDetectionConfig, toolExecutionConfig) async {
+              try {
+                await _controller.configureToolAgents(
+                  toolDetectionConfig: toolDetectionConfig,
+                  toolExecutionConfig: toolExecutionConfig,
+                );
+                if (mounted) {
+                  toastService.showToast('工具 Agent 配置成功');
+                }
+              } catch (e) {
+                if (mounted) {
+                  toastService.showToast('配置失败: $e');
+                }
+              }
+            },
+          ),
+    );
+  }
+
+  /// 获取 Agent 显示文本
+  String _getAgentDisplayText() {
+    if (_controller.isChainMode) {
+      final chainLength = _controller.agentChain.length;
+      if (chainLength == 0) return '配置 Agent 链';
+      return '$chainLength 个 Agent 链';
+    } else {
+      return _controller.currentAgent?.name ?? 'agent_chat_selectAgent'.tr;
+    }
+  }
+
+  /// 检查是否有有效的 Agent
+  bool _hasValidAgent() {
+    if (_controller.isChainMode) {
+      return _controller.agentChain.isNotEmpty;
+    } else {
+      return _controller.currentAgent != null;
+    }
   }
 
   /// 显示删除确认对话框

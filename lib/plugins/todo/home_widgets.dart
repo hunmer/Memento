@@ -100,6 +100,7 @@ class TodoHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'todo',
         pluginName: 'todo_name'.tr,
         pluginIcon: Icons.check_box,
         pluginDefaultColor: Colors.blue,

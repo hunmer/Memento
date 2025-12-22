@@ -107,6 +107,7 @@ class BillHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'bill',
         pluginName: 'bill_name'.tr,
         pluginIcon: Icons.account_balance_wallet,
         pluginDefaultColor: Colors.green,

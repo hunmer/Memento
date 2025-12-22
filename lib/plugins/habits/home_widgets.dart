@@ -113,6 +113,7 @@ class HabitsHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'habits',
         pluginName: 'habits_name'.tr,
         pluginIcon: Icons.auto_awesome,
         pluginDefaultColor: Colors.amber,

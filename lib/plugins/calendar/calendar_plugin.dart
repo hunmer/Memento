@@ -15,8 +15,6 @@ import './pages/event_edit_page.dart';
 import './pages/completed_events_page.dart';
 import './pages/event_list_page.dart';
 import './widgets/event_detail_card.dart';
-import './services/todo_event_service.dart';
-import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
@@ -151,23 +149,8 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
-    // 获取Todo插件的TaskController实例
-    final todoPlugin = pluginManager.getPlugin('todo') as TodoPlugin?;
-    if (todoPlugin != null) {
-      final taskController = todoPlugin.taskController;
-      if (taskController != null) {
-        // 创建TodoEventService并设置到总控制器
-        final todoEventService = TodoEventService(taskController);
-        controller.setTodoEventService(todoEventService);
-
-        // 监听任务变化
-        taskController.addListener(() {
-          controller.refresh();
-          // 同步小组件数据
-          syncWidgetData();
-        });
-      }
-    }
+    // 加载系统日历事件
+    await controller.loadSystemEvents();
 
     // 监听日历事件变化，同步小组件数据
     controller.addListener(() {
@@ -333,6 +316,11 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     // 使用总控制器获取所有事件（包括普通事件和Todo任务事件）
     final List<CalendarEvent> allEvents = controller.getAllEvents();
 
+    debugPrint('CalendarPlugin: getUserAppointments - 总事件数: ${allEvents.length}');
+    for (final event in allEvents) {
+      debugPrint('CalendarPlugin: 事件 - ID: ${event.id}, 标题: ${event.title}, 来源: ${event.source}');
+    }
+
     return allEvents
         .map(
           (event) => syncfusion.Appointment(
@@ -360,25 +348,16 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
         syncfusion.CalendarElement.appointment) {
       final String eventId = details.appointments?.first.id as String;
 
-      // 检查是否为Todo任务事件
-      if (eventId.startsWith('todo_')) {
-        // Todo任务事件只显示，不允许编辑
-        final todoEventService = controller.todoEventService;
-        if (todoEventService != null) {
-          final events = todoEventService.getTaskEvents();
-          final event = events.firstWhere(
-            (event) => event.id == eventId,
-            orElse: () => throw Exception('Event not found'),
-          );
-          showEventDetails(context, event);
-        }
-      } else {
-        // 普通日历事件
-        final event = controller.events.firstWhere(
+      // 查找事件（包括系统日历事件）
+      final allEvents = controller.getAllEvents();
+      try {
+        final event = allEvents.firstWhere(
           (event) => event.id == eventId,
           orElse: () => throw Exception('Event not found'),
         );
         showEventDetails(context, event);
+      } catch (e) {
+        debugPrint('CalendarPlugin: 事件未找到: $eventId');
       }
     }
   }
@@ -919,11 +898,36 @@ class CalendarMainView extends StatefulWidget {
 class _CalendarMainViewState extends State<CalendarMainView> {
   late CalendarPlugin plugin;
   String _searchQuery = '';
+  bool _isRefreshing = false;
 
   @override
   void initState() {
     super.initState();
     plugin = PluginManager.instance.getPlugin('calendar') as CalendarPlugin;
+
+    // ✅ 每次进入日历界面时自动刷新系统事件
+    _refreshSystemEvents();
+  }
+
+  /// 刷新系统日历事件
+  Future<void> _refreshSystemEvents() async {
+    if (_isRefreshing) return;
+
+    setState(() {
+      _isRefreshing = true;
+    });
+
+    try {
+      await plugin.controller.loadSystemEvents();
+    } catch (e) {
+      debugPrint('CalendarMainView: 刷新系统事件失败: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRefreshing = false;
+        });
+      }
+    }
   }
 
   /// 搜索事件：基于标题和描述进行模糊搜索
@@ -1132,6 +1136,23 @@ class _CalendarMainViewState extends State<CalendarMainView> {
             });
           },
           actions: [
+            // 刷新系统事件按钮
+            IconButton(
+              icon: _isRefreshing
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          theme.iconTheme.color ?? Colors.grey,
+                        ),
+                      ),
+                    )
+                  : Icon(Icons.refresh, color: theme.iconTheme.color),
+              tooltip: _isRefreshing ? '正在刷新...' : '刷新日历事件',
+              onPressed: _isRefreshing ? null : _refreshSystemEvents,
+            ),
             // 跳转到今天按钮
             IconButton(
               icon: Icon(Icons.today, color: theme.iconTheme.color),

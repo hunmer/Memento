@@ -16,7 +16,7 @@ class AudioMessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 获取音频文件路径
-    final audioPath = message.originalFilePath;
+    final audioPath = message.content;
     if (audioPath == null) {
       return Text('chat_audioMessageBubbleErrorText'.tr);
     }

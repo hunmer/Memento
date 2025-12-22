@@ -14,6 +14,7 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'markdown_content.dart';
 import 'tool_detail_dialog.dart';
 import 'tool_call_steps.dart';
+import 'chain_message_container.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 /// 消息气泡组件
@@ -30,9 +31,13 @@ class MessageBubble extends StatelessWidget {
   final Future<void> Function(String messageId, String templateId)?
   onExecuteTemplate; // 执行匹配的模版
   final String? Function(String templateId)? getTemplateName; // 获取模版名称
+  final String? Function(String agentId)? getAgentName; // 获取 Agent 名称（链式模式）
   final VoidCallback? onCancel; // 取消生成的回调
   final bool hasAgent;
   final StorageManager? storage;
+
+  /// MessageService（用于加载链式消息）
+  final dynamic messageService;
 
   const MessageBubble({
     super.key,
@@ -45,9 +50,11 @@ class MessageBubble extends StatelessWidget {
     this.onRerunStep,
     this.onExecuteTemplate,
     this.getTemplateName,
+    this.getAgentName,
     this.onCancel,
     this.hasAgent = true,
     this.storage,
+    this.messageService,
   });
 
   @override
@@ -55,6 +62,14 @@ class MessageBubble extends StatelessWidget {
     // 如果是会话分隔符，显示特殊样式
     if (message.isSessionDivider) {
       return _buildSessionDivider();
+    }
+
+    // -  如果是链式调用的后续消息（不是第一条）或最终总结消息，隐藏显示
+    // 注意：isFinalSummary 消息在单agent模式下应该显示，所以不隐藏
+    if (message.chainExecutionId != null &&
+        ((message.chainStepIndex != null && message.chainStepIndex! > 0) ||
+            message.isFinalSummary)) {
+      return const SizedBox.shrink();
     }
 
     final isUser = message.isUser;
@@ -81,67 +96,92 @@ class MessageBubble extends StatelessWidget {
                     vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: isUser
-                        ? Theme.of(context).colorScheme.primaryContainer
-                        : Theme.of(context).colorScheme.surfaceVariant,
+                    color:
+                        isUser
+                            ? Theme.of(context).colorScheme.primaryContainer
+                            : Theme.of(context).colorScheme.surfaceVariant,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 消息内容 - 优先检查是否有工具调用
-                      if (isToolCallMessage)
-                        // 如果是工具调用消息，显示工具调用步骤（内部处理加载状态）
-                        _buildToolCallContent()
-                      else if (message.isGenerating)
-                        // 普通消息正在生成中
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '正在生成...',
-                              style: TextStyle(
-                                fontStyle: FontStyle.italic,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            // 取消按钮
-                            if (onCancel != null) ...[
-                              const SizedBox(width: 8),
-                              IconButton(
-                                icon: Icon(Icons.cancel, size: 20),
-                                color: Theme.of(context).colorScheme.error,
-                                tooltip: '取消生成',
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(
-                                  minWidth: 32,
-                                  minHeight: 32,
-                                ),
-                                onPressed: onCancel,
-                              ),
-                            ],
-                          ],
+                      // 如果是链式调用的第一条消息，使用 ChainMessageContainer
+                      if (!isUser &&
+                          message.chainExecutionId != null &&
+                          message.chainStepIndex == 0 &&
+                          messageService != null)
+                        ChainMessageContainer(
+                          conversationId: message.conversationId,
+                          chainExecutionId: message.chainExecutionId!,
+                          messageService: messageService,
+                          getAgentName: getAgentName,
+                          onRerunStep: onRerunStep,
                         )
-                      else if (message.matchedTemplateIds != null &&
-                          message.matchedTemplateIds!.isNotEmpty)
-                        // 显示模版选择按钮
-                        _buildTemplateSelectionUI()
-                      else
-                        _buildMessageContent(),
+                      else ...[
+                        // 传统的单消息显示模式
+                        // Agent 标签（链式模式下显示，仅当不使用容器时）
+                        if (!isUser &&
+                            message.generatedByAgentId != null &&
+                            message.chainStepIndex != null)
+                          _buildAgentLabel(context),
 
-                      // 附件显示
-                      if (message.attachments.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        _buildAttachments(),
+                        // 消息内容 - 优先检查是否有工具调用
+                        if (isToolCallMessage)
+                          // 如果是工具调用消息，显示工具调用步骤（内部处理加载状态）
+                          _buildToolCallContent()
+                        else if (message.isGenerating)
+                          // 普通消息正在生成中
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '正在生成...',
+                                style: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              // 取消按钮
+                              if (onCancel != null) ...[
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  icon: Icon(Icons.cancel, size: 20),
+                                  color: Theme.of(context).colorScheme.error,
+                                  tooltip: '取消生成',
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(
+                                    minWidth: 32,
+                                    minHeight: 32,
+                                  ),
+                                  onPressed: onCancel,
+                                ),
+                              ],
+                            ],
+                          )
+                        else if (message.matchedTemplateIds != null &&
+                            message.matchedTemplateIds!.isNotEmpty)
+                          // 显示模版选择按钮
+                          _buildTemplateSelectionUI()
+                        else
+                          _buildMessageContent(),
+
+                        // 附件显示
+                        if (message.attachments.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          _buildAttachments(),
+                        ],
                       ],
                     ],
                   ),
@@ -157,7 +197,10 @@ class MessageBubble extends StatelessWidget {
                       TokenCounterService.formatTokenCountShort(
                         message.tokenCount,
                       ),
-                      style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
 
                     const SizedBox(width: 8),
@@ -165,7 +208,10 @@ class MessageBubble extends StatelessWidget {
                     // 时间
                     Text(
                       _formatTime(message.timestamp),
-                      style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
 
                     // 已编辑标记
@@ -199,41 +245,61 @@ class MessageBubble extends StatelessWidget {
   /// 构建会话分隔符
   Widget _buildSessionDivider() {
     return Builder(
-      builder: (context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Row(
-        children: [
-          Expanded(child: Divider(color: Theme.of(context).colorScheme.primary, thickness: 1)),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Theme.of(context).colorScheme.primary),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.fiber_new, size: 16, color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(width: 6),
-                  Text(
-                    message.content,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w500,
+      builder:
+          (context) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Divider(
+                    color: Theme.of(context).colorScheme.primary,
+                    thickness: 1,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.fiber_new,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          message.content,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+                Expanded(
+                  child: Divider(
+                    color: Theme.of(context).colorScheme.primary,
+                    thickness: 1,
+                  ),
+                ),
+              ],
             ),
           ),
-          Expanded(child: Divider(color: Theme.of(context).colorScheme.primary, thickness: 1)),
-        ],
-      ),
-      ),
     );
   }
 
@@ -373,84 +439,100 @@ class MessageBubble extends StatelessWidget {
   /// 构建图片附件
   Widget _buildImageAttachment(FileAttachment attachment) {
     return Builder(
-      builder: (context) => GestureDetector(
-        onTap: () => _viewImage(context, attachment),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            constraints: const BoxConstraints(
-              maxWidth: 200,
-              maxHeight: 200,
-            ),
-            child: Image.file(
-              File(attachment.filePath),
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 200,
-                  height: 150,
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.broken_image,
-                        size: 48,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      builder:
+          (context) => GestureDetector(
+            onTap: () => _viewImage(context, attachment),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                constraints: const BoxConstraints(
+                  maxWidth: 200,
+                  maxHeight: 200,
+                ),
+                child: Image.file(
+                  File(attachment.filePath),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 200,
+                      height: 150,
+                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.broken_image,
+                            size: 48,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Image load failed',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Image load failed',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                    );
+                  },
+                ),
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 
   /// 构建文件附件
   Widget _buildFileAttachment(FileAttachment attachment) {
     return Builder(
-      builder: (context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: Theme.of(context).colorScheme.outline),
-        ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.description, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          const SizedBox(width: 4),
-          Text(attachment.fileName, style: const TextStyle(fontSize: 12)),
-          const SizedBox(width: 4),
-          Text(
-            attachment.formattedSize,
-            style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant),
+      builder:
+          (context) => Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Theme.of(context).colorScheme.outline),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.description,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                Text(attachment.fileName, style: const TextStyle(fontSize: 12)),
+                const SizedBox(width: 4),
+                Text(
+                  attachment.formattedSize,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-      ),
     );
   }
 
   /// 查看图片大图
   void _viewImage(BuildContext context, FileAttachment attachment) {
-    NavigationHelper.push(context, FilePreviewScreen(
-              filePath: attachment.filePath,
-              fileName: attachment.fileName,
-              mimeType: 'image/${_getImageExtension(attachment.fileName)}',
-              fileSize: attachment.fileSize,),
+    NavigationHelper.push(
+      context,
+      FilePreviewScreen(
+        filePath: attachment.filePath,
+        fileName: attachment.fileName,
+        mimeType: 'image/${_getImageExtension(attachment.fileName)}',
+        fileSize: attachment.fileSize,
+      ),
     );
   }
 
@@ -467,7 +549,11 @@ class MessageBubble extends StatelessWidget {
 
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
-      icon: Icon(Icons.more_vert, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+      icon: Icon(
+        Icons.more_vert,
+        size: 16,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
       onSelected: (value) {
         switch (value) {
           case 'copy':
@@ -534,11 +620,17 @@ class MessageBubble extends StatelessWidget {
                 value: 'save_tool',
                 child: Row(
                   children: [
-                    Icon(Icons.save, size: 18, color: Theme.of(context).colorScheme.primary),
+                    Icon(
+                      Icons.save,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'agent_chat_saveTool'.tr,
-                      style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -548,11 +640,17 @@ class MessageBubble extends StatelessWidget {
                 value: 'rerun_tool',
                 child: Row(
                   children: [
-                    Icon(Icons.replay, size: 18, color: Theme.of(context).colorScheme.secondary),
+                    Icon(
+                      Icons.replay,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'agent_chat_reExecuteTool'.tr,
-                      style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
                     ),
                   ],
                 ),
@@ -570,7 +668,9 @@ class MessageBubble extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'agent_chat_viewDetails'.tr,
-                      style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -580,11 +680,17 @@ class MessageBubble extends StatelessWidget {
                 value: 'delete',
                 child: Row(
                   children: [
-                    Icon(Icons.delete, size: 18, color: Theme.of(context).colorScheme.error),
+                    Icon(
+                      Icons.delete,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'agent_chat_delete'.tr,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                   ],
                 ),
@@ -619,7 +725,8 @@ class MessageBubble extends StatelessWidget {
                       'AI',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                        color:
+                            Theme.of(context).colorScheme.onSecondaryContainer,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -647,7 +754,10 @@ class MessageBubble extends StatelessWidget {
                     alignment: Alignment.centerRight,
                     child: Text(
                       '${textController.text.length} 字符',
-                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],
@@ -731,149 +841,184 @@ class MessageBubble extends StatelessWidget {
         message.toolCall != null && message.toolCall!.steps.isNotEmpty;
 
     return Builder(
-      builder: (context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 模版卡片列表
-        ...message.matchedTemplateIds!.map((templateId) {
-          // 获取模版名称
-          final templateName = getTemplateName?.call(templateId) ?? '未知模版';
-          // 判断当前模版是否已运行
-          // 只要有 toolCall，就说明已经执行了
-          final isExecuted = hasToolCall;
+      builder:
+          (context) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 模版卡片列表
+              ...message.matchedTemplateIds!.map((templateId) {
+                // 获取模版名称
+                final templateName =
+                    getTemplateName?.call(templateId) ?? '未知模版';
+                // 判断当前模版是否已运行
+                // 只要有 toolCall，就说明已经执行了
+                final isExecuted = hasToolCall;
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 模版卡片
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isExecuted ? Theme.of(context).colorScheme.tertiaryContainer : Theme.of(context).colorScheme.primaryContainer,
-                    border: Border.all(
-                      color:
-                          isExecuted ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.primary,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 左侧：图标
-                      Icon(
-                        isExecuted
-                            ? Icons.check_circle_outline
-                            : Icons.play_circle_outline,
-                        size: 24,
-                        color:
-                            isExecuted ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 12),
-
-                      // 中间：模版信息
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      // 模版卡片
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color:
+                              isExecuted
+                                  ? Theme.of(
+                                    context,
+                                  ).colorScheme.tertiaryContainer
+                                  : Theme.of(
+                                    context,
+                                  ).colorScheme.primaryContainer,
+                          border: Border.all(
+                            color:
+                                isExecuted
+                                    ? Theme.of(context).colorScheme.tertiary
+                                    : Theme.of(context).colorScheme.primary,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
                           children: [
-                            Text(
-                              templateName,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                                color:
-                                    isExecuted
-                                        ? Theme.of(context).colorScheme.onTertiaryContainer
-                                        : Theme.of(context).colorScheme.onPrimaryContainer,
+                            // 左侧：图标
+                            Icon(
+                              isExecuted
+                                  ? Icons.check_circle_outline
+                                  : Icons.play_circle_outline,
+                              size: 24,
+                              color:
+                                  isExecuted
+                                      ? Theme.of(context).colorScheme.tertiary
+                                      : Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 12),
+
+                            // 中间：模版信息
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    templateName,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      color:
+                                          isExecuted
+                                              ? Theme.of(
+                                                context,
+                                              ).colorScheme.onTertiaryContainer
+                                              : Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    isExecuted ? '已运行' : '待运行',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color:
+                                          isExecuted
+                                              ? Theme.of(
+                                                context,
+                                              ).colorScheme.tertiary
+                                              : Theme.of(
+                                                context,
+                                              ).colorScheme.secondary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              isExecuted ? '已运行' : '待运行',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color:
+
+                            // 右侧：操作按钮
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // 查看结果按钮（仅已运行时显示）
+                                if (isExecuted) ...[
+                                  Builder(
+                                    builder:
+                                        (context) => IconButton(
+                                          icon: Icon(
+                                            Icons.visibility_outlined,
+                                            size: 20,
+                                          ),
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.tertiary,
+                                          tooltip: '查看结果',
+                                          onPressed:
+                                              () => _showTemplateResultDialog(
+                                                context,
+                                              ),
+                                        ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                ],
+
+                                // 运行/重新运行按钮
+                                ElevatedButton.icon(
+                                  onPressed:
+                                      onExecuteTemplate != null
+                                          ? () => onExecuteTemplate!(
+                                            message.id,
+                                            templateId,
+                                          )
+                                          : null,
+                                  icon: Icon(
                                     isExecuted
-                                        ? Theme.of(context).colorScheme.tertiary
-                                        : Theme.of(context).colorScheme.secondary,
-                                fontWeight: FontWeight.w500,
-                              ),
+                                        ? Icons.replay
+                                        : Icons.play_arrow,
+                                    size: 16,
+                                  ),
+                                  label: Text(isExecuted ? '重新运行' : '运行'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        isExecuted
+                                            ? Theme.of(
+                                              context,
+                                            ).colorScheme.tertiary
+                                            : Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                    foregroundColor:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                    textStyle: const TextStyle(fontSize: 13),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
 
-                      // 右侧：操作按钮
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // 查看结果按钮（仅已运行时显示）
-                          if (isExecuted) ...[
-                            Builder(
-                              builder:
-                                  (context) => IconButton(
-                                    icon: Icon(
-                                      Icons.visibility_outlined,
-                                      size: 20,
-                                    ),
-                                    color: Theme.of(context).colorScheme.tertiary,
-                                    tooltip: '查看结果',
-                                    onPressed:
-                                        () =>
-                                            _showTemplateResultDialog(context),
-                                  ),
-                            ),
-                            const SizedBox(width: 4),
-                          ],
+                      // 分割线（如果有 AI 回复内容）
+                      if (message.content.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Divider(
+                          color: Theme.of(context).colorScheme.outline,
+                          thickness: 1,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
 
-                          // 运行/重新运行按钮
-                          ElevatedButton.icon(
-                            onPressed:
-                                onExecuteTemplate != null
-                                    ? () => onExecuteTemplate!(
-                                      message.id,
-                                      templateId,
-                                    )
-                                    : null,
-                            icon: Icon(
-                              isExecuted ? Icons.replay : Icons.play_arrow,
-                              size: 16,
-                            ),
-                            label: Text(isExecuted ? '重新运行' : '运行'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  isExecuted
-                                      ? Theme.of(context).colorScheme.tertiary
-                                      : Theme.of(context).colorScheme.primary,
-                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              textStyle: const TextStyle(fontSize: 13),
-                            ),
-                          ),
-                        ],
-                      ),
+                      // AI 最终回复（从 content 中提取，排除工具结果部分）
+                      if (message.content.isNotEmpty) _buildFinalReplyContent(),
                     ],
                   ),
-                ),
-
-                // 分割线（如果有 AI 回复内容）
-                if (message.content.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Divider(color: Theme.of(context).colorScheme.outline, thickness: 1),
-                  const SizedBox(height: 12),
-                ],
-
-                // AI 最终回复（从 content 中提取，排除工具结果部分）
-                if (message.content.isNotEmpty) _buildFinalReplyContent(),
-              ],
-            ),
-          );
-        }),
-      ],
-      ),
+                );
+              }),
+            ],
+          ),
     );
   }
 
@@ -944,30 +1089,34 @@ class MessageBubble extends StatelessWidget {
   /// 构建工具执行时的加载状态
   Widget _buildToolLoadingState() {
     return Builder(
-      builder: (context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+      builder:
+          (context) => Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'AI正在构建答案...',
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text(
-                'AI正在构建答案...',
-                style: TextStyle(fontStyle: FontStyle.italic, color: Theme.of(context).colorScheme.onSurfaceVariant),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
     );
   }
 
@@ -1013,7 +1162,10 @@ class MessageBubble extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primaryContainer,
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.primaryContainer,
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -1058,10 +1210,14 @@ class MessageBubble extends StatelessWidget {
                         decoration: BoxDecoration(
                           color:
                               step.status == ToolCallStatus.success
-                                  ? Theme.of(context).colorScheme.tertiaryContainer
+                                  ? Theme.of(
+                                    context,
+                                  ).colorScheme.tertiaryContainer
                                   : step.status == ToolCallStatus.failed
                                   ? Theme.of(context).colorScheme.errorContainer
-                                  : Theme.of(context).colorScheme.surfaceVariant,
+                                  : Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceVariant,
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
                             color:
@@ -1086,10 +1242,16 @@ class MessageBubble extends StatelessWidget {
                                   size: 16,
                                   color:
                                       step.status == ToolCallStatus.success
-                                          ? Theme.of(context).colorScheme.onTertiaryContainer
+                                          ? Theme.of(
+                                            context,
+                                          ).colorScheme.onTertiaryContainer
                                           : step.status == ToolCallStatus.failed
-                                          ? Theme.of(context).colorScheme.onErrorContainer
-                                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                                          ? Theme.of(
+                                            context,
+                                          ).colorScheme.onErrorContainer
+                                          : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
@@ -1103,11 +1265,17 @@ class MessageBubble extends StatelessWidget {
                                     fontWeight: FontWeight.bold,
                                     color:
                                         step.status == ToolCallStatus.success
-                                            ? Theme.of(context).colorScheme.onTertiaryContainer
+                                            ? Theme.of(
+                                              context,
+                                            ).colorScheme.onTertiaryContainer
                                             : step.status ==
                                                 ToolCallStatus.failed
-                                            ? Theme.of(context).colorScheme.onErrorContainer
-                                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                                            ? Theme.of(
+                                              context,
+                                            ).colorScheme.onErrorContainer
+                                            : Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ],
@@ -1145,41 +1313,47 @@ class MessageBubble extends StatelessWidget {
   /// 构建消息内容（处理工具模板和普通文本）
   Widget _buildMessageContent() {
     // 检查是否有工具模板信息（用户消息）
-    final toolTemplate = message.metadata?['toolTemplate'] as Map<String, dynamic>?;
+    final toolTemplate =
+        message.metadata?['toolTemplate'] as Map<String, dynamic>?;
     final hasToolTemplate = toolTemplate != null;
     final hasContent = message.content.isNotEmpty;
 
     // 如果既没有内容也没有工具模板，显示空消息提示
     if (!hasContent && !hasToolTemplate) {
       return Builder(
-        builder: (context) => Text(
-          '(空消息)',
-          style: TextStyle(
-            fontStyle: FontStyle.italic,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
+        builder:
+            (context) => Text(
+              '(空消息)',
+              style: TextStyle(
+                fontStyle: FontStyle.italic,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
       );
     }
 
     return Builder(
-      builder: (context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 显示工具模板（如果有）
-        if (hasToolTemplate) ...[
-          _buildUserToolTemplate(toolTemplate),
-          // 如果同时有文本内容，添加分隔
-          if (hasContent) ...[
-            const SizedBox(height: 8),
-            Divider(color: Theme.of(context).colorScheme.outline, thickness: 1),
-            const SizedBox(height: 8),
-          ],
-        ],
-        // 显示文本内容（如果有）
-        if (hasContent) MarkdownContent(content: message.content),
-      ],
-      ),
+      builder:
+          (context) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 显示工具模板（如果有）
+              if (hasToolTemplate) ...[
+                _buildUserToolTemplate(toolTemplate),
+                // 如果同时有文本内容，添加分隔
+                if (hasContent) ...[
+                  const SizedBox(height: 8),
+                  Divider(
+                    color: Theme.of(context).colorScheme.outline,
+                    thickness: 1,
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ],
+              // 显示文本内容（如果有）
+              if (hasContent) MarkdownContent(content: message.content),
+            ],
+          ),
     );
   }
 
@@ -1189,63 +1363,119 @@ class MessageBubble extends StatelessWidget {
     final description = toolTemplate['description'] as String?;
 
     return Builder(
-      builder: (context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondaryContainer,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Theme.of(context).colorScheme.secondary),
-        ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.build_circle, size: 18, color: Theme.of(context).colorScheme.onSecondaryContainer),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      builder:
+          (context) => Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      '工具模板:',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSecondaryContainer,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                Icon(
+                  Icons.build_circle,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
                 ),
-                if (description != null && description.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            '工具模板:',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onSecondaryContainer,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              name,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSecondaryContainer,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (description != null && description.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          description,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color:
+                                Theme.of(
+                                  context,
+                                ).colorScheme.onSecondaryContainer,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
                   ),
-                ],
+                ),
               ],
             ),
           ),
-        ],
-      ),
+    );
+  }
+
+  /// 构建 Agent 标签（链式模式）
+  Widget _buildAgentLabel(BuildContext context) {
+    final agentName =
+        getAgentName?.call(message.generatedByAgentId!) ?? 'Agent';
+    final stepIndex = message.chainStepIndex!;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.link,
+              size: 14,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '步骤 ${stepIndex + 1}: $agentName',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

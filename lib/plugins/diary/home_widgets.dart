@@ -113,6 +113,7 @@ class DiaryHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'diary',
         pluginName: 'diary_name'.tr,
         pluginIcon: Icons.menu_book,
         pluginDefaultColor: Colors.indigo,

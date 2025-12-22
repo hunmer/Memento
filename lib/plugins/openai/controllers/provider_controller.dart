@@ -15,17 +15,41 @@ class ProviderController {
   Future<List<ServiceProvider>> getProviders() async {
     try {
       final data = await storage.read(storagePath);
+
       if (data.isEmpty) {
-        return [];
+        // 首次使用，加载默认服务商并保存
+        final defaultProviders = getDefaultProviders();
+        await saveProviders(defaultProviders);
+        return defaultProviders;
       }
 
       final List<dynamic> jsonList = data['providers'] as List<dynamic>;
-      return jsonList
+      final providers = jsonList
           .map((json) => ServiceProvider.fromJson(json as Map<String, dynamic>))
           .toList();
+
+      // 智能合并：检查是否有新的默认服务商，如果有则添加
+      final defaultProviders = getDefaultProviders();
+      bool hasNewProviders = false;
+
+      for (final defaultProvider in defaultProviders) {
+        final exists = providers.any((p) => p.id == defaultProvider.id);
+        if (!exists) {
+          providers.add(defaultProvider);
+          hasNewProviders = true;
+        }
+      }
+
+      // 如果有新增的服务商，保存到本地存储
+      if (hasNewProviders) {
+        await saveProviders(providers);
+      }
+
+      return providers;
     } catch (e) {
       debugPrint('Error loading providers: $e');
-      return [];
+      // 加载失败时，返回默认服务商列表而不是空列表
+      return getDefaultProviders();
     }
   }
 

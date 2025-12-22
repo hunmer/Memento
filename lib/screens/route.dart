@@ -11,6 +11,7 @@ import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart'
 import 'package:Memento/screens/notification_test/notification_test_page.dart';
 import 'package:Memento/screens/floating_widget_screen/floating_widget_screen.dart';
 import 'package:Memento/screens/data_selector_test/data_selector_test_screen.dart';
+import 'package:Memento/screens/settings_screen/screens/live_activities_test_screen.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:get/get.dart';
@@ -176,7 +177,11 @@ class AppRoutes extends NavigatorObserver {
   }
 
   // 创建错误页面的辅助函数
-  static Route _createErrorRoute(String titleKey, String messageKey, {String? messageParam}) {
+  static Route _createErrorRoute(
+    String titleKey,
+    String messageKey, {
+    String? messageParam,
+  }) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) {
         String title;
@@ -202,7 +207,9 @@ class AppRoutes extends NavigatorObserver {
             message = 'screens_errorHabitsPluginNotFound'.tr;
             break;
           case 'errorHabitNotFound':
-            message = 'screens_errorHabitNotFound'.trParams({'id': messageParam ?? ''});
+            message = 'screens_errorHabitNotFound'.trParams({
+              'id': messageParam ?? '',
+            });
             break;
           default:
             message = messageKey;
@@ -374,6 +381,9 @@ class AppRoutes extends NavigatorObserver {
       case '/data_selector_test':
       case 'data_selector_test':
         return _createRoute(const DataSelectorTestScreen());
+      case '/live_activities_test':
+      case 'live_activities_test':
+        return _createRoute(const LiveActivitiesTestScreen());
       case '/chat':
       case 'chat':
         // 支持通过 channelId 参数直接打开指定频道
@@ -512,10 +522,7 @@ class AppRoutes extends NavigatorObserver {
         }
 
         if (activityWeeklyWidgetId == null) {
-          return _createErrorRoute(
-            'error',
-            'errorWidgetIdMissing',
-          );
+          return _createErrorRoute('error', 'errorWidgetIdMissing');
         }
 
         return _createRoute(
@@ -541,10 +548,7 @@ class AppRoutes extends NavigatorObserver {
         }
 
         if (activityDailyWidgetId == null) {
-          return _createErrorRoute(
-            'error',
-            'errorWidgetIdMissing',
-          );
+          return _createErrorRoute('error', 'errorWidgetIdMissing');
         }
 
         return _createRoute(
@@ -570,10 +574,7 @@ class AppRoutes extends NavigatorObserver {
         }
 
         if (habitsWeeklyWidgetId == null) {
-          return _createErrorRoute(
-            'error',
-            'errorWidgetIdMissing',
-          );
+          return _createErrorRoute('error', 'errorWidgetIdMissing');
         }
 
         return _createRoute(
@@ -636,20 +637,14 @@ class AppRoutes extends NavigatorObserver {
         }
 
         if (habitId == null) {
-          return _createErrorRoute(
-            'error',
-            'errorHabitIdRequired',
-          );
+          return _createErrorRoute('error', 'errorHabitIdRequired');
         }
 
         // 获取 HabitsPlugin 实例
         final habitsPlugin =
             PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
         if (habitsPlugin == null) {
-          return _createErrorRoute(
-            'error',
-            'errorHabitsPluginNotFound',
-          );
+          return _createErrorRoute('error', 'errorHabitsPluginNotFound');
         }
 
         // 查找对应的 Habit
@@ -887,6 +882,8 @@ class AppRoutes extends NavigatorObserver {
     jsConsole: (context) => const JSConsoleScreen(),
     jsonDynamicTest: (context) => const JsonDynamicTestScreen(),
     notificationTest: (context) => const NotificationTestPage(),
+    'data_selector_test': (context) => const DataSelectorTestScreen(),
+    'live_activities_test': (context) => const LiveActivitiesTestScreen(),
   };
 
   static String get initialRoute => home;

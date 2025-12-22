@@ -18,6 +18,7 @@ import 'package:Memento/screens/settings_screen/widgets/permission_request_dialo
 import 'package:get/get.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/core/plugin_base.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -118,23 +119,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      builder:
-          (context) => DraggableScrollableSheet(
-            initialChildSize: 0.9,
-            minChildSize: 0.5,
-            maxChildSize: 0.95,
-            expand: false,
-            builder:
-                (context, scrollController) => SingleChildScrollView(
-                  controller: scrollController,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).viewInsets.bottom,
-                    ),
-                    child: const ServerSyncSettingsSection(),
-                  ),
-                ),
+      builder: (context) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.85,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: const ServerSyncSettingsSection(),
           ),
+        ),
+      ),
     );
 
     // 重新检查服务器同步状态
@@ -200,6 +195,67 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     apiKeyController.dispose();
+  }
+
+  Future<void> _showPluginManagementSheet() async {
+    await SmoothBottomSheet.show(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        final double sheetHeight = MediaQuery.of(context).size.height * 0.75;
+        return SizedBox(
+          height: sheetHeight,
+          child: StatefulBuilder(
+            builder: (context, setModalState) {
+              final List<PluginBase> plugins = List<PluginBase>.from(
+                _controller.availablePlugins,
+              )
+                ..sort(
+                  (a, b) => (a.getPluginName(context) ?? a.id)
+                      .compareTo(b.getPluginName(context) ?? b.id),
+                );
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      'settings_screen_pluginManagementTip'.tr,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.separated(
+                      itemCount: plugins.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final plugin = plugins[index];
+                        final pluginName =
+                            plugin.getPluginName(context) ?? plugin.id;
+                        final isEnabled =
+                            _controller.isPluginEnabled(plugin.id);
+                        return SwitchListTile(
+                          title: Text(pluginName),
+                          subtitle: Text(plugin.id),
+                          value: isEnabled,
+                          onChanged: (value) async {
+                            await _controller.setPluginEnabled(
+                              plugin.id,
+                              value,
+                            );
+                            setModalState(() {});
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -372,6 +428,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: _backupService.showBackupScheduleDialog,
           ),
           ListTile(
+            leading: const Icon(Icons.extension),
+            title: Text('settings_screen_pluginManagementTitle'.tr),
+            subtitle: Text('settings_screen_pluginManagementSubtitle'.tr),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: _showPluginManagementSheet,
+          ),
+          ListTile(
             leading: const Icon(Icons.play_circle),
             title: Text('settings_screen_autoOpenLastPluginTitle'.tr),
             subtitle: Text('settings_screen_autoOpenLastPluginSubtitle'.tr),
@@ -490,6 +553,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/intent_test');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.notifications_active),
+            title: const Text('Live Activities 测试'),
+            subtitle: const Text('测试实时活动通知'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/live_activities_test');
             },
           ),
           const Divider(),

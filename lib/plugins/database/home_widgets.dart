@@ -95,6 +95,7 @@ class DatabaseHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'database',
         pluginName: 'database_name'.tr,
         pluginIcon: Icons.storage,
         pluginDefaultColor: Colors.deepPurple,

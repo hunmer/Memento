@@ -116,6 +116,7 @@ class TtsHomeWidgets {
 
       // 使用通用小组件
       return GenericPluginWidget(
+        pluginId: 'tts',
         pluginName: 'tts_name'.tr,
         pluginIcon: Icons.record_voice_over,
         pluginDefaultColor: Colors.purple,

@@ -48,6 +48,18 @@ class ChatMessage {
   /// 是否为会话分隔符（用于标记新会话的开始）
   bool isSessionDivider;
 
+  /// 生成此消息的 Agent ID（仅 AI 消息，链式模式下使用）
+  String? generatedByAgentId;
+
+  /// 在链式调用中的步骤索引（仅 AI 消息，链式模式下使用）
+  int? chainStepIndex;
+
+  /// 链式执行ID（同一次链式调用的所有消息共享此ID）
+  String? chainExecutionId;
+
+  /// 是否为最终总结消息（工具调用后的AI总结回复）
+  bool isFinalSummary;
+
   ChatMessage({
     required this.id,
     required this.conversationId,
@@ -63,6 +75,10 @@ class ChatMessage {
     this.matchedTemplateIds,
     this.parentId,
     this.isSessionDivider = false,
+    this.generatedByAgentId,
+    this.chainStepIndex,
+    this.chainExecutionId,
+    this.isFinalSummary = false,
   });
 
   /// 创建用户消息
@@ -92,6 +108,10 @@ class ChatMessage {
     int tokenCount = 0,
     bool isGenerating = true,
     Map<String, dynamic>? metadata,
+    String? generatedByAgentId,
+    int? chainStepIndex,
+    String? chainExecutionId,
+    bool isFinalSummary = false,
   }) {
     return ChatMessage(
       id: _uuid.v4(),
@@ -102,6 +122,10 @@ class ChatMessage {
       tokenCount: tokenCount,
       isGenerating: isGenerating,
       metadata: metadata,
+      generatedByAgentId: generatedByAgentId,
+      chainStepIndex: chainStepIndex,
+      chainExecutionId: chainExecutionId,
+      isFinalSummary: isFinalSummary,
     );
   }
 
@@ -146,6 +170,10 @@ class ChatMessage {
               .toList(),
       parentId: json['parentId'] as String?,
       isSessionDivider: json['isSessionDivider'] as bool? ?? false,
+      generatedByAgentId: json['generatedByAgentId'] as String?,
+      chainStepIndex: json['chainStepIndex'] as int?,
+      chainExecutionId: json['chainExecutionId'] as String?,
+      isFinalSummary: json['isFinalSummary'] as bool? ?? false,
     );
   }
 
@@ -167,6 +195,10 @@ class ChatMessage {
         'matchedTemplateIds': matchedTemplateIds,
       if (parentId != null) 'parentId': parentId,
       'isSessionDivider': isSessionDivider,
+      if (generatedByAgentId != null) 'generatedByAgentId': generatedByAgentId,
+      if (chainStepIndex != null) 'chainStepIndex': chainStepIndex,
+      if (chainExecutionId != null) 'chainExecutionId': chainExecutionId,
+      'isFinalSummary': isFinalSummary,
     };
   }
 
@@ -182,6 +214,10 @@ class ChatMessage {
     List<String>? matchedTemplateIds,
     String? parentId,
     bool? isSessionDivider,
+    String? generatedByAgentId,
+    int? chainStepIndex,
+    String? chainExecutionId,
+    bool? isFinalSummary,
   }) {
     return ChatMessage(
       id: id,
@@ -198,6 +234,10 @@ class ChatMessage {
       matchedTemplateIds: matchedTemplateIds ?? this.matchedTemplateIds,
       parentId: parentId ?? this.parentId,
       isSessionDivider: isSessionDivider ?? this.isSessionDivider,
+      generatedByAgentId: generatedByAgentId ?? this.generatedByAgentId,
+      chainStepIndex: chainStepIndex ?? this.chainStepIndex,
+      chainExecutionId: chainExecutionId ?? this.chainExecutionId,
+      isFinalSummary: isFinalSummary ?? this.isFinalSummary,
     );
   }
 

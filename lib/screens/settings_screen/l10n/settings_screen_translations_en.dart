@@ -42,6 +42,11 @@ const Map<String, String> settingsScreenTranslationsEn = {
   'settings_screen_autoBackupTitle': 'Auto Backup Settings',
   'settings_screen_autoBackupSubtitle': 'Set auto backup schedule',
 
+  // Plugin management
+  'settings_screen_pluginManagementTitle': 'Plugin Management',
+  'settings_screen_pluginManagementSubtitle': 'Choose which plugins load on startup',
+  'settings_screen_pluginManagementTip': 'Disabled plugins will skip initialization on next launch. Re-enable them to restore.',
+
   // Auto open last plugin
   'settings_screen_autoOpenLastPluginTitle': 'Auto Open Last Used Plugin',
   'settings_screen_autoOpenLastPluginSubtitle': 'Automatically open last used plugin on startup',

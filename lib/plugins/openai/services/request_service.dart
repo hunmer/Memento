@@ -46,21 +46,92 @@ String _extractErrorMessage(dynamic error) {
 
 /// 修复UTF-8编码的字符串
 ///
-/// 尝试将错误编码的字符串（如Latin1误编码为UTF-8）转换为正确的UTF-8字符串
+/// 尝试将错误编码的字符串（如Latin1/GBK误编码为UTF-8）转换为正确的UTF-8字符串
 String _fixUTF8Encoding(String message) {
   try {
-    // 将字符串按 Latin1 编码转换为字节
-    final bytes = latin1.encode(message);
-    // 再按 UTF-8 解码
-    final decodedMessage = utf8.decode(bytes, allowMalformed: false);
-    // 如果成功解码且与原始消息不同，说明原消息有编码问题
-    if (decodedMessage != message && decodedMessage.isNotEmpty) {
-      return decodedMessage;
+    // 方案1：尝试将字符串按 Latin1 编码转换为字节，再按 UTF-8 解码
+    final bytes1 = latin1.encode(message);
+    final decodedMessage1 = utf8.decode(bytes1, allowMalformed: false);
+    if (decodedMessage1 != message && decodedMessage1.isNotEmpty) {
+      // 检查解码结果是否包含中文或常见字符
+      if (_containsValidCharacters(decodedMessage1)) {
+        return decodedMessage1;
+      }
     }
   } catch (e) {
-    // 解码失败，返回原始消息
+    // Latin1方案失败，继续尝试其他方案
   }
+
+  try {
+    // 方案2：尝试将字符串按 UTF-8 编码重新解释为字节，再按 GBK 解码
+    // 这适用于GBK/GB2312编码被误当作UTF-8的情况
+    final bytes2 = utf8.encode(message);
+    // 尝试将字节当作 GBK 编码处理（使用latin1作为近似）
+    // 注意：Dart标准库不直接支持GBK，这里使用一个近似方法
+    final gbkApprox = latin1.decode(bytes2);
+    if (gbkApprox != message && gbkApprox.isNotEmpty) {
+      // 检查解码结果是否包含中文或常见字符
+      if (_containsValidCharacters(gbkApprox)) {
+        return gbkApprox;
+      }
+    }
+  } catch (e) {
+    // GBK方案失败
+  }
+
+  // 如果所有方案都失败，返回原始消息
   return message;
+}
+
+/// 检查字符串是否包含有效的字符（中文、英文字母、数字等）
+bool _containsValidCharacters(String text) {
+  // 如果包含常见的中文字符，说明解码成功
+  if (RegExp(r'[\u4e00-\u9fff]').hasMatch(text)) {
+    return true;
+  }
+  // 如果包含常见的英文字母和数字，且不是乱码符号
+  if (RegExp(r'[a-zA-Z0-9]').hasMatch(text) &&
+      !text.contains('�') &&
+      text.length > 3) {
+    return true;
+  }
+  return false;
+}
+
+/// 格式化消息列表用于日志输出
+String _formatMessagesForLog(List<ChatCompletionMessage> messages) {
+  final buffer = StringBuffer();
+  for (int i = 0; i < messages.length; i++) {
+    final msg = messages[i];
+    final role = msg.role.name;
+    String content;
+
+    // 提取消息内容
+    final rawContent = msg.content;
+    if (rawContent is String) {
+      content = rawContent;
+    } else if (rawContent is ChatCompletionUserMessageContent) {
+      // 处理 user 消息的特殊类型
+      content = rawContent.map(
+        parts: (parts) => parts.value.map((p) => p.map(
+          text: (t) => t.text,
+          image: (i) => '[图片]',
+          audio: (a) => '[音频]',
+          refusal: (r) => '[拒绝]',
+        )).join(' '),
+        string: (s) => s.value,
+      );
+    } else {
+      content = rawContent?.toString() ?? '';
+    }
+
+    // 截断过长内容
+    final truncated = content.length > 200
+        ? '${content.substring(0, 200)}... (${content.length}字符)'
+        : content;
+    buffer.writeln('  [$i] $role: $truncated');
+  }
+  return buffer.toString();
 }
 
 class RequestService {
@@ -453,7 +524,7 @@ class RequestService {
 
       developer.log('发送流式请求: ${request.model}', name: 'RequestService');
       developer.log(
-        '发送所有文本内容：${messages.map((e) => e.content).join('')}',
+        '发送消息列表 (${messages.length}条):\n${_formatMessagesForLog(messages)}',
         name: 'RequestService',
       );
 

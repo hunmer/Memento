@@ -122,7 +122,7 @@ class BillTranslationsZh {
     'bill_deleteSubscription': '删除订阅',
     'bill_subscriptionList': '订阅列表',
     'bill_activeSubscriptions': '活跃订阅',
-    'bill_inactiveSubscriptions': '已终止',
+    'bill_inactiveSubscriptions': '不再续费',
     'bill_noSubscriptions': '暂无订阅服务',
     'bill_clickToAddSubscription': '点击下方按钮添加订阅服务',
     'bill_subscriptionName': '订阅名称',

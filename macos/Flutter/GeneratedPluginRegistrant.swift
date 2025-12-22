@@ -10,6 +10,7 @@ import awesome_notifications
 import device_info_plus
 import file_picker
 import file_selector_macos
+import flutter_app_group_directory
 import flutter_image_compress_macos
 import flutter_inappwebview_macos
 import flutter_js
@@ -32,6 +33,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   DeviceInfoPlusMacosPlugin.register(with: registry.registrar(forPlugin: "DeviceInfoPlusMacosPlugin"))
   FilePickerPlugin.register(with: registry.registrar(forPlugin: "FilePickerPlugin"))
   FileSelectorPlugin.register(with: registry.registrar(forPlugin: "FileSelectorPlugin"))
+  FlutterAppGroupDirectoryPlugin.register(with: registry.registrar(forPlugin: "FlutterAppGroupDirectoryPlugin"))
   FlutterImageCompressMacosPlugin.register(with: registry.registrar(forPlugin: "FlutterImageCompressMacosPlugin"))
   InAppWebViewFlutterPlugin.register(with: registry.registrar(forPlugin: "InAppWebViewFlutterPlugin"))
   FlutterJsPlugin.register(with: registry.registrar(forPlugin: "FlutterJsPlugin"))

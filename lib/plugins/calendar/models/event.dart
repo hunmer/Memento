@@ -11,6 +11,7 @@ class CalendarEvent {
   final String source;
   final int? reminderMinutes; // 提前提醒的分钟数
   final DateTime? completedTime;
+  final String? systemEventId; // 系统日历中的实际事件ID（用于删除）
 
   CalendarEvent({
     required this.id,
@@ -23,6 +24,7 @@ class CalendarEvent {
     this.source = 'default',
     this.reminderMinutes,
     this.completedTime,
+    this.systemEventId,
   });
 
   CalendarEvent copyWith({
@@ -36,6 +38,7 @@ class CalendarEvent {
     String? source,
     int? reminderMinutes,
     DateTime? completedTime,
+    String? systemEventId,
   }) {
     return CalendarEvent(
       id: id ?? this.id,
@@ -48,6 +51,7 @@ class CalendarEvent {
       source: source ?? this.source,
       reminderMinutes: reminderMinutes ?? this.reminderMinutes,
       completedTime: completedTime ?? this.completedTime,
+      systemEventId: systemEventId ?? this.systemEventId,
     );
   }
 
@@ -63,6 +67,7 @@ class CalendarEvent {
     'source': source,
     'reminderMinutes': reminderMinutes,
     'completedTime': completedTime?.toIso8601String(),
+    'systemEventId': systemEventId,
   };
 
   factory CalendarEvent.fromJson(Map<String, dynamic> json) => CalendarEvent(
@@ -76,5 +81,6 @@ class CalendarEvent {
     source: json['source'] ?? 'default',
     reminderMinutes: json['reminderMinutes'],
     completedTime: json['completedTime'] != null ? DateTime.parse(json['completedTime']) : null,
+    systemEventId: json['systemEventId'],
   );
 }

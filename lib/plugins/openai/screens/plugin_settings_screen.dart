@@ -11,6 +11,13 @@ class PluginSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.maybePop(context),
+        ),
+        title: Text('openai_pluginSettingsTitle'.tr),
+      ),
       body: ListView(
         children: [
           ListTile(
