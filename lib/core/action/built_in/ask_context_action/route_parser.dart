@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'models/route_context.dart';
 
 /// 路由解析器
@@ -61,23 +62,32 @@ class RouteParser {
   /// 解析当前路由
   ///
   /// 从BuildContext中提取路由信息并转换为RouteContext对象
-  /// 优先使用 GetX 路由信息，以确保与 GetX 路由管理保持一致
+  /// 优先级：RouteHistoryManager（手动设置） > GetX 路由 > Flutter 原生路由
   static RouteContext parseRoute(BuildContext context) {
     try {
       String? routeName;
       dynamic arguments;
 
-      // 优先使用 GetX 路由信息
-      // GetX 使用 routing.current 存储当前路由名称
-      if (Get.routing.current.isNotEmpty) {
-        routeName = Get.routing.current;
-        // GetX 的路由参数通过 Get.arguments 获取
-        arguments = Get.arguments;
-
-        debugPrint('RouteParser: 使用 GetX 路由信息 - route: $routeName, args: $arguments');
+      // 最高优先级：使用 RouteHistoryManager 中手动设置的当前上下文
+      // 这允许页面在不刷新的情况下更新上下文信息
+      final currentContext = RouteHistoryManager.getCurrentContext();
+      if (currentContext != null) {
+        routeName = currentContext.pageId;
+        arguments = currentContext.params;
+        debugPrint('RouteParser: 使用 RouteHistoryManager 上下文 - route: $routeName, args: $arguments');
       }
 
-      // 回退：使用 Flutter 原生路由（当 GetX 路由信息不可用时）
+      // 第二优先级：使用 GetX 路由信息
+      if (routeName == null || routeName.isEmpty || routeName == '/') {
+        if (Get.routing.current.isNotEmpty) {
+          routeName = Get.routing.current;
+          // GetX 的路由参数通过 Get.arguments 获取
+          arguments = Get.arguments;
+          debugPrint('RouteParser: 使用 GetX 路由信息 - route: $routeName, args: $arguments');
+        }
+      }
+
+      // 第三优先级：回退到 Flutter 原生路由
       if (routeName == null || routeName.isEmpty || routeName == '/') {
         final route = ModalRoute.of(context)?.settings;
         final fallbackRouteName = route?.name;

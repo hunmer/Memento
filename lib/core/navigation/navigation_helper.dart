@@ -374,38 +374,6 @@ class NavigationHelper {
     return !Navigator.of(context).canPop();
   }
 
-  // ==================== 路由参数更新 ====================
-
-  /// 更新当前路由的参数（通过替换路由实现）
-  ///
-  /// 用于在不离开当前页面的情况下更新路由信息，常用于：
-  /// - 日记日历切换日期时更新路由，使"询问当前上下文"功能能获取到当前日期
-  /// - 其他需要动态反映页面状态到路由的场景
-  ///
-  /// [context] BuildContext
-  /// [routeName] 新的路由名称
-  /// [arguments] 新的路由参数
-  ///
-  /// 示例：
-  /// ```dart
-  /// // 日记日历切换到2025-12-22
-  /// NavigationHelper.updateRouteWithArguments(
-  ///   context,
-  ///   '/diary_detail',
-  ///   {'date': '2025-12-22'},
-  /// );
-  /// ```
-  static Future<void> updateRouteWithArguments(
-    BuildContext context,
-    String routeName,
-    Map<String, dynamic> arguments,
-  ) {
-    // 调试输出：显示路由切换信息
-    print('NavigationHelper: 切换到路由 "$routeName"，参数: $arguments');
-
-    return pushReplacementNamed(context, routeName, arguments: arguments);
-  }
-
   // ==================== OpenContainer 替代方法 ====================
 
   /// 使用 BackSwipePageRoute 导航到新页面
