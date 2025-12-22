@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import '../../../widgets/circle_icon_picker.dart';
 import '../models/subscription.dart';
 import '../bill_plugin.dart';
@@ -55,9 +56,15 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
       _selectedIcon = sub.icon;
       _selectedColor = sub.iconColor;
       _isActive = sub.isActive;
+
+      // 设置编辑模式的路由上下文
+      _updateRouteContext(isEdit: true, subscriptionId: sub.id);
     } else {
       // Defaults
       _daysController.text = '30'; // Default to Monthly
+
+      // 设置新建模式的路由上下文
+      _updateRouteContext(isEdit: false);
     }
   }
 
@@ -68,6 +75,23 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
     _daysController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前状态
+  void _updateRouteContext({required bool isEdit, String? subscriptionId}) {
+    if (isEdit && subscriptionId != null) {
+      RouteHistoryManager.updateCurrentContext(
+        pageId: '/bill_subscription_edit',
+        title: '编辑订阅',
+        params: {'subscriptionId': subscriptionId},
+      );
+    } else {
+      RouteHistoryManager.updateCurrentContext(
+        pageId: '/bill_subscription_create',
+        title: '新建订阅',
+        params: {},
+      );
+    }
   }
 
   void _setCycle(int days) {

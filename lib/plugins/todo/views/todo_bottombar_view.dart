@@ -15,6 +15,7 @@ import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/todo/views/todo_four_quadrant_view.dart';
 import 'package:Memento/plugins/todo/widgets/filter_dialog.dart';
 import 'package:Memento/plugins/todo/widgets/history_completed_view.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'todo_item_detail.dart';
 
 class TodoBottomBarView extends StatefulWidget {
@@ -56,6 +57,8 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
         setState(() {
           _currentPage = _tabController.index;
         });
+        // 更新路由上下文
+        _updateRouteContext();
       }
     });
 
@@ -73,6 +76,11 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
         setState(() {});
       }
     });
+
+    // 初始化时设置路由上下文
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRouteContext();
+    });
   }
 
   @override
@@ -80,6 +88,43 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
     _timer?.cancel();
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前页面状态
+  void _updateRouteContext() {
+    String pageId;
+    String title;
+    Map<String, dynamic> params = {};
+
+    if (_currentPage == 0) {
+      // 待办列表页
+      final taskCount = _plugin.taskController.tasks.length;
+
+      if (_searchQuery.isNotEmpty) {
+        pageId = '/todo_list_search';
+        title = '待办事项 - 搜索: $_searchQuery';
+        params['searchQuery'] = _searchQuery;
+        params['resultCount'] = taskCount;
+      } else {
+        pageId = '/todo_list';
+        title = '待办事项';
+        params['taskCount'] = taskCount;
+      }
+
+      params['viewMode'] = _plugin.taskController.isGridView ? 'grid' : 'list';
+      params['sortBy'] = _plugin.taskController.sortBy.toString();
+    } else {
+      // 历史记录页
+      pageId = '/todo_history';
+      title = '待办历史记录';
+      params['completedCount'] = _plugin.taskController.completedTasks.length;
+    }
+
+    RouteHistoryManager.updateCurrentContext(
+      pageId: pageId,
+      title: title,
+      params: params,
+    );
   }
 
   // 测量底部栏高度
@@ -286,6 +331,8 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
             _plugin.taskController.applyFilter({'keyword': query});
           }
         });
+        // 更新路由上下文
+        _updateRouteContext();
       },
       onSearchFilterChanged: (filters) {
         // 处理搜索过滤器变化
