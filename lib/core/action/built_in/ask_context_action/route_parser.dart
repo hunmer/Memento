@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'models/route_context.dart';
 
 /// 路由解析器
@@ -60,11 +61,38 @@ class RouteParser {
   /// 解析当前路由
   ///
   /// 从BuildContext中提取路由信息并转换为RouteContext对象
+  /// 优先使用 GetX 路由信息，以确保与 GetX 路由管理保持一致
   static RouteContext parseRoute(BuildContext context) {
     try {
-      final route = ModalRoute.of(context)?.settings;
-      final routeName = route?.name ?? '/';
-      final arguments = route?.arguments;
+      String? routeName;
+      dynamic arguments;
+
+      // 优先使用 GetX 路由信息
+      // GetX 使用 routing.current 存储当前路由名称
+      if (Get.routing.current.isNotEmpty) {
+        routeName = Get.routing.current;
+        // GetX 的路由参数通过 Get.arguments 获取
+        arguments = Get.arguments;
+
+        debugPrint('RouteParser: 使用 GetX 路由信息 - route: $routeName, args: $arguments');
+      }
+
+      // 回退：使用 Flutter 原生路由（当 GetX 路由信息不可用时）
+      if (routeName == null || routeName.isEmpty || routeName == '/') {
+        final route = ModalRoute.of(context)?.settings;
+        final fallbackRouteName = route?.name;
+        final fallbackArguments = route?.arguments;
+
+        // 只有当找到了有效的路由时才覆盖
+        if (fallbackRouteName != null && fallbackRouteName.isNotEmpty) {
+          routeName = fallbackRouteName;
+          arguments ??= fallbackArguments;
+          debugPrint('RouteParser: 回退到原生路由 - route: $routeName, args: $arguments');
+        }
+      }
+
+      // 确保至少有一个有效的路由名称
+      routeName ??= '/';
 
       // 获取路由模板
       String description = _routeTemplates[routeName] ?? '用户正在查看：$routeName';
