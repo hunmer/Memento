@@ -1,8 +1,9 @@
-import 'package:Memento/plugins/agent_chat/data/sample_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
+import 'package:Memento/plugins/agent_chat/models/agent_chain_node.dart';
+import 'package:Memento/plugins/agent_chat/data/sample_data.dart';
 
 /// 会话服务
 ///
@@ -31,6 +32,9 @@ class ConversationService extends ChangeNotifier {
     notifyListeners();
 
     await _loadConversations();
+
+    // 清理过期的临时频道
+    await cleanupExpiredTemporaryConversations();
 
     _isLoading = false;
     notifyListeners();
@@ -273,5 +277,114 @@ class ConversationService extends ChangeNotifier {
   Future<void> refresh() async {
     // 插件已在 initialize() 中完成初始化
     // 这里可以添加额外的应用级注册逻辑
+  }
+
+  // ========== 临时频道管理 ==========
+
+  /// 创建临时会话（用于特定路由的上下文查询）
+  ///
+  /// 临时会话不会显示在会话列表中，并在7天后自动删除
+  Future<Conversation> createTemporaryConversation({
+    required String title,
+    required String routeName,
+    String? agentId,
+    List<AgentChainNode>? agentChain,
+  }) async {
+    final now = DateTime.now();
+    final expiresAt = now.add(const Duration(days: 7));
+
+    final conversation = Conversation.create(
+      title: title,
+      agentId: agentId,
+      agentChain: agentChain,
+      groups: ['临时'],
+    );
+
+    // 在 metadata 中添加临时频道标记
+    final conversationWithMetadata = conversation.copyWith(
+      metadata: {
+        'isTemporary': true,
+        'hideInList': true,
+        'createdForRoute': routeName,
+        'expiresAt': expiresAt.toIso8601String(),
+      },
+    );
+
+    _conversations.add(conversationWithMetadata);
+    await _saveConversations();
+    notifyListeners();
+
+    return conversationWithMetadata;
+  }
+
+  /// 获取指定路由的临时会话
+  ///
+  /// 如果已存在且未过期，则返回现有会话；否则返回 null
+  Conversation? getTemporaryConversationForRoute(String routeName) {
+    try {
+      final now = DateTime.now();
+      return _conversations.firstWhere((c) {
+        final metadata = c.metadata;
+        if (metadata == null) return false;
+
+        final isTemporary = metadata['isTemporary'] == true;
+        final createdForRoute = metadata['createdForRoute'] as String?;
+        final expiresAtStr = metadata['expiresAt'] as String?;
+
+        if (!isTemporary || createdForRoute != routeName) return false;
+
+        // 检查是否过期
+        if (expiresAtStr != null) {
+          final expiresAt = DateTime.parse(expiresAtStr);
+          if (now.isAfter(expiresAt)) return false;
+        }
+
+        return true;
+      });
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// 清理过期的临时会话
+  Future<void> cleanupExpiredTemporaryConversations() async {
+    final now = DateTime.now();
+    final expiredConversations = <Conversation>[];
+
+    for (final conversation in _conversations) {
+      final metadata = conversation.metadata;
+      if (metadata == null) continue;
+
+      final isTemporary = metadata['isTemporary'] == true;
+      final expiresAtStr = metadata['expiresAt'] as String?;
+
+      if (isTemporary && expiresAtStr != null) {
+        final expiresAt = DateTime.parse(expiresAtStr);
+        if (now.isAfter(expiresAt)) {
+          expiredConversations.add(conversation);
+        }
+      }
+    }
+
+    // 删除过期的会话
+    for (final conversation in expiredConversations) {
+      debugPrint('清理过期临时会话: ${conversation.title} (${conversation.id})');
+      await deleteConversation(conversation.id);
+    }
+
+    if (expiredConversations.isNotEmpty) {
+      debugPrint('已清理 ${expiredConversations.length} 个过期临时会话');
+    }
+  }
+
+  /// 获取所有非临时会话（用于列表显示）
+  List<Conversation> getNonTemporaryConversations() {
+    return _conversations.where((c) {
+      final metadata = c.metadata;
+      if (metadata == null) return true;
+
+      final hideInList = metadata['hideInList'] == true;
+      return !hideInList;
+    }).toList();
   }
 }

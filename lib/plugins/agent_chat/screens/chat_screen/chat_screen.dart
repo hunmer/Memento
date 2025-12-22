@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:Memento/plugins/agent_chat/models/agent_chain_node.dart';
+import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
@@ -32,6 +34,7 @@ class ChatScreen extends StatefulWidget {
   final StorageManager storage;
   final ConversationService? conversationService;
   final Map<String, dynamic> Function()? getSettings; // 获取插件设置的回调
+  final String? initialMessage; // 初始消息文本（预填充到输入框）
 
   const ChatScreen({
     super.key,
@@ -39,6 +42,7 @@ class ChatScreen extends StatefulWidget {
     required this.storage,
     this.conversationService,
     this.getSettings,
+    this.initialMessage,
   });
 
   @override
@@ -55,6 +59,11 @@ class _ChatScreenState extends State<ChatScreen> {
   String? _selectedTTSServiceId; // 选择的TTS服务ID
   String? _lastReadMessageId; // 上次朗读的消息ID
   bool _isListReady = false; // 列表是否准备好显示（滚动到底部后）
+
+  // Agent 选择状态 - 由 ChatScreen 自己管理
+  AIAgent? _currentAgent;
+  List<AIAgent>? _agentChain;  // 使用 AIAgent 列表而不是 AgentChainNode
+  bool _isChainMode = false;
 
   // 猜你想问相关
   List<String> _suggestedQuestions = [];
@@ -103,6 +112,15 @@ class _ChatScreenState extends State<ChatScreen> {
       '✅ ChatController初始化完成, currentAgent=${_controller.currentAgent?.name}',
     );
 
+    // 如果提供了初始消息，设置到输入框
+    if (widget.initialMessage != null && widget.initialMessage!.isNotEmpty) {
+      _controller.setInputText(widget.initialMessage!);
+      debugPrint('✅ 已设置初始消息到输入框: ${widget.initialMessage}');
+    }
+
+    // 从 controller 同步初始 agent 状态到本地
+    _syncAgentStateFromController();
+
     // 初始化完成后在下一帧添加监听器，避免在build期间触发setState
     if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -130,6 +148,13 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       });
     }
+  }
+
+  /// 从 controller 同步 agent 状态到本地
+  void _syncAgentStateFromController() {
+    _isChainMode = _controller.isChainMode;
+    _currentAgent = _controller.currentAgent;
+    _agentChain = _controller.agentChain;
   }
 
   void _onControllerChanged() {
@@ -216,8 +241,7 @@ class _ChatScreenState extends State<ChatScreen> {
   /// 加载建议问题
   Future<void> _loadSuggestedQuestions() async {
     // 检查 agent 是否开启了猜你想问功能
-    if (_controller.currentAgent == null ||
-        !_controller.currentAgent!.enableOpeningQuestions) {
+    if (_currentAgent == null || !_currentAgent!.enableOpeningQuestions) {
       setState(() {
         _suggestedQuestions = [];
       });
@@ -225,10 +249,10 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     // 如果有预设问题,使用预设问题
-    if (_controller.currentAgent!.openingQuestions.isNotEmpty) {
+    if (_currentAgent!.openingQuestions.isNotEmpty) {
       setState(() {
         _suggestedQuestions = List.from(
-          _controller.currentAgent!.openingQuestions,
+          _currentAgent!.openingQuestions,
         );
       });
     } else {
@@ -242,7 +266,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   /// 刷新建议问题（使用 AI 生成）
   Future<void> _refreshSuggestedQuestions() async {
-    if (_controller.currentAgent == null) return;
+    if (_currentAgent == null) return;
 
     setState(() {
       _isLoadingSuggestions = true;
@@ -251,7 +275,7 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       // 使用 AI 生成新问题
       final questions = await _suggestionsService.generateQuestionsWithAI(
-        agent: _controller.currentAgent!,
+        agent: _currentAgent!,
         count: 5,
       );
 
@@ -324,7 +348,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   // 显示模式图标
                   Icon(
-                    _controller.isChainMode ? Icons.link : Icons.smart_toy,
+                    _isChainMode ? Icons.link : Icons.smart_toy,
                     size: 14,
                     color: Colors.grey[600],
                   ),
@@ -601,8 +625,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                     padding: const EdgeInsets.only(bottom: 16),
                                     child: MessageBubble(
                                       message: message,
-                                      hasAgent:
-                                          _controller.currentAgent != null,
+                                      hasAgent: _currentAgent != null,
                                       storage: widget.storage,
                                       onEdit: (messageId, newContent) async {
                                         await _controller.editMessage(
@@ -657,19 +680,15 @@ class _ChatScreenState extends State<ChatScreen> {
                                       },
                                       getAgentName: (agentId) {
                                         // 从 agent 链中查找
-                                        if (_controller.isChainMode) {
-                                          final agent = _controller.agentChain
-                                              .firstWhere(
-                                                (a) => a.id == agentId,
-                                                orElse:
-                                                    () =>
-                                                        _controller
-                                                            .agentChain
-                                                            .first,
-                                              );
+                                        if (_isChainMode &&
+                                            _agentChain != null) {
+                                          final agent = _agentChain!.firstWhere(
+                                            (a) => a.id == agentId,
+                                            orElse: () => _agentChain!.first,
+                                          );
                                           return agent.name;
                                         }
-                                        return _controller.currentAgent?.name;
+                                        return _currentAgent?.name;
                                       },
                                       onCancel:
                                           message.isGenerating
@@ -805,13 +824,13 @@ class _ChatScreenState extends State<ChatScreen> {
           Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
-            _controller.currentAgent != null ? '开始新的对话' : '请先选择一个Agent',
+            _currentAgent != null ? '开始新的对话' : '请先选择一个Agent',
             style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
-          if (_controller.currentAgent != null)
+          if (_currentAgent != null)
             Text(
-              '当前Agent: ${_controller.currentAgent!.name}',
+              '当前Agent: ${_currentAgent!.name}',
               style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             )
           else
@@ -1168,16 +1187,17 @@ class _ChatScreenState extends State<ChatScreen> {
     if (!mounted) return;
 
     // 检查当前配置状态
-    final isCurrentlySingleMode = !_controller.isChainMode && _controller.currentAgent != null;
-    final isCurrentlyChainMode = _controller.isChainMode && _controller.agentChain.isNotEmpty;
+    final isCurrentlySingleMode = !_isChainMode && _currentAgent != null;
+    final isCurrentlyChainMode =
+        _isChainMode && _agentChain != null && _agentChain!.isNotEmpty;
 
     // 获取当前配置的agent显示文本
     String getCurrentAgentDisplayText() {
       if (isCurrentlySingleMode) {
-        return '当前: ${_controller.currentAgent!.name}';
+        return '当前: ${_currentAgent!.name}';
       } else if (isCurrentlyChainMode) {
-        final chainLength = _controller.agentChain.length;
-        final agentNames = _controller.agentChain.map((a) => a.name).join(' → ');
+        final chainLength = _agentChain!.length;
+        final agentNames = _agentChain!.map((a) => a.name).join(' → ');
         return '当前 ($chainLength个): $agentNames';
       }
       return '未配置';
@@ -1237,7 +1257,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _showSingleAgentSelector() async {
     if (!mounted) return;
 
-    final currentAgent = _controller.currentAgent;
+    final currentAgent = _currentAgent;
     final selectedAgents =
         currentAgent != null
             ? [
@@ -1261,7 +1281,13 @@ class _ChatScreenState extends State<ChatScreen> {
               try {
                 await _controller.switchToSingleAgent(selectedAgentId);
                 await _loadSuggestedQuestions();
+
+                // 立即更新本地状态并刷新 UI
                 if (mounted) {
+                  // 重新从 controller 同步状态
+                  _syncAgentStateFromController();
+                  // 强制刷新 UI
+                  setState(() {});
                   toastService.showToast('已切换到 ${agents.first['name']}');
                 }
               } catch (e) {
@@ -1286,7 +1312,13 @@ class _ChatScreenState extends State<ChatScreen> {
             onSave: (chain) async {
               try {
                 await _controller.selectAgentChain(chain);
+
+                // 立即更新本地状态并刷新 UI
                 if (mounted) {
+                  // 重新从 controller 同步状态
+                  _syncAgentStateFromController();
+                  // 强制刷新 UI
+                  setState(() {});
                   toastService.showToast('Agent 链配置成功');
                 }
               } catch (e) {
@@ -1332,21 +1364,21 @@ class _ChatScreenState extends State<ChatScreen> {
 
   /// 获取 Agent 显示文本
   String _getAgentDisplayText() {
-    if (_controller.isChainMode) {
-      final chainLength = _controller.agentChain.length;
+    if (_isChainMode) {
+      final chainLength = _agentChain?.length ?? 0;
       if (chainLength == 0) return '配置 Agent 链';
       return '$chainLength 个 Agent 链';
     } else {
-      return _controller.currentAgent?.name ?? 'agent_chat_selectAgent'.tr;
+      return _currentAgent?.name ?? 'agent_chat_selectAgent'.tr;
     }
   }
 
   /// 检查是否有有效的 Agent
   bool _hasValidAgent() {
-    if (_controller.isChainMode) {
-      return _controller.agentChain.isNotEmpty;
+    if (_isChainMode) {
+      return _agentChain != null && _agentChain!.isNotEmpty;
     } else {
-      return _controller.currentAgent != null;
+      return _currentAgent != null;
     }
   }
 

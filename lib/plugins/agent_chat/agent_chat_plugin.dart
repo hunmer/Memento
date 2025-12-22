@@ -1,4 +1,5 @@
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/agent_chat/models/conversation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -12,7 +13,9 @@ import 'screens/agent_chat_settings_screen.dart';
 import 'services/tool_service.dart';
 import 'services/tool_template_service.dart';
 import 'services/widget_service.dart';
+import 'services/route_agent_config_service.dart';
 import 'models/chat_message.dart';
+import 'models/agent_chain_node.dart';
 import 'repositories/client_agent_chat_repository.dart';
 import 'package:shared_models/shared_models.dart';
 
@@ -38,6 +41,9 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
 
   ToolTemplateService? _templateService;
   ToolTemplateService? get templateService => _templateService;
+
+  RouteAgentConfigService? _routeConfigService;
+  RouteAgentConfigService? get routeConfigService => _routeConfigService;
 
   /// UseCase 业务逻辑层
   late final AgentChatUseCase agentChatUseCase;
@@ -81,6 +87,10 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
     // 初始化工具模板服务
     _templateService = ToolTemplateService(storage);
     await _templateService!.ensureInitialized();
+
+    // 初始化路由配置服务
+    _routeConfigService = RouteAgentConfigService(storage: storage);
+    await _routeConfigService!.initialize();
 
     // 初始化工具服务
     await ToolService.initialize();
@@ -200,6 +210,67 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
       debugPrint('获取活跃会话数失败: $e');
       return 0;
     }
+  }
+
+  // ==================== 临时频道管理 ====================
+
+  /// 创建或获取用于上下文查询的临时会话
+  ///
+  /// 如果已存在且未过期，则返回现有会话；否则创建新会话
+  Future<Conversation> getOrCreateTemporaryConversation({
+    required String routeName,
+    required String title,
+    String? agentId,
+    List<AgentChainNode>? agentChain,
+  }) async {
+    final controller = conversationController;
+    if (controller == null) {
+      throw Exception('conversationController 未初始化');
+    }
+
+    // 尝试获取已存在的临时会话
+    var conversation = controller.conversationService
+        .getTemporaryConversationForRoute(routeName);
+
+    if (conversation != null) {
+      debugPrint('找到已存在的临时会话: ${conversation.id}');
+      return conversation;
+    }
+
+    // 创建新的临时会话
+    debugPrint('为路由 $routeName 创建新的临时会话');
+    conversation = await controller.conversationService
+        .createTemporaryConversation(
+          title: title,
+          routeName: routeName,
+          agentId: agentId,
+          agentChain: agentChain,
+        );
+
+    return conversation;
+  }
+
+  /// 保存路由的 Agent 配置
+  Future<void> saveRouteAgentConfig(
+    String routeName,
+    String? agentId,
+    List<AgentChainNode>? agentChain,
+  ) async {
+    final routeConfig = _routeConfigService;
+    if (routeConfig == null) {
+      debugPrint('routeConfigService 未初始化');
+      return;
+    }
+
+    final config = RouteAgentConfig(agentId: agentId, agentChain: agentChain);
+
+    await routeConfig.saveConfig(routeName, config);
+    debugPrint('已保存路由 $routeName 的 Agent 配置');
+  }
+
+  /// 获取路由的 Agent 配置
+  RouteAgentConfig? getRouteAgentConfig(String routeName) {
+    return _routeConfigService?.getConfig(routeName);
   }
 }
 

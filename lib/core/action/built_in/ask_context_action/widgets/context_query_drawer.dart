@@ -2,18 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:Memento/plugins/openai/openai_plugin.dart';
-import 'package:Memento/plugins/openai/models/ai_agent.dart';
-import 'package:Memento/plugins/openai/services/request_service.dart';
-import 'package:Memento/plugins/openai/widgets/agent_list_drawer.dart';
-import 'package:Memento/plugins/agent_chat/models/agent_chain_node.dart';
-import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/agent_mode_selection_dialog.dart';
-import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/agent_chain_config_dialog.dart';
+import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
+import 'package:Memento/plugins/agent_chat/models/conversation.dart';
+import 'package:Memento/plugins/agent_chat/screens/chat_screen/chat_screen.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import '../models/route_context.dart';
 
 /// 上下文查询抽屉
 ///
-/// 允许用户基于当前路由上下文向AI提问
+/// 通过创建临时频道，使用 agent_chat 插件进行上下文查询
 class ContextQueryDrawer extends StatefulWidget {
   /// 路由上下文信息
   final RouteContext routeContext;
@@ -28,192 +25,139 @@ class ContextQueryDrawer extends StatefulWidget {
 }
 
 class _ContextQueryDrawerState extends State<ContextQueryDrawer> {
-  late TextEditingController _textController;
-
-  // Agent 配置状态
-  bool _isChainMode = false; // 是否为链模式
-  AIAgent? _selectedAgent; // 单 Agent 模式选中的 Agent
-  List<AgentChainNode> _agentChain = []; // Agent 链配置
-
   bool _isLoading = false;
-  String _responseText = '';
-  bool _hasResponse = false;
 
   @override
   void initState() {
     super.initState();
-    // 初始化输入框为路由解释文本
-    _textController =
-        TextEditingController(text: widget.routeContext.description);
+    // 延迟打开聊天界面，避免在 build 过程中调用
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _openChatInterface();
+    });
   }
 
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
-
-  /// 显示 Agent 模式选择器
-  Future<void> _showAgentModeSelector() async {
-    final mode = await showDialog<String>(
-      context: context,
-      builder:
-          (context) => AgentModeSelectionDialog(
-            currentAgent: _selectedAgent,
-            agentChain: _agentChain,
-            isChainMode: _isChainMode,
-          ),
-    );
-
-    if (mode == null || !mounted) return;
-
-    if (mode == 'single') {
-      await _showSingleAgentSelector();
-    } else {
-      await _showAgentChainConfig();
-    }
-  }
-
-  /// 显示单 Agent 选择器
-  Future<void> _showSingleAgentSelector() async {
-    final result = await showModalBottomSheet<List<Map<String, String>>>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => AgentListDrawer(
-        selectedAgents: _selectedAgent != null
-            ? [
-                {'id': _selectedAgent!.id, 'name': _selectedAgent!.name}
-              ]
-            : [],
-        onAgentSelected: (agents) {
-              // AgentListDrawer 会自己关闭并返回结果
-        },
-        allowMultipleSelection: false,
-      ),
-    );
-
-    if (result != null && result.isNotEmpty && mounted) {
-      try {
-        final plugin =
-            PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
-        final agent = await plugin.controller.getAgent(result.first['id']!);
-        setState(() {
-          _selectedAgent = agent;
-          _isChainMode = false;
-          _agentChain = [];
-        });
-      } catch (e) {
-        Toast.error('加载AI助手失败: $e');
-      }
-    }
-  }
-
-  /// 显示 Agent 链配置对话框
-  Future<void> _showAgentChainConfig() async {
+  /// 打开聊天界面
+  Future<void> _openChatInterface() async {
     if (!mounted) return;
 
-    await showDialog(
-      context: context,
-      builder:
-          (context) => AgentChainConfigDialog(
-            initialChain: _agentChain.isNotEmpty ? _agentChain : null,
-            onSave: (chain) {
-              setState(() {
-                _agentChain = chain;
-                _isChainMode = true;
-                _selectedAgent = null;
-              });
-            },
-          ),
-    );
-  }
-
-  /// 获取当前 Agent 配置的显示文本
-  String _getAgentDisplayText() {
-    if (_isChainMode && _agentChain.isNotEmpty) {
-      return '链模式 (${_agentChain.length}个Agent)';
-    } else if (!_isChainMode && _selectedAgent != null) {
-      return _selectedAgent!.name;
-    }
-    return '未选择';
-  }
-
-  /// 发送查询
-  Future<void> _sendQuery() async {
-    // 验证 Agent 配置
-    if (_isChainMode) {
-      if (_agentChain.isEmpty) {
-        Toast.show('请先配置 Agent 链');
-        return;
-      }
-
-      // 链模式需要使用完整的聊天界面
-      Toast.show('链模式功能需要使用聊天界面，当前仅支持单 Agent 查询');
-      return;
-    } else {
-      if (_selectedAgent == null) {
-        Toast.show('请先选择AI助手');
-        return;
-      }
-    }
-
-    // 验证输入
-    final query = _textController.text.trim();
-    if (query.isEmpty) {
-      Toast.show('请输入问题');
-      return;
-    }
-
-    // 单 Agent 模式使用简单的 RequestService 调用
-    await _sendSingleAgentQuery(query);
-  }
-
-  /// 发送单 Agent 查询
-  Future<void> _sendSingleAgentQuery(String query) async {
-    // 重置状态
     setState(() {
       _isLoading = true;
-      _hasResponse = false;
-      _responseText = '';
     });
 
     try {
-      await RequestService.streamResponse(
-        agent: _selectedAgent!,
-        prompt: query,
-        onToken: (token) {
-          if (mounted) {
-            setState(() {
-              _responseText += token;
-              _hasResponse = true;
-            });
-          }
-        },
-        onError: (error) {
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-              _responseText = '错误: $error';
-              _hasResponse = true;
-            });
-            Toast.error('发送失败');
-          }
-        },
-        onComplete: () {
-          if (mounted) {
-            setState(() => _isLoading = false);
-          }
-        },
-        shouldCancel: () => !mounted,
+      // 获取 agent_chat 插件
+      final plugin =
+          PluginManager.instance.getPlugin('agent_chat') as AgentChatPlugin?;
+
+      if (plugin == null) {
+        Toast.error('Agent Chat 插件未加载');
+        if (mounted) Navigator.pop(context);
+        return;
+      }
+
+      // 等待插件初始化
+      if (!plugin.isInitialized) {
+        debugPrint('等待 Agent Chat 插件初始化...');
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (!plugin.isInitialized) {
+          Toast.error('Agent Chat 插件初始化超时');
+          if (mounted) Navigator.pop(context);
+          return;
+        }
+      }
+
+      // 尝试从路由配置中读取上次使用的 Agent 配置
+      final routeConfig = plugin.getRouteAgentConfig(widget.routeContext.routeName);
+      final agentId = routeConfig?.agentId;
+      final agentChain = routeConfig?.agentChain;
+
+      // 创建或获取临时会话
+      final conversation = await plugin.getOrCreateTemporaryConversation(
+        routeName: widget.routeContext.routeName,
+        title: '询问: ${widget.routeContext.description}',
+        agentId: agentId,
+        agentChain: agentChain,
       );
+
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      // 关闭当前抽屉
+      Navigator.pop(context);
+
+      // 使用 SmoothBottomSheet 展示 ChatScreen
+      await _showChatScreen(plugin, conversation);
     } catch (e) {
+      debugPrint('打开聊天界面失败: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _responseText = '发送失败: $e';
-          _hasResponse = true;
         });
+        Toast.error('打开聊天界面失败: $e');
+        Navigator.pop(context);
       }
+    }
+  }
+
+  /// 展示聊天界面
+  Future<void> _showChatScreen(
+    AgentChatPlugin plugin,
+    Conversation conversation,
+  ) async {
+    if (!mounted) return;
+
+    final controller = plugin.conversationController;
+    if (controller == null) return;
+
+    // 记录对话打开前的配置
+    final initialAgentId = conversation.agentId;
+    final initialAgentChain = conversation.agentChain;
+
+    // 展示聊天界面
+    await SmoothBottomSheet.show<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.9,
+        child: ChatScreen(
+          conversation: conversation,
+          storage: controller.storage,
+          conversationService: controller.conversationService,
+          getSettings: () => plugin.settings,
+          initialMessage: widget.routeContext.description, // 将上下文描述设为初始消息
+        ),
+      ),
+    );
+
+    // 聊天界面关闭后，检查 Agent 配置是否发生变化
+    if (!mounted) return;
+
+    try {
+      // 重新获取会话以获取最新配置
+      final updatedConversation =
+          controller.conversationService.getConversation(conversation.id);
+
+      if (updatedConversation != null) {
+        final hasAgentIdChanged =
+            updatedConversation.agentId != initialAgentId;
+        final hasAgentChainChanged =
+            updatedConversation.agentChain != initialAgentChain;
+
+        // 如果配置发生变化，保存到路由配置
+        if (hasAgentIdChanged || hasAgentChainChanged) {
+          await plugin.saveRouteAgentConfig(
+            widget.routeContext.routeName,
+            updatedConversation.agentId,
+            updatedConversation.agentChain,
+          );
+          debugPrint('已保存路由 ${widget.routeContext.routeName} 的 Agent 配置');
+        }
+      }
+    } catch (e) {
+      debugPrint('保存路由 Agent 配置失败: $e');
     }
   }
 
@@ -225,117 +169,78 @@ class _ContextQueryDrawerState extends State<ContextQueryDrawer> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      child: SingleChildScrollView(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // 标题
+          Row(
             children: [
-              // 标题
-              Row(
-                children: [
-                  Icon(Icons.assistant, color: theme.primaryColor),
-                  const SizedBox(width: 8),
-                  Text(
-                    '询问当前上下文',
-                    style: theme.textTheme.titleLarge,
-                  ),
-                ],
-              ),
-              const Divider(height: 24),
-
-              // 路由信息展示
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline,
-                        size: 20, color: theme.primaryColor),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        widget.routeContext.description,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Agent选择
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(_isChainMode ? Icons.link : Icons.smart_toy),
-                title: const Text('选择AI助手'),
-                subtitle: Text(_getAgentDisplayText()),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: _showAgentModeSelector,
-              ),
-              const Divider(),
-
-              // 输入框
-              TextField(
-                controller: _textController,
-                decoration: const InputDecoration(
-                  labelText: '您的问题',
-                  hintText: '编辑您的问题...',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 5,
-                minLines: 3,
-              ),
-              const SizedBox(height: 16),
-
-              // 加载指示器
-              if (_isLoading) const LinearProgressIndicator(),
-
-              // 响应展示
-              if (_hasResponse) ...[
-                const SizedBox(height: 16),
-                const Text('AI回复：',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Container(
-                  constraints: const BoxConstraints(maxHeight: 300),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceVariant,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: SingleChildScrollView(
-                    child: SelectableText(_responseText),
-                  ),
-                ),
-              ],
-
-              const SizedBox(height: 24),
-
-              // 操作按钮
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('app_cancel'.tr),
-                  ),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _sendQuery,
-                    child: const Text('发送'),
-                  ),
-                ],
+              Icon(Icons.assistant, color: theme.primaryColor),
+              const SizedBox(width: 8),
+              Text(
+                '询问当前上下文',
+                style: theme.textTheme.titleLarge,
               ),
             ],
           ),
-        ),
+          const Divider(height: 24),
+
+          // 路由信息展示
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceVariant,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline,
+                    size: 20, color: theme.primaryColor),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widget.routeContext.description,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // 加载指示器
+          if (_isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('正在打开聊天界面...'),
+                  ],
+                ),
+              ),
+            )
+          else
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 32),
+                child: Text('初始化中...'),
+              ),
+            ),
+
+          const SizedBox(height: 24),
+
+          // 取消按钮
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('app_cancel'.tr),
+          ),
+        ],
       ),
     );
   }

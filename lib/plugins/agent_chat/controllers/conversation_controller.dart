@@ -57,7 +57,8 @@ class ConversationController extends ChangeNotifier {
   List<ChatMessage> get currentMessages => messageService.currentMessages;
 
   /// 获取所有会话（包括未过滤的），用于提取分组名称
-  List<Conversation> get allConversations => conversationService.conversations;
+  /// 注意：只返回非临时会话，临时会话不会显示在列表中
+  List<Conversation> get allConversations => conversationService.getNonTemporaryConversations();
 
   String get searchQuery => _searchQuery;
   List<String> get selectedGroupFilters => _selectedGroupFilters;
