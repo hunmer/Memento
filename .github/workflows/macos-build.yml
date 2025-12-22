@@ -2,7 +2,7 @@ name: macOS
 
 on:
   push:
-    branches: [ build ]
+    branches: [ naster ]
   pull_request:
     branches: [ master ]
 
