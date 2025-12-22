@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/event/event.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/widgets/calendar_strip_date_picker.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/plugins/activity/widgets/activity_timeline.dart';
@@ -56,7 +57,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     final storage = StorageManager();
     await storage.initialize();
     _activityService = ActivityService(storage, 'activity');
-    
+
     _activityController = ActivityController(
       activityService: _activityService,
       onActivitiesChanged: () {
@@ -78,6 +79,9 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
 
     await _tagController.initialize();
     await _activityController.loadActivities(_selectedDate);
+
+    // 初始化时设置当前日期的路由上下文
+    _updateRouteContext(_selectedDate);
   }
 
   void _onDateChanged(DateTime date) {
@@ -87,6 +91,20 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       _selectedDate = date;
     });
     _activityController.loadActivities(_selectedDate);
+
+    // 更新路由上下文
+    _updateRouteContext(date);
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前日期
+  void _updateRouteContext(DateTime date) {
+    final dateStr =
+        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/activity_timeline",
+      title: '活动时间轴 - $dateStr',
+      params: {'date': dateStr},
+    );
   }
 
   @override
