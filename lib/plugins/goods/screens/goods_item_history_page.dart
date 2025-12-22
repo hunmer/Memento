@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'package:Memento/plugins/goods/models/usage_record.dart';
 
@@ -25,6 +26,22 @@ class _GoodsItemHistoryPageState extends State<GoodsItemHistoryPage> {
   void initState() {
     super.initState();
     _item = widget.item;
+
+    // 设置路由上下文
+    _updateRouteContext();
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前物品信息
+  void _updateRouteContext() {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/goods/item_history",
+      title: '物品 - 使用记录: ${_item.title}',
+      params: {
+        'itemId': _item.id,
+        'itemName': _item.title,
+        'warehouseId': widget.warehouseId,
+      },
+    );
   }
 
   String _formatDate(DateTime date) {

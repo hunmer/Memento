@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../../widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/models/bill_model.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
@@ -40,6 +41,9 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
     // 默认显示当前月份，而不是 startDate 的月份
     final now = DateTime.now();
     _selectedMonth = DateTime(now.year, now.month);
+
+    // 初始化时设置路由上下文
+    _updateRouteContext(_selectedMonth);
   }
 
   @override
@@ -132,6 +136,18 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
       );
       _expandedCategories.clear();
     });
+    // 更新路由上下文
+    _updateRouteContext(_selectedMonth);
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前月份
+  void _updateRouteContext(DateTime month) {
+    final monthStr = '${month.year}-${month.month.toString().padLeft(2, '0')}';
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/bill_stats',
+      title: '账单分析 - $monthStr',
+      params: {'month': monthStr},
+    );
   }
 
   String _formatCurrency(double amount) {
@@ -333,6 +349,8 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
                 _selectedMonth = month;
                 _expandedCategories.clear();
               });
+              // 更新路由上下文
+              _updateRouteContext(month);
             },
             getMonthStats: _getMonthStats,
             primaryColor: _primaryColor,

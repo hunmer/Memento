@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'warehouse_detail_screen.dart';
@@ -24,6 +25,18 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
   void initState() {
     super.initState();
     GoodsPlugin.instance.addListener(_onWarehousesChanged);
+
+    // 设置路由上下文
+    _updateRouteContext();
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前页面状态
+  void _updateRouteContext() {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/goods/warehouses",
+      title: '物品 - 所有仓库',
+      params: {},
+    );
   }
 
   @override

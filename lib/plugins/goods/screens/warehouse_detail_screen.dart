@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/goods/models/warehouse.dart';
@@ -32,6 +33,9 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
     // 从插件中获取该仓库的排序偏好
     _sortBy = GoodsPlugin.instance.getSortPreference(_warehouse.id);
 
+    // 设置路由上下文
+    _updateRouteContext();
+
     // 监听物品添加事件
     EventManager.instance.subscribe('goods_item_added', (args) {
       if (args is GoodsItemAddedEventArgs &&
@@ -49,12 +53,26 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
     });
   }
 
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前仓库信息
+  void _updateRouteContext() {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: "/goods/warehouse_detail",
+      title: '物品 - 仓库: ${_warehouse.title}',
+      params: {
+        'warehouseId': _warehouse.id,
+        'warehouseName': _warehouse.title,
+      },
+    );
+  }
+
   Future<void> _refreshWarehouse() async {
     final updatedWarehouse = GoodsPlugin.instance.getWarehouse(_warehouse.id);
     if (updatedWarehouse != null && mounted) {
       setState(() {
         _warehouse = updatedWarehouse;
       });
+      // 更新路由上下文
+      _updateRouteContext();
     }
   }
 

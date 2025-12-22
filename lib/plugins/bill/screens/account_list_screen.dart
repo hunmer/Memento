@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/models/account.dart';
@@ -21,6 +22,18 @@ class _AccountListScreenState extends State<AccountListScreen> {
   void initState() {
     super.initState();
     widget.billPlugin.addListener(_onAccountsChanged);
+
+    // 设置路由上下文
+    _updateRouteContext();
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能识别当前页面
+  void _updateRouteContext() {
+    RouteHistoryManager.updateCurrentContext(
+      pageId: '/bill_accounts',
+      title: '账户管理',
+      params: {},
+    );
   }
 
   @override

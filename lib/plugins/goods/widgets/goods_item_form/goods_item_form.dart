@@ -2,7 +2,9 @@ import 'package:get/get.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
+import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'controllers/form_controller.dart';
 import 'widgets/basic_info_tab.dart';
 
@@ -29,6 +31,31 @@ class _GoodsItemFormState extends State<GoodsItemForm> {
   void initState() {
     super.initState();
     _formController = GoodsItemFormController(initialData: widget.initialData);
+
+    // 设置路由上下文
+    _updateRouteContext();
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前编辑的物品信息
+  void _updateRouteContext() {
+    if (widget.initialData != null) {
+      final result = GoodsPlugin.instance.findGoodsItemById(widget.initialData!.id);
+      RouteHistoryManager.updateCurrentContext(
+        pageId: "/goods/item_dialog_edit",
+        title: '物品 - 编辑: ${widget.initialData!.title}',
+        params: {
+          'itemId': widget.initialData!.id,
+          'itemName': widget.initialData!.title,
+          'warehouseId': result?.warehouseId ?? '',
+        },
+      );
+    } else {
+      RouteHistoryManager.updateCurrentContext(
+        pageId: "/goods/item_dialog_new",
+        title: '物品 - 新建物品',
+        params: {},
+      );
+    }
   }
 
   @override

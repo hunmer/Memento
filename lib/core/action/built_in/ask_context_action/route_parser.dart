@@ -28,7 +28,12 @@ class RouteParser {
 
     // 账单插件
     '/bill': '用户正在查看账单',
-    '/bill_edit': '用户正在编辑账单',
+    '/bill_list': '用户正在查看 {month} 的账单列表',
+    '/bill_stats': '用户正在分析 {month} 的账单统计',
+    '/bill_create': '用户正在新建账单',
+    '/bill_edit': '用户正在编辑账单 {billId}',
+    '/bill_subscriptions': '用户正在管理订阅服务',
+    '/bill_accounts': '用户正在管理账单账户',
 
     // 日历插件
     '/calendar': '用户正在查看日历',
@@ -51,6 +56,14 @@ class RouteParser {
     '/checkin': '用户正在查看打卡记录',
     '/contact': '用户正在查看联系人',
     '/goods': '用户正在查看商品管理',
+    '/goods/warehouses': '用户正在查看所有仓库列表',
+    '/goods/warehouse_detail': '用户正在查看仓库: {warehouseName}',
+    '/goods/items_all': '用户正在查看所有物品列表',
+    '/goods/items_filtered': '用户正在查看仓库 {warehouseName} 的物品列表',
+    '/goods/item_history': '用户正在查看物品 {itemName} 的使用记录',
+    '/goods/item_form': '用户正在编辑物品: {itemName}',
+    '/goods/item_dialog_edit': '用户正在编辑物品: {itemName}',
+    '/goods/item_dialog_new': '用户正在创建新物品',
     '/chat': '用户正在查看聊天',
     '/chat/channels': '用户正在查看聊天频道列表',
     '/chat/timeline': '用户正在查看聊天时间线',

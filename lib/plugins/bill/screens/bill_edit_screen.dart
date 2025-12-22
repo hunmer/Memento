@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/models/bill.dart';
@@ -111,6 +112,9 @@ class _BillEditScreenState extends State<BillEditScreen> {
       if (_tag != null && !_availableTags.contains(_tag)) {
         _availableTags.add(_tag!);
       }
+
+      // 设置编辑模式的路由上下文
+      _updateRouteContext(isEdit: true, billId: widget.bill!.id);
     } else {
       // 使用预填充参数（来自快捷记账小组件）或默认值
       _tag = widget.initialCategory ?? _availableTags.first;
@@ -130,6 +134,9 @@ class _BillEditScreenState extends State<BillEditScreen> {
       if (_tag != null && !_availableTags.contains(_tag)) {
         _availableTags.add(_tag!);
       }
+
+      // 设置新建模式的路由上下文
+      _updateRouteContext(isEdit: false);
     }
   }
 
@@ -141,6 +148,23 @@ class _BillEditScreenState extends State<BillEditScreen> {
     _subscriptionNameController.dispose();
     _subscriptionDaysController.dispose();
     super.dispose();
+  }
+
+  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前状态
+  void _updateRouteContext({required bool isEdit, String? billId}) {
+    if (isEdit && billId != null) {
+      RouteHistoryManager.updateCurrentContext(
+        pageId: '/bill_edit',
+        title: '编辑账单',
+        params: {'billId': billId},
+      );
+    } else {
+      RouteHistoryManager.updateCurrentContext(
+        pageId: '/bill_create',
+        title: '新建账单',
+        params: {},
+      );
+    }
   }
 
   Future<void> _saveBill() async {
