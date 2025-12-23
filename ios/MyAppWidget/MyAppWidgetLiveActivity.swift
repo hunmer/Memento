@@ -2,79 +2,132 @@
 //  MyAppWidgetLiveActivity.swift
 //  MyAppWidget
 //
-//  Created by liao on 2025/12/21.
+//  Created by liao on 2025/12/23.
 //
 
 import ActivityKit
 import WidgetKit
 import SwiftUI
 
-struct MyAppWidgetAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        // Dynamic stateful properties about your activity go here!
-        var emoji: String
-    }
+// Create shared default with custom group
+let sharedDefault = UserDefaults(suiteName: "group.github.hunmer.memento")!
+
+struct LiveActivitiesAppAttributes: ActivityAttributes, Identifiable {
+    public typealias LiveDeliveryData = ContentState // don't forget to add this line, otherwise, live activity will not display it.
+
+    public struct ContentState: Codable, Hashable { }
 
     // Fixed non-changing properties about your activity go here!
-    var name: String
+    var id = UUID()
 }
 
 struct MyAppWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: MyAppWidgetAttributes.self) { context in
+        ActivityConfiguration(for: LiveActivitiesAppAttributes.self) { context in
+            // 从 UserDefaults 读取数据
+            let title = sharedDefault.string(forKey: context.attributes.prefixedKey("title")) ?? "未知任务"
+            let subtitle = sharedDefault.string(forKey: context.attributes.prefixedKey("subtitle")) ?? ""
+            let progress = sharedDefault.double(forKey: context.attributes.prefixedKey("progress"))
+            let status = sharedDefault.string(forKey: context.attributes.prefixedKey("status")) ?? ""
+
             // Lock screen/banner UI goes here
-            VStack {
-                Text("Hello \(context.state.emoji)")
+            VStack(spacing: 12) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(title)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        Text(subtitle)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text(status)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text("\(Int(progress * 100))%")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    ProgressView(value: progress)
+                        .tint(.blue)
+                }
             }
-            .activityBackgroundTint(Color.cyan)
+            .padding()
+            .activityBackgroundTint(Color.cyan.opacity(0.2))
             .activitySystemActionForegroundColor(Color.black)
 
         } dynamicIsland: { context in
-            DynamicIsland {
-                // Expanded UI goes here.  Compose the expanded UI through
-                // various regions, like leading/trailing/center/bottom
+            // 从 UserDefaults 读取数据
+            let title = sharedDefault.string(forKey: context.attributes.prefixedKey("title")) ?? "未知任务"
+            let progress = sharedDefault.double(forKey: context.attributes.prefixedKey("progress"))
+
+            return DynamicIsland {
+                // Expanded UI goes here
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    Image(systemName: "app.badge")
+                        .foregroundColor(.blue)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    Text("\(Int(progress * 100))%")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
-                    // more content
+                    VStack(spacing: 4) {
+                        Text(title)
+                            .font(.caption)
+                        ProgressView(value: progress)
+                            .tint(.blue)
+                    }
                 }
             } compactLeading: {
-                Text("L")
+                Image(systemName: "app.badge")
             } compactTrailing: {
-                Text("T \(context.state.emoji)")
+                let progress = sharedDefault.double(forKey: context.attributes.prefixedKey("progress"))
+                Text("\(Int(progress * 100))%")
+                    .font(.caption2)
             } minimal: {
-                Text(context.state.emoji)
+                Image(systemName: "app.badge")
             }
-            .widgetURL(URL(string: "http://www.apple.com"))
-            .keylineTint(Color.red)
+            .widgetURL(URL(string: "memento://live-activity"))
+            .keylineTint(Color.blue)
         }
     }
 }
 
-extension MyAppWidgetAttributes {
-    fileprivate static var preview: MyAppWidgetAttributes {
-        MyAppWidgetAttributes(name: "World")
+// Extension to handle prefixed keys
+extension LiveActivitiesAppAttributes {
+    func prefixedKey(_ key: String) -> String {
+        return "\(id)_\(key)"
     }
 }
 
-extension MyAppWidgetAttributes.ContentState {
-    fileprivate static var smiley: MyAppWidgetAttributes.ContentState {
-        MyAppWidgetAttributes.ContentState(emoji: "😀")
+extension LiveActivitiesAppAttributes {
+    fileprivate static var preview: LiveActivitiesAppAttributes {
+        LiveActivitiesAppAttributes()
+    }
+}
+
+extension LiveActivitiesAppAttributes.ContentState {
+    fileprivate static var inProgress: LiveActivitiesAppAttributes.ContentState {
+        LiveActivitiesAppAttributes.ContentState()
      }
-     
-     fileprivate static var starEyes: MyAppWidgetAttributes.ContentState {
-         MyAppWidgetAttributes.ContentState(emoji: "🤩")
+
+     fileprivate static var completed: LiveActivitiesAppAttributes.ContentState {
+         LiveActivitiesAppAttributes.ContentState()
      }
 }
 
-#Preview("Notification", as: .content, using: MyAppWidgetAttributes.preview) {
+#Preview("Notification", as: .content, using: LiveActivitiesAppAttributes.preview) {
    MyAppWidgetLiveActivity()
 } contentStates: {
-    MyAppWidgetAttributes.ContentState.smiley
-    MyAppWidgetAttributes.ContentState.starEyes
+    LiveActivitiesAppAttributes.ContentState.inProgress
+    LiveActivitiesAppAttributes.ContentState.completed
 }

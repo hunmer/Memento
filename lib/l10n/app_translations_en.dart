@@ -145,6 +145,9 @@ const Map<String, String> appTranslationsEn = {
   'app_permission_storageTitle': 'Storage',
   'app_permission_storageDescription':
       'Required to read and write backup files on your device.',
+  'app_permission_calendarTitle': 'Calendar',
+  'app_permission_calendarDescription':
+      'Required to sync system calendar and manage calendar events.',
 
   // File operations
   'app_downloadCancelled': 'Download cancelled',

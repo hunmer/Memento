@@ -81,7 +81,45 @@ public class MementoNfcPlugin: NSObject, FlutterPlugin, NFCNDEFReaderSessionDele
             } else {
                 result(["success": false, "error": "创建Text payload失败"])
             }
-            
+
+        case "writeNfcRecords":
+            guard let args = call.arguments as? [String: Any],
+                  let records = args["records"] as? [[String: String]] else {
+                result(["success": false, "error": "参数无效"])
+                return
+            }
+
+            var payloads: [NFCNDEFPayload] = []
+            for record in records {
+                guard let type = record["type"],
+                      let data = record["data"] else {
+                    continue
+                }
+
+                if let payload = createNFCPayload(type: type, data: data) {
+                    payloads.append(payload)
+                }
+            }
+
+            if payloads.isEmpty {
+                result(["success": false, "error": "没有有效的记录可写入"])
+                return
+            }
+
+            pendingMessage = NFCNDEFMessage(records: payloads)
+            isWriteMode = true
+            startNfcSession()
+
+        case "openNfcSettings":
+            // iOS 没有专门的 NFC 设置页面，打开通用设置
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url, options: [:]) { success in
+                    result(success)
+                }
+            } else {
+                result(false)
+            }
+
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -114,6 +152,75 @@ public class MementoNfcPlugin: NSObject, FlutterPlugin, NFCNDEFReaderSessionDele
             payload: payload,
             chunkSize: 0
         )
+    }
+
+    /// 根据类型创建 NFCNDEFPayload
+    private func createNFCPayload(type: String, data: String) -> NFCNDEFPayload? {
+        switch type.uppercased() {
+        case "URI":
+            // URI 记录
+            return NFCNDEFPayload.wellKnownTypeURIPayload(string: data)
+
+        case "TEXT":
+            // 文本记录
+            return NFCNDEFPayload.wellKnownTypeTextPayload(string: data, locale: Locale.current) ??
+                   NFCNDEFPayload.wellKnownTypeTextPayload(string: data, locale: Locale(identifier: "en"))
+
+        case "MIME":
+            // MIME 类型记录 - data 格式: "mime_type|content"
+            let parts = data.split(separator: "|", maxSplits: 1)
+            let mimeType = parts.count > 1 ? String(parts[0]) : "text/plain"
+            let content = parts.count > 1 ? String(parts[1]) : data
+
+            guard let contentData = content.data(using: .utf8),
+                  let mimeTypeData = mimeType.data(using: .utf8) else {
+                return nil
+            }
+
+            return NFCNDEFPayload(
+                format: .media,
+                type: mimeTypeData,
+                identifier: Data(),
+                payload: contentData
+            )
+
+        case "AAR":
+            // Android Application Record
+            // iOS 不直接支持 AAR，但可以创建外部类型记录
+            guard let packageData = data.data(using: .utf8) else {
+                return nil
+            }
+            let domain = "android.com"
+            let type = "pkg"
+            return NFCNDEFPayload(
+                format: .nfcExternal,
+                type: "\(domain):\(type)".data(using: .utf8) ?? Data(),
+                identifier: Data(),
+                payload: packageData
+            )
+
+        case "EXTERNAL":
+            // 外部类型记录 - data 格式: "domain:type|content"
+            let parts = data.split(separator: "|", maxSplits: 1)
+            let typeSpec = parts.count > 1 ? String(parts[0]) : "memento:data"
+            let content = parts.count > 1 ? String(parts[1]) : data
+
+            guard let contentData = content.data(using: .utf8),
+                  let typeData = typeSpec.data(using: .utf8) else {
+                return nil
+            }
+
+            return NFCNDEFPayload(
+                format: .nfcExternal,
+                type: typeData,
+                identifier: Data(),
+                payload: contentData
+            )
+
+        default:
+            // 默认使用纯文本
+            return NFCNDEFPayload.wellKnownTypeTextPayload(string: data, locale: Locale(identifier: "en"))
+        }
     }
     
     // MARK: - 写入入口（iOS 13+ 写入模式走这里）
@@ -206,5 +313,10 @@ public class MementoNfcPlugin: NSObject, FlutterPlugin, NFCNDEFReaderSessionDele
             return
         }
         flutterResult?(["success": false, "error": error.localizedDescription])
+    }
+
+    // MARK: - 可选代理方法(消除 iOS 警告)
+    public func readerSessionDidBecomeActive(_ session: NFCNDEFReaderSession) {
+        print("[NFC Info] NFC session became active")
     }
 }

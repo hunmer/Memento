@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:live_activities/live_activities.dart';
+import 'package:live_activities/models/activity_update.dart';
+import 'package:live_activities/models/url_scheme_data.dart';
 import 'package:uuid/uuid.dart';
+import '../controllers/live_activities_controller.dart';
 
 class LiveActivitiesTestScreen extends StatefulWidget {
   const LiveActivitiesTestScreen({super.key});
@@ -12,7 +14,8 @@ class LiveActivitiesTestScreen extends StatefulWidget {
 }
 
 class _LiveActivitiesTestScreenState extends State<LiveActivitiesTestScreen> {
-  final LiveActivities _liveActivitiesPlugin = LiveActivities();
+  final LiveActivitiesController _controller =
+      LiveActivitiesController.instance;
   bool _isInitialized = false;
   bool _isSupported = false;
   String? _activityId;
@@ -35,58 +38,18 @@ class _LiveActivitiesTestScreenState extends State<LiveActivitiesTestScreen> {
 
   Future<void> _initPlugin() async {
     try {
-      // 初始化插件 - 使用自定义的App Group ID和URL Scheme
-      await _liveActivitiesPlugin.init(
-        appGroupId: 'group.github.hunmer.memento', // 需要在Xcode中配置
-        urlScheme: 'memento', // 使用应用中已定义的scheme
+      // 使用控制器初始化
+      final isSupported = await _controller.init(
+        appGroupId: 'group.github.hunmer.memento',
+        urlScheme: 'memento',
         requireNotificationPermission: true,
+        onActivityUpdate: _handleActivityUpdate,
+        onUrlScheme: _handleUrlScheme,
       );
-
-      // 检查设备是否支持Live Activities
-      final isSupported = await _liveActivitiesPlugin.areActivitiesEnabled();
 
       setState(() {
         _isInitialized = true;
         _isSupported = isSupported;
-      });
-
-      // 监听URL Scheme事件
-      _liveActivitiesPlugin.urlSchemeStream().listen((schemeData) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('收到URL Scheme: ${schemeData.url}'),
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      });
-
-      // 监听活动更新
-      _liveActivitiesPlugin.activityUpdateStream.listen((event) {
-        event.map(
-          active: (activity) {
-            print('活动激活: ${activity.activityId}');
-            print('推送令牌: ${activity.activityToken}');
-          },
-          ended: (activity) {
-            print('活动结束: ${activity.activityId}');
-            setState(() {
-              _activityId = null;
-              _progress = 0.0;
-              _status = '活动已结束';
-            });
-          },
-          stale: (activity) {
-            print('活动过期: ${activity.activityId}');
-            setState(() {
-              _activityId = null;
-              _progress = 0.0;
-              _status = '活动已过期';
-            });
-          },
-          unknown: (activity) {
-            print('未知活动状态: ${activity.activityId}');
-          },
-        );
       });
     } catch (e) {
       print('初始化失败: $e');
@@ -95,6 +58,42 @@ class _LiveActivitiesTestScreenState extends State<LiveActivitiesTestScreen> {
           context,
         ).showSnackBar(SnackBar(content: Text('初始化失败: $e')));
       }
+    }
+  }
+
+  void _handleActivityUpdate(ActivityUpdate event) {
+    event.map(
+      active: (activity) {
+        // 活动已激活
+      },
+      ended: (activity) {
+        setState(() {
+          _activityId = null;
+          _progress = 0.0;
+          _status = '活动已结束';
+        });
+      },
+      stale: (activity) {
+        setState(() {
+          _activityId = null;
+          _progress = 0.0;
+          _status = '活动已过期';
+        });
+      },
+      unknown: (activity) {
+        // 未知状态
+      },
+    );
+  }
+
+  void _handleUrlScheme(UrlSchemeData schemeData) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('收到URL Scheme: ${schemeData.url}'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 
@@ -108,31 +107,32 @@ class _LiveActivitiesTestScreenState extends State<LiveActivitiesTestScreen> {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final activityId = _uuid.v4();
 
-      // 准备活动数据
+      // 准备活动数据 - 必须匹配 Swift ContentState 的字段
       final Map<String, dynamic> activityModel = {
         'title': 'Memento 任务',
         'subtitle': '正在处理中...',
         'progress': _progress,
         'status': _status,
         'timestamp': timestamp,
-        'iconUrl': 'https://via.placeholder.com/64x64.png?text=M',
       };
 
-      final id = await _liveActivitiesPlugin.createActivity(
-        activityId,
-        activityModel,
-        staleIn: const Duration(minutes: 10),
-      );
+      // 使用控制器创建活动
+      final id = await _controller.createActivity(activityId, activityModel);
 
-      setState(() {
-        _activityId = id;
-      });
+      if (id != null) {
+        setState(() {
+          _activityId = id;
+        });
 
-      _showMessage('活动创建成功: $id');
+        _showMessage('活动创建成功: $id');
 
-      // 开始定期更新
-      _startUpdateTimer();
+        // 开始定期更新
+        _startUpdateTimer();
+      } else {
+        _showMessage('创建活动失败');
+      }
     } catch (e) {
+      print('创建活动失败详情: $e');
       _showMessage('创建活动失败: $e');
     }
   }
@@ -154,9 +154,16 @@ class _LiveActivitiesTestScreenState extends State<LiveActivitiesTestScreen> {
         'timestamp': timestamp,
       };
 
-      await _liveActivitiesPlugin.updateActivity(_activityId!, activityModel);
+      final success = await _controller.updateActivity(
+        _activityId!,
+        activityModel,
+      );
 
-      _showMessage('活动更新成功');
+      if (success) {
+        _showMessage('活动更新成功');
+      } else {
+        _showMessage('更新活动失败');
+      }
     } catch (e) {
       _showMessage('更新活动失败: $e');
     }
@@ -169,17 +176,21 @@ class _LiveActivitiesTestScreenState extends State<LiveActivitiesTestScreen> {
     }
 
     try {
-      await _liveActivitiesPlugin.endActivity(_activityId!);
+      final success = await _controller.endActivity(_activityId!);
 
-      setState(() {
-        _activityId = null;
-        _progress = 0.0;
-        _status = '活动已结束';
-      });
+      if (success) {
+        setState(() {
+          _activityId = null;
+          _progress = 0.0;
+          _status = '活动已结束';
+        });
 
-      _updateTimer?.cancel();
+        _updateTimer?.cancel();
 
-      _showMessage('活动已结束');
+        _showMessage('活动已结束');
+      } else {
+        _showMessage('结束活动失败');
+      }
     } catch (e) {
       _showMessage('结束活动失败: $e');
     }

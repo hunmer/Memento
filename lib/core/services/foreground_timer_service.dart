@@ -1,19 +1,39 @@
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../screens/settings_screen/controllers/live_activities_controller.dart';
 
 /// 通用前台计时器服务（增强版）
 /// 提供后台计时通知功能,可被任何插件使用
 /// 支持多通知栏实例：每个计时器可独立显示通知栏
-/// 注意: 仅在 Android/iOS 平台有效,桌面端和 Web 端会静默忽略
+///
+/// 平台实现：
+/// - Android: 使用 MethodChannel 调用原生前台服务
+/// - iOS: 使用 Live Activities (动态岛/灵动岛)
+/// - 桌面端/Web: 静默忽略
 class ForegroundTimerService {
   static const MethodChannel _channel = MethodChannel(
     'github.hunmer.memento/timer_service',
   );
 
+  // iOS Live Activities 活动ID映射
+  static final Map<String, String> _iosActivityIds = {};
+
   /// 检查当前平台是否支持前台服务
   static bool get _isPlatformSupported {
     return defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS;
+  }
+
+  /// 判断是否为 iOS 平台
+  static bool get _isIOS {
+    return !kIsWeb && Platform.isIOS;
+  }
+
+  /// 判断是否为 Android 平台
+  static bool get _isAndroid {
+    return !kIsWeb && Platform.isAndroid;
   }
 
   /// 启动前台通知服务
@@ -36,16 +56,76 @@ class ForegroundTimerService {
     if (!_isPlatformSupported) return;
 
     try {
-      await _channel.invokeMethod('startMultipleTimerService', {
-        'timerId': id,
-        'taskName': title,
-        'content': content,
-        'progress': progress,
-        'maxProgress': maxProgress,
-        'color': color?.value,
-      });
+      if (_isIOS) {
+        // iOS: 使用 Live Activities
+        await _startIOSActivity(
+          id: id,
+          title: title,
+          content: content,
+          progress: progress,
+          maxProgress: maxProgress,
+        );
+      } else if (_isAndroid) {
+        // Android: 使用原生前台服务
+        await _channel.invokeMethod('startMultipleTimerService', {
+          'timerId': id,
+          'taskName': title,
+          'content': content,
+          'progress': progress,
+          'maxProgress': maxProgress,
+          'color': color?.value,
+        });
+      }
     } catch (e) {
-      print('Error starting foreground timer service: $e');
+      debugPrint('Error starting foreground timer service: $e');
+    }
+  }
+
+  /// iOS: 启动 Live Activity
+  static Future<void> _startIOSActivity({
+    required String id,
+    required String title,
+    required String content,
+    required int progress,
+    required int maxProgress,
+  }) async {
+    final controller = LiveActivitiesController.instance;
+
+    // 确保控制器已初始化
+    if (!controller.isInitialized) {
+      await controller.init(
+        appGroupId: 'group.github.hunmer.memento',
+        urlScheme: 'memento',
+        requireNotificationPermission: true,
+      );
+    }
+
+    if (!controller.isSupported) {
+      debugPrint('iOS Live Activities 不支持');
+      return;
+    }
+
+    // 计算进度百分比 (0.0-1.0)
+    final progressValue = maxProgress > 0 ? progress / maxProgress : 0.0;
+
+    // 创建活动数据
+    final activityData = {
+      'title': title,
+      'subtitle': content,
+      'progress': progressValue.clamp(0.0, 1.0),
+      'status': content,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    };
+
+    // 创建活动
+    final activityId = await controller.createActivity(
+      'timer_$id',
+      activityData,
+    );
+
+    if (activityId != null) {
+      _iosActivityIds[id] = activityId;
+      debugPrint('iOS Live Activity 创建成功: $activityId');
     }
   }
 
@@ -65,15 +145,59 @@ class ForegroundTimerService {
     if (!_isPlatformSupported) return;
 
     try {
-      await _channel.invokeMethod('updateMultipleTimerService', {
-        'timerId': id,
-        'content': content,
-        'progress': progress,
-        'maxProgress': maxProgress,
-      });
+      if (_isIOS) {
+        // iOS: 更新 Live Activity
+        await _updateIOSActivity(
+          id: id,
+          content: content,
+          progress: progress,
+          maxProgress: maxProgress,
+        );
+      } else if (_isAndroid) {
+        // Android: 更新原生前台服务
+        await _channel.invokeMethod('updateMultipleTimerService', {
+          'timerId': id,
+          'content': content,
+          'progress': progress,
+          'maxProgress': maxProgress,
+        });
+      }
     } catch (e) {
-      print('Error updating foreground timer service: $e');
+      debugPrint('Error updating foreground timer service: $e');
     }
+  }
+
+  /// iOS: 更新 Live Activity
+  static Future<void> _updateIOSActivity({
+    required String id,
+    required String content,
+    required int progress,
+    required int maxProgress,
+  }) async {
+    final activityId = _iosActivityIds[id];
+    if (activityId == null) {
+      debugPrint('iOS Live Activity 未找到: $id');
+      return;
+    }
+
+    final controller = LiveActivitiesController.instance;
+    if (!controller.isInitialized) {
+      debugPrint('LiveActivitiesController 未初始化');
+      return;
+    }
+
+    // 计算进度百分比 (0.0-1.0)
+    final progressValue = maxProgress > 0 ? progress / maxProgress : 0.0;
+
+    // 更新活动数据
+    final activityData = {
+      'subtitle': content,
+      'progress': progressValue.clamp(0.0, 1.0),
+      'status': content,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    };
+
+    await controller.updateActivity(activityId, activityData);
   }
 
   /// 停止前台通知服务
@@ -84,83 +208,35 @@ class ForegroundTimerService {
     if (!_isPlatformSupported) return;
 
     try {
-      await _channel.invokeMethod('stopMultipleTimerService', {
-        'timerId': id,
-      });
+      if (_isIOS) {
+        // iOS: 结束 Live Activity
+        await _stopIOSActivity(id);
+      } else if (_isAndroid) {
+        // Android: 停止原生前台服务
+        await _channel.invokeMethod('stopMultipleTimerService', {'timerId': id});
+      }
     } catch (e) {
-      print('Error stopping foreground timer service: $e');
+      debugPrint('Error stopping foreground timer service: $e');
     }
   }
 
-  // ========== 兼容旧版本API（已废弃，建议使用新API） ==========
-
-  /// 启动前台通知服务（兼容性方法，已废弃）
-  ///
-  /// [id] 计时器唯一标识
-  /// [name] 计时器名称
-  /// [elapsedSeconds] 已经过秒数
-  /// [totalSeconds] 总秒数 (倒计时模式需要)
-  /// [isCountdown] 是否为倒计时模式
-  @Deprecated('Use startService with title and content instead')
-  static Future<void> startTimerService({
-    required String id,
-    required String name,
-    required int elapsedSeconds,
-    int? totalSeconds,
-    bool isCountdown = false,
-  }) async {
-    if (!_isPlatformSupported) return;
-
-    final progress = totalSeconds != null && totalSeconds > 0
-        ? (elapsedSeconds / totalSeconds * 100).toInt()
-        : 0;
-
-    await startService(
-      id: id,
-      title: name,
-      content: _formatTime(elapsedSeconds),
-      progress: progress.clamp(0, 100),
-      maxProgress: 100,
-    );
-  }
-
-  /// 更新前台通知（兼容性方法，已废弃）
-  ///
-  /// [id] 计时器唯一标识
-  /// [name] 计时器名称
-  /// [elapsedSeconds] 已经过秒数
-  /// [totalSeconds] 总秒数 (倒计时模式需要)
-  /// [isCompleted] 是否已完成
-  @Deprecated('Use updateService with content and progress instead')
-  static Future<void> updateTimerService({
-    required String id,
-    required String name,
-    required int elapsedSeconds,
-    int? totalSeconds,
-    bool isCompleted = false,
-  }) async {
-    if (!_isPlatformSupported) return;
-
-    final progress = totalSeconds != null && totalSeconds > 0
-        ? (elapsedSeconds / totalSeconds * 100).toInt()
-        : 0;
-
-    await updateService(
-      id: id,
-      content: _formatTime(elapsedSeconds),
-      progress: progress.clamp(0, 100),
-      maxProgress: 100,
-    );
-  }
-
-  /// 停止前台通知服务（兼容性方法，已废弃）
-  ///
-  /// [id] 计时器唯一标识
-  @Deprecated('Use stopService instead')
-  static Future<void> stopTimerService({String? id}) async {
-    if (id != null) {
-      await stopService(id);
+  /// iOS: 结束 Live Activity
+  static Future<void> _stopIOSActivity(String id) async {
+    final activityId = _iosActivityIds[id];
+    if (activityId == null) {
+      debugPrint('iOS Live Activity 未找到: $id');
+      return;
     }
+
+    final controller = LiveActivitiesController.instance;
+    if (!controller.isInitialized) {
+      debugPrint('LiveActivitiesController 未初始化');
+      return;
+    }
+
+    await controller.endActivity(activityId);
+    _iosActivityIds.remove(id);
+    debugPrint('iOS Live Activity 已结束: $activityId');
   }
 
   /// 格式化时间显示
