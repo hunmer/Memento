@@ -3,46 +3,189 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/index.dart';
+import 'package:Memento/widgets/preset_edit_form.dart';
 import 'package:Memento/plugins/openai/models/prompt_preset.dart';
 import 'package:Memento/plugins/openai/services/prompt_preset_service.dart';
 
-class PromptPresetScreen extends StatelessWidget {
+class PromptPresetScreen extends StatefulWidget {
   const PromptPresetScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final service = PromptPresetService();
+  State<PromptPresetScreen> createState() => _PromptPresetScreenState();
+}
 
-    // 确保预设已加载
-    if (service.presets.isEmpty) {
-      service.loadPresets();
+class _PromptPresetScreenState extends State<PromptPresetScreen> {
+  late final PromptPresetService _service;
+  List<PromptPreset> _filteredPresets = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _service = PromptPresetService();
+
+    // 加载预设数据
+    _loadPresets();
+  }
+
+  Future<void> _loadPresets() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    await _service.loadPresets();
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        _filteredPresets = _service.presets;
+      });
+    }
+  }
+
+  /// 构建过滤条件列表
+  List<FilterItem> _buildFilterItems() {
+    // 获取所有可用标签
+    final allTags = <String>{};
+    for (final preset in _service.presets) {
+      allTags.addAll(preset.tags);
     }
 
+    return [
+      // 标签过滤
+      FilterItem(
+        id: 'tags',
+        title: 'openai_tags'.tr,
+        type: FilterType.tagsMultiple,
+        builder: (context, currentValue, onChanged) {
+          return FilterBuilders.buildTagsFilter(
+            context: context,
+            currentValue: currentValue,
+            onChanged: onChanged,
+            availableTags: allTags.toList(),
+          );
+        },
+        getBadge: FilterBuilders.tagsBadge,
+      ),
+    ];
+  }
+
+  /// 应用过滤条件
+  void _applyFilters(Map<String, dynamic> filters) {
+    List<PromptPreset> result = [..._service.presets];
+
+    // 标签过滤
+    if (filters['tags'] != null && (filters['tags'] as List).isNotEmpty) {
+      final selectedTags = filters['tags'] as List<String>;
+      result =
+          result.where((preset) {
+            return selectedTags.any((tag) => preset.tags.contains(tag));
+          }).toList();
+    }
+
+    setState(() {
+      _filteredPresets = result;
+    });
+  }
+  /// 处理搜索
+  void _handleSearch(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _filteredPresets = _service.presets;
+      });
+      return;
+    }
+
+    final keyword = query.toLowerCase();
+    final filteredBySearch = _service.presets.where((preset) {
+      return preset.name.toLowerCase().contains(keyword) ||
+          preset.description.toLowerCase().contains(keyword) ||
+          preset.content.toLowerCase().contains(keyword);
+    }).toList();
+
+    setState(() {
+      _filteredPresets = filteredBySearch;
+    });
+  }
+
+  /// 显示编辑对话框
+  Future<void> _showEditDialog({PromptPreset? preset}) async {
+    await showPresetEditDialog(
+      context: context,
+      preset: preset,
+      onSave: (newPreset) async {
+        if (preset == null) {
+          await _service.addPreset(newPreset);
+        } else {
+          await _service.updatePreset(newPreset);
+        }
+      },
+    );
+  }
+
+  /// 删除预设
+  Future<void> _deletePreset(PromptPreset preset) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('openai_deletePreset'.tr),
+            content: Text('openai_confirmDeletePreset'.tr),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text('openai_cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  'openai_delete'.tr,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true) {
+      await _service.deletePreset(preset.id);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
       title: Text('openai_promptPresetManagement'.tr),
       largeTitle: 'openai_promptPresetManagement'.tr,
       enableLargeTitle: false,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+    
+      // 启用多条件过滤
+      enableMultiFilter: true,
+      multiFilterItems: _buildFilterItems(),
+      onMultiFilterChanged: _applyFilters,
+
+      // 启用搜索栏
+      enableSearchBar: true,
+      onSearchChanged: _handleSearch,
+
       actions: [
         IconButton(
           icon: const Icon(Icons.add),
-          onPressed: () async {
-            final result = await showDialog<PromptPreset>(
-              context: context,
-              builder: (context) => const _PresetEditDialog(),
-            );
-
-            if (result != null) {
-              await service.addPreset(result);
-            }
-          },
+          onPressed: () => _showEditDialog(),
         ),
       ],
       body: AnimatedBuilder(
-        animation: service,
+        animation: _service,
         builder: (context, _) {
-          if (service.presets.isEmpty) {
+          if (_isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
+          if (_service.presets.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -66,16 +209,7 @@ class PromptPresetScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
-                    onPressed: () async {
-                      final result = await showDialog<PromptPreset>(
-                        context: context,
-                        builder: (context) => const _PresetEditDialog(),
-                      );
-
-                      if (result != null) {
-                        await service.addPreset(result);
-                      }
-                    },
+                    onPressed: () => _showEditDialog(),
                     icon: const Icon(Icons.add),
                     label: Text('openai_addPreset'.tr),
                   ),
@@ -84,11 +218,34 @@ class PromptPresetScreen extends StatelessWidget {
             );
           }
 
+          if (_filteredPresets.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.search_off, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text(
+                    'openai_noMatchingPresets'.tr,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'openai_tryAdjustingFilters'.tr,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
+          }
+
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: service.presets.length,
+            itemCount: _filteredPresets.length,
             itemBuilder: (context, index) {
-              final preset = service.presets[index];
+              final preset = _filteredPresets[index];
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
@@ -135,39 +292,9 @@ class PromptPresetScreen extends StatelessWidget {
                   trailing: PopupMenuButton<String>(
                     onSelected: (value) async {
                       if (value == 'edit') {
-                        final result = await showDialog<PromptPreset>(
-                          context: context,
-                          builder: (context) => _PresetEditDialog(preset: preset),
-                        );
-
-                        if (result != null) {
-                          await service.updatePreset(result);
-                        }
+                        await _showEditDialog(preset: preset);
                       } else if (value == 'delete') {
-                        final confirmed = await showDialog<bool>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('openai_deletePreset'.tr),
-                            content: Text('openai_confirmDeletePreset'.tr),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(false),
-                                child: Text('openai_cancel'.tr),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(true),
-                                child: Text(
-                                  'openai_delete'.tr,
-                                  style: const TextStyle(color: Colors.red),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-
-                        if (confirmed == true) {
-                          await service.deletePreset(preset.id);
-                        }
+                        await _deletePreset(preset);
                       }
                     },
                     itemBuilder: (context) => [
@@ -196,16 +323,7 @@ class PromptPresetScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  onTap: () async {
-                    final result = await showDialog<PromptPreset>(
-                      context: context,
-                      builder: (context) => _PresetEditDialog(preset: preset),
-                    );
-
-                    if (result != null) {
-                      await service.updatePreset(result);
-                    }
-                  },
+                  onTap: () => _showEditDialog(preset: preset),
                 ),
               );
             },
@@ -213,180 +331,5 @@ class PromptPresetScreen extends StatelessWidget {
         },
       ),
     );
-  }
-}
-
-class _PresetEditDialog extends StatefulWidget {
-  final PromptPreset? preset;
-
-  const _PresetEditDialog({this.preset});
-
-  @override
-  State<_PresetEditDialog> createState() => _PresetEditDialogState();
-}
-
-class _PresetEditDialogState extends State<_PresetEditDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _contentController = TextEditingController();
-  final _tagController = TextEditingController();
-  final List<String> _tags = [];
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.preset != null) {
-      _nameController.text = widget.preset!.name;
-      _descriptionController.text = widget.preset!.description;
-      _contentController.text = widget.preset!.content;
-      _tags.addAll(widget.preset!.tags);
-    }
-  }
-
-  void _addTag() {
-    final tag = _tagController.text.trim();
-    if (tag.isNotEmpty && !_tags.contains(tag)) {
-      setState(() {
-        _tags.add(tag);
-        _tagController.clear();
-      });
-    }
-  }
-
-  void _removeTag(String tag) {
-    setState(() {
-      _tags.remove(tag);
-    });
-  }
-
-  void _save() {
-    if (!_formKey.currentState!.validate()) return;
-
-    final now = DateTime.now();
-    final preset = PromptPreset(
-      id: widget.preset?.id ?? now.millisecondsSinceEpoch.toString(),
-      name: _nameController.text.trim(),
-      description: _descriptionController.text.trim(),
-      content: _contentController.text,
-      tags: _tags,
-      createdAt: widget.preset?.createdAt ?? now,
-      updatedAt: now,
-    );
-
-    Navigator.of(context).pop(preset);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    final isEditing = widget.preset != null;
-
-    return AlertDialog(
-      title: Text(isEditing ? 'openai_editPreset'.tr : 'openai_addPreset'.tr),
-      content: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: 'openai_presetTitle'.tr,
-                    hintText: 'openai_pleaseEnterTitle'.tr,
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'openai_pleaseEnterTitle'.tr;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    labelText: 'openai_presetDescription'.tr,
-                  ),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _contentController,
-                  decoration: InputDecoration(
-                    labelText: 'openai_promptContent'.tr,
-                    hintText: 'openai_enterSystemPrompt'.tr,
-                  ),
-                  maxLines: 8,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'openai_pleaseEnterSystemPrompt'.tr;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _tagController,
-                        decoration: InputDecoration(
-                          labelText: 'openai_presetTags'.tr,
-                          hintText: 'openai_enterTagName'.tr,
-                        ),
-                        onFieldSubmitted: (_) => _addTag(),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: _addTag,
-                    ),
-                  ],
-                ),
-                if (_tags.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: _tags
-                        .map(
-                          (tag) => Chip(
-                            label: Text(tag),
-                            onDeleted: () => _removeTag(tag),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text('openai_cancel'.tr),
-        ),
-        ElevatedButton(
-          onPressed: _save,
-          child: Text('openai_save'.tr),
-        ),
-      ],
-    );
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    _contentController.dispose();
-    _tagController.dispose();
-    super.dispose();
   }
 }

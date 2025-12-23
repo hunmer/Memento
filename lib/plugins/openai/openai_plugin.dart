@@ -14,6 +14,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:shared_models/usecases/openai/openai_usecase.dart';
+import 'package:Memento/widgets/preset_edit_form.dart';
 import 'repositories/client_openai_repository.dart';
 import 'screens/agent_list_screen.dart';
 import 'screens/plugin_settings_screen.dart';
@@ -791,84 +792,17 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
   }
 
   void _showPresetEditDialog() async {
-    final nameController = TextEditingController();
-    final descriptionController = TextEditingController();
-    final contentController = TextEditingController();
-
-    final result = await showDialog<bool>(
+    await showPresetEditDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('openai_addPreset'.tr),
-            content: SizedBox(
-              width: 400,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: 'openai_presetTitle'.tr,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(
-                      labelText: 'openai_presetDescription'.tr,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: contentController,
-                    decoration: InputDecoration(
-                      labelText: 'openai_contentLabel'.tr,
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 5,
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text('openai_cancel'.tr),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: Text('openai_addPreset'.tr),
-              ),
-            ],
-          ),
+      onSave: (preset) async {
+        final service = PromptPresetService();
+        await service.addPreset(preset);
+
+        if (mounted) {
+          Toast.success('openai_presetSaved'.tr);
+        }
+      },
     );
-
-    if (result == true &&
-        nameController.text.isNotEmpty &&
-        contentController.text.isNotEmpty) {
-      final service = PromptPresetService();
-      final preset = PromptPreset(
-        id: const Uuid().v4(),
-        name: nameController.text,
-        description: descriptionController.text,
-        content: contentController.text,
-        tags: [],
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      await service.addPreset(preset);
-
-      if (mounted) {
-        Toast.success('openai_presetSaved'.tr);
-      }
-    }
-
-    nameController.dispose();
-    descriptionController.dispose();
-    contentController.dispose();
   }
 
   @override

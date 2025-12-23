@@ -174,6 +174,8 @@ final Map<String, String> openaiTranslationsEn = {
   'openai_createFirstPreset': 'Click the button in the bottom left to create your first preset',
   'openai_addTag': 'Add Tag',
   'openai_enterTagName': 'Enter tag name',
+  'openai_tagName': 'Tag Name',
+  'openai_add': 'Add',
   'openai_createdAt': 'Created at',
 
   // Provider Settings
@@ -210,6 +212,11 @@ final Map<String, String> openaiTranslationsEn = {
   'openai_promptPresetActiveHint': 'Preset selected, this field will be ignored',
   'openai_promptContent': 'Prompt Content',
   'openai_searchAgent': 'Search agents',
+  'openai_searchPresetsHint': 'Search title, description or content',
+  'openai_noMatchingPresets': 'No matching presets',
+  'openai_tryAdjustingFilters': 'Try adjusting search or filter conditions',
+  'openai_update': 'Update',
+  'openai_search': 'Search',
 
   // Clipboard Share & Import
   'openai_shareAgent': 'Share Agent',

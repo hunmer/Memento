@@ -174,6 +174,8 @@ final Map<String, String> openaiTranslationsZh = {
   'openai_createFirstPreset': '点击左下角按钮创建第一个预设',
   'openai_addTag': '添加标签',
   'openai_enterTagName': '输入标签名称',
+  'openai_tagName': '标签名称',
+  'openai_add': '添加',
   'openai_createdAt': '创建于',
 
   // Provider Settings
@@ -210,6 +212,11 @@ final Map<String, String> openaiTranslationsZh = {
   'openai_promptPresetActiveHint': '已选择预设,此字段内容将被忽略',
   'openai_promptContent': 'Prompt 内容',
   'openai_searchAgent': '搜索智能体',
+  'openai_searchPresetsHint': '搜索标题、描述或内容',
+  'openai_noMatchingPresets': '没有匹配的预设',
+  'openai_tryAdjustingFilters': '尝试调整搜索或过滤条件',
+  'openai_update': '更新',
+  'openai_search': '搜索',
 
   // Clipboard Share & Import
   'openai_shareAgent': '分享智能体',
