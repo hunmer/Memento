@@ -78,6 +78,8 @@ const Map<String, String> todoTranslationsEn = {
   'todo_sortByDueDate': 'Sort by Due Date',
   'todo_sortByPriority': 'Sort by Priority',
   'todo_customSort': 'Custom Sort',
+  'todo_dateRange': 'Date Range',
+  'todo_status': 'Status',
 
   // Time range options
   'todo_today': 'Today',

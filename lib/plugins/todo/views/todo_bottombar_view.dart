@@ -12,8 +12,8 @@ import 'package:Memento/plugins/todo/widgets/task_list_view.dart';
 import 'package:Memento/plugins/todo/widgets/task_form.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/index.dart';
 import 'package:Memento/plugins/todo/views/todo_four_quadrant_view.dart';
-import 'package:Memento/plugins/todo/widgets/filter_dialog.dart';
 import 'package:Memento/plugins/todo/widgets/history_completed_view.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'todo_item_detail.dart';
@@ -305,6 +305,140 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
     }
   }
 
+  /// 构建过滤条件列表
+  List<FilterItem> _buildFilterItems() {
+    // 获取所有可用标签
+    final availableTags = _plugin.taskController.getAllTags();
+
+    return [
+      // 1. 标签多选过滤
+      if (availableTags.isNotEmpty)
+        FilterItem(
+          id: 'tags',
+          title: 'todo_tags'.tr,
+          type: FilterType.tagsMultiple,
+          builder: (context, currentValue, onChanged) {
+            return FilterBuilders.buildTagsFilter(
+              context: context,
+              currentValue: currentValue,
+              onChanged: onChanged,
+              availableTags: availableTags,
+            );
+          },
+          getBadge: FilterBuilders.tagsBadge,
+        ),
+
+      // 2. 优先级过滤
+      FilterItem(
+        id: 'priority',
+        title: 'todo_priority'.tr,
+        type: FilterType.custom,
+        builder: (context, currentValue, onChanged) {
+          return FilterBuilders.buildPriorityFilter<TaskPriority>(
+            context: context,
+            currentValue: currentValue,
+            onChanged: onChanged,
+            priorityLabels: {
+              TaskPriority.low: 'todo_low'.tr,
+              TaskPriority.medium: 'todo_medium'.tr,
+              TaskPriority.high: 'todo_high'.tr,
+            },
+            priorityColors: const {
+              TaskPriority.low: Colors.green,
+              TaskPriority.medium: Colors.orange,
+              TaskPriority.high: Colors.red,
+            },
+          );
+        },
+        getBadge: (value) => FilterBuilders.priorityBadge(
+          value,
+          {
+            TaskPriority.low: 'todo_low'.tr,
+            TaskPriority.medium: 'todo_medium'.tr,
+            TaskPriority.high: 'todo_high'.tr,
+          },
+        ),
+      ),
+
+      // 3. 日期范围过滤
+      FilterItem(
+        id: 'dateRange',
+        title: 'todo_dateRange'.tr,
+        type: FilterType.dateRange,
+        builder: (context, currentValue, onChanged) {
+          return FilterBuilders.buildDateRangeFilter(
+            context: context,
+            currentValue: currentValue,
+            onChanged: onChanged,
+          );
+        },
+        getBadge: FilterBuilders.dateRangeBadge,
+      ),
+
+      // 4. 完成状态过滤
+      FilterItem(
+        id: 'status',
+        title: 'todo_status'.tr,
+        type: FilterType.checkbox,
+        builder: (context, currentValue, onChanged) {
+          return FilterBuilders.buildCheckboxFilter(
+            context: context,
+            currentValue: currentValue,
+            onChanged: onChanged,
+            options: {
+              'showCompleted': 'todo_showCompleted'.tr,
+              'showIncomplete': 'todo_showIncomplete'.tr,
+            },
+          );
+        },
+        getBadge: FilterBuilders.checkboxBadge,
+        initialValue: const {
+          'showCompleted': true,
+          'showIncomplete': true,
+        },
+      ),
+    ];
+  }
+
+  /// 应用多条件过滤
+  void _applyMultiFilters(Map<String, dynamic> filters) {
+    // 构建过滤参数
+    final filterParams = <String, dynamic>{};
+
+    // 标签过滤
+    if (filters['tags'] != null && (filters['tags'] as List).isNotEmpty) {
+      filterParams['tags'] = filters['tags'];
+    }
+
+    // 优先级过滤
+    if (filters['priority'] != null) {
+      filterParams['priority'] = filters['priority'];
+    }
+
+    // 日期范围过滤
+    if (filters['dateRange'] != null) {
+      final range = filters['dateRange'] as DateTimeRange;
+      filterParams['startDate'] = range.start;
+      filterParams['endDate'] = range.end;
+    }
+
+    // 完成状态过滤
+    if (filters['status'] != null) {
+      final status = filters['status'] as Map<String, bool>;
+      filterParams['showCompleted'] = status['showCompleted'] ?? true;
+      filterParams['showIncomplete'] = status['showIncomplete'] ?? true;
+    }
+
+    // 应用过滤
+    if (filterParams.isEmpty) {
+      _plugin.taskController.clearFilter();
+    } else {
+      _plugin.taskController.applyFilter(filterParams);
+    }
+
+    setState(() {});
+  }
+
   // 构建任务列表视图（第一个tab）
   Widget _buildTaskListView() {
 
@@ -348,11 +482,14 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
         });
       },
       searchBody: _buildSearchResults(),
+
+      // 启用多条件过滤
+      enableMultiFilter: true,
+      multiFilterItems: _buildFilterItems(),
+      multiFilterBarHeight: 50,
+      onMultiFilterChanged: _applyMultiFilters,
+
       actions: [
-        IconButton(
-          icon: const Icon(Icons.filter_alt),
-          onPressed: _showFilterDialog,
-        ),
         IconButton(
           icon: Icon(
             _plugin.taskController.isGridView
@@ -468,26 +605,6 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
         taskController: _plugin.taskController,
       ),
     );
-  }
-
-  // 显示过滤器对话框
-  void _showFilterDialog() async {
-    final tags =
-        _plugin.taskController.tasks
-            .expand((task) => task.tags)
-            .toSet()
-            .toList();
-    final filter = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder:
-          (context) => FilterDialog(
-            onFilter: (filter) => Navigator.pop(context, filter),
-            availableTags: tags,
-          ),
-    );
-    if (filter != null) {
-      _plugin.taskController.applyFilter(filter);
-    }
   }
 
   // 显示任务详情对话框

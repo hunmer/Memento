@@ -78,6 +78,8 @@ const Map<String, String> todoTranslationsZh = {
   'todo_sortByDueDate': '按截止日期排序',
   'todo_sortByPriority': '按优先级排序',
   'todo_customSort': '自定义排序',
+  'todo_dateRange': '日期范围',
+  'todo_status': '状态',
 
   // 时间范围选项
   'todo_today': '今日',

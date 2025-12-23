@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.dart';
+import 'super_cupertino_navigation_wrapper/filter_models.dart';
+import 'super_cupertino_navigation_wrapper/multi_filter_bar.dart';
 
 /// Super Cupertino Navigation Bar 的封装组件
 ///
@@ -9,6 +11,7 @@ import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.da
 /// - 大标题 (Large Title)
 /// - 搜索栏 (Search Bar)
 /// - 底部栏 (Bottom Bar)
+/// - 多条件过滤栏 (Multi Filter Bar)
 /// - 自定义主题和样式
 class SuperCupertinoNavigationWrapper extends StatefulWidget {
   /// 导航栏标题
@@ -107,6 +110,20 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
   /// 如果提供此回调，在非移动端（桌面平台）将显示自定义返回按钮
   final VoidCallback? onLeadingPressed;
 
+  /// ========== 多条件过滤相关配置 ==========
+
+  /// 是否启用多条件过滤
+  final bool enableMultiFilter;
+
+  /// 多条件过滤项列表
+  final List<FilterItem>? multiFilterItems;
+
+  /// 多条件过滤栏高度
+  final double multiFilterBarHeight;
+
+  /// 多条件过滤变更回调
+  final ValueChanged<Map<String, dynamic>>? onMultiFilterChanged;
+
   const SuperCupertinoNavigationWrapper({
     super.key,
     required this.title,
@@ -142,6 +159,11 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
     this.filterLabels = const {}, // 改为空映射，通过国际化获取默认值
     this.onSearchFilterChanged,
     this.onLeadingPressed,
+    // 多条件过滤参数
+    this.enableMultiFilter = false,
+    this.multiFilterItems,
+    this.multiFilterBarHeight = 50,
+    this.onMultiFilterChanged,
   });
 
   @override
@@ -161,17 +183,24 @@ class _SuperCupertinoNavigationWrapperState
     'comment': true,
   };
 
+  /// 多条件过滤状态
+  late MultiFilterState _multiFilterState;
+
   /// 获取国际化文本
   @override
   void dispose() {
     _searchController.dispose();
     _searchFocusNode.dispose();
+    _multiFilterState.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+
+    // 初始化多条件过滤状态
+    _multiFilterState = MultiFilterState();
     // 初始化搜索过滤器状态
     _searchFilters.addAll(
       widget.filterLabels.keys
@@ -375,10 +404,22 @@ class _SuperCupertinoNavigationWrapperState
             // 搜索过滤器 - 依赖 _isSearchFocused 状态
             if (widget.enableSearchFilter && _isSearchFocused)
               _buildSearchFilter(),
-            // 过滤栏 - 只在非搜索状态下显示
+            // 多条件过滤栏 - 只在非搜索状态下显示
+            if (widget.enableMultiFilter &&
+                widget.multiFilterItems != null &&
+                widget.multiFilterItems!.isNotEmpty &&
+                !_isSearchFocused)
+              MultiFilterBar(
+                filterItems: widget.multiFilterItems!,
+                filterState: _multiFilterState,
+                onFilterChanged: widget.onMultiFilterChanged,
+                height: widget.multiFilterBarHeight,
+              ),
+            // 过滤栏 - 只在非搜索状态下显示（保持向后兼容）
             if (widget.enableFilterBar &&
                 widget.filterBarChild != null &&
-                !_isSearchFocused)
+                !_isSearchFocused &&
+                !widget.enableMultiFilter)
               Container(
                 height: widget.filterBarHeight,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
