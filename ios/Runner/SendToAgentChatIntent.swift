@@ -11,7 +11,12 @@ struct SendToAgentChatIntent: AppIntent {
     var messageText: String
 
     // 参数2: 图片列表（可选）
-    @Parameter(title: "图片", description: "要发送的图片（支持多张）")
+    // 添加 supportedTypeIdentifiers 参数,iOS 会自动优化为相册选择器
+    @Parameter(
+        title: "图片",
+        description: "从相册选择图片（支持多张）",
+        supportedTypeIdentifiers: ["public.image"]
+    )
     var images: [IntentFile]?
 
     // 参数3: 频道选择（可选）
@@ -37,30 +42,26 @@ struct SendToAgentChatIntent: AppIntent {
             print("[SendToAgentChat] 收到 \(images.count) 张图片")
             var imagePaths: [String] = []
 
-            for (index, imageFile) in images.enumerated() {
-                print("[SendToAgentChat] 处理图片 \(index): \(imageFile)")
+            for (index, imageItem) in images.enumerated() {
+                print("[SendToAgentChat] 处理图片 \(index)")
 
-                // 将图片保存到临时目录
-                if let fileURL = imageFile.fileURL {
-                    print("[SendToAgentChat] 图片源路径: \(fileURL.path)")
+                do {
+                    // 获取图片数据
+                    let imageData = imageItem.data
+                    print("[SendToAgentChat] 读取图片数据，大小: \(imageData.count) bytes")
+
+                    // 保存到临时目录
                     let tempDir = FileManager.default.temporaryDirectory
                     let fileName = "shortcut_image_\(index)_\(Date().timeIntervalSince1970).jpg"
                     let destURL = tempDir.appendingPathComponent(fileName)
                     print("[SendToAgentChat] 图片目标路径: \(destURL.path)")
 
-                    do {
-                        // 复制文件到临时目录
-                        if FileManager.default.fileExists(atPath: destURL.path) {
-                            try FileManager.default.removeItem(at: destURL)
-                        }
-                        try FileManager.default.copyItem(at: fileURL, to: destURL)
-                        imagePaths.append(destURL.path)
-                        print("[SendToAgentChat] 图片复制成功: \(destURL.path)")
-                    } catch {
-                        print("[SendToAgentChat] 图片处理失败: \(error)")
-                    }
-                } else {
-                    print("[SendToAgentChat] 警告：图片 \(index) 没有 fileURL")
+                    // 写入文件
+                    try imageData.write(to: destURL)
+                    imagePaths.append(destURL.path)
+                    print("[SendToAgentChat] 图片保存成功: \(destURL.path)")
+                } catch {
+                    print("[SendToAgentChat] 图片处理失败: \(error)")
                 }
             }
 

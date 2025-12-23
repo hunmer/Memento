@@ -252,14 +252,20 @@ class AgentChainExecutor {
 
     // 添加预设消息（在 system prompt 之后）
     if (agent.messages != null && agent.messages!.isNotEmpty) {
-      debugPrint('📋 [链式调用] Agent ${agent.name} 开始添加预设消息，共 ${agent.messages!.length} 条');
+      debugPrint(
+        '📋 [链式调用] Agent ${agent.name} 开始添加预设消息，共 ${agent.messages!.length} 条',
+      );
       for (final prompt in agent.messages!) {
-        debugPrint('  - 类型: ${prompt.type}, 内容: ${prompt.content.substring(0, prompt.content.length > 30 ? 30 : prompt.content.length)}${prompt.content.length > 30 ? '...' : ''}');
+        debugPrint(
+          '  - 类型: ${prompt.type}, 内容: ${prompt.content.substring(0, prompt.content.length > 30 ? 30 : prompt.content.length)}${prompt.content.length > 30 ? '...' : ''}',
+        );
         switch (prompt.type) {
           case 'user':
             messages.add(
               ChatCompletionMessage.user(
-                content: ChatCompletionUserMessageContent.string(prompt.content),
+                content: ChatCompletionUserMessageContent.string(
+                  prompt.content,
+                ),
               ),
             );
             break;
@@ -328,9 +334,10 @@ class AgentChainExecutor {
           final prevContent = previousMessages[stepIndex - 1].content;
 
           // 防护：确保 prevAgent 是有效的 AIAgent 对象
-          final agentName = prevAgent != null && prevAgent.name.isNotEmpty
-              ? prevAgent.name
-              : '未知 Agent';
+          final agentName =
+              prevAgent != null && prevAgent.name.isNotEmpty
+                  ? prevAgent.name
+                  : '未知 Agent';
 
           messages.add(
             ChatCompletionMessage.user(
@@ -637,7 +644,6 @@ class AgentChainExecutor {
         agent: agent,
         prompt: null,
         contextMessages: summaryContextMessages,
-        vision: false,
         shouldCancel: isCancelling,
         onToken: (token) {
           buffer.write(token);

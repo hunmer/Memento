@@ -25,19 +25,14 @@ String _extractErrorMessage(dynamic error) {
             // 修复可能的UTF-8编码问题
             final fixedMessage = _fixUTF8Encoding(message);
             final code = errorObj['code'];
-            errorDetails = code != null
-                ? '错误码 $code: $fixedMessage'
-                : fixedMessage;
+            errorDetails =
+                code != null ? '错误码 $code: $fixedMessage' : fixedMessage;
           }
         }
       }
     } catch (parseError) {
       // 如果解析失败，使用原始错误消息
-      developer.log(
-        '解析错误消息失败',
-        name: 'RequestService',
-        error: parseError,
-      );
+      developer.log('解析错误消息失败', name: 'RequestService', error: parseError);
     }
   }
 
@@ -113,12 +108,17 @@ String _formatMessagesForLog(List<ChatCompletionMessage> messages) {
     } else if (rawContent is ChatCompletionUserMessageContent) {
       // 处理 user 消息的特殊类型
       content = rawContent.map(
-        parts: (parts) => parts.value.map((p) => p.map(
-          text: (t) => t.text,
-          image: (i) => '[图片]',
-          audio: (a) => '[音频]',
-          refusal: (r) => '[拒绝]',
-        )).join(' '),
+        parts:
+            (parts) => parts.value
+                .map(
+                  (p) => p.map(
+                    text: (t) => t.text,
+                    image: (i) => '[图片]',
+                    audio: (a) => '[音频]',
+                    refusal: (r) => '[拒绝]',
+                  ),
+                )
+                .join(' '),
         string: (s) => s.value,
       );
     } else {
@@ -126,9 +126,10 @@ String _formatMessagesForLog(List<ChatCompletionMessage> messages) {
     }
 
     // 截断过长内容
-    final truncated = content.length > 200
-        ? '${content.substring(0, 200)}... (${content.length}字符)'
-        : content;
+    final truncated =
+        content.length > 200
+            ? '${content.substring(0, 200)}... (${content.length}字符)'
+            : content;
     buffer.writeln('  [$i] $role: $truncated');
   }
   return buffer.toString();
@@ -149,7 +150,9 @@ class RequestService {
         '正在获取预设 Prompt: ${agent.promptPresetId}',
         name: 'RequestService',
       );
-      final presetContent = await PromptPresetService().getPresetContent(agent.promptPresetId);
+      final presetContent = await PromptPresetService().getPresetContent(
+        agent.promptPresetId,
+      );
       if (presetContent != null && presetContent.isNotEmpty) {
         developer.log(
           '✓ 使用预设 Prompt (${agent.promptPresetId}), 长度: ${presetContent.length}字符',
@@ -332,11 +335,7 @@ class RequestService {
       return content;
     } catch (e) {
       final errorDetails = _extractErrorMessage(e);
-      developer.log(
-        '聊天请求错误: $errorDetails',
-        name: 'RequestService',
-        error: e,
-      );
+      developer.log('聊天请求错误: $errorDetails', name: 'RequestService', error: e);
       return 'Error: $errorDetails';
     }
   }
@@ -360,7 +359,7 @@ class RequestService {
     required Function(String) onToken,
     required Function(String) onError,
     required Function() onComplete,
-    bool vision = false,
+    bool vision = true,
     String? filePath,
     List<ChatCompletionMessage>? contextMessages,
     ResponseFormat? responseFormat,
@@ -382,24 +381,34 @@ class RequestService {
             !effectiveSystemPrompt.contains('{tool_brief}') &&
             !effectiveSystemPrompt.contains('{tool_detail}')) {
           // 构建默认模板：原始prompt + 工具相关占位符
-          effectiveSystemPrompt = '{agent_prompt}\n{tool_templates}{tool_brief}{tool_detail}';
+          effectiveSystemPrompt =
+              '{agent_prompt}\n{tool_templates}{tool_brief}{tool_detail}';
         }
 
         // 替换 {agent_prompt} 占位符为原始 agent prompt
-        effectiveSystemPrompt = effectiveSystemPrompt.replaceAll('{agent_prompt}', originalAgentPrompt);
+        effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(
+          '{agent_prompt}',
+          originalAgentPrompt,
+        );
 
         // 替换 additionalPrompts 中提供的占位符
         additionalPrompts.forEach((placeholder, content) {
           final fullPlaceholder = '{$placeholder}';
           if (content.isNotEmpty) {
-            effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(fullPlaceholder, content);
+            effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(
+              fullPlaceholder,
+              content,
+            );
             developer.log(
               '替换占位符 $fullPlaceholder (长度: ${content.length})',
               name: 'RequestService',
             );
           } else {
             // 如果内容为空，移除占位符
-            effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(fullPlaceholder, '');
+            effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(
+              fullPlaceholder,
+              '',
+            );
             developer.log(
               '替换占位符 $fullPlaceholder (内容为空)',
               name: 'RequestService',
@@ -408,14 +417,21 @@ class RequestService {
         });
 
         // 定义所有标准工具占位符
-        final standardToolPlaceholders = ['tool_templates', 'tool_brief', 'tool_detail'];
+        final standardToolPlaceholders = [
+          'tool_templates',
+          'tool_brief',
+          'tool_detail',
+        ];
 
         // 替换所有未在 additionalPrompts 中提供的标准占位符为空字符串
         for (final placeholder in standardToolPlaceholders) {
           if (!additionalPrompts.containsKey(placeholder)) {
             final fullPlaceholder = '{$placeholder}';
             if (effectiveSystemPrompt.contains(fullPlaceholder)) {
-              effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(fullPlaceholder, '');
+              effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(
+                fullPlaceholder,
+                '',
+              );
               developer.log(
                 '替换未提供的标准占位符 $fullPlaceholder 为空字符串',
                 name: 'RequestService',
@@ -439,7 +455,9 @@ class RequestService {
         bool hasSystemMessage = false;
         for (int i = 0; i < messages.length; i++) {
           if (messages[i].role == ChatCompletionMessageRole.system) {
-            messages[i] = ChatCompletionMessage.system(content: effectiveSystemPrompt);
+            messages[i] = ChatCompletionMessage.system(
+              content: effectiveSystemPrompt,
+            );
             hasSystemMessage = true;
             developer.log(
               '替换 contextMessages 中的 system 消息（已应用占位符）',
@@ -451,7 +469,10 @@ class RequestService {
 
         // 如果没有 system 消息，在开头插入
         if (!hasSystemMessage) {
-          messages.insert(0, ChatCompletionMessage.system(content: effectiveSystemPrompt));
+          messages.insert(
+            0,
+            ChatCompletionMessage.system(content: effectiveSystemPrompt),
+          );
           developer.log(
             '在 contextMessages 开头插入 system 消息（已应用占位符）',
             name: 'RequestService',
@@ -489,12 +510,28 @@ class RequestService {
               String? textContent;
               if (content is String) {
                 textContent = content;
+              } else if (content is ChatCompletionUserMessageContent) {
+                // 处理 ChatCompletionUserMessageContent 类型
+                textContent = content.map(
+                  parts: (parts) => parts.value
+                      .map(
+                        (p) => p.map(
+                          text: (t) => t.text,
+                          image: (i) => '', // 跳过已有的图片
+                          audio: (a) => '',
+                          refusal: (r) => '',
+                        ),
+                      )
+                      .where((s) => s.isNotEmpty)
+                      .join(' '),
+                  string: (s) => s.value,
+                );
               }
 
               // 创建新的消息，包含文本（如果有）和图片
               messages[i] = ChatCompletionMessage.user(
                 content: ChatCompletionUserMessageContent.parts([
-                  if (textContent != null)
+                  if (textContent != null && textContent.isNotEmpty)
                     ChatCompletionMessageContentPart.text(text: textContent),
                   ChatCompletionMessageContentPart.image(
                     imageUrl: ChatCompletionMessageImageUrl(
@@ -544,7 +581,9 @@ class RequestService {
 
       // 定期检查是否需要取消（每100ms检查一次）
       if (shouldCancel != null) {
-        cancelCheckTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+        cancelCheckTimer = Timer.periodic(const Duration(milliseconds: 100), (
+          timer,
+        ) {
           if (shouldCancel() && !wasCancelled) {
             developer.log('🛑 定时检查发现取消请求', name: 'RequestService');
             wasCancelled = true;
@@ -718,11 +757,7 @@ class RequestService {
       return urls;
     } catch (e) {
       final errorDetails = _extractErrorMessage(e);
-      developer.log(
-        '图像生成错误: $errorDetails',
-        name: 'RequestService',
-        error: e,
-      );
+      developer.log('图像生成错误: $errorDetails', name: 'RequestService', error: e);
       return ['Error: $errorDetails'];
     }
   }

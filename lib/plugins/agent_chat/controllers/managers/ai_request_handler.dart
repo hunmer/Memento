@@ -54,8 +54,8 @@ class AIRequestHandler {
     _toolOrchestrator = ToolOrchestrator(
       context: context,
       conversation: conversation,
-      getToolAgent: (config, {enableFunctionCalling = false}) =>
-          getToolAgent(config),
+      getToolAgent:
+          (config, {enableFunctionCalling = false}) => getToolAgent(config),
       isCancelling: isCancelling,
     );
   }
@@ -143,7 +143,6 @@ class AIRequestHandler {
             agent: currentAgent,
             prompt: null,
             contextMessages: contextMessages,
-            vision: false,
             responseFormat: ResponseFormat.jsonSchema(
               jsonSchema: JsonSchemaObject(
                 name: 'ToolTemplateMatch',
@@ -296,7 +295,9 @@ class AIRequestHandler {
         tokenCount: tokenCount,
         isCollectingToolCall: isCollectingToolCall,
         onUpdateMessage: (content, count) {
-          final processedContent = RequestService.processThinkingContent(content);
+          final processedContent = RequestService.processThinkingContent(
+            content,
+          );
           context.messageService.updateAIMessageContent(
             context.conversationId,
             aiMessageId,
@@ -412,13 +413,19 @@ class AIRequestHandler {
         print('📋 开始添加预设消息，共 ${currentAgent.messages!.length} 条');
         debugPrint('📋 开始添加预设消息，共 ${currentAgent.messages!.length} 条');
         for (final prompt in currentAgent.messages!) {
-          print('  - 类型: ${prompt.type}, 内容: ${prompt.content.substring(0, prompt.content.length > 30 ? 30 : prompt.content.length)}${prompt.content.length > 30 ? '...' : ''}');
-          debugPrint('  - 类型: ${prompt.type}, 内容: ${prompt.content.substring(0, prompt.content.length > 30 ? 30 : prompt.content.length)}${prompt.content.length > 30 ? '...' : ''}');
+          print(
+            '  - 类型: ${prompt.type}, 内容: ${prompt.content.substring(0, prompt.content.length > 30 ? 30 : prompt.content.length)}${prompt.content.length > 30 ? '...' : ''}',
+          );
+          debugPrint(
+            '  - 类型: ${prompt.type}, 内容: ${prompt.content.substring(0, prompt.content.length > 30 ? 30 : prompt.content.length)}${prompt.content.length > 30 ? '...' : ''}',
+          );
           switch (prompt.type) {
             case 'user':
               messages.add(
                 ChatCompletionMessage.user(
-                  content: ChatCompletionUserMessageContent.string(prompt.content),
+                  content: ChatCompletionUserMessageContent.string(
+                    prompt.content,
+                  ),
                 ),
               );
               break;
@@ -537,6 +544,17 @@ class AIRequestHandler {
       } else {
         messages.add(ChatCompletionMessage.assistant(content: msg.content));
       }
+    }
+
+    // ⚠️ 关键修复:添加当前用户输入到消息列表
+    // 注意:图片会在后续通过 vision 模式单独处理
+    if (currentInput.isNotEmpty) {
+      messages.add(
+        ChatCompletionMessage.user(
+          content: ChatCompletionUserMessageContent.string(currentInput),
+        ),
+      );
+      debugPrint('✅ 添加当前用户输入到消息列表: $currentInput');
     }
 
     return messages;
