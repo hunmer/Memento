@@ -5,6 +5,7 @@ import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:Memento/utils/date_time_utils.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
+import 'package:Memento/widgets/form_fields/index.dart';
 
 class CheckinFormScreen extends StatefulWidget {
   final CheckinItem? initialItem;
@@ -17,11 +18,10 @@ class CheckinFormScreen extends StatefulWidget {
 
 class _CheckinFormScreenState extends State<CheckinFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  late String _name;
   late IconData _icon;
-  late String? _group;
   late Color _color;
   ReminderSettings? _reminderSettings;
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _groupController = TextEditingController();
   Set<String> _existingGroups = <String>{};
   Set<String> _existingNames = <String>{};
@@ -30,14 +30,13 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
   void initState() {
     super.initState();
     // 使用初始项目的值或默认值
-    _name = widget.initialItem?.name ?? '';
     _icon = widget.initialItem?.icon ?? Icons.check_circle;
-    _group = widget.initialItem?.group;
     _color = widget.initialItem?.color ?? Colors.blue;
     _reminderSettings = widget.initialItem?.reminderSettings;
 
-    // 设置分组控制器的文本
-    _groupController.text = _group ?? '';
+    // 设置控制器的文本
+    _nameController.text = widget.initialItem?.name ?? '';
+    _groupController.text = widget.initialItem?.group ?? '';
 
     // 加载现有分组和名称
     _loadExistingData();
@@ -51,7 +50,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
   /// 更新路由上下文，使"询问当前上下文"功能能获取到当前编辑的模式和项目
   void _updateRouteContext() {
     final isEdit = widget.initialItem != null;
-    final itemName = widget.initialItem?.name ?? '';
+    final itemName = _nameController.text.trim();
 
     if (isEdit) {
       RouteHistoryManager.updateCurrentContext(
@@ -79,11 +78,10 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       }
 
       // 加载名称，排除当前编辑项
-      _existingNames =
-          items
-              .where((item) => item.id != widget.initialItem?.id)
-              .map((item) => item.name)
-              .toSet();
+      _existingNames = items
+          .where((item) => item.id != widget.initialItem?.id)
+          .map((item) => item.name)
+          .toSet();
     } else {
       _existingGroups = {'默认分组'};
       _existingNames = {};
@@ -94,6 +92,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _groupController.dispose();
     super.dispose();
   }
@@ -111,13 +110,16 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
           TextButton(
             onPressed: () {
               if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
+                final name = _nameController.text.trim();
+                final group = _groupController.text.trim().isEmpty
+                    ? null
+                    : _groupController.text.trim();
                 final item = CheckinItem(
                   id: widget.initialItem?.id,
-                  name: _name,
+                  name: name,
                   icon: _icon,
                   color: _color,
-                  group: _group,
+                  group: group,
                   reminderSettings: _reminderSettings,
                   checkInRecords:
                       widget.initialItem?.checkInRecords ?? {}, // 保留打卡记录
@@ -143,12 +145,10 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
             ),
             const SizedBox(height: 24),
             // 名称输入框
-            TextFormField(
-              decoration: InputDecoration(
-                labelText: 'checkin_nameLabel'.tr,
-                hintText: 'checkin_nameHint'.tr,
-              ),
-              initialValue: _name,
+            TextInputField(
+              controller: _nameController,
+              labelText: 'checkin_nameLabel'.tr,
+              hintText: 'checkin_nameHint'.tr,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'checkin_nameRequiredError'.tr;
@@ -158,19 +158,13 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
                 }
                 return null;
               },
-              onSaved: (value) => _name = value!.trim(),
             ),
             const SizedBox(height: 16),
             // 分组输入框
-            TextFormField(
-              decoration: InputDecoration(
-                labelText: 'checkin_groupLabel'.tr,
-                hintText: 'checkin_groupHint'.tr,
-              ),
-              initialValue: _group,
-              onSaved:
-                  (value) =>
-                      _group = value?.trim().isEmpty == true ? null : value,
+            TextInputField(
+              controller: _groupController,
+              labelText: 'checkin_groupLabel'.tr,
+              hintText: 'checkin_groupHint'.tr,
             ),
             const SizedBox(height: 24),
             // 提醒设置
@@ -195,12 +189,9 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
 
   // 提醒类型选择器
   Widget _buildReminderTypeSelector() {
-    return DropdownButtonFormField<ReminderType>(
-      decoration: InputDecoration(
-        labelText: 'checkin_reminderTypeLabel'.tr,
-        border: const OutlineInputBorder(),
-      ),
-      initialValue: _reminderSettings?.type,
+    return SelectField<ReminderType?>(
+      value: _reminderSettings?.type,
+      labelText: 'checkin_reminderTypeLabel'.tr,
       items: [
         DropdownMenuItem(
           value: null,
@@ -210,12 +201,9 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
           (type) => DropdownMenuItem(
             value: type,
             child: Text(switch (type) {
-              ReminderType.weekly =>
-                'checkin_weeklyReminder'.tr,
-              ReminderType.monthly =>
-                'checkin_monthlyReminder'.tr,
-              ReminderType.specific =>
-                'checkin_specificDateReminder'.tr,
+              ReminderType.weekly => 'checkin_weeklyReminder'.tr,
+              ReminderType.monthly => 'checkin_monthlyReminder'.tr,
+              ReminderType.specific => 'checkin_specificDateReminder'.tr,
             }),
           ),
         ),
@@ -238,6 +226,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
 
   // 星期选择器
   Widget _buildWeekdaySelector() {
+    final theme = Theme.of(context);
     final weekdays = [
       'checkin_sunday'.tr,
       'checkin_monday'.tr,
@@ -247,44 +236,75 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       'checkin_friday'.tr,
       'checkin_saturday'.tr,
     ];
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: List.generate(7, (index) {
-        final isSelected = _reminderSettings?.weekdays.contains(index) ?? false;
-        return FilterChip(
-          label: Text(weekdays[index]),
-          selected: isSelected,
-          onSelected: (selected) {
-            setState(() {
-              final List<int> newWeekdays = List.from(
-                _reminderSettings?.weekdays ?? [],
-              );
-              if (selected) {
-                newWeekdays.add(index);
-              } else {
-                newWeekdays.remove(index);
-              }
-              _reminderSettings = ReminderSettings(
-                type: ReminderType.weekly,
-                weekdays: newWeekdays,
-                timeOfDay: _reminderSettings?.timeOfDay ?? TimeOfDay.now(),
-              );
-            });
-          },
-        );
-      }),
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.2),
+        ),
+      ),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: List.generate(7, (index) {
+          final isSelected = _reminderSettings?.weekdays.contains(index) ?? false;
+          return InkWell(
+            onTap: () {
+              setState(() {
+                final List<int> newWeekdays = List.from(
+                  _reminderSettings?.weekdays ?? [],
+                );
+                if (isSelected) {
+                  newWeekdays.remove(index);
+                } else {
+                  newWeekdays.add(index);
+                }
+                _reminderSettings = ReminderSettings(
+                  type: ReminderType.weekly,
+                  weekdays: newWeekdays,
+                  timeOfDay: _reminderSettings?.timeOfDay ?? TimeOfDay.now(),
+                );
+              });
+            },
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.outline.withOpacity(0.2),
+                ),
+              ),
+              child: Text(
+                weekdays[index],
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: isSelected
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
     );
   }
 
   // 月份日期选择器
   Widget _buildMonthDaySelector() {
-    return DropdownButtonFormField<int>(
-      decoration: InputDecoration(
-        labelText: 'checkin_monthlyReminderDayLabel'.tr,
-        border: const OutlineInputBorder(),
-      ),
-      initialValue: _reminderSettings?.dayOfMonth,
+    return SelectField<int?>(
+      value: _reminderSettings?.dayOfMonth,
+      labelText: 'checkin_monthlyReminderDayLabel'.tr,
       items: List.generate(31, (index) {
         return DropdownMenuItem(
           value: index + 1,
@@ -307,13 +327,12 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
 
   // 特定日期选择器
   Widget _buildSpecificDateSelector() {
-    return ListTile(
-      title: Text(
-        _reminderSettings?.specificDate != null
-            ? DateTimeUtils.formatDate(_reminderSettings!.specificDate!)
-            : 'checkin_selectDate'.tr,
-      ),
-      trailing: const Icon(Icons.calendar_today),
+    return DatePickerField(
+      date: _reminderSettings?.specificDate,
+      formattedDate: _reminderSettings?.specificDate != null
+          ? DateTimeUtils.formatDate(_reminderSettings!.specificDate!)
+          : '',
+      placeholder: 'checkin_selectDate'.tr,
       onTap: () async {
         final date = await showDatePicker(
           context: context,
@@ -336,29 +355,19 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
 
   // 时间选择器
   Widget _buildTimeSelector() {
-    return ListTile(
-      title: Text(
-        _reminderSettings?.timeOfDay != null
-            ? '${'checkin_selectTime'.tr}: ${_reminderSettings!.timeOfDay.format(context)}'
-            : 'checkin_selectTime'.tr,
-      ),
-      trailing: const Icon(Icons.access_time),
-      onTap: () async {
-        final time = await showTimePicker(
-          context: context,
-          initialTime: _reminderSettings?.timeOfDay ?? TimeOfDay.now(),
-        );
-        if (time != null) {
-          setState(() {
-            _reminderSettings = ReminderSettings(
-              type: _reminderSettings!.type,
-              weekdays: _reminderSettings!.weekdays,
-              dayOfMonth: _reminderSettings!.dayOfMonth,
-              specificDate: _reminderSettings!.specificDate,
-              timeOfDay: time,
-            );
-          });
-        }
+    return TimePickerField(
+      label: 'checkin_selectTime'.tr,
+      time: _reminderSettings?.timeOfDay ?? TimeOfDay.now(),
+      onTimeChanged: (time) {
+        setState(() {
+          _reminderSettings = ReminderSettings(
+            type: _reminderSettings!.type,
+            weekdays: _reminderSettings!.weekdays,
+            dayOfMonth: _reminderSettings!.dayOfMonth,
+            specificDate: _reminderSettings!.specificDate,
+            timeOfDay: time,
+          );
+        });
       },
     );
   }

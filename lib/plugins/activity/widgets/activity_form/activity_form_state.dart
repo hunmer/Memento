@@ -12,7 +12,6 @@ import '../../../../../../core/services/toast_service.dart';
 class ActivityFormState extends State<ActivityFormWidget> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
-  late TextEditingController _tagsController;
   late TextEditingController _durationController;
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
@@ -21,8 +20,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? const Color(0xFF27272A) : Colors.white;
     final primaryColor = Theme.of(context).primaryColor;
 
     return Column(
@@ -111,135 +108,78 @@ class ActivityFormState extends State<ActivityFormWidget> {
               const SizedBox(height: 16),
 
               // Mood Card
-              _buildCard(
-                context,
-                cardColor,
-                icon: Icons.mood,
-                child: MoodSelector(
-                  selectedMood: _selectedMood,
-                  onMoodSelected: _selectMood,
-                  recentMoods: widget.recentMoods,
-                ),
+              FormFieldGroup(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  OptionSelectorField(
+                    labelText: 'activity_mood'.tr,
+                    options: _buildMoodOptions(),
+                    selectedId: _selectedMood,
+                    onSelectionChanged: (optionId) {
+                      setState(() {
+                        _selectedMood = optionId;
+                      });
+                    },
+                    useHorizontalScroll: true,
+                    optionWidth: 80,
+                    optionHeight: 80,
+                    primaryColor: primaryColor,
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
 
+
+              // Description Card
+              FormFieldGroup(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  TextAreaField(
+                    controller: _descriptionController,
+                    hintText: 'activity_contentHint'.tr,
+                    minLines: 4,
+                    maxLines: 4,
+                    inline: true,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+
               // Tags Card
-              _buildCard(
-                context,
-                cardColor,
-                icon: Icons.local_offer, // sell icon
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Stack(
-                      alignment: Alignment.centerRight,
+              FormFieldGroup(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextField(
-                          controller: _tagsController,
-                          decoration: InputDecoration(
-                            hintText: 'app_tags'.tr,
-                            hintStyle: TextStyle(color: Colors.grey[400]),
-                            border: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: primaryColor),
-                            ),
-                            contentPadding: const EdgeInsets.only(
-                              right: 24,
-                              bottom: 8,
-                            ),
-                            isDense: true,
+                        Text(
+                          'activity_tags'.tr,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Icon(
-                            Icons.tag,
-                            color: Colors.grey[400],
-                            size: 20,
-                          ),
+                        const SizedBox(height: 8),
+                        TagsField(
+                          tags: _selectedTags,
+                          onAddTag: _showAddTagDialog,
+                          onRemoveTag: (tag) {
+                            setState(() {
+                              _selectedTags.remove(tag);
+                            });
+                          },
+                          addButtonText: '添加标签',
+                          primaryColor: primaryColor,
                         ),
                       ],
                     ),
-                    if (widget.recentTags != null &&
-                        widget.recentTags!.isNotEmpty) ...[
-                      const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children:
-                            widget.recentTags!.map((tag) {
-                              // Check if tag is selected
-                              // Note: _selectedTags comes from controller parsing in current logic
-                              // We need to keep that logic synced.
-                              final isSelected = _selectedTags.contains(tag);
-                              return InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    if (_selectedTags.contains(tag)) {
-                                      _selectedTags.remove(tag);
-                                    } else {
-                                      _selectedTags.add(tag);
-                                    }
-                                    _tagsController.text = _selectedTags.join(
-                                      ', ',
-                                    );
-                                  });
-                                },
-                                borderRadius: BorderRadius.circular(20),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        isSelected
-                                            ? primaryColor.withOpacity(0.2)
-                                            : (isDark
-                                                ? primaryColor.withOpacity(0.1)
-                                                : primaryColor.withOpacity(
-                                                  0.1,
-                                                )),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    tag,
-                                    style: TextStyle(
-                                      color:
-                                          isSelected
-                                              ? primaryColor
-                                              : (isDark
-                                                  ? Colors.purple[200]
-                                                  : primaryColor),
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                      ),
-                    ],
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-
-              // Description Card
-              TextAreaField(
-                controller: _descriptionController,
-                labelText: 'activity_contentHint'.tr,
-                hintText: 'activity_contentHint'.tr,
-                minLines: 4,
-                maxLines: 4,
-              ),
-
-              // 底部保存按钮的间距
-              const SizedBox(height: 80),
             ],
           ),
         ),
@@ -251,7 +191,10 @@ class ActivityFormState extends State<ActivityFormWidget> {
             color: Theme.of(context).scaffoldBackgroundColor,
             border: Border(
               top: BorderSide(
-                color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[800]!
+                        : Colors.grey[200]!,
               ),
             ),
           ),
@@ -279,38 +222,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildCard(
-    BuildContext context,
-    Color bgColor, {
-    required IconData icon,
-    required Widget child,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 2.0, right: 16.0),
-            child: Icon(icon, color: Colors.grey[500], size: 28),
-          ),
-          Expanded(child: child),
-        ],
-      ),
     );
   }
 
@@ -450,10 +361,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
       text: activity?.description ?? '',
     );
     _selectedTags = activity?.tags ?? [];
-    _tagsController = TextEditingController(text: _selectedTags.join(', '));
-
-    // 添加标签输入监听器
-    _tagsController.addListener(_onTagsChanged);
     _durationController = TextEditingController(text: '60');
     _selectedMood = activity?.mood;
 
@@ -481,26 +388,10 @@ class ActivityFormState extends State<ActivityFormWidget> {
     _syncDurationWithTimes();
   }
 
-  void _onTagsChanged() {
-    final inputTags =
-        _tagsController.text
-            .replaceAll('，', ',')
-            .split(',')
-            .map((tag) => tag.trim())
-            .where((tag) => tag.isNotEmpty)
-            .toList();
-
-    setState(() {
-      _selectedTags = inputTags;
-    });
-  }
-
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _tagsController.removeListener(_onTagsChanged);
-    _tagsController.dispose();
     _durationController.dispose();
     super.dispose();
   }
@@ -514,10 +405,42 @@ class ActivityFormState extends State<ActivityFormWidget> {
     _durationController.text = minutes.toString();
   }
 
-  void _selectMood(String mood) {
-    setState(() {
-      _selectedMood = mood;
-    });
+  List<OptionItem> _buildMoodOptions() {
+    final List<String> combinedMoods = [];
+
+    // 如果有最近使用的心情，先添加它们
+    if (widget.recentMoods != null && widget.recentMoods!.isNotEmpty) {
+      combinedMoods.addAll(widget.recentMoods!);
+    }
+
+    // 添加默认心情，但排除已经在最近使用中的
+    const List<String> kMoods = [
+      '😊',
+      '😃',
+      '🙂',
+      '😐',
+      '😢',
+      '😡',
+      '😴',
+      '🤔',
+      '😎',
+      '🥳',
+    ];
+    for (String mood in kMoods) {
+      if (!combinedMoods.contains(mood)) {
+        combinedMoods.add(mood);
+      }
+    }
+
+    // 转换为 OptionItem 列表，使用 emoji 作为 label
+    return combinedMoods.map((mood) {
+      return OptionItem(
+        id: mood,
+        icon: Icons.emoji_emotions, // 默认图标（不会被使用）
+        label: mood, // 使用 emoji 作为标签
+        useTextAsIcon: true, // 启用文本模式
+      );
+    }).toList();
   }
 
   Future<void> _handleSave() async {
@@ -560,13 +483,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
     }
 
     // 处理标签
-    final inputTags =
-        _tagsController.text
-            .replaceAll('，', ',')
-            .split(',')
-            .map((tag) => tag.trim())
-            .where((tag) => tag.isNotEmpty)
-            .toList();
+    final inputTags = _selectedTags;
 
     // 获取标签组服务
     final storage = StorageManager();
@@ -631,5 +548,57 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
     widget.onSave(activity);
     Navigator.of(context).pop();
+  }
+
+  void _showAddTagDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final controller = TextEditingController();
+        return AlertDialog(
+          title: Text('添加标签'),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText: '输入标签名称',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            autofocus: true,
+            onSubmitted: (value) {
+              if (value.trim().isNotEmpty) {
+                Navigator.pop(context);
+                _addTag(value.trim());
+              }
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('取消'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final value = controller.text.trim();
+                if (value.isNotEmpty) {
+                  Navigator.pop(context);
+                  _addTag(value);
+                }
+              },
+              child: Text('添加'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _addTag(String tag) {
+    setState(() {
+      if (!_selectedTags.contains(tag)) {
+        _selectedTags.add(tag);
+      }
+    });
   }
 }

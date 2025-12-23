@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/widgets/color_picker_section.dart';
@@ -23,6 +24,9 @@ class GoalEditPage extends StatefulWidget {
 class _GoalEditPageState extends State<GoalEditPage> {
   final _formKey = GlobalKey<FormState>();
   final _groupController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _unitTypeController = TextEditingController();
+  final _targetValueController = TextEditingController();
 
   late String _name;
   late String _icon;
@@ -81,6 +85,11 @@ class _GoalEditPageState extends State<GoalEditPage> {
                 DateTime.parse('1970-01-01 ${widget.goal!.reminderTime!}'),
               )
               : null;
+
+      // 初始化控制器
+      _nameController.text = _name;
+      _unitTypeController.text = _unitType;
+      _targetValueController.text = _targetValue.toString();
     } else {
       _name = '';
       _icon = '0';
@@ -92,12 +101,20 @@ class _GoalEditPageState extends State<GoalEditPage> {
       _startDate = null;
       _endDate = null;
       _reminderTime = null;
+
+      // 初始化控制器
+      _nameController.text = '';
+      _unitTypeController.text = '';
+      _targetValueController.text = '';
     }
   }
 
   @override
   void dispose() {
     _groupController.dispose();
+    _nameController.dispose();
+    _unitTypeController.dispose();
+    _targetValueController.dispose();
     super.dispose();
   }
 
@@ -296,86 +313,63 @@ class _GoalEditPageState extends State<GoalEditPage> {
             ),
             const SizedBox(height: 24),
             // 分组选择器
-            Row(
-              children: [
-                Expanded(
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: 'tracker_selectGroup'.tr,
-                      border: OutlineInputBorder(),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _group,
-                        isDense: true,
-                        isExpanded: true,
-                        items: [
-                          ..._groups.map(
-                            (group) => DropdownMenuItem(
-                              value: group,
-                              child: Text(group),
-                            ),
-                          ),
-                          DropdownMenuItem(
-                            value: '新建分组',
-                            child: Row(
-                              children: [
-                                const Icon(Icons.add, size: 16),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'tracker_createGroup'.tr,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value == '新建分组') {
-                            _addNewGroup();
-                          } else if (value != null) {
-                            setState(() => _group = value);
-                          }
-                        },
+            SelectField<String>(
+              value: _group,
+              labelText: 'tracker_selectGroup'.tr,
+              items: [
+                ..._groups.map(
+                  (group) => DropdownMenuItem(
+                    value: group,
+                    child: Text(group),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: '新建分组',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.add, size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        'tracker_createGroup'.tr,
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ],
+              onChanged: (value) {
+                if (value == '新建分组') {
+                  _addNewGroup();
+                } else if (value != null) {
+                  setState(() => _group = value);
+                }
+              },
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              initialValue: _name,
-              decoration: InputDecoration(
-                labelText: 'tracker_goalName'.tr,
-              ),
+            TextInputField(
+              controller: _nameController,
+              labelText: 'tracker_goalName'.tr,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return '请输入目标名称';
                 }
                 return null;
               },
-              onSaved: (value) => _name = value!,
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              initialValue: _unitType,
-              decoration: InputDecoration(
-                labelText: 'tracker_unitType'.tr,
-              ),
+            TextInputField(
+              controller: _unitTypeController,
+              labelText: 'tracker_unitType'.tr,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return '请输入单位';
                 }
                 return null;
               },
-              onSaved: (value) => _unitType = value!,
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              initialValue: _targetValue.toString(),
-              decoration: InputDecoration(
-                labelText: 'tracker_targetValue'.tr,
-              ),
+            TextInputField(
+              controller: _targetValueController,
+              labelText: 'tracker_targetValue'.tr,
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -390,41 +384,29 @@ class _GoalEditPageState extends State<GoalEditPage> {
                 }
                 return null;
               },
-              onSaved: (value) => _targetValue = double.parse(value!),
             ),
             const SizedBox(height: 16),
-            ListTile(
-              title: Text(
-                _reminderTime == null
-                    ? '设置每日提醒时间'
-                    : '提醒时间: ${_reminderTime!.format(context)}',
-              ),
-              trailing: const Icon(Icons.access_time),
-              onTap: () async {
-                final time = await showTimePicker(
-                  context: context,
-                  initialTime: _reminderTime ?? TimeOfDay.now(),
-                );
-                if (time != null) {
-                  setState(() => _reminderTime = time);
-                }
+            TimePickerField(
+              label: _reminderTime == null
+                  ? '设置每日提醒时间'
+                  : '提醒时间',
+              time: _reminderTime ?? TimeOfDay.now(),
+              onTimeChanged: (time) {
+                setState(() => _reminderTime = time);
               },
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              initialValue: _dateType,
-              decoration: InputDecoration(
-                labelText: 'tracker_dateSettings'.tr,
-              ),
-              items:
-                  ['none', 'daily', 'weekly', 'monthly', 'custom']
-                      .map(
-                        (type) => DropdownMenuItem(
-                          value: type,
-                          child: Text(_getDateTypeName(type)),
-                        ),
-                      )
-                      .toList(),
+            SelectField<String>(
+              value: _dateType,
+              labelText: 'tracker_dateSettings'.tr,
+              items: ['none', 'daily', 'weekly', 'monthly', 'custom']
+                  .map(
+                    (type) => DropdownMenuItem(
+                      value: type,
+                      child: Text(_getDateTypeName(type)),
+                    ),
+                  )
+                  .toList(),
               onChanged: (value) {
                 if (value != null) {
                   setState(() => _dateType = value);
@@ -433,23 +415,24 @@ class _GoalEditPageState extends State<GoalEditPage> {
             ),
             if (_dateType == 'custom') ...[
               const SizedBox(height: 16),
-              ListTile(
-                title: Text(
-                  _startDate == null
-                      ? '选择开始日期'
-                      : '开始日期: ${_startDate!.toLocal().toString().split(' ')[0]}',
-                ),
-                trailing: const Icon(Icons.calendar_today),
+              DatePickerField(
+                date: _startDate,
                 onTap: () => _selectDate(context, isStartDate: true),
+                formattedDate: _startDate == null
+                    ? ''
+                    : _startDate!.toLocal().toString().split(' ')[0],
+                placeholder: '选择开始日期',
+                icon: Icons.calendar_today,
               ),
-              ListTile(
-                title: Text(
-                  _endDate == null
-                      ? '选择结束日期'
-                      : '结束日期: ${_endDate!.toLocal().toString().split(' ')[0]}',
-                ),
-                trailing: const Icon(Icons.calendar_today),
+              const SizedBox(height: 8),
+              DatePickerField(
+                date: _endDate,
                 onTap: () => _selectDate(context, isStartDate: false),
+                formattedDate: _endDate == null
+                    ? ''
+                    : _endDate!.toLocal().toString().split(' ')[0],
+                placeholder: '选择结束日期',
+                icon: Icons.calendar_today,
               ),
             ],
           ],
@@ -498,7 +481,10 @@ class _GoalEditPageState extends State<GoalEditPage> {
 
   Future<void> _saveGoal() async {
     if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+      // 从控制器获取值
+      _name = _nameController.text;
+      _unitType = _unitTypeController.text;
+      _targetValue = double.parse(_targetValueController.text);
 
       // 如果 _imagePath 是绝对路径，转换为相对路径
       String? finalImagePath = _imagePath;

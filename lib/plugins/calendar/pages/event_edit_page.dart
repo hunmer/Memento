@@ -6,6 +6,7 @@ import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:Memento/plugins/calendar/utils/calendar_notification_utils.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
+import 'package:Memento/widgets/form_fields/index.dart';
 
 class EventEditPage extends StatefulWidget {
   final CalendarEvent? event;
@@ -24,18 +25,6 @@ class EventEditPage extends StatefulWidget {
 }
 
 class _EventEditPageState extends State<EventEditPage> {
-  String _getReminderText(int minutes) {
-    if (minutes >= 1440) {
-      final days = minutes ~/ 1440;
-      return '提前$days天';
-    } else if (minutes >= 60) {
-      final hours = minutes ~/ 60;
-      return '提前$hours小时';
-    } else {
-      return '提前$minutes分钟';
-    }
-  }
-
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
   late DateTime _startDate;
@@ -114,81 +103,104 @@ class _EventEditPageState extends State<EventEditPage> {
     }
   }
 
-  Future<void> _selectStartTime() async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: _startTime,
-    );
-    if (picked != null) {
-      setState(() {
-        _startTime = picked;
-        // 如果结束时间未设置，默认设置为开始时间后1小时
-        _endTime ??= TimeOfDay(
-          hour: (picked.hour + 1) % 24,
-          minute: picked.minute,
-        );
-      });
-    }
-  }
-
-  Future<void> _selectReminderMinutes() async {
-    final items = [
-      {'label': '不提醒', 'value': null},
-      {'label': '提前5分钟', 'value': 5},
-      {'label': '提前15分钟', 'value': 15},
-      {'label': '提前30分钟', 'value': 30},
-      {'label': '提前1小时', 'value': 60},
-      {'label': '提前2小时', 'value': 120},
-      {'label': '提前1天', 'value': 1440},
-      {'label': '提前2天', 'value': 2880},
-    ];
-
-    final result = await showDialog<int>(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: Text('calendar_selectReminderTime'.tr),
-          children:
-              items
-                  .map(
-                    (item) => SimpleDialogOption(
-                      onPressed: () {
-                        Navigator.pop(context, item['value'] as int?);
-                      },
-                      child: Text(item['label'] as String),
-                    ),
-                  )
-                  .toList(),
-        );
-      },
-    );
-
-    if (result != null) {
-      setState(() {
-        _reminderMinutes = result;
-      });
-    }
-  }
-
-  Future<void> _selectEndTime() async {
-    if (_endDate == null) {
-      toastService.showToast('calendar_selectDateRangeFirst'.tr);
-      return;
-    }
-
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: _endTime ?? TimeOfDay.now(),
-    );
-    if (picked != null) {
-      setState(() {
-        _endTime = picked;
-      });
-    }
-  }
-
   DateTime _combineDateAndTime(DateTime date, TimeOfDay time) {
     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+  }
+
+  Widget _buildDateRangeSelector() {
+    return GestureDetector(
+      onTap: _selectDateRange,
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.only(left: 10, right: 12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.calendar_today_outlined,
+                color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _endDate != null
+                    ? '${_startDate.year}-${_startDate.month.toString().padLeft(2, '0')}-${_startDate.day.toString().padLeft(2, '0')} 至 ${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}'
+                    : '${_startDate.year}-${_startDate.month.toString().padLeft(2, '0')}-${_startDate.day.toString().padLeft(2, '0')}',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Text(
+              'calendar_dateRange'.tr,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReminderSelector() {
+    final reminderItems = <DropdownMenuItem<int?>>[
+      const DropdownMenuItem(value: null, child: Text('不提醒')),
+      const DropdownMenuItem(value: 5, child: Text('提前5分钟')),
+      const DropdownMenuItem(value: 15, child: Text('提前15分钟')),
+      const DropdownMenuItem(value: 30, child: Text('提前30分钟')),
+      const DropdownMenuItem(value: 60, child: Text('提前1小时')),
+      const DropdownMenuItem(value: 120, child: Text('提前2小时')),
+      const DropdownMenuItem(value: 1440, child: Text('提前1天')),
+      const DropdownMenuItem(value: 2880, child: Text('提前2天')),
+    ];
+
+    return SelectField<int?>(
+      value: _reminderMinutes,
+      labelText: 'calendar_reminderSettings'.tr,
+      items: reminderItems,
+      onChanged: (value) {
+        setState(() {
+          _reminderMinutes = value;
+        });
+      },
+    );
+  }
+
+  Widget _buildStartTimeSelector() {
+    return TimePickerField(
+      label: 'calendar_startTime'.tr,
+      time: _startTime,
+      onTimeChanged: (time) {
+        setState(() {
+          _startTime = time;
+          // 如果结束时间未设置，默认设置为开始时间后1小时
+          _endTime ??= TimeOfDay(
+            hour: (time.hour + 1) % 24,
+            minute: time.minute,
+          );
+        });
+      },
+    );
+  }
+
+  Widget _buildEndTimeSelector() {
+    return TimePickerField(
+      label: 'calendar_endTime'.tr,
+      time: _endTime ?? const TimeOfDay(hour: 0, minute: 0),
+      onTimeChanged: (time) {
+        setState(() {
+          _endTime = time;
+        });
+      },
+    );
   }
 
   Future<void> _saveEvent() async {
@@ -269,65 +281,31 @@ class _EventEditPageState extends State<EventEditPage> {
                   (color) => setState(() => _selectedColor = color),
             ),
             const SizedBox(height: 16),
-            TextField(
+            TextInputField(
               controller: _titleController,
-              decoration: InputDecoration(
-                labelText: 'calendar_eventTitle'.tr,
-                border: const OutlineInputBorder(),
-              ),
+              labelText: 'calendar_eventTitle'.tr,
             ),
             const SizedBox(height: 16),
-            TextField(
+            TextAreaField(
               controller: _descriptionController,
-              decoration: InputDecoration(
-                labelText: 'calendar_eventDescription'.tr,
-                border: const OutlineInputBorder(),
-              ),
-              maxLines: 3,
+              hintText: '请输入事件描述',
+              labelText: 'calendar_eventDescription'.tr,
+              minLines: 3,
+              maxLines: 5,
             ),
             const SizedBox(height: 16),
-            ListTile(
-              title: Text('calendar_dateRange'.tr),
-              subtitle: Text(
-                _endDate != null
-                    ? '${_startDate.year}-${_startDate.month}-${_startDate.day} 至 ${_endDate!.year}-${_endDate!.month}-${_endDate!.day}'
-                    : '${_startDate.year}-${_startDate.month}-${_startDate.day}',
-              ),
-              onTap: _selectDateRange,
-            ),
-            ListTile(
-              title: Text('calendar_reminderSettings'.tr),
-              subtitle: Text(
-                _reminderMinutes != null
-                    ? _getReminderText(_reminderMinutes!)
-                    : '不提醒',
-              ),
-              trailing:
-                  _reminderMinutes != null
-                      ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed:
-                            () => setState(() => _reminderMinutes = null),
-                      )
-                      : null,
-              onTap: _selectReminderMinutes,
-            ),
+            _buildDateRangeSelector(),
+            const SizedBox(height: 16),
+            _buildReminderSelector(),
             const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
-                  child: ListTile(
-                    title: Text('calendar_startTime'.tr),
-                    subtitle: Text(_startTime.format(context)),
-                    onTap: _selectStartTime,
-                  ),
+                  child: _buildStartTimeSelector(),
                 ),
+                const SizedBox(width: 16),
                 Expanded(
-                  child: ListTile(
-                    title: Text('calendar_endTime'.tr),
-                    subtitle: Text(_endTime?.format(context) ?? '无'),
-                    onTap: _selectEndTime,
-                  ),
+                  child: _buildEndTimeSelector(),
                 ),
               ],
             ),

@@ -5,16 +5,24 @@ class OptionItem {
   /// 选项ID
   final String id;
 
-  /// 显示图标
-  final IconData icon;
+  /// 显示图标（当 useTextAsIcon 为 false 时使用）
+  final IconData? icon;
 
   /// 显示标签
   final String label;
 
+  /// 显示文本（当 useTextAsIcon 为 true 时使用，可以是 emoji）
+  final String? subtitle;
+
+  /// 是否使用文本代替图标
+  final bool useTextAsIcon;
+
   const OptionItem({
     required this.id,
-    required this.icon,
+    this.icon,
     required this.label,
+    this.subtitle,
+    this.useTextAsIcon = false,
   });
 }
 
@@ -70,81 +78,108 @@ class OptionSelectorField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (labelText != null) ...[
-          Text(
-            labelText!,
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w500,
-              color: theme.colorScheme.onSurface,
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (labelText != null) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                labelText!,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
+          ],
+          if (useHorizontalScroll)
+            _buildHorizontalScroll(theme)
+          else
+            _buildGridLayout(theme),
         ],
-        if (useHorizontalScroll)
-          _buildHorizontalScroll(theme)
-        else
-          _buildGridLayout(theme),
-      ],
+      ),
     );
   }
 
   Widget _buildHorizontalScroll(ThemeData theme) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: options.map((option) {
-          final isSelected = selectedId == option.id;
-          return Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: InkWell(
-              onTap: () => onSelectionChanged(option.id),
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                width: optionWidth,
-                height: optionHeight,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? primaryColor
-                      : theme.colorScheme.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
+    return Scrollbar(
+      thumbVisibility: true,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        child: Row(
+          children: options.map((option) {
+            final isSelected = selectedId == option.id;
+            return Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: InkWell(
+                onTap: () => onSelectionChanged(option.id),
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  width: optionWidth,
+                  height: optionHeight,
+                  decoration: BoxDecoration(
                     color: isSelected
                         ? primaryColor
-                        : theme.colorScheme.outline.withOpacity(0.2),
+                        : theme.colorScheme.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isSelected
+                          ? primaryColor
+                          : theme.colorScheme.outline.withOpacity(0.2),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                          if (option.useTextAsIcon)
+                            Text(
+                              option.label,
+                              style: TextStyle(
+                                fontSize: 32,
+                                color:
+                                    isSelected
+                                        ? Colors.white
+                                        : theme.colorScheme.onSurface,
+                              ),
+                            )
+                          else if (option.icon != null)
+                            Icon(
+                              option.icon,
+                              size: 32,
+                              color:
+                                  isSelected
+                                      ? Colors.white
+                                      : theme.colorScheme.onSurface,
+                            ),
+                          if (!option.useTextAsIcon) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              option.label,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color:
+                                    isSelected
+                                        ? Colors.white
+                                        : theme.colorScheme.onSurface,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                    ],
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      option.icon,
-                      size: 32,
-                      color: isSelected
-                          ? Colors.white
-                          : theme.colorScheme.onSurface,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      option.label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected
-                            ? Colors.white
-                            : theme.colorScheme.onSurface,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
               ),
-            ),
-          );
-        }).toList(),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -178,25 +213,41 @@ class OptionSelectorField extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    Icon(
-                      option.icon,
-                      size: 24,
-                      color: isSelected
-                          ? Colors.white
-                          : theme.colorScheme.onSurface,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      option.label,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected
-                            ? Colors.white
-                            : theme.colorScheme.onSurface,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                        if (option.useTextAsIcon)
+                          Text(
+                            option.label,
+                            style: TextStyle(
+                              fontSize: 28,
+                              color:
+                                  isSelected
+                                      ? Colors.white
+                                      : theme.colorScheme.onSurface,
+                            ),
+                          )
+                        else if (option.icon != null)
+                          Icon(
+                            option.icon,
+                            size: 24,
+                            color:
+                                isSelected
+                                    ? Colors.white
+                                    : theme.colorScheme.onSurface,
+                          ),
+                        if (!option.useTextAsIcon) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            option.label,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  isSelected
+                                      ? Colors.white
+                                      : theme.colorScheme.onSurface,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                   ],
                 ),
               ),
