@@ -153,18 +153,9 @@ class _MultiFilterBarState extends State<MultiFilterBar> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.clear_all,
+                      Icons.close,
                       size: 16,
                       color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'core_clearAll'.tr,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Theme.of(context).colorScheme.error,
-                        fontWeight: FontWeight.w500,
-                      ),
                     ),
                   ],
                 ),
@@ -193,16 +184,6 @@ class _MultiFilterBarState extends State<MultiFilterBar> {
           padding: const EdgeInsets.all(8),
           constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
         ),
-
-        // 标题
-        Text(
-          item.title,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-
-        const SizedBox(width: 16),
 
         // 内容区域（可滚动）
         Expanded(
