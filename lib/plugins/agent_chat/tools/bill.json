@@ -159,14 +159,15 @@
     "title": "创建账单",
     "description": "在指定账户中创建新账单，不指定账户时使用第一个账户",
     "parameters": [
+      {"name": "type", "type": "string", "required": true, "description": "类型（必需）：'income'（收入）或 'expense'（支出）"},
+      {"name": "amount", "type": "number", "required": true, "description": "金额（必需）"},
+      {"name": "category", "type": "string", "required": true, "description": "分类（必需，如：工资、餐饮、交通）"},
       {"name": "accountId", "type": "string", "required": false, "description": "账户ID（可选，不传则使用第一个账户）"},
-      {"name": "amount", "type": "number", "required": true, "description": "金额（正数=收入，负数=支出）"},
-      {"name": "category", "type": "string", "required": true, "description": "分类（如：工资、餐饮、交通）"},
-      {"name": "title", "type": "string", "required": true, "description": "账单标题"},
-      {"name": "id", "type": "string", "required": false, "description": "账单ID(可选,不提供则自动生成)"},
-      {"name": "date", "type": "string", "required": false, "description": "日期（格式：YYYY-MM-DD，默认今天）"},
-      {"name": "note", "type": "string", "required": false, "description": "备注"},
-      {"name": "tag", "type": "string", "required": false, "description": "标签"}
+      {"name": "description", "type": "string", "required": false, "description": "账单描述（可选）"},
+      {"name": "id", "type": "string", "required": false, "description": "自定义ID（可选，不提供则自动生成UUID）"},
+      {"name": "date", "type": "string", "required": false, "description": "日期（可选，ISO8601格式，默认当天）"},
+      {"name": "tags", "type": "array", "required": false, "description": "标签列表（可选）"},
+      {"name": "metadata", "type": "object", "required": false, "description": "元数据（可选）"}
     ],
     "returns": {
       "type": "Object",
@@ -174,23 +175,23 @@
     },
     "examples": [
       {
-        "title": "创建收入账单（指定账户ID）",
-        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst bill = await Memento.plugins.bill.createBill({accountId: 'acc123', amount: 5000, category: '工资', title: '月度工资', date: today});\nsetResult(`账单已创建: ${bill.id}`);"
+        "title": "创建收入账单（指定账户ID1）",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst bill = await Memento.plugins.bill.createBill({accountId: 'acc123', type: 'income', amount: 5000, category: '工资', description: '月度工资', date: today});\nsetResult(`账单已创建: ${bill.id}`);"
       },
       {
         "title": "创建支出账单（指定账户ID）",
-        "code": "const bill = await Memento.plugins.bill.createBill({accountId: 'acc123', amount: -120, category: '餐饮', title: '午餐', note: '公司食堂'});\nsetResult('已记录午餐支出 120元');"
+        "code": "const bill = await Memento.plugins.bill.createBill({accountId: 'acc123', type: 'expense', amount: -120, category: '餐饮', description: '午餐 - 公司食堂'});\nsetResult('已记录午餐支出 120元');"
       },
       {
         "title": "使用自定义ID创建账单",
-        "code": "const bill = await Memento.plugins.bill.createBill({\n  accountId: 'acc123',\n  amount: -299,\n  category: '购物',\n  title: '购买书籍',\n  id: 'bill123',\n  date: '2025-01-15',\n  note: '技术书籍《代码大全》'\n});\nsetResult(`账单已创建，自定义ID: ${bill.id}`);"
+        "code": "const bill = await Memento.plugins.bill.createBill({\n  accountId: 'acc123',\n  type: 'expense',\n  amount: -299,\n  category: '购物',\n  description: '购买书籍 - 技术书籍《代码大全》',\n  id: 'bill123',\n  date: '2025-01-15'\n});\nsetResult(`账单已创建，自定义ID: ${bill.id}`);"
       },
       {
         "title": "自动使用首个账户创建账单（推荐）",
-        "code": "const bill = await Memento.plugins.bill.createBill({amount: -88, category: '交通', title: '地铁费'});\nsetResult(`已在默认账户中创建账单: ${bill.id}`);"
+        "code": "const bill = await Memento.plugins.bill.createBill({type: 'expense', amount: -88, category: '交通', description: '地铁费'});\nsetResult(`已在默认账户中创建账单: ${bill.id}`);"
       }
     ],
-    "notes": "必需参数: amount(金额)、category(分类)、title(账单标题);可选参数: accountId(账户ID，不传则使用第一个账户)、id(自定义ID)、date(日期)、note(备注)、tag(标签);如果不提供id会自动生成UUID;ID不能与现有账单重复;金额为正数记录收入，负数记录支出;不提供日期时使用当天日期;如果没有账户会报错",
+    "notes": "必需参数: type(类型: 'income'或'expense')、amount(金额)、category(分类);可选参数: accountId(账户ID，不传则使用第一个账户)、description(描述)、id(自定义ID)、date(日期，ISO8601格式)、tags(标签数组)、metadata(元数据对象);如果不提供id会自动生成UUID;ID不能与现有账单重复;不提供日期时使用当天日期;如果没有账户会报错",
     "enabled": true
   },
   "updateBill": {

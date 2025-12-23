@@ -392,13 +392,14 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 创建账单
-  /// @param params.accountId 账户ID (可选，不传则使用第一个账户)
-  /// @param params.amount 金额 (必需，正数=收入，负数=支出)
+  /// @param params.amount 金额 (必需)
+  /// @param params.type 类型 (必需，'income' 或 'expense')
   /// @param params.category 分类 (必需)
-  /// @param params.title 标题 (必需)
-  /// @param params.date 日期 (可选，格式: YYYY-MM-DD，默认今天)
-  /// @param params.note 备注 (可选，默认空字符串)
-  /// @param params.tag 标签 (可选)
+  /// @param params.accountId 账户ID (可选，不传则使用第一个账户)
+  /// @param params.description 描述 (可选)
+  /// @param params.date 日期 (可选，ISO8601格式，默认今天)
+  /// @param params.tags 标签列表 (可选)
+  /// @param params.metadata 元数据 (可选)
   Future<String> _jsCreateBill(Map<String, dynamic> params) async {
     final result = await _billUseCase.createBill(params);
 
