@@ -107,14 +107,21 @@ class _PromptEditorState extends State<PromptEditor> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  TextFormField(
-                    initialValue: prompt.content,
-                    decoration: InputDecoration(
-                      labelText: 'openai_contentLabel'.tr,
-                      border: const OutlineInputBorder(),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: 120,
+                      maxHeight: 200,
                     ),
-                    maxLines: 3,
-                    onChanged: (value) => _updatePromptContent(index, value),
+                    child: TextFormField(
+                      initialValue: prompt.content,
+                      decoration: InputDecoration(
+                        labelText: 'openai_contentLabel'.tr,
+                        border: const OutlineInputBorder(),
+                        alignLabelWithHint: true,
+                      ),
+                      maxLines: null,
+                      onChanged: (value) => _updatePromptContent(index, value),
+                    ),
                   ),
                 ],
               ),
