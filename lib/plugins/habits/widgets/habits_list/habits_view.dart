@@ -74,6 +74,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
   List<Habit> _filteredHabits = []; // 搜索过滤后的习惯列表
   final Map<String, bool> _timingStatus = {};
   int _refreshKey = 0; // 用于强制刷新 HabitCard
+  String _selectedGroup = '全部'; // 当前选中的分组
 
   @override
   void initState() {
@@ -182,6 +183,36 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
     }
   }
 
+  /// 获取所有分组(用于过滤栏)
+  List<String> get _groups {
+    final g = _habits
+        .map((habit) => habit.group ?? '未分组')
+        .toSet()
+        .toList()
+      ..sort();
+    return ['全部', ...g];
+  }
+
+  /// 选择分组
+  void _selectGroup(String group) {
+    setState(() {
+      _selectedGroup = group;
+    });
+    // 更新路由上下文
+    _updateRouteContext();
+  }
+
+  /// 根据选中的分组过滤习惯
+  List<Habit> get _filteredByGroup {
+    if (_selectedGroup == '全部') {
+      return _habits;
+    } else {
+      return _habits
+          .where((habit) => (habit.group ?? '未分组') == _selectedGroup)
+          .toList();
+    }
+  }
+
   Future<void> _showHabitForm(BuildContext context, [Habit? habit]) async {
 
     await NavigationHelper.push(context, Scaffold(
@@ -240,6 +271,43 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
     );
   }
 
+  /// 构建分组过滤栏
+  Widget _buildFilterBar() {
+    final groups = _groups;
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: groups.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final group = groups[index];
+          final isSelected = group == _selectedGroup;
+          return ChoiceChip(
+            label: Text(group),
+            selected: isSelected,
+            onSelected: (selected) {
+              if (selected) {
+                _selectGroup(group);
+              }
+            },
+            showCheckmark: false,
+            labelStyle: TextStyle(
+              color:
+                  isSelected
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).textTheme.bodyMedium?.color,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+            selectedColor: Theme.of(context).primaryColor,
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -248,6 +316,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
       largeTitle: 'habits_habits'.tr,
       enableLargeTitle: true,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      // ========== 搜索相关配置 ==========
       enableSearchBar: true, // 启用搜索栏
       searchPlaceholder: 'habits_searchHabitPlaceholder'.tr, // 搜索栏占位符
       onSearchChanged: (query) {
@@ -263,10 +332,13 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
         controller: widget.controller,
         onHabitTap: (habit) => _showHabitForm(context, habit),
       ), // 搜索结果页面
+      // ========== 过滤栏配置 ==========
+      enableFilterBar: true,
+      filterBarChild: _buildFilterBar(),
       actions: [
 
       ],
-      body: _buildCardView(_habits),
+      body: _buildCardView(_filteredByGroup),
     );
   }
 }

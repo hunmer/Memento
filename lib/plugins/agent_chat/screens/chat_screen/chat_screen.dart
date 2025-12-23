@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:Memento/plugins/agent_chat/models/agent_chain_node.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

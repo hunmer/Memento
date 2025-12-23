@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:Memento/core/event/event_args.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
@@ -37,10 +38,12 @@ class _HabitCardState extends State<HabitCard> {
   String _timerText = "00:00";
   late TimerController _timerController;
   Timer? _uiUpdateTimer;
+  late Habit _currentHabit; // 缓存当前习惯对象，用于获取最新的 totalDurationMinutes
 
   @override
   void initState() {
     super.initState();
+    _currentHabit = widget.habit;
     _themeColor = _getColor(widget.habit.skillId ?? widget.habit.id);
 
     final habitsPlugin =
@@ -58,6 +61,7 @@ class _HabitCardState extends State<HabitCard> {
       'habit_timer_stopped',
       _onTimerStateChanged,
     );
+    EventManager.instance.subscribe('habit_data_changed', _onHabitDataChanged);
   }
 
   @override
@@ -71,7 +75,26 @@ class _HabitCardState extends State<HabitCard> {
       'habit_timer_stopped',
       _onTimerStateChanged,
     );
+    EventManager.instance.unsubscribe(
+      'habit_data_changed',
+      _onHabitDataChanged,
+    );
     super.dispose();
+  }
+
+  void _onHabitDataChanged(EventArgs args) {
+    if (args is Value) {
+      final data = args.value;
+      if (data is Map && data.containsKey('habit')) {
+        final updatedHabit = data['habit'] as Habit;
+        // 只更新当前习惯的数据
+        if (updatedHabit.id == widget.habit.id && mounted) {
+          setState(() {
+            _currentHabit = updatedHabit;
+          });
+        }
+      }
+    }
   }
 
   void _onTimerStateChanged(EventArgs args) {
@@ -409,7 +432,7 @@ class _HabitCardState extends State<HabitCard> {
             // Stats
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
                 color:
                     isDark
@@ -417,25 +440,63 @@ class _HabitCardState extends State<HabitCard> {
                         : Colors.grey[100],
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Stack(
-                alignment: Alignment.center,
+              child: Column(
                 children: [
-                  Text(
-                    _formatTotalDuration(_totalDurationMinutes),
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white70 : Colors.grey[700],
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      '/ $_completionCount',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isDark ? Colors.white38 : Colors.grey[500],
+                  // 文本：累计时长(完成次数) / 目标时长 | 总累计时长
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${_formatTotalDuration(_totalDurationMinutes)}($_completionCount)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.grey[700],
+                        ),
                       ),
+                      Text(
+                        ' / ${widget.habit.durationMinutes}m',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark ? Colors.white38 : Colors.grey[500],
+                        ),
+                      ),
+                      if (_currentHabit.totalDurationMinutes > 0) ...[
+                        Text(
+                          ' | ',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? Colors.white24 : Colors.grey[400],
+                          ),
+                        ),
+                        Text(
+                          '总${_formatTotalDuration(_currentHabit.totalDurationMinutes)}',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white54 : Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  // 进度条
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(2),
+                    child: LinearProgressIndicator(
+                      value:
+                          widget.habit.durationMinutes > 0
+                              ? (_totalDurationMinutes /
+                                      widget.habit.durationMinutes)
+                                  .clamp(0.0, 1.0)
+                              : 0.0,
+                      backgroundColor:
+                          isDark
+                              ? Colors.white.withValues(alpha: 0.1)
+                              : Colors.grey[300],
+                      valueColor: AlwaysStoppedAnimation<Color>(_themeColor),
+                      minHeight: 3,
                     ),
                   ),
                 ],

@@ -240,4 +240,35 @@ class HabitController {
   Future<void> _syncWidget() async {
     await PluginWidgetSyncHelper.instance.syncHabits();
   }
+
+  /// 更新习惯的总累计时长（仅在记录变更时调用，避免重复计算）
+  Future<void> updateTotalDuration(String habitId, int totalMinutes) async {
+    final habits = getHabits();
+    final index = habits.indexWhere((h) => h.id == habitId);
+
+    if (index >= 0) {
+      final oldHabit = habits[index];
+      // 创建新的习惯对象，更新总时长
+      final updatedHabit = Habit(
+        id: oldHabit.id,
+        title: oldHabit.title,
+        notes: oldHabit.notes,
+        group: oldHabit.group,
+        icon: oldHabit.icon,
+        image: oldHabit.image,
+        reminderDays: oldHabit.reminderDays,
+        intervalDays: oldHabit.intervalDays,
+        durationMinutes: oldHabit.durationMinutes,
+        tags: oldHabit.tags,
+        skillId: oldHabit.skillId,
+        totalDurationMinutes: totalMinutes,
+      );
+
+      habits[index] = updatedHabit;
+      await storage.writeJson(_habitsKey, habits.map((h) => h.toMap()).toList());
+
+      // 广播习惯数据变更事件
+      EventManager.instance.broadcast('habit_data_changed', Value({'habit': updatedHabit}));
+    }
+  }
 }

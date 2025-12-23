@@ -20,13 +20,13 @@ class TimerMainView extends StatefulWidget {
   State<TimerMainView> createState() => _TimerMainViewState();
 }
 
-class _TimerMainViewState extends State<TimerMainView> with SingleTickerProviderStateMixin {
+class _TimerMainViewState extends State<TimerMainView> {
   List<TimerTask> _tasks = [];
   late TimerPlugin _plugin;
   Map<String, List<TimerTask>> _groupedTasks = {};
   List<TimerTask> _searchResults = [];
   String _currentQuery = '';
-  TabController? _tabController;
+  String _selectedGroup = '全部'; // 当前选中的分组
 
   @override
   void initState() {
@@ -35,32 +35,12 @@ class _TimerMainViewState extends State<TimerMainView> with SingleTickerProvider
     _updateTasksAndGroups();
     _loadConfig();
 
-    // 初始化 TabController 并监听切换
+    // 初始化时设置路由上下文
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _groupedTasks.isNotEmpty) {
-        _tabController = DefaultTabController.of(context);
-        _tabController?.addListener(_onTabChanged);
-        // 初始化时设置路由上下文
-        _updateRouteContext(_groupedTasks.keys.first);
+      if (mounted) {
+        _updateRouteContext(_selectedGroup);
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _tabController?.removeListener(_onTabChanged);
-    super.dispose();
-  }
-
-  /// TabBar 切换监听
-  void _onTabChanged() {
-    if (_tabController != null && _groupedTasks.isNotEmpty) {
-      final groups = _groupedTasks.keys.toList();
-      final currentIndex = _tabController!.index;
-      if (currentIndex >= 0 && currentIndex < groups.length) {
-        _updateRouteContext(groups[currentIndex]);
-      }
-    }
   }
 
   /// 更新路由上下文，使"询问当前上下文"功能能获取到当前分组
@@ -93,6 +73,30 @@ class _TimerMainViewState extends State<TimerMainView> with SingleTickerProvider
     });
   }
 
+  /// 获取所有分组(用于过滤栏)
+  List<String> get _groups {
+    final g = _groupedTasks.keys.toList()..sort();
+    return ['全部', ...g];
+  }
+
+  /// 选择分组
+  void _selectGroup(String group) {
+    setState(() {
+      _selectedGroup = group;
+    });
+    // 更新路由上下文
+    _updateRouteContext(group);
+  }
+
+  /// 根据选中的分组过滤任务
+  List<TimerTask> get _filteredByGroup {
+    if (_selectedGroup == '全部') {
+      return _tasks;
+    } else {
+      return _groupedTasks[_selectedGroup] ?? [];
+    }
+  }
+
   Future<void> _loadConfig() async {
     try {
       // final config = await _plugin.storage.read('configs/${_plugin.id}.json');
@@ -101,17 +105,57 @@ class _TimerMainViewState extends State<TimerMainView> with SingleTickerProvider
     }
   }
 
+  /// 构建分组过滤栏
+  Widget _buildFilterBar() {
+    final groups = _groups;
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: groups.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final group = groups[index];
+          final isSelected = group == _selectedGroup;
+          return ChoiceChip(
+            label: Text(group),
+            selected: isSelected,
+            onSelected: (selected) {
+              if (selected) {
+                _selectGroup(group);
+              }
+            },
+            showCheckmark: false,
+            labelStyle: TextStyle(
+              color:
+                  isSelected
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).textTheme.bodyMedium?.color,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+            selectedColor: Theme.of(context).primaryColor,
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final groups = _groupedTasks.keys.toList();
-
     return SuperCupertinoNavigationWrapper(
       title: Text(_plugin.getPluginName(context)!),
       largeTitle: '计时器',
       enableLargeTitle: true,
+      // ========== 搜索相关配置 ==========
       enableSearchBar: true,
       searchPlaceholder: 'timer_searchPlaceholder'.tr,
       onSearchChanged: _searchTasks,
+      searchBody: _buildSearchResults(),
+      // ========== 过滤栏配置 ==========
+      enableFilterBar: true,
+      filterBarChild: _buildFilterBar(),
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       backgroundColor: Theme.of(context).colorScheme.surface,
       actions: [
@@ -134,49 +178,21 @@ class _TimerMainViewState extends State<TimerMainView> with SingleTickerProvider
           },
         ),
       ],
-      body: DefaultTabController(
-        length: groups.length,
-        child: Column(
-          children: [
-            // 分组标签栏
-            Container(
-              height: 48,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: TabBar(
-                isScrollable: true,
-                labelColor: Theme.of(context).colorScheme.primary,
-                unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
-                indicatorColor: Theme.of(context).colorScheme.primary,
-                tabs: groups.map((group) => Tab(text: group)).toList(),
-              ),
-            ),
-            // 任务列表
-            Expanded(
-              child: TabBarView(
-                children: groups.map((group) {
-                  final tasksInGroup = _groupedTasks[group]!;
-                  return ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: tasksInGroup.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 16),
-                    itemBuilder: (context, index) {
-                      final task = tasksInGroup[index];
-                      return _TimerTaskCard(
-                        task: task,
-                        onTap: _showTaskDetails,
-                        onEdit: _editTask,
-                        onReset: _resetTask,
-                        onDelete: _deleteTask,
-                      );
-                    },
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-        ),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: _filteredByGroup.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 16),
+        itemBuilder: (context, index) {
+          final task = _filteredByGroup[index];
+          return _TimerTaskCard(
+            task: task,
+            onTap: _showTaskDetails,
+            onEdit: _editTask,
+            onReset: _resetTask,
+            onDelete: _deleteTask,
+          );
+        },
       ),
-      searchBody: _buildSearchResults(),
     );
   }
 

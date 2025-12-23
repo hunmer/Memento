@@ -43,6 +43,13 @@ class CompletionRecordController {
     records.add(record);
     await storage.writeJson(path, records.map((r) => r.toMap()).toList());
 
+    // 更新习惯的总累计时长缓存
+    final totalMinutes = records.fold<int>(
+      0,
+      (sum, r) => sum + r.duration.inMinutes,
+    );
+    await habitController.updateTotalDuration(habitId, totalMinutes);
+
     // 广播完成记录已保存的事件，触发小组件同步
     EventManager.instance.broadcast(
       'habit_completion_record_saved',
@@ -96,7 +103,7 @@ class CompletionRecordController {
   }
 
   Future<int> getTotalDuration(String habitId) async {
-    final records = await getSkillCompletionRecords(habitId);
+    final records = await getHabitCompletionRecords(habitId);
     return records.fold<int>(
       0,
       (sum, record) => sum + record.duration.inMinutes,
@@ -104,12 +111,13 @@ class CompletionRecordController {
   }
 
   Future<int> getCompletionCount(String habitId) async {
-    final records = await getSkillCompletionRecords(habitId);
+    final records = await getHabitCompletionRecords(habitId);
     return records.length;
   }
 
   Future<void> deleteCompletionRecord(String recordId) async {
     bool recordFound = false;
+    String? affectedHabitId;
 
     for (final habitId in getHabitIds()) {
       final records = await getHabitCompletionRecords(habitId);
@@ -118,10 +126,19 @@ class CompletionRecordController {
 
       if (records.length < initialLength) {
         recordFound = true;
+        affectedHabitId = habitId;
         await storage.writeJson(
           'habits/records/$habitId.json',
           records.map((r) => r.toMap()).toList(),
         );
+
+        // 更新习惯的总累计时长缓存
+        final totalMinutes = records.fold<int>(
+          0,
+          (sum, r) => sum + r.duration.inMinutes,
+        );
+        await habitController.updateTotalDuration(habitId, totalMinutes);
+        break;
       }
     }
 
@@ -132,6 +149,8 @@ class CompletionRecordController {
 
   Future<void> clearAllCompletionRecords(String habitId) async {
     await storage.writeJson('habits/records/$habitId.json', []);
+    // 清空记录后，重置总累计时长为 0
+    await habitController.updateTotalDuration(habitId, 0);
   }
 
   Future<List<CompletionRecord>> getHabitCompletionRecords(
