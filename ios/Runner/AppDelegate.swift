@@ -35,20 +35,8 @@ import intelligence
   private func setupIntelligencePlugin() {
     IntelligencePlugin.storage.attachListener {
       // 当频道列表更新时，刷新 Shortcuts 参数
-      if #available(iOS 16.0, *) {
-        // 注意：这里需要在项目中定义 AppShortcuts
-        // AppShortcuts.updateAppShortcutParameters()
-      }
-    }
-
-    // iOS 18+ 支持 Spotlight 集成
-    if #available(iOS 18.0, *) {
-      IntelligencePlugin.spotlightCore.attachEntityMapper { item in
-        return ConversationEntity(
-          id: item.id,
-          title: item.representation
-        )
-      }
+      // 可以在这里添加刷新逻辑
+      print("[AppDelegate] 频道列表已更新")
     }
 
     print("[AppDelegate] Intelligence 插件已配置")

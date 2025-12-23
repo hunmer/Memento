@@ -125,6 +125,7 @@ extension LiveActivitiesAppAttributes.ContentState {
      }
 }
 
+@available(iOS 17.0, *)
 #Preview("Notification", as: .content, using: LiveActivitiesAppAttributes.preview) {
    MyAppWidgetLiveActivity()
 } contentStates: {
