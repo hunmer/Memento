@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/circle_icon_picker.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:Memento/plugins/openai/models/service_provider.dart';
 import 'package:Memento/plugins/openai/models/llm_models.dart';
@@ -239,14 +240,38 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     return result;
   }
 
-  void _addTag() {
-    final tag = _tagController.text.trim();
-    if (tag.isNotEmpty && !_tags.contains(tag)) {
-      setState(() {
-        _tags.add(tag);
-        _tagController.clear();
-      });
-    }
+  void _showAddTagDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('openai_addTag'.tr),
+            content: TextField(
+              controller: _tagController,
+              autofocus: true,
+              decoration: InputDecoration(hintText: 'openai_enterTag'.tr),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('openai_cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () {
+                  final tag = _tagController.text.trim();
+                  if (tag.isNotEmpty && !_tags.contains(tag)) {
+                    setState(() {
+                      _tags.add(tag);
+                      _tagController.clear();
+                    });
+                  }
+                  Navigator.pop(context);
+                },
+                child: Text('openai_add'.tr),
+              ),
+            ],
+          ),
+    );
   }
 
   void _removeTag(String tag) {
@@ -630,12 +655,10 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            TextInputField(
               controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'openai_agentName'.tr,
-                hintText: 'openai_enterAgentName'.tr,
-              ),
+              labelText: 'openai_agentName'.tr,
+              hintText: 'openai_enterAgentName'.tr,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'openai_pleaseEnterName'.tr;
@@ -648,14 +671,14 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                 ? Center(
                   child: Text('openai_loadingProviders'.tr),
                 )
-                : DropdownButtonFormField<String>(
+                : SelectField<String>(
                   value: _providers.isNotEmpty &&
                          _providers.any((p) => p.id == _selectedProviderId)
                       ? _selectedProviderId
-                      : (_providers.isNotEmpty ? _providers.first.id : null),
-                  decoration: InputDecoration(
-                    labelText: 'openai_serviceProvider'.tr,
-                  ),
+                          : (_providers.isNotEmpty
+                              ? _providers.first.id
+                              : null),
+                  labelText: 'openai_serviceProvider'.tr,
                   items:
                       _providers.map((provider) {
                         return DropdownMenuItem(
@@ -725,12 +748,11 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                   },
                 ),
             const SizedBox(height: 16),
-            TextFormField(
+            TextAreaField(
               controller: _descriptionController,
-              decoration: InputDecoration(
-                labelText: 'openai_description'.tr,
-                hintText: 'openai_enterDescription'.tr,
-              ),
+              labelText: 'openai_description'.tr,
+              hintText: 'openai_enterDescription'.tr,
+              minLines: 3,
               maxLines: 3,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -741,15 +763,13 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             ),
             const SizedBox(height: 16),
             // Prompt 预设选择
-            DropdownButtonFormField<String>(
+            SelectField<String>(
               value: _selectedPresetId != null &&
                      _presets.any((p) => p.id == _selectedPresetId)
                   ? _selectedPresetId
-                  : null,
-              decoration: InputDecoration(
-                labelText: 'openai_promptPreset'.tr,
-                hintText: 'openai_selectPromptPreset'.tr,
-              ),
+                      : null,
+              labelText: 'openai_promptPreset'.tr,
+              hintText: 'openai_selectPromptPreset'.tr,
               items: [
                 DropdownMenuItem<String>(
                   value: null,
@@ -769,22 +789,21 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            TextAreaField(
               controller: _promptController,
-              decoration: InputDecoration(
-                labelText: 'openai_systemPrompt'.tr,
-                hintText: 'openai_enterSystemPrompt'.tr,
-                helperText: _selectedPresetId != null
-                    ? 'openai_promptPresetActiveHint'.tr
-                    : null,
-                helperStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
+              labelText: 'openai_systemPrompt'.tr,
+              hintText: 'openai_enterSystemPrompt'.tr,
+              minLines: 5,
               maxLines: 5,
               enabled: _selectedPresetId == null,
+              helperText:
+                  _selectedPresetId != null
+                      ? 'openai_promptPresetActiveHint'.tr
+                      : null,
+              helperStyle: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+              ),
               validator: (value) {
-                // 如果选择了预设，不需要验证原有的 prompt
                 if (_selectedPresetId != null) {
                   return null;
                 }
@@ -795,12 +814,10 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            TextInputField(
               controller: _baseUrlController,
-              decoration: InputDecoration(
-                labelText: 'openai_baseUrl'.tr,
-                hintText: 'openai_enterBaseUrl'.tr,
-              ),
+              labelText: 'openai_baseUrl'.tr,
+              hintText: 'openai_enterBaseUrl'.tr,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'openai_pleaseEnterBaseUrl'.tr;
@@ -812,12 +829,10 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
+                  child: TextInputField(
                     controller: _modelController,
-                    decoration: InputDecoration(
-                      labelText: 'openai_model'.tr,
-                      hintText: 'openai_enterModel'.tr,
-                    ),
+                    labelText: 'openai_model'.tr,
+                    hintText: 'openai_enterModel'.tr,
                   ),
                 ),
                 IconButton(
@@ -828,46 +843,24 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            TextFormField(
+            TextAreaField(
               controller: _headersController,
-              decoration: InputDecoration(
-                labelText: 'openai_headers'.tr,
-                hintText: 'openai_enterHeaders'.tr,
-              ),
+              labelText: 'openai_headers'.tr,
+              hintText: 'openai_enterHeaders'.tr,
+              minLines: 3,
               maxLines: 3,
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _tagController,
-                    decoration: InputDecoration(
-                      labelText: 'openai_tags'.tr,
-                      hintText: 'openai_enterTag'.tr,
-                    ),
-                  ),
-                ),
-                IconButton(icon: const Icon(Icons.add), onPressed: _addTag),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children:
-                  _tags
-                      .map(
-                        (tag) => Chip(
-                          label: Text(tag),
-                          onDeleted: () => _removeTag(tag),
-                        ),
-                      )
-                      .toList(),
+            TagsField(
+              tags: _tags,
+              onAddTag: _showAddTagDialog,
+              onRemoveTag: _removeTag,
+              addButtonText: 'openai_addTag'.tr,
             ),
             const SizedBox(height: 24),
-            SwitchListTile(
-              title: Text('openai_enablePluginFunctionCalls'.tr),
-              subtitle: Text('openai_allowAICallPluginFunctions'.tr),
+            SwitchField(
+              title: 'openai_enablePluginFunctionCalls'.tr,
+              subtitle: 'openai_allowAICallPluginFunctions'.tr,
               value: _enableFunctionCalling,
               onChanged: (value) {
                 setState(() {
@@ -876,9 +869,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-            SwitchListTile(
-              title: Text('openai_enableGuessWhatYouWantToAsk'.tr),
-              subtitle: Text('openai_showPresetOpeningQuestions'.tr),
+            SwitchField(
+              title: 'openai_enableGuessWhatYouWantToAsk'.tr,
+              subtitle: 'openai_showPresetOpeningQuestions'.tr,
               value: _enableOpeningQuestions,
               onChanged: (value) {
                 setState(() {
@@ -888,89 +881,36 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
             ),
             if (_enableOpeningQuestions) ...[
               const SizedBox(height: 16),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  '开场白问题列表',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+              EditableListField(
+                items: _openingQuestions,
+                controller: _openingQuestionController,
+                onAdd: () {
+                  final question = _openingQuestionController.text.trim();
+                  if (question.isNotEmpty) {
+                    setState(() {
+                      _openingQuestions.add(question);
+                      _openingQuestionController.clear();
+                    });
+                  }
+                },
+                onRemove: (index) {
+                  setState(() {
+                    _openingQuestions.removeAt(index);
+                  });
+                },
+                onEdit: (index, content) {
+                  setState(() {
+                    _openingQuestionController.text = content;
+                    _openingQuestions.removeAt(index);
+                  });
+                },
+                addButtonText: '添加',
+                inputLabel: '添加开场白问题',
+                inputHint: '输入一个问题',
+                titleText: '开场白问题列表',
+                maxLines: 2,
+                primaryColor: Theme.of(context).colorScheme.primary,
               ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _openingQuestionController,
-                        decoration: const InputDecoration(
-                          labelText: '添加开场白问题',
-                          hintText: '输入一个问题',
-                        ),
-                        maxLines: 2,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () {
-                        final question = _openingQuestionController.text.trim();
-                        if (question.isNotEmpty) {
-                          setState(() {
-                            _openingQuestions.add(question);
-                            _openingQuestionController.clear();
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              if (_openingQuestions.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: _openingQuestions.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final question = entry.value;
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            child: Text(
-                              '${index + 1}',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          title: Text(question),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, size: 20),
-                                onPressed: () {
-                                  _openingQuestionController.text = question;
-                                  setState(() {
-                                    _openingQuestions.removeAt(index);
-                                  });
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, size: 20),
-                                onPressed: () {
-                                  setState(() {
-                                    _openingQuestions.removeAt(index);
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
             ],
             const SizedBox(height: 32),
             ElevatedButton(

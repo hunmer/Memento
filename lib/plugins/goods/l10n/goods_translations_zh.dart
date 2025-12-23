@@ -119,4 +119,16 @@ const Map<String, String> goodsTranslationsZh = {
   'goods_widgetDescription': '快速打开物品管理',
   'goods_overviewName': '物品概览',
   'goods_overviewDescription': '显示物品统计信息',
+
+  // Multi-Filter Strings
+  'goods_purchaseDateRange': '购入日期',
+  'goods_expirationDateRange': '过期日期',
+  'goods_priceRange': '价格范围',
+  'goods_minPrice': '最低价格',
+  'goods_maxPrice': '最高价格',
+  'goods_status': '使用状态',
+  'goods_statusNormal': '正常',
+  'goods_statusDamaged': '损坏',
+  'goods_statusLent': '借出',
+  'goods_statusSold': '已售',
 };

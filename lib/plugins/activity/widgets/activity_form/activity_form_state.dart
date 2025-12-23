@@ -5,6 +5,7 @@ import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/widgets/tag_manager_dialog.dart';
+import 'package:Memento/widgets/form_fields/index.dart';
 import 'activity_form_utils.dart';
 import '../../../../../../core/services/toast_service.dart';
 
@@ -26,164 +27,86 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
     return Column(
       children: [
-        // 顶部拖动指示器和关闭按钮
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              // 拖动指示器
-              Expanded(
-                child: Center(
-                  child: Container(
-                    width: 40,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[700] : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                ),
-              ),
-              // 关闭按钮
-              IconButton(
-                icon: Icon(
-                  Icons.close,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-                onPressed: () => Navigator.of(context).pop(),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
-          ),
-        ),
-
         // 表单内容
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             children: [
               // Title Card
-              _buildCard(
-                context,
-                cardColor,
-                icon: Icons.edit,
-                child: TextField(
-                  controller: _titleController,
-                  style: const TextStyle(fontSize: 16),
-                  decoration: InputDecoration(
-                    hintText: 'activity_activityName'.tr,
-                    hintStyle: TextStyle(color: Colors.grey[400]),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                    isDense: true,
-                  ),
-                ),
+              TextInputField(
+                controller: _titleController,
+                labelText: 'activity_activityName'.tr,
+                hintText: 'activity_activityName'.tr,
+                prefixIcon: const Icon(Icons.edit),
               ),
               const SizedBox(height: 16),
 
               // Time Card
-              _buildCard(
-                context,
-                cardColor,
-                icon: Icons.schedule,
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTimeBox(
-                            context,
-                            label: 'activity_startTime'.tr,
-                            time: _startTime,
-                            onTap: () => _selectTime(context, true),
-                            isDark: isDark,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildTimeBox(
-                            context,
-                            label: 'activity_endTime'.tr,
-                            time: _endTime,
-                            onTap: () => _selectTime(context, false),
-                            isDark: isDark,
-                          ),
-                        ),
-                      ],
+              Row(
+                children: [
+                  Expanded(
+                    child: TimePickerField(
+                      label: 'activity_startTime'.tr,
+                      time: _startTime,
+                      onTimeChanged: (time) {
+                        setState(() {
+                          _startTime = time;
+                          _syncDurationWithTimes();
+                        });
+                      },
                     ),
-                    const SizedBox(height: 12),
-                    // Duration Slider Section
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color:
-                            isDark ? Colors.black26 : const Color(0xFFF5F7F8),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 标题和当前时长
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'activity_duration'.tr,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[500],
-                                ),
-                              ),
-                              Text(
-                                _calculateDurationString(context),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          // Slider
-                          SliderTheme(
-                            data: SliderThemeData(
-                              activeTrackColor: primaryColor,
-                              inactiveTrackColor: primaryColor.withOpacity(0.2),
-                              thumbColor: primaryColor,
-                              overlayColor: primaryColor.withOpacity(0.2),
-                              trackHeight: 4,
-                            ),
-                            child: Slider(
-                              min: 1,
-                              max: _getMaxDuration().toDouble(),
-                              value: _getCurrentDuration().toDouble().clamp(
-                                1.0,
-                                _getMaxDuration().toDouble(),
-                              ),
-                              divisions:
-                                  _getMaxDuration() > 1
-                                      ? _getMaxDuration() - 1
-                                      : 1,
-                              onChanged: (value) {
-                                _updateDurationFromSlider(value.toInt());
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          // 快捷时长按钮
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: _buildDurationButtons(primaryColor),
-                            ),
-                          ),
-                        ],
-                      ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TimePickerField(
+                      label: 'activity_endTime'.tr,
+                      time: _endTime,
+                      onTimeChanged: (time) {
+                        setState(() {
+                          _endTime = time;
+                          _syncDurationWithTimes();
+                        });
+                      },
                     ),
-                  ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Duration Slider Section
+              SliderField(
+                label: 'activity_duration'.tr,
+                valueText: _calculateDurationString(context),
+                min: 1,
+                max: _getMaxDuration().toDouble(),
+                value: _getCurrentDuration().toDouble().clamp(
+                  1.0,
+                  _getMaxDuration().toDouble(),
                 ),
+                divisions: _getMaxDuration() > 1 ? _getMaxDuration() - 1 : 1,
+                onChanged: (value) {
+                  _updateDurationFromSlider(value.toInt());
+                },
+                quickValues:
+                    [15, 30, 60, 90, 120, 180, 240, 300, 360, 480]
+                        .where((duration) => duration <= _getMaxDuration())
+                        .map((e) => e.toDouble())
+                        .toList(),
+                quickValueLabel: (value) {
+                  final duration = value.toInt();
+                  final hours = duration ~/ 60;
+                  final minutes = duration % 60;
+                  if (hours > 0 && minutes > 0) {
+                    return '${hours}h${minutes}m';
+                  } else if (hours > 0) {
+                    return '${hours}h';
+                  } else {
+                    return '${minutes}m';
+                  }
+                },
+                onQuickValueTap: (value) {
+                  _updateDurationFromSlider(value.toInt());
+                },
               ),
               const SizedBox(height: 16),
 
@@ -307,21 +230,12 @@ class ActivityFormState extends State<ActivityFormWidget> {
               const SizedBox(height: 16),
 
               // Description Card
-              _buildCard(
-                context,
-                cardColor,
-                icon: Icons.description,
-                child: TextField(
-                  controller: _descriptionController,
-                  style: const TextStyle(fontSize: 16),
-                  decoration: InputDecoration(
-                    hintText: 'activity_contentHint'.tr,
-                    hintStyle: TextStyle(color: Colors.grey[400]),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  maxLines: 4,
-                ),
+              TextAreaField(
+                controller: _descriptionController,
+                labelText: 'activity_contentHint'.tr,
+                hintText: 'activity_contentHint'.tr,
+                minLines: 4,
+                maxLines: 4,
               ),
 
               // 底部保存按钮的间距
@@ -398,45 +312,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
         ],
       ),
     );
-  }
-
-  Widget _buildTimeBox(
-    BuildContext context, {
-    required String label,
-    required TimeOfDay time,
-    required VoidCallback onTap,
-    required bool isDark,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isDark ? Colors.black26 : const Color(0xFFF5F7F8),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          children: [
-            Text(
-              label,
-              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              _formatTime(time),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatTime(TimeOfDay time) {
-    final hour = time.hour.toString().padLeft(2, '0');
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
   }
 
   String _calculateDurationString(BuildContext context) {
@@ -565,64 +440,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
     });
   }
 
-  /// 构建快捷时长按钮
-  List<Widget> _buildDurationButtons(Color primaryColor) {
-    // 定义常用时长（分钟）
-    final durations = [15, 30, 60, 90, 120, 180, 240, 300, 360, 480];
-
-    final maxDuration = _getMaxDuration();
-    final currentDuration = _getCurrentDuration();
-
-    return durations.where((duration) => duration <= maxDuration).map((
-      duration,
-    ) {
-      final isSelected = currentDuration == duration;
-      final hours = duration ~/ 60;
-      final minutes = duration % 60;
-
-      String label;
-      if (hours > 0 && minutes > 0) {
-        label = '${hours}h${minutes}m';
-      } else if (hours > 0) {
-        label = '${hours}h';
-      } else {
-        label = '${minutes}m';
-      }
-
-      return Padding(
-        padding: const EdgeInsets.only(right: 8),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _updateDurationFromSlider(duration),
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color:
-                    isSelected ? primaryColor : primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color:
-                      isSelected ? primaryColor : primaryColor.withOpacity(0.3),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : primaryColor,
-                  fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }).toList();
-  }
-
   @override
   void initState() {
     super.initState();
@@ -686,23 +503,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
     _tagsController.dispose();
     _durationController.dispose();
     super.dispose();
-  }
-
-  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: isStartTime ? _startTime : _endTime,
-    );
-    if (picked != null) {
-      setState(() {
-        if (isStartTime) {
-          _startTime = picked;
-        } else {
-          _endTime = picked;
-        }
-        _syncDurationWithTimes();
-      });
-    }
   }
 
   void _syncDurationWithTimes() {
