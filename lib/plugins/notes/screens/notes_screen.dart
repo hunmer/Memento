@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/index.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
+import 'package:Memento/plugins/notes/models/note.dart';
 import 'package:Memento/plugins/notes/models/folder_tree_node.dart';
 import 'package:Memento/plugins/notes/widgets/folder_selection_sheet.dart';
 import 'notes_screen/folder_item.dart';
@@ -115,9 +117,10 @@ class _NotesMainViewState extends NotesMainViewState
       body: _buildBody(),
       enableLargeTitle: true,
       enableSearchBar: true,
-      enableFilterBar: true,
-      filterBarHeight: 50,
-      filterBarChild: _buildFilterBar(),
+      enableMultiFilter: true,
+      multiFilterItems: _buildFilterItems(),
+      multiFilterBarHeight: 50,
+      onMultiFilterChanged: _applyMultiFilters,
       searchPlaceholder: 'notes_searchPlaceholder'.tr,
       onSearchChanged: _handleSearchChanged,
       onSearchSubmitted: _handleSearchSubmitted,
@@ -197,94 +200,6 @@ class _NotesMainViewState extends NotesMainViewState
     // 实现滚动位置保存
   }
 
-  /// 构建过滤栏
-  Widget _buildFilterBar() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(
-          children: [
-            _buildFilterChip(
-              icon: Icons.folder_outlined,
-              label: currentFolder?.name ?? 'Root',
-              onTap: () {
-                _showFolderPicker();
-              },
-            ),
-            const SizedBox(width: 8),
-            _buildFilterChip(
-              icon: Icons.label_outline,
-              label: _selectedTag ?? 'notes_allTags'.tr,
-              onTap: () {
-                _showTagPicker();
-              },
-            ),
-            const SizedBox(width: 8),
-            _buildFilterChip(
-              icon: Icons.calendar_today,
-              label:
-                  _selectedDate != null
-                      ? DateFormat('yyyy/MM/dd').format(_selectedDate!)
-                      : 'All Dates',
-              onTap: () {
-                _showDatePicker();
-              },
-            ),
-            const SizedBox(width: 8),
-            // 添加清除过滤器按钮
-            if (_selectedTag != null || _selectedDate != null)
-              _buildClearFilterButton(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 构建清除过滤器按钮
-  Widget _buildClearFilterButton() {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTag = null;
-          _selectedDate = null;
-          loadCurrentFolder();
-        });
-        // 更新路由上下文
-        _updateRouteContext();
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Theme.of(context).primaryColor.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.clear_all,
-              size: 16,
-              color: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              'notes_clearAll'.tr,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildExpandableFab() {
     return Column(
@@ -484,54 +399,12 @@ class _NotesMainViewState extends NotesMainViewState
     );
   }
 
-  Widget _buildFilterChip({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color:
-              isDark
-                  ? const Color(0xFF27272A)
-                  : const Color(0xFFE4E4E7), // Zinc 800 / 200
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF52525B),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: isDark ? Colors.white : const Color(0xFF27272A),
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(
-              Icons.arrow_drop_down,
-              size: 20,
-              color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF52525B),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  // 显示文件夹选择器 - 使用树形结构展示
-  Future<void> _showFolderPicker() async {
+
+
+
+  /// 显示文件夹选择器
+  Future<Folder?> _showFolderPicker() async {
     final rootFolder = plugin.controller.getFolder('root')!;
     final allFolders = plugin.controller.getAllFolders();
 
@@ -547,19 +420,15 @@ class _NotesMainViewState extends NotesMainViewState
     final selectedFolder = await FolderSelectionSheet.show(
       context: context,
       rootNode: rootNode,
-      note: null, // 不传递笔记，因为这是文件夹导航而不是移动笔记
+      note: null, // 不传递笔记，因为这是过滤而不是移动笔记
     );
 
-    if (selectedFolder != null && selectedFolder.id != currentFolder?.id) {
-      setState(() {
-        navigateToFolder(selectedFolder);
-      });
-    }
+    return selectedFolder;
   }
 
-  /// 显示标签选择器
-  void _showTagPicker() {
-    // 获取所有笔记中的标签
+  /// 构建多条件过滤列表
+  List<FilterItem> _buildFilterItems() {
+    // 获取所有标签
     final allTags = <String>{};
     final allNotes = plugin.controller.getAllNotes();
 
@@ -573,104 +442,153 @@ class _NotesMainViewState extends NotesMainViewState
 
     final tagsList = allTags.toList();
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('notes_selectTag'.tr),
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 300,
-            child:
-                tagsList.isEmpty
-                    ? Center(child: Text('notes_noTagsAvailable'.tr))
-                    : ListView.builder(
-                      itemCount:
-                          tagsList.length + 1, // +1 for "All Tags" option
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          // "All Tags" option
-                          return ListTile(
-                            leading: const Icon(Icons.label),
-                            title: Text('notes_allTags'.tr),
-                            onTap: () {
-                              setState(() {
-                                _selectedTag = null;
-                                _applyFilters();
-                              });
-                              Navigator.pop(context);
-                            },
-                          );
-                        }
-
-                        final tag = tagsList[index - 1];
-                        return ListTile(
-                          leading: const Icon(Icons.label_outline),
-                          title: Text(tag),
-                          onTap: () {
-                            setState(() {
-                              _selectedTag = tag;
-                              _applyFilters();
-                            });
-                            Navigator.pop(context);
-                          },
-                        );
-                      },
-                    ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('notes_cancel'.tr),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  /// 显示日期选择器
-  void _showDatePicker() {
-    showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    ).then((selectedDate) {
-      if (selectedDate != null) {
-        setState(() {
-          _selectedDate = selectedDate;
-          _applyFilters();
-        });
-      }
-    });
-  }
-
-  /// 应用当前过滤条件
-  void _applyFilters() {
-    setState(() {
-      if (searchController.text.isNotEmpty) {
-        // 如果有搜索文本，应用搜索 + 过滤
-        notes = plugin.controller.searchNotes(
-          query: searchController.text,
-          tags: _selectedTag != null ? [_selectedTag!] : null,
-          startDate: _selectedDate,
-          endDate: _selectedDate,
-        );
-      } else {
-        // 如果没有搜索文本，仅应用过滤
-        if (_selectedTag != null || _selectedDate != null) {
-          notes = plugin.controller.searchNotes(
-            query: '',
-            tags: _selectedTag != null ? [_selectedTag!] : null,
-            startDate: _selectedDate,
-            endDate: _selectedDate,
+    return [
+      // 文件夹选择过滤
+      FilterItem(
+        id: 'folder',
+        title: 'notes_folder'.tr,
+        type: FilterType.custom,
+        builder: (context, currentValue, onChanged) {
+          final selectedFolder = currentValue as Folder?;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton.icon(
+                icon: const Icon(Icons.folder_outlined, size: 16),
+                label: Text(
+                  selectedFolder?.name ?? 'notes_selectFolder'.tr,
+                  style: const TextStyle(fontSize: 13),
+                ),
+                onPressed: () async {
+                  final folder = await _showFolderPicker();
+                  if (folder != null) {
+                    onChanged(folder);
+                  }
+                },
+              ),
+              if (selectedFolder != null)
+                IconButton(
+                  icon: const Icon(Icons.clear, size: 16),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                  onPressed: () => onChanged(null),
+                ),
+            ],
           );
-        } else {
-          loadCurrentFolder();
-        }
+        },
+        getBadge: (value) {
+          if (value is Folder) {
+            return value.name;
+          }
+          return null;
+        },
+      ),
+
+      // 标签多选过滤
+      if (tagsList.isNotEmpty)
+        FilterItem(
+          id: 'tags',
+          title: 'notes_tags'.tr,
+          type: FilterType.tagsMultiple,
+          builder: (context, currentValue, onChanged) {
+            return FilterBuilders.buildTagsFilter(
+              context: context,
+              currentValue: currentValue,
+              onChanged: onChanged,
+              availableTags: tagsList,
+            );
+          },
+          getBadge: FilterBuilders.tagsBadge,
+        ),
+
+      // 日期过滤
+      FilterItem(
+        id: 'date',
+        title: 'notes_date'.tr,
+        type: FilterType.date,
+        builder: (context, currentValue, onChanged) {
+          return FilterBuilders.buildDateFilter(
+            context: context,
+            currentValue: currentValue,
+            onChanged: onChanged,
+          );
+        },
+        getBadge: FilterBuilders.dateBadge,
+      ),
+    ];
+  }
+
+  /// 应用多条件过滤
+  void _applyMultiFilters(Map<String, dynamic> filters) {
+    setState(() {
+      // 提取文件夹过滤
+      final folderFilter = filters['folder'] as Folder?;
+
+      // 提取标签过滤
+      final tagFilters = filters['tags'] as List<String>?;
+
+      // 提取日期过滤
+      final dateFilter = filters['date'] as DateTime?;
+
+      // 如果选择了文件夹过滤，先获取该文件夹的笔记
+      List<Note> baseNotes;
+      if (folderFilter != null) {
+        baseNotes = plugin.controller.getFolderNotes(folderFilter.id);
+      } else {
+        // 否则使用当前文件夹的笔记
+        baseNotes = plugin.controller.getFolderNotes(currentFolderId);
       }
+
+      // 应用标签和日期过滤
+      if (searchController.text.isNotEmpty ||
+          (tagFilters != null && tagFilters.isNotEmpty) ||
+          dateFilter != null) {
+        // 对基础笔记列表应用额外过滤
+        notes = baseNotes.where((note) {
+          // 搜索文本过滤
+          if (searchController.text.isNotEmpty) {
+            final query = searchController.text.toLowerCase();
+            if (!note.title.toLowerCase().contains(query) &&
+                !note.content.toLowerCase().contains(query)) {
+              return false;
+            }
+          }
+
+          // 标签过滤
+          if (tagFilters != null && tagFilters.isNotEmpty) {
+            if (!tagFilters.any((tag) => note.tags.contains(tag))) {
+              return false;
+            }
+          }
+
+          // 日期过滤
+          if (dateFilter != null) {
+            final noteDate = DateTime(
+              note.createdAt.year,
+              note.createdAt.month,
+              note.createdAt.day,
+            );
+            final filterDate = DateTime(
+              dateFilter.year,
+              dateFilter.month,
+              dateFilter.day,
+            );
+            if (!noteDate.isAtSameMomentAs(filterDate)) {
+              return false;
+            }
+          }
+
+          return true;
+        }).toList();
+      } else {
+        notes = baseNotes;
+      }
+
+      // 更新旧的状态变量（保持兼容性）
+      _selectedTag = tagFilters != null && tagFilters.isNotEmpty ? tagFilters.first : null;
+      _selectedDate = dateFilter;
     });
+
     // 更新路由上下文
     _updateRouteContext();
   }

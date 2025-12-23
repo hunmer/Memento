@@ -29,7 +29,8 @@
       "Bash(done)",
       "WebFetch(domain:pub.dev)",
       "Skill(skill-creator)",
-      "Skill(add-route-context)"
+      "Skill(add-route-context)",
+      "Skill(add-multi-filter)"
     ],
     "deny": [],
     "ask": []
