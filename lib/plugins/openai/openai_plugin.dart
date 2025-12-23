@@ -25,7 +25,6 @@ import 'controllers/agent_controller.dart';
 import 'controllers/service_provider_controller.dart';
 import 'controllers/model_controller.dart';
 import 'services/request_service.dart';
-import 'models/prompt_preset.dart';
 import 'models/ai_agent.dart';
 import 'services/prompt_preset_service.dart';
 import 'sample_data.dart';
@@ -794,7 +793,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
   void _showPresetEditDialog() async {
     await showPresetEditDialog(
       context: context,
-      onSave: (preset) async {
+      onSave: (preset, prompts) async {
         final service = PromptPresetService();
         await service.addPreset(preset);
 

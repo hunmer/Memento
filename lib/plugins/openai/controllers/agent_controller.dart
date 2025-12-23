@@ -35,6 +35,7 @@ class AgentController extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _agents = [];
+      debugPrint('❌ 加载Agents失败: $e');
       notifyListeners();
     }
     return _agents;
@@ -43,6 +44,17 @@ class AgentController extends ChangeNotifier {
   Future<void> saveAgent(AIAgent agent) async {
     final plugin = PluginManager.instance.getPlugin('openai');
     if (plugin == null) return;
+
+    // 调试日志：确认保存的Agent包含messages
+    debugPrint('💾 保存Agent: ${agent.name}');
+    debugPrint('📝 预设消息数量: ${agent.messages?.length ?? 0}');
+    if (agent.messages != null && agent.messages!.isNotEmpty) {
+      for (final msg in agent.messages!) {
+        debugPrint(
+          '  - ${msg.type}: ${msg.content.substring(0, msg.content.length > 20 ? 20 : msg.content.length)}${msg.content.length > 20 ? '...' : ''}',
+        );
+      }
+    }
 
     // Load existing agents
     await loadAgents();

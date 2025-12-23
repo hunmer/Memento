@@ -114,12 +114,18 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
     await showPresetEditDialog(
       context: context,
       preset: preset,
-      onSave: (newPreset) async {
+      onSave: (newPreset, prompts) async {
+        // 确保 prompts 正确设置到 preset 中
+        final updatedPreset = newPreset.copyWith(prompts: prompts);
+
+        // 保存包含 prompts 的预设
         if (preset == null) {
-          await _service.addPreset(newPreset);
+          await _service.addPreset(updatedPreset);
         } else {
-          await _service.updatePreset(newPreset);
+          await _service.updatePreset(updatedPreset);
         }
+        // 重新加载以获取最新的 prompts 数据
+        await _loadPresets();
       },
     );
   }

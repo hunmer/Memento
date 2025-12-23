@@ -1,3 +1,5 @@
+import 'ai_agent.dart';
+
 /// Prompt 预设模型
 /// 用于管理可复用的系统提示词模板
 class PromptPreset {
@@ -10,6 +12,7 @@ class PromptPreset {
   final bool isDefault;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final List<Prompt>? prompts;  // 结构化的 prompt 列表
 
   const PromptPreset({
     required this.id,
@@ -21,6 +24,7 @@ class PromptPreset {
     this.isDefault = false,
     required this.createdAt,
     required this.updatedAt,
+    this.prompts,
   });
 
   Map<String, dynamic> toJson() => {
@@ -33,6 +37,7 @@ class PromptPreset {
     'isDefault': isDefault,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
+    'prompts': prompts?.map((p) => p.toJson()).toList(),
   };
 
   factory PromptPreset.fromJson(Map<String, dynamic> json) => PromptPreset(
@@ -45,6 +50,9 @@ class PromptPreset {
     isDefault: json['isDefault'] as bool? ?? false,
     createdAt: DateTime.parse(json['createdAt'] as String),
     updatedAt: DateTime.parse(json['updatedAt'] as String),
+    prompts: (json['prompts'] as List?)
+        ?.map((p) => Prompt.fromJson(p as Map<String, dynamic>))
+        .toList(),
   );
 
   PromptPreset copyWith({
@@ -57,6 +65,7 @@ class PromptPreset {
     bool? isDefault,
     DateTime? createdAt,
     DateTime? updatedAt,
+    List<Prompt>? prompts,
   }) {
     return PromptPreset(
       id: id ?? this.id,
@@ -68,6 +77,7 @@ class PromptPreset {
       isDefault: isDefault ?? this.isDefault,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      prompts: prompts ?? this.prompts,
     );
   }
 }

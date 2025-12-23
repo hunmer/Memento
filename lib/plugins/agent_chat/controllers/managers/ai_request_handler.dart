@@ -379,8 +379,18 @@ class AIRequestHandler {
 
   /// 构建上下文消息列表
   List<ChatCompletionMessage> buildContextMessages(String currentInput) {
+    print('═══════════════════════════════════════════');
+    print('🔍 [DEBUG] buildContextMessages 被调用！');
+    print('═══════════════════════════════════════════');
+
     final messages = <ChatCompletionMessage>[];
     final currentAgent = getCurrentAgent();
+
+    // 调试日志
+    print('🤖 当前Agent: ${currentAgent?.name ?? 'null'}');
+    print('📝 Agent消息数量: ${currentAgent?.messages?.length ?? 0}');
+    debugPrint('🤖 当前Agent: ${currentAgent?.name ?? 'null'}');
+    debugPrint('📝 Agent消息数量: ${currentAgent?.messages?.length ?? 0}');
 
     // 添加系统提示词
     if (currentAgent != null) {
@@ -396,6 +406,43 @@ class AIRequestHandler {
       }
 
       messages.add(ChatCompletionMessage.system(content: systemPrompt));
+
+      // 添加预设消息（在 system prompt 之后）
+      if (currentAgent.messages != null && currentAgent.messages!.isNotEmpty) {
+        print('📋 开始添加预设消息，共 ${currentAgent.messages!.length} 条');
+        debugPrint('📋 开始添加预设消息，共 ${currentAgent.messages!.length} 条');
+        for (final prompt in currentAgent.messages!) {
+          print('  - 类型: ${prompt.type}, 内容: ${prompt.content.substring(0, prompt.content.length > 30 ? 30 : prompt.content.length)}${prompt.content.length > 30 ? '...' : ''}');
+          debugPrint('  - 类型: ${prompt.type}, 内容: ${prompt.content.substring(0, prompt.content.length > 30 ? 30 : prompt.content.length)}${prompt.content.length > 30 ? '...' : ''}');
+          switch (prompt.type) {
+            case 'user':
+              messages.add(
+                ChatCompletionMessage.user(
+                  content: ChatCompletionUserMessageContent.string(prompt.content),
+                ),
+              );
+              break;
+            case 'assistant':
+              messages.add(
+                ChatCompletionMessage.assistant(content: prompt.content),
+              );
+              break;
+            case 'system':
+              // System 类型的消息已经添加过了，跳过
+              print('  ⚠️ 跳过system类型的消息');
+              debugPrint('  ⚠️ 跳过system类型的消息');
+              continue;
+          }
+        }
+        print('✅ 预设消息添加完成，当前messages列表长度: ${messages.length}');
+        debugPrint('✅ 预设消息添加完成');
+      } else {
+        print('⚠️ 当前Agent没有配置messages或messages为空');
+        debugPrint('⚠️ 当前Agent没有配置messages或messages为空');
+      }
+    } else {
+      print('❌ 当前Agent为null');
+      debugPrint('❌ 当前Agent为null');
     }
 
     // 获取历史消息（排除正在生成的消息，保留子消息以避免丢失工具结果）
