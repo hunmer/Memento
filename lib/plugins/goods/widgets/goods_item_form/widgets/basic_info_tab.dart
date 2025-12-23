@@ -4,10 +4,10 @@ import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:Memento/widgets/image_picker_dialog.dart';
 import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/controllers/form_controller.dart';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_selector_dialog.dart';
-import 'package:Memento/plugins/goods/widgets/goods_item_form/custom_fields_list.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 class BasicInfoTab extends StatelessWidget {
@@ -27,7 +27,7 @@ class BasicInfoTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
         _buildImageUploadSection(context),
         const SizedBox(height: 24),
@@ -54,138 +54,92 @@ class BasicInfoTab extends StatelessWidget {
   }
 
   Widget _buildImageUploadSection(BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: () => _pickAndCropImage(context),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         height: 160,
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: theme.colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Theme.of(context).dividerColor,
-            style:
-                BorderStyle
-                    .solid, // Using solid as dashed border needs custom painter or package
+            color: theme.colorScheme.outline,
+            style: BorderStyle.solid,
           ),
         ),
-        child:
-            controller.imagePath != null
-                ? ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: _buildImage(),
-                )
-                : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.add_a_photo,
-                      size: 48,
-                      color: Theme.of(context).disabledColor,
+        child: controller.imagePath != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: _buildImage(),
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_a_photo,
+                    size: 48,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'goods_uploadItemImage'.tr,
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '上传物品图片', // TODO: Localize
-                      style: TextStyle(color: Theme.of(context).disabledColor),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
       ),
     );
   }
 
   Widget _buildItemNameCard(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.label_outline,
-                size: 20,
-                color: Theme.of(context).hintColor,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'goods_productName'.tr,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).hintColor,
-                ),
-              ),
-            ],
+    return FormFieldGroup(
+      children: [
+        TextInputField(
+          controller: controller.nameController,
+          labelText: 'goods_productName'.tr,
+          hintText: 'goods_enterProductName'.tr,
+          prefixIcon: Icon(
+            Icons.label_outline,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: controller.nameController,
-            decoration: InputDecoration(
-              hintText: 'goods_enterProductName'.tr,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Theme.of(context).dividerColor),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Theme.of(context).dividerColor),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Theme.of(context).primaryColor),
-              ),
-              filled: true,
-              fillColor: Theme.of(context).scaffoldBackgroundColor,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
-              ),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'goods_pleaseEnterProductName'.tr;
-              }
-              return null;
-            },
-          ),
-        ],
-      ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'goods_pleaseEnterProductName'.tr;
+            }
+            return null;
+          },
+        ),
+      ],
     );
   }
 
   Widget _buildDateGrid(BuildContext context) {
-    return Row(
+    return FormFieldGroup(
       children: [
-        Expanded(
-          child: _buildDateCard(
-            context,
-            '购入日期', // TODO: Localize
-            Icons.calendar_today,
-            controller.purchaseDate,
-            (date) {
-              if (date != null) {
-                controller.purchaseDate = date;
-                onStateChanged();
-              }
-            },
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildDateCard(
-            context,
-            '过期日期 (可选)', // TODO: Localize
-            Icons.event_busy,
-            controller.expirationDate,
-            (date) {
-              controller.expirationDate = date;
+        _buildDateCard(
+          context,
+          'goods_purchaseDate'.tr,
+          Icons.calendar_today,
+          controller.purchaseDate,
+          (date) {
+            if (date != null) {
+              controller.purchaseDate = date;
               onStateChanged();
-            },
-          ),
+            }
+          },
+        ),
+        _buildDateCard(
+          context,
+          'goods_expirationDate'.tr,
+          Icons.event_busy,
+          controller.expirationDate,
+          (date) {
+            controller.expirationDate = date;
+            onStateChanged();
+          },
         ),
       ],
     );
@@ -198,408 +152,150 @@ class BasicInfoTab extends StatelessWidget {
     DateTime? date,
     Function(DateTime?) onDateSelected,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 18, color: Theme.of(context).hintColor),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    color: Theme.of(context).hintColor,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          InkWell(
-            onTap: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: date ?? DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-              );
-              if (picked != null) {
-                onDateSelected(picked);
-              }
-            },
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Theme.of(context).dividerColor),
-              ),
-              child: Text(
-                date != null
-                    ? DateFormat('yyyy-MM-dd').format(date)
-                    : '选择日期', // TODO: Localize
-                style: TextStyle(
-                  color:
-                      date != null
-                          ? Theme.of(context).textTheme.bodyLarge?.color
-                          : Theme.of(context).hintColor,
-                ),
-              ),
-            ),
-          ),
-        ],
+    return DatePickerField(
+      date: date,
+      formattedDate: date != null
+          ? DateFormat('yyyy-MM-dd').format(date)
+          : '',
+      placeholder: 'goods_selectDate'.tr,
+      icon: icon,
+      inline: true,
+      labelText: label,
+      onTap: () => _showDatePicker(
+        context,
+        date,
+        onDateSelected,
       ),
     );
+  }
+
+  Future<void> _showDatePicker(
+    BuildContext context,
+    DateTime? initialDate,
+    Function(DateTime?) onDateSelected,
+  ) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      onDateSelected(picked);
+    }
   }
 
   Widget _buildPriceQuantityGrid(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          child: _buildInputCard(
-            context,
-            'goods_price'.tr,
-            Icons.paid,
-            controller.priceController,
-            keyboardType: TextInputType.number,
+          child: TextInputField(
+            controller: controller.priceController,
+            labelText: 'goods_price'.tr,
             hintText: '¥ 0.00',
+            keyboardType: TextInputType.number,
+            prefixIcon: Icon(
+              Icons.paid,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: _buildInputCard(
-            context,
-            '数量', // TODO: Localize
-            Icons.pin_invoke, // Using approximate icon
-            controller.stockController,
+          child: TextInputField(
+            controller: controller.stockController,
+            labelText: 'goods_quantity'.tr,
             keyboardType: TextInputType.number,
+            prefixIcon: Icon(
+              Icons.pin_invoke,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildInputCard(
-    BuildContext context,
-    String label,
-    IconData icon,
-    TextEditingController controller, {
-    TextInputType keyboardType = TextInputType.text,
-    String? hintText,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 18, color: Theme.of(context).hintColor),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: Theme.of(context).hintColor,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: controller,
-            keyboardType: keyboardType,
-            decoration: InputDecoration(
-              hintText: hintText,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Theme.of(context).dividerColor),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Theme.of(context).dividerColor),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Theme.of(context).primaryColor),
-              ),
-              filled: true,
-              fillColor: Theme.of(context).scaffoldBackgroundColor,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 12,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildCategorySection(BuildContext context) {
     final categories = [
-      {'id': 'electronics', 'icon': Icons.devices, 'label': '电子产品'},
-      {'id': 'household', 'icon': Icons.lightbulb, 'label': '生活用品'},
-      {'id': 'clothing', 'icon': Icons.checkroom, 'label': '服饰'},
-      {'id': 'books', 'icon': Icons.menu_book, 'label': '书籍'},
-      {'id': 'other', 'icon': Icons.category, 'label': '其他'},
+      OptionItem(id: 'electronics', icon: Icons.devices, label: 'goods_categoryElectronics'.tr),
+      OptionItem(id: 'household', icon: Icons.lightbulb, label: 'goods_categoryHousehold'.tr),
+      OptionItem(id: 'clothing', icon: Icons.checkroom, label: 'goods_categoryClothing'.tr),
+      OptionItem(id: 'books', icon: Icons.menu_book, label: 'goods_categoryBooks'.tr),
+      OptionItem(id: 'other', icon: Icons.category, label: 'goods_categoryOther'.tr),
     ];
 
     // Determine selected category from tags
     String selectedCategory = 'other';
     for (var cat in categories) {
-      if (controller.tags.contains(cat['id'])) {
-        selectedCategory = cat['id'] as String;
+      if (controller.tags.contains(cat.id)) {
+        selectedCategory = cat.id;
         break;
       }
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.category,
-                size: 20,
-                color: Theme.of(context).hintColor,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                '分类', // TODO: Localize
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).hintColor,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children:
-                  categories.map((cat) {
-                    final isSelected = selectedCategory == cat['id'];
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: InkWell(
-                        onTap: () {
-                          // Clear old category tags
-                          controller.tags.removeWhere(
-                            (t) => categories.any((c) => c['id'] == t),
-                          );
-                          // Add new category tag
-                          controller.tags.add(cat['id'] as String);
-                          onStateChanged();
-                        },
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          width: 96,
-                          height: 96,
-                          decoration: BoxDecoration(
-                            color:
-                                isSelected
-                                    ? Theme.of(context).primaryColor
-                                    : Theme.of(context).scaffoldBackgroundColor,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                cat['icon'] as IconData,
-                                size: 32,
-                                color:
-                                    isSelected
-                                        ? Colors.white
-                                        : Theme.of(context).iconTheme.color,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                cat['label'] as String,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color:
-                                      isSelected
-                                          ? Colors.white
-                                          : Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium?.color,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-            ),
-          ),
-        ],
-      ),
+    return OptionSelectorField(
+      options: categories,
+      selectedId: selectedCategory,
+      labelText: 'goods_category'.tr,
+      onSelectionChanged: (optionId) {
+        // Clear old category tags
+        controller.tags.removeWhere(
+          (t) => categories.any((c) => c.id == t),
+        );
+        // Add new category tag
+        controller.tags.add(optionId);
+        onStateChanged();
+      },
     );
   }
 
   Widget _buildStatusSection(BuildContext context) {
     final statuses = [
-      {'id': 'normal', 'icon': Icons.check_circle_outline, 'label': '正常'},
-      {'id': 'damaged', 'icon': Icons.broken_image, 'label': '损坏'},
-      {'id': 'lent', 'icon': Icons.ios_share, 'label': '借出'},
-      {'id': 'sold', 'icon': Icons.sell, 'label': '已出'},
+      OptionItem(id: 'normal', icon: Icons.check_circle_outline, label: 'goods_statusNormal'.tr),
+      OptionItem(id: 'damaged', icon: Icons.broken_image, label: 'goods_statusDamaged'.tr),
+      OptionItem(id: 'lent', icon: Icons.ios_share, label: 'goods_statusLent'.tr),
+      OptionItem(id: 'sold', icon: Icons.sell, label: 'goods_statusSold'.tr),
     ];
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.inventory,
-                size: 20,
-                color: Theme.of(context).hintColor,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                '使用状态', // TODO: Localize
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).hintColor,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final itemWidth =
-                  (constraints.maxWidth - 24) / 4; // 24 = 3 gaps * 8
-              return Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children:
-                    statuses.map((status) {
-                      final isSelected = controller.status == status['id'];
-                      return InkWell(
-                        onTap: () {
-                          controller.status = status['id'] as String;
-                          onStateChanged();
-                        },
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          width: itemWidth,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          decoration: BoxDecoration(
-                            color:
-                                isSelected
-                                    ? Theme.of(context).primaryColor
-                                    : Theme.of(context).scaffoldBackgroundColor,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(
-                                status['icon'] as IconData,
-                                size: 24,
-                                color:
-                                    isSelected
-                                        ? Colors.white
-                                        : Theme.of(context).iconTheme.color,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                status['label'] as String,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color:
-                                      isSelected
-                                          ? Colors.white
-                                          : Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium?.color,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }).toList(),
-              );
-            },
-          ),
-        ],
-      ),
+    return OptionSelectorField(
+      options: statuses,
+      selectedId: controller.status,
+      labelText: 'goods_usageStatus'.tr,
+      useHorizontalScroll: false,
+      gridColumns: 4,
+      onSelectionChanged: (optionId) {
+        controller.status = optionId;
+        onStateChanged();
+      },
     );
   }
 
   Widget _buildCustomFieldsSection(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.tune, size: 20, color: Theme.of(context).hintColor),
-              const SizedBox(width: 6),
-              Text(
-                'goods_customFields'.tr,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).hintColor,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          CustomFieldsList(
-            fields: controller.customFields,
-            onFieldsChanged: (fields) {
-              controller.customFields = fields;
-              onStateChanged();
-            },
-          ),
-        ],
-      ),
+    return CustomFieldsField(
+      fields: controller.customFields,
+      onFieldsChanged: (fields) {
+        controller.customFields = fields;
+        onStateChanged();
+      },
+      labelText: 'goods_customFields'.tr,
+      addButtonText: 'goods_addField'.tr,
+      addDialogTitle: 'goods_addCustomField'.tr,
+      editDialogTitle: 'goods_editCustomField'.tr,
+      fieldNameLabel: 'goods_fieldName'.tr,
+      fieldNameHint: 'goods_enterFieldName'.tr,
+      fieldValueLabel: 'goods_fieldValue'.tr,
+      fieldValueHint: 'goods_enterFieldValue'.tr,
+      deleteConfirmTitle: 'goods_confirmDelete'.tr,
+      deleteConfirmContent: 'goods_confirmDeleteCustomField'.tr,
     );
   }
 
   Widget _buildSubItemsSection(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(16),
@@ -608,13 +304,14 @@ class BasicInfoTab extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.widgets, size: 20, color: Theme.of(context).hintColor),
+              Icon(Icons.widgets,
+                  size: 20, color: theme.colorScheme.onSurfaceVariant),
               const SizedBox(width: 6),
               Text(
-                '子物品清单', // TODO: Localize
+                'goods_subItemList'.tr,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).hintColor,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
             ],
@@ -630,7 +327,7 @@ class BasicInfoTab extends StatelessWidget {
                     child: Container(
                       width: 128,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).scaffoldBackgroundColor,
+                        color: theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       clipBehavior: Clip.hardEdge,
@@ -692,10 +389,10 @@ class BasicInfoTab extends StatelessWidget {
                     width: 128,
                     height: 134, // Match height approx
                     decoration: BoxDecoration(
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Theme.of(context).dividerColor,
+                        color: theme.colorScheme.outline,
                         style: BorderStyle.solid,
                       ),
                     ),
@@ -705,14 +402,14 @@ class BasicInfoTab extends StatelessWidget {
                         Icon(
                           Icons.add,
                           size: 32,
-                          color: Theme.of(context).hintColor,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '添加', // TODO: Localize
+                          'goods_add'.tr,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Theme.of(context).hintColor,
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -796,38 +493,45 @@ class BasicInfoTab extends StatelessWidget {
   }
 
   Widget _buildDeleteButton(BuildContext context) {
+    final theme = Theme.of(context);
     return OutlinedButton(
       onPressed: () {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder:
-              (context) => AlertDialog(
-                title: Text('goods_confirmDelete'.tr),
-                content: Text('goods_confirmDeleteItem'.tr),
-                actions: [
-                  TextButton(
-                    child: Text('goods_cancel'.tr),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  TextButton(
-                    child: Text(
-                      'goods_delete'.tr,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      onDelete?.call();
-                    },
-                  ),
-                ],
+          builder: (context) => AlertDialog(
+            backgroundColor: theme.colorScheme.surface,
+            title: Text(
+              'goods_confirmDelete'.tr,
+              style: TextStyle(color: theme.colorScheme.onSurface),
+            ),
+            content: Text(
+              'goods_confirmDeleteItem'.tr,
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            ),
+            actions: [
+              TextButton(
+                child: Text('goods_cancel'.tr),
+                onPressed: () => Navigator.pop(context),
               ),
+              TextButton(
+                child: Text(
+                  'goods_delete'.tr,
+                  style: TextStyle(color: theme.colorScheme.error),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  onDelete?.call();
+                },
+              ),
+            ],
+          ),
         );
       },
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(48),
-        foregroundColor: Colors.red,
-        side: const BorderSide(color: Colors.red),
+        foregroundColor: theme.colorScheme.error,
+        side: BorderSide(color: theme.colorScheme.error),
       ),
       child: Text('goods_deleteProduct'.tr),
     );

@@ -308,253 +308,6 @@ class _TaskFormState extends State<TaskForm> {
     );
   }
 
-  Widget _buildTitleSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: IconTitleField(
-        controller: _titleController,
-        icon: _icon,
-        onIconTap: () async {
-          final selectedIcon = await showIconPickerDialog(
-            context,
-            _icon ?? Icons.assignment,
-          );
-          if (selectedIcon != null && mounted) {
-            setState(() {
-              _icon = selectedIcon;
-            });
-          }
-        },
-        hintText: 'todo_title'.tr,
-      ),
-    );
-  }
-
-  Widget _buildNotesSection() {
-    return _buildSectionContainer(
-      label: 'todo_notes'.tr,
-      child: TextAreaField(
-        controller: _notesController,
-        hintText: 'todo_addSomeNotesHint'.tr,
-        minLines: 4,
-        primaryColor: _primaryColor,
-      ),
-    );
-  }
-
-  Widget _buildTagsSection() {
-    return _buildSectionContainer(
-      label: 'todo_tags'.tr,
-      child: TagsField(
-        tags: _tags,
-        onAddTag: _showAddTagDialog,
-        onRemoveTag: (tag) {
-          setState(() {
-            _tags.remove(tag);
-          });
-        },
-        addButtonText: 'todo_addTag'.tr,
-        primaryColor: _primaryColor,
-      ),
-    );
-  }
-
-  Widget _buildSubtasksSection() {
-    return _buildSectionContainer(
-      label: 'todo_subtasks'.tr,
-      child: ListAddField<Subtask>(
-        items: _subtasks,
-        controller: _subtaskController,
-        onAdd: _addSubtask,
-        onToggle: _toggleSubtask,
-        onRemove: _removeSubtask,
-        getTitle: (subtask) => subtask.title,
-        getIsCompleted: (subtask) => subtask.isCompleted,
-        addButtonText: '${'todo_add'.tr} ${'todo_subtasks'.tr}',
-        primaryColor: _primaryColor,
-      ),
-    );
-  }
-
-  Widget _buildDateSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildInputBox(
-              label: 'todo_startDate'.tr,
-              icon: Icons.calendar_today_outlined,
-              value: _startDate != null ? DateFormat.yMMMEd(Localizations.localeOf(context).toString()).format(_startDate!) : '',
-              placeholder: DateFormat.yMMMEd(Localizations.localeOf(context).toString()).format(DateTime.now()),
-              onTap: () => _selectStartDate(context),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _buildInputBox(
-              label: 'todo_dueDate'.tr,
-              icon: Icons.calendar_today_outlined,
-              value: _dueDate != null ? DateFormat.yMMMEd(Localizations.localeOf(context).toString()).format(_dueDate!) : '',
-              placeholder: DateFormat.yMMMEd(Localizations.localeOf(context).toString()).format(DateTime.now().add(const Duration(days: 1))),
-              onTap: () => _selectDueDate(context),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPriorityAndReminderSection() {
-     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildPriorityDropdown(),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _buildReminderDropdown(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPriorityDropdown() {
-    final labels = {
-      TaskPriority.high: 'todo_high'.tr,
-      TaskPriority.medium: 'todo_medium'.tr,
-      TaskPriority.low: 'todo_low'.tr,
-    };
-
-    return _buildSectionContainer(
-      label: 'todo_priority'.tr.replaceAll(':', ''),
-      child: SelectField<TaskPriority>(
-        value: _priority,
-        onChanged: (val) {
-          if (val != null) {
-            setState(() => _priority = val);
-          }
-        },
-        items: TaskPriority.values.map((p) {
-          return DropdownMenuItem(
-            value: p,
-            child: Text(labels[p] ?? ''),
-          );
-        }).toList(),
-        icon: Icons.flag_outlined,
-        primaryColor: _primaryColor,
-      ),
-      padding: EdgeInsets.zero,
-    );
-  }
-
-  Widget _buildReminderDropdown() {
-     final isDark = Theme.of(context).brightness == Brightness.dark;
-     String text = 'todo_none'.tr;
-     if (_reminders.isNotEmpty) {
-       final r = _reminders.first;
-       text = '${r.month}/${r.day} ${r.hour}:${r.minute.toString().padLeft(2,'0')}';
-       if (_reminders.length > 1) text += ' (+${_reminders.length - 1})';
-     }
-
-     return _buildSectionContainer(
-      label: 'todo_reminders'.tr,
-      child: GestureDetector(
-        onTap: _showRemindersModal,
-        child: Container(
-          height: 50,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-               color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.notifications_outlined, color: isDark ? Colors.grey[500] : Colors.grey[400]),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  text,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                   style: TextStyle(
-                     fontSize: 16,
-                     color: isDark ? Colors.white : Colors.grey[900],
-                   ),
-                ),
-              ),
-              Icon(Icons.expand_more, color: isDark ? Colors.grey[500] : Colors.grey[400]),
-            ],
-          ),
-        ),
-      ),
-      padding: EdgeInsets.zero
-    );
-  }
-
-  Widget _buildInputBox({
-    required String label,
-    required IconData icon,
-    required String value,
-    required String placeholder,
-    required VoidCallback onTap,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 16, bottom: 4),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isDark ? Colors.grey[400] : Colors.grey[500],
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        DatePickerField(
-          date: value.isNotEmpty ? DateTime.now() : null,
-          onTap: onTap,
-          formattedDate: value,
-          placeholder: placeholder,
-          icon: icon,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSectionContainer({required String label, required Widget child, EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 16)}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Padding(
-      padding: padding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16, bottom: 4), // Align label with input padding if needed, or keep consistent 16
-            child: Text(
-              label,
-              style: TextStyle(
-                color: isDark ? Colors.grey[400] : Colors.grey[500],
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          child,
-        ],
-      ),
-    );
-  }
-
   void _showAddTagDialog() {
     final TextEditingController tagController = TextEditingController();
     showDialog(
@@ -646,7 +399,6 @@ class _TaskFormState extends State<TaskForm> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDark ? _backgroundDark : _backgroundLight,
       body: SafeArea(
         child: Column(
           children: [
@@ -654,26 +406,37 @@ class _TaskFormState extends State<TaskForm> {
              Expanded(
                child: SingleChildScrollView(
                  padding: const EdgeInsets.only(bottom: 80), // Space for button
-                 child: Column(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   children: [
-                     const SizedBox(height: 8),
-                     _buildTitleSection(),
-                     const SizedBox(height: 24),
-                     _buildNotesSection(),
-                     const SizedBox(height: 16),
-                     _buildTagsSection(),
-                     const SizedBox(height: 16),
-                     _buildSubtasksSection(),
-                     const SizedBox(height: 16),
-                     _buildDateSection(),
-                     const SizedBox(height: 16),
-                     _buildPriorityAndReminderSection(),
-                     const SizedBox(height: 32),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+
+                      // 基本信息组
+                      _buildBasicInfoGroup(),
+
+                      const SizedBox(height: 16),
+
+                      // 属性组
+                      _buildPropertiesGroup(),
+
+                      const SizedBox(height: 16),
+
+                      // 时间组
+                      _buildDateGroup(),
+
+                      const SizedBox(height: 16),
+
+                      // 设置组
+                      _buildSettingsGroup(),
+
+                      const SizedBox(height: 32),
                    ],
                  ),
                ),
              ),
+            )
           ],
         ),
       ),
@@ -698,13 +461,221 @@ class _TaskFormState extends State<TaskForm> {
             shadowColor: Colors.transparent,
           ),
           child: Text(
-            widget.task == null 
+            widget.task == null
                 ? 'todo_createTask'.tr
-                : 'todo_saveTask'.tr, 
+                : 'todo_saveTask'.tr,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
       ),
+    );
+  }
+
+  /// 构建基本信息组（标题、描述）
+  Widget _buildBasicInfoGroup() {
+    return FormFieldGroup(
+      children: [
+        // 标题输入
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: IconTitleField(
+            controller: _titleController,
+            icon: _icon,
+            onIconTap: () async {
+              final selectedIcon = await showIconPickerDialog(
+                context,
+                _icon ?? Icons.assignment,
+              );
+              if (selectedIcon != null && mounted) {
+                setState(() {
+                  _icon = selectedIcon;
+                });
+              }
+            },
+            hintText: 'todo_title'.tr,
+          ),
+        ),
+        // 描述输入
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: TextAreaField(
+            controller: _notesController,
+            hintText: 'todo_addSomeNotesHint'.tr,
+            minLines: 4,
+            primaryColor: _primaryColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 构建属性组（标签、子任务）
+  Widget _buildPropertiesGroup() {
+    return FormFieldGroup(
+      children: [
+        // 标签管理
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'todo_tags'.tr,
+                style: TextStyle(
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[400]
+                          : Colors.grey[500],
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TagsField(
+                tags: _tags,
+                onAddTag: _showAddTagDialog,
+                onRemoveTag: (tag) {
+                  setState(() {
+                    _tags.remove(tag);
+                  });
+                },
+                addButtonText: 'todo_addTag'.tr,
+                primaryColor: _primaryColor,
+              ),
+            ],
+          ),
+        ),
+        // 子任务管理
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'todo_subtasks'.tr,
+                style: TextStyle(
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[400]
+                          : Colors.grey[500],
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ListAddField<Subtask>(
+                items: _subtasks,
+                controller: _subtaskController,
+                onAdd: _addSubtask,
+                onToggle: _toggleSubtask,
+                onRemove: _removeSubtask,
+                getTitle: (subtask) => subtask.title,
+                getIsCompleted: (subtask) => subtask.isCompleted,
+                addButtonText: '${'todo_add'.tr} ${'todo_subtasks'.tr}',
+                primaryColor: _primaryColor,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 构建时间组（开始日期、截止日期）
+  Widget _buildDateGroup() {
+    final locale = Localizations.localeOf(context).toString();
+    return FormFieldGroup(
+      children: [
+        DatePickerField(
+          date: _startDate,
+          onTap: () => _selectStartDate(context),
+          formattedDate:
+              _startDate != null
+                  ? DateFormat.yMMMEd(locale).format(_startDate!)
+                  : '',
+          placeholder: DateFormat.yMMMEd(locale).format(DateTime.now()),
+          icon: Icons.calendar_today_outlined,
+          labelText: 'todo_startDate'.tr,
+          inline: true,
+        ),
+        DatePickerField(
+          date: _dueDate,
+          onTap: () => _selectDueDate(context),
+          formattedDate:
+              _dueDate != null
+                  ? DateFormat.yMMMEd(locale).format(_dueDate!)
+                  : '',
+          placeholder: DateFormat.yMMMEd(
+            locale,
+          ).format(DateTime.now().add(const Duration(days: 1))),
+          icon: Icons.calendar_today_outlined,
+          labelText: 'todo_dueDate'.tr,
+          inline: true,
+        ),
+      ],
+    );
+  }
+
+  /// 构建设置组（优先级、提醒）
+  Widget _buildSettingsGroup() {
+    final labels = {
+      TaskPriority.high: 'todo_high'.tr,
+      TaskPriority.medium: 'todo_medium'.tr,
+      TaskPriority.low: 'todo_low'.tr,
+    };
+
+    return FormFieldGroup(
+      children: [
+        SelectField<TaskPriority>(
+          value: _priority,
+          onChanged: (val) {
+            if (val != null) {
+              setState(() => _priority = val);
+            }
+          },
+          items:
+              TaskPriority.values.map((p) {
+                return DropdownMenuItem(value: p, child: Text(labels[p] ?? ''));
+              }).toList(),
+          labelText: 'todo_priority'.tr,
+          inline: true,
+        ),
+        GestureDetector(
+          onTap: _showRemindersModal,
+          child: Container(
+            height: 50,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'todo_reminders'.tr,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    _reminders.isNotEmpty
+                        ? '${_reminders.first.month}/${_reminders.first.day} ${_reminders.first.hour}:${_reminders.first.minute.toString().padLeft(2, '0')}${_reminders.length > 1 ? ' (+${_reminders.length - 1})' : ''}'
+                        : 'todo_none'.tr,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontSize: 17,
+                      color:
+                          _reminders.isNotEmpty
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

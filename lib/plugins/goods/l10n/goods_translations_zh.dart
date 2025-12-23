@@ -1,7 +1,7 @@
 /// 物品管理插件 - 中文翻译
 const Map<String, String> goodsTranslationsZh = {
   'goods_allCategories': '所有分类',
-  'goods_price': '￥@price',
+  'goods_price': '价格',
   'goods_addField': '添加字段',
   'goods_noCustomFields': '暂无自定义字段',
   'goods_addCustomField': '添加自定义字段',
@@ -131,4 +131,23 @@ const Map<String, String> goodsTranslationsZh = {
   'goods_statusDamaged': '损坏',
   'goods_statusLent': '借出',
   'goods_statusSold': '已售',
+
+  // BasicInfoTab 表单字段
+  'goods_uploadItemImage': '上传物品图片',
+  'goods_purchaseDate': '购入日期',
+  'goods_expirationDate': '过期日期',
+  'goods_selectDate': '选择日期',
+  'goods_priceLabel': '价格',
+  'goods_quantity': '数量',
+  'goods_category': '分类',
+  'goods_usageStatus': '使用状态',
+  'goods_subItemList': '子物品清单',
+  'goods_add': '添加',
+
+  // 分类选项
+  'goods_categoryElectronics': '电子产品',
+  'goods_categoryHousehold': '生活用品',
+  'goods_categoryClothing': '服饰',
+  'goods_categoryBooks': '书籍',
+  'goods_categoryOther': '其他',
 };

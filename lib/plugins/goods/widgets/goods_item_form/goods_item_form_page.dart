@@ -108,23 +108,33 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
   }
 
   void _handleDelete(GoodsItem item) async {
+    final theme = Theme.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('goods_confirmDelete'.tr),
-            content: Text('goods_confirmDeleteItem'.tr),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text('goods_cancel'.tr),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: Text('goods_delete'.tr),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        title: Text(
+          'goods_confirmDelete'.tr,
+          style: TextStyle(color: theme.colorScheme.onSurface),
+        ),
+        content: Text(
+          'goods_confirmDeleteItem'.tr,
+          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('goods_cancel'.tr),
           ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              'goods_delete'.tr,
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
+          ),
+        ],
+      ),
     );
 
     if (confirmed == true && mounted) {
@@ -152,13 +162,21 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        body: const Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (_item == null) {
       return Scaffold(
+        backgroundColor: theme.colorScheme.surface,
         appBar: AppBar(
+          backgroundColor: theme.colorScheme.surface,
+          foregroundColor: theme.colorScheme.onSurface,
+          elevation: 0,
           title: Text('goods_itemNotFound'.tr),
         ),
         body: Center(child: Text('goods_itemNotExist'.tr)),

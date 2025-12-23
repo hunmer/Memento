@@ -3,6 +3,7 @@
 /// 提供一组可复用的表单字段组件,用于构建统一风格的表单界面
 library;
 
+export 'form_field_group.dart';
 export 'tags_field.dart';
 export 'list_add_field.dart';
 export 'text_area_field.dart';
@@ -14,3 +15,6 @@ export 'editable_list_field.dart';
 export 'switch_field.dart';
 export 'time_picker_field.dart';
 export 'slider_field.dart';
+export 'category_selector_field.dart';
+export 'custom_fields_field.dart';
+export 'option_selector_field.dart';
