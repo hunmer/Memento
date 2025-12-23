@@ -202,24 +202,18 @@ class BillUseCase {
   /// 创建账单
   ///
   /// [params] 必需参数:
-  /// - `accountId`: 账户 ID
   /// - `amount`: 金额（正数为收入，负数为支出）
   /// - `type`: 类型（'income' or 'expense'）
   /// - `category`: 分类
   /// 可选参数:
+  /// - `accountId`: 账户 ID（不传则使用第一个账户）
   /// - `description`: 描述
   /// - `date`: 日期（ISO8601 格式，默认当前日期）
   /// - `tags`: 标签列表
   /// - `metadata`: 元数据
   Future<Result<Map<String, dynamic>>> createBill(
       Map<String, dynamic> params) async {
-    final accountIdValidation =
-        ParamValidator.requireString(params, 'accountId');
-    if (!accountIdValidation.isValid) {
-      return Result.failure(accountIdValidation.errorMessage!,
-          code: ErrorCodes.invalidParams);
-    }
-
+    // 验证必需参数
     if (!params.containsKey('amount') || params['amount'] == null) {
       return Result.failure('缺少必需参数: amount', code: ErrorCodes.invalidParams);
     }
@@ -237,13 +231,28 @@ class BillUseCase {
     }
 
     try {
+      // 处理 accountId: 如果未提供,使用第一个账户
+      String? accountId = params['accountId'] as String?;
+      if (accountId == null || accountId.isEmpty) {
+        final accountsResult = await repository.getAccounts();
+        if (accountsResult.isFailure) {
+          return Result.failure('获取账户失败', code: ErrorCodes.serverError);
+        }
+        final accounts = accountsResult.dataOrNull;
+        if (accounts == null || accounts.isEmpty) {
+          return Result.failure('没有可用账户，请先创建账户',
+              code: ErrorCodes.invalidParams);
+        }
+        accountId = accounts.first.id;
+      }
+
       final now = DateTime.now();
       final dateStr = params['date'] as String?;
       final date = dateStr != null ? DateTime.parse(dateStr) : now;
 
       final bill = BillDto(
         id: params['id'] as String? ?? _uuid.v4(),
-        accountId: params['accountId'] as String,
+        accountId: accountId,
         amount: (params['amount'] as num).toDouble(),
         type: params['type'] as String,
         category: params['category'] as String,
