@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/models/bill.dart';
 import 'package:Memento/plugins/bill/models/subscription.dart';
+import 'package:Memento/widgets/form_fields/index.dart';
 
 class BillEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -230,9 +231,10 @@ class _BillEditScreenState extends State<BillEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark ? const Color(0xFF101622) : const Color(0xFFF6F6F8);
-    final cardColor = isDark ? const Color(0xFF1F2937) : Colors.white;
+    final backgroundColor = theme.colorScheme.surface;
+    final cardColor = theme.colorScheme.surfaceContainerLow;
     final primaryColor = Theme.of(context).primaryColor;
     
     // Colors from the design
@@ -310,27 +312,70 @@ class _BillEditScreenState extends State<BillEditScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          _buildCategoryList(primaryColor, isDark),
+                          CategorySelectorField(
+                            categories: _availableTags,
+                            selectedCategory: _tag,
+                            categoryIcons: _categoryIcons,
+                            primaryColor: primaryColor,
+                            onCategoryChanged: (category) {
+                              setState(() {
+                                _tag = category;
+                                _selectedIcon =
+                                    _categoryIcons[category] ?? Icons.category;
+                                _titleController.text = '';
+                              });
+                            },
+                          ),
                         ],
                       ),
                     ),
 
                     const SizedBox(height: 16),
 
-                    // Details Section (Note & Date)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: cardColor,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        children: [
-                          _buildNoteInput(isDark),
-                          Divider(height: 1, color: isDark ? Colors.grey[800] : Colors.grey[100]),
-                          _buildDateInput(isDark),
-                        ],
-                      ),
+                    Column(
+                      children: [
+                        FormFieldGroup(
+                          showDividers: true,
+                          children: [
+                            DatePickerField(
+                              date: _selectedDate,
+                              formattedDate:
+                                  '${_selectedDate.year}年${_selectedDate.month}月${_selectedDate.day}日',
+                              placeholder: '选择日期',
+                              labelText: '日期',
+                              inline: true,
+                              onTap: () async {
+                                final DateTime? picked =
+                                    await showDateTimePicker(
+                                      context: context,
+                                      initialDate: _selectedDate,
+                                    );
+                                if (picked != null &&
+                                    picked != _selectedDate &&
+                                    mounted) {
+                                  setState(() {
+                                    _selectedDate = picked;
+                                  });
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        FormFieldGroup(
+                          showDividers: false,
+                          children: [
+                            TextAreaField(
+                              controller: _noteController,
+                              labelText: '备注',
+                              hintText: '添加笔记...',
+                              minLines: 3,
+                              maxLines: 5,
+                              inline: true,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
 
                     const SizedBox(height: 16),
@@ -354,22 +399,21 @@ class _BillEditScreenState extends State<BillEditScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          SwitchListTile(
-                            title: Text('启用订阅服务'),
-                            subtitle: Text('启用后将自动生成每日账单'),
+                          SwitchField(
                             value: _isSubscription,
                             onChanged: (value) => setState(() => _isSubscription = value),
-                            contentPadding: EdgeInsets.zero,
+                            title: '启用订阅服务',
+                            subtitle: '启用后将自动生成每日账单',
+                            icon: Icons.autorenew,
+                            primaryColor: primaryColor,
                           ),
                           if (_isSubscription) ...[
                             const SizedBox(height: 16),
-                            TextFormField(
+                            TextInputField(
                               controller: _subscriptionNameController,
-                              decoration: InputDecoration(
-                                labelText: '订阅服务名称 *',
-                                hintText: '例如：Netflix会员',
-                                border: OutlineInputBorder(),
-                              ),
+                              labelText: '订阅服务名称 *',
+                              hintText: '例如：Netflix会员',
+                              primaryColor: primaryColor,
                               validator: (value) {
                                 if (_isSubscription && (value == null || value.isEmpty)) {
                                   return '请输入订阅服务名称';
@@ -378,15 +422,13 @@ class _BillEditScreenState extends State<BillEditScreen> {
                               },
                             ),
                             const SizedBox(height: 16),
-                            TextFormField(
+                            TextInputField(
                               controller: _subscriptionDaysController,
+                              labelText: '订阅天数 *',
+                              hintText: '例如：30',
                               keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: '订阅天数 *',
-                                hintText: '例如：30',
-                                border: OutlineInputBorder(),
-                                suffixText: '天',
-                              ),
+                              primaryColor: primaryColor,
+                              helperText: '天',
                               validator: (value) {
                                 if (_isSubscription) {
                                   if (value == null || value.isEmpty) {
@@ -592,121 +634,6 @@ class _BillEditScreenState extends State<BillEditScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildCategoryList(Color primaryColor, bool isDark) {
-    return SizedBox(
-      height: 100,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: _availableTags.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 16),
-        itemBuilder: (context, index) {
-          final tag = _availableTags[index];
-          final isSelected = tag == _tag;
-          final icon = _categoryIcons[tag] ?? Icons.category;
-          
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _tag = tag;
-                _selectedIcon = icon;
-                _titleController.text = ''; // Clear title so tag is used, or could set it to tag
-              });
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSelected ? primaryColor : (isDark ? Colors.grey[800] : Colors.grey[100]),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: isSelected ? Colors.white : (isDark ? Colors.grey[400] : Colors.grey[600]),
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  tag,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: isSelected ? (isDark ? Colors.white : Colors.black87) : Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildNoteInput(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Icon(Icons.edit_note, color: Colors.grey[500], size: 28),
-          const SizedBox(width: 16),
-          Expanded(
-            child: TextFormField(
-              controller: _noteController,
-              decoration: InputDecoration(
-                hintText: '添加笔记...',
-                hintStyle: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[400]),
-                border: InputBorder.none,
-                isDense: true,
-              ),
-              style: TextStyle(
-                fontSize: 16,
-                color: isDark ? Colors.white : Colors.black87,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDateInput(bool isDark) {
-    return InkWell(
-      onTap: () async {
-        final DateTime? picked = await showDateTimePicker(
-          context: context,
-          initialDate: _selectedDate,
-        );
-        if (picked != null && picked != _selectedDate && mounted) {
-          setState(() {
-            _selectedDate = picked;
-          });
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Row(
-          children: [
-            Icon(Icons.calendar_today, color: Colors.grey[500], size: 24),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                '${_selectedDate.year}年${_selectedDate.month}月${_selectedDate.day}日',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
-              ),
-            ),
-            Icon(Icons.chevron_right, color: Colors.grey[400]),
-          ],
-        ),
-      ),
     );
   }
 

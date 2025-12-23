@@ -14,8 +14,13 @@ class _AddTagDialogState extends State<AddTagDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AlertDialog(
-      title: Text('goods_addTag'.tr),
+      backgroundColor: theme.colorScheme.surface,
+      title: Text(
+        'goods_addTag'.tr,
+        style: TextStyle(color: theme.colorScheme.onSurface),
+      ),
       content: TextField(
         controller: _controller,
         decoration: InputDecoration(

@@ -1,7 +1,7 @@
 /// 物品管理插件 - 英文翻译
 const Map<String, String> goodsTranslationsEn = {
   'goods_allCategories': 'All Categories',
-  'goods_price': '\$@price',
+  'goods_price': 'price',
   'goods_addField': 'Add Field',
   'goods_noCustomFields': 'No Custom Fields',
   'goods_addCustomField': 'Add Custom Field',
@@ -131,4 +131,23 @@ const Map<String, String> goodsTranslationsEn = {
   'goods_statusDamaged': 'Damaged',
   'goods_statusLent': 'Lent',
   'goods_statusSold': 'Sold',
+
+  // BasicInfoTab form fields
+  'goods_uploadItemImage': 'Upload item image',
+  'goods_purchaseDate': 'Purchase Date',
+  'goods_expirationDate': 'Expiration Date',
+  'goods_selectDate': 'Select date',
+  'goods_priceLabel': 'Price',
+  'goods_quantity': 'Quantity',
+  'goods_category': 'Category',
+  'goods_usageStatus': 'Usage Status',
+  'goods_subItemList': 'Sub Items List',
+  'goods_add': 'Add',
+
+  // Category options
+  'goods_categoryElectronics': 'Electronics',
+  'goods_categoryHousehold': 'Household',
+  'goods_categoryClothing': 'Clothing',
+  'goods_categoryBooks': 'Books',
+  'goods_categoryOther': 'Other',
 };

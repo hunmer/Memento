@@ -326,4 +326,5 @@ class BuiltInActions {
   static const String lockScreen = 'lockScreen';
   static const String showNotifications = 'showNotifications';
   static const String askContext = 'askContext';
+  static const String toggleTheme = 'toggleTheme';
 }

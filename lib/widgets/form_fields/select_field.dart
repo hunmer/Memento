@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 /// - 支持 FormField 验证
 /// - 统一的样式和主题适配
 /// - 可配置的装饰器属性
+/// - 支持 inline 模式（label在左，输入在右）
 class SelectField<T> extends StatelessWidget {
   /// 当前选中的值
   final T? value;
@@ -40,6 +41,12 @@ class SelectField<T> extends StatelessWidget {
   /// 左侧图标
   final IconData? icon;
 
+  /// 是否使用inline模式（label在左，输入在右）
+  final bool inline;
+
+  /// inline模式下label的宽度
+  final double labelWidth;
+
   const SelectField({
     super.key,
     required this.value,
@@ -53,19 +60,80 @@ class SelectField<T> extends StatelessWidget {
     this.helperStyle,
     this.primaryColor = const Color(0xFF607AFB),
     this.icon,
+    this.inline = false,
+    this.labelWidth = 100,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
+    // inline 模式：label 在左，下拉框在右
+    if (inline) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            SizedBox(
+              width: labelWidth,
+              child: Text(
+                labelText ?? '',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+            Expanded(
+              child: DropdownButtonFormField<T>(
+                value: value,
+                items: items.map((item) {
+                  // 确保菜单项文本右对齐
+                  return DropdownMenuItem<T>(
+                    value: item.value,
+                    alignment: Alignment.centerRight,
+                    child: Container(
+                      width: double.infinity,
+                      alignment: Alignment.centerRight,
+                      child: item.child,
+                    ),
+                  );
+                }).toList(),
+                onChanged: enabled ? onChanged : null,
+                validator: validator,
+                style: TextStyle(
+                  fontSize: 17,
+                  color: theme.colorScheme.onSurface,
+                ),
+                dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: hintText,
+                  hintStyle: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.only(right: 8),
+                ),
+                alignment: Alignment.centerRight,
+                isExpanded: true,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 默认模式：独立卡片样式
     return DropdownButtonFormField<T>(
       value: value,
       items: items,
       onChanged: enabled ? onChanged : null,
       validator: validator,
-      style: TextStyle(color: isDark ? Colors.white : Colors.grey[900]),
-      dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      style: TextStyle(color: theme.colorScheme.onSurface),
+      dropdownColor: theme.colorScheme.surfaceContainerLow,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
@@ -73,29 +141,29 @@ class SelectField<T> extends StatelessWidget {
         helperStyle: helperStyle,
         prefixIcon: icon != null ? Icon(icon) : null,
         hintStyle: TextStyle(
-          color: isDark ? Colors.grey[500] : Colors.grey[400],
+          color: theme.colorScheme.onSurfaceVariant,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+            color: theme.colorScheme.outline.withOpacity(0.2),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+            color: theme.colorScheme.outline.withOpacity(0.2),
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: primaryColor,
+            color: theme.colorScheme.primary,
             width: 1.5,
           ),
         ),
         filled: true,
-        fillColor: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
+        fillColor: theme.colorScheme.surfaceContainerLow,
         contentPadding: const EdgeInsets.all(12),
       ),
     );

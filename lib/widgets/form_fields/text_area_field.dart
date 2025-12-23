@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 /// - 统一的样式和主题适配
 /// - 可自定义最小和最大行数
 /// - 支持表单验证
+/// - 支持 inline 模式（label在上方，适用于 FormFieldGroup）
 class TextAreaField extends StatelessWidget {
   /// 输入控制器
   final TextEditingController controller;
@@ -38,6 +39,9 @@ class TextAreaField extends StatelessWidget {
   /// 辅助文本样式
   final TextStyle? helperStyle;
 
+  /// 是否使用inline模式（无边框，适用于 FormFieldGroup）
+  final bool inline;
+
   const TextAreaField({
     super.key,
     required this.controller,
@@ -50,48 +54,91 @@ class TextAreaField extends StatelessWidget {
     this.enabled = true,
     this.helperText,
     this.helperStyle,
+    this.inline = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
+    // inline 模式：label 在上方，无边框
+    if (inline) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (labelText != null) ...[
+              Text(
+                labelText!,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            TextFormField(
+              controller: controller,
+              maxLines: maxLines,
+              minLines: minLines,
+              enabled: enabled,
+              validator: validator,
+              style: TextStyle(color: theme.colorScheme.onSurface),
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: hintText,
+                hintStyle: TextStyle(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontSize: 15,
+                ),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 默认模式：独立卡片样式
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
       minLines: minLines,
       enabled: enabled,
       validator: validator,
-      style: TextStyle(color: isDark ? Colors.white : Colors.grey[900]),
+      style: TextStyle(color: theme.colorScheme.onSurface),
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
         helperText: helperText,
         helperStyle: helperStyle,
         hintStyle: TextStyle(
-          color: isDark ? Colors.grey[500] : Colors.grey[400],
+          color: theme.colorScheme.onSurfaceVariant,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+            color: theme.colorScheme.outline.withOpacity(0.2),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+            color: theme.colorScheme.outline.withOpacity(0.2),
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: primaryColor,
+            color: theme.colorScheme.primary,
             width: 1.5,
           ),
         ),
         filled: true,
-        fillColor: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
+        fillColor: theme.colorScheme.surfaceContainerLow,
         contentPadding: const EdgeInsets.all(12),
       ),
     );

@@ -14,6 +14,7 @@ import 'package:Memento/widgets/route_history_dialog/route_history_dialog.dart';
 import 'package:Memento/screens/settings_screen/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/theme_controller.dart';
 import 'action_manager.dart';
 import 'models/action_definition.dart';
 import 'models/action_group.dart';
@@ -139,6 +140,9 @@ class BuiltInActionExecutor implements ActionExecutor {
 
         case BuiltInActions.askContext:
           return await _executeAskContext(context, data);
+
+        case BuiltInActions.toggleTheme:
+          return await _executeToggleTheme(context, data);
 
         default:
           return ExecutionResult.failure(
@@ -383,6 +387,20 @@ class BuiltInActionExecutor implements ActionExecutor {
         stackTrace: stack.toString(),
       );
     }
+  }
+
+  /// 执行切换主题
+  Future<ExecutionResult> _executeToggleTheme(
+    BuildContext context,
+    Map<String, dynamic>? data,
+  ) async {
+    if (!context.mounted) {
+      return ExecutionResult.failure(error: 'Context not mounted');
+    }
+
+    ThemeController.toggleTheme(context);
+
+    return ExecutionResult.success(data: {'action': 'toggleTheme'});
   }
 }
 

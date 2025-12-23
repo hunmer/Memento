@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 /// - 统一的样式和主题适配
 /// - 支持标签、子标题和图标
 /// - 可配置启用状态
+/// - 支持 inline 模式（适用于 FormFieldGroup）
 class SwitchField extends StatelessWidget {
   /// 当前开关状态
   final bool value;
@@ -28,6 +29,9 @@ class SwitchField extends StatelessWidget {
   /// 主题色
   final Color primaryColor;
 
+  /// 是否使用inline模式（无边框，适用于 FormFieldGroup）
+  final bool inline;
+
   const SwitchField({
     super.key,
     required this.value,
@@ -37,18 +41,63 @@ class SwitchField extends StatelessWidget {
     this.icon,
     this.enabled = true,
     this.primaryColor = const Color(0xFF607AFB),
+    this.inline = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
+    // inline 模式：无边框，适用于 FormFieldGroup
+    if (inline) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w500,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Switch.adaptive(
+              value: value,
+              onChanged: enabled ? onChanged : null,
+              activeColor: theme.colorScheme.primary,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 默认模式：独立卡片样式
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
+        color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+          color: theme.colorScheme.outline.withOpacity(0.2),
         ),
       ),
       child: SwitchListTile(
@@ -57,7 +106,7 @@ class SwitchField extends StatelessWidget {
         title: Text(
           title,
           style: TextStyle(
-            color: isDark ? Colors.white : Colors.grey[900],
+            color: theme.colorScheme.onSurface,
             fontSize: 16,
           ),
         ),
@@ -65,7 +114,7 @@ class SwitchField extends StatelessWidget {
             ? Text(
                 subtitle!,
                 style: TextStyle(
-                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  color: theme.colorScheme.onSurfaceVariant,
                   fontSize: 14,
                 ),
               )
@@ -73,10 +122,10 @@ class SwitchField extends StatelessWidget {
         secondary: icon != null
             ? Icon(
                 icon,
-                color: isDark ? Colors.grey[500] : Colors.grey[400],
+                color: theme.colorScheme.onSurfaceVariant,
               )
             : null,
-        activeColor: primaryColor,
+        activeColor: theme.colorScheme.primary,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 4,

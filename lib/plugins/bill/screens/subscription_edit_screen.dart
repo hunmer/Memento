@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
-import '../../../widgets/circle_icon_picker.dart';
+import 'package:Memento/widgets/circle_icon_picker.dart';
+import 'package:Memento/widgets/form_fields/index.dart';
 import '../models/subscription.dart';
 import '../bill_plugin.dart';
 
@@ -237,139 +238,132 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
             const SizedBox(height: 24),
 
             // Name & Price Group
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  _buildInputRow(
-                    label: 'bill_subscriptionName'.tr,
-                    child: TextFormField(
-                      controller: _nameController,
-                      textAlign: TextAlign.end,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Netflix',
-                        hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
+            FormFieldGroup(
+              children: [
+                TextInputField(
+                  controller: _nameController,
+                  labelText: 'bill_subscriptionName'.tr,
+                  hintText: 'Netflix',
+                  inline: true,
+                  validator:
+                      (v) =>
+                          v?.isEmpty == true ? 'bill_requiredField'.tr : null,
+                ),
+                TextInputField(
+                  controller: _totalAmountController,
+                  labelText: 'bill_subscriptionPrice'.tr,
+                  hintText: '0.00',
+                  keyboardType: TextInputType.number,
+                  inline: true,
+                  validator:
+                      (v) =>
+                          v?.isEmpty == true ? 'bill_requiredField'.tr : null,
+                  suffix: Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: Text(
+                      '¥',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 17,
                       ),
-                      style: TextStyle(fontSize: 17, color: Theme.of(context).colorScheme.onSurface),
-                      validator: (v) => v?.isEmpty == true ? 'bill_requiredField'.tr : null,
                     ),
                   ),
-                  Divider(height: 1, indent: 16, endIndent: 0, color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
-                  _buildInputRow(
-                    label: 'bill_subscriptionPrice'.tr,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _totalAmountController,
-                            textAlign: TextAlign.end,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: '0.00',
-                              hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                              isDense: true,
-                              contentPadding: const EdgeInsets.only(right: 8),
-                            ),
-                            style: TextStyle(fontSize: 17, color: Theme.of(context).colorScheme.onSurface),
-                            validator: (v) => v?.isEmpty == true ? 'bill_requiredField'.tr : null,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: Text(
-                            '¥',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              fontSize: 17,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
 
             // Timing Group
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainer,
+                color: Theme.of(context).colorScheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 children: [
-                  // Start Date
-                  InkWell(
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _startDate,
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2100),
-                      );
-                      if (picked != null) setState(() => _startDate = picked);
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('bill_startDate'.tr, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface)),
-                        Text(
-                          DateFormat('yyyy-MM-dd').format(_startDate),
-                          style: TextStyle(fontSize: 17, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Divider(height: 1, color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
-                  ),
-                  
-                  // End Date (Optional)
-                  InkWell(
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _endDate ?? _startDate.add(Duration(days: currentDays > 0 ? currentDays : 30)),
-                        firstDate: _startDate,
-                        lastDate: DateTime(2100),
-                      );
-                      if (picked != null) setState(() => _endDate = picked);
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('bill_endDate'.tr, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface)),
-                        Text(
-                          _endDate != null ? DateFormat('yyyy-MM-dd').format(_endDate!) : 'bill_none'.tr,
-                          style: TextStyle(fontSize: 17, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                        ),
-                      ],
-                    ),
+                  // Start & End Date
+                  FormFieldGroup(
+                    showDividers: true,
+                    children: [
+                      DatePickerField(
+                        date: _startDate,
+                        formattedDate: DateFormat(
+                          'yyyy-MM-dd',
+                        ).format(_startDate),
+                        placeholder: '',
+                        labelText: 'bill_startDate'.tr,
+                        inline: true,
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: _startDate,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null)
+                            setState(() => _startDate = picked);
+                        },
+                      ),
+                      DatePickerField(
+                        date: _endDate,
+                        formattedDate:
+                            _endDate != null
+                                ? DateFormat('yyyy-MM-dd').format(_endDate!)
+                                : '',
+                        placeholder: 'bill_none'.tr,
+                        labelText: 'bill_endDate'.tr,
+                        inline: true,
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate:
+                                _endDate ??
+                                _startDate.add(
+                                  Duration(
+                                    days: currentDays > 0 ? currentDays : 30,
+                                  ),
+                                ),
+                            firstDate: _startDate,
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) setState(() => _endDate = picked);
+                        },
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
 
                   // Cycle Buttons
-                  Row(
-                    children: [
-                      Expanded(child: _buildCycleButton('bill_monthly'.tr, 30, currentDays == 30)),
-                      const SizedBox(width: 8),
-                      Expanded(child: _buildCycleButton('bill_quarterly'.tr, 90, currentDays == 90)),
-                      const SizedBox(width: 8),
-                      Expanded(child: _buildCycleButton('bill_yearly'.tr, 365, currentDays >= 360)),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _buildCycleButton(
+                            'bill_monthly'.tr,
+                            30,
+                            currentDays == 30,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _buildCycleButton(
+                            'bill_quarterly'.tr,
+                            90,
+                            currentDays == 90,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _buildCycleButton(
+                            'bill_yearly'.tr,
+                            365,
+                            currentDays >= 360,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -377,58 +371,32 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
             const SizedBox(height: 24),
 
             // Auto-subscribe
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('bill_autoSubscribe'.tr, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface)),
-                      const SizedBox(height: 2),
-                      Text('bill_autoSubscribeDesc'.tr, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                    ],
-                  ),
-                  Switch.adaptive(
-                    value: _isActive,
-                    onChanged: (val) => setState(() => _isActive = val),
-                    activeColor: Theme.of(context).colorScheme.primary,
-                  ),
-                ],
-              ),
+            FormFieldGroup(
+              showDividers: false,
+              children: [
+                SwitchField(
+                  value: _isActive,
+                  onChanged: (val) => setState(() => _isActive = val),
+                  title: 'bill_autoSubscribe'.tr,
+                  subtitle: 'bill_autoSubscribeDesc'.tr,
+                  inline: true,
+                ),
+              ],
             ),
             const SizedBox(height: 24),
 
             // Notes
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('bill_notes'.tr, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface)),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _noteController,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'bill_notesHint'.tr,
-                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 15),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-                  ),
-                ],
-              ),
+            FormFieldGroup(
+              showDividers: false,
+              children: [
+                TextAreaField(
+                  controller: _noteController,
+                  labelText: 'bill_notes'.tr,
+                  hintText: 'bill_notesHint'.tr,
+                  maxLines: 4,
+                  inline: true,
+                ),
+              ],
             ),
             const SizedBox(height: 24),
 
@@ -439,7 +407,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
                 child: TextButton(
                   onPressed: _deleteSubscription,
                   style: TextButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -452,21 +420,6 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
             const SizedBox(height: 32),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildInputRow({required String label, required Widget child}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(label, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface)),
-          ),
-          Expanded(child: child),
-        ],
       ),
     );
   }

@@ -66,6 +66,7 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
               final field = _fields[index];
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 4),
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 child: ListTile(
                   title: Text(field.key),
                   subtitle: Text(field.value),
@@ -85,12 +86,17 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
   void _addNewField() async {
     final TextEditingController keyController = TextEditingController();
     final TextEditingController valueController = TextEditingController();
+    final theme = Theme.of(context);
 
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('goods_addCustomField'.tr),
+          backgroundColor: theme.colorScheme.surface,
+          title: Text(
+            'goods_addCustomField'.tr,
+            style: TextStyle(color: theme.colorScheme.onSurface),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -153,12 +159,17 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
     final TextEditingController valueController = TextEditingController(
       text: field.value,
     );
+    final theme = Theme.of(context);
 
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('goods_editCustomField'.tr),
+          backgroundColor: theme.colorScheme.surface,
+          title: Text(
+            'goods_editCustomField'.tr,
+            style: TextStyle(color: theme.colorScheme.onSurface),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -215,13 +226,19 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
   }
 
   void _removeField(int index) {
+    final theme = Theme.of(context);
     showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('goods_confirmDelete'.tr),
+          backgroundColor: theme.colorScheme.surface,
+          title: Text(
+            'goods_confirmDelete'.tr,
+            style: TextStyle(color: theme.colorScheme.onSurface),
+          ),
           content: Text(
             'goods_confirmDeleteCustomField'.tr,
+            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
           ),
           actions: [
             TextButton(
@@ -230,7 +247,10 @@ class _CustomFieldsListState extends State<CustomFieldsList> {
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text('goods_delete'.tr),
+              child: Text(
+                'goods_delete'.tr,
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
             ),
           ],
         );

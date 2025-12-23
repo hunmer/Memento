@@ -79,9 +79,14 @@ class _GoodsItemFormState extends State<GoodsItemForm> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
+        elevation: 0,
         title: Text(
           widget.initialData == null
               ? 'goods_addItem'.tr
@@ -112,8 +117,8 @@ class _GoodsItemFormState extends State<GoodsItemForm> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
               elevation: 0,
             ),
             child: Text(

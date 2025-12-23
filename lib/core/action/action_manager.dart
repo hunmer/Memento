@@ -146,6 +146,19 @@ class ActionManager {
       ),
     );
 
+    // 切换亮色/暗色模式
+    registerAction(
+      ActionDefinition(
+        id: BuiltInActions.toggleTheme,
+        title: '切换亮色/暗色模式',
+        description: '在亮色主题和暗色主题之间切换',
+        icon: Icons.brightness_4,
+        category: ActionCategory.system,
+        executor: BuiltInActionExecutor(BuiltInActions.toggleTheme),
+        isBuiltIn: true,
+      ),
+    );
+
     // 重新打开上个路由
     registerAction(
       ActionDefinition(

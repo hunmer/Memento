@@ -33,16 +33,16 @@ class TagsField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
+        color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+          color: theme.colorScheme.outline.withOpacity(0.2),
         ),
       ),
       child: Wrap(
@@ -50,7 +50,7 @@ class TagsField extends StatelessWidget {
         runSpacing: 8,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          ...tags.map((tag) => _buildTagChip(tag, isDark)),
+          ...tags.map((tag) => _buildTagChip(tag, theme)),
           InkWell(
             onTap: onAddTag,
             borderRadius: BorderRadius.circular(4),
@@ -59,12 +59,12 @@ class TagsField extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.add_circle_outline, color: primaryColor, size: 20),
+                  Icon(Icons.add_circle_outline, color: theme.colorScheme.primary, size: 20),
                   const SizedBox(width: 4),
                   Text(
                     addButtonText,
                     style: TextStyle(
-                      color: primaryColor,
+                      color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w500,
                       fontSize: 14,
                     ),
@@ -78,13 +78,11 @@ class TagsField extends StatelessWidget {
     );
   }
 
-  Widget _buildTagChip(String tag, bool isDark) {
+  Widget _buildTagChip(String tag, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: isDark
-            ? primaryColor.withOpacity(0.2)
-            : const Color(0xFFEFF6FF),
+        color: theme.colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -93,9 +91,7 @@ class TagsField extends StatelessWidget {
           Text(
             tag,
             style: TextStyle(
-              color: isDark
-                  ? const Color(0xFF93C5FD)
-                  : const Color(0xFF1E40AF),
+              color: theme.colorScheme.onPrimaryContainer,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -106,9 +102,7 @@ class TagsField extends StatelessWidget {
             child: Icon(
               Icons.close,
               size: 14,
-              color: isDark
-                  ? const Color(0xFF93C5FD)
-                  : const Color(0xFF1E40AF),
+              color: theme.colorScheme.onPrimaryContainer,
             ),
           ),
         ],

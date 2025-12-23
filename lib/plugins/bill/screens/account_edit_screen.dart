@@ -6,6 +6,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/models/account.dart';
 import 'package:Memento/widgets/icon_picker_dialog.dart';
+import 'package:Memento/widgets/form_fields/text_input_field.dart';
 
 class AccountEditScreen extends StatefulWidget {
   final BillPlugin billPlugin;
@@ -83,179 +84,142 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
     final isEdit = widget.account != null;
     final theme = Theme.of(context);
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Custom Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  Expanded(
-                    child: Text(
-                      isEdit ? '编辑账户' : '新建账户',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 48), // Balance the back button
-                ],
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 32),
-                    // Icon Display
-                    GestureDetector(
-                      onTap: _pickIcon,
-                      child: Container(
-                        width: 96,
-                        height: 96,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _selectedColor.withValues(alpha: 0.1),
-                        ),
-                        child: Icon(
-                          _selectedIcon,
-                          size: 48,
-                          color: _selectedColor,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Icon & Color Selection Trigger
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TextButton(
-                          onPressed: _pickIcon,
-                          child: Text(
-                            '选择图标',
-                            style: TextStyle(
-                              color: _selectedColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: _pickColor,
-                          child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _selectedColor,
-                              border: Border.all(
-                                color: theme.dividerColor,
-                                width: 1,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 48),
-                    // Input Field
-                    SizedBox(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 4, bottom: 8),
-                            child: Text(
-                              'bill_accountName'.tr,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.hintColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          TextField(
-                            controller: _titleController,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 18),
-                            decoration: InputDecoration(
-                              hintText: '例如: 现金, 银行卡',
-                              filled: true,
-                              fillColor: theme.cardColor,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(
-                                  color: _selectedColor,
-                                  width: 2,
-                                ),
-                              ),
-                              contentPadding: const EdgeInsets.all(20),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (isEdit) ...[
-                      const SizedBox(height: 32),
-                      TextButton.icon(
-                        style: TextButton.styleFrom(
-                          foregroundColor: theme.colorScheme.error,
-                        ),
-                        icon: const Icon(Icons.delete_outline),
-                        label: Text(
-                          'bill_deleteAccount'.tr,
-                        ),
-                        onPressed: _deleteAccount,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            // Bottom Button
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _saveAccount,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _selectedColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: const StadiumBorder(),
-                    elevation: 4,
-                    shadowColor: _selectedColor.withValues(alpha: 0.4),
-                  ),
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.85,
+      child: Column(
+        children: [
+          // 标题栏
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            child: Row(
+              children: [
+                Expanded(
                   child: Text(
-                    isEdit ? '保存' : '创建',
-                    style: const TextStyle(
-                      fontSize: 18,
+                    isEdit ? '编辑账户' : '新建账户',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 32),
+                  // Icon Display
+                  GestureDetector(
+                    onTap: _pickIcon,
+                    child: Container(
+                      width: 96,
+                      height: 96,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _selectedColor.withValues(alpha: 0.1),
+                      ),
+                      child: Icon(
+                        _selectedIcon,
+                        size: 48,
+                        color: _selectedColor,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Icon & Color Selection Trigger
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: _pickIcon,
+                        child: Text(
+                          '选择图标',
+                          style: TextStyle(
+                            color: _selectedColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: _pickColor,
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _selectedColor,
+                            border: Border.all(
+                              color: theme.dividerColor,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 48),
+                  // Input Field
+                  TextInputField(
+                    controller: _titleController,
+                    labelText: 'bill_accountName'.tr,
+                    hintText: '例如: 现金, 银行卡',
+                    primaryColor: _selectedColor,
+                  ),
+                  if (isEdit) ...[
+                    const SizedBox(height: 32),
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: theme.colorScheme.error,
+                      ),
+                      icon: const Icon(Icons.delete_outline),
+                      label: Text(
+                        'bill_deleteAccount'.tr,
+                      ),
+                      onPressed: _deleteAccount,
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          // Bottom Button
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              24,
+              16,
+              24,
+              MediaQuery.of(context).viewInsets.bottom + 24,
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _saveAccount,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _selectedColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: const StadiumBorder(),
+                  elevation: 4,
+                  shadowColor: _selectedColor.withValues(alpha: 0.4),
+                ),
+                child: Text(
+                  isEdit ? '保存' : '创建',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -281,10 +245,17 @@ class _AccountEditScreenState extends State<AccountEditScreen> {
         if (widget.billPlugin.accounts.length == 1) {
           // 如果是第一个账户，自动设置为选中账户并进入
           widget.billPlugin.selectedAccount = widget.billPlugin.accounts.first;
-          Navigator.pushReplacement(
-            context,
-            NavigationHelper.createRoute(widget.billPlugin.buildMainView(context)),
-          );
+          // 先关闭BottomSheet
+          Navigator.pop(context);
+          // 使用WidgetsBinding确保在下一帧执行导航,避免导航冲突
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              Navigator.pushReplacement(
+                context,
+                NavigationHelper.createRoute(widget.billPlugin.buildMainView(context)),
+              );
+            }
+          });
           return;
         }
         Navigator.pop(context);

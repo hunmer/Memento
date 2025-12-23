@@ -6,6 +6,7 @@ import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/models/account.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'account_edit_screen.dart';
 
 class AccountListScreen extends StatefulWidget {
@@ -51,7 +52,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
@@ -81,9 +82,13 @@ class _AccountListScreenState extends State<AccountListScreen> {
         width: 64,
         height: 64,
         child: FloatingActionButton(
-          onPressed:
-              () => NavigationHelper.push(context, AccountEditScreen(billPlugin: widget.billPlugin),
-              ),
+          onPressed: () => SmoothBottomSheet.show(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) => AccountEditScreen(
+              billPlugin: widget.billPlugin,
+            ),
+          ),
           backgroundColor: Theme.of(context).primaryColor,
           elevation: 4,
           shape: const CircleBorder(),
@@ -256,9 +261,13 @@ class _AccountListScreenState extends State<AccountListScreen> {
   }
 
   void _editAccount(BuildContext context, Account account) {
-    NavigationHelper.push(context, AccountEditScreen(
-              billPlugin: widget.billPlugin,
-              account: account,),
+    SmoothBottomSheet.show(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => AccountEditScreen(
+        billPlugin: widget.billPlugin,
+        account: account,
+      ),
     );
   }
 }
