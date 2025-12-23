@@ -65,6 +65,14 @@ class ToolOrchestrator {
       onError: onError,
     );
 
+    // ⚠️ 关键修复：检查第一阶段是否直接返回了工具调用代码（steps格式）
+    final firstResponse = buffer.toString();
+    if (ToolService.containsToolCall(firstResponse)) {
+      debugPrint('✅ 第一阶段直接返回了工具调用代码，跳过第二阶段');
+      onFirstPhaseComplete(firstResponse);
+      return true;
+    }
+
     // 如果第一阶段返回空，表示没有工具需求或出错
     if (toolRequest == null || toolRequest.isEmpty) {
       return false;

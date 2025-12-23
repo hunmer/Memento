@@ -427,7 +427,7 @@ class AgentChainExecutor {
         },
         onFirstPhaseComplete: (toolCallCode) async {
           // 使用内部的方法处理链式调用的完成逻辑
-          _handleChainAgentComplete(
+          await _handleChainAgentComplete(
             agent: agent,
             aiMessageId: aiMessageId,
             contextMessages: contextMessages,
@@ -466,7 +466,7 @@ class AgentChainExecutor {
 
   /// 处理链式调用中 Agent 完成后的逻辑
   /// [toolCallCode] - 由 ToolOrchestrator 生成的工具调用代码（可能为 null）
-  void _handleChainAgentComplete({
+  Future<void> _handleChainAgentComplete({
     required AIAgent agent,
     required String aiMessageId,
     required List<ChatCompletionMessage> contextMessages,
@@ -480,7 +480,7 @@ class AgentChainExecutor {
       // 如果 ToolOrchestrator 已经生成了工具调用代码，直接处理
       if (toolCallCode != null && toolCallCode.isNotEmpty) {
         debugPrint('🔍 [链式调用] 使用 ToolOrchestrator 生成的工具调用代码');
-        _handleSecondPhaseComplete(
+        await _handleSecondPhaseComplete(
           agent: agent,
           aiMessageId: aiMessageId,
           secondResponse: toolCallCode,
@@ -524,7 +524,7 @@ class AgentChainExecutor {
   /// [aiMessageId] - 消息ID
   /// [secondResponse] - 第二阶段响应
   /// [completer] - 完成器
-  void _handleSecondPhaseComplete({
+  Future<void> _handleSecondPhaseComplete({
     required AIAgent agent,
     required String aiMessageId,
     required String secondResponse,

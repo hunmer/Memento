@@ -1346,8 +1346,9 @@ return result;
       // 继续修复
     }
 
-    // 修复模式：将 JSON 对象中单引号包裹的字符串值转为双引号
-    // 例如：{"from": '早起', "to": '晨跑'} -> {"from": "早起", "to": "晨跑"}
+    // 修复模式：
+    // 1. 将 JSON 字符串值中的原始换行符转为 \n 转义序列
+    // 2. 将单引号包裹的字符串值转为双引号
     final buffer = StringBuffer();
     bool inDoubleQuote = false;
     bool inSingleQuote = false;
@@ -1357,31 +1358,9 @@ return result;
       final char = jsonStr[i];
 
       if (escaped) {
-        // 处理转义字符
-        switch (char) {
-          case 'n':
-            buffer.write('\n'); // 换行符
-            break;
-          case 'r':
-            buffer.write('\r'); // 回车符
-            break;
-          case 't':
-            buffer.write('\t'); // 制表符
-            break;
-          case '\\':
-            buffer.write('\\'); // 反斜杠
-            break;
-          case '"':
-            buffer.write('"'); // 双引号
-            break;
-          case "'":
-            buffer.write("'"); // 单引号
-            break;
-          default:
-            // 未知转义序列，保留原样
-            buffer.write('\\');
-            buffer.write(char);
-        }
+        // 保留转义序列（原样写入，不做额外处理）
+        buffer.write('\\');
+        buffer.write(char);
         escaped = false;
         continue;
       }
@@ -1398,6 +1377,15 @@ return result;
         // 单引号转双引号
         inSingleQuote = !inSingleQuote;
         buffer.write('"');
+      } else if ((inDoubleQuote || inSingleQuote) && char == '\n') {
+        // ⚠️ 关键修复：在字符串值内部，将原始换行符转为 \n 转义序列
+        buffer.write('\\n');
+      } else if ((inDoubleQuote || inSingleQuote) && char == '\r') {
+        // 将回车符转为 \r 转义序列
+        buffer.write('\\r');
+      } else if ((inDoubleQuote || inSingleQuote) && char == '\t') {
+        // 将制表符转为 \t 转义序列
+        buffer.write('\\t');
       } else {
         buffer.write(char);
       }
