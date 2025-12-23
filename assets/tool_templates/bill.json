@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "记录支出",
         "desc": "记录午餐50元支出",
-        "data": "const accounts = await Memento.plugins.bill.getAccounts();\nconst defaultAccount = accounts[0];\n\nif (!defaultAccount) {\n  const result = { success: false, message: '没有可用账户' };\n  setResult(result);\n  return result;\n}\n\nconst bill = await Memento.plugins.bill.createBill({\n  accountId: defaultAccount.id,\n  type: 'expense',\n  amount: 50,\n  category: '餐饮',\n  note: '午餐'\n});\n\nconst result = {\n  success: true,\n  bill: {\n    id: bill.id,\n    amount: bill.amount,\n    category: bill.category,\n    note: bill.note\n  }\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const accounts = await Memento.plugins.bill.getAccounts();\nconst defaultAccount = accounts[0];\n\nif (!defaultAccount) {\n  const result = { success: false, message: '没有可用账户' };\n  setResult(result);\n  return result;\n}\n\nconst bill = await Memento.plugins.bill.createBill({\n  accountId: defaultAccount.id,\n  type: 'expense',\n  amount: 50,\n  category: '餐饮',\n  description: '午餐',\n  date: new Date().toISOString()\n});\n\nconst result = {\n  success: true,\n  bill: {\n    id: bill.id,\n    amount: bill.amount,\n    category: bill.category,\n    type: bill.type,\n    description: bill.description\n  }\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -45,7 +45,7 @@
         "method": "run_js",
         "title": "记录收入",
         "desc": "记录工资5000元收入",
-        "data": "const accounts = await Memento.plugins.bill.getAccounts();\nconst defaultAccount = accounts[0];\n\nif (!defaultAccount) {\n  const result = { success: false, message: '没有可用账户' };\n  setResult(result);\n  return result;\n}\n\nconst bill = await Memento.plugins.bill.createBill({\n  accountId: defaultAccount.id,\n  type: 'income',\n  amount: 5000,\n  category: '工资',\n  note: '月工资'\n});\n\nconst result = {\n  success: true,\n  bill: {\n    id: bill.id,\n    amount: bill.amount,\n    category: bill.category\n  }\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const accounts = await Memento.plugins.bill.getAccounts();\nconst defaultAccount = accounts[0];\n\nif (!defaultAccount) {\n  const result = { success: false, message: '没有可用账户' };\n  setResult(result);\n  return result;\n}\n\nconst bill = await Memento.plugins.bill.createBill({\n  accountId: defaultAccount.id,\n  type: 'income',\n  amount: 5000,\n  category: '工资',\n  description: '月工资',\n  date: new Date().toISOString()\n});\n\nconst result = {\n  success: true,\n  bill: {\n    id: bill.id,\n    amount: bill.amount,\n    category: bill.category,\n    type: bill.type,\n    description: bill.description\n  }\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
