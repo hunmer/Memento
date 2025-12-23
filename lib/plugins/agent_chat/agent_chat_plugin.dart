@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,8 @@ import 'services/tool_service.dart';
 import 'services/tool_template_service.dart';
 import 'services/widget_service.dart';
 import 'services/route_agent_config_service.dart';
+import 'services/shortcuts_handler_service.dart';
+import 'services/conversation_sync_service.dart';
 import 'models/chat_message.dart';
 import 'models/agent_chain_node.dart';
 import 'repositories/client_agent_chat_repository.dart';
@@ -97,6 +101,17 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
 
     // 初始化小组件服务
     await AgentChatWidgetService.initialize();
+
+    // 初始化 iOS Shortcuts 处理服务（仅 iOS）
+    if (!kIsWeb && Platform.isIOS) {
+      ShortcutsHandlerService.instance.initialize();
+      debugPrint('[AgentChatPlugin] iOS Shortcuts 处理服务已启动');
+
+      // 初始同步频道列表到 iOS
+      await ConversationSyncService.instance.syncConversationsToIOS(
+        _conversationController!.conversationService,
+      );
+    }
   }
 
   @override

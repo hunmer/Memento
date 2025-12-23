@@ -9,7 +9,6 @@
 library;
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/event_args.dart';
@@ -175,14 +174,15 @@ class UnifiedTimerController {
     }
 
     final wasRunning = state.status == TimerStatus.running;
+    final isCompleted = state.isCompleted;
 
     state.stop();
 
-    // 停止通知栏（延迟5秒后清除，给用户时间看到完成状态）
+    // 停止通知栏/Live Activity
     if (wasRunning) {
-      Timer(const Duration(seconds: 5), () {
-        ForegroundTimerService.stopService(id);
-      });
+      // iOS: 立即停止并显示完成状态（如果是正常完成）
+      // Android: 延迟5秒后清除（给用户时间看到完成状态）
+      ForegroundTimerService.stopService(id, showCompleted: isCompleted);
     }
 
     // 广播事件
@@ -348,9 +348,11 @@ class UnifiedTimerController {
     }
   }
 
-  /// 更新单个通知栏
+  /// 更新单个通知栏 / Live Activity
   Future<void> _updateNotification(TimerState state) async {
-    if (!Platform.isAndroid) return;
+    // 移除平台限制，让 ForegroundTimerService 内部处理平台差异
+    // Android -> 前台通知栏
+    // iOS -> Live Activities (动态岛)
 
     try {
       final displayText = state.getCurrentStageDisplay();
@@ -379,7 +381,7 @@ class UnifiedTimerController {
         );
       }
     } catch (e) {
-      print('Error updating notification for timer ${state.id}: $e');
+      print('Error updating notification/activity for timer ${state.id}: $e');
     }
   }
 
@@ -388,10 +390,10 @@ class UnifiedTimerController {
     final state = _timers[id];
     if (state == null) return;
 
-    // 停止通知栏（延迟清除）
-    Timer(const Duration(seconds: 10), () {
-      ForegroundTimerService.stopService(id);
-    });
+    // 停止通知栏/Live Activity（显示完成状态）
+    // iOS: 会先更新到100%并显示"已完成"，延迟2秒后结束
+    // Android: 延迟10秒后清除通知
+    ForegroundTimerService.stopService(id, showCompleted: true);
 
     // 保存历史记录
     await TimerStorage.saveTimerHistory(

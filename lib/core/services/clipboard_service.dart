@@ -39,8 +39,26 @@ class ClipboardService {
   /// 上次处理的剪贴板内容（避免重复处理）
   String? _lastProcessedContent;
 
-  /// 是否启用剪贴板监听
-  bool enabled = true;
+  /// 是否启用剪贴板监听（自动读取）
+  bool _autoReadEnabled = false;
+
+  /// 获取自动读取状态
+  bool get autoReadEnabled => _autoReadEnabled;
+
+  /// 设置自动读取状态
+  set autoReadEnabled(bool value) {
+    _autoReadEnabled = value;
+    debugPrint('[ClipboardService] 自动读取剪贴板: ${value ? "开启" : "关闭"}');
+  }
+
+  /// 是否启用剪贴板监听（已废弃，保留以兼容旧代码）
+  @Deprecated('Use autoReadEnabled instead')
+  bool get enabled => _autoReadEnabled;
+
+  @Deprecated('Use autoReadEnabled instead')
+  set enabled(bool value) {
+    _autoReadEnabled = value;
+  }
 
   /// 注册处理器
   void registerHandler(String method, ClipboardMethodHandler handler) {
@@ -121,8 +139,8 @@ class ClipboardService {
   /// 返回 true 如果成功处理了数据
   Future<bool> processClipboard() async {
     debugPrint('[ClipboardService] 开始检查剪贴板');
-    if (!enabled) {
-      debugPrint('[ClipboardService] 剪贴板监听已禁用');
+    if (!_autoReadEnabled) {
+      debugPrint('[ClipboardService] 剪贴板自动读取已禁用');
       return false;
     }
 

@@ -81,7 +81,7 @@ class ForegroundTimerService {
     }
   }
 
-  /// iOS: 启动 Live Activity
+  /// iOS: 启动/更新 Live Activity
   static Future<void> _startIOSActivity({
     required String id,
     required String title,
@@ -108,24 +108,38 @@ class ForegroundTimerService {
     // 计算进度百分比 (0.0-1.0)
     final progressValue = maxProgress > 0 ? progress / maxProgress : 0.0;
 
-    // 创建活动数据
-    final activityData = {
-      'title': title,
-      'subtitle': content,
-      'progress': progressValue.clamp(0.0, 1.0),
-      'status': content,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
+    // 检查是否已存在活动
+    final existingActivityId = _iosActivityIds[id];
 
-    // 创建活动
-    final activityId = await controller.createActivity(
-      'timer_$id',
-      activityData,
-    );
+    if (existingActivityId != null) {
+      // 已存在，更新活动
+      final activityData = {
+        'subtitle': content,
+        'progress': progressValue.clamp(0.0, 1.0),
+        'status': content,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      };
 
-    if (activityId != null) {
-      _iosActivityIds[id] = activityId;
-      debugPrint('iOS Live Activity 创建成功: $activityId');
+      await controller.updateActivity(existingActivityId, activityData);
+    } else {
+      // 不存在，创建新活动
+      final activityData = {
+        'title': title,
+        'subtitle': content,
+        'progress': progressValue.clamp(0.0, 1.0),
+        'status': content,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      };
+
+      final activityId = await controller.createActivity(
+        'timer_$id',
+        activityData,
+      );
+
+      if (activityId != null) {
+        _iosActivityIds[id] = activityId;
+        debugPrint('iOS Live Activity 创建成功: $activityId');
+      }
     }
   }
 
@@ -203,14 +217,18 @@ class ForegroundTimerService {
   /// 停止前台通知服务
   ///
   /// [id] 计时器唯一标识
-  static Future<void> stopService(String id) async {
+  /// [showCompleted] 是否显示完成状态（100%）
+  static Future<void> stopService(
+    String id, {
+    bool showCompleted = false,
+  }) async {
     // 仅在支持的平台上调用
     if (!_isPlatformSupported) return;
 
     try {
       if (_isIOS) {
-        // iOS: 结束 Live Activity
-        await _stopIOSActivity(id);
+        // iOS: 结束 Live Activity（可选显示完成状态）
+        await _stopIOSActivity(id, showCompleted: showCompleted);
       } else if (_isAndroid) {
         // Android: 停止原生前台服务
         await _channel.invokeMethod('stopMultipleTimerService', {'timerId': id});
@@ -221,7 +239,10 @@ class ForegroundTimerService {
   }
 
   /// iOS: 结束 Live Activity
-  static Future<void> _stopIOSActivity(String id) async {
+  static Future<void> _stopIOSActivity(
+    String id, {
+    bool showCompleted = false,
+  }) async {
     final activityId = _iosActivityIds[id];
     if (activityId == null) {
       debugPrint('iOS Live Activity 未找到: $id');
@@ -232,6 +253,20 @@ class ForegroundTimerService {
     if (!controller.isInitialized) {
       debugPrint('LiveActivitiesController 未初始化');
       return;
+    }
+
+    // 如果需要显示完成状态，先更新到100%
+    if (showCompleted) {
+      final completedData = {
+        'subtitle': '已完成',
+        'progress': 1.0,
+        'status': '已完成',
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      };
+      await controller.updateActivity(activityId, completedData);
+
+      // 延迟2秒让用户看到完成状态
+      await Future.delayed(const Duration(seconds: 2));
     }
 
     await controller.endActivity(activityId);
