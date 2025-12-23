@@ -6,7 +6,7 @@ struct ConversationQuery: EntityQuery {
         return IntelligencePlugin.storage.get(for: identifiers).map { item in
             return ConversationEntity(
                 id: item.id,
-                representation: item.representation
+                title: item.representation
             )
         }
     }
@@ -15,7 +15,7 @@ struct ConversationQuery: EntityQuery {
         return IntelligencePlugin.storage.get().map { item in
             return ConversationEntity(
                 id: item.id,
-                representation: item.representation
+                title: item.representation
             )
         }
     }
@@ -26,7 +26,7 @@ extension ConversationQuery: EnumerableEntityQuery {
         return IntelligencePlugin.storage.get().map { item in
             return ConversationEntity(
                 id: item.id,
-                representation: item.representation
+                title: item.representation
             )
         }
     }

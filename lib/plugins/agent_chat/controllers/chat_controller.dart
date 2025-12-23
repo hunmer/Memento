@@ -169,6 +169,13 @@ class ChatController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 设置初始文件（用于 Shortcuts 等外部调用）
+  void setInitialFiles(List<File> files) {
+    _messageSender.selectedFiles.clear();
+    _messageSender.selectedFiles.addAll(files);
+    notifyListeners();
+  }
+
   // ========== 初始化 ==========
 
   /// 初始化聊天控制器

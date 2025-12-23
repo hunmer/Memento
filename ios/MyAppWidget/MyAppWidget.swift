@@ -37,24 +37,26 @@ struct Provider: AppIntentTimelineProvider {
 //    }
 }
 
-// iOS 16 兼容的简单 Provider
+// iOS 16 兼容的简单 Provider - 不使用配置
 @available(iOS 16.0, *)
 struct SimpleProvider: TimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: ConfigurationAppIntent())
+    typealias Entry = SimpleEntryV16
+
+    func placeholder(in context: Context) -> SimpleEntryV16 {
+        SimpleEntryV16(date: Date())
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date(), configuration: ConfigurationAppIntent())
+    func getSnapshot(in context: Context, completion: @escaping (SimpleEntryV16) -> ()) {
+        let entry = SimpleEntryV16(date: Date())
         completion(entry)
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        var entries: [SimpleEntry] = []
+    func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntryV16>) -> ()) {
+        var entries: [SimpleEntryV16] = []
         let currentDate = Date()
         for hourOffset in 0 ..< 5 {
             let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, configuration: ConfigurationAppIntent())
+            let entry = SimpleEntryV16(date: entryDate)
             entries.append(entry)
         }
         let timeline = Timeline(entries: entries, policy: .atEnd)
@@ -62,13 +64,22 @@ struct SimpleProvider: TimelineProvider {
     }
 }
 
+// iOS 16 版本的 Entry（不包含配置）
+struct SimpleEntryV16: TimelineEntry {
+    let date: Date
+}
+
+// iOS 17+ 版本的 Entry（包含配置）
+@available(iOS 17.0, *)
 struct SimpleEntry: TimelineEntry {
     let date: Date
     let configuration: ConfigurationAppIntent
 }
 
+// iOS 17+ 视图（带配置）
+@available(iOS 17.0, *)
 struct MyAppWidgetEntryView : View {
-    var entry: Provider.Entry
+    var entry: SimpleEntry
 
     var body: some View {
         VStack {
@@ -81,18 +92,34 @@ struct MyAppWidgetEntryView : View {
     }
 }
 
+// iOS 16 视图（不带配置）
+@available(iOS 16.0, *)
+struct MyAppWidgetEntryViewV16 : View {
+    var entry: SimpleEntryV16
+
+    var body: some View {
+        VStack {
+            Text("Time:")
+            Text(entry.date, style: .time)
+
+            Text("Default Widget")
+                .font(.caption)
+        }
+    }
+}
+
 struct MyAppWidget: Widget {
     let kind: String = "MyAppWidget"
 
     var body: some WidgetConfiguration {
-        if #available(iOS 17.0, *) {
+        if #available(iOSApplicationExtension 17.0, *) {
             return AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
                 MyAppWidgetEntryView(entry: entry)
                     .containerBackground(.fill.tertiary, for: .widget)
             }
         } else {
             return StaticConfiguration(kind: kind, provider: SimpleProvider()) { entry in
-                MyAppWidgetEntryView(entry: entry)
+                MyAppWidgetEntryViewV16(entry: entry)
                     .padding()
                     .background()
             }
@@ -100,13 +127,14 @@ struct MyAppWidget: Widget {
     }
 }
 
+@available(iOS 17.0, *)
 extension ConfigurationAppIntent {
     fileprivate static var smiley: ConfigurationAppIntent {
         let intent = ConfigurationAppIntent()
         intent.favoriteEmoji = "😀"
         return intent
     }
-    
+
     fileprivate static var starEyes: ConfigurationAppIntent {
         let intent = ConfigurationAppIntent()
         intent.favoriteEmoji = "🤩"

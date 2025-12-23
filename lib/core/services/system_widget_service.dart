@@ -82,6 +82,8 @@ class SystemWidgetService {
     }
 
     try {
+      // 确保已初始化（iOS 需要设置 App Group ID）
+      await initialize();
       return await HomeWidget.initiallyLaunchedFromHomeWidget();
     } catch (e) {
       debugPrint('Failed to get initial URI from widget: $e');

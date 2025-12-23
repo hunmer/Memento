@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:Memento/plugins/bill/models/bill_shortcut.dart';
+import 'package:Memento/core/services/system_widget_service.dart';
 
 /// 快捷记账小组件数据同步服务
 ///
@@ -29,6 +30,9 @@ class BillShortcutsWidgetService {
   /// 返回是否保存成功
   Future<bool> saveWidgetConfig(BillShortcutsWidgetConfig config) async {
     try {
+      // 确保 SystemWidgetService 已初始化（iOS 需要设置 App Group ID）
+      await SystemWidgetService.instance.initialize();
+
       final configKey = '$_configKeyPrefix${config.widgetId}';
       final configJson = jsonEncode(config.toJson());
 
