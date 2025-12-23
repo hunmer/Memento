@@ -179,6 +179,7 @@ class _AddProductPageState extends State<AddProductPage> {
         child: Form(
           key: _formKey,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // 图片选择
               GestureDetector(

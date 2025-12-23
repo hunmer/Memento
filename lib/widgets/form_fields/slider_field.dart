@@ -62,16 +62,16 @@ class SliderField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
+        color: colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+          color: colorScheme.outlineVariant,
         ),
       ),
       child: Column(
@@ -85,7 +85,7 @@ class SliderField extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontSize: 12,
-                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               Text(
@@ -93,7 +93,7 @@ class SliderField extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.grey[900],
+                  color: colorScheme.onSurface,
                 ),
               ),
             ],
