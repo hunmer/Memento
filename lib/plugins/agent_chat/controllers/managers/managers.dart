@@ -1,7 +1,7 @@
 /// 管理器导出文件
 ///
 /// 统一导出所有管理器，方便其他模块引用
-library managers;
+library;
 
 // 共享上下文
 export 'shared/manager_context.dart';

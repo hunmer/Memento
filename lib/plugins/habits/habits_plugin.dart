@@ -90,11 +90,46 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
     );
     _useCase = HabitsUseCase(_repository);
 
+    // 迁移：为已有习惯初始化总累计时长
+    await _migrateTotalDuration();
+
     // 注册 JS API（最后一步）
     await registerJSAPI();
 
     // 注册数据选择器
     _registerDataSelectors();
+  }
+
+  /// 一次性迁移：为已有习惯初始化总累计时长字段
+  Future<void> _migrateTotalDuration() async {
+    const migrationKey = 'habits/migrations/total_duration_initialized';
+    final migrated = await storage.readJson(migrationKey, false);
+
+    if (migrated == true) {
+      return; // 已经迁移过，跳过
+    }
+
+    try {
+      final habits = _habitController.getHabits();
+      for (final habit in habits) {
+        // 计算每个习惯的总累计时长
+        final records = await _recordController.getHabitCompletionRecords(habit.id);
+        final totalMinutes = records.fold<int>(
+          0,
+          (sum, record) => sum + record.duration.inMinutes,
+        );
+
+        // 更新习惯的总累计时长
+        if (totalMinutes > 0) {
+          await _habitController.updateTotalDuration(habit.id, totalMinutes);
+        }
+      }
+
+      // 标记迁移完成
+      await storage.writeJson(migrationKey, true);
+    } catch (e) {
+      print('Error migrating total duration: $e');
+    }
   }
 
   TimerController get timerController => _timerController;

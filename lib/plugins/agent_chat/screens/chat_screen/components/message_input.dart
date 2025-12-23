@@ -951,7 +951,9 @@ class _MessageInputState extends State<MessageInput> {
     // 如果文本为空且没有工具模板和文件，则不能发送
     if (text.isEmpty &&
         widget.controller.selectedToolTemplate == null &&
-        widget.controller.selectedFiles.isEmpty) return;
+        widget.controller.selectedFiles.isEmpty) {
+      return;
+    }
 
     // 检查是否是命令
     if (text.startsWith('/')) {

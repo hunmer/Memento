@@ -687,6 +687,7 @@ class ContactMainViewState extends State<ContactMainView> {
   List<Contact> _searchResults = [];
   String _currentSearchQuery = '';
   bool _isSearching = false;
+  String _selectedTag = '全部'; // 当前选中的标签
 
   // GlobalKey for OpenContainer animation
   final GlobalKey _addButtonKey = GlobalKey();
@@ -896,14 +897,100 @@ class ContactMainViewState extends State<ContactMainView> {
     );
   }
 
+  /// 获取所有标签(用于过滤栏)
+  Future<List<String>> _getTags() async {
+    final tags = await _controller.getAllTags();
+    return ['全部', ...tags];
+  }
+
+  /// 选择标签
+  void _selectTag(String tag) {
+    setState(() {
+      _selectedTag = tag;
+    });
+  }
+
+  /// 根据选中的标签过滤联系人
+  Future<List<Contact>> _getFilteredByTag() async {
+    final contacts = await _controller.getFilteredAndSortedContacts();
+    if (_selectedTag == '全部') {
+      return contacts;
+    } else {
+      return contacts
+          .where((contact) => contact.tags.contains(_selectedTag))
+          .toList();
+    }
+  }
+
+  /// 构建标签过滤栏
+  Widget _buildFilterBar() {
+    return FutureBuilder<List<String>>(
+      future: _getTags(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox.shrink();
+        }
+
+        final tags = snapshot.data!;
+        if (tags.length <= 1) {
+          // 只有"全部"标签,不显示过滤栏
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          height: 50,
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            scrollDirection: Axis.horizontal,
+            itemCount: tags.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final tag = tags[index];
+              final isSelected = tag == _selectedTag;
+              return ChoiceChip(
+                label: Text(tag),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    _selectTag(tag);
+                  }
+                },
+                showCheckmark: false,
+                labelStyle: TextStyle(
+                  color:
+                      isSelected
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).textTheme.bodyMedium?.color,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+                selectedColor: Theme.of(context).primaryColor,
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
       title: Text('contact_contacts'.tr),
       largeTitle: 'contact_contactListTitle'.tr,
       automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+      // ========== 搜索相关配置 ==========
+      enableSearchBar: true,
+      searchPlaceholder: 'contact_searchPlaceholder'.tr,
+      onSearchChanged: (query) {
+        _searchContacts(query);
+      },
+      searchBody: _buildSearchResults(),
+      // ========== 过滤栏配置 ==========
+      enableFilterBar: true,
+      filterBarChild: _buildFilterBar(),
       body: FutureBuilder<List<Contact>>(
-        future: _controller.getFilteredAndSortedContacts(),
+        future: _getFilteredByTag(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -951,14 +1038,6 @@ class ContactMainViewState extends State<ContactMainView> {
           );
         },
       ),
-      // 启用搜索栏
-      enableSearchBar: true,
-      searchPlaceholder: 'contact_searchPlaceholder'.tr,
-      onSearchChanged: (query) {
-        _searchContacts(query);
-      },
-      // 搜索结果页面
-      searchBody: _buildSearchResults(),
       actions: [
         IconButton(
           icon: const Icon(Icons.filter_list),

@@ -41,7 +41,8 @@ class WeeklyCheckinCircles extends StatelessWidget {
         // 检查日期是否在未来
         final isFuture = date.isAfter(DateTime(now.year, now.month, now.day));
 
-        return GestureDetector(
+        return Expanded(
+          child: GestureDetector(
           onTap: () {
             // 如果是未来日期，不允许点击
             if (isFuture) return;
@@ -127,6 +128,7 @@ class WeeklyCheckinCircles extends StatelessWidget {
                 ),
               ),
             ],
+          ),
           ),
         );
       }),

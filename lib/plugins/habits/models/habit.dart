@@ -10,6 +10,7 @@ class Habit {
   final int durationMinutes;
   final List<String> tags;
   final String? skillId;
+  final int totalDurationMinutes; // 所有记录累计时长（缓存字段，避免重复计算）
 
   Habit({
     required this.id,
@@ -23,6 +24,7 @@ class Habit {
     required this.durationMinutes,
     this.tags = const [],
     this.skillId,
+    this.totalDurationMinutes = 0,
   });
 
   Map<String, dynamic> toMap() {
@@ -38,6 +40,7 @@ class Habit {
       'durationMinutes': durationMinutes,
       'tags': tags,
       'skillId': skillId,
+      'totalDurationMinutes': totalDurationMinutes,
     };
   }
 
@@ -54,6 +57,7 @@ class Habit {
       durationMinutes: (map['durationMinutes'] as num?)?.toInt() ?? 0,
       tags: List<String>.from(map['tags'] ?? []),
       skillId: map['skillId'],
+      totalDurationMinutes: (map['totalDurationMinutes'] as num?)?.toInt() ?? 0,
     );
   }
 }
