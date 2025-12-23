@@ -119,4 +119,16 @@ const Map<String, String> goodsTranslationsEn = {
   'goods_widgetDescription': 'Quick access to goods management',
   'goods_overviewName': 'Goods Overview',
   'goods_overviewDescription': 'Display goods statistics',
+
+  // Multi-Filter Strings
+  'goods_purchaseDateRange': 'Purchase Date',
+  'goods_expirationDateRange': 'Expiration Date',
+  'goods_priceRange': 'Price Range',
+  'goods_minPrice': 'Min Price',
+  'goods_maxPrice': 'Max Price',
+  'goods_status': 'Status',
+  'goods_statusNormal': 'Normal',
+  'goods_statusDamaged': 'Damaged',
+  'goods_statusLent': 'Lent',
+  'goods_statusSold': 'Sold',
 };

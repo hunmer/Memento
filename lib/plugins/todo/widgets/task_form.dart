@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:Memento/widgets/icon_picker_dialog.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -308,288 +309,69 @@ class _TaskFormState extends State<TaskForm> {
   }
 
   Widget _buildTitleSection() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () async {
-              final selectedIcon = await showIconPickerDialog(
-                context,
-                _icon ?? Icons.assignment,
-              );
-              if (selectedIcon != null && mounted) {
-                setState(() {
-                  _icon = selectedIcon;
-                });
-              }
-            },
-            child: Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color:
-                    isDark ? Colors.white.withOpacity(0.1) : Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                _icon ?? Icons.assignment,
-                color: isDark ? Colors.grey[400] : Colors.grey[500],
-                size: 28,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: TextField(
-              controller: _titleController,
-              style: TextStyle(
-                fontSize: 20, 
-                fontWeight: FontWeight.w500,
-                color: isDark ? Colors.white : Colors.grey[900],
-              ),
-              decoration: InputDecoration(
-                hintText: 'todo_title'.tr,
-                border: InputBorder.none,
-                hintStyle: TextStyle(
-                  color: isDark ? Colors.grey[500] : Colors.grey[400],
-                ),
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-          ),
-        ],
+      child: IconTitleField(
+        controller: _titleController,
+        icon: _icon,
+        onIconTap: () async {
+          final selectedIcon = await showIconPickerDialog(
+            context,
+            _icon ?? Icons.assignment,
+          );
+          if (selectedIcon != null && mounted) {
+            setState(() {
+              _icon = selectedIcon;
+            });
+          }
+        },
+        hintText: 'todo_title'.tr,
       ),
     );
   }
 
   Widget _buildNotesSection() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return _buildSectionContainer(
       label: 'todo_notes'.tr,
-      child: TextField(
+      child: TextAreaField(
         controller: _notesController,
-        maxLines: null,
+        hintText: 'todo_addSomeNotesHint'.tr,
         minLines: 4,
-        style: TextStyle(color: isDark ? Colors.white : Colors.grey[900]),
-        decoration: InputDecoration(
-          hintText: 'todo_addSomeNotesHint'.tr,
-          hintStyle: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[400]),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-               color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-             borderRadius: BorderRadius.circular(12),
-             borderSide: BorderSide(
-               color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
-            ),
-          ),
-           focusedBorder: OutlineInputBorder(
-             borderRadius: BorderRadius.circular(12),
-             borderSide: const BorderSide(
-               color: _primaryColor,
-               width: 1.5,
-            ),
-          ),
-          filled: true,
-          fillColor: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
-          contentPadding: const EdgeInsets.all(12),
-        ),
+        primaryColor: _primaryColor,
       ),
     );
   }
 
   Widget _buildTagsSection() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return _buildSectionContainer(
       label: 'todo_tags'.tr,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-           color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-           border: Border.all(
-             color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
-           ),
-        ),
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            ..._tags.map((tag) => _buildTagChip(tag)),
-            InkWell(
-              onTap: _showAddTagDialog,
-              borderRadius: BorderRadius.circular(4),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.add_circle_outline, color: _primaryColor, size: 20),
-                    const SizedBox(width: 4),
-                    Text(
-                      'todo_addTag'.tr,
-                      style: const TextStyle(
-                        color: _primaryColor,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTagChip(String tag) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF607AFB).withOpacity(0.2) : const Color(0xFFEFF6FF), // Blue-50 equivalent
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            tag,
-            style: TextStyle(
-              color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E40AF), // Blue-300 : Blue-800
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 4),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _tags.remove(tag);
-              });
-            },
-            child: Icon(
-              Icons.close,
-              size: 14,
-              color: isDark ? const Color(0xFF93C5FD) : const Color(0xFF1E40AF),
-            ),
-          ),
-        ],
+      child: TagsField(
+        tags: _tags,
+        onAddTag: _showAddTagDialog,
+        onRemoveTag: (tag) {
+          setState(() {
+            _tags.remove(tag);
+          });
+        },
+        addButtonText: 'todo_addTag'.tr,
+        primaryColor: _primaryColor,
       ),
     );
   }
 
   Widget _buildSubtasksSection() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-     return _buildSectionContainer(
+    return _buildSectionContainer(
       label: 'todo_subtasks'.tr,
-      child: Container(
-        decoration: BoxDecoration(
-           color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
-          ),
-        ),
-        child: Column(
-          children: [
-            if (_subtasks.isNotEmpty)
-              ..._subtasks.asMap().entries.map((entry) {
-                 final index = entry.key;
-                 final subtask = entry.value;
-                 return Container(
-                   decoration: BoxDecoration(
-                     border: Border(bottom: BorderSide(
-                       color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
-                     )),
-                   ),
-                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                   child: Row(
-                     children: [
-                       SizedBox(
-                         width: 20,
-                         height: 20,
-                         child: Checkbox(
-                           value: subtask.isCompleted,
-                           onChanged: (_) => _toggleSubtask(index),
-                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                           activeColor: _primaryColor,
-                           side: BorderSide(
-                             color: isDark ? Colors.white.withOpacity(0.2) : Colors.grey[400]!,
-                             width: 2,
-                           ),
-                         ),
-                       ),
-                       const SizedBox(width: 12),
-                       Expanded(
-                         child: Text(
-                           subtask.title,
-                           style: TextStyle(
-                             decoration: subtask.isCompleted ? TextDecoration.lineThrough : null,
-                             fontSize: 16,
-                             color: isDark ? Colors.white : Colors.grey[900],
-                           ),
-                         ),
-                       ),
-                       IconButton(
-                         icon: const Icon(Icons.close, size: 18),
-                         onPressed: () => _removeSubtask(index),
-                         color: isDark ? Colors.grey[400] : Colors.grey[500],
-                       )
-                     ],
-                   ),
-                 );
-              }),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  InkWell(
-                    onTap: _addSubtask,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Row(
-                      children: [
-                         const Icon(Icons.add_circle_outline, color: _primaryColor, size: 20),
-                         const SizedBox(width: 8),
-                         Text(
-                            '${'todo_add'.tr} ${'todo_subtasks'.tr}',
-                            style: const TextStyle(
-                              color: _primaryColor,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14,
-                            ),
-                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _subtaskController,
-                      style: TextStyle(color: isDark ? Colors.white : Colors.grey[900]),
-                      decoration: InputDecoration(
-                        hintText: '', // Placeholder is covered by the button text effectively or we can add one
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      onSubmitted: (_) => _addSubtask(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      child: ListAddField<Subtask>(
+        items: _subtasks,
+        controller: _subtaskController,
+        onAdd: _addSubtask,
+        onToggle: _toggleSubtask,
+        onRemove: _removeSubtask,
+        getTitle: (subtask) => subtask.title,
+        getIsCompleted: (subtask) => subtask.isCompleted,
+        addButtonText: '${'todo_add'.tr} ${'todo_subtasks'.tr}',
+        primaryColor: _primaryColor,
       ),
     );
   }
@@ -641,7 +423,6 @@ class _TaskFormState extends State<TaskForm> {
   }
 
   Widget _buildPriorityDropdown() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final labels = {
       TaskPriority.high: 'todo_high'.tr,
       TaskPriority.medium: 'todo_medium'.tr,
@@ -649,50 +430,24 @@ class _TaskFormState extends State<TaskForm> {
     };
 
     return _buildSectionContainer(
-      label: 'todo_priority'.tr.replaceAll(':', ''), // Remove colon if present in loc
-      child: Container(
-        height: 50,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-         decoration: BoxDecoration(
-           color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-             color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.flag_outlined, color: isDark ? Colors.grey[500] : Colors.grey[400]),
-            const SizedBox(width: 8),
-            Expanded(
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<TaskPriority>(
-                  value: _priority,
-                  isExpanded: true,
-                  dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-                  icon: Icon(Icons.expand_more, color: isDark ? Colors.grey[500] : Colors.grey[400]),
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.grey[900],
-                    fontSize: 16,
-                  ),
-                  items: TaskPriority.values.map((p) {
-                    return DropdownMenuItem(
-                      value: p,
-                      child: Text(labels[p] ?? ''),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) {
-                      setState(() => _priority = val);
-                    }
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
+      label: 'todo_priority'.tr.replaceAll(':', ''),
+      child: SelectField<TaskPriority>(
+        value: _priority,
+        onChanged: (val) {
+          if (val != null) {
+            setState(() => _priority = val);
+          }
+        },
+        items: TaskPriority.values.map((p) {
+          return DropdownMenuItem(
+            value: p,
+            child: Text(labels[p] ?? ''),
+          );
+        }).toList(),
+        icon: Icons.flag_outlined,
+        primaryColor: _primaryColor,
       ),
-      padding: EdgeInsets.zero
+      padding: EdgeInsets.zero,
     );
   }
 
@@ -765,37 +520,12 @@ class _TaskFormState extends State<TaskForm> {
             ),
           ),
         ),
-        GestureDetector(
+        DatePickerField(
+          date: value.isNotEmpty ? DateTime.now() : null,
           onTap: onTap,
-          child: Container(
-            height: 50,
-            padding: const EdgeInsets.only(left: 10, right: 12), // Adjust padding for icon alignment
-             decoration: BoxDecoration(
-               color: isDark ? Colors.grey[800]!.withOpacity(0.2) : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                 color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(icon, color: isDark ? Colors.grey[500] : Colors.grey[400], size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    value.isEmpty ? placeholder : value,
-                    style: TextStyle(
-                       color: value.isEmpty 
-                          ? (isDark ? Colors.grey[500] : Colors.grey[400]) 
-                          : (isDark ? Colors.white : Colors.grey[900]),
-                       fontSize: 16,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          formattedDate: value,
+          placeholder: placeholder,
+          icon: icon,
         ),
       ],
     );

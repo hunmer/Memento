@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/filter_models.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/agent_chat/controllers/conversation_controller.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
@@ -144,6 +145,81 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   }
 
 
+  /// 构建分组过滤的 FilterItem
+  List<FilterItem> _buildGroupFilterItems() {
+    // 从所有会话（未过滤）的groups字段中提取唯一的分组名称
+    final allGroupNames = <String>{};
+    for (final conv in _controller.allConversations) {
+      allGroupNames.addAll(conv.groups);
+    }
+    final groups = allGroupNames.toList()..sort();
+
+    // 如果没有分组，返回空列表
+    if (groups.isEmpty) {
+      return [];
+    }
+
+    return [
+      FilterItem(
+        id: 'groups',
+        title: '分组',
+        type: FilterType.tagsMultiple,
+        builder: (context, currentValue, onChanged) {
+          final selectedGroups = currentValue as List<String>? ?? [];
+
+          return Row(
+            children: [
+              // "全部"按钮
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilterChip(
+                  label: const Text('全部'),
+                  selected: selectedGroups.isEmpty,
+                  onSelected: (selected) {
+                    if (selected || selectedGroups.isNotEmpty) {
+                      onChanged(<String>[]);
+                    }
+                  },
+                  showCheckmark: false,
+                  labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              // 分组按钮
+              ...groups.map((groupName) {
+                final isSelected = selectedGroups.contains(groupName);
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(groupName),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      final newGroups = List<String>.from(selectedGroups);
+                      if (selected) {
+                        newGroups.add(groupName);
+                      } else {
+                        newGroups.remove(groupName);
+                      }
+                      onChanged(newGroups);
+                    },
+                    showCheckmark: true,
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                );
+              }),
+            ],
+          );
+        },
+        getBadge: (value) {
+          final selectedGroups = value as List<String>? ?? [];
+          return selectedGroups.isEmpty ? null : '${selectedGroups.length}';
+        },
+        initialValue: <String>[],
+      ),
+    ];
+  }
+
   /// 显示添加频道对话框
   Future<void> _showAddChannelDialog() async {
     final nameController = TextEditingController();
@@ -239,6 +315,18 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
           onPressed: _openSettings,
         ),
       ],
+      // 多条件过滤配置
+      enableMultiFilter: true,
+      multiFilterItems: _buildGroupFilterItems(),
+      onMultiFilterChanged: (filters) {
+        final selectedGroups = filters['groups'] as List<String>? ?? [];
+        // 清空现有过滤
+        _controller.clearGroupFilters();
+        // 应用新的过滤
+        for (final group in selectedGroups) {
+          _controller.toggleGroupFilter(group);
+        }
+      },
       body:
           _controller.isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -274,38 +362,18 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   Widget _buildConversationList() {
     final conversations = _controller.conversations;
 
-    // 从所有会话（未过滤）的groups字段中提取唯一的分组名称
-    // 重要：使用 allConversations 而不是 conversations，以确保分组列表不会随着过滤而变化
-    final allGroupNames = <String>{};
-    for (final conv in _controller.allConversations) {
-      allGroupNames.addAll(conv.groups);
-    }
-    final groups = allGroupNames.toList()..sort();
-
-    // 使用更稳定的分组判断逻辑
-    final hasGroups = groups.isNotEmpty;
-
-    return Column(
-      children: [
-        // 分组过滤器区域 - 使用更稳定的判断
-        if (hasGroups) _buildGroupFilters(groups) else const SizedBox.shrink(),
-        // 会话列表 - 使用 FadeThroughTransition 实现淡入淡出效果
-        Expanded(
-          child: _conversationListTransition(
-            isEmpty: conversations.isEmpty,
-            emptyWidget: _buildEmptyListState(key: const ValueKey('empty')),
-            listWidget: ListView.builder(
-              key: ValueKey('conversation_list_${conversations.length}'),
-              padding: EdgeInsets.zero,
-              itemCount: conversations.length,
-              itemBuilder: (context, index) {
-                final conversation = conversations[index];
-                return _buildConversationCard(conversation);
-              },
-            ),
-          ),
-        ),
-      ],
+    return _conversationListTransition(
+      isEmpty: conversations.isEmpty,
+      emptyWidget: _buildEmptyListState(key: const ValueKey('empty')),
+      listWidget: ListView.builder(
+        key: ValueKey('conversation_list_${conversations.length}'),
+        padding: EdgeInsets.zero,
+        itemCount: conversations.length,
+        itemBuilder: (context, index) {
+          final conversation = conversations[index];
+          return _buildConversationCard(conversation);
+        },
+      ),
     );
   }
 
@@ -349,102 +417,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     );
   }
 
-  /// 分组过滤器
-  Widget _buildGroupFilters(List<String> groupNames) {
-    // 额外的安全检查，确保groups列表不为空
-    if (groupNames.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Text(
-                '分组过滤',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              ),
-              const Spacer(),
-              if (_controller.selectedGroupFilters.isNotEmpty)
-                TextButton(
-                  onPressed: () => _controller.clearGroupFilters(),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 0,
-                    ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    'agent_chat_clear'.tr,
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          // 横向滚动的过滤器
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                // 全部按钮 - 当没有选择任何分组时显示为选中状态
-                _animatedFilterChip(
-                  label: '全部',
-                  isSelected: _controller.selectedGroupFilters.isEmpty,
-                  onSelected: (selected) {
-                    // 点击"全部"按钮会清除所有过滤器
-                    if (selected ||
-                        _controller.selectedGroupFilters.isNotEmpty) {
-                      _controller.clearGroupFilters();
-                    }
-                  },
-                ),
-                // 分组按钮
-                ...groupNames.map((groupName) {
-                  final isSelected = _controller.selectedGroupFilters.contains(
-                    groupName,
-                  );
-                  return _animatedFilterChip(
-                    label: groupName,
-                    isSelected: isSelected,
-                    onSelected: (selected) {
-                      _controller.toggleGroupFilter(groupName);
-                    },
-                  );
-                }),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 动画 FilterChip 组件
-  Widget _animatedFilterChip({
-    required String label,
-    required bool isSelected,
-    required ValueChanged<bool> onSelected,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: AnimatedScale(
-        scale: isSelected ? 1.0 : 0.95,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeInOut,
-        child: FilterChip(
-          label: Text(label),
-          selected: isSelected,
-          onSelected: onSelected,
-        ),
-      ),
-    );
-  }
 
   /// 会话卡片
   Widget _buildConversationCard(Conversation conversation) {
