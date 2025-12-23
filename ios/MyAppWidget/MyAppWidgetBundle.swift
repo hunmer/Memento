@@ -10,9 +10,12 @@ import SwiftUI
 
 @main
 struct MyAppWidgetBundle: WidgetBundle {
+    @WidgetBundleBuilder
     var body: some Widget {
         MyAppWidget()
-        MyAppWidgetControl()
+        if #available(iOS 18.0, *) {
+            MyAppWidgetControl()
+        }
         MyAppWidgetLiveActivity()
     }
 }

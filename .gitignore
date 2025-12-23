@@ -80,3 +80,4 @@ mcp-memento-server/node_modules/*
 mcp-memento-server/dist/*
 node_modules/*
 packages/memento-mock/node_modules/*
+ios/build/ios/XCBuildData/*
