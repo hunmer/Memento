@@ -146,11 +146,29 @@ class MyWidgetManager {
 
   MyWidgetManager._internal();
 
+  /// App Group ID (iOS)
+  static const String _appGroupId = 'group.github.hunmer.memento';
+
+  /// 是否已初始化
+  bool _isInitialized = false;
+
+  /// 确保已初始化 (对于 iOS App Group，Android 可选)
+  Future<void> _ensureInitialized() async {
+    if (_isInitialized) return;
+
+    if (Platform.isIOS) {
+      await HomeWidget.setAppGroupId(_appGroupId);
+    }
+    _isInitialized = true;
+  }
+
   /// 初始化 (对于 iOS App Group，Android 可选)
+  /// @deprecated 使用内部自动初始化，无需手动调用
   Future<void> init(String? appGroupId) async {
     if (appGroupId != null) {
       await HomeWidget.setAppGroupId(appGroupId);
     }
+    _isInitialized = true;
     // 可添加其他初始化，如注册背景任务
   }
 
@@ -162,6 +180,7 @@ class MyWidgetManager {
     }
 
     try {
+      await _ensureInitialized();
       if (value.isEmpty) return false;
       final result = await HomeWidget.saveWidgetData<String>(key, value);
       return result == true;
@@ -179,6 +198,7 @@ class MyWidgetManager {
     }
 
     try {
+      await _ensureInitialized();
       final result = await HomeWidget.saveWidgetData<int>(key, value);
       return result == true;
     } catch (e) {
@@ -195,6 +215,7 @@ class MyWidgetManager {
     }
 
     try {
+      await _ensureInitialized();
       final result = await HomeWidget.saveWidgetData<bool>(key, value);
       return result == true;
     } catch (e) {
@@ -211,6 +232,7 @@ class MyWidgetManager {
     }
 
     try {
+      await _ensureInitialized();
       final result = await HomeWidget.saveWidgetData<double>(key, value);
       return result == true;
     } catch (e) {
@@ -226,6 +248,7 @@ class MyWidgetManager {
       return null;
     }
 
+    await _ensureInitialized();
     return await HomeWidget.getWidgetData<T>(key);
   }
 
@@ -241,6 +264,7 @@ class MyWidgetManager {
     }
 
     try {
+      await _ensureInitialized();
       final targets = widgetName == null
           ? ['TextWidgetProvider', 'ImageWidgetProvider']
           : [widgetName];
@@ -257,7 +281,7 @@ class MyWidgetManager {
       );
       return results.every((result) => result == true);
     } catch (e) {
-      debugPrint('???????: $e');
+      debugPrint('更新小组件失败: $e');
       return false;
     }
   }
@@ -279,6 +303,7 @@ class MyWidgetManager {
     }
 
     try {
+      await _ensureInitialized();
       final result = await HomeWidget.renderFlutterWidget(
         flutterWidget,
         key: key,
@@ -309,6 +334,7 @@ class MyWidgetManager {
       return null;
     }
 
+    await _ensureInitialized();
     return await HomeWidget.initiallyLaunchedFromHomeWidget();
   }
 

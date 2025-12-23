@@ -34,14 +34,19 @@ struct SendToAgentChatIntent: AppIntent {
 
         // 处理图片文件
         if let images = images, !images.isEmpty {
+            print("[SendToAgentChat] 收到 \(images.count) 张图片")
             var imagePaths: [String] = []
 
             for (index, imageFile) in images.enumerated() {
+                print("[SendToAgentChat] 处理图片 \(index): \(imageFile)")
+
                 // 将图片保存到临时目录
                 if let fileURL = imageFile.fileURL {
+                    print("[SendToAgentChat] 图片源路径: \(fileURL.path)")
                     let tempDir = FileManager.default.temporaryDirectory
                     let fileName = "shortcut_image_\(index)_\(Date().timeIntervalSince1970).jpg"
                     let destURL = tempDir.appendingPathComponent(fileName)
+                    print("[SendToAgentChat] 图片目标路径: \(destURL.path)")
 
                     do {
                         // 复制文件到临时目录
@@ -50,15 +55,23 @@ struct SendToAgentChatIntent: AppIntent {
                         }
                         try FileManager.default.copyItem(at: fileURL, to: destURL)
                         imagePaths.append(destURL.path)
+                        print("[SendToAgentChat] 图片复制成功: \(destURL.path)")
                     } catch {
                         print("[SendToAgentChat] 图片处理失败: \(error)")
                     }
+                } else {
+                    print("[SendToAgentChat] 警告：图片 \(index) 没有 fileURL")
                 }
             }
 
             if !imagePaths.isEmpty {
                 data["imagePaths"] = imagePaths
+                print("[SendToAgentChat] 添加了 \(imagePaths.count) 张图片到数据: \(imagePaths)")
+            } else {
+                print("[SendToAgentChat] 警告：所有图片处理失败，imagePaths 为空")
             }
+        } else {
+            print("[SendToAgentChat] 未收到图片或图片数组为空")
         }
 
         // 将数据转换为 JSON 字符串

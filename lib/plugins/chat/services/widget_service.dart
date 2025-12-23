@@ -146,6 +146,9 @@ class ChatWidgetService {
     }
 
     try {
+      // 确保 SystemWidgetService 已初始化（iOS 需要设置 App Group ID）
+      await SystemWidgetService.instance.initialize();
+
       // 初次更新快速小组件
       await updateWidget();
 

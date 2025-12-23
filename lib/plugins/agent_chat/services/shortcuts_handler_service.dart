@@ -105,7 +105,7 @@ class ShortcutsHandlerService {
     }
 
     // 2. 处理图片附件
-    final List<FileAttachment> attachments = [];
+    final List<File> attachmentFiles = [];
 
     if (imagePaths != null && imagePaths.isNotEmpty) {
       for (final pathStr in imagePaths) {
@@ -113,42 +113,19 @@ class ShortcutsHandlerService {
         final file = File(path);
 
         if (await file.exists()) {
-          final fileName = file.uri.pathSegments.last;
-          final fileSize = await file.length();
-
-          attachments.add(FileAttachment.image(
-            filePath: path,
-            fileName: fileName,
-            fileSize: fileSize,
-          ));
+          attachmentFiles.add(file);
         } else {
           debugPrint('[ShortcutsHandler] 图片文件不存在: $path');
         }
       }
 
-      debugPrint('[ShortcutsHandler] 处理了 ${attachments.length} 张图片');
+      debugPrint('[ShortcutsHandler] 处理了 ${attachmentFiles.length} 张图片');
     }
 
-    // 3. 创建用户消息
-    final userMessage = ChatMessage.user(
-      conversationId: targetConversation.id,
-      content: messageText,
-      attachments: attachments,
-    );
-
-    // 4. 保存消息到数据库
-    await controller.messageService.addMessage(userMessage);
-    debugPrint('[ShortcutsHandler] 消息已保存到数据库');
-
-    // 5. 更新会话最后消息信息
-    await controller.conversationService.updateLastMessage(
-      targetConversation.id,
-      messageText,
-    );
-
-    // 6. 导航到聊天界面
+    // 3. 导航到聊天界面
     final context = navigatorKey.currentContext;
     if (context != null) {
+      // 导航到聊天界面并自动发送消息（支持文本和图片）
       await NavigationHelper.push(
         context,
         ChatScreen(
@@ -156,11 +133,16 @@ class ShortcutsHandlerService {
           storage: plugin.storage,
           conversationService: controller.conversationService,
           getSettings: () => plugin.settings,
-          initialMessage: null, // 消息已发送，不需要预填充
+          initialMessage: messageText, // 传递消息文本
+          initialFiles: attachmentFiles.isNotEmpty ? attachmentFiles : null, // 传递图片文件
+          autoSend: true, // 自动发送消息
         ),
       );
 
-      debugPrint('[ShortcutsHandler] 已导航到聊天界面');
+      debugPrint(
+        '[ShortcutsHandler] 已导航到聊天界面，消息将自动发送'
+        '${attachmentFiles.isNotEmpty ? "（包含 ${attachmentFiles.length} 张图片）" : ""}',
+      );
     } else {
       debugPrint('[ShortcutsHandler] 警告：navigatorKey.currentContext 为 null，无法导航');
     }

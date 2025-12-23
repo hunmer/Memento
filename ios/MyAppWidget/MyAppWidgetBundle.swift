@@ -16,6 +16,8 @@ struct MyAppWidgetBundle: WidgetBundle {
         if #available(iOS 18.0, *) {
             MyAppWidgetControl()
         }
-        MyAppWidgetLiveActivity()
+        if #available(iOSApplicationExtension 16.1, *) {
+            MyAppWidgetLiveActivity()
+        }
     }
 }

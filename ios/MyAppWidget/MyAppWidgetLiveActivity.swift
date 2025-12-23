@@ -21,6 +21,7 @@ struct LiveActivitiesAppAttributes: ActivityAttributes, Identifiable {
     var id = UUID()
 }
 
+@available(iOSApplicationExtension 16.1, *)
 struct MyAppWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: LiveActivitiesAppAttributes.self) { context in

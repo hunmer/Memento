@@ -13,6 +13,9 @@
 		4B95490C2EFAD21F005F06E5 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B95490B2EFAD21F005F06E5 /* WidgetKit.framework */; };
 		4B95490E2EFAD21F005F06E5 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B95490D2EFAD21F005F06E5 /* SwiftUI.framework */; };
 		4B95491F2EFAD220005F06E5 /* MyAppWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4B95490A2EFAD21F005F06E5 /* MyAppWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4B954B402EFB061F005F06E5 /* ConversationQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954B3E2EFB061F005F06E5 /* ConversationQuery.swift */; };
+		4B954B412EFB061F005F06E5 /* ConversationEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954B3D2EFB061F005F06E5 /* ConversationEntity.swift */; };
+		4B954B422EFB061F005F06E5 /* SendToAgentChatIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954B3F2EFB061F005F06E5 /* SendToAgentChatIntent.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
@@ -75,6 +78,9 @@
 		4B95490B2EFAD21F005F06E5 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		4B95490D2EFAD21F005F06E5 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		4B9549262EFAD2D8005F06E5 /* MyAppWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MyAppWidgetExtension.entitlements; sourceTree = "<group>"; };
+		4B954B3D2EFB061F005F06E5 /* ConversationEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationEntity.swift; sourceTree = "<group>"; };
+		4B954B3E2EFB061F005F06E5 /* ConversationQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationQuery.swift; sourceTree = "<group>"; };
+		4B954B3F2EFB061F005F06E5 /* SendToAgentChatIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendToAgentChatIntent.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
@@ -195,6 +201,9 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				4B954B3D2EFB061F005F06E5 /* ConversationEntity.swift */,
+				4B954B3E2EFB061F005F06E5 /* ConversationQuery.swift */,
+				4B954B3F2EFB061F005F06E5 /* SendToAgentChatIntent.swift */,
 				4B9549052EFAD1D0005F06E5 /* Runner.entitlements */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
@@ -492,6 +501,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B954B402EFB061F005F06E5 /* ConversationQuery.swift in Sources */,
+				4B954B412EFB061F005F06E5 /* ConversationEntity.swift in Sources */,
+				4B954B422EFB061F005F06E5 /* SendToAgentChatIntent.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);

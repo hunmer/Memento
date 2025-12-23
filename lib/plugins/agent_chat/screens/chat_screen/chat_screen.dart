@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +35,8 @@ class ChatScreen extends StatefulWidget {
   final ConversationService? conversationService;
   final Map<String, dynamic> Function()? getSettings; // 获取插件设置的回调
   final String? initialMessage; // 初始消息文本（预填充到输入框）
+  final List<File>? initialFiles; // 初始附件文件（预添加到消息）
+  final bool autoSend; // 是否自动发送 initialMessage
 
   const ChatScreen({
     super.key,
@@ -42,6 +45,8 @@ class ChatScreen extends StatefulWidget {
     this.conversationService,
     this.getSettings,
     this.initialMessage,
+    this.initialFiles,
+    this.autoSend = false,
   });
 
   @override
@@ -61,7 +66,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // Agent 选择状态 - 由 ChatScreen 自己管理
   AIAgent? _currentAgent;
-  List<AIAgent>? _agentChain;  // 使用 AIAgent 列表而不是 AgentChainNode
+  List<AIAgent>? _agentChain; // 使用 AIAgent 列表而不是 AgentChainNode
   bool _isChainMode = false;
 
   // 猜你想问相关
@@ -117,6 +122,12 @@ class _ChatScreenState extends State<ChatScreen> {
       debugPrint('✅ 已设置初始消息到输入框: ${widget.initialMessage}');
     }
 
+    // 如果提供了初始文件，设置到 controller
+    if (widget.initialFiles != null && widget.initialFiles!.isNotEmpty) {
+      _controller.setInitialFiles(widget.initialFiles!);
+      debugPrint('✅ 已设置 ${widget.initialFiles!.length} 个初始文件');
+    }
+
     // 从 controller 同步初始 agent 状态到本地
     _syncAgentStateFromController();
 
@@ -132,6 +143,21 @@ class _ChatScreenState extends State<ChatScreen> {
 
           // 触发一次更新以显示初始化后的数据
           setState(() {});
+
+          // 如果需要自动发送消息
+          if (widget.autoSend &&
+              widget.initialMessage != null &&
+              widget.initialMessage!.isNotEmpty) {
+            debugPrint('🚀 自动发送 Shortcuts 消息: ${widget.initialMessage}');
+            // 延迟一帧确保 UI 完全初始化后再发送
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                _controller.sendMessage().catchError((e) {
+                  debugPrint('❌ 自动发送消息失败: $e');
+                });
+              }
+            });
+          }
 
           // 延迟等待 Markdown 等复杂组件渲染完成后再滚动和显示
           // Markdown 渲染会导致内容高度变化，需要等待高度稳定
@@ -250,9 +276,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // 如果有预设问题,使用预设问题
     if (_currentAgent!.openingQuestions.isNotEmpty) {
       setState(() {
-        _suggestedQuestions = List.from(
-          _currentAgent!.openingQuestions,
-        );
+        _suggestedQuestions = List.from(_currentAgent!.openingQuestions);
       });
     } else {
       // 否则使用随机问题
@@ -694,7 +718,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                               ? () =>
                                                   _controller.cancelSending()
                                               : null,
-                                      messageService: _controller.messageService,
+                                      messageService:
+                                          _controller.messageService,
                                     ),
                                   );
                                 },
@@ -1213,7 +1238,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 onPressed: () => Navigator.pop(context, 'single'),
                 child: ListTile(
                   leading: Icon(
-                    isCurrentlySingleMode ? Icons.check_circle : Icons.smart_toy,
+                    isCurrentlySingleMode
+                        ? Icons.check_circle
+                        : Icons.smart_toy,
                     color: isCurrentlySingleMode ? Colors.green : null,
                   ),
                   title: const Text('单 Agent 模式'),
