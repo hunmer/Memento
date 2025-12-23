@@ -4,6 +4,7 @@ import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
 import 'package:Memento/plugins/agent_chat/models/agent_chain_node.dart';
 import 'package:Memento/plugins/agent_chat/data/sample_data.dart';
+import 'package:Memento/plugins/agent_chat/services/conversation_sync_service.dart';
 
 /// 会话服务
 ///
@@ -156,6 +157,9 @@ class ConversationService extends ChangeNotifier {
     // 同步小组件数据
     await PluginWidgetSyncHelper.instance.syncAgentChat();
 
+    // 同步到 iOS Shortcuts
+    await ConversationSyncService.instance.syncConversationsToIOS(this);
+
     return conversation;
   }
 
@@ -176,6 +180,9 @@ class ConversationService extends ChangeNotifier {
       _conversations.sort(Conversation.compare);
       await _saveConversations();
       notifyListeners();
+
+      // 同步到 iOS Shortcuts
+      await ConversationSyncService.instance.syncConversationsToIOS(this);
     }
   }
 
@@ -194,6 +201,9 @@ class ConversationService extends ChangeNotifier {
 
     // 同步小组件数据
     await PluginWidgetSyncHelper.instance.syncAgentChat();
+
+    // 同步到 iOS Shortcuts
+    await ConversationSyncService.instance.syncConversationsToIOS(this);
   }
 
   /// 更新会话的最后消息信息

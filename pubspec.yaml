@@ -121,6 +121,7 @@ dependencies:
     sdk: flutter
   full_swipe_back_gesture: ^0.1.2
   scroll_to_index: ^3.0.1
+  intelligence: ^0.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -457,6 +457,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.edit),
             onTap: () => _showLocationApiKeyDialog(),
           ),
+          const Divider(),
+
+          // 剪切板设置
+          Text(
+            '剪切板设置',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ListTile(
+            leading: const Icon(Icons.content_paste),
+            title: const Text('自动读取剪切板'),
+            subtitle: const Text('启用后将自动识别剪切板中的数据'),
+            trailing: Switch(
+              value: _controller.clipboardAutoRead,
+              onChanged: (value) => setState(() {
+                _controller.clipboardAutoRead = value;
+              }),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.content_paste_go),
+            title: const Text('读取并识别剪切板'),
+            subtitle: const Text('手动读取剪切板中的数据并识别处理'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () async {
+              final result = await _controller.readAndProcessClipboard();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(result ? '剪切板识别成功' : '剪切板中没有可识别的数据'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+          ),
           if (showPermissionEntry)
             ListTile(
               leading: const Icon(Icons.privacy_tip),

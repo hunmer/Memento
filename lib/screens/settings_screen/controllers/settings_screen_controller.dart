@@ -2,6 +2,7 @@ import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/core/theme_controller.dart';
 import 'package:Memento/core/builtin_plugins.dart';
 import 'package:Memento/core/plugin_base.dart';
+import 'package:Memento/core/services/clipboard_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'base_settings_controller.dart';
@@ -49,6 +50,10 @@ class SettingsScreenController extends ChangeNotifier {
     await _loadLastBackupCheckDate();
     enableLogging = _prefs.getBool('enable_logging') ?? false;
     _locationApiKey = _prefs.getString('location_api_key') ?? 'dad6a772bf826842c3049e9c7198115c';
+
+    // 加载剪切板自动读取配置（默认关闭）
+    _clipboardAutoRead = _prefs.getBool('clipboard_auto_read') ?? false;
+    ClipboardService.instance.autoReadEnabled = _clipboardAutoRead;
   }
 
   Future<void> _loadBackupSchedule() async {
@@ -158,6 +163,21 @@ class SettingsScreenController extends ChangeNotifier {
     _locationApiKey = value;
     await _prefs.setString('location_api_key', value);
     notifyListeners();
+  }
+
+  // 剪切板配置
+  bool _clipboardAutoRead = false;
+  bool get clipboardAutoRead => _clipboardAutoRead;
+  set clipboardAutoRead(bool value) {
+    _clipboardAutoRead = value;
+    ClipboardService.instance.autoReadEnabled = value;
+    _prefs.setBool('clipboard_auto_read', value);
+    notifyListeners();
+  }
+
+  /// 手动读取并识别剪切板
+  Future<bool> readAndProcessClipboard() async {
+    return await ClipboardService.instance.processClipboard();
   }
 
   Future<void> checkForUpdates() => _autoUpdateController.showUpdateDialog();

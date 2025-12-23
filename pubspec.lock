@@ -925,6 +925,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.2"
+  intelligence:
+    dependency: "direct main"
+    description:
+      name: intelligence
+      sha256: "43da4cd47efb183ac259537f290dd1d9bdc19aa9dd7779900de378ebcac4adb5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   interpolation:
     dependency: transitive
     description:

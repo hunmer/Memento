@@ -2,6 +2,7 @@ import Flutter
 import UIKit
 import flutter_foreground_task
 import UserNotifications
+import intelligence
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -21,7 +22,69 @@ import UserNotifications
     // 设置timer服务的MethodChannel
     setupTimerServiceChannel()
 
+    // 设置 Intelligence 插件监听器
+    setupIntelligencePlugin()
+
+    // 清理旧的临时文件
+    cleanupOldTempFiles()
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  /// 设置 Intelligence 插件
+  private func setupIntelligencePlugin() {
+    IntelligencePlugin.storage.attachListener {
+      // 当频道列表更新时，刷新 Shortcuts 参数
+      if #available(iOS 16.0, *) {
+        // 注意：这里需要在项目中定义 AppShortcuts
+        // AppShortcuts.updateAppShortcutParameters()
+      }
+    }
+
+    // iOS 18+ 支持 Spotlight 集成
+    if #available(iOS 18.0, *) {
+      IntelligencePlugin.spotlightCore.attachEntityMapper { item in
+        return ConversationEntity(
+          id: item.id,
+          title: item.representation
+        )
+      }
+    }
+
+    print("[AppDelegate] Intelligence 插件已配置")
+  }
+
+  /// 清理旧的临时文件（24小时前的文件）
+  private func cleanupOldTempFiles() {
+    let tempDir = FileManager.default.temporaryDirectory
+    guard let files = try? FileManager.default.contentsOfDirectory(
+      at: tempDir,
+      includingPropertiesForKeys: [.creationDateKey]
+    ) else {
+      return
+    }
+
+    let now = Date()
+    let oneDayAgo = now.addingTimeInterval(-86400) // 24小时 = 86400秒
+
+    var cleanedCount = 0
+    for fileURL in files {
+      // 只清理 Shortcuts 图片临时文件
+      if fileURL.lastPathComponent.hasPrefix("shortcut_image_") {
+        if let attrs = try? FileManager.default.attributesOfItem(atPath: fileURL.path),
+           let creationDate = attrs[.creationDate] as? Date {
+          // 删除 24 小时前的文件
+          if creationDate < oneDayAgo {
+            try? FileManager.default.removeItem(at: fileURL)
+            cleanedCount += 1
+          }
+        }
+      }
+    }
+
+    if cleanedCount > 0 {
+      print("[AppDelegate] 已清理 \(cleanedCount) 个旧临时文件")
+    }
   }
 
   private func setupTimerServiceChannel() {
