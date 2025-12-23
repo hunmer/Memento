@@ -250,6 +250,33 @@ class AgentChainExecutor {
       messages.add(ChatCompletionMessage.system(content: systemPrompt));
     }
 
+    // 添加预设消息（在 system prompt 之后）
+    if (agent.messages != null && agent.messages!.isNotEmpty) {
+      debugPrint('📋 [链式调用] Agent ${agent.name} 开始添加预设消息，共 ${agent.messages!.length} 条');
+      for (final prompt in agent.messages!) {
+        debugPrint('  - 类型: ${prompt.type}, 内容: ${prompt.content.substring(0, prompt.content.length > 30 ? 30 : prompt.content.length)}${prompt.content.length > 30 ? '...' : ''}');
+        switch (prompt.type) {
+          case 'user':
+            messages.add(
+              ChatCompletionMessage.user(
+                content: ChatCompletionUserMessageContent.string(prompt.content),
+              ),
+            );
+            break;
+          case 'assistant':
+            messages.add(
+              ChatCompletionMessage.assistant(content: prompt.content),
+            );
+            break;
+          case 'system':
+            // System 类型的消息已经添加过了，跳过
+            debugPrint('  ⚠️ 跳过system类型的消息');
+            continue;
+        }
+      }
+      debugPrint('✅ [链式调用] Agent ${agent.name} 预设消息添加完成');
+    }
+
     switch (node.contextMode) {
       case AgentContextMode.conversationContext:
         // 使用会话的历史上下文（遵循 contextMessageCount）

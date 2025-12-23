@@ -1,3 +1,4 @@
+import 'package:Memento/plugins/openai/widgets/prompt_editor.dart';
 import 'package:get/get.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -70,6 +71,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   bool _enableOpeningQuestions = false;
   final List<String> _openingQuestions = [];
   final _openingQuestionController = TextEditingController();
+  final List<Prompt> _messages = []; // 预设消息列表
 
   List<ServiceProvider> _providers = [];
   bool _isLoadingProviders = true;
@@ -102,6 +104,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       _selectedPresetId = widget.agent!.promptPresetId;
       _enableOpeningQuestions = widget.agent!.enableOpeningQuestions;
       _openingQuestions.addAll(widget.agent!.openingQuestions);
+      _messages.addAll(widget.agent!.messages ?? []);
     }
   }
 
@@ -307,6 +310,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       promptPresetId: _selectedPresetId,
       enableOpeningQuestions: _enableOpeningQuestions,
       openingQuestions: _openingQuestions,
+      messages: _messages.isNotEmpty ? _messages : null,
     );
 
     try {
@@ -465,6 +469,11 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       icon: _selectedIcon,
       iconColor: _selectedIconColor,
       avatarUrl: _avatarUrl,
+      enableFunctionCalling: _enableFunctionCalling,
+      promptPresetId: _selectedPresetId,
+      enableOpeningQuestions: _enableOpeningQuestions,
+      openingQuestions: List.from(_openingQuestions),
+      messages: List.from(_messages),
     );
 
     try {
@@ -789,30 +798,53 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               },
             ),
             const SizedBox(height: 16),
-            TextAreaField(
-              controller: _promptController,
-              labelText: 'openai_systemPrompt'.tr,
-              hintText: 'openai_enterSystemPrompt'.tr,
-              minLines: 5,
-              maxLines: 5,
-              enabled: _selectedPresetId == null,
-              helperText:
-                  _selectedPresetId != null
-                      ? 'openai_promptPresetActiveHint'.tr
-                      : null,
-              helperStyle: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              validator: (value) {
-                if (_selectedPresetId != null) {
-                  return null;
-                }
-                if (value == null || value.isEmpty) {
-                  return 'openai_pleaseEnterSystemPrompt'.tr;
-                }
-                return null;
-              },
+            // 提示词与消息编辑器
+            Text(
+              '提示词与消息',
+              style: Theme.of(context).textTheme.titleMedium,
             ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 400, // 为 PromptEditor 提供明确的高度
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: PromptEditor(
+                  prompts: () {
+                    final prompts = <Prompt>[];
+                    if (_promptController.text.isNotEmpty) {
+                      prompts.add(Prompt(type: 'system', content: _promptController.text));
+                    }
+                    prompts.addAll(_messages);
+                    return prompts;
+                  }(),
+                  onPromptsChanged: (prompts) {
+                    setState(() {
+                      // 清空原有数据
+                      _promptController.clear();
+                      _messages.clear();
+
+                      // 分离 system prompt 和 messages
+                      for (final prompt in prompts) {
+                        if (prompt.type == 'system') {
+                          _promptController.text = prompt.content;
+                        } else if (prompt.content.isNotEmpty) {
+                          _messages.add(prompt);
+                        }
+                      }
+                    });
+                  },
+                  separateSystemPrompt: true,
+                  systemPromptController: _promptController,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             const SizedBox(height: 16),
             TextInputField(
               controller: _baseUrlController,
@@ -963,6 +995,11 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       topP: 1.0,
       frequencyPenalty: 0.0,
       presencePenalty: 0.0,
+      enableFunctionCalling: _enableFunctionCalling,
+      promptPresetId: _selectedPresetId,
+      enableOpeningQuestions: _enableOpeningQuestions,
+      openingQuestions: _openingQuestions,
+      messages: _messages.isNotEmpty ? List.from(_messages) : null,
     );
 
     // 获取当前表单的值
