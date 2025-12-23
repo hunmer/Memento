@@ -6,9 +6,14 @@ const Map<String, String> coreTranslationsEn = {
   // Navigation
   'core_back': 'Back',
   'core_search': 'Search',
+  'core_searchPlaceholder': 'Search...',
   'core_activity': 'Activity',
   'core_tag': 'Tag',
   'core_comment': 'Comment',
+  'core_clearAll': 'Clear All',
+  'core_selectDate': 'Select Date',
+  'core_selectDateRange': 'Select Date Range',
+  'core_searchScope': 'Search Scope',
 
   // Action Executor
   'core_inputJavaScriptCode': 'Input JavaScript Code',

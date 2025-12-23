@@ -7,32 +7,6 @@ description: 为Flutter页面添加路由上下文记录功能，支持日期等
 
 为Flutter页面添加路由上下文记录，使AI助手能理解用户当前查看的页面参数。
 
-## Usage
-
-```bash
-# 日期参数（默认）
-/add-route-context <page-file> --route <route-name>
-
-# 自定义参数
-/add-route-context <page-file> --route <route-name> --param <param-name>
-```
-
-**Examples:**
-
-```bash
-# 活动时间轴页面
-/add-route-context lib/plugins/activity/screens/activity_timeline_screen.dart --route /activity_timeline
-
-# 用户详情页面
-/add-route-context lib/screens/user_profile_screen.dart --route /user_profile --param userId
-```
-
-## Arguments
-
-- `<page-file>`: Target Flutter page file path (StatefulWidget)
-- `--route <name>`: Route name (must start with `/`)
-- `--param <name>`: Parameter name (default: `date` for DateTime variables)
-
 ## Workflow
 
 ### 1. Analyze Target File
