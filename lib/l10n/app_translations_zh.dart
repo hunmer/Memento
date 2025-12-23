@@ -133,6 +133,8 @@ const Map<String, String> appTranslationsZh = {
   'app_permission_notificationsDescription': '用于发送提醒、倒计时等系统通知。',
   'app_permission_storageTitle': '存储',
   'app_permission_storageDescription': '用于读写备份、导入导出所需的文件。',
+  'app_permission_calendarTitle': '日历',
+  'app_permission_calendarDescription': '用于同步系统日历、创建和管理日历事件。',
 
   // File operations
   'app_downloadCancelled': '下载已取消',

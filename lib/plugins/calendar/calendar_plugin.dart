@@ -28,7 +28,8 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   static CalendarPlugin? _instance;
   static CalendarPlugin get instance {
     if (_instance == null) {
-      _instance = PluginManager.instance.getPlugin('calendar') as CalendarPlugin?;
+      _instance =
+          PluginManager.instance.getPlugin('calendar') as CalendarPlugin?;
       if (_instance == null) {
         throw StateError('CalendarPlugin has not been initialized');
       }
@@ -138,7 +139,10 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     }
   }
 
-  void onViewChanged(syncfusion.ViewChangedDetails details, VoidCallback? updateRouteContext) async {
+  void onViewChanged(
+    syncfusion.ViewChangedDetails details,
+    VoidCallback? updateRouteContext,
+  ) async {
     // 保存最后使用的视图
     await storageManager.write('calendar/calendar_last_view', {
       'view': _getStringFromCalendarView(sfController.view!),
@@ -187,14 +191,15 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
 
       // 获取本月所有事件
       final allEvents = controller.getAllEvents();
-      final monthEvents = allEvents.where((event) {
-        return event.startTime.isAfter(
-              firstDayOfMonth.subtract(const Duration(seconds: 1)),
-            ) &&
-            event.startTime.isBefore(
-              lastDayOfMonth.add(const Duration(days: 1)),
-            );
-      }).toList();
+      final monthEvents =
+          allEvents.where((event) {
+            return event.startTime.isAfter(
+                  firstDayOfMonth.subtract(const Duration(seconds: 1)),
+                ) &&
+                event.startTime.isBefore(
+                  lastDayOfMonth.add(const Duration(days: 1)),
+                );
+          }).toList();
 
       // 构建每日事件数据
       final Map<String, List<Map<String, dynamic>>> dayEventsMap = {};
@@ -260,7 +265,8 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
 
   void showEventDetails(BuildContext context, CalendarEvent event) {
     // 更新路由上下文
-    final dateStr = '${event.startTime.year}-${event.startTime.month.toString().padLeft(2, '0')}-${event.startTime.day.toString().padLeft(2, '0')}';
+    final dateStr =
+        '${event.startTime.year}-${event.startTime.month.toString().padLeft(2, '0')}-${event.startTime.day.toString().padLeft(2, '0')}';
     RouteHistoryManager.updateCurrentContext(
       pageId: '/calendar_event_detail',
       title: '事件详情 - ${event.title}',
@@ -294,39 +300,46 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   void showEventEditPage(BuildContext context, [CalendarEvent? event]) {
-    NavigationHelper.push(context, EventEditPage(
-              event: event,
-              initialDate: event?.startTime ?? controller.selectedDate,
-              onSave: (updatedEvent) {
-                if (event != null) {
-                  controller.updateEvent(updatedEvent);
-                } else {
-                  controller.addEvent(updatedEvent);
-                }
-                // 强制重建界面
-                controller.refresh();
-              },),
+    NavigationHelper.push(
+      context,
+      EventEditPage(
+        event: event,
+        initialDate: event?.startTime ?? controller.selectedDate,
+        onSave: (updatedEvent) {
+          if (event != null) {
+            controller.updateEvent(updatedEvent);
+          } else {
+            controller.addEvent(updatedEvent);
+          }
+          // 强制重建界面
+          controller.refresh();
+        },
+      ),
     );
   }
 
   void showAllEvents(BuildContext context) {
-    NavigationHelper.push(context, EventListPage(
-              events: controller.events,
-              onEventUpdated: (event) {
-                showEventEditPage(context, event);
-              },
-              onEventCompleted: (event) {
-                controller.completeEvent(event);
-              },
-              onEventDeleted: (event) {
-                controller.deleteEvent(event);
-              },),
+    NavigationHelper.push(
+      context,
+      EventListPage(
+        events: controller.events,
+        onEventUpdated: (event) {
+          showEventEditPage(context, event);
+        },
+        onEventCompleted: (event) {
+          controller.completeEvent(event);
+        },
+        onEventDeleted: (event) {
+          controller.deleteEvent(event);
+        },
+      ),
     );
   }
 
   void showCompletedEvents(BuildContext context) {
-    NavigationHelper.push(context, CompletedEventsPage(
-              completedEvents: controller.completedEvents,),
+    NavigationHelper.push(
+      context,
+      CompletedEventsPage(completedEvents: controller.completedEvents),
     );
   }
 
@@ -334,11 +347,6 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   List<syncfusion.Appointment> getUserAppointments() {
     // 使用总控制器获取所有事件（包括普通事件和Todo任务事件）
     final List<CalendarEvent> allEvents = controller.getAllEvents();
-
-    debugPrint('CalendarPlugin: getUserAppointments - 总事件数: ${allEvents.length}');
-    for (final event in allEvents) {
-      debugPrint('CalendarPlugin: 事件 - ID: ${event.id}, 标题: ${event.title}, 来源: ${event.source}');
-    }
 
     return allEvents
         .map(
@@ -564,41 +572,44 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== 数据选择器注册 ====================
 
   void _registerDataSelectors() {
-    pluginDataSelectorService.registerSelector(SelectorDefinition(
-      id: 'calendar.event',
-      pluginId: id,
-      name: '选择日历事件',
-      icon: icon,
-      color: color,
-      searchable: true,
-      selectionMode: SelectionMode.single,
-      steps: [
-        SelectorStep(
-          id: 'event',
-          title: '选择日历事件',
-          viewType: SelectorViewType.calendar,
-          isFinalStep: true,
-          dataLoader: (_) async {
-            final events = controller.getAllEvents();
-            return events.map((event) {
-              return SelectableItem(
-                id: event.id,
-                title: event.title,
-                subtitle: event.description.isNotEmpty ? event.description : null,
-                icon: event.icon,
-                rawData: event,
-                metadata: {
-                  'date': event.startTime.toIso8601String(),
-                  'endTime': event.endTime?.toIso8601String(),
-                  'source': event.source,
-                  'color': event.color.value,
-                },
-              );
-            }).toList();
-          },
-        ),
-      ],
-    ));
+    pluginDataSelectorService.registerSelector(
+      SelectorDefinition(
+        id: 'calendar.event',
+        pluginId: id,
+        name: '选择日历事件',
+        icon: icon,
+        color: color,
+        searchable: true,
+        selectionMode: SelectionMode.single,
+        steps: [
+          SelectorStep(
+            id: 'event',
+            title: '选择日历事件',
+            viewType: SelectorViewType.calendar,
+            isFinalStep: true,
+            dataLoader: (_) async {
+              final events = controller.getAllEvents();
+              return events.map((event) {
+                return SelectableItem(
+                  id: event.id,
+                  title: event.title,
+                  subtitle:
+                      event.description.isNotEmpty ? event.description : null,
+                  icon: event.icon,
+                  rawData: event,
+                  metadata: {
+                    'date': event.startTime.toIso8601String(),
+                    'endTime': event.endTime?.toIso8601String(),
+                    'source': event.source,
+                    'color': event.color.value,
+                  },
+                );
+              }).toList();
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   // ==================== JS API 定义 ====================
@@ -746,7 +757,10 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     final result = await calendarUseCase.deleteEvent(params);
 
     if (result.isFailure) {
-      return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
+      return jsonEncode({
+        'success': false,
+        'error': result.errorOrNull?.message,
+      });
     }
 
     return jsonEncode({'success': true});
@@ -944,46 +958,57 @@ class _CalendarMainViewState extends State<CalendarMainView> {
     switch (view) {
       case syncfusion.CalendarView.day:
         viewMode = '日视图';
-        timeRange = '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}-${displayDate.day.toString().padLeft(2, '0')}';
+        timeRange =
+            '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}-${displayDate.day.toString().padLeft(2, '0')}';
         break;
       case syncfusion.CalendarView.week:
       case syncfusion.CalendarView.workWeek:
         viewMode = view == syncfusion.CalendarView.week ? '周视图' : '工作周视图';
-        final weekStart = displayDate.subtract(Duration(days: displayDate.weekday - 1));
+        final weekStart = displayDate.subtract(
+          Duration(days: displayDate.weekday - 1),
+        );
         final weekEnd = weekStart.add(const Duration(days: 6));
-        timeRange = '${weekStart.year}-${weekStart.month.toString().padLeft(2, '0')}-${weekStart.day.toString().padLeft(2, '0')} 至 ${weekEnd.year}-${weekEnd.month.toString().padLeft(2, '0')}-${weekEnd.day.toString().padLeft(2, '0')}';
+        timeRange =
+            '${weekStart.year}-${weekStart.month.toString().padLeft(2, '0')}-${weekStart.day.toString().padLeft(2, '0')} 至 ${weekEnd.year}-${weekEnd.month.toString().padLeft(2, '0')}-${weekEnd.day.toString().padLeft(2, '0')}';
         break;
       case syncfusion.CalendarView.month:
         viewMode = '月视图';
-        timeRange = '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}';
+        timeRange =
+            '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}';
         break;
       case syncfusion.CalendarView.schedule:
         viewMode = '日程视图';
-        timeRange = '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}';
+        timeRange =
+            '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}';
         break;
       case syncfusion.CalendarView.timelineDay:
         viewMode = '时间轴日视图';
-        timeRange = '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}-${displayDate.day.toString().padLeft(2, '0')}';
+        timeRange =
+            '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}-${displayDate.day.toString().padLeft(2, '0')}';
         break;
       case syncfusion.CalendarView.timelineWeek:
       case syncfusion.CalendarView.timelineWorkWeek:
-        viewMode = view == syncfusion.CalendarView.timelineWeek ? '时间轴周视图' : '时间轴工作周视图';
-        final weekStart = displayDate.subtract(Duration(days: displayDate.weekday - 1));
+        viewMode =
+            view == syncfusion.CalendarView.timelineWeek
+                ? '时间轴周视图'
+                : '时间轴工作周视图';
+        final weekStart = displayDate.subtract(
+          Duration(days: displayDate.weekday - 1),
+        );
         final weekEnd = weekStart.add(const Duration(days: 6));
-        timeRange = '${weekStart.year}-${weekStart.month.toString().padLeft(2, '0')}-${weekStart.day.toString().padLeft(2, '0')} 至 ${weekEnd.year}-${weekEnd.month.toString().padLeft(2, '0')}-${weekEnd.day.toString().padLeft(2, '0')}';
+        timeRange =
+            '${weekStart.year}-${weekStart.month.toString().padLeft(2, '0')}-${weekStart.day.toString().padLeft(2, '0')} 至 ${weekEnd.year}-${weekEnd.month.toString().padLeft(2, '0')}-${weekEnd.day.toString().padLeft(2, '0')}';
         break;
       default:
         viewMode = '未知视图';
-        timeRange = '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}';
+        timeRange =
+            '${displayDate.year}-${displayDate.month.toString().padLeft(2, '0')}';
     }
 
     RouteHistoryManager.updateCurrentContext(
       pageId: '/calendar_main',
       title: '日历 - $viewMode',
-      params: {
-        'viewMode': viewMode,
-        'timeRange': timeRange,
-      },
+      params: {'viewMode': viewMode, 'timeRange': timeRange},
     );
   }
 
@@ -1017,7 +1042,7 @@ class _CalendarMainViewState extends State<CalendarMainView> {
 
     return allEvents.where((event) {
       return event.title.toLowerCase().contains(lowerQuery) ||
-             event.description.toLowerCase().contains(lowerQuery);
+          event.description.toLowerCase().contains(lowerQuery);
     }).toList();
   }
 
@@ -1028,18 +1053,11 @@ class _CalendarMainViewState extends State<CalendarMainView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               '未找到匹配的事件',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -1060,9 +1078,7 @@ class _CalendarMainViewState extends State<CalendarMainView> {
             ),
             title: Text(
               event.title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1070,10 +1086,7 @@ class _CalendarMainViewState extends State<CalendarMainView> {
                 const SizedBox(height: 4),
                 Text(
                   _formatDateTime(event.startTime),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
                 if (event.description.isNotEmpty) ...[
                   const SizedBox(height: 4),
@@ -1081,10 +1094,7 @@ class _CalendarMainViewState extends State<CalendarMainView> {
                     event.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[700],
-                    ),
+                    style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                   ),
                 ],
               ],
@@ -1120,8 +1130,9 @@ class _CalendarMainViewState extends State<CalendarMainView> {
       dateStr = '${dateTime.month}-${dateTime.day}';
     }
 
-    final timeStr = '${dateTime.hour.toString().padLeft(2, '0')}:'
-                   '${dateTime.minute.toString().padLeft(2, '0')}';
+    final timeStr =
+        '${dateTime.hour.toString().padLeft(2, '0')}:'
+        '${dateTime.minute.toString().padLeft(2, '0')}';
 
     return '$dateStr $timeStr';
   }
@@ -1148,7 +1159,8 @@ class _CalendarMainViewState extends State<CalendarMainView> {
                 children: [
                   Expanded(
                     child: syncfusion.SfCalendar(
-                      view: plugin.sfController.view ??
+                      view:
+                          plugin.sfController.view ??
                           syncfusion.CalendarView.month,
                       controller: plugin.sfController,
                       allowedViews: plugin.allowedViews,
@@ -1157,9 +1169,14 @@ class _CalendarMainViewState extends State<CalendarMainView> {
                         plugin.getUserAppointments(),
                       ),
                       initialDisplayDate: plugin.controller.focusedMonth,
-                      onViewChanged: (details) => plugin.onViewChanged(details, _updateRouteContext),
-                      onTap: (details) =>
-                          plugin.handleCalendarTap(context, details),
+                      onViewChanged:
+                          (details) => plugin.onViewChanged(
+                            details,
+                            _updateRouteContext,
+                          ),
+                      onTap:
+                          (details) =>
+                              plugin.handleCalendarTap(context, details),
                       monthViewSettings: const syncfusion.MonthViewSettings(
                         showAgenda: true,
                         agendaViewHeight: 200,
@@ -1168,10 +1185,10 @@ class _CalendarMainViewState extends State<CalendarMainView> {
                       ),
                       timeSlotViewSettings:
                           const syncfusion.TimeSlotViewSettings(
-                        startHour: 6,
-                        endHour: 23,
-                        timeInterval: Duration(minutes: 30),
-                      ),
+                            startHour: 6,
+                            endHour: 23,
+                            timeInterval: Duration(minutes: 30),
+                          ),
                       todayHighlightColor: Theme.of(context).primaryColor,
                       selectionDecoration: BoxDecoration(
                         border: Border.all(
@@ -1216,18 +1233,19 @@ class _CalendarMainViewState extends State<CalendarMainView> {
           actions: [
             // 刷新系统事件按钮
             IconButton(
-              icon: _isRefreshing
-                  ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          theme.iconTheme.color ?? Colors.grey,
+              icon:
+                  _isRefreshing
+                      ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            theme.iconTheme.color ?? Colors.grey,
+                          ),
                         ),
-                      ),
-                    )
-                  : Icon(Icons.refresh, color: theme.iconTheme.color),
+                      )
+                      : Icon(Icons.refresh, color: theme.iconTheme.color),
               tooltip: _isRefreshing ? '正在刷新...' : '刷新日历事件',
               onPressed: _isRefreshing ? null : _refreshSystemEvents,
             ),

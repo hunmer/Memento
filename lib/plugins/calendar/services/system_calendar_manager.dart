@@ -18,15 +18,16 @@ class SystemCalendarManager {
   bool _isInitialized = false;
 
   /// 初始化系统日历管理器
+  /// 注意: 此方法不会主动请求权限,需要在调用前确保已获得日历权限
   Future<bool> initialize() async {
     try {
       _deviceCalendar = DeviceCalendarPlugin();
       debugPrint('SystemCalendarManager: 开始初始化...');
 
-      // 请求日历权限
-      final permissionsGranted = await _deviceCalendar.requestPermissions();
-      if (!permissionsGranted.isSuccess) {
-        debugPrint('SystemCalendarManager: 日历权限被拒绝');
+      // 检查日历权限是否已授予
+      final permissionsGranted = await _deviceCalendar.hasPermissions();
+      if (permissionsGranted.data != true) {
+        debugPrint('SystemCalendarManager: 日历权限未授予');
         return false;
       }
 

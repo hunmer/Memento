@@ -62,6 +62,8 @@ class _NfcMainViewState extends State<NfcMainView> {
     // 先显示等待对话框
     if (!mounted) return;
 
+    bool isCancelled = false;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -81,12 +83,27 @@ class _NfcMainViewState extends State<NfcMainView> {
               ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                isCancelled = true;
+                Navigator.of(context).pop();
+                setState(() {
+                  _isReading = false;
+                });
+              },
+              child: const Text('取消'),
+            ),
+          ],
         ),
       ),
     );
 
     try {
       final result = await _controller.readNfc();
+
+      // 如果用户已取消,则不处理结果
+      if (isCancelled) return;
 
       // 关闭等待对话框
       if (mounted) {
@@ -109,6 +126,9 @@ class _NfcMainViewState extends State<NfcMainView> {
         _controller.showError(result.error ?? '读取失败');
       }
     } catch (e) {
+      // 如果用户已取消,则不处理错误
+      if (isCancelled) return;
+
       // 关闭等待对话框
       if (mounted) {
         Navigator.of(context).pop();

@@ -245,15 +245,8 @@ class CalendarController extends ChangeNotifier {
         if (systemEventId == systemEvent.systemEventId) {
           // 只排除 calendar 插件自己创建的事件
           if (from == 'calendar') {
-            debugPrint(
-              'CalendarController: [映射]过滤重复的系统事件 "${systemEvent.title}" (来源: $from)',
-            );
             return true; // 排除此事件
           }
-          // 保留 todo 等其他插件的事件
-          debugPrint(
-            'CalendarController: [映射]保留系统事件 "${systemEvent.title}" (来源: $from)',
-          );
           return false;
         }
       }
@@ -268,9 +261,6 @@ class CalendarController extends ChangeNotifier {
             _isSameDateTime(systemEvent.endTime, localEvent.endTime);
 
         if (isSameEvent) {
-          debugPrint(
-            'CalendarController: [匹配]过滤重复的系统事件 "${systemEvent.title}"',
-          );
           return true; // 排除此事件
         }
       }
@@ -338,9 +328,6 @@ class CalendarController extends ChangeNotifier {
           // 检查是否已经有映射关系
           final existingSystemId = mappingManager.getSystemEventId(event.id);
           if (existingSystemId != null) {
-            debugPrint(
-              'CalendarController: 事件 "${event.title}" (ID: ${event.id}) 已存在映射关系，跳过',
-            );
             skippedCount++;
             continue;
           }

@@ -16,8 +16,11 @@ Flutter NFC插件，支持Android和iOS平台的NFC标签读写功能。
 
 ## 平台支持
 
-- ✅ Android (API Level 21+)
-- ✅ iOS (13.0+)
+- ✅ **Android** (API Level 21+) - 完全支持
+- ✅ **iOS** (13.0+) - 完全支持
+  - 支持所有 NDEF 记录类型（URI、TEXT、MIME、EXTERNAL）
+  - AAR 记录通过外部类型模拟
+  - 需要配置 entitlements（见下方配置说明）
 
 ## 安装
 
@@ -158,12 +161,47 @@ if (textResult.success) {
 
 ### iOS
 
+#### 1. Info.plist 配置
+
 在iOS项目的`Info.plist`中添加NFC权限描述：
 
 ```xml
 <key>NFCReaderUsageDescription</key>
 <string>此应用需要访问NFC以读取和写入NFC标签</string>
+
+<!-- 可选：如果需要在Info.plist中声明支持的格式 -->
+<key>com.apple.developer.nfc.readersession.formats</key>
+<array>
+  <string>NDEF</string>
+  <string>TAG</string>
+</array>
 ```
+
+#### 2. Entitlements 配置（必需）
+
+在 Xcode 中为你的项目添加 NFC 功能：
+
+1. 打开 Xcode 项目
+2. 选择 Target → Signing & Capabilities
+3. 点击 "+ Capability"
+4. 添加 "Near Field Communication Tag Reading"
+
+这会自动创建 `.entitlements` 文件并添加以下内容：
+
+```xml
+<key>com.apple.developer.nfc.readersession.formats</key>
+<array>
+  <string>NDEF</string>
+  <string>TAG</string>
+</array>
+```
+
+或者手动创建 `Runner.entitlements` 文件并添加上述内容。
+
+#### 3. 最低系统要求
+
+- iOS 13.0 或更高版本
+- 支持 NFC 的设备（iPhone 7 及以上）
 
 ## 注意事项
 
