@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:openai_dart/openai_dart.dart';
@@ -19,8 +20,11 @@ class ToolOrchestrator {
   final Conversation conversation;
 
   /// 获取工具专用 Agent
-  final Future<AIAgent?> Function(ToolAgentConfig?, {bool enableFunctionCalling})?
-      getToolAgent;
+  final Future<AIAgent?> Function(
+    ToolAgentConfig?, {
+    bool enableFunctionCalling,
+  })?
+  getToolAgent;
 
   /// 是否正在取消
   final bool Function() isCancelling;
@@ -75,6 +79,7 @@ class ToolOrchestrator {
       userInput: userInput,
       firstResponse: buffer.toString(),
       aiMessageId: aiMessageId,
+      files: files,
       onUpdateMessage: onUpdateMessage,
       onError: onError,
     );
@@ -129,15 +134,11 @@ class ToolOrchestrator {
             '🔧 [第一阶段] 使用专用工具识别Agent: ${toolDetectionConfig.providerId}/${toolDetectionConfig.modelId}',
           );
         } else {
-          debugPrint(
-            '⚠️ [第一阶段] 创建工具识别Agent失败，使用原agent',
-          );
+          debugPrint('⚠️ [第一阶段] 创建工具识别Agent失败，使用原agent');
         }
       } else {
         // 未配置专用agent，使用当前agent + 工具提示词（通过占位符传递）
-        debugPrint(
-          '🔧 [第一阶段] 未配置专用agent，使用原agent + 工具提示词',
-        );
+        debugPrint('🔧 [第一阶段] 未配置专用agent，使用原agent + 工具提示词');
       }
     }
 
@@ -216,6 +217,7 @@ class ToolOrchestrator {
     required String userInput,
     required String firstResponse,
     required String aiMessageId,
+    required List<File> files,
     required Function(String content, int count) onUpdateMessage,
     required Function(String error) onError,
   }) async {
@@ -246,25 +248,61 @@ class ToolOrchestrator {
           '🔧 [第二阶段] 使用专用工具执行Agent: ${toolExecutionConfig.providerId}/${toolExecutionConfig.modelId}',
         );
       } else {
-        debugPrint(
-          '⚠️ [第二阶段] 创建工具执行Agent失败，使用原agent',
-        );
+        debugPrint('⚠️ [第二阶段] 创建工具执行Agent失败，使用原agent');
       }
     } else {
       // 未配置专用agent，使用当前agent + 工具详细文档（通过占位符传递）
-      debugPrint(
-        '🔧 [第二阶段] 未配置专用agent，使用原agent + 工具详细文档',
-      );
+      debugPrint('🔧 [第二阶段] 未配置专用agent，使用原agent + 工具详细文档');
     }
 
     // 构建第二阶段的 context messages（用户输入）
-    final toolExecutionMessages = [
-      ChatCompletionMessage.user(
+    // ⚠️ 关键修复：如果有图片，需要使用 parts 格式传递图片和文字
+    final imageFiles =
+        files.where((f) => f.path != null && f.path.isNotEmpty).toList();
+
+    final ChatCompletionMessage userMessage;
+    if (imageFiles.isNotEmpty) {
+      // 包含图片：使用 parts 格式
+      final parts = <ChatCompletionMessageContentPart>[
+        ChatCompletionMessageContentPart.text(
+          text:
+              '原始用户输入：\n$effectiveUserInput\n\n第一阶段识别的工具：${toolRequest.join(", ")}\n\n请根据文档生成工具调用代码。',
+        ),
+      ];
+
+      // 添加图片
+      for (var file in imageFiles) {
+        try {
+          final fileObj = File(file.path);
+          if (fileObj.existsSync()) {
+            final bytes = fileObj.readAsBytesSync();
+            final base64Image = base64Encode(bytes);
+            parts.add(
+              ChatCompletionMessageContentPart.image(
+                imageUrl: ChatCompletionMessageImageUrl(
+                  url: 'data:image/jpeg;base64,$base64Image',
+                ),
+              ),
+            );
+          }
+        } catch (e) {
+          debugPrint('读取图片文件失败: ${file.path}, 错误: $e');
+        }
+      }
+
+      userMessage = ChatCompletionMessage.user(
+        content: ChatCompletionUserMessageContent.parts(parts),
+      );
+    } else {
+      // 不包含图片：使用字符串格式
+      userMessage = ChatCompletionMessage.user(
         content: ChatCompletionUserMessageContent.string(
           '原始用户输入：\n$effectiveUserInput\n\n第一阶段识别的工具：${toolRequest.join(", ")}\n\n请根据文档生成工具调用代码。',
         ),
-      ),
-    ];
+      );
+    }
+
+    final toolExecutionMessages = [userMessage];
 
     // 用于第二阶段的 buffer
     final secondBuffer = StringBuffer();
@@ -279,7 +317,6 @@ class ToolOrchestrator {
       agent: executionAgent,
       prompt: null,
       contextMessages: toolExecutionMessages,
-      vision: false,
       additionalPrompts: secondAdditionalPrompts,
       responseFormat: ResponseFormat.jsonSchema(
         jsonSchema: JsonSchemaObject(

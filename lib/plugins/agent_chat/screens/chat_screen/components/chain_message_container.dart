@@ -119,7 +119,6 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
           _selectedTabIndex == 0 &&
           wasGenerating == null) {
         _selectedTabIndex = regularMessages.length - 1; // 选中最后一个常规消息
-        debugPrint('✅ [ChainMessageContainer] 链式调用完成，自动选中最后一个步骤tab');
       }
       // 计算总的tab数量（包括最终结果tab）
       else {
