@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/store/store_plugin.dart';
-import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 
 /// Store 插件的底部栏组件
 /// 提供商品列表、用户物品和积分历史三个 Tab 的切换功能
@@ -299,9 +299,9 @@ class _StoreBottomBarState extends State<StoreBottomBar>
                 onPressed: () {
                   if (_currentPage == 0) {
                     // Tab0: 添加商品
-                    SmoothBottomSheet.show(
-                      context: context,
-                      builder: (context) => AddProductPage(controller: widget.plugin.controller),
+                    NavigationHelper.push(
+                      context,
+                      AddProductPage(controller: widget.plugin.controller),
                     );
                   } else if (_currentPage == 2) {
                     // Tab2: 添加积分

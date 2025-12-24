@@ -930,10 +930,9 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                     _openingQuestions.removeAt(index);
                   });
                 },
-                onEdit: (index, content) {
+                onUpdate: (index, newContent) {
                   setState(() {
-                    _openingQuestionController.text = content;
-                    _openingQuestions.removeAt(index);
+                    _openingQuestions[index] = newContent;
                   });
                 },
                 addButtonText: '添加',

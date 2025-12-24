@@ -174,92 +174,101 @@ class _AddProductPageState extends State<AddProductPage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 图片选择
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: _buildImagePreview(),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - 32,
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 图片选择
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        height: 200,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: _buildImagePreview(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // 商品名称
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: 'store_productNameLabel'.tr,
+                        border: const OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'store_productNameRequired'.tr;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // 价格
+                    TextFormField(
+                      controller: _priceController,
+                      decoration: InputDecoration(
+                        labelText: 'store_priceLabel'.tr,
+                        border: const OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'store_priceRequired'.tr;
+                        }
+                        if (int.tryParse(value) == null) {
+                          return 'store_priceInvalid'.tr;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // 库存
+                    TextFormField(
+                      controller: _stockController,
+                      decoration: InputDecoration(
+                        labelText: 'store_stockLabel'.tr,
+                        border: const OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'store_stockRequired'.tr;
+                        }
+                        if (int.tryParse(value) == null) {
+                          return 'store_stockInvalid'.tr;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // 描述
+                    TextFormField(
+                      controller: _descController,
+                      decoration: InputDecoration(
+                        labelText: 'store_descriptionLabel'.tr,
+                        border: const OutlineInputBorder(),
+                      ),
+                      maxLines: 3,
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
-              // 商品名称
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'store_productNameLabel'.tr,
-                  border: const OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'store_productNameRequired'.tr;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              // 价格
-              TextFormField(
-                controller: _priceController,
-                decoration: InputDecoration(
-                  labelText: 'store_priceLabel'.tr,
-                  border: const OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'store_priceRequired'.tr;
-                  }
-                  if (int.tryParse(value) == null) {
-                    return 'store_priceInvalid'.tr;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              // 库存
-              TextFormField(
-                controller: _stockController,
-                decoration: InputDecoration(
-                  labelText: 'store_stockLabel'.tr,
-                  border: const OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'store_stockRequired'.tr;
-                  }
-                  if (int.tryParse(value) == null) {
-                    return 'store_stockInvalid'.tr;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              // 描述
-              TextFormField(
-                controller: _descController,
-                decoration: InputDecoration(
-                  labelText: 'store_descriptionLabel'.tr,
-                  border: const OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
