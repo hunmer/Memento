@@ -29,7 +29,7 @@
 ## 组件分类
 
 ### 1. 编辑器类
-- **MarkdownEditor**：Markdown 编辑器，支持预览和工具栏
+- **QuillEditor**：Markdown 编辑器，支持预览和工具栏
 
 ### 2. 选择器类
 - **LocationPicker**：位置选择器，支持搜索和当前定位
@@ -57,7 +57,7 @@
 
 ## 核心组件详解
 
-### MarkdownEditor
+### QuillEditor
 
 Markdown 编辑器组件，提供完整的 Markdown 编辑和预览功能。
 
@@ -91,7 +91,7 @@ Markdown 编辑器组件，提供完整的 Markdown 编辑和预览功能。
 import 'package:Memento/widgets/markdown_editor/index.dart';
 
 // 基础使用
-MarkdownEditor(
+QuillEditor(
   initialTitle: '我的笔记',
   initialContent: '# 标题\n内容',
   onSave: (title, content) {
@@ -100,7 +100,7 @@ MarkdownEditor(
 )
 
 // 自定义工具栏
-MarkdownEditor(
+QuillEditor(
   showTitle: false,
   contentHint: '请输入备注...',
   actions: [
@@ -691,7 +691,7 @@ lib/widgets/
 
 | 包名 | 用途 | 使用组件 |
 |-----|------|---------|
-| flutter_quill | Markdown 渲染 | MarkdownEditor |
+| flutter_quill | Markdown 渲染 | QuillEditor |
 | photo_view | 图片缩放预览 | FilePreviewScreen |
 | share_plus | 文件分享 | FilePreviewScreen |
 | image_picker | 图片选择 | ImagePickerDialog, AvatarPicker |

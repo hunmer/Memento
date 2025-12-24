@@ -22,7 +22,6 @@ import 'package:Memento/screens/widgets_gallery/screens/calendar_strip_picker_ex
 import 'package:Memento/screens/widgets_gallery/screens/image_picker_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/location_picker_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/backup_time_picker_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/quill_viewer_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/memento_editor_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/data_selector_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/enhanced_calendar_example.dart';
@@ -453,8 +452,6 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const LocationPickerExample());
       case '/widgets_gallery/backup_time_picker':
         return _createRoute(const BackupTimePickerExample());
-      case '/widgets_gallery/quill_viewer':
-        return _createRoute(const QuillViewerExample());
       case '/widgets_gallery/memento_editor':
         return _createRoute(const MementoEditorExample());
       case '/widgets_gallery/data_selector':

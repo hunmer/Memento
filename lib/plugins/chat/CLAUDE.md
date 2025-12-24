@@ -276,7 +276,7 @@ ChatMainView
             ├── VideoPicker
             ├── AudioRecorder
             ├── FilePicker
-            └── MarkdownEditor
+            └── QuillEditor
 ```
 
 ### 关键界面文件
