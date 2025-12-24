@@ -6,10 +6,12 @@ import 'package:Memento/widgets/picker/image_picker_dialog.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/controllers/form_controller.dart';
-import 'package:Memento/plugins/goods/models/goods_item.dart';
-import 'package:Memento/plugins/goods/widgets/goods_item_selector_dialog.dart';
+import 'package:Memento/plugins/goods/widgets/goods_sub_items_field.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
+/// 物品基本信息标签页
+///
+/// 使用 FormBuilderWrapper 进行声明式表单管理
 class BasicInfoTab extends StatelessWidget {
   final GoodsItemFormController controller;
   final Function() onStateChanged;
@@ -26,28 +28,195 @@ class BasicInfoTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 分类选项
+    final categories = [
+      OptionItem(id: 'electronics', icon: Icons.devices, label: 'goods_categoryElectronics'.tr),
+      OptionItem(id: 'household', icon: Icons.lightbulb, label: 'goods_categoryHousehold'.tr),
+      OptionItem(id: 'clothing', icon: Icons.checkroom, label: 'goods_categoryClothing'.tr),
+      OptionItem(id: 'books', icon: Icons.menu_book, label: 'goods_categoryBooks'.tr),
+      OptionItem(id: 'other', icon: Icons.category, label: 'goods_categoryOther'.tr),
+    ];
+
+    // 状态选项
+    final statuses = [
+      OptionItem(id: 'normal', icon: Icons.check_circle_outline, label: 'goods_statusNormal'.tr),
+      OptionItem(id: 'damaged', icon: Icons.broken_image, label: 'goods_statusDamaged'.tr),
+      OptionItem(id: 'lent', icon: Icons.ios_share, label: 'goods_statusLent'.tr),
+      OptionItem(id: 'sold', icon: Icons.sell, label: 'goods_statusSold'.tr),
+    ];
+
+    // 确定当前选中的分类
+    String selectedCategory = 'other';
+    for (var cat in categories) {
+      if (controller.tags.contains(cat.id)) {
+        selectedCategory = cat.id;
+        break;
+      }
+    }
+
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       children: [
+        // 图片上传部分 - 保持自定义 UI
         _buildImageUploadSection(context),
         const SizedBox(height: 24),
-        _buildItemNameCard(context),
+
+        // 物品名称
+        FormFieldGroup(
+          children: [
+            TextInputField(
+              controller: controller.nameController,
+              labelText: 'goods_productName'.tr,
+              hintText: 'goods_enterProductName'.tr,
+              prefixIcon: Icon(
+                Icons.label_outline,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'goods_pleaseEnterProductName'.tr;
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
+
         const SizedBox(height: 16),
-        _buildDateGrid(context),
+
+        // 购买日期和到期日期
+        FormFieldGroup(
+          children: [
+            _buildDateCard(
+              context,
+              'goods_purchaseDate'.tr,
+              Icons.calendar_today,
+              controller.purchaseDate,
+              (date) {
+                if (date != null) {
+                  controller.purchaseDate = date;
+                  onStateChanged();
+                }
+              },
+            ),
+            _buildDateCard(
+              context,
+              'goods_expirationDate'.tr,
+              Icons.event_busy,
+              controller.expirationDate,
+              (date) {
+                controller.expirationDate = date;
+                onStateChanged();
+              },
+            ),
+          ],
+        ),
+
         const SizedBox(height: 16),
-        _buildPriceQuantityGrid(context),
+
+        // 价格和数量
+        Row(
+          children: [
+            Expanded(
+              child: TextInputField(
+                controller: controller.priceController,
+                labelText: 'goods_price'.tr,
+                hintText: '¥ 0.00',
+                keyboardType: TextInputType.number,
+                prefixIcon: Icon(
+                  Icons.paid,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: TextInputField(
+                controller: controller.stockController,
+                labelText: 'goods_quantity'.tr,
+                keyboardType: TextInputType.number,
+                prefixIcon: Icon(
+                  Icons.pin_invoke,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        ),
+
         const SizedBox(height: 16),
-        _buildCategorySection(context),
+
+        // 分类选择器
+        OptionSelectorField(
+          options: categories,
+          selectedId: selectedCategory,
+          labelText: 'goods_category'.tr,
+          onSelectionChanged: (optionId) {
+            // 清除旧分类标签
+            controller.tags.removeWhere(
+              (t) => categories.any((c) => c.id == t),
+            );
+            // 添加新分类标签
+            controller.tags.add(optionId);
+            onStateChanged();
+          },
+        ),
+
         const SizedBox(height: 16),
-        _buildStatusSection(context),
+
+        // 状态选择器
+        OptionSelectorField(
+          options: statuses,
+          selectedId: controller.status,
+          labelText: 'goods_usageStatus'.tr,
+          useHorizontalScroll: false,
+          gridColumns: 4,
+          onSelectionChanged: (optionId) {
+            controller.status = optionId;
+            onStateChanged();
+          },
+        ),
+
         const SizedBox(height: 16),
-        _buildCustomFieldsSection(context),
+
+        // 自定义字段
+        CustomFieldsField(
+          fields: controller.customFields,
+          onFieldsChanged: (fields) {
+            controller.customFields = fields;
+            onStateChanged();
+          },
+          labelText: 'goods_customFields'.tr,
+          addButtonText: 'goods_addField'.tr,
+          addDialogTitle: 'goods_addCustomField'.tr,
+          editDialogTitle: 'goods_editCustomField'.tr,
+          fieldNameLabel: 'goods_fieldName'.tr,
+          fieldNameHint: 'goods_enterFieldName'.tr,
+          fieldValueLabel: 'goods_fieldValue'.tr,
+          fieldValueHint: 'goods_enterFieldValue'.tr,
+          deleteConfirmTitle: 'goods_confirmDelete'.tr,
+          deleteConfirmContent: 'goods_confirmDeleteCustomField'.tr,
+        ),
+
         const SizedBox(height: 16),
-        _buildSubItemsSection(context),
+
+        // 子物品列表
+        GoodsSubItemsField(
+          subItems: controller.subItems,
+          excludeItemId: controller.initialData?.id,
+          onSubItemsChanged: (items) {
+            controller.subItems.clear();
+            controller.subItems.addAll(items);
+            onStateChanged();
+          },
+        ),
+
+        // 删除按钮
         if (showDeleteButton && onDelete != null) ...[
           const SizedBox(height: 24),
           _buildDeleteButton(context),
         ],
+
         const SizedBox(height: 80), // Space for FAB/Bottom Bar
       ],
     );
@@ -94,57 +263,6 @@ class BasicInfoTab extends StatelessWidget {
     );
   }
 
-  Widget _buildItemNameCard(BuildContext context) {
-    return FormFieldGroup(
-      children: [
-        TextInputField(
-          controller: controller.nameController,
-          labelText: 'goods_productName'.tr,
-          hintText: 'goods_enterProductName'.tr,
-          prefixIcon: Icon(
-            Icons.label_outline,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'goods_pleaseEnterProductName'.tr;
-            }
-            return null;
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDateGrid(BuildContext context) {
-    return FormFieldGroup(
-      children: [
-        _buildDateCard(
-          context,
-          'goods_purchaseDate'.tr,
-          Icons.calendar_today,
-          controller.purchaseDate,
-          (date) {
-            if (date != null) {
-              controller.purchaseDate = date;
-              onStateChanged();
-            }
-          },
-        ),
-        _buildDateCard(
-          context,
-          'goods_expirationDate'.tr,
-          Icons.event_busy,
-          controller.expirationDate,
-          (date) {
-            controller.expirationDate = date;
-            onStateChanged();
-          },
-        ),
-      ],
-    );
-  }
-
   Widget _buildDateCard(
     BuildContext context,
     String label,
@@ -182,313 +300,6 @@ class BasicInfoTab extends StatelessWidget {
     );
     if (picked != null) {
       onDateSelected(picked);
-    }
-  }
-
-  Widget _buildPriceQuantityGrid(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextInputField(
-            controller: controller.priceController,
-            labelText: 'goods_price'.tr,
-            hintText: '¥ 0.00',
-            keyboardType: TextInputType.number,
-            prefixIcon: Icon(
-              Icons.paid,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: TextInputField(
-            controller: controller.stockController,
-            labelText: 'goods_quantity'.tr,
-            keyboardType: TextInputType.number,
-            prefixIcon: Icon(
-              Icons.pin_invoke,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategorySection(BuildContext context) {
-    final categories = [
-      OptionItem(id: 'electronics', icon: Icons.devices, label: 'goods_categoryElectronics'.tr),
-      OptionItem(id: 'household', icon: Icons.lightbulb, label: 'goods_categoryHousehold'.tr),
-      OptionItem(id: 'clothing', icon: Icons.checkroom, label: 'goods_categoryClothing'.tr),
-      OptionItem(id: 'books', icon: Icons.menu_book, label: 'goods_categoryBooks'.tr),
-      OptionItem(id: 'other', icon: Icons.category, label: 'goods_categoryOther'.tr),
-    ];
-
-    // Determine selected category from tags
-    String selectedCategory = 'other';
-    for (var cat in categories) {
-      if (controller.tags.contains(cat.id)) {
-        selectedCategory = cat.id;
-        break;
-      }
-    }
-
-    return OptionSelectorField(
-      options: categories,
-      selectedId: selectedCategory,
-      labelText: 'goods_category'.tr,
-      onSelectionChanged: (optionId) {
-        // Clear old category tags
-        controller.tags.removeWhere(
-          (t) => categories.any((c) => c.id == t),
-        );
-        // Add new category tag
-        controller.tags.add(optionId);
-        onStateChanged();
-      },
-    );
-  }
-
-  Widget _buildStatusSection(BuildContext context) {
-    final statuses = [
-      OptionItem(id: 'normal', icon: Icons.check_circle_outline, label: 'goods_statusNormal'.tr),
-      OptionItem(id: 'damaged', icon: Icons.broken_image, label: 'goods_statusDamaged'.tr),
-      OptionItem(id: 'lent', icon: Icons.ios_share, label: 'goods_statusLent'.tr),
-      OptionItem(id: 'sold', icon: Icons.sell, label: 'goods_statusSold'.tr),
-    ];
-
-    return OptionSelectorField(
-      options: statuses,
-      selectedId: controller.status,
-      labelText: 'goods_usageStatus'.tr,
-      useHorizontalScroll: false,
-      gridColumns: 4,
-      onSelectionChanged: (optionId) {
-        controller.status = optionId;
-        onStateChanged();
-      },
-    );
-  }
-
-  Widget _buildCustomFieldsSection(BuildContext context) {
-    return CustomFieldsField(
-      fields: controller.customFields,
-      onFieldsChanged: (fields) {
-        controller.customFields = fields;
-        onStateChanged();
-      },
-      labelText: 'goods_customFields'.tr,
-      addButtonText: 'goods_addField'.tr,
-      addDialogTitle: 'goods_addCustomField'.tr,
-      editDialogTitle: 'goods_editCustomField'.tr,
-      fieldNameLabel: 'goods_fieldName'.tr,
-      fieldNameHint: 'goods_enterFieldName'.tr,
-      fieldValueLabel: 'goods_fieldValue'.tr,
-      fieldValueHint: 'goods_enterFieldValue'.tr,
-      deleteConfirmTitle: 'goods_confirmDelete'.tr,
-      deleteConfirmContent: 'goods_confirmDeleteCustomField'.tr,
-    );
-  }
-
-  Widget _buildSubItemsSection(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.widgets,
-                  size: 20, color: theme.colorScheme.onSurfaceVariant),
-              const SizedBox(width: 6),
-              Text(
-                'goods_subItemList'.tr,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                ...controller.subItems.map(
-                  (subItem) => Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: Container(
-                      width: 128,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      clipBehavior: Clip.hardEdge,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Stack(
-                            children: [
-                              SizedBox(
-                                height: 96,
-                                width: double.infinity,
-                                child: _buildSubItemImage(subItem),
-                              ),
-                              if (subItem.purchasePrice != null)
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.6),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      '¥${subItem.purchasePrice!.toStringAsFixed(0)}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              subItem.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                InkWell(
-                  onTap: () => _showAddSubItemDialog(context),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    width: 128,
-                    height: 134, // Match height approx
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: theme.colorScheme.outline,
-                        style: BorderStyle.solid,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.add,
-                          size: 32,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'goods_add'.tr,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSubItemImage(GoodsItem item) {
-    if (item.imageUrl != null) {
-      // This is simplified; ideally use the same resolving logic as GoodsItemCard
-      // But since we might not be able to async resolve here easily without state,
-      // we can try to check if it's network or file.
-      // However, item.imageUrl stored in DB is relative.
-      // For preview here, if it's a new item, it might be absolute path.
-      // If it's existing item, it's relative.
-      // For simplicity, we use a FutureBuilder wrapper or just icon if complicated.
-      // Let's use a simple FutureBuilder for local images.
-      return FutureBuilder<String>(
-        future: _getItemImageUrl(item),
-        builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-            final path = snapshot.data!;
-            if (path.startsWith('http')) {
-              return Image.network(path, fit: BoxFit.cover);
-            } else {
-              return Image.file(File(path), fit: BoxFit.cover);
-            }
-          }
-          return Container(
-            color: item.iconColor ?? Colors.grey[200],
-            child: Icon(item.icon ?? Icons.inventory_2, color: Colors.white),
-          );
-        },
-      );
-    }
-    return Container(
-      color: item.iconColor ?? Colors.grey[200],
-      child: Icon(item.icon ?? Icons.inventory_2, color: Colors.white),
-    );
-  }
-
-  // 获取物品图片URL的工具方法
-  Future<String> _getItemImageUrl(GoodsItem item) async {
-    final thumbUrl = await item.getThumbUrl();
-    if (thumbUrl != null && thumbUrl.isNotEmpty) {
-      return thumbUrl;
-    }
-
-    final imageUrl = await item.getImageUrl();
-    return imageUrl ?? '';
-  }
-
-  void _showAddSubItemDialog(BuildContext context) async {
-    final result = await showDialog<dynamic>(
-      context: context,
-      builder:
-          (context) => GoodsItemSelectorDialog(
-            excludeItemId: controller.initialData?.id,
-            excludeItemIds: controller.subItems.map((e) => e.id).toList(),
-          ),
-    );
-
-    if (result != null) {
-      if (result is GoodsItem) {
-        controller.addSubItem(result);
-        onStateChanged();
-      } else if (result is List<GoodsItem>) {
-        for (var item in result) {
-          controller.addSubItem(item);
-        }
-        onStateChanged();
-      }
     }
   }
 

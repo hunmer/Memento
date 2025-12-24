@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:get/get.dart';
-import 'package:flutter/services.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:uuid/uuid.dart';
@@ -40,21 +40,16 @@ class BillEditScreen extends StatefulWidget {
 }
 
 class _BillEditScreenState extends State<BillEditScreen> {
-  late final GlobalKey<FormState> _formKey;
-  late final TextEditingController _titleController;
-  late final TextEditingController _amountController;
-  late final TextEditingController _noteController;
+  // 表单 key
+  final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
+
+  // 分类相关数据
   String? _tag;
-  bool _isExpense = true;
   IconData _selectedIcon = Icons.category;
   Color _selectedColor = Colors.blue;
   DateTime _selectedDate = DateTime.now();
 
-  /// 订阅服务相关字段
-  bool _isSubscription = false;
-  late final TextEditingController _subscriptionNameController;
-  late final TextEditingController _subscriptionDaysController;
-
+  // 可用的分类标签
   final List<String> _availableTags = <String>[
     '餐饮',
     '购物',
@@ -70,6 +65,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
     '其他',
   ];
 
+  // 分类图标映射
   final Map<String, IconData> _categoryIcons = {
     '餐饮': Icons.restaurant,
     '购物': Icons.shopping_bag,
@@ -89,23 +85,17 @@ class _BillEditScreenState extends State<BillEditScreen> {
   @override
   void initState() {
     super.initState();
-    _formKey = GlobalKey<FormState>();
-    _titleController = TextEditingController();
-    _amountController = TextEditingController();
-    _noteController = TextEditingController();
-    _subscriptionNameController = TextEditingController();
-    _subscriptionDaysController = TextEditingController();
+    _initializeFormData();
+  }
 
+  /// 初始化表单数据
+  void _initializeFormData() {
     if (widget.initialDate != null) {
       _selectedDate = widget.initialDate!;
     }
 
     if (widget.bill != null) {
-      _titleController.text = widget.bill!.title;
-      _amountController.text = widget.bill!.absoluteAmount.toString();
-      _noteController.text = widget.bill!.note;
       _tag = widget.bill!.tag ?? widget.bill!.category;
-      _isExpense = widget.bill!.isExpense;
       _selectedIcon = widget.bill!.icon;
       _selectedColor = widget.bill!.iconColor;
       _selectedDate = widget.bill!.date;
@@ -114,44 +104,20 @@ class _BillEditScreenState extends State<BillEditScreen> {
         _availableTags.add(_tag!);
       }
 
-      // 设置编辑模式的路由上下文
       _updateRouteContext(isEdit: true, billId: widget.bill!.id);
     } else {
-      // 使用预填充参数（来自快捷记账小组件）或默认值
       _tag = widget.initialCategory ?? _availableTags.first;
       _selectedIcon = _categoryIcons[_tag] ?? Icons.category;
 
-      // 预填充金额
-      if (widget.initialAmount != null) {
-        _amountController.text = widget.initialAmount!.toStringAsFixed(2);
-      }
-
-      // 预填充收入/支出类型
-      if (widget.initialIsExpense != null) {
-        _isExpense = widget.initialIsExpense!;
-      }
-
-      // 确保分类在可用标签列表中
       if (_tag != null && !_availableTags.contains(_tag)) {
         _availableTags.add(_tag!);
       }
 
-      // 设置新建模式的路由上下文
       _updateRouteContext(isEdit: false);
     }
   }
 
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _amountController.dispose();
-    _noteController.dispose();
-    _subscriptionNameController.dispose();
-    _subscriptionDaysController.dispose();
-    super.dispose();
-  }
-
-  /// 更新路由上下文,使"询问当前上下文"功能能获取到当前状态
+  /// 更新路由上下文
   void _updateRouteContext({required bool isEdit, String? billId}) {
     if (isEdit && billId != null) {
       RouteHistoryManager.updateCurrentContext(
@@ -168,79 +134,72 @@ class _BillEditScreenState extends State<BillEditScreen> {
     }
   }
 
-  Future<void> _saveBill() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        final amount = double.parse(_amountController.text);
+  /// 保存账单
+  Future<void> _handleSave(Map<String, dynamic> values) async {
+    try {
+      final amount = values['amount'] as double;
+      final isExpense = values['isExpense'] as bool;
+      final isSubscription = values['isSubscription'] as bool?;
 
-        if (_isSubscription) {
-          // 保存为订阅服务
-          final subscription = Subscription(
-            name: _subscriptionNameController.text,
-            totalAmount: amount,
-            days: int.parse(_subscriptionDaysController.text),
-            category: _tag ?? '订阅',
-            startDate: _selectedDate,
-            note: _noteController.text.isEmpty ? null : _noteController.text,
-            icon: _selectedIcon,
-            iconColor: _selectedColor,
-          );
+      if (isSubscription == true) {
+        // 保存为订阅服务
+        final subscription = Subscription(
+          name: values['subscriptionName'] as String,
+          totalAmount: amount,
+          days: int.parse(values['subscriptionDays'] as String),
+          category: _tag ?? '订阅',
+          startDate: _selectedDate,
+          note: values['note'] as String?,
+          icon: _selectedIcon,
+          iconColor: _selectedColor,
+        );
 
-          await widget.billPlugin.controller.subscriptions.createSubscription(subscription);
+        await widget.billPlugin.controller.subscriptions.createSubscription(subscription);
 
-          if (!mounted) return;
-          Toast.success('订阅服务创建成功');
-        } else {
-          // 保存为普通账单
-          // Use category as title if title is empty
-          final title =
-              _titleController.text.isEmpty
-                  ? (_tag ?? '未分类')
-                  : _titleController.text;
-
-          final bill = Bill(
-            id:
-                widget.bill?.id ??
-                const Uuid().v4(),
-            title: title,
-            amount: _isExpense ? -amount : amount,
-            accountId: widget.accountId,
-            category: _tag ?? '未分类',
-            date: _selectedDate,
-            tag: _tag,
-            note: _noteController.text,
-            icon: _selectedIcon,
-            iconColor: _selectedColor,
-            createdAt: widget.bill?.createdAt ?? _selectedDate,
-          );
-
-          await widget.billPlugin.controller.saveBill(bill);
-
-          if (!mounted) return;
-          Toast.success('bill_billSaved'.tr);
-        }
-
-        Navigator.of(context).pop();
-        widget.onSaved?.call();
-      } catch (e) {
         if (!mounted) return;
-        Toast.error('${'bill_billSaveFailed'.tr}: $e');
+        Toast.success('订阅服务创建成功');
+      } else {
+        // 保存为普通账单
+        final title = values['title'] as String?;
+        final finalTitle = (title == null || title.isEmpty)
+            ? (_tag ?? '未分类')
+            : title;
+
+        final bill = Bill(
+          id: widget.bill?.id ?? const Uuid().v4(),
+          title: finalTitle,
+          amount: isExpense ? -amount : amount,
+          accountId: widget.accountId,
+          category: _tag ?? '未分类',
+          date: _selectedDate,
+          tag: _tag,
+          note: values['note'] as String? ?? '',
+          icon: _selectedIcon,
+          iconColor: _selectedColor,
+          createdAt: widget.bill?.createdAt ?? _selectedDate,
+        );
+
+        await widget.billPlugin.controller.saveBill(bill);
+
+        if (!mounted) return;
+        Toast.success('bill_billSaved'.tr);
       }
+
+      Navigator.of(context).pop();
+      widget.onSaved?.call();
+    } catch (e) {
+      if (!mounted) return;
+      Toast.error('${'bill_billSaveFailed'.tr}: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
     final backgroundColor = theme.colorScheme.surface;
     final cardColor = theme.colorScheme.surfaceContainerLow;
-    final primaryColor = Theme.of(context).primaryColor;
-    
-    // Colors from the design
-    final expenseColor = const Color(0xFFE74C3C);
-    final incomeColor = const Color(0xFF2ECC71);
-    final activeAmountColor = _isExpense ? expenseColor : incomeColor;
+    final primaryColor = theme.primaryColor;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -250,7 +209,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
         scrolledUnderElevation: 0,
         centerTitle: true,
         title: Text(
-          widget.bill == null ? '添加账单' : '编辑账单', // Could use l10n here if available
+          widget.bill == null ? '添加账单' : '编辑账单',
           style: TextStyle(
             color: isDark ? Colors.white : Colors.black87,
             fontWeight: FontWeight.bold,
@@ -270,400 +229,377 @@ class _BillEditScreenState extends State<BillEditScreen> {
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Type and Amount Card
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: cardColor,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        children: [
-                          _buildTypeSelector(isDark),
-                          const SizedBox(height: 24),
-                          _buildAmountInput(activeAmountColor, isDark),
-                        ],
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 16),
-
-                    // Category Selector Card
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: cardColor,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '选择分类',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.grey[300] : Colors.grey[600],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          CategorySelectorField(
-                            categories: _availableTags,
-                            selectedCategory: _tag,
-                            categoryIcons: _categoryIcons,
-                            primaryColor: primaryColor,
-                            onCategoryChanged: (category) {
-                              setState(() {
-                                _tag = category;
-                                _selectedIcon =
-                                    _categoryIcons[category] ?? Icons.category;
-                                _titleController.text = '';
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    Column(
-                      children: [
-                        FormFieldGroup(
-                          showDividers: true,
-                          children: [
-                            DatePickerField(
-                              date: _selectedDate,
-                              formattedDate:
-                                  '${_selectedDate.year}年${_selectedDate.month}月${_selectedDate.day}日',
-                              placeholder: '选择日期',
-                              labelText: '日期',
-                              inline: true,
-                              onTap: () async {
-                                final DateTime? picked =
-                                    await showDateTimePicker(
-                                      context: context,
-                                      initialDate: _selectedDate,
-                                    );
-                                if (picked != null &&
-                                    picked != _selectedDate &&
-                                    mounted) {
-                                  setState(() {
-                                    _selectedDate = picked;
-                                  });
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        FormFieldGroup(
-                          showDividers: false,
-                          children: [
-                            TextAreaField(
-                              controller: _noteController,
-                              labelText: '备注',
-                              hintText: '添加笔记...',
-                              minLines: 3,
-                              maxLines: 5,
-                              inline: true,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // 订阅服务选项
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: cardColor,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '订阅服务',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.grey[300] : Colors.grey[600],
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          SwitchField(
-                            value: _isSubscription,
-                            onChanged: (value) => setState(() => _isSubscription = value),
-                            title: '启用订阅服务',
-                            subtitle: '启用后将自动生成每日账单',
-                            icon: Icons.autorenew,
-                            primaryColor: primaryColor,
-                          ),
-                          if (_isSubscription) ...[
-                            const SizedBox(height: 16),
-                            TextInputField(
-                              controller: _subscriptionNameController,
-                              labelText: '订阅服务名称 *',
-                              hintText: '例如：Netflix会员',
-                              primaryColor: primaryColor,
-                              validator: (value) {
-                                if (_isSubscription && (value == null || value.isEmpty)) {
-                                  return '请输入订阅服务名称';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                            TextInputField(
-                              controller: _subscriptionDaysController,
-                              labelText: '订阅天数 *',
-                              hintText: '例如：30',
-                              keyboardType: TextInputType.number,
-                              primaryColor: primaryColor,
-                              helperText: '天',
-                              validator: (value) {
-                                if (_isSubscription) {
-                                  if (value == null || value.isEmpty) {
-                                    return '请输入订阅天数';
-                                  }
-                                  final days = int.tryParse(value);
-                                  if (days == null || days <= 0) {
-                                    return '请输入有效的订阅天数';
-                                  }
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                            // 显示单日金额计算结果
-                            if (_amountController.text.isNotEmpty && _subscriptionDaysController.text.isNotEmpty)
-                              Card(
-                                color: primaryColor.withOpacity(0.1),
-                                child: Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.calculate, color: primaryColor),
-                                      SizedBox(width: 12),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '单日金额',
-                                            style: TextStyle(
-                                              color: isDark ? Colors.grey[300] : Colors.grey[600],
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          Text(
-                                            '¥${(double.parse(_amountController.text) / int.parse(_subscriptionDaysController.text)).toStringAsFixed(2)} / 天',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: primaryColor,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
+              child: FormBuilderWrapper(
+                formKey: _formKey,
+                config: FormConfig(
+                  fields: _buildFormFields(primaryColor),
+                  showSubmitButton: false,
+                  showResetButton: false,
+                  onSubmit: _handleSave,
+                  fieldSpacing: 0,
                 ),
+                contentBuilder: (context, fields) {
+                  // 使用 contentBuilder 自定义布局
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // 类型和金额卡片
+                      _buildTypeAndAmountCard(fields, cardColor, primaryColor, isDark),
+                      const SizedBox(height: 16),
+
+                      // 分类选择卡片
+                      _buildCategoryCard(fields, cardColor, primaryColor, isDark),
+                      const SizedBox(height: 16),
+
+                      // 日期和备注
+                      _buildDateAndNoteSection(fields),
+                      const SizedBox(height: 16),
+
+                      // 订阅服务卡片
+                      _buildSubscriptionCard(fields, cardColor, primaryColor, isDark),
+                    ],
+                  );
+                },
               ),
             ),
           ),
-          
-          // Save Button Area
-          Container(
-            padding: const EdgeInsets.all(16) + MediaQuery.of(context).padding.copyWith(top: 0),
-            color: backgroundColor.withValues(alpha: 0.8),
-            child: SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _saveBill,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 2,
-                ),
-                child: Text(
-                  'bill_save'.tr,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
+
+          // 保存按钮区域
+          _buildSaveButton(backgroundColor, primaryColor),
         ],
       ),
     );
   }
 
-  Widget _buildTypeSelector(bool isDark) {
-    final unselectedColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-    final selectedBgColor = isDark ? const Color(0xFF1F2937) : Colors.white;
-    
+  /// 构建表单字段配置
+  List<FormFieldConfig> _buildFormFields(Color primaryColor) {
+    return [
+      // 收支类型选择器（隐藏，用于状态管理）
+      FormFieldConfig(
+        name: 'isExpense',
+        type: FormFieldType.expenseTypeSelector,
+        initialValue: widget.bill != null
+            ? widget.bill!.isExpense
+            : (widget.initialIsExpense ?? true),
+        extra: {
+          'expenseColor': const Color(0xFFE74C3C),
+          'incomeColor': const Color(0xFF2ECC71),
+        },
+      ),
+
+      // 金额输入框（隐藏，用于状态管理）
+      FormFieldConfig(
+        name: 'amount',
+        type: FormFieldType.amountInput,
+        initialValue: widget.bill != null
+            ? widget.bill!.absoluteAmount
+            : widget.initialAmount,
+        required: true,
+        extra: {
+          'currencySymbol': '¥',
+          'fontSize': 40.0,
+        },
+      ),
+
+      // 标题
+      FormFieldConfig(
+        name: 'title',
+        type: FormFieldType.text,
+        initialValue: widget.bill?.title ?? '',
+        labelText: '标题',
+        hintText: '留空则使用分类名称',
+      ),
+
+      // 日期选择器
+      FormFieldConfig(
+        name: 'date',
+        type: FormFieldType.date,
+        initialValue: _selectedDate,
+        extra: {
+          'format': 'yyyy年MM月dd日',
+          'inline': true,
+        },
+      ),
+
+      // 备注
+      FormFieldConfig(
+        name: 'note',
+        type: FormFieldType.textArea,
+        initialValue: widget.bill?.note ?? '',
+        labelText: '备注',
+        hintText: '添加笔记...',
+        extra: {
+          'minLines': 3,
+          'maxLines': 5,
+        },
+      ),
+
+      // 订阅服务开关
+      FormFieldConfig(
+        name: 'isSubscription',
+        type: FormFieldType.switchField,
+        initialValue: false,
+        labelText: '启用订阅服务',
+        hintText: '启用后将自动生成每日账单',
+        prefixIcon: Icons.autorenew,
+      ),
+
+      // 订阅服务名称（条件显示）
+      FormFieldConfig(
+        name: 'subscriptionName',
+        type: FormFieldType.text,
+        labelText: '订阅服务名称 *',
+        hintText: '例如：Netflix会员',
+        required: true,
+        validationMessage: '请输入订阅服务名称',
+        visible: (values) => values['isSubscription'] == true,
+      ),
+
+      // 订阅天数（条件显示）
+      FormFieldConfig(
+        name: 'subscriptionDays',
+        type: FormFieldType.number,
+        labelText: '订阅天数 *',
+        hintText: '例如：30',
+        required: true,
+        validationMessage: '请输入有效的订阅天数',
+        visible: (values) => values['isSubscription'] == true,
+      ),
+    ];
+  }
+
+  /// 构建类型和金额卡片
+  Widget _buildTypeAndAmountCard(List<Widget> fields, Color cardColor, Color primaryColor, bool isDark) {
+    // 获取类型选择器和金额输入框的字段
+    final typeField = fields[0];
+    final amountField = fields[1];
+
+    final expenseColor = const Color(0xFFE74C3C);
+    final incomeColor = const Color(0xFF2ECC71);
+
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: unselectedColor,
-        borderRadius: BorderRadius.circular(12),
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: _buildTypeButton(
-              label: 'bill_expense'.tr,
-              isSelected: _isExpense,
-              activeColor: const Color(0xFFE74C3C),
-              bgOnSelected: selectedBgColor,
-              onTap: () => setState(() => _isExpense = true),
-            ),
-          ),
-          Expanded(
-            child: _buildTypeButton(
-              label: 'bill_income'.tr,
-              isSelected: !_isExpense,
-              activeColor: const Color(0xFF2ECC71),
-              bgOnSelected: selectedBgColor,
-              onTap: () => setState(() => _isExpense = false),
-            ),
-          ),
+          typeField,
+          const SizedBox(height: 24),
+          _buildAmountDisplay(amountField, expenseColor, incomeColor, isDark),
         ],
       ),
     );
   }
 
-  Widget _buildTypeButton({
-    required String label,
-    required bool isSelected,
-    required Color activeColor,
-    required Color bgOnSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? bgOnSelected : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: isSelected ? [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 2,
-              offset: const Offset(0, 1),
-            )
-          ] : null,
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: TextStyle(
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected ? activeColor : Colors.grey,
-            fontSize: 16,
-          ),
-        ),
-      ),
+  /// 构建金额显示区域
+  Widget _buildAmountDisplay(Widget amountField, Color expenseColor, Color incomeColor, bool isDark) {
+    // 监听表单值变化以获取当前类型
+    return FormBuilderField(
+      name: '_amountDisplay',
+      builder: (fieldState) {
+        final formState = _formKey.currentState;
+        final isExpense = formState?.value['isExpense'] as bool? ?? true;
+        final activeColor = isExpense ? expenseColor : incomeColor;
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              '¥',
+              style: TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+                color: activeColor,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: amountField,
+            ),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildAmountInput(Color activeColor, bool isDark) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          '¥',
-          style: TextStyle(
-            fontSize: 36,
-            fontWeight: FontWeight.bold,
-            color: activeColor,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: TextFormField(
-            controller: _amountController,
+  /// 构建分类选择卡片
+  Widget _buildCategoryCard(List<Widget> fields, Color cardColor, Color primaryColor, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '选择分类',
             style: TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-              color: activeColor,
-              height: 1.2,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.grey[300] : Colors.grey[600],
             ),
-            textAlign: TextAlign.right,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: '0.00',
-              hintStyle: TextStyle(
-                color: isDark ? Colors.grey[700] : Colors.grey[300],
-              ),
-              contentPadding: EdgeInsets.zero,
-              isDense: true,
-            ),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-            ],
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'bill_enterAmount'.tr;
-              }
-              if (double.tryParse(value) == null) {
-                return 'bill_enterValidAmount'.tr;
-              }
-              return null;
+          ),
+          const SizedBox(height: 16),
+          CategorySelectorField(
+            categories: _availableTags,
+            selectedCategory: _tag,
+            categoryIcons: _categoryIcons,
+            primaryColor: primaryColor,
+            onCategoryChanged: (category) {
+              setState(() {
+                _tag = category;
+                _selectedIcon = _categoryIcons[category] ?? Icons.category;
+              });
             },
           ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建日期和备注区域
+  Widget _buildDateAndNoteSection(List<Widget> fields) {
+    final dateField = fields[3];
+    final noteField = fields[4];
+
+    return Column(
+      children: [
+        FormFieldGroup(
+          showDividers: true,
+          children: [dateField],
+        ),
+        const SizedBox(height: 16),
+        FormFieldGroup(
+          showDividers: false,
+          children: [noteField],
         ),
       ],
     );
   }
 
-  Future<DateTime?> showDateTimePicker({
-    required BuildContext context,
-    required DateTime initialDate,
-  }) async {
-    DateTime? date = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+  /// 构建订阅服务卡片
+  Widget _buildSubscriptionCard(List<Widget> fields, Color cardColor, Color primaryColor, bool isDark) {
+    final switchField = fields[5];
+    final nameField = fields[6];
+    final daysField = fields[7];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '订阅服务',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.grey[300] : Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 16),
+          switchField,
+          nameField,
+          if (nameField is! SizedBox) const SizedBox(height: 16),
+          daysField,
+          _buildDailyAmountCalculation(cardColor, primaryColor, isDark),
+        ],
+      ),
     );
+  }
 
-    if (date != null && mounted) {
-      TimeOfDay? time = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.fromDateTime(initialDate),
-      );
+  /// 构建单日金额计算显示
+  Widget _buildDailyAmountCalculation(Color cardColor, Color primaryColor, bool isDark) {
+    return FormBuilderField(
+      name: '_dailyAmount',
+      builder: (fieldState) {
+        final formState = _formKey.currentState;
+        final amountValue = formState?.value['amount'];
+        final daysValue = formState?.value['subscriptionDays'];
 
-      if (time != null) {
-        return DateTime(
-          date.year,
-          date.month,
-          date.day,
-          time.hour,
-          time.minute,
+        if (amountValue == null || daysValue == null) {
+          return const SizedBox.shrink();
+        }
+
+        final amount = amountValue as double;
+        final days = int.tryParse(daysValue.toString());
+
+        if (days == null || days <= 0) {
+          return const SizedBox.shrink();
+        }
+
+        return Card(
+          color: primaryColor.withOpacity(0.1),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Icon(Icons.calculate, color: primaryColor),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '单日金额',
+                      style: TextStyle(
+                        color: isDark ? Colors.grey[300] : Colors.grey[600],
+                        fontSize: 12,
+                      ),
+                    ),
+                    Text(
+                      '¥${(amount / days).toStringAsFixed(2)} / 天',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         );
-      }
-    }
-    return null;
+      },
+    );
+  }
+
+  /// 构建保存按钮
+  Widget _buildSaveButton(Color backgroundColor, Color primaryColor) {
+    return Container(
+      padding: const EdgeInsets.all(16) + MediaQuery.of(context).padding.copyWith(top: 0),
+      color: backgroundColor.withValues(alpha: 0.8),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton(
+          onPressed: () {
+            // 触发表单验证和提交
+            if (_formKey.currentState?.saveAndValidate() ?? false) {
+              _handleSave(_formKey.currentState!.value);
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryColor,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 2,
+          ),
+          child: Text(
+            'bill_save'.tr,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+    );
   }
 }

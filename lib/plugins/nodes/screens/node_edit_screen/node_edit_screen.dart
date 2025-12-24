@@ -2,11 +2,13 @@ import 'package:get/get.dart' hide Node;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'dart:convert';
 import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
 import 'package:Memento/plugins/nodes/models/node.dart';
 import 'components/breadcrumbs.dart';
 import 'components/custom_fields_section.dart';
+import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 
 class NodeEditScreen extends StatefulWidget {
@@ -26,30 +28,26 @@ class NodeEditScreen extends StatefulWidget {
 }
 
 class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProviderStateMixin {
-  late TextEditingController _titleController;
-  late List<String> _tags;
-  late NodeStatus _status;
-  late Color _color;
-  DateTime? _startDate;
-  DateTime? _endDate;
+  // 两个 FormBuilderWrapper 的 key，用于访问表单状态
+  final GlobalKey<FormBuilderState> _basicInfoFormKey = GlobalKey<FormBuilderState>();
+  final GlobalKey<FormBuilderState> _dateFieldsFormKey = GlobalKey<FormBuilderState>();
+
+  // 自定义字段列表（CustomFieldsSection 使用 nodes.CustomField 类型）
   late List<CustomField> _customFields;
+
+  // Quill 编辑器控制器（保留）
   late quill.QuillController _quillController;
+
+  // TabController（保留）
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.node.title);
-    _tags = List.from(widget.node.tags);
-    _status = widget.node.status;
-    _color = widget.node.color;
-    _startDate = widget.node.startDate;
-    _endDate = widget.node.endDate;
+    // 初始化自定义字段列表
     _customFields = List.from(widget.node.customFields);
-
     // 初始化 Quill 编辑器
     _quillController = _initializeQuillController();
-
     // 初始化 TabController
     _tabController = TabController(length: 3, vsync: this);
   }
@@ -78,7 +76,6 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
 
   @override
   void dispose() {
-    _titleController.dispose();
     _quillController.dispose();
     _tabController.dispose();
     super.dispose();
@@ -141,66 +138,76 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
           ),
           const SizedBox(height: 16),
 
-          // 标题输入框
-          TextInputField(
-            controller: _titleController,
-            labelText: 'nodes_nodeTitle'.tr,
-            hintText: '请输入节点标题',
-          ),
-          const SizedBox(height: 16),
+          // 使用 FormBuilderWrapper
+          FormBuilderWrapper(
+            formKey: _basicInfoFormKey,
+            config: FormConfig(
+              showSubmitButton: false,
+              showResetButton: false,
+              fieldSpacing: 16,
+              fields: [
+                // 标题输入框
+                FormFieldConfig(
+                  name: 'title',
+                  type: FormFieldType.text,
+                  labelText: 'nodes_nodeTitle'.tr,
+                  hintText: '请输入节点标题',
+                  initialValue: widget.node.title,
+                  required: true,
+                  validationMessage: '${'nodes_nodeTitle'.tr}不能为空',
+                ),
 
-          // 标签部分
-          TagsField(
-            tags: _tags,
-            onAddTag: () => _showAddTagDialog(context),
-            onRemoveTag: (tag) {
-              setState(() => _tags.remove(tag));
-            },
-            addButtonText: '添加标签',
-          ),
-          const SizedBox(height: 16),
+                // 标签字段
+                FormFieldConfig(
+                  name: 'tags',
+                  type: FormFieldType.tags,
+                  labelText: 'nodes_tags'.tr,
+                  hintText: '添加标签',
+                  initialTags: widget.node.tags,
+                ),
 
-          // 颜色选择器
-          ColorSelectorField(
-            selectedColor: _color,
-            onColorChanged: (color) {
-              setState(() => _color = color);
-            },
-            labelText: 'nodes_nodeColor'.tr,
-          ),
-          const SizedBox(height: 16),
+                // 颜色选择器
+                FormFieldConfig(
+                  name: 'color',
+                  type: FormFieldType.color,
+                  labelText: 'nodes_nodeColor'.tr,
+                  initialValue: widget.node.color,
+                ),
 
-          // 状态下拉框
-          SelectField<NodeStatus>(
-            value: _status,
-            onChanged: (value) {
-              if (value != null) {
-                setState(() => _status = value);
-              }
-            },
-            labelText: 'nodes_status'.tr,
-            hintText: '请选择状态',
-            items: NodeStatus.values.map((status) {
-              String label;
-              switch (status) {
-                case NodeStatus.none:
-                  label = 'nodes_none'.tr;
-                  break;
-                case NodeStatus.todo:
-                  label = 'nodes_todo'.tr;
-                  break;
-                case NodeStatus.doing:
-                  label = 'nodes_doing'.tr;
-                  break;
-                case NodeStatus.done:
-                  label = 'nodes_done'.tr;
-                  break;
-              }
-              return DropdownMenuItem(
-                value: status,
-                child: Text(label),
-              );
-            }).toList(),
+                // 状态下拉框
+                FormFieldConfig(
+                  name: 'status',
+                  type: FormFieldType.select,
+                  labelText: 'nodes_status'.tr,
+                  hintText: '请选择状态',
+                  initialValue: widget.node.status,
+                  items: NodeStatus.values.map((status) {
+                    String label;
+                    switch (status) {
+                      case NodeStatus.none:
+                        label = 'nodes_none'.tr;
+                        break;
+                      case NodeStatus.todo:
+                        label = 'nodes_todo'.tr;
+                        break;
+                      case NodeStatus.doing:
+                        label = 'nodes_doing'.tr;
+                        break;
+                      case NodeStatus.done:
+                        label = 'nodes_done'.tr;
+                        break;
+                    }
+                    return DropdownMenuItem(
+                      value: status,
+                      child: Text(label),
+                    );
+                  }).toList(),
+                ),
+              ],
+              onSubmit: (values) {
+                // 提交处理在外部统一处理
+              },
+            ),
           ),
         ],
       ),
@@ -214,53 +221,59 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 日期部分
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'nodes_dateRange'.tr,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: DatePickerField(
-                      date: _startDate,
-                      onTap: () => _selectDate(context, true),
-                      formattedDate: _startDate != null
-                          ? '${_startDate!.year}/${_startDate!.month}/${_startDate!.day}'
-                          : '',
-                      placeholder: 'nodes_startDate'.tr,
-                      icon: Icons.calendar_today,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: DatePickerField(
-                      date: _endDate,
-                      onTap: () => _selectDate(context, false),
-                      formattedDate: _endDate != null
-                          ? '${_endDate!.year}/${_endDate!.month}/${_endDate!.day}'
-                          : '',
-                      placeholder: 'nodes_endDate'.tr,
-                      icon: Icons.calendar_today,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+          // 日期部分标题
+          Text(
+            'nodes_dateRange'.tr,
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 16),
 
-          // 自定义字段部分
-          CustomFieldsSection(
-            initialFields: _customFields,
-            onFieldsChanged: (fields) {
-              setState(() {
-                _customFields = fields;
-              });
+          // 使用 FormBuilderWrapper，并通过 contentBuilder 添加自定义字段部分
+          FormBuilderWrapper(
+            formKey: _dateFieldsFormKey,
+            config: FormConfig(
+              showSubmitButton: false,
+              showResetButton: false,
+              fieldSpacing: 16,
+              fields: [
+                // 开始日期
+                FormFieldConfig(
+                  name: 'startDate',
+                  type: FormFieldType.date,
+                  labelText: 'nodes_startDate'.tr,
+                  hintText: '选择开始日期',
+                  initialValue: widget.node.startDate,
+                ),
+
+                // 结束日期
+                FormFieldConfig(
+                  name: 'endDate',
+                  type: FormFieldType.date,
+                  labelText: 'nodes_endDate'.tr,
+                  hintText: '选择结束日期',
+                  initialValue: widget.node.endDate,
+                ),
+              ],
+              onSubmit: (values) {
+                // 提交处理在外部统一处理
+              },
+            ),
+            // 使用 contentBuilder 添加自定义字段部分（避免类型冲突）
+            contentBuilder: (context, fields) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...fields,
+                  const SizedBox(height: 16),
+                  // 自定义字段部分
+                  CustomFieldsSection(
+                    initialFields: _customFields,
+                    onFieldsChanged: (fields) {
+                      setState(() => _customFields = fields);
+                    },
+                  ),
+                ],
+              );
             },
           ),
         ],
@@ -402,69 +415,35 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
     );
   }
 
-  Future<void> _selectDate(BuildContext context, bool isStart) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate:
-          isStart ? _startDate ?? DateTime.now() : _endDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-
-    if (picked != null) {
-      setState(() {
-        if (isStart) {
-          _startDate = picked;
-        } else {
-          _endDate = picked;
-        }
-      });
-    }
-  }
-
-  void _showAddTagDialog(BuildContext context) async {
-    final TextEditingController controller = TextEditingController();
-    final result = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('添加标签'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: '标签名称',
-            hintText: '请输入标签名称',
-          ),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('cancel'.tr),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.isNotEmpty) {
-                Navigator.pop(context, controller.text);
-              }
-            },
-            child: Text('confirm'.tr),
-          ),
-        ],
-      ),
-    );
-
-    if (result != null && result.isNotEmpty) {
-      setState(() {
-        if (!_tags.contains(result)) {
-          _tags.add(result);
-        }
-      });
-    }
-  }
-
   void _saveNode(BuildContext context, NodesController controller) {
+    // 获取基本信息表单的值
+    final basicInfoState = _basicInfoFormKey.currentState;
+    if (basicInfoState == null || !basicInfoState.saveAndValidate()) {
+      // 验证失败
+      return;
+    }
+    final basicInfoValues = basicInfoState.value;
+
+    // 获取时间与字段表单的值
+    final dateFieldsState = _dateFieldsFormKey.currentState;
+    final dateFieldsValues = dateFieldsState?.value ?? {};
+
+    // 从表单值中提取数据
+    final title = basicInfoValues['title'] as String? ?? '';
+    final tags = (basicInfoValues['tags'] as List<dynamic>?)
+            ?.cast<String>() ??
+        [];
+    final status = basicInfoValues['status'] as NodeStatus? ??
+        widget.node.status;
+    final color = basicInfoValues['color'] as Color? ?? Colors.grey;
+
+    final startDate = dateFieldsValues['startDate'] as DateTime?;
+    final endDate = dateFieldsValues['endDate'] as DateTime?;
+    // 使用状态变量中的 customFields（nodes.CustomField 类型）
+    final customFields = _customFields;
+
     // 计算节点的完整路径值
-    String pathValue = _titleController.text;
+    String pathValue = title;
     if (widget.node.parentId.isNotEmpty) {
       final parentNode = controller.findNodeById(
         widget.notebookId,
@@ -482,17 +461,17 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
     final updatedNode = Node(
       id: widget.node.id,
       parentId: widget.node.parentId,
-      title: _titleController.text,
-      tags: _tags,
-      status: _status,
-      startDate: _startDate,
-      endDate: _endDate,
-      customFields: _customFields,
+      title: title,
+      tags: tags,
+      status: status,
+      startDate: startDate,
+      endDate: endDate,
+      customFields: customFields,
       notes: notesJson,
       createdAt: widget.node.createdAt,
       pathValue: pathValue,
       children: widget.isNew ? [] : widget.node.children,
-      color: _color,
+      color: color,
     );
 
     if (widget.isNew) {

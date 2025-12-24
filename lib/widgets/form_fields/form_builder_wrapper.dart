@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/plugins/goods/models/custom_field.dart';
+import 'package:Memento/plugins/openai/models/ai_agent.dart';
+import 'package:Memento/plugins/timer/models/timer_item.dart';
+import 'package:Memento/plugins/timer/views/add_timer_item_dialog.dart';
+import 'package:Memento/plugins/contact/models/custom_activity_event_model.dart';
 import 'form_field_wrapper.dart';
 import 'index.dart';
 
@@ -17,6 +21,7 @@ enum FormFieldType {
   // 选择器类
   select,
   date,
+  dateRange,           // 日期范围选择器
   time,
 
   // 开关滑块类
@@ -39,6 +44,29 @@ enum FormFieldType {
   calendarStripPicker, // 日历条日期选择器
   imagePicker,         // 图片选择器
   locationPicker,      // 位置选择器
+
+  // 自定义复合字段
+  promptEditor,        // 提示词编辑器
+  iconAvatarRow,       // 图标头像行
+
+  // 账单专用字段
+  expenseTypeSelector, // 收支类型选择器
+  amountInput,         // 金额输入框
+
+  // 待办任务专用字段
+  reminders,           // 提醒时间列表
+
+  // 计时器专用字段
+  timerItems,          // 子计时器列表
+  timerIconGrid,       // 图标网格选择器
+
+  // 联系人专用字段
+  genderSelector,      // 性别选择器
+  customEvents,        // 自定义活动事件列表
+  avatarNameSection,   // 头像名称区域（头像+姓名组合）
+
+  // 日记相册专用字段
+  chipSelector,        // Chip 选择器（心情、天气等）
 }
 
 /// 表单字段配置
@@ -121,6 +149,15 @@ class FormFieldConfig {
   /// 自定义属性（用于扩展）
   final Map<String, dynamic>? extra;
 
+  /// 显示条件（返回 true 时显示字段）
+  final bool Function(Map<String, dynamic> formValues)? visible;
+
+  /// 输入框前缀按钮（用于 text/number/email 等输入类型）
+  final List<InputGroupButton>? prefixButtons;
+
+  /// 输入框后缀按钮（用于 text/number/email 等输入类型）
+  final List<InputGroupButton>? suffixButtons;
+
   const FormFieldConfig({
     required this.name,
     required this.type,
@@ -148,6 +185,27 @@ class FormFieldConfig {
     this.initialCustomFields,
     this.onChanged,
     this.extra,
+    this.visible,
+    this.prefixButtons,
+    this.suffixButtons,
+  });
+}
+
+/// 输入框组按钮
+class InputGroupButton {
+  /// 按钮图标
+  final IconData icon;
+
+  /// 按钮提示文本
+  final String? tooltip;
+
+  /// 点击回调
+  final VoidCallback onPressed;
+
+  const InputGroupButton({
+    required this.icon,
+    this.tooltip,
+    required this.onPressed,
   });
 }
 
@@ -177,6 +235,9 @@ class FormConfig {
   /// 是否显示重置按钮
   final bool showResetButton;
 
+  /// 自定义提交按钮 widget（替代内置按钮）
+  final Widget? submitButtonWidget;
+
   /// 按钮布局方式
   final MainAxisAlignment buttonAlignment;
 
@@ -198,6 +259,7 @@ class FormConfig {
     this.resetButtonText = '重置',
     this.showSubmitButton = true,
     this.showResetButton = false,
+    this.submitButtonWidget,
     this.buttonAlignment = MainAxisAlignment.end,
     this.fieldSpacing = 16,
     this.autovalidateMode = false,
@@ -235,12 +297,18 @@ class FormBuilderWrapper extends StatefulWidget {
   });
 
   @override
-  State<FormBuilderWrapper> createState() => _FormBuilderWrapperState();
+  State<FormBuilderWrapper> createState() => FormBuilderWrapperState();
 }
 
-class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
+class FormBuilderWrapperState extends State<FormBuilderWrapper> {
   // 存储每个字段的 state key，用于访问其 getValue 和 reset 方法
   final Map<String, GlobalKey<WrappedFormFieldState>> _fieldKeys = {};
+
+  // 用于 FormBuilder 的 key（用于监听表单值变化）
+  final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
+
+  // 用于监听表单变化的 ValueNotifier
+  final ValueNotifier<int> _formChangeNotifier = ValueNotifier(0);
 
   @override
   void initState() {
@@ -254,10 +322,27 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
   @override
   void dispose() {
     super.dispose();
+    _formChangeNotifier.dispose();
   }
 
-  // 提交表单
-  void _submitForm() {
+  // 获取当前表单值
+  Map<String, dynamic> get _currentValues {
+    return _fbKey.currentState?.value ?? {};
+  }
+
+  // 公共提交方法（可从外部调用）
+  void submitForm() => _submitFormInternal();
+
+  // 获取当前表单值（公共方法）
+  Map<String, dynamic> get currentValues => _currentValues;
+
+  // 更新指定字段的值（公共方法）
+  void patchValue(Map<String, dynamic> values) {
+    _fbKey.currentState?.patchValue(values);
+  }
+
+  // 内部提交表单方法
+  void _submitFormInternal() {
     // 从所有字段包装器中获取值
     final values = <String, dynamic>{};
 
@@ -298,22 +383,40 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    final fields = widget.config.fields.map((config) => _buildField(config)).toList();
+    return FormBuilder(
+      key: widget.formKey ?? _fbKey,
+      child: Column(
+        crossAxisAlignment: widget.config.crossAxisAlignment,
+        children: [
+          if (widget.contentBuilder != null)
+            widget.contentBuilder!(context, widget.config.fields.map((config) => _buildFieldWrapper(config)).toList())
+          else
+            ...widget.config.fields.map((config) => _buildFieldWrapper(config)).expand((field) => [
+              field,
+              SizedBox(height: widget.config.fieldSpacing),
+            ]).toList()
+              ..removeLast(), // 移除最后一个间距
+          if (widget.config.showSubmitButton || widget.config.showResetButton)
+            _buildButtons(),
+        ],
+      ),
+    );
+  }
 
-    return Column(
-      crossAxisAlignment: widget.config.crossAxisAlignment,
-      children: [
-        if (widget.contentBuilder != null)
-          widget.contentBuilder!(context, fields)
-        else
-          ...fields.expand((field) => [
-            field,
-            SizedBox(height: widget.config.fieldSpacing),
-          ]).toList()
-            ..removeLast(), // 移除最后一个间距
-        if (widget.config.showSubmitButton || widget.config.showResetButton)
-          _buildButtons(),
-      ],
+  // 包装字段，支持条件显示
+  Widget _buildFieldWrapper(FormFieldConfig config) {
+    // 如果没有 visible 条件，直接返回字段
+    if (config.visible == null) {
+      return _buildField(config);
+    }
+
+    // 使用 ValueListenableBuilder 监听表单值变化
+    return ValueListenableBuilder(
+      valueListenable: _formChangeNotifier,
+      builder: (context, _, __) {
+        final shouldShow = config.visible!(_currentValues);
+        return shouldShow ? _buildField(config) : const SizedBox.shrink();
+      },
     );
   }
 
@@ -338,6 +441,9 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
 
       case FormFieldType.date:
         return _buildDateField(config, fieldKey!);
+
+      case FormFieldType.dateRange:
+        return _buildDateRangeField(config, fieldKey!);
 
       case FormFieldType.time:
         return _buildTimeField(config, fieldKey!);
@@ -389,100 +495,172 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
 
       case FormFieldType.locationPicker:
         return _buildLocationPickerField(config, fieldKey!);
+
+      // 自定义复合字段
+      case FormFieldType.promptEditor:
+        return _buildPromptEditorField(config, fieldKey!);
+
+      case FormFieldType.iconAvatarRow:
+        return _buildIconAvatarRowField(config, fieldKey!);
+
+      // 账单专用字段
+      case FormFieldType.expenseTypeSelector:
+        return _buildExpenseTypeSelectorField(config, fieldKey!);
+
+      case FormFieldType.amountInput:
+        return _buildAmountInputField(config, fieldKey!);
+
+      // 待办任务专用字段
+      case FormFieldType.reminders:
+        return _buildRemindersField(config, fieldKey!);
+
+      // 计时器专用字段
+      case FormFieldType.timerItems:
+        return _buildTimerItemsField(config, fieldKey!);
+
+      case FormFieldType.timerIconGrid:
+        return _buildTimerIconGridField(config, fieldKey!);
+
+      // 联系人专用字段
+      case FormFieldType.genderSelector:
+        return _buildGenderSelectorField(config, fieldKey!);
+
+      case FormFieldType.customEvents:
+        return _buildCustomEventsField(config, fieldKey!);
+
+      case FormFieldType.avatarNameSection:
+        return _buildAvatarNameSectionField(config, fieldKey!);
+
+      // 日记相册专用字段
+      case FormFieldType.chipSelector:
+        return _buildChipSelectorField(config, fieldKey!);
     }
   }
 
   // 构建文本输入框
   Widget _buildTextField(FormFieldConfig config, GlobalKey fieldKey) {
-    late TextEditingController controller;
+    // 如果有前缀或后缀按钮，使用 FormBuilderField + TextField
+    if (config.prefixButtons != null || config.suffixButtons != null) {
+      return FormBuilderField<String>(
+        key: fieldKey,
+        name: config.name,
+        initialValue: config.initialValue?.toString() ?? '',
+        enabled: config.enabled,
+        builder: (fieldState) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (config.labelText != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    config.labelText!,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+              Row(
+                children: [
+                  // 前缀按钮
+                  if (config.prefixButtons != null)
+                    ...config.prefixButtons!.map((btn) => IconButton(
+                          icon: Icon(btn.icon),
+                          tooltip: btn.tooltip,
+                          onPressed: btn.onPressed,
+                        )),
+                  // 输入框
+                  Expanded(
+                    child: TextField(
+                      controller: TextEditingController.fromValue(
+                        TextEditingValue(text: fieldState.value ?? ''),
+                      ),
+                      decoration: InputDecoration(
+                        hintText: config.hintText,
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      ),
+                      obscureText: config.type == FormFieldType.password,
+                      keyboardType: config.type == FormFieldType.email
+                          ? TextInputType.emailAddress
+                          : config.type == FormFieldType.number
+                              ? TextInputType.number
+                              : TextInputType.text,
+                      enabled: config.enabled,
+                      onChanged: (v) {
+                        fieldState.didChange(v);
+                        config.onChanged?.call(v);
+                      },
+                    ),
+                  ),
+                  // 后缀按钮
+                  if (config.suffixButtons != null)
+                    ...config.suffixButtons!.map((btn) => IconButton(
+                          icon: Icon(btn.icon),
+                          tooltip: btn.tooltip,
+                          onPressed: btn.onPressed,
+                        )),
+                ],
+              ),
+            ],
+          );
+        },
+      );
+    }
 
-    return WrappedFormField(
+    // 默认使用 FormBuilderTextField
+    return FormBuilderTextField(
       key: fieldKey,
       name: config.name,
       initialValue: config.initialValue?.toString() ?? '',
+      decoration: InputDecoration(
+        labelText: config.labelText,
+        hintText: config.hintText,
+        prefixIcon: config.prefixIcon != null ? Icon(config.prefixIcon) : null,
+      ),
+      obscureText: config.type == FormFieldType.password,
+      keyboardType: config.type == FormFieldType.email
+          ? TextInputType.emailAddress
+          : config.type == FormFieldType.number
+              ? TextInputType.number
+              : TextInputType.text,
       enabled: config.enabled,
       onChanged: config.onChanged,
-      builder: (context, value, setValue) {
-        // 初始化或重用控制器
-        try {
-          controller = TextEditingController(text: value.toString());
-          controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
-        } catch (e) {
-          controller = TextEditingController(text: value.toString());
-        }
-
-        return TextInputField(
-          controller: controller,
-          labelText: config.labelText ?? '',
-          hintText: config.hintText ?? '',
-          prefixIcon: config.prefixIcon != null ? Icon(config.prefixIcon) : null,
-          obscureText: config.type == FormFieldType.password,
-          keyboardType: config.type == FormFieldType.email
-              ? TextInputType.emailAddress
-              : config.type == FormFieldType.number
-                  ? TextInputType.number
-                  : TextInputType.text,
-          enabled: config.enabled,
-        );
-      },
-      getValue: () => controller.text,
-      onReset: () {
-        controller.text = config.initialValue?.toString() ?? '';
-      },
     );
   }
 
   // 构建多行文本输入框
   Widget _buildTextAreaField(FormFieldConfig config, GlobalKey fieldKey) {
-    late TextEditingController controller;
     final extra = config.extra ?? {};
 
-    return WrappedFormField(
+    return FormBuilderTextField(
       key: fieldKey,
       name: config.name,
       initialValue: config.initialValue?.toString() ?? '',
+      decoration: InputDecoration(
+        labelText: config.labelText,
+        hintText: config.hintText,
+        border: const OutlineInputBorder(),
+      ),
+      minLines: (extra['minLines'] as int?) ?? 3,
+      maxLines: (extra['maxLines'] as int?) ?? 6,
+      keyboardType: TextInputType.multiline,
       enabled: config.enabled,
       onChanged: config.onChanged,
-      builder: (context, value, setValue) {
-        try {
-          controller = TextEditingController(text: value.toString());
-          controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
-        } catch (e) {
-          controller = TextEditingController(text: value.toString());
-        }
-
-        return TextAreaField(
-          controller: controller,
-          labelText: config.labelText ?? '',
-          hintText: config.hintText ?? '',
-          minLines: (extra['minLines'] as int?) ?? 3,
-          maxLines: (extra['maxLines'] as int?) ?? 6,
-          inline: (extra['inline'] as bool?) ?? false,
-          enabled: config.enabled,
-        );
-      },
-      getValue: () => controller.text,
-      onReset: () {
-        controller.text = config.initialValue?.toString() ?? '';
-      },
     );
   }
 
   // 构建下拉选择框
   Widget _buildSelectField(FormFieldConfig config, GlobalKey fieldKey) {
-    return WrappedFormField(
+    return FormBuilderDropdown<dynamic>(
       key: fieldKey,
       name: config.name,
       initialValue: config.initialValue,
-      enabled: config.enabled,
-      onChanged: config.onChanged,
-      builder: (context, value, setValue) => SelectField<dynamic>(
-        value: value,
-        labelText: config.labelText ?? '',
+      decoration: InputDecoration(
+        labelText: config.labelText,
         hintText: config.hintText ?? '请选择',
-        items: config.items ?? [],
-        onChanged: setValue,
       ),
+      enabled: config.enabled,
+      items: config.items ?? [],
+      onChanged: config.onChanged,
     );
   }
 
@@ -549,19 +727,21 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
   Widget _buildSwitchField(FormFieldConfig config, GlobalKey fieldKey) {
     final extra = config.extra ?? {};
 
-    return WrappedFormField(
+    return FormBuilderField<bool>(
       key: fieldKey,
       name: config.name,
       initialValue: config.initialValue as bool? ?? false,
       enabled: config.enabled,
-      onChanged: config.onChanged,
-      builder: (context, value, setValue) => SwitchField(
-        value: value ?? false,
+      builder: (fieldState) => SwitchField(
+        value: fieldState.value ?? false,
         title: config.labelText ?? '',
         subtitle: config.hintText,
         icon: config.prefixIcon,
         inline: (extra['inline'] as bool?) ?? false,
-        onChanged: config.enabled ? setValue : null,
+        onChanged: config.enabled ? (v) {
+          fieldState.didChange(v);
+          config.onChanged?.call(v);
+        } : null,
       ),
     );
   }
@@ -622,14 +802,13 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
     final extra = config.extra ?? {};
     final quickSelectTags = extra['quickSelectTags'] as List<String>?;
 
-    return WrappedFormField(
+    return FormBuilderField<List<String>>(
       key: fieldKey,
       name: config.name,
-      initialValue: initialTags,
+      initialValue: initialTags.cast<String>(),
       enabled: config.enabled,
-      onChanged: config.onChanged,
-      builder: (context, value, setValue) {
-        final tags = (value as List<dynamic>?)?.cast<String>() ?? initialTags;
+      builder: (fieldState) {
+        final tags = fieldState.value ?? initialTags.cast<String>();
 
         return TagsField(
           tags: tags,
@@ -638,7 +817,9 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
           quickSelectTags: quickSelectTags,
           onQuickSelectTag: (tag) {
             if (!tags.contains(tag)) {
-              setValue([...tags, tag]);
+              final newTags = [...tags, tag];
+              fieldState.didChange(newTags);
+              config.onChanged?.call(newTags);
             }
           },
           onAddTag: () async {
@@ -653,11 +834,15 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
               ),
             );
             if (result != null && result.isNotEmpty) {
-              setValue([...tags, result]);
+              final newTags = [...tags, result];
+              fieldState.didChange(newTags);
+              config.onChanged?.call(newTags);
             }
           },
           onRemoveTag: (tag) {
-            setValue(List<String>.from(tags)..remove(tag));
+            final newTags = List<String>.from(tags)..remove(tag);
+            fieldState.didChange(newTags);
+            config.onChanged?.call(newTags);
           },
         );
       },
@@ -777,14 +962,13 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
     final extra = config.extra ?? {};
     final initialItems = extra['initialItems'] as List<dynamic>? ?? [];
 
-    return WrappedFormField(
+    return FormBuilderField<List<dynamic>>(
       key: fieldKey,
       name: config.name,
       initialValue: initialItems,
       enabled: config.enabled,
-      onChanged: config.onChanged,
-      builder: (context, value, setValue) {
-        final items = (value as List<dynamic>?) ?? initialItems;
+      builder: (fieldState) {
+        final items = fieldState.value ?? initialItems;
 
         // 使用 Function 类型避免类型转换问题
         final getTitleRaw = extra['getTitle'];
@@ -823,7 +1007,9 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
           addButtonText: config.hintText ?? '添加',
           onAdd: () {
             if (controller.text.isNotEmpty) {
-              setValue([...items, controller.text]);
+              final newItems = [...items, controller.text];
+              fieldState.didChange(newItems);
+              config.onChanged?.call(newItems);
               controller.clear();
             }
           },
@@ -831,7 +1017,9 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
             wrappedOnToggle(index, items[index]);
           },
           onRemove: (index) {
-            setValue(List<dynamic>.from(items)..removeAt(index));
+            final newItems = List<dynamic>.from(items)..removeAt(index);
+            fieldState.didChange(newItems);
+            config.onChanged?.call(newItems);
           },
           getTitle: wrappedGetTitle,
           getIsCompleted: wrappedGetIsCompleted,
@@ -986,12 +1174,436 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
     );
   }
 
-  // 构建按钮区域
-  Widget _buildButtons() {
-    if (widget.buttonBuilder != null) {
-      return widget.buttonBuilder!(context, _submitForm, _resetForm);
+  // 构建提示词编辑器字段
+  Widget _buildPromptEditorField(FormFieldConfig config, GlobalKey fieldKey) {
+    final extra = config.extra ?? {};
+    final labelText = extra['labelText'] as String? ?? config.labelText;
+
+    return FormBuilderField<List<Prompt>>(
+      key: fieldKey,
+      name: config.name,
+      initialValue: (config.initialValue as List<dynamic>? ?? []).cast<Prompt>(),
+      enabled: config.enabled,
+      builder: (fieldState) => PromptEditorField(
+        name: config.name,
+        initialValue: fieldState.value ?? [],
+        enabled: config.enabled,
+        labelText: labelText,
+        onChanged: (v) {
+          fieldState.didChange(v);
+          config.onChanged?.call(v);
+        },
+      ),
+    );
+  }
+
+  // 构建图标头像行字段
+  Widget _buildIconAvatarRowField(FormFieldConfig config, GlobalKey fieldKey) {
+    final extra = config.extra ?? {};
+    final avatarSaveDirectory = extra['avatarSaveDirectory'] as String? ?? 'openai/agent_avatars';
+
+    final initialValue = config.initialValue as Map<String, dynamic>? ?? {
+      'icon': Icons.smart_toy,
+      'iconColor': Colors.blue,
+      'avatarUrl': null,
+    };
+
+    return FormBuilderField<Map<String, dynamic>>(
+      key: fieldKey,
+      name: config.name,
+      initialValue: initialValue,
+      enabled: config.enabled,
+      builder: (fieldState) {
+        final value = fieldState.value ?? initialValue;
+        return IconAvatarRowField(
+          name: config.name,
+          initialIcon: value['icon'] as IconData?,
+          initialIconColor: value['iconColor'] as Color?,
+          initialAvatarUrl: value['avatarUrl'] as String?,
+          enabled: config.enabled,
+          avatarSaveDirectory: avatarSaveDirectory,
+          onChanged: (v) {
+            fieldState.didChange(v);
+            config.onChanged?.call(v);
+          },
+        );
+      },
+    );
+  }
+
+  // 构建收支类型选择器字段
+  Widget _buildExpenseTypeSelectorField(FormFieldConfig config, GlobalKey fieldKey) {
+    final extra = config.extra ?? {};
+    final expenseColor = extra['expenseColor'] as Color? ?? const Color(0xFFE74C3C);
+    final incomeColor = extra['incomeColor'] as Color? ?? const Color(0xFF2ECC71);
+
+    return WrappedFormField(
+      key: fieldKey,
+      name: config.name,
+      initialValue: config.initialValue as bool? ?? true,
+      enabled: config.enabled,
+      onChanged: config.onChanged,
+      builder: (context, value, setValue) => ExpenseTypeSelectorField(
+        isExpense: value as bool? ?? true,
+        onTypeChanged: config.enabled ? setValue : (isExpense) {},
+        expenseColor: expenseColor,
+        incomeColor: incomeColor,
+      ),
+    );
+  }
+
+  // 构建金额输入框字段
+  Widget _buildAmountInputField(FormFieldConfig config, GlobalKey fieldKey) {
+    final extra = config.extra ?? {};
+    final currencySymbol = extra['currencySymbol'] as String? ?? '¥';
+    final fontSize = extra['fontSize'] as double? ?? 40.0;
+
+    return WrappedFormField(
+      key: fieldKey,
+      name: config.name,
+      initialValue: config.initialValue as double?,
+      enabled: config.enabled,
+      onChanged: config.onChanged,
+      builder: (context, value, setValue) => AmountInputField(
+        amount: value as double?,
+        onAmountChanged: setValue,
+        currencySymbol: currencySymbol,
+        fontSize: fontSize,
+        enabled: config.enabled,
+        validator: config.required
+            ? (value) {
+                if (value == null || value.isEmpty) {
+                  return config.validationMessage ?? '请输入金额';
+                }
+                if (double.tryParse(value) == null) {
+                  return '请输入有效的金额';
+                }
+                return null;
+              }
+            : null,
+      ),
+    );
+  }
+
+  // 构建提醒时间列表字段
+  Widget _buildRemindersField(FormFieldConfig config, GlobalKey fieldKey) {
+    final extra = config.extra ?? {};
+    final primaryColor = extra['primaryColor'] as Color? ?? const Color(0xFF607AFB);
+
+    return FormBuilderField<List<DateTime>>(
+      key: fieldKey,
+      name: config.name,
+      initialValue: (config.initialValue as List<dynamic>? ?? []).cast<DateTime>(),
+      enabled: config.enabled,
+      builder: (fieldState) {
+        final reminders = fieldState.value ?? <DateTime>[];
+
+        return RemindersField(
+          reminders: reminders,
+          labelText: config.labelText,
+          hintText: config.hintText ?? '无',
+          primaryColor: primaryColor,
+          onRemoveReminder: (index) {
+            final newReminders = List<DateTime>.from(reminders)..removeAt(index);
+            fieldState.didChange(newReminders);
+            config.onChanged?.call(newReminders);
+          },
+          onReminderAdded: (newReminders) {
+            fieldState.didChange(newReminders);
+            config.onChanged?.call(newReminders);
+          },
+        );
+      },
+    );
+  }
+
+  // 构建日期范围选择器字段
+  Widget _buildDateRangeField(FormFieldConfig config, GlobalKey fieldKey) {
+    final extra = config.extra ?? {};
+
+    // 从 initialValue 中提取开始和结束日期
+    DateTime? startDate;
+    DateTime? endDate;
+
+    if (config.initialValue is DateTimeRange) {
+      final range = config.initialValue as DateTimeRange;
+      startDate = range.start;
+      endDate = range.end;
+    } else if (config.initialValue is Map) {
+      final data = config.initialValue as Map<String, dynamic>;
+      startDate = data['startDate'] as DateTime?;
+      endDate = data['endDate'] as DateTime?;
     }
 
+    return WrappedFormField(
+      key: fieldKey,
+      name: config.name,
+      initialValue: {
+        'startDate': startDate,
+        'endDate': endDate,
+      },
+      enabled: config.enabled,
+      onChanged: config.onChanged,
+      builder: (context, value, setValue) {
+        final currentStartDate = value?['startDate'] as DateTime?;
+        final currentEndDate = value?['endDate'] as DateTime?;
+
+        return DateRangeField(
+          startDate: currentStartDate,
+          endDate: currentEndDate,
+          enabled: config.enabled,
+          placeholder: config.hintText,
+          rangeLabelText: extra['rangeLabelText'] as String?,
+          firstDate: extra['firstDate'] as DateTime?,
+          lastDate: extra['lastDate'] as DateTime?,
+          onDateRangeChanged: (range) {
+            if (range != null) {
+              setValue({
+                'startDate': range.start,
+                'endDate': range.end,
+              });
+            } else {
+              // 清除选择
+              setValue({'startDate': null, 'endDate': null});
+            }
+          },
+        );
+      },
+    );
+  }
+
+  // 构建子计时器列表字段
+  Widget _buildTimerItemsField(FormFieldConfig config, GlobalKey fieldKey) {
+    return FormBuilderField<List<dynamic>>(
+      key: fieldKey,
+      name: config.name,
+      initialValue: (config.initialValue as List<dynamic>? ?? []).cast(),
+      enabled: config.enabled,
+      builder: (fieldState) {
+        final items = (fieldState.value ?? []).cast<dynamic>();
+        // 转换为 TimerItem 列表
+        final timerItems = items.cast<TimerItem>();
+
+        return TimerItemsField(
+          timerItems: timerItems,
+          enabled: config.enabled,
+          onAdd: () {
+            // 打开添加计时器对话框
+            final context = fieldState.context;
+            if (context != null) {
+              _showAddTimerDialog(context, fieldState);
+            }
+          },
+          onEdit: (index, item) {
+            final newItems = List<dynamic>.from(items);
+            newItems[index] = item;
+            fieldState.didChange(newItems);
+            config.onChanged?.call(newItems);
+          },
+          onRemove: (index) {
+            final newItems = List<dynamic>.from(items)..removeAt(index);
+            fieldState.didChange(newItems);
+            config.onChanged?.call(newItems);
+          },
+        );
+      },
+    );
+  }
+
+  /// 显示添加计时器对话框
+  void _showAddTimerDialog(BuildContext context, dynamic fieldState) {
+    showDialog(
+      context: context,
+      builder: (context) => const AddTimerItemDialog(),
+    ).then((newTimer) {
+      if (newTimer != null) {
+        final currentItems = fieldState.value ?? [];
+        final newItems = List<dynamic>.from(currentItems)..add(newTimer);
+        fieldState.didChange(newItems);
+      }
+    });
+  }
+
+  // 构建图标网格选择器字段
+  Widget _buildTimerIconGridField(FormFieldConfig config, GlobalKey fieldKey) {
+    final extra = config.extra ?? {};
+    final presetIcons = extra['presetIcons'] as List<IconData>?;
+
+    return WrappedFormField(
+      key: fieldKey,
+      name: config.name,
+      initialValue: config.initialValue as IconData? ?? Icons.psychology,
+      enabled: config.enabled,
+      onChanged: config.onChanged,
+      builder: (context, value, setValue) {
+        return TimerIconGridField(
+          selectedIcon: value as IconData? ?? Icons.psychology,
+          presetIcons: presetIcons ?? const [
+            Icons.psychology,
+            Icons.auto_stories,
+            Icons.code,
+            Icons.fitness_center,
+            Icons.edit,
+            Icons.more_horiz,
+          ],
+          enabled: config.enabled,
+          primaryColor: config.primaryColor,
+          onIconChanged: setValue,
+        );
+      },
+    );
+  }
+
+  // ============ 联系人专用字段（新增）============
+
+  // 构建性别选择器字段
+  Widget _buildGenderSelectorField(FormFieldConfig config, GlobalKey fieldKey) {
+    return WrappedFormField(
+      key: fieldKey,
+      name: config.name,
+      initialValue: config.initialValue,
+      enabled: config.enabled,
+      onChanged: config.onChanged,
+      builder: (context, value, setValue) => GenderSelectorField(
+        selectedGender: value,
+        onGenderChanged: setValue,
+        enabled: config.enabled,
+      ),
+    );
+  }
+
+  // 构建自定义活动事件字段
+  Widget _buildCustomEventsField(FormFieldConfig config, GlobalKey fieldKey) {
+    final initialEvents = config.initialValue as List<dynamic>? ?? [];
+
+    return FormBuilderField<List<CustomActivityEvent>>(
+      key: fieldKey,
+      name: config.name,
+      initialValue: initialEvents.cast<CustomActivityEvent>(),
+      enabled: config.enabled,
+      builder: (fieldState) {
+        final events = fieldState.value ?? initialEvents.cast<CustomActivityEvent>();
+
+        return CustomEventsField(
+          events: events,
+          labelText: config.labelText,
+          addButtonText: config.hintText ?? '添加事件',
+          enabled: config.enabled,
+          onEventsChanged: (newEvents) {
+            fieldState.didChange(newEvents);
+            config.onChanged?.call(newEvents);
+          },
+        );
+      },
+    );
+  }
+
+  // 构建头像名称区域字段
+  Widget _buildAvatarNameSectionField(FormFieldConfig config, GlobalKey fieldKey) {
+    final initialValue = config.initialValue as Map<String, dynamic>? ?? {};
+
+    return FormBuilderField<Map<String, dynamic>>(
+      key: fieldKey,
+      name: config.name,
+      initialValue: initialValue,
+      enabled: config.enabled,
+      builder: (fieldState) {
+        final value = fieldState.value ?? initialValue;
+
+        return AvatarNameSection(
+          avatarUrl: value['avatarUrl'] as String?,
+          firstName: value['firstName'] as String? ?? '',
+          lastName: value['lastName'] as String? ?? '',
+          enabled: config.enabled,
+          onAvatarChanged: (url) {
+            final newValue = Map<String, dynamic>.from(value);
+            newValue['avatarUrl'] = url;
+            fieldState.didChange(newValue);
+            config.onChanged?.call(newValue);
+          },
+          onFirstNameChanged: (name) {
+            final newValue = Map<String, dynamic>.from(value);
+            newValue['firstName'] = name;
+            fieldState.didChange(newValue);
+            config.onChanged?.call(newValue);
+          },
+          onLastNameChanged: (name) {
+            final newValue = Map<String, dynamic>.from(value);
+            newValue['lastName'] = name;
+            fieldState.didChange(newValue);
+            config.onChanged?.call(newValue);
+          },
+        );
+      },
+    );
+  }
+
+  // ============ 日记相册专用字段（新增）============
+
+  // 构建 Chip 选择器字段
+  Widget _buildChipSelectorField(FormFieldConfig config, GlobalKey fieldKey) {
+    final extra = config.extra ?? {};
+
+    // 从 extra 中获取选项列表
+    final optionsRaw = extra['options'] as List<dynamic>?;
+    final options = optionsRaw?.map((e) {
+      if (e is ChipOption) return e;
+      if (e is Map<String, dynamic>) {
+        return ChipOption(
+          id: e['id'] as String,
+          label: e['label'] as String,
+          icon: e['icon'] as IconData?,
+          color: e['color'] as Color?,
+        );
+      }
+      return ChipOption(id: e.toString(), label: e.toString());
+    }).toList() ?? <ChipOption>[];
+
+    final hintText = extra['hintText'] as String? ?? config.hintText ?? '选择';
+    final selectorTitle = extra['selectorTitle'] as String? ?? '选择';
+    final selectedBackgroundColor = extra['selectedBackgroundColor'] as Color?;
+    final selectedForegroundColor = extra['selectedForegroundColor'] as Color?;
+    final icon = extra['icon'] as IconData?;
+
+    return WrappedFormField(
+      key: fieldKey,
+      name: config.name,
+      initialValue: config.initialValue as String?,
+      enabled: config.enabled,
+      onChanged: config.onChanged,
+      builder: (context, value, setValue) => ChipSelectorField(
+        options: options,
+        selectedId: value as String?,
+        hintText: hintText,
+        selectorTitle: selectorTitle,
+        enabled: config.enabled,
+        selectedBackgroundColor: selectedBackgroundColor,
+        selectedForegroundColor: selectedForegroundColor,
+        icon: icon,
+        onValueChanged: setValue,
+      ),
+    );
+  }
+
+  // 构建按钮区域
+  Widget _buildButtons() {
+    // 如果有自定义按钮构建器，使用它
+    if (widget.buttonBuilder != null) {
+      return widget.buttonBuilder!(context, submitForm, _resetForm);
+    }
+
+    // 如果有自定义提交按钮 widget，使用它
+    if (widget.config.submitButtonWidget != null) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: InkWell(
+          onTap: submitForm,
+          child: widget.config.submitButtonWidget,
+        ),
+      );
+    }
+
+    // 默认按钮
     return Padding(
       padding: const EdgeInsets.only(top: 16),
       child: Row(
@@ -1007,7 +1619,7 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
             ),
           if (widget.config.showSubmitButton)
             FilledButton(
-              onPressed: _submitForm,
+              onPressed: submitForm,
               child: Text(widget.config.submitButtonText),
             ),
         ],

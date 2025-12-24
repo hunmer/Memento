@@ -328,6 +328,196 @@ _emailController.dispose();
 | `ImagePickerDialog` | `imagePicker` | 图片选择器 |
 | `LocationPicker` | `locationPicker` | 位置选择器 |
 | `ColorPickerSection` | `color` | 颜色选择器 |
+| `PromptEditor` | `promptEditor` | 提示词编辑器（复合字段）|
+| `IconAvatarRow` | `iconAvatarRow` | 图标头像并排（复合字段）|
+
+## 高级功能
+
+### 1. 条件显示字段
+
+使用 `visible` 参数根据其他字段的值动态显示/隐藏字段：
+
+```dart
+// 开场白问题列表只在启用时显示
+FormFieldConfig(
+  name: 'openingQuestions',
+  type: FormFieldType.listAdd,
+  initialValue: [],
+  visible: (values) => values['enableOpeningQuestions'] == true,
+),
+
+// 高级选项只在选中"自定义"时显示
+FormFieldConfig(
+  name: 'customConfig',
+  type: FormFieldType.textArea,
+  visible: (values) => values['mode'] == 'custom',
+),
+```
+
+### 2. 输入框组按钮
+
+使用 `prefixButtons` 和 `suffixButtons` 在文本输入框前后添加操作按钮：
+
+```dart
+FormFieldConfig(
+  name: 'model',
+  type: FormFieldType.text,
+  labelText: '模型',
+  hintText: '输入或选择模型',
+  suffixButtons: [
+    InputGroupButton(
+      icon: Icons.search,
+      tooltip: '搜索模型',
+      onPressed: () {
+        // 打开模型选择对话框
+        _selectModel();
+      },
+    ),
+  ],
+),
+
+// 带前后缀按钮的输入框
+FormFieldConfig(
+  name: 'apiKey',
+  type: FormFieldType.text,
+  prefixButtons: [
+    InputGroupButton(
+      icon: Icons.key,
+      tooltip: '生成密钥',
+      onPressed: () => _generateApiKey(),
+    ),
+  ],
+  suffixButtons: [
+    InputGroupButton(
+      icon: Icons.visibility,
+      tooltip: '显示/隐藏',
+      onPressed: () => _toggleVisibility(),
+    ),
+  ],
+),
+```
+
+### 3. 字段联动与回调
+
+使用 `onChanged` 回调实现字段间的联动：
+
+```dart
+// 服务商选择后自动更新配置
+FormFieldConfig(
+  name: 'serviceProvider',
+  type: FormFieldType.select,
+  labelText: '服务商',
+  items: _providers.map((p) => DropdownMenuItem(
+    value: p.id,
+    child: Text(p.label),
+  )).toList(),
+  onChanged: (value) {
+    // 服务商切换时，自动更新相关字段
+    if (value != null) {
+      final provider = _providers.firstWhere((p) => p.id == value);
+      _updateProviderFields(provider);
+    }
+  },
+),
+
+// 数量变化时重新计算价格
+FormFieldConfig(
+  name: 'quantity',
+  type: FormFieldType.number,
+  labelText: '数量',
+  onChanged: (value) {
+    // 数量变化时自动更新价格
+    _updatePrice();
+  },
+),
+```
+
+### 4. 完整的联动表单示例
+
+```dart
+FormBuilderWrapper(
+  config: FormConfig(
+    fields: [
+      // 启用开场白问题开关
+      FormFieldConfig(
+        name: 'enableOpeningQuestions',
+        type: FormFieldType.switchField,
+        labelText: '启用开场白问题',
+        initialValue: false,
+      ),
+
+      // 开场白问题列表 - 条件显示
+      FormFieldConfig(
+        name: 'openingQuestions',
+        type: FormFieldType.listAdd,
+        initialValue: [],
+        visible: (values) => values['enableOpeningQuestions'] == true,
+      ),
+
+      // 服务商选择 - 联动更新配置
+      FormFieldConfig(
+        name: 'serviceProvider',
+        type: FormFieldType.select,
+        labelText: '服务商',
+        initialValue: _providers.first.id,
+        items: _providers.map((p) => DropdownMenuItem(
+          value: p.id,
+          child: Text(p.label),
+        )).toList(),
+        onChanged: (value) {
+          if (value != null) {
+            final provider = _providers.firstWhere((p) => p.id == value);
+            // 自动更新 BaseUrl 和 Headers
+            _formKey.currentState?.patchValue({
+              'baseUrl': provider.baseUrl,
+              'headers': _formatHeaders(provider.headers),
+            });
+          }
+        },
+      ),
+
+      // 模型选择 - 带搜索按钮
+      FormFieldConfig(
+        name: 'model',
+        type: FormFieldType.text,
+        labelText: '模型',
+        suffixButtons: [
+          InputGroupButton(
+            icon: Icons.search,
+            tooltip: '搜索模型',
+            onPressed: () => _selectModel(),
+          ),
+        ],
+      ),
+    ],
+    onSubmit: (values) {
+      // values 包含所有字段的最新值
+      _saveAgent(values);
+    },
+  ),
+)
+```
+
+### 5. InputGroupButton 类型定义
+
+```dart
+class InputGroupButton {
+  /// 按钮图标
+  final IconData icon;
+
+  /// 按钮提示文本
+  final String? tooltip;
+
+  /// 点击回调
+  final VoidCallback onPressed;
+
+  const InputGroupButton({
+    required this.icon,
+    this.tooltip,
+    required this.onPressed,
+  });
+}
+```
 
 ## Extra Parameters Guide
 
@@ -676,6 +866,46 @@ class EditUserScreen extends StatelessWidget {
 }
 ```
 
+## 表单联动与回调机制
+
+FormBuilderWrapper 通过 `onChanged` 回调和 `visible` 条件函数支持复杂的表单联动场景。
+
+### 联动场景类型
+
+1. **字段值联动**: 一个字段变化时自动更新其他字段
+2. **条件显示**: 根据某些字段的值显示/隐藏其他字段
+3. **动态按钮**: 输入框前后按钮触发额外操作
+4. **级联选择**: 选择器级联更新选项
+
+### 技术实现
+
+```dart
+// 使用 onChanged 回调
+FormFieldConfig(
+  name: 'country',
+  type: FormFieldType.select,
+  onChanged: (value) {
+    // 联动更新城市选项
+    _updateCities(value);
+  },
+),
+
+// 使用 visible 条件函数
+FormFieldConfig(
+  name: 'city',
+  type: FormFieldType.select,
+  visible: (values) => values['country'] != null,
+),
+
+// 使用 patchValue 更新其他字段
+void _updateProviderFields(ServiceProvider provider) {
+  _formKey.currentState?.patchValue({
+    'baseUrl': provider.baseUrl,
+    'headers': _formatHeaders(provider.headers),
+  });
+}
+```
+
 ## Benefits
 
 ### 代码减少
@@ -764,6 +994,71 @@ onValidationFailed: (errors) {
 
 ## Troubleshooting
 
+### formKey 参数错误
+
+**症状**: `_formKey.currentState` 始终为 null
+
+```dart
+// ❌ 错误：使用 key 参数
+FormBuilderWrapper(
+  key: _formKey,  // 这是 Flutter widget key，不是 FormBuilder key
+)
+
+// ✅ 正确：使用 formKey 参数
+FormBuilderWrapper(
+  formKey: _formKey,
+)
+```
+
+### 字段值未被收集
+
+**症状**: 保存时 `values` 只包含部分字段或为空
+
+**原因**: `WrappedFormField` 不会将值注册到 `FormBuilder`，必须使用 `FormBuilderField` 或 `flutter_form_builder` 内置字段
+
+```dart
+// ❌ 错误：使用 WrappedFormField
+return WrappedFormField(
+  name: config.name,
+  builder: (context, value, setValue) => MyField(...),
+);
+
+// ✅ 正确：使用 FormBuilderField
+return FormBuilderField<String>(
+  name: config.name,
+  initialValue: config.initialValue?.toString() ?? '',
+  builder: (fieldState) => MyField(
+    value: fieldState.value,
+    onChanged: (v) => fieldState.didChange(v),  // 关键：通知 FormBuilder
+  ),
+);
+
+// ✅ 或使用内置字段：FormBuilderTextField
+return FormBuilderTextField(
+  name: config.name,
+  initialValue: config.initialValue?.toString() ?? '',
+);
+```
+
+### buttonBuilder 参数位置错误
+
+**症状**: `buttonBuilder` 参数未定义错误
+
+```dart
+// ❌ 错误：放在 config 中
+FormBuilderWrapper(
+  config: FormConfig(
+    buttonBuilder: ...,  // FormConfig 没有这个参数
+  ),
+)
+
+// ✅ 正确：作为 FormBuilderWrapper 的直接参数
+FormBuilderWrapper(
+  buttonBuilder: (context, onSubmit, onReset) => ElevatedButton(...),
+  config: FormConfig(...),
+)
+```
+
 ### 类型转换错误
 
 确保 `initialValue` 类型与字段类型匹配：
@@ -781,6 +1076,28 @@ FormFieldConfig(
   name: 'count',
   type: FormFieldType.number,
   initialValue: 123,  // int 类型
+)
+```
+
+### Dropdown value 不在 items 中
+
+**症状**: DropdownButton value assertion error
+
+```dart
+// ❌ 错误：initialValue 可能不在 items 列表中
+FormFieldConfig(
+  name: 'provider',
+  initialValue: _selectedProviderId,  // 可能为空字符串或不存在
+  items: _providers.map(...).toList(),
+)
+
+// ✅ 正确：确保 initialValue 在 items 中
+FormFieldConfig(
+  name: 'provider',
+  initialValue: _providers.any((p) => p.id == _selectedProviderId)
+      ? _selectedProviderId
+      : (_providers.isNotEmpty ? _providers.first.id : null),
+  items: _providers.map(...).toList(),
 )
 ```
 
