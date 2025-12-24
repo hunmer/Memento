@@ -5,6 +5,7 @@ import 'package:Memento/widgets/picker/circle_icon_picker.dart';
 import 'package:Memento/widgets/picker/image_picker_dialog.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/widgets/picker/color_picker_section.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
@@ -22,24 +23,21 @@ class GoalEditPage extends StatefulWidget {
 }
 
 class _GoalEditPageState extends State<GoalEditPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _groupController = TextEditingController();
-  final _nameController = TextEditingController();
-  final _unitTypeController = TextEditingController();
-  final _targetValueController = TextEditingController();
+  final _formKey = GlobalKey<FormBuilderState>();
+  final _formChangeNotifier = ValueNotifier(0);
 
-  late String _name;
-  late String _icon;
-  Color? _iconColor;
-  Color? _progressColor;
-  String _group = '默认';
-  String? _imagePath;
-  late String _unitType;
-  late double _targetValue;
-  late String _dateType;
-  late DateTime? _startDate;
-  late DateTime? _endDate;
-  late TimeOfDay? _reminderTime;
+  late String _initialIcon;
+  late Color _initialIconColor;
+  late Color _initialProgressColor;
+  late String _initialImagePath;
+  late String _initialGroup;
+  late String _initialName;
+  late String _initialUnitType;
+  late double _initialTargetValue;
+  late String _initialDateType;
+  late DateTime? _initialStartDate;
+  late DateTime? _initialEndDate;
+  late TimeOfDay? _initialReminderTime;
 
   // 分组列表
   List<String> _groups = [];
@@ -47,86 +45,81 @@ class _GoalEditPageState extends State<GoalEditPage> {
   @override
   void initState() {
     super.initState();
+    _initializeData();
+  }
+
+  void _initializeData() {
     // 初始化分组列表
     _groups = widget.controller.getAllGroups();
     if (!_groups.contains('默认')) {
       _groups.add('默认');
     }
 
-    final validDateTypes = ['daily', 'weekly', 'monthly', 'custom'];
     if (widget.goal != null) {
-      _name = widget.goal!.name;
-      _icon = widget.goal!.icon;
-      _group = widget.goal!.group;
+      _initialIcon = widget.goal!.icon;
+      _initialGroup = widget.goal!.group;
       // 确保当前分组在列表中
-      if (!_groups.contains(_group)) {
-        _groups.add(_group);
+      if (!_groups.contains(_initialGroup)) {
+        _groups.add(_initialGroup);
       }
-      _imagePath = widget.goal!.imagePath;
-      _iconColor =
-          widget.goal!.iconColor != null
-              ? Color(widget.goal!.iconColor!)
-              : null;
-      _progressColor =
-          widget.goal!.progressColor != null
-              ? Color(widget.goal!.progressColor!)
-              : null;
-      _unitType = widget.goal!.unitType;
-      _targetValue = widget.goal!.targetValue;
-      _dateType =
-          validDateTypes.contains(widget.goal!.dateSettings.type)
-              ? widget.goal!.dateSettings.type
-              : 'daily'; // 默认值
-      _startDate = widget.goal!.dateSettings.startDate;
-      _endDate = widget.goal!.dateSettings.endDate;
-      _reminderTime =
-          widget.goal!.reminderTime != null
-              ? TimeOfDay.fromDateTime(
-                DateTime.parse('1970-01-01 ${widget.goal!.reminderTime!}'),
-              )
-              : null;
-
-      // 初始化控制器
-      _nameController.text = _name;
-      _unitTypeController.text = _unitType;
-      _targetValueController.text = _targetValue.toString();
+      _initialImagePath = widget.goal!.imagePath ?? '';
+      _initialIconColor = widget.goal!.iconColor != null
+          ? Color(widget.goal!.iconColor!)
+          : Colors.blue;
+      _initialProgressColor = widget.goal!.progressColor != null
+          ? Color(widget.goal!.progressColor!)
+          : Colors.blue;
+      _initialUnitType = widget.goal!.unitType;
+      _initialTargetValue = widget.goal!.targetValue;
+      _initialName = widget.goal!.name;
+      _initialDateType = ['daily', 'weekly', 'monthly', 'custom']
+          .contains(widget.goal!.dateSettings.type)
+          ? widget.goal!.dateSettings.type
+          : 'daily';
+      _initialStartDate = widget.goal!.dateSettings.startDate;
+      _initialEndDate = widget.goal!.dateSettings.endDate;
+      _initialReminderTime = widget.goal!.reminderTime != null
+          ? TimeOfDay.fromDateTime(
+            DateTime.parse('1970-01-01 ${widget.goal!.reminderTime!}'),
+          )
+          : null;
     } else {
-      _name = '';
-      _icon = '0';
-      _iconColor = null;
-      _progressColor = null;
-      _unitType = '';
-      _targetValue = 0;
-      _dateType = 'daily'; // 确保初始值与下拉选项匹配
-      _startDate = null;
-      _endDate = null;
-      _reminderTime = null;
-
-      // 初始化控制器
-      _nameController.text = '';
-      _unitTypeController.text = '';
-      _targetValueController.text = '';
+      _initialIcon = '0';
+      _initialGroup = '默认';
+      _initialImagePath = '';
+      _initialIconColor = Colors.blue;
+      _initialProgressColor = Colors.blue;
+      _initialUnitType = '';
+      _initialTargetValue = 0;
+      _initialName = '';
+      _initialDateType = 'daily';
+      _initialStartDate = null;
+      _initialEndDate = null;
+      _initialReminderTime = null;
     }
-  }
-
-  @override
-  void dispose() {
-    _groupController.dispose();
-    _nameController.dispose();
-    _unitTypeController.dispose();
-    _targetValueController.dispose();
-    super.dispose();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _iconColor ??= Theme.of(context).colorScheme.primary;
-    _progressColor ??= Theme.of(context).colorScheme.primary;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    _initialIconColor = _initialIconColor == Colors.blue ? primaryColor : _initialIconColor;
+    _initialProgressColor = _initialProgressColor == Colors.blue ? primaryColor : _initialProgressColor;
+  }
+
+  @override
+  void dispose() {
+    _formChangeNotifier.dispose();
+    super.dispose();
+  }
+
+  // 获取当前表单值
+  Map<String, dynamic> get _currentValues {
+    return _formKey.currentState?.value ?? {};
   }
 
   // 添加新分组
-  void _addNewGroup() async {
+  Future<void> _addNewGroup() async {
     final newGroupController = TextEditingController();
     final newGroup = await showDialog<String>(
       context: context,
@@ -163,9 +156,119 @@ class _GoalEditPageState extends State<GoalEditPage> {
         if (!_groups.contains(newGroup)) {
           _groups.add(newGroup);
         }
-        _group = newGroup;
+        _initialGroup = newGroup;
+        // 更新表单中的分组值
+        _updateFormValue('group', newGroup);
       });
     }
+  }
+
+  // 构建顶部自定义区域（图标+图片并排）
+  Widget _buildTopSection(Map<String, dynamic> currentValues) {
+    final iconData = currentValues['iconData'] as Map<String, dynamic>?;
+    final icon = iconData?['icon'] as IconData?;
+    final iconColor = iconData?['color'] as Color? ?? _initialIconColor;
+    final imagePath = currentValues['imagePath'] as String? ?? _initialImagePath;
+    final progressColor = currentValues['progressColor'] as Color? ?? _initialProgressColor;
+
+    return Column(
+      children: [
+        // 图标和图片并排
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded(
+              child: CircleIconPicker(
+                currentIcon: icon ?? IconData(
+                  int.tryParse(_initialIcon) ?? 0xe145,
+                  fontFamily: 'MaterialIcons',
+                ),
+                backgroundColor: iconColor,
+                onIconSelected: (selectedIcon) {
+                  _updateFormValues({
+                    'iconData': {'icon': selectedIcon, 'color': iconColor}
+                  });
+                },
+                onColorSelected: (color) {
+                  _updateFormValues({
+                    'iconData': {'icon': icon, 'color': color}
+                  });
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: GestureDetector(
+                onTap: () async {
+                  final result = await showDialog<Map<String, dynamic>>(
+                    context: context,
+                    builder: (context) => ImagePickerDialog(
+                      initialUrl: imagePath.isNotEmpty ? imagePath : null,
+                      saveDirectory: 'tracker/goal_images',
+                      enableCrop: true,
+                      cropAspectRatio: 9 / 16,
+                    ),
+                  );
+                  if (result != null && result['url'] != null) {
+                    _updateFormValue('imagePath', result['url'] as String);
+                  }
+                },
+                child: SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                        width: 2,
+                      ),
+                    ),
+                    child: imagePath.isNotEmpty
+                        ? FutureBuilder<String>(
+                          future: ImageUtils.getAbsolutePath(imagePath),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                              return ClipOval(
+                                child: Image.file(
+                                  File(snapshot.data!),
+                                  width: 64,
+                                  height: 64,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(Icons.broken_image),
+                                ),
+                              );
+                            }
+                            return const Icon(Icons.broken_image);
+                          },
+                        )
+                        : const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add_photo_alternate_outlined, size: 24),
+                              SizedBox(height: 2),
+                              Text('图片', style: TextStyle(fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // 进度颜色选择器
+        ColorPickerSection(
+          selectedColor: progressColor,
+          onColorChanged: (color) {
+            _updateFormValue('progressColor', color);
+          },
+        ),
+      ],
+    );
   }
 
   @override
@@ -177,145 +280,19 @@ class _GoalEditPageState extends State<GoalEditPage> {
           IconButton(icon: const Icon(Icons.save), onPressed: _saveGoal),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  child: CircleIconPicker(
-                    currentIcon: IconData(
-                      int.tryParse(_icon) ?? 0xe145, // 默认使用 add 图标
-                      fontFamily: 'MaterialIcons',
-                    ),
-                    backgroundColor:
-                        _iconColor ??
-                        Theme.of(context).colorScheme.primaryContainer,
-                    onIconSelected: (icon) {
-                      setState(() => _icon = icon.codePoint.toString());
-                    },
-                    onColorSelected: (color) {
-                      setState(() => _iconColor = color);
-                    },
-                  ),
-                ),
-
-                const SizedBox(width: 16),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () async {
-                      final result = await showDialog<Map<String, dynamic>>(
-                        context: context,
-                        builder:
-                            (context) => ImagePickerDialog(
-                              initialUrl: _imagePath,
-                              saveDirectory: 'tracker/goal_images',
-                              enableCrop: true,
-                              cropAspectRatio: 9 / 16,
-                            ),
-                      );
-                      if (result != null && result['url'] != null) {
-                        setState(() {
-                          _imagePath = result['url'] as String;
-                        });
-                      }
-                    },
-                    child: SizedBox(
-                      width: 64,
-                      height: 64,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.5),
-                            width: 2,
-                          ),
-                        ),
-                        child:
-                            _imagePath != null && _imagePath!.isNotEmpty
-                                ? FutureBuilder<String>(
-                                  future: ImageUtils.getAbsolutePath(
-                                    _imagePath,
-                                  ),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData &&
-                                        snapshot.data!.isNotEmpty) {
-                                      return Container(
-                                        width: 64,
-                                        height: 64,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                                .withValues(alpha: 0.5),
-                                            width: 2,
-                                          ),
-                                        ),
-                                        child: ClipOval(
-                                          child: Image.file(
-                                            File(snapshot.data!),
-                                            width: 64,
-                                            height: 64,
-                                            fit: BoxFit.contain,
-                                            errorBuilder:
-                                                (context, error, stackTrace) =>
-                                                    const Icon(
-                                                      Icons.broken_image,
-                                                    ),
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                    return const Icon(Icons.broken_image);
-                                  },
-                                )
-                                : const Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.add_photo_alternate_outlined,
-                                        size: 24,
-                                      ),
-                                      SizedBox(height: 2),
-                                      Text(
-                                        '图片',
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 16),
-            Column(
-              children: [
-                const SizedBox(height: 8),
-                ColorPickerSection(
-                  selectedColor:
-                      _progressColor ?? Theme.of(context).colorScheme.primary,
-                  onColorChanged: (color) {
-                    setState(() => _progressColor = color);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
+      body: FormBuilderWrapper(
+        formKey: _formKey,
+        config: FormConfig(
+          showSubmitButton: false,
+          showResetButton: false,
+          fieldSpacing: 16,
+          fields: [
             // 分组选择器
-            SelectField<String>(
-              value: _group,
+            FormFieldConfig(
+              name: 'group',
+              type: FormFieldType.select,
               labelText: 'tracker_selectGroup'.tr,
+              initialValue: _initialGroup,
               items: [
                 ..._groups.map(
                   (group) => DropdownMenuItem(
@@ -324,81 +301,66 @@ class _GoalEditPageState extends State<GoalEditPage> {
                   ),
                 ),
                 DropdownMenuItem(
-                  value: '新建分组',
+                  value: '__create_new__',
                   child: Row(
                     children: [
                       const Icon(Icons.add, size: 16),
                       const SizedBox(width: 8),
-                      Text(
-                        'tracker_createGroup'.tr,
-                      ),
+                      Text('tracker_createGroup'.tr),
                     ],
                   ),
                 ),
               ],
               onChanged: (value) {
-                if (value == '新建分组') {
+                if (value == '__create_new__') {
                   _addNewGroup();
-                } else if (value != null) {
-                  setState(() => _group = value);
                 }
               },
             ),
-            const SizedBox(height: 16),
-            TextInputField(
-              controller: _nameController,
+
+            // 目标名称
+            FormFieldConfig(
+              name: 'name',
+              type: FormFieldType.text,
               labelText: 'tracker_goalName'.tr,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入目标名称';
-                }
-                return null;
-              },
+              initialValue: _initialName,
+              required: true,
+              validationMessage: '请输入目标名称',
             ),
-            const SizedBox(height: 16),
-            TextInputField(
-              controller: _unitTypeController,
+
+            // 单位
+            FormFieldConfig(
+              name: 'unitType',
+              type: FormFieldType.text,
               labelText: 'tracker_unitType'.tr,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入单位';
-                }
-                return null;
-              },
+              initialValue: _initialUnitType,
+              required: true,
+              validationMessage: '请输入单位',
             ),
-            const SizedBox(height: 16),
-            TextInputField(
-              controller: _targetValueController,
+
+            // 目标值
+            FormFieldConfig(
+              name: 'targetValue',
+              type: FormFieldType.text,
               labelText: 'tracker_targetValue'.tr,
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入目标值';
-                }
-                final numValue = double.tryParse(value);
-                if (numValue == null) {
-                  return '请输入有效的数字';
-                }
-                if (numValue <= 0) {
-                  return '目标值不能小于等于0';
-                }
-                return null;
-              },
+              initialValue: _initialTargetValue > 0 ? _initialTargetValue.toString() : '',
+              required: true,
+              validationMessage: '请输入目标值',
             ),
-            const SizedBox(height: 16),
-            TimePickerField(
-              label: _reminderTime == null
-                  ? '设置每日提醒时间'
-                  : '提醒时间',
-              time: _reminderTime ?? TimeOfDay.now(),
-              onTimeChanged: (time) {
-                setState(() => _reminderTime = time);
-              },
+
+            // 提醒时间
+            FormFieldConfig(
+              name: 'reminderTime',
+              type: FormFieldType.time,
+              initialValue: _initialReminderTime,
             ),
-            const SizedBox(height: 16),
-            SelectField<String>(
-              value: _dateType,
+
+            // 日期类型
+            FormFieldConfig(
+              name: 'dateType',
+              type: FormFieldType.select,
               labelText: 'tracker_dateSettings'.tr,
+              initialValue: _initialDateType,
               items: ['none', 'daily', 'weekly', 'monthly', 'custom']
                   .map(
                     (type) => DropdownMenuItem(
@@ -407,36 +369,45 @@ class _GoalEditPageState extends State<GoalEditPage> {
                     ),
                   )
                   .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _dateType = value);
-                }
-              },
             ),
-            if (_dateType == 'custom') ...[
-              const SizedBox(height: 16),
-              DatePickerField(
-                date: _startDate,
-                onTap: () => _selectDate(context, isStartDate: true),
-                formattedDate: _startDate == null
-                    ? ''
-                    : _startDate!.toLocal().toString().split(' ')[0],
-                placeholder: '选择开始日期',
-                icon: Icons.calendar_today,
-              ),
-              const SizedBox(height: 8),
-              DatePickerField(
-                date: _endDate,
-                onTap: () => _selectDate(context, isStartDate: false),
-                formattedDate: _endDate == null
-                    ? ''
-                    : _endDate!.toLocal().toString().split(' ')[0],
-                placeholder: '选择结束日期',
-                icon: Icons.calendar_today,
-              ),
-            ],
+
+            // 开始日期（条件显示）
+            FormFieldConfig(
+              name: 'startDate',
+              type: FormFieldType.date,
+              hintText: '选择开始日期',
+              initialValue: _initialStartDate,
+              visible: (values) => values['dateType'] == 'custom',
+            ),
+
+            // 结束日期（条件显示）
+            FormFieldConfig(
+              name: 'endDate',
+              type: FormFieldType.date,
+              hintText: '选择结束日期',
+              initialValue: _initialEndDate,
+              visible: (values) => values['dateType'] == 'custom',
+            ),
           ],
+          onSubmit: (values) => _handleSubmit(values),
         ),
+        // 使用 contentBuilder 添加顶部自定义区域
+        contentBuilder: (context, fields) {
+          return ValueListenableBuilder(
+            valueListenable: _formChangeNotifier,
+            builder: (context, _,__) {
+              final formValues = _currentValues;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildTopSection(formValues),
+                  const SizedBox(height: 24),
+                  ...fields,
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -458,59 +429,52 @@ class _GoalEditPageState extends State<GoalEditPage> {
     }
   }
 
-  Future<void> _selectDate(
-    BuildContext context, {
-    required bool isStartDate,
-  }) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) {
-      setState(() {
-        if (isStartDate) {
-          _startDate = picked;
-        } else {
-          _endDate = picked;
-        }
-      });
-    }
+  void _handleSubmit(Map<String, dynamic> values) {
+    // 处理逻辑由 _saveGoal 直接调用
   }
 
   Future<void> _saveGoal() async {
-    if (_formKey.currentState!.validate()) {
-      // 从控制器获取值
-      _name = _nameController.text;
-      _unitType = _unitTypeController.text;
-      _targetValue = double.parse(_targetValueController.text);
+    if (_formKey.currentState?.saveAndValidate() ?? false) {
+      final values = _formKey.currentState!.value;
 
-      // 如果 _imagePath 是绝对路径，转换为相对路径
-      String? finalImagePath = _imagePath;
-      if (_imagePath != null && _imagePath!.isNotEmpty) {
-        if (File(_imagePath!).existsSync()) {
-          finalImagePath = await ImageUtils.toRelativePath(_imagePath!);
+      // 获取图标数据
+      final iconData = values['iconData'] as Map<String, dynamic>?;
+      final icon = iconData?['icon'] as IconData?;
+      final iconColor = iconData?['color'] as Color?;
+
+      // 获取图片路径并转换为相对路径
+      String? finalImagePath = values['imagePath'] as String?;
+      if (finalImagePath != null && finalImagePath.isNotEmpty) {
+        if (File(finalImagePath).existsSync()) {
+          finalImagePath = await ImageUtils.toRelativePath(finalImagePath);
         }
       }
 
+      final name = values['name'] as String? ?? _initialName;
+      final unitType = values['unitType'] as String? ?? _initialUnitType;
+      final targetValue = double.tryParse(values['targetValue']?.toString() ?? '') ?? _initialTargetValue;
+      final dateType = values['dateType'] as String? ?? _initialDateType;
+      final group = values['group'] as String? ?? _initialGroup;
+      final progressColor = values['progressColor'] as Color?;
+      final reminderTime = values['reminderTime'] as TimeOfDay?;
+
       final newGoal = Goal(
         id: widget.goal?.id ?? const Uuid().v4(),
-        name: _name,
-        icon: _icon,
-        group: _group,
-        imagePath: finalImagePath,
-        iconColor: _iconColor?.value,
-        progressColor: _progressColor?.value,
-        unitType: _unitType,
-        targetValue: _targetValue,
+        name: name,
+        icon: icon?.codePoint.toString() ?? _initialIcon,
+        group: group,
+        imagePath: finalImagePath?.isNotEmpty == true ? finalImagePath : null,
+        iconColor: iconColor?.value,
+        progressColor: progressColor?.value,
+        unitType: unitType,
+        targetValue: targetValue,
         currentValue: widget.goal?.currentValue ?? 0,
         dateSettings: DateSettings(
-          type: _dateType,
-          startDate: _startDate,
-          endDate: _endDate,
+          type: dateType,
+          startDate: values['startDate'] as DateTime?,
+          endDate: values['endDate'] as DateTime?,
         ),
-        reminderTime: _reminderTime?.format(context),
+        reminderTime: reminderTime?.format(context),
         isLoopReset: false,
         createdAt: widget.goal?.createdAt ?? DateTime.now(),
       );
@@ -523,5 +487,17 @@ class _GoalEditPageState extends State<GoalEditPage> {
 
       Navigator.pop(context);
     }
+  }
+
+  // 更新表单值并通知
+  void _updateFormValue(String key, dynamic value) {
+    _formKey.currentState?.patchValue({key: value});
+    _formChangeNotifier.value++;
+  }
+
+  // 更新多个表单值并通知
+  void _updateFormValues(Map<String, dynamic> values) {
+    _formKey.currentState?.patchValue(values);
+    _formChangeNotifier.value++;
   }
 }

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:Memento/widgets/picker/location_picker.dart';
 import 'package:smooth_sheets/smooth_sheets.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/widgets/form_fields/chip_selector_field.dart';
 import 'entry_editor_controller.dart';
 import 'entry_editor_image_handler.dart';
 import 'entry_editor_tag_handler.dart';
@@ -33,18 +34,11 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     super.initState();
     controller = widget.controller;
     isEditing = widget.isEditing;
-    // Ensure location controller listener updates UI
-    controller.locationController.addListener(_onLocationChanged);
   }
 
   @override
   void dispose() {
-    controller.locationController.removeListener(_onLocationChanged);
     super.dispose();
-  }
-
-  void _onLocationChanged() {
-    if (mounted) setState(() {});
   }
 
   @override
@@ -76,11 +70,11 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
                       },
                     ),
                     const SizedBox(height: 20),
-                    _buildContentCard(),
+                    _buildContentForm(),
                     const SizedBox(height: 20),
                     EntryEditorTagHandler(controller: controller),
                     const SizedBox(height: 20),
-                    _buildMetadataGrid(),
+                    _buildMetadataForm(),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -138,7 +132,15 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     );
   }
 
-  Widget _buildContentCard() {
+  /// 构建内容表单（标题、内容、心情）
+  Widget _buildContentForm() {
+    // 准备心情选项
+    final moods = ['Happy', 'Sad', 'Excited', 'Tired', 'Calm', 'Anxious', 'Angry', 'Content'];
+    final moodOptions = moods.map((m) => ChipOption(
+      id: m,
+      label: 'calendar_album_mood_${m.toLowerCase()}'.tr,
+    )).toList();
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -154,12 +156,26 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
       ),
       child: Column(
         children: [
+          // 心情选择 + 标题输入行
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
-                _buildMoodButton(),
+                // 心情选择器
+                ChipSelectorField(
+                  options: moodOptions,
+                  selectedId: controller.mood,
+                  hintText: 'calendar_album_mood'.tr,
+                  selectorTitle: 'calendar_album_select_mood'.tr,
+                  icon: Icons.sentiment_satisfied,
+                  onValueChanged: (value) {
+                    setState(() {
+                      controller.mood = value;
+                    });
+                  },
+                ),
                 const SizedBox(width: 12),
+                // 标题输入框
                 Expanded(
                   child: TextField(
                     controller: controller.titleController,
@@ -180,6 +196,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
             ),
           ),
           Divider(height: 1, color: Colors.grey.shade100),
+          // 内容输入
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
@@ -199,96 +216,49 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     );
   }
 
-  Widget _buildMoodButton() {
-    final mood = controller.mood ?? 'Happy';
-    final moodTranslationKey = 'calendar_album_mood_${mood.toLowerCase()}';
-    return GestureDetector(
-      onTap: _showMoodPicker,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.orange.shade50,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.sentiment_satisfied, size: 20, color: Colors.orange.shade600),
-            const SizedBox(width: 8),
-            Text(
-              moodTranslationKey.tr,
-              style: TextStyle(
-                color: Colors.orange.shade600,
-                fontWeight: FontWeight.w500,
-                fontSize: 15,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  /// 构建元数据表单（位置、天气）
+  Widget _buildMetadataForm() {
+    // 准备天气选项
+    final weathers = ['Sunny', 'Cloudy', 'Rainy', 'Snowy', 'Windy', 'Foggy', 'Stormy', 'Clear'];
+    final weatherOptions = weathers.map((w) => ChipOption(
+      id: w,
+      label: 'calendar_album_weather_${w.toLowerCase()}'.tr,
+    )).toList();
 
-  void _showMoodPicker() {
-    final moods = ['Happy', 'Sad', 'Excited', 'Tired', 'Calm', 'Anxious', 'Angry', 'Content'];
-    SmoothBottomSheet.show(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-             Text('calendar_album_select_mood'.tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-             const SizedBox(height: 16),
-             Wrap(
-               spacing: 8,
-               runSpacing: 8,
-               children: moods.map((m) => ActionChip(
-                 label: Text('calendar_album_mood_${m.toLowerCase()}'.tr),
-                 backgroundColor: controller.mood == m ? Colors.orange.shade100 : null,
-                 onPressed: () {
-                   setState(() {
-                     controller.mood = m;
-                   });
-                   Navigator.pop(context);
-                 },
-               )).toList(),
-             ),
-             const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMetadataGrid() {
     return Row(
       children: [
-        Expanded(child: _buildMetadataCard(
-          icon: Icons.location_on,
-          iconColor: Colors.red.shade500,
-          iconBg: Colors.red.shade50,
-          label: 'calendar_album_location'.tr.toUpperCase(),
-          value: controller.locationController.text.isNotEmpty
-              ? controller.locationController.text
-              : 'calendar_album_add_location'.tr,
-          onTap: () => _handleLocationSelection(widget.parentContext),
-        )),
+        // 位置选择器
+        Expanded(
+          child: _buildMetadataCard(
+            icon: Icons.location_on,
+            iconColor: Colors.red.shade500,
+            iconBg: Colors.red.shade50,
+            label: 'calendar_album_location'.tr.toUpperCase(),
+            value: controller.locationController.text.isNotEmpty
+                ? controller.locationController.text
+                : 'calendar_album_add_location'.tr,
+            onTap: () => _handleLocationSelection(widget.parentContext),
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _buildMetadataCard(
-          icon: Icons.sunny,
-          iconColor: Colors.blue.shade500,
-          iconBg: Colors.blue.shade50,
-          label: 'calendar_album_weather'.tr.toUpperCase(),
-          value: controller.weather != null
-              ? 'calendar_album_weather_${controller.weather!.toLowerCase()}'.tr
-              : 'calendar_album_add_weather'.tr,
-          onTap: _showWeatherPicker,
-        )),
+        // 天气选择器
+        Expanded(
+          child: _buildMetadataCard(
+            icon: Icons.sunny,
+            iconColor: Colors.blue.shade500,
+            iconBg: Colors.blue.shade50,
+            label: 'calendar_album_weather'.tr.toUpperCase(),
+            value: controller.weather != null
+                ? 'calendar_album_weather_${controller.weather!.toLowerCase()}'.tr
+                : 'calendar_album_add_weather'.tr,
+            onTap: () => _showWeatherPicker(weatherOptions),
+          ),
+        ),
       ],
     );
   }
 
+  /// 构建元数据卡片
   Widget _buildMetadataCard({
     required IconData icon,
     required Color iconColor,
@@ -352,6 +322,7 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     );
   }
 
+  /// 处理位置选择
   Future<void> _handleLocationSelection(BuildContext dialogContext) async {
     final isMobile =
         !kIsWeb &&
@@ -361,29 +332,28 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
     await Navigator.of(dialogContext).push(
       ModalSheetRoute(
         swipeDismissible: true,
-        builder:
-            (context) => Sheet(
-              decoration: const MaterialSheetDecoration(
-                size: SheetSize.fit,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: LocationPicker(
-                onLocationSelected: (location) {
-                  if (mounted) {
-                    setState(() {
-                      controller.locationController.text = location;
-                    });
-                  }
-                },
-                isMobile: isMobile,
-              ),
-            ),
+        builder: (context) => Sheet(
+          decoration: const MaterialSheetDecoration(
+            size: SheetSize.fit,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: LocationPicker(
+            onLocationSelected: (location) {
+              if (mounted) {
+                setState(() {
+                  controller.locationController.text = location;
+                });
+              }
+            },
+            isMobile: isMobile,
+          ),
+        ),
       ),
     );
   }
 
-  void _showWeatherPicker() {
-     final weathers = ['Sunny', 'Cloudy', 'Rainy', 'Snowy', 'Windy', 'Foggy', 'Stormy', 'Clear'];
+  /// 显示天气选择器
+  void _showWeatherPicker(List<ChipOption> weatherOptions) {
     SmoothBottomSheet.show(
       context: context,
       builder: (context) => Container(
@@ -391,23 +361,23 @@ class _EntryEditorUIState extends State<EntryEditorUI> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-             Text('calendar_album_select_weather'.tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-             const SizedBox(height: 16),
-             Wrap(
-               spacing: 8,
-               runSpacing: 8,
-               children: weathers.map((w) => ActionChip(
-                 label: Text('calendar_album_weather_${w.toLowerCase()}'.tr),
-                 backgroundColor: controller.weather == w ? Colors.blue.shade100 : null,
-                 onPressed: () {
-                   setState(() {
-                     controller.weather = w;
-                   });
-                   Navigator.pop(context);
-                 },
-               )).toList(),
-             ),
-             const SizedBox(height: 20),
+            Text('calendar_album_select_weather'.tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: weatherOptions.map((opt) => ActionChip(
+                label: Text(opt.label),
+                backgroundColor: controller.weather == opt.id ? Colors.blue.shade100 : null,
+                onPressed: () {
+                  setState(() {
+                    controller.weather = opt.id;
+                  });
+                  Navigator.pop(context);
+                },
+              )).toList(),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

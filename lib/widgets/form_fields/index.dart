@@ -28,3 +28,21 @@ export 'circle_icon_picker_field.dart';
 export 'calendar_strip_picker_field.dart';
 export 'image_picker_field.dart';
 export 'location_picker_field.dart';
+export 'prompt_editor_field.dart';
+export 'icon_avatar_row_field.dart';
+export 'expense_type_selector_field.dart';
+export 'amount_input_field.dart';
+export 'reminders_field.dart';
+export 'date_range_field.dart';
+
+// 计时器专用字段
+export 'timer_items_field.dart';
+export 'timer_icon_grid_field.dart';
+
+// 联系人专用字段
+export 'gender_selector_field.dart';
+export 'custom_events_field.dart';
+export 'avatar_name_section.dart';
+
+// 日记相册专用字段
+export 'chip_selector_field.dart';

@@ -1,14 +1,15 @@
 import 'package:get/get.dart';
-import 'package:Memento/plugins/timer/views/add_timer_item_dialog.dart';
-import 'package:Memento/widgets/group_selector_dialog.dart';
+import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
+import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:flutter/material.dart';
-import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:uuid/uuid.dart';
 import '../models/timer_task.dart' show TimerTask;
 import 'package:Memento/plugins/timer/models/timer_item.dart';
-import 'package:Memento/widgets/picker/icon_picker_dialog.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 
+/// 添加/编辑计时器任务对话框
+///
+/// 使用 FormBuilderWrapper 进行表单管理
 class AddTimerTaskDialog extends StatefulWidget {
   final List<String> groups;
   final TimerTask? initialTask;
@@ -16,21 +17,18 @@ class AddTimerTaskDialog extends StatefulWidget {
   const AddTimerTaskDialog({super.key, required this.groups, this.initialTask});
 
   @override
-  _AddTimerTaskDialogState createState() => _AddTimerTaskDialogState();
+  State<AddTimerTaskDialog> createState() => _AddTimerTaskDialogState();
 }
 
 class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
-  bool _enableNotification = false;
-  final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _nameController;
-  late final List<TimerItem> _timerItems;
   late final String _id;
-  late Color _selectedColor;
-  late IconData _selectedIcon;
-  late String? _selectedGroup;
-  late int _repeatCount;
+  late final Color _selectedColor;
 
-  final List<IconData> _presetIcons = [
+  // 当前表单值的缓存（用于提交前检查）
+  Map<String, dynamic> _currentValues = {};
+
+  /// 预设图标列表
+  static const List<IconData> _presetIcons = [
     Icons.psychology,
     Icons.auto_stories,
     Icons.code,
@@ -45,22 +43,28 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
     final initialTask = widget.initialTask;
     if (initialTask != null) {
       _id = initialTask.id;
-      _nameController = TextEditingController(text: initialTask.name);
-      _timerItems = List.from(initialTask.timerItems);
       _selectedColor = initialTask.color;
-      _selectedIcon = initialTask.icon;
-      _selectedGroup = initialTask.group;
-      _repeatCount = initialTask.repeatCount;
-      _enableNotification = initialTask.enableNotification;
+      // 初始化当前值
+      _currentValues = {
+        'name': initialTask.name,
+        'icon': initialTask.icon,
+        'repeatCount': initialTask.repeatCount,
+        'group': initialTask.group,
+        'timerItems': initialTask.timerItems,
+        'enableNotification': initialTask.enableNotification,
+      };
     } else {
       _id = const Uuid().v4();
-      _nameController = TextEditingController();
-      _timerItems = [];
       _selectedColor = const Color(0xFF607AFB);
-      _selectedIcon = Icons.psychology;
-      _selectedGroup = null;
-      _repeatCount = 1;
-      _enableNotification = true;
+      // 初始化默认值
+      _currentValues = {
+        'name': '',
+        'icon': Icons.psychology,
+        'repeatCount': 1,
+        'group': null,
+        'timerItems': <TimerItem>[],
+        'enableNotification': true,
+      };
     }
 
     // 初始化时设置路由上下文
@@ -72,7 +76,9 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
   /// 更新路由上下文，使"询问当前上下文"功能能获取到当前编辑状态
   void _updateRouteContext() {
     final isEdit = widget.initialTask != null;
-    final taskName = _nameController.text.isNotEmpty ? _nameController.text : '新计时器';
+    final name = _currentValues['name'] as String? ?? '';
+    final taskName = name.isNotEmpty ? name : '新计时器';
+
     RouteHistoryManager.updateCurrentContext(
       pageId: "/timer_edit",
       title: isEdit ? '编辑计时器 - $taskName' : '创建新计时器',
@@ -85,16 +91,9 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
   }
 
   @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark ? const Color(0xFF0F1323) : const Color(0xFFF5F6F8);
-    final cardColor = isDark ? const Color(0xFF181D2C) : Colors.white;
     final primaryColor = const Color(0xFF607AFB);
 
     return Dialog(
@@ -124,280 +123,13 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Section 1: Basic Info
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel(context, '图标'),
-                      const SizedBox(height: 8),
-                      _buildIconGrid(primaryColor, isDark),
-                      const SizedBox(height: 24),
-
-                      _buildLabel(context, 'timer_taskName'.tr),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _nameController,
-                        style: TextStyle(
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                        decoration: _buildInputDecoration(
-                          context,
-                          hint: '例如: 晨间专注',
-                          isDark: isDark,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return '请输入${'timer_taskName'.tr}';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 24),
-
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLabel(
-                                  context,
-                                  'timer_repeatCount'.tr,
-                                ),
-                                const SizedBox(height: 8),
-                                TextFormField(
-                                  initialValue: _repeatCount.toString(),
-                                  keyboardType: TextInputType.number,
-                                  style: TextStyle(
-                                    color: isDark ? Colors.white : Colors.black,
-                                  ),
-                                  decoration: _buildInputDecoration(
-                                    context,
-                                    isDark: isDark,
-                                  ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return '必填';
-                                    }
-                                    final count = int.tryParse(value);
-                                    if (count == null || count < 1) {
-                                      return '> 0';
-                                    }
-                                    return null;
-                                  },
-                                  onChanged: (value) {
-                                    if (value.isNotEmpty) {
-                                      final count = int.tryParse(value) ?? 1;
-                                      setState(() {
-                                        _repeatCount = count.clamp(1, 100);
-                                      });
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildLabel(
-                                  context,
-                                  'timer_selectGroup'.tr,
-                                ),
-                                const SizedBox(height: 8),
-                                InkWell(
-                                  onTap: _showGroupSelector,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 14, // Match text field height approx
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? Colors.grey[800]
-                                          : Colors.grey[50],
-                                      border: Border.all(
-                                        color: isDark
-                                            ? Colors.grey[600]!
-                                            : Colors.grey[300]!,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            _selectedGroup ?? '选择分组',
-                                            style: TextStyle(
-                                              color: isDark
-                                                  ? Colors.white
-                                                  : Colors.black,
-                                            ),
-                                          ),
-                                        ),
-                                        Icon(
-                                          Icons.arrow_drop_down,
-                                          color: isDark
-                                              ? Colors.white70
-                                              : Colors.black54,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Section 2: Sub-timers
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '子计时器',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.grey[400] : Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      if (_timerItems.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Center(
-                            child: Text(
-                              '暂无子计时器',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                        ),
-                      ..._timerItems.map(
-                        (timer) => _buildSubTimerItem(context, timer, isDark),
-                      ),
-                      const SizedBox(height: 12),
-                      InkWell(
-                        onTap: _showAddTimerDialog,
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          decoration: BoxDecoration(
-                            color: isDark ? Colors.grey[800] : Colors.grey[100],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.add,
-                                size: 20,
-                                color: isDark ? Colors.white : Colors.grey[700],
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'timer_addTimer'.tr,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark
-                                      ? Colors.white
-                                      : Colors.grey[700],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Section 3: Notifications
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.notifications, color: primaryColor),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'timer_enableNotification'.tr,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: isDark
-                                ? Colors.white
-                                : const Color(0xFF1E293B),
-                          ),
-                        ),
-                      ),
-                      Switch.adaptive(
-                        value: _enableNotification,
-                        activeColor: primaryColor,
-                        onChanged:
-                            (value) => setState(() => _enableNotification = value),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 80), // Space for bottom bar
-              ],
+          child: FormBuilderWrapper(
+            config: FormConfig(
+              showSubmitButton: false,
+              showResetButton: false,
+              fieldSpacing: 0,
+              fields: _buildFormFields(primaryColor),
+              onSubmit: _handleSubmit,
             ),
           ),
         ),
@@ -406,7 +138,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
           color: backgroundColor,
           child: SafeArea(
             child: ElevatedButton(
-              onPressed: _timerItems.isEmpty ? null : _submit,
+              onPressed: _canSubmit() ? _submit : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 foregroundColor: Colors.white,
@@ -431,249 +163,133 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
     );
   }
 
-  Widget _buildLabel(BuildContext context, String text) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: isDark ? Colors.grey[500] : Colors.grey[600],
-      ),
-    );
-  }
+  /// 构建表单字段配置
+  List<FormFieldConfig> _buildFormFields(Color primaryColor) {
+    final initialTask = widget.initialTask;
 
-  InputDecoration _buildInputDecoration(
-    BuildContext context, {
-    String? hint,
-    bool isDark = false,
-  }) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(
-        color: isDark ? Colors.grey[600] : Colors.grey[500],
-      ),
-      filled: true,
-      fillColor: isDark ? Colors.grey[800] : Colors.grey[50],
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(
-          color: isDark ? Colors.grey[600]! : Colors.grey[300]!,
-        ),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(
-          color: isDark ? Colors.grey[600]! : Colors.grey[300]!,
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFF607AFB), width: 2),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    );
-  }
-
-  Widget _buildIconGrid(Color primaryColor, bool isDark) {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 6,
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-      childAspectRatio: 1.0,
-      children: _presetIcons.map((icon) {
-        final isSelected = _selectedIcon == icon;
-        return InkWell(
-          onTap: () {
-            if (icon == Icons.more_horiz) {
-              // Open full picker
-              _openFullIconPicker();
-            } else {
-              setState(() {
-                _selectedIcon = icon;
-              });
-            }
-          },
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? primaryColor
-                  : (isDark ? Colors.grey[800] : Colors.grey[100]),
-              borderRadius: BorderRadius.circular(8),
-              border: isSelected
-                  ? Border.all(color: primaryColor, width: 2)
-                  : null,
-            ),
-            child: Icon(
-              icon,
-              color: isSelected
-                  ? Colors.white
-                  : (isDark ? Colors.grey[400] : Colors.grey[600]),
-              size: 24,
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildSubTimerItem(BuildContext context, TimerItem timer, bool isDark) {
-    String typeText;
-    switch (timer.type) {
-      case TimerType.countUp:
-        typeText = 'timer_countUpTimer'.tr;
-        break;
-      case TimerType.countDown:
-        typeText = 'timer_countDownTimer'.tr;
-        break;
-      case TimerType.pomodoro:
-        typeText = 'timer_pomodoroTimer'.tr;
-        break;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey[800]!.withValues(alpha: 0.5) : Colors.grey[50],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.drag_indicator,
-            color: isDark ? Colors.grey[600] : Colors.grey[400],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  timer.name.isEmpty ? typeText : timer.name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : const Color(0xFF1E293B),
-                  ),
-                ),
-                Text(
-                  _formatDuration(timer.duration),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark ? Colors.grey[500] : Colors.grey[500],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-             icon: const Icon(Icons.edit, size: 20),
-             color: isDark ? Colors.grey[500] : Colors.grey[500],
-             onPressed: () => _editTimerItem(timer),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete, size: 20),
-            color: isDark ? Colors.grey[500] : Colors.grey[500],
-            onPressed: () => setState(() => _timerItems.remove(timer)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _openFullIconPicker() async {
-    final result = await showIconPickerDialog(context, _selectedIcon);
-    if (result != null) {
-      setState(() {
-        _selectedIcon = result;
-      });
-    }
-  }
-
-  Future<void> _showGroupSelector() async {
-    final selectedGroup = await showDialog<String>(
-      context: context,
-      builder: (context) => GroupSelectorDialog(
-        groups: widget.groups,
-        initialSelectedGroup: _selectedGroup,
-        onGroupRenamed: (oldName, newName) {
-          setState(() {
-            if (_selectedGroup == oldName) {
-              _selectedGroup = newName;
-            }
-          });
+    return [
+      // Section 1: 基本信息（图标、名称、重复次数、分组）
+      FormFieldConfig(
+        type: FormFieldType.timerIconGrid,
+        name: 'icon',
+        initialValue: initialTask?.icon ?? Icons.psychology,
+        extra: {
+          'presetIcons': _presetIcons,
         },
-        onGroupDeleted: (groupName) {
-          setState(() {
-            if (_selectedGroup == groupName) {
-              _selectedGroup = null;
-            }
-          });
+        primaryColor: primaryColor,
+        onChanged: (value) {
+          setState(() => _currentValues['icon'] = value);
+          _updateRouteContext();
         },
       ),
-    );
-    if (selectedGroup != null) {
-      setState(() {
-        _selectedGroup = selectedGroup;
-      });
-    }
+
+      // 任务名称
+      FormFieldConfig(
+        name: 'name',
+        type: FormFieldType.text,
+        labelText: 'timer_taskName'.tr,
+        hintText: '例如: 晨间专注',
+        initialValue: initialTask?.name ?? '',
+        required: true,
+        validationMessage: '请输入${'timer_taskName'.tr}',
+        onChanged: (value) {
+          setState(() => _currentValues['name'] = value);
+          _updateRouteContext();
+        },
+      ),
+
+      // 重复次数
+      FormFieldConfig(
+        name: 'repeatCount',
+        type: FormFieldType.number,
+        labelText: 'timer_repeatCount'.tr,
+        initialValue: initialTask?.repeatCount ?? 1,
+        required: true,
+        onChanged: (value) => setState(() => _currentValues['repeatCount'] = value),
+      ),
+
+      // 分组选择
+      FormFieldConfig(
+        name: 'group',
+        type: FormFieldType.text,
+        labelText: 'timer_selectGroup'.tr,
+        initialValue: initialTask?.group,
+        extra: {
+          'groups': widget.groups,
+          'onGroupRenamed': _onGroupRenamed,
+          'onGroupDeleted': _onGroupDeleted,
+        },
+        onChanged: (value) => setState(() => _currentValues['group'] = value),
+      ),
+
+      // Section 2: 子计时器列表
+      FormFieldConfig(
+        name: 'timerItems',
+        type: FormFieldType.timerItems,
+        initialValue: initialTask?.timerItems ?? [],
+        onChanged: (value) => setState(() => _currentValues['timerItems'] = value),
+      ),
+
+      // Section 3: 通知开关
+      FormFieldConfig(
+        name: 'enableNotification',
+        type: FormFieldType.switchField,
+        labelText: 'timer_enableNotification'.tr,
+        initialValue: initialTask?.enableNotification ?? true,
+        prefixIcon: Icons.notifications,
+        extra: {'inline': true},
+        onChanged: (value) => setState(() => _currentValues['enableNotification'] = value),
+      ),
+    ];
   }
 
-  void _showAddTimerDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AddTimerItemDialog(),
-    ).then((editedTimer) {
-      if (editedTimer != null) {
-        setState(() => _timerItems.add(editedTimer));
-      }
-    });
+  /// 检查是否可以提交（至少需要一个子计时器）
+  bool _canSubmit() {
+    final timerItems = _currentValues['timerItems'] as List?;
+    return timerItems != null && timerItems.isNotEmpty;
   }
 
-  void _editTimerItem(TimerItem timer) {
-    final index = _timerItems.indexOf(timer);
-    showDialog(
-      context: context,
-      builder: (context) => AddTimerItemDialog(initialItem: timer),
-    ).then((editedTimer) {
-      if (editedTimer != null) {
-        setState(() {
-          _timerItems[index] = editedTimer;
-        });
-      }
-    });
-  }
-
+  /// 提交表单
   void _submit() {
-    if (_formKey.currentState?.validate() ?? false) {
-      final task = TimerTask.create(
-        id: _id,
-        name: _nameController.text,
-        color: _selectedColor,
-        icon: _selectedIcon,
-        timerItems: _timerItems,
-        group: _selectedGroup,
-        repeatCount: _repeatCount,
-        enableNotification: _enableNotification,
-      );
-      Navigator.of(context).pop(task);
+    if (_canSubmit()) {
+      _handleSubmit(_currentValues);
     }
   }
 
-  String _formatDuration(Duration duration) {
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes.remainder(60);
-    final seconds = duration.inSeconds.remainder(60);
+  /// 处理表单提交
+  void _handleSubmit(Map<String, dynamic> values) {
+    final name = values['name'] as String? ?? '';
+    final icon = values['icon'] as IconData? ?? Icons.psychology;
+    final repeatCount = values['repeatCount'] as int? ?? 1;
+    final group = values['group'] as String?;
+    final timerItems = (values['timerItems'] as List?)?.cast<TimerItem>() ?? [];
+    final enableNotification = values['enableNotification'] as bool? ?? true;
 
-    if (hours > 0) {
-      return '${hours}h ${minutes}m';
-    } else if (minutes > 0) {
-      return '${minutes}m';
-    } else {
-      return '${seconds}s';
+    final task = TimerTask.create(
+      id: _id,
+      name: name,
+      color: _selectedColor,
+      icon: icon,
+      timerItems: timerItems,
+      group: group,
+      repeatCount: repeatCount,
+      enableNotification: enableNotification,
+    );
+
+    Navigator.of(context).pop(task);
+  }
+
+  /// 分组重命名回调
+  void _onGroupRenamed(String oldName, String newName) {
+    if (_currentValues['group'] == oldName) {
+      setState(() => _currentValues['group'] = newName);
+    }
+  }
+
+  /// 分组删除回调
+  void _onGroupDeleted(String groupName) {
+    if (_currentValues['group'] == groupName) {
+      setState(() => _currentValues['group'] = null);
     }
   }
 }

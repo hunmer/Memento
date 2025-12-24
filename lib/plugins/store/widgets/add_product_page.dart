@@ -1,10 +1,9 @@
 import 'package:get/get.dart';
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:uuid/uuid.dart';
-import 'package:Memento/widgets/picker/image_picker_dialog.dart';
+import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
+import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 
@@ -19,40 +18,11 @@ class AddProductPage extends StatefulWidget {
 }
 
 class _AddProductPageState extends State<AddProductPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _stockController = TextEditingController();
-  final _descController = TextEditingController();
-  String? _imageUrl;
-  Uint8List? _imageBytes;
+  final _formKey = GlobalKey<FormBuilderState>();
 
   @override
   void initState() {
     super.initState();
-    if (widget.product != null) {
-      _nameController.text = widget.product!.name;
-      _priceController.text = widget.product!.price.toString();
-      _stockController.text = widget.product!.stock.toString();
-      _descController.text = widget.product!.description;
-      _imageUrl = widget.product!.image;
-    }
-  }
-
-  Future<void> _pickImage() async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder:
-          (context) =>
-              ImagePickerDialog(enableCrop: true, cropAspectRatio: 1.0),
-    );
-
-    if (result != null) {
-      setState(() {
-        _imageUrl = result['url'];
-        _imageBytes = result['bytes'];
-      });
-    }
   }
 
   Future<void> _confirmArchive() async {
@@ -113,40 +83,42 @@ class _AddProductPageState extends State<AddProductPage> {
     }
   }
 
-  Future<void> _submit() async {
-    if (_formKey.currentState!.validate()) {
-      final product =
-          widget.product != null
-              ? Product(
-                id: widget.product!.id,
-                name: _nameController.text,
-                description: _descController.text,
-                image: _imageUrl ?? widget.product!.image,
-                stock: int.parse(_stockController.text),
-                price: int.parse(_priceController.text),
-                exchangeStart: widget.product!.exchangeStart,
-                exchangeEnd: widget.product!.exchangeEnd,
-                useDuration: widget.product!.useDuration,
-              )
-              : Product(
-                id: const Uuid().v4(),
-                name: _nameController.text,
-                description: _descController.text,
-                image: _imageUrl ?? '',
-                stock: int.parse(_stockController.text),
-                price: int.parse(_priceController.text),
-                exchangeStart: DateTime.now(),
-                exchangeEnd: DateTime.now().add(const Duration(days: 30)),
-                useDuration: 30,
-              );
+  Future<void> _submit(Map<String, dynamic> values) async {
+    // 处理图片值（可能是 Map 或 String）
+    final imageValue = values['image'];
+    final imageUrl = imageValue is Map ? (imageValue['url'] as String?) ?? '' : (imageValue as String? ?? '');
 
-      if (widget.product != null) {
-        widget.controller.products.removeWhere((p) => p.id == product.id);
-      }
-      widget.controller.addProduct(product);
-      await widget.controller.saveProducts();
-      Navigator.pop(context);
+    final product =
+        widget.product != null
+            ? Product(
+              id: widget.product!.id,
+              name: values['name'] as String,
+              description: values['description'] as String? ?? '',
+              image: imageUrl.isEmpty ? widget.product!.image : imageUrl,
+              stock: int.parse(values['stock'] as String),
+              price: int.parse(values['price'] as String),
+              exchangeStart: widget.product!.exchangeStart,
+              exchangeEnd: widget.product!.exchangeEnd,
+              useDuration: widget.product!.useDuration,
+            )
+            : Product(
+              id: const Uuid().v4(),
+              name: values['name'] as String,
+              description: values['description'] as String? ?? '',
+              image: imageUrl,
+              stock: int.parse(values['stock'] as String),
+              price: int.parse(values['price'] as String),
+              exchangeStart: DateTime.now(),
+              exchangeEnd: DateTime.now().add(const Duration(days: 30)),
+              useDuration: 30,
+            );
+
+    if (widget.product != null) {
+      widget.controller.products.removeWhere((p) => p.id == product.id);
     }
+    widget.controller.addProduct(product);
+    await widget.controller.saveProducts();
+    Navigator.pop(context);
   }
 
   @override
@@ -169,7 +141,7 @@ class _AddProductPageState extends State<AddProductPage> {
           ],
           IconButton(
             icon: const Icon(Icons.check),
-            onPressed: _submit,
+            onPressed: () => _formKey.currentState?.save(),
             tooltip: 'store_saveButton'.tr,
           ),
         ],
@@ -182,88 +154,63 @@ class _AddProductPageState extends State<AddProductPage> {
               constraints: BoxConstraints(
                 minHeight: constraints.maxHeight - 32,
               ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+              child: FormBuilderWrapper(
+                formKey: _formKey,
+                config: FormConfig(
+                  showSubmitButton: false,
+                  fieldSpacing: 16,
+                  fields: [
                     // 图片选择
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child: Container(
-                        height: 200,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: _buildImagePreview(),
-                      ),
+                    FormFieldConfig(
+                      name: 'image',
+                      type: FormFieldType.imagePicker,
+                      initialValue: widget.product?.image,
+                      extra: {
+                        'enableCrop': true,
+                        'cropAspectRatio': 1.0,
+                        'saveDirectory': 'store/products',
+                      },
                     ),
-                    const SizedBox(height: 20),
                     // 商品名称
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: 'store_productNameLabel'.tr,
-                        border: const OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'store_productNameRequired'.tr;
-                        }
-                        return null;
-                      },
+                    FormFieldConfig(
+                      name: 'name',
+                      type: FormFieldType.text,
+                      labelText: 'store_productNameLabel'.tr,
+                      initialValue: widget.product?.name ?? '',
+                      required: true,
+                      validationMessage: 'store_productNameRequired'.tr,
                     ),
-                    const SizedBox(height: 16),
                     // 价格
-                    TextFormField(
-                      controller: _priceController,
-                      decoration: InputDecoration(
-                        labelText: 'store_priceLabel'.tr,
-                        border: const OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'store_priceRequired'.tr;
-                        }
-                        if (int.tryParse(value) == null) {
-                          return 'store_priceInvalid'.tr;
-                        }
-                        return null;
-                      },
+                    FormFieldConfig(
+                      name: 'price',
+                      type: FormFieldType.number,
+                      labelText: 'store_priceLabel'.tr,
+                      initialValue: widget.product?.price.toString() ?? '0',
+                      required: true,
+                      validationMessage: 'store_priceRequired'.tr,
                     ),
-                    const SizedBox(height: 16),
                     // 库存
-                    TextFormField(
-                      controller: _stockController,
-                      decoration: InputDecoration(
-                        labelText: 'store_stockLabel'.tr,
-                        border: const OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'store_stockRequired'.tr;
-                        }
-                        if (int.tryParse(value) == null) {
-                          return 'store_stockInvalid'.tr;
-                        }
-                        return null;
-                      },
+                    FormFieldConfig(
+                      name: 'stock',
+                      type: FormFieldType.number,
+                      labelText: 'store_stockLabel'.tr,
+                      initialValue: widget.product?.stock.toString() ?? '0',
+                      required: true,
+                      validationMessage: 'store_stockRequired'.tr,
                     ),
-                    const SizedBox(height: 16),
                     // 描述
-                    TextFormField(
-                      controller: _descController,
-                      decoration: InputDecoration(
-                        labelText: 'store_descriptionLabel'.tr,
-                        border: const OutlineInputBorder(),
-                      ),
-                      maxLines: 3,
+                    FormFieldConfig(
+                      name: 'description',
+                      type: FormFieldType.textArea,
+                      labelText: 'store_descriptionLabel'.tr,
+                      initialValue: widget.product?.description ?? '',
+                      extra: {
+                        'minLines': 3,
+                        'maxLines': 5,
+                      },
                     ),
                   ],
+                  onSubmit: _submit,
                 ),
               ),
             ),
@@ -271,62 +218,5 @@ class _AddProductPageState extends State<AddProductPage> {
         },
       ),
     );
-  }
-
-  // 判断是否为网络图片
-  bool isNetworkImage(String path) {
-    return path.startsWith('http://') || path.startsWith('https://');
-  }
-
-  // 构建加载指示器
-  Widget _buildLoadingIndicator() {
-    return const Center(child: CircularProgressIndicator());
-  }
-
-  // 构建错误图片显示
-  Widget _buildErrorImage() {
-    return const Icon(Icons.broken_image, size: 48);
-  }
-
-  // 构建图片预览
-  Widget _buildImagePreview() {
-    if (_imageBytes != null) {
-      return Image.memory(_imageBytes!, fit: BoxFit.cover);
-    } else if (_imageUrl != null && _imageUrl!.isNotEmpty) {
-      return FutureBuilder<String>(
-        future: ImageUtils.getAbsolutePath(_imageUrl!),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData) {
-              final imagePath = snapshot.data!;
-              return isNetworkImage(imagePath)
-                  ? Image.network(
-                    imagePath,
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (context, error, stackTrace) => _buildErrorImage(),
-                  )
-                  : Image.file(
-                    File(imagePath),
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (context, error, stackTrace) => _buildErrorImage(),
-                  );
-            }
-          }
-          return _buildLoadingIndicator();
-        },
-      );
-    }
-    return const Icon(Icons.add_a_photo, size: 50);
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _priceController.dispose();
-    _stockController.dispose();
-    _descController.dispose();
-    super.dispose();
   }
 }

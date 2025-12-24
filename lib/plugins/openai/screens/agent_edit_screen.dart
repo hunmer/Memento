@@ -1,13 +1,9 @@
-import 'package:Memento/plugins/openai/widgets/prompt_editor.dart';
 import 'package:get/get.dart';
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/clipboard_service.dart';
 import 'package:uuid/uuid.dart';
-import 'package:Memento/utils/image_utils.dart';
-import 'package:Memento/widgets/picker/circle_icon_picker.dart';
-import 'package:Memento/widgets/picker/image_picker_dialog.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:Memento/plugins/openai/models/service_provider.dart';
@@ -54,32 +50,16 @@ class AgentEditScreen extends StatefulWidget {
 }
 
 class _AgentEditScreenState extends State<AgentEditScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _promptController = TextEditingController();
-  IconData _selectedIcon = Icons.smart_toy;
-  Color _selectedIconColor = Colors.blue;
-  String? _avatarUrl;
-  final _baseUrlController = TextEditingController();
-  final _headersController = TextEditingController();
-  final _modelController = TextEditingController();
-  String _selectedProviderId = '';
-  final List<String> _tags = [];
-  final _tagController = TextEditingController();
-  bool _enableFunctionCalling = false;
-  bool _enableOpeningQuestions = false;
-  final List<String> _openingQuestions = [];
-  final _openingQuestionController = TextEditingController();
-  final List<Prompt> _messages = []; // 预设消息列表
+  // FormBuilderWrapper key
+  final _formKey = GlobalKey<FormBuilderState>();
 
+  // 服务商相关状态（需要特殊处理）
   List<ServiceProvider> _providers = [];
-  bool _isLoadingProviders = true;
+  String _selectedProviderId = '';
 
-  // Prompt 预设相关
+  // 预设相关（用于下拉选项）
   final PromptPresetService _presetService = PromptPresetService();
   List<PromptPreset> _presets = [];
-  String? _selectedPresetId;
 
   @override
   void initState() {
@@ -87,24 +67,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     _loadProviders();
     _loadPresets();
     if (widget.agent != null) {
-      _nameController.text = widget.agent!.name;
-      _descriptionController.text = widget.agent!.description;
-      _promptController.text = widget.agent!.systemPrompt;
-      _selectedIcon = widget.agent!.icon ?? Icons.smart_toy;
-      // 如果 iconColor 为 null，使用服务商默认颜色
-      _selectedIconColor = widget.agent!.iconColor ??
-          _getColorForServiceProvider(widget.agent!.serviceProviderId);
-      _avatarUrl = widget.agent!.avatarUrl;
       _selectedProviderId = widget.agent!.serviceProviderId;
-      _baseUrlController.text = widget.agent!.baseUrl;
-      _modelController.text = widget.agent!.model;
-      _headersController.text = _formatHeaders(widget.agent!.headers);
-      _tags.addAll(widget.agent!.tags);
-      _enableFunctionCalling = widget.agent!.enableFunctionCalling;
-      _selectedPresetId = widget.agent!.promptPresetId;
-      _enableOpeningQuestions = widget.agent!.enableOpeningQuestions;
-      _openingQuestions.addAll(widget.agent!.openingQuestions);
-      _messages.addAll(widget.agent!.messages ?? []);
     }
   }
 
@@ -132,89 +95,22 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   }
 
   Future<void> _loadProviders() async {
-    setState(() {
-      _isLoadingProviders = true;
-    });
-
     try {
       final providerController = ProviderController();
       _providers = await providerController.getProviders();
 
       if (_providers.isNotEmpty) {
         if (_selectedProviderId.isEmpty) {
-          // 如果没有选择服务商，使用第一个
           _selectedProviderId = _providers.first.id;
-          _updateProviderFields(_providers.first);
-        } else {
-          // 如果已经选择了服务商，找到对应的服务商
-          final provider = _providers.firstWhere(
-            (p) => p.id == _selectedProviderId,
-            orElse: () => _providers.first,
-          );
-          _selectedProviderId = provider.id;
-
-          // 如果是新建智能体，或者是编辑但字段为空，则使用服务商的默认配置
-          if (widget.agent == null ||
-              _baseUrlController.text.isEmpty ||
-              _headersController.text.isEmpty) {
-            _updateProviderFields(provider);
-          }
-        }
-      } else {
-        // 如果没有可用的服务商，创建一个默认的
-        _selectedProviderId = 'default';
-        final defaultProvider = ServiceProvider(
-          id: 'default',
-          label: 'Default',
-          baseUrl: '',
-          headers: {},
-        );
-        if (_baseUrlController.text.isEmpty ||
-            _headersController.text.isEmpty) {
-          _updateProviderFields(defaultProvider);
         }
       }
+      setState(() {});
     } catch (e) {
       if (mounted) {
         ToastService.instance.showToast(
           '${'openai_loadProvidersError'.tr}: $e',
         );
       }
-    } finally {
-      setState(() {
-        _isLoadingProviders = false;
-      });
-    }
-  }
-
-  void _updateProviderFields(ServiceProvider provider, {bool updateModel = true}) {
-    // 如果是新建智能体，或者用户明确要更新配置，则使用服务商的默认配置
-    setState(() {
-      _baseUrlController.text = provider.baseUrl;
-      _headersController.text = _formatHeaders(provider.headers);
-
-      // 使用服务商的默认模型
-      if (updateModel && provider.defaultModel != null && provider.defaultModel!.isNotEmpty) {
-        _modelController.text = provider.defaultModel!;
-      }
-    });
-
-    // 显示确认更新的消息
-    if (mounted) {
-      ToastService.instance.showToast('openai_configUpdated'.tr);
-    }
-  }
-
-  Future<void> _selectModel() async {
-    final selectedModel = await NavigationHelper.push<LLMModel>(
-      context,
-      ModelSearchScreen(initialModelId: _modelController.text),
-    );
-
-    if (selectedModel != null) {
-      setState(() {
-        _modelController.text = selectedModel.id;
-      });
     }
   }
 
@@ -243,74 +139,45 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     return result;
   }
 
-  void _showAddTagDialog() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('openai_addTag'.tr),
-            content: TextField(
-              controller: _tagController,
-              autofocus: true,
-              decoration: InputDecoration(hintText: 'openai_enterTag'.tr),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('openai_cancel'.tr),
-              ),
-              TextButton(
-                onPressed: () {
-                  final tag = _tagController.text.trim();
-                  if (tag.isNotEmpty && !_tags.contains(tag)) {
-                    setState(() {
-                      _tags.add(tag);
-                      _tagController.clear();
-                    });
-                  }
-                  Navigator.pop(context);
-                },
-                child: Text('openai_add'.tr),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _removeTag(String tag) {
-    setState(() {
-      _tags.remove(tag);
-    });
-  }
-
   Future<void> _saveAgent() async {
-    if (!_formKey.currentState!.validate()) {
+    if (_formKey.currentState == null || !_formKey.currentState!.saveAndValidate()) {
       return;
     }
 
+    final values = _formKey.currentState!.value;
+
+    // 从 iconAvatarRow 字段获取图标和头像
+    final iconAvatarData = values['iconAvatar'] as Map<String, dynamic>?;
+
+    // 从 promptEditor 字段获取提示词
+    final prompts = values['promptEditor'] as List<dynamic>? ?? [];
+    final systemPrompt = prompts
+            .where((p) => p is Prompt && p.type == 'system')
+            .map((p) => (p as Prompt).content)
+            .firstOrNull ??
+        '';
+    final messages = prompts.where((p) => p is Prompt && p.type != 'system').toList();
+
     final agent = AIAgent(
       id: widget.agent?.id ?? const Uuid().v4(),
-      name: _nameController.text,
-      description: _descriptionController.text,
+      name: values['name'] as String? ?? '',
+      description: values['description'] as String? ?? '',
       serviceProviderId: _selectedProviderId,
-      baseUrl: _baseUrlController.text,
-      headers: _parseHeaders(_headersController.text),
-      systemPrompt: _promptController.text,
-      model:
-          _modelController.text.isEmpty
-              ? 'gpt-3.5-turbo'
-              : _modelController.text,
-      tags: _tags,
+      baseUrl: values['baseUrl'] as String? ?? '',
+      headers: _parseHeaders(values['headers'] as String? ?? ''),
+      systemPrompt: systemPrompt,
+      model: values['model'] as String? ?? 'gpt-3.5-turbo',
+      tags: (values['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       createdAt: widget.agent?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),
-      icon: _selectedIcon,
-      iconColor: _selectedIconColor,
-      avatarUrl: _avatarUrl,
-      enableFunctionCalling: _enableFunctionCalling,
-      promptPresetId: _selectedPresetId,
-      enableOpeningQuestions: _enableOpeningQuestions,
-      openingQuestions: _openingQuestions,
-      messages: _messages.isNotEmpty ? _messages : null,
+      icon: iconAvatarData?['icon'] as IconData?,
+      iconColor: iconAvatarData?['iconColor'] as Color?,
+      avatarUrl: iconAvatarData?['avatarUrl'] as String?,
+      enableFunctionCalling: values['enableFunctionCalling'] as bool? ?? false,
+      promptPresetId: values['promptPresetId'] as String?,
+      enableOpeningQuestions: values['enableOpeningQuestions'] as bool? ?? false,
+      openingQuestions: (values['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? [],
+      messages: messages.isNotEmpty ? messages.cast<Prompt>() : null,
     );
 
     try {
@@ -448,32 +315,43 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   }
 
   Future<void> _cloneAgent() async {
-    if (widget.agent == null) return;
+    if (widget.agent == null || _formKey.currentState == null) return;
+
+    final values = _formKey.currentState!.value;
+
+    // 从 iconAvatarRow 字段获取图标和头像
+    final iconAvatarData = values['iconAvatar'] as Map<String, dynamic>?;
+
+    // 从 promptEditor 字段获取提示词
+    final prompts = values['promptEditor'] as List<dynamic>? ?? [];
+    final systemPrompt = prompts
+            .where((p) => p is Prompt && p.type == 'system')
+            .map((p) => (p as Prompt).content)
+            .firstOrNull ??
+        '';
+    final messages = prompts.where((p) => p is Prompt && p.type != 'system').toList();
 
     // 创建一个新的智能体，复制当前智能体的所有属性，但生成新ID并更新名称
     final clonedAgent = AIAgent(
       id: const Uuid().v4(),
-      name: '${_nameController.text} (复制)',
-      description: _descriptionController.text,
+      name: '${values['name'] as String? ?? ''} (复制)',
+      description: values['description'] as String? ?? '',
       serviceProviderId: _selectedProviderId,
-      baseUrl: _baseUrlController.text,
-      headers: _parseHeaders(_headersController.text),
-      systemPrompt: _promptController.text,
-      model:
-          _modelController.text.isEmpty
-              ? 'gpt-3.5-turbo'
-              : _modelController.text,
-      tags: List.from(_tags),
+      baseUrl: values['baseUrl'] as String? ?? '',
+      headers: _parseHeaders(values['headers'] as String? ?? ''),
+      systemPrompt: systemPrompt,
+      model: values['model'] as String? ?? 'gpt-3.5-turbo',
+      tags: (values['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
-      icon: _selectedIcon,
-      iconColor: _selectedIconColor,
-      avatarUrl: _avatarUrl,
-      enableFunctionCalling: _enableFunctionCalling,
-      promptPresetId: _selectedPresetId,
-      enableOpeningQuestions: _enableOpeningQuestions,
-      openingQuestions: List.from(_openingQuestions),
-      messages: List.from(_messages),
+      icon: iconAvatarData?['icon'] as IconData?,
+      iconColor: iconAvatarData?['iconColor'] as Color?,
+      avatarUrl: iconAvatarData?['avatarUrl'] as String?,
+      enableFunctionCalling: values['enableFunctionCalling'] as bool? ?? false,
+      promptPresetId: values['promptPresetId'] as String?,
+      enableOpeningQuestions: values['enableOpeningQuestions'] as bool? ?? false,
+      openingQuestions: (values['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? [],
+      messages: messages.isNotEmpty ? messages.cast<Prompt>() : null,
     );
 
     try {
@@ -504,7 +382,6 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               : 'openai_editAgent'.tr,
         ),
         actions: [
-          // 只有在编辑现有智能体时才显示分享、删除和克隆按钮
           if (widget.agent != null) ...[
             IconButton(
               icon: const Icon(Icons.share),
@@ -529,519 +406,328 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
           ),
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  child: CircleIconPicker(
-                    currentIcon: _selectedIcon,
-                    backgroundColor: _selectedIconColor,
-                    onIconSelected: (icon) {
-                      setState(() {
-                        _selectedIcon = icon;
-                      });
-                    },
-                    onColorSelected: (color) {
-                      setState(() {
-                        _selectedIconColor = color;
-                      });
-                    },
-                  ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          FormBuilderWrapper(
+            formKey: _formKey,
+            buttonBuilder: (context, onSubmit, onReset) {
+              return ElevatedButton(
+                onPressed: () => _testAgentWithSubmit(onSubmit),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () async {
-                      final result = await showDialog<Map<String, dynamic>>(
-                        context: context,
-                        builder:
-                            (context) => ImagePickerDialog(
-                              initialUrl: _avatarUrl,
-                              saveDirectory: 'openai/agent_avatars',
-                              enableCrop: true,
-                              cropAspectRatio: 1.0,
-                            ),
-                      );
-                      if (result != null && result['url'] != null) {
-                        setState(() {
-                          _avatarUrl = result['url'] as String;
-                        });
-                      }
-                    },
-                    child: SizedBox(
-                      width: 64,
-                      height: 64,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.5),
-                            width: 2,
-                          ),
-                        ),
-                        child:
-                            _avatarUrl != null && _avatarUrl!.isNotEmpty
-                                ? FutureBuilder<String>(
-                                  future:
-                                      _avatarUrl!.startsWith('http')
-                                          ? Future.value(_avatarUrl!)
-                                          : ImageUtils.getAbsolutePath(
-                                            _avatarUrl,
-                                          ),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      return Center(
-                                        child: AspectRatio(
-                                          aspectRatio: 1.0,
-                                          child: ClipOval(
-                                            child:
-                                                _avatarUrl!.startsWith('http')
-                                                    ? Image.network(
-                                                      snapshot.data!,
-                                                      width: 64,
-                                                      height: 64,
-                                                      fit: BoxFit.cover,
-                                                      errorBuilder:
-                                                          (
-                                                            context,
-                                                            error,
-                                                            stackTrace,
-                                                          ) => const Icon(
-                                                            Icons.broken_image,
-                                                          ),
-                                                    )
-                                                    : Image.file(
-                                                      File(snapshot.data!),
-                                                      width: 64,
-                                                      height: 64,
-                                                      fit: BoxFit.cover,
-                                                      errorBuilder:
-                                                          (
-                                                            context,
-                                                            error,
-                                                            stackTrace,
-                                                          ) => const Icon(
-                                                            Icons.broken_image,
-                                                          ),
-                                                    ),
-                                          ),
-                                        ),
-                                      );
-                                    } else if (snapshot.hasError) {
-                                      return const Icon(Icons.broken_image);
-                                    } else {
-                                      return const CircularProgressIndicator();
-                                    }
-                                  },
-                                )
-                                : Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.add_photo_alternate_outlined,
-                                        size: 24,
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'openai_avatar'.tr,
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                      ),
-                    ),
-                  ),
+                child: Text('openai_testAgent'.tr),
+              );
+            },
+            config: FormConfig(
+              showSubmitButton: false,
+              showResetButton: false,
+              fieldSpacing: 16,
+              fields: [
+                // 图标头像行
+                FormFieldConfig(
+                  name: 'iconAvatar',
+                  type: FormFieldType.iconAvatarRow,
+                  initialValue: {
+                    'icon': widget.agent?.icon,
+                    'iconColor': widget.agent?.iconColor ?? _getColorForServiceProvider(_selectedProviderId),
+                    'avatarUrl': widget.agent?.avatarUrl,
+                  },
+                  extra: {
+                    'avatarSaveDirectory': 'openai/agent_avatars',
+                  },
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextInputField(
-              controller: _nameController,
-              labelText: 'openai_agentName'.tr,
-              hintText: 'openai_enterAgentName'.tr,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'openai_pleaseEnterName'.tr;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            _isLoadingProviders
-                ? Center(
-                  child: Text('openai_loadingProviders'.tr),
-                )
-                : SelectField<String>(
-                  value: _providers.isNotEmpty &&
-                         _providers.any((p) => p.id == _selectedProviderId)
-                      ? _selectedProviderId
-                          : (_providers.isNotEmpty
-                              ? _providers.first.id
-                              : null),
+                // 名称
+                FormFieldConfig(
+                  name: 'name',
+                  type: FormFieldType.text,
+                  labelText: 'openai_agentName'.tr,
+                  hintText: 'openai_enterAgentName'.tr,
+                  initialValue: widget.agent?.name ?? '',
+                  required: true,
+                  validationMessage: 'openai_pleaseEnterName'.tr,
+                ),
+                // 服务商选择 - 使用自定义渲染处理特殊逻辑
+                FormFieldConfig(
+                  name: 'serviceProvider',
+                  type: FormFieldType.select,
                   labelText: 'openai_serviceProvider'.tr,
-                  items:
-                      _providers.map((provider) {
-                        return DropdownMenuItem(
-                          value: provider.id,
-                          child: Text(provider.label),
-                        );
-                      }).toList(),
+                  initialValue: _providers.any((p) => p.id == _selectedProviderId)
+                      ? _selectedProviderId
+                      : (_providers.isNotEmpty ? _providers.first.id : null),
+                  required: true,
+                  items: _providers
+                      .map((p) => DropdownMenuItem(
+                            value: p.id,
+                            child: Text(p.label),
+                          ))
+                      .toList(),
                   onChanged: (value) {
                     if (value != null) {
-                      final provider = _providers.firstWhere(
-                        (p) => p.id == value,
-                      );
-
-                      // 如果是编辑现有智能体，先询问用户是否要更新配置
-                      if (widget.agent != null) {
-                        showDialog(
-                          context: context,
-                          builder:
-                              (context) => AlertDialog(
-                                title: Text(
-                                  'openai_updateConfig'.tr,
-                                ),
-                                content: Text(
-                                  'openai_updateConfigConfirm'.tr,
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      setState(() {
-                                        _selectedProviderId = value;
-                                      });
-                                    },
-                                    child: Text(
-                                      'openai_keepCurrentConfig'.tr,
-                                    ),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      setState(() {
-                                        _selectedProviderId = value;
-                                        _updateProviderFields(provider);
-                                      });
-                                    },
-                                    child: Text(
-                                      'openai_useDefaultConfig'.tr,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                        );
-                      } else {
-                        // 如果是新建智能体，直接更新配置
-                        setState(() {
-                          _selectedProviderId = value;
-                          _updateProviderFields(provider);
-                        });
-                      }
+                      final provider = _providers.firstWhere((p) => p.id == value);
+                      setState(() => _selectedProviderId = value);
+                      // 服务商切换时的特殊逻辑
+                      _handleProviderChange(provider);
                     }
                   },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'openai_pleaseSelectProvider'.tr;
-                    }
-                    return null;
+                ),
+                // 描述
+                FormFieldConfig(
+                  name: 'description',
+                  type: FormFieldType.textArea,
+                  labelText: 'openai_description'.tr,
+                  hintText: 'openai_enterDescription'.tr,
+                  initialValue: widget.agent?.description ?? '',
+                  required: true,
+                  validationMessage: 'openai_pleaseEnterDescription'.tr,
+                  extra: {'minLines': 3, 'maxLines': 3},
+                ),
+                // Prompt 预设选择
+                FormFieldConfig(
+                  name: 'promptPresetId',
+                  type: FormFieldType.select,
+                  labelText: 'openai_promptPreset'.tr,
+                  hintText: 'openai_selectPromptPreset'.tr,
+                  initialValue: widget.agent?.promptPresetId,
+                  items: [
+                    DropdownMenuItem<String>(
+                      value: null,
+                      child: Text('openai_noPreset'.tr),
+                    ),
+                    ..._presets.map((preset) => DropdownMenuItem<String>(
+                          value: preset.id,
+                          child: Text(preset.name),
+                        )),
+                  ],
+                ),
+                // 提示词编辑器
+                FormFieldConfig(
+                  name: 'promptEditor',
+                  type: FormFieldType.promptEditor,
+                  initialValue: widget.agent?.messages ?? [],
+                ),
+                // BaseUrl
+                FormFieldConfig(
+                  name: 'baseUrl',
+                  type: FormFieldType.text,
+                  labelText: 'openai_baseUrl'.tr,
+                  hintText: 'openai_enterBaseUrl'.tr,
+                  initialValue: widget.agent?.baseUrl ?? '',
+                  required: true,
+                  validationMessage: 'openai_pleaseEnterBaseUrl'.tr,
+                ),
+                // 模型（带搜索按钮）
+                FormFieldConfig(
+                  name: 'model',
+                  type: FormFieldType.text,
+                  labelText: 'openai_model'.tr,
+                  hintText: 'openai_enterModel'.tr,
+                  initialValue: widget.agent?.model ?? '',
+                  suffixButtons: [
+                    InputGroupButton(
+                      icon: Icons.search,
+                      tooltip: 'openai_searchModel'.tr,
+                      onPressed: () => _selectModel(),
+                    ),
+                  ],
+                ),
+                // Headers
+                FormFieldConfig(
+                  name: 'headers',
+                  type: FormFieldType.textArea,
+                  labelText: 'openai_headers'.tr,
+                  hintText: 'openai_enterHeaders'.tr,
+                  initialValue: _formatHeaders(widget.agent?.headers ?? {}),
+                  extra: {'minLines': 3, 'maxLines': 3},
+                ),
+                // 标签
+                FormFieldConfig(
+                  name: 'tags',
+                  type: FormFieldType.tags,
+                  initialTags: widget.agent?.tags ?? [],
+                ),
+                // 启用函数调用
+                FormFieldConfig(
+                  name: 'enableFunctionCalling',
+                  type: FormFieldType.switchField,
+                  labelText: 'openai_enablePluginFunctionCalls'.tr,
+                  hintText: 'openai_allowAICallPluginFunctions'.tr,
+                  initialValue: widget.agent?.enableFunctionCalling ?? false,
+                ),
+                // 启用开场白问题
+                FormFieldConfig(
+                  name: 'enableOpeningQuestions',
+                  type: FormFieldType.switchField,
+                  labelText: 'openai_enableGuessWhatYouWantToAsk'.tr,
+                  hintText: 'openai_showPresetOpeningQuestions'.tr,
+                  initialValue: widget.agent?.enableOpeningQuestions ?? false,
+                ),
+                // 开场白问题列表（条件显示）
+                FormFieldConfig(
+                  name: 'openingQuestions',
+                  type: FormFieldType.listAdd,
+                  initialValue: widget.agent?.openingQuestions ?? [],
+                  extra: {
+                    'initialItems': widget.agent?.openingQuestions ?? [],
                   },
-                ),
-            const SizedBox(height: 16),
-            TextAreaField(
-              controller: _descriptionController,
-              labelText: 'openai_description'.tr,
-              hintText: 'openai_enterDescription'.tr,
-              minLines: 3,
-              maxLines: 3,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'openai_pleaseEnterDescription'.tr;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            // Prompt 预设选择
-            SelectField<String>(
-              value: _selectedPresetId != null &&
-                     _presets.any((p) => p.id == _selectedPresetId)
-                  ? _selectedPresetId
-                      : null,
-              labelText: 'openai_promptPreset'.tr,
-              hintText: 'openai_selectPromptPreset'.tr,
-              items: [
-                DropdownMenuItem<String>(
-                  value: null,
-                  child: Text('openai_noPreset'.tr),
-                ),
-                ..._presets.map((preset) {
-                  return DropdownMenuItem<String>(
-                    value: preset.id,
-                    child: Text(preset.name),
-                  );
-                }),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _selectedPresetId = value;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            // 提示词与消息编辑器
-            Text(
-              '提示词与消息',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 400, // 为 PromptEditor 提供明确的高度
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: PromptEditor(
-                  prompts: () {
-                    final prompts = <Prompt>[];
-                    if (_promptController.text.isNotEmpty) {
-                      prompts.add(Prompt(type: 'system', content: _promptController.text));
-                    }
-                    prompts.addAll(_messages);
-                    return prompts;
-                  }(),
-                  onPromptsChanged: (prompts) {
-                    setState(() {
-                      // 清空原有数据
-                      _promptController.clear();
-                      _messages.clear();
-
-                      // 分离 system prompt 和 messages
-                      for (final prompt in prompts) {
-                        if (prompt.type == 'system') {
-                          _promptController.text = prompt.content;
-                        } else if (prompt.content.isNotEmpty) {
-                          _messages.add(prompt);
-                        }
-                      }
-                    });
-                  },
-                  separateSystemPrompt: true,
-                  systemPromptController: _promptController,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const SizedBox(height: 16),
-            TextInputField(
-              controller: _baseUrlController,
-              labelText: 'openai_baseUrl'.tr,
-              hintText: 'openai_enterBaseUrl'.tr,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'openai_pleaseEnterBaseUrl'.tr;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextInputField(
-                    controller: _modelController,
-                    labelText: 'openai_model'.tr,
-                    hintText: 'openai_enterModel'.tr,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: _selectModel,
-                  tooltip: 'openai_searchModel'.tr,
+                  visible: (values) => values['enableOpeningQuestions'] == true,
                 ),
               ],
-            ),
-            const SizedBox(height: 16),
-            TextAreaField(
-              controller: _headersController,
-              labelText: 'openai_headers'.tr,
-              hintText: 'openai_enterHeaders'.tr,
-              minLines: 3,
-              maxLines: 3,
-            ),
-            const SizedBox(height: 16),
-            TagsField(
-              tags: _tags,
-              onAddTag: _showAddTagDialog,
-              onRemoveTag: _removeTag,
-              addButtonText: 'openai_addTag'.tr,
-            ),
-            const SizedBox(height: 24),
-            SwitchField(
-              title: 'openai_enablePluginFunctionCalls'.tr,
-              subtitle: 'openai_allowAICallPluginFunctions'.tr,
-              value: _enableFunctionCalling,
-              onChanged: (value) {
-                setState(() {
-                  _enableFunctionCalling = value;
-                });
+              onSubmit: (values) {
+                // 由 _saveAgent 处理
               },
             ),
-            const SizedBox(height: 16),
-            SwitchField(
-              title: 'openai_enableGuessWhatYouWantToAsk'.tr,
-              subtitle: 'openai_showPresetOpeningQuestions'.tr,
-              value: _enableOpeningQuestions,
-              onChanged: (value) {
-                setState(() {
-                  _enableOpeningQuestions = value;
-                });
+          ),
+          ],
+        ),
+      );
+  }
+
+  // 处理服务商切换
+  void _handleProviderChange(ServiceProvider provider) {
+    // 如果是编辑现有智能体，先询问用户是否要更新配置
+    if (widget.agent != null) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('openai_updateConfig'.tr),
+          content: Text('openai_updateConfigConfirm'.tr),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // 保留当前配置，不更新
               },
+              child: Text('openai_keepCurrentConfig'.tr),
             ),
-            if (_enableOpeningQuestions) ...[
-              const SizedBox(height: 16),
-              EditableListField(
-                items: _openingQuestions,
-                controller: _openingQuestionController,
-                onAdd: () {
-                  final question = _openingQuestionController.text.trim();
-                  if (question.isNotEmpty) {
-                    setState(() {
-                      _openingQuestions.add(question);
-                      _openingQuestionController.clear();
-                    });
-                  }
-                },
-                onRemove: (index) {
-                  setState(() {
-                    _openingQuestions.removeAt(index);
-                  });
-                },
-                onUpdate: (index, newContent) {
-                  setState(() {
-                    _openingQuestions[index] = newContent;
-                  });
-                },
-                addButtonText: '添加',
-                inputLabel: '添加开场白问题',
-                inputHint: '输入一个问题',
-                titleText: '开场白问题列表',
-                maxLines: 2,
-                primaryColor: Theme.of(context).colorScheme.primary,
-              ),
-            ],
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _testAgent,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 48),
-              ),
-              child: Text('openai_testAgent'.tr),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // 更新为服务商默认配置
+                _updateFormWithProvider(provider);
+              },
+              child: Text('openai_useDefaultConfig'.tr),
             ),
           ],
         ),
-      ),
+      );
+    } else {
+      // 新建智能体，直接使用服务商默认配置
+      _updateFormWithProvider(provider);
+    }
+  }
+
+  // 使用服务商配置更新表单
+  void _updateFormWithProvider(ServiceProvider provider) {
+    if (_formKey.currentState != null) {
+      final currentValues = Map<String, dynamic>.from(_formKey.currentState!.value);
+      currentValues['baseUrl'] = provider.baseUrl;
+      currentValues['headers'] = _formatHeaders(provider.headers);
+      if (provider.defaultModel != null && provider.defaultModel!.isNotEmpty) {
+        currentValues['model'] = provider.defaultModel!;
+      }
+      _formKey.currentState!.patchValue(currentValues);
+    }
+    ToastService.instance.showToast('openai_configUpdated'.tr);
+  }
+
+  // 模型选择
+  Future<void> _selectModel() async {
+    final currentModel = _formKey.currentState?.value['model'] as String? ?? '';
+    final selectedModel = await NavigationHelper.push<LLMModel>(
+      context,
+      ModelSearchScreen(initialModelId: currentModel),
     );
+    if (selectedModel != null && _formKey.currentState != null) {
+      _formKey.currentState!.patchValue({'model': selectedModel.id});
+    }
+  }
+
+  // 触发表单验证并测试 Agent
+  Future<void> _testAgentWithSubmit(VoidCallback onSubmit) async {
+    // 首先调用 onSubmit 回调触发表单验证和 onSubmitted
+    onSubmit();
+
+    // 等待一帧让表单状态更新
+    await Future.delayed(Duration.zero);
+
+    // 然后调用 _testAgent，它会再次验证并获取表单值
+    await _testAgent();
   }
 
   Future<void> _testAgent() async {
-    if (!_formKey.currentState!.validate()) {
+    if (_formKey.currentState == null || !_formKey.currentState!.saveAndValidate()) {
       return;
     }
 
-    // 获取当前选中的服务商
-    _providers.firstWhere(
-      (p) => p.id == _selectedProviderId,
-      orElse: () => throw Exception('未找到选定的服务商'),
-    );
+    final values = _formKey.currentState!.value;
+
+    // 从 iconAvatarRow 字段获取图标和头像
+    final iconAvatarData = values['iconAvatar'] as Map<String, dynamic>?;
+
+    // 从 promptEditor 字段获取提示词
+    final prompts = values['promptEditor'] as List<dynamic>? ?? [];
+    final systemPrompt = prompts
+            .where((p) => p is Prompt && p.type == 'system')
+            .map((p) => (p as Prompt).content)
+            .firstOrNull ??
+        '';
+    final messages = prompts.where((p) => p is Prompt && p.type != 'system').toList();
 
     // 创建临时agent用于测试，使用表单中的最新配置
-    final headers = _parseHeaders(_headersController.text);
+    final headers = _parseHeaders(values['headers'] as String? ?? '');
     final apiKey = headers['Authorization']?.replaceFirst('Bearer ', '') ?? '';
 
     final testAgent = AIAgent(
       id: 'test',
-      // 如果模型为空，使用 gpt-4-vision-preview 作为默认模型
-      model:
-          _modelController.text.isEmpty
-              ? 'gpt-4-vision-preview'
-              : _modelController.text,
-      name: _nameController.text,
-      description: _descriptionController.text,
+      model: values['model'] as String? ?? 'gpt-4-vision-preview',
+      name: values['name'] as String? ?? '',
+      description: values['description'] as String? ?? '',
       serviceProviderId: _selectedProviderId,
-      baseUrl: _baseUrlController.text,
+      baseUrl: values['baseUrl'] as String? ?? '',
       headers: headers,
-      systemPrompt: _promptController.text,
-      tags: _tags,
+      systemPrompt: systemPrompt,
+      tags: (values['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
-      // 默认参数值
+      icon: iconAvatarData?['icon'] as IconData?,
+      iconColor: iconAvatarData?['iconColor'] as Color?,
+      avatarUrl: iconAvatarData?['avatarUrl'] as String?,
       temperature: 0.7,
       maxLength: 2000,
       topP: 1.0,
       frequencyPenalty: 0.0,
       presencePenalty: 0.0,
-      enableFunctionCalling: _enableFunctionCalling,
-      promptPresetId: _selectedPresetId,
-      enableOpeningQuestions: _enableOpeningQuestions,
-      openingQuestions: _openingQuestions,
-      messages: _messages.isNotEmpty ? List.from(_messages) : null,
+      enableFunctionCalling: values['enableFunctionCalling'] as bool? ?? false,
+      promptPresetId: values['promptPresetId'] as String?,
+      enableOpeningQuestions: values['enableOpeningQuestions'] as bool? ?? false,
+      openingQuestions: (values['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? [],
+      messages: messages.isNotEmpty ? messages.cast<Prompt>() : null,
     );
 
     // 获取当前表单的值
     final formValues = {
-      'name': _nameController.text,
-      'baseUrl': _baseUrlController.text,
-      'model': _modelController.text,
-      'systemPrompt': _promptController.text,
+      'name': values['name'],
+      'baseUrl': values['baseUrl'],
+      'model': values['model'],
+      'systemPrompt': systemPrompt,
       'serviceProviderId': _selectedProviderId,
       'apiKey': apiKey,
-      // 可以在这里添加更多参数，如果界面上有相应的输入控件
-      'temperature': 0.7, // 默认值，如果界面上有输入控件，可以从控件获取
-      'maxLength': 2000, // 默认值
-      'topP': 1.0, // 默认值
-      'frequencyPenalty': 0.0, // 默认值
-      'presencePenalty': 0.0, // 默认值
+      'temperature': 0.7,
+      'maxLength': 2000,
+      'topP': 1.0,
+      'frequencyPenalty': 0.0,
+      'presencePenalty': 0.0,
     };
 
-    // 使用 TestService 的对话框，传递 testAgent 和 formValues
-    // 对话框内部会自动处理测试和显示结果
     await TestService.showLongTextInputDialog(
       context,
-      title:
-          '${'openai_testAgentTitle'.tr}${testAgent.name}',
+      title: '${'openai_testAgentTitle'.tr}${testAgent.name}',
       hintText: 'openai_enterTestText'.tr,
       enableImagePicker: true,
       testAgent: testAgent,
       formValues: formValues,
     );
   }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    _promptController.dispose();
-    _baseUrlController.dispose();
-    _headersController.dispose();
-    _modelController.dispose();
-    _tagController.dispose();
-    _openingQuestionController.dispose();
-    super.dispose();
-  }
 }
-
-// 删除自定义对话框，因为现在使用 TestService 中的对话框
