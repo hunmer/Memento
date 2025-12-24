@@ -32,9 +32,6 @@ import 'package:Memento/screens/widgets_gallery/screens/statistics_example.dart'
 import 'package:Memento/screens/widgets_gallery/screens/custom_dialog_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/smooth_bottom_sheet_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/file_preview_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/tts_settings_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/import_dialog_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/route_history_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/app_drawer_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/widget_config_editor_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/preset_edit_form_example.dart';
@@ -472,12 +469,6 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const SmoothBottomSheetExample());
       case '/widgets_gallery/file_preview':
         return _createRoute(const FilePreviewExample());
-      case '/widgets_gallery/tts_settings':
-        return _createRoute(const TTSSettingsExample());
-      case '/widgets_gallery/import_dialog':
-        return _createRoute(const ImportDialogExample());
-      case '/widgets_gallery/route_history':
-        return _createRoute(const RouteHistoryExample());
       case '/widgets_gallery/app_drawer':
         return _createRoute(const AppDrawerExample());
       case '/widgets_gallery/widget_config_editor':

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/file_preview/file_preview_screen.dart';
 
 /// 文件预览示例
 class FilePreviewExample extends StatelessWidget {
@@ -22,13 +23,61 @@ class FilePreviewExample extends StatelessWidget {
             const SizedBox(height: 16),
             const Text('这是一个文件预览组件，支持多种文件类型。'),
             const SizedBox(height: 8),
-            const Text('需要提供文件路径、文件名、MIME 类型和文件大小。'),
-            const SizedBox(height: 32),
+            const Text('点击下方按钮查看不同类型的文件预览效果：'),
+            const SizedBox(height: 24),
             _buildPreviewButton(
               context,
-              title: '查看使用说明',
-              icon: Icons.info,
-              onPressed: () => _showUsageInfo(context),
+              title: '图片预览',
+              subtitle: '支持缩放和拖动',
+              icon: Icons.image,
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FilePreviewScreen(
+                    filePath: 'app_data/images/sample.jpg',
+                    fileName: 'sample.jpg',
+                    mimeType: 'image/jpeg',
+                    fileSize: 1024000,
+                  ),
+                ),
+              ),
+            ),
+            const Divider(height: 32),
+            _buildPreviewButton(
+              context,
+              title: '视频预览',
+              subtitle: '支持视频播放',
+              icon: Icons.videocam,
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FilePreviewScreen(
+                    filePath: 'app_data/videos/sample.mp4',
+                    fileName: 'sample.mp4',
+                    mimeType: 'video/mp4',
+                    fileSize: 5120000,
+                    isVideo: true,
+                  ),
+                ),
+              ),
+            ),
+            const Divider(height: 32),
+            _buildPreviewButton(
+              context,
+              title: '普通文件预览',
+              subtitle: '显示文件信息',
+              icon: Icons.insert_drive_file,
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FilePreviewScreen(
+                    filePath: 'app_data/documents/report.pdf',
+                    fileName: 'report.pdf',
+                    mimeType: 'application/pdf',
+                    fileSize: 2048000,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -39,53 +88,16 @@ class FilePreviewExample extends StatelessWidget {
   Widget _buildPreviewButton(
     BuildContext context, {
     required String title,
+    required String subtitle,
     required IconData icon,
     required VoidCallback onPressed,
   }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(title),
+      subtitle: Text(subtitle),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: onPressed,
-    );
-  }
-
-  void _showUsageInfo(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('FilePreviewScreen 使用说明'),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('必需参数:', style: TextStyle(fontWeight: FontWeight.bold)),
-              SizedBox(height: 8),
-              Text('• filePath: 文件路径'),
-              Text('• fileName: 文件名称'),
-              Text('• mimeType: 文件 MIME 类型'),
-              Text('• fileSize: 文件大小（字节）'),
-              SizedBox(height: 16),
-              Text('使用示例:', style: TextStyle(fontWeight: FontWeight.bold)),
-              SizedBox(height: 8),
-              Text('''
-FilePreviewScreen(
-  filePath: 'app_data/images/photo.jpg',
-  fileName: 'photo.jpg',
-  mimeType: 'image/jpeg',
-  fileSize: 1024000,
-)'''),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
-          ),
-        ],
-      ),
     );
   }
 }

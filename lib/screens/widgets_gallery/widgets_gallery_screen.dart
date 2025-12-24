@@ -168,21 +168,6 @@ class WidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'CustomDialog',
             route: '/widgets_gallery/custom_dialog',
           ),
-          _buildListItem(
-            context,
-            icon: Icons.record_voice_over,
-            title: 'TTS 设置对话框',
-            subtitle: 'TTSSettingsDialog',
-            route: '/widgets_gallery/tts_settings',
-          ),
-          _buildListItem(
-            context,
-            icon: Icons.upload_file,
-            title: '导入对话框',
-            subtitle: 'ImportDialog',
-            route: '/widgets_gallery/import_dialog',
-          ),
-
           const Divider(),
 
           // 弹窗类
@@ -199,13 +184,6 @@ class WidgetsGalleryScreen extends StatelessWidget {
 
           // 导航类
           _buildSectionHeader(context, '导航类'),
-          _buildListItem(
-            context,
-            icon: Icons.history,
-            title: '路由历史对话框',
-            subtitle: 'RouteHistoryDialog',
-            route: '/widgets_gallery/route_history',
-          ),
           _buildListItem(
             context,
             icon: Icons.menu,

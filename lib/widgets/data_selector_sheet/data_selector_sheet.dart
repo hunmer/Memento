@@ -246,9 +246,6 @@ class _DataSelectorSheetState extends State<DataSelectorSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 拖拽指示器
-          _buildDragHandle(theme),
-
           // 顶部标题栏
           SelectorHeader(
             title: widget.config.title ?? widget.definition.name,
@@ -310,17 +307,6 @@ class _DataSelectorSheetState extends State<DataSelectorSheet> {
     );
   }
 
-  Widget _buildDragHandle(ThemeData theme) {
-    return Container(
-      width: 40,
-      height: 4,
-      margin: const EdgeInsets.only(top: 12, bottom: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.outline.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(2),
-      ),
-    );
-  }
 
   Widget _buildContent() {
     if (_isLoading) {
