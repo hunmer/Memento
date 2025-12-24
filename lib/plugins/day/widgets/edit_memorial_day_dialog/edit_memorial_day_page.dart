@@ -17,6 +17,7 @@ class EditMemorialDayPage extends StatefulWidget {
 
 class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
   late TextEditingController _titleController;
+  late TextEditingController _noteController;
   late DateTime _selectedDate;
   late List<String> _notes;
   late Color _selectedColor;
@@ -29,6 +30,7 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.memorialDay?.title);
+    _noteController = TextEditingController();
     _selectedDate = widget.memorialDay?.targetDate ?? DateTime.now();
     _notes = List.from(widget.memorialDay?.notes ?? []);
     _selectedColor = widget.memorialDay?.backgroundColor ?? Colors.blue[300]!;
@@ -64,6 +66,7 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
   @override
   void dispose() {
     _titleController.dispose();
+    _noteController.dispose();
     super.dispose();
   }
 
@@ -87,8 +90,12 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
   }
 
   void _addNote() {
+    final note = _noteController.text.trim();
+    if (note.isEmpty) return;
+
     setState(() {
-      _notes.add('');
+      _notes.add(note);
+      _noteController.clear();
     });
   }
 
@@ -98,9 +105,10 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
     });
   }
 
-  void _editNote(int index, String content) {
-    _titleController.text = content;
-    _removeNote(index);
+  void _updateNote(int index, String newContent) {
+    setState(() {
+      _notes[index] = newContent;
+    });
   }
 
   void _selectColor(Color color) {
@@ -239,10 +247,10 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
                 padding: const EdgeInsets.all(16),
                 child: EditableListField(
                   items: _notes,
-                  controller: TextEditingController(),
+                  controller: _noteController,
                   onAdd: _addNote,
                   onRemove: _removeNote,
-                  onEdit: _editNote,
+                  onUpdate: _updateNote,
                   addButtonText: 'day_addNote'.tr,
                   inputLabel: 'day_note'.tr,
                   inputHint: 'day_enterNote'.tr,
