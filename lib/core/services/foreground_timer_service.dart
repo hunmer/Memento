@@ -273,17 +273,4 @@ class ForegroundTimerService {
     _iosActivityIds.remove(id);
     debugPrint('iOS Live Activity 已结束: $activityId');
   }
-
-  /// 格式化时间显示
-  static String _formatTime(int seconds) {
-    final hours = seconds ~/ 3600;
-    final minutes = (seconds % 3600) ~/ 60;
-    final secs = seconds % 60;
-
-    if (hours > 0) {
-      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
-    } else {
-      return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
-    }
-  }
 }

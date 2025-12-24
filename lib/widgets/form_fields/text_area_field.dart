@@ -60,7 +60,6 @@ class TextAreaField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     // inline 模式：label 在上方，无边框
     if (inline) {

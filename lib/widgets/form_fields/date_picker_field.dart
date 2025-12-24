@@ -47,7 +47,6 @@ class DatePickerField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     // inline 模式：label 在左，日期在右
     if (inline) {
