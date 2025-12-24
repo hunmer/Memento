@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:Memento/widgets/location_picker.dart';
+import 'package:Memento/widgets/picker/location_picker.dart';
 import 'package:smooth_sheets/smooth_sheets.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'entry_editor_controller.dart';

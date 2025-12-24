@@ -203,9 +203,10 @@ class _LocationPickerState extends State<LocationPicker> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
+    return Material(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
         // 拖拽指示器
         Center(
           child: Container(
@@ -318,6 +319,7 @@ class _LocationPickerState extends State<LocationPicker> {
                   ),
         ),
       ],
+    ),
     );
   }
 }

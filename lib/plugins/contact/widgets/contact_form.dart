@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/widgets/picker/image_picker_dialog.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/plugins/contact/models/contact_model.dart';
 import 'package:Memento/plugins/contact/models/custom_activity_event_model.dart';

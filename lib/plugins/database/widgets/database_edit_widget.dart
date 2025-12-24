@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:Memento/plugins/database/controllers/field_controller.dart';
-import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/widgets/picker/image_picker_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:uuid/uuid.dart';

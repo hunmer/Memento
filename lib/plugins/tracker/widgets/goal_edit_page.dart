@@ -1,12 +1,12 @@
 import 'package:get/get.dart';
 import 'dart:io';
 
-import 'package:Memento/widgets/circle_icon_picker.dart';
-import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/widgets/picker/circle_icon_picker.dart';
+import 'package:Memento/widgets/picker/image_picker_dialog.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import 'package:Memento/widgets/color_picker_section.dart';
+import 'package:Memento/widgets/picker/color_picker_section.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
 import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
 import 'package:Memento/utils/image_utils.dart';

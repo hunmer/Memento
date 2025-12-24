@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/calendar/models/event.dart';
-import 'package:Memento/widgets/circle_icon_picker.dart';
+import 'package:Memento/widgets/picker/circle_icon_picker.dart';
 import 'package:Memento/plugins/calendar/utils/calendar_notification_utils.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/route/route_history_manager.dart';

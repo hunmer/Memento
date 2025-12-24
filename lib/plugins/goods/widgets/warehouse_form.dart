@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/goods/models/warehouse.dart';
-import 'package:Memento/widgets/icon_picker_dialog.dart';
-import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/widgets/picker/icon_picker_dialog.dart';
+import 'package:Memento/widgets/picker/image_picker_dialog.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/core/services/toast_service.dart';
 

@@ -48,7 +48,6 @@ class ClipboardService {
   /// 设置自动读取状态
   set autoReadEnabled(bool value) {
     _autoReadEnabled = value;
-    debugPrint('[ClipboardService] 自动读取剪贴板: ${value ? "开启" : "关闭"}');
   }
 
   /// 是否启用剪贴板监听（已废弃，保留以兼容旧代码）
@@ -63,13 +62,11 @@ class ClipboardService {
   /// 注册处理器
   void registerHandler(String method, ClipboardMethodHandler handler) {
     _handlers[method] = handler;
-    debugPrint('[ClipboardService] 注册处理器: $method');
   }
 
   /// 注销处理器
   void unregisterHandler(String method) {
     _handlers.remove(method);
-    debugPrint('[ClipboardService] 注销处理器: $method');
   }
 
   /// 检查是否有指定 method 的处理器
@@ -83,7 +80,6 @@ class ClipboardService {
     try {
       final clipboard = SystemClipboard.instance;
       if (clipboard == null) {
-        debugPrint('[ClipboardService] 剪贴板不可用');
         return false;
       }
 
@@ -94,10 +90,8 @@ class ClipboardService {
       item.add(Formats.plainText(jsonStr));
       await clipboard.write([item]);
 
-      debugPrint('[ClipboardService] 已写入剪贴板: $method');
       return true;
     } catch (e) {
-      debugPrint('[ClipboardService] 写入剪贴板失败: $e');
       return false;
     }
   }
@@ -138,9 +132,7 @@ class ClipboardService {
   /// 处理剪贴板数据（调用注册的 handler）
   /// 返回 true 如果成功处理了数据
   Future<bool> processClipboard() async {
-    debugPrint('[ClipboardService] 开始检查剪贴板');
     if (!_autoReadEnabled) {
-      debugPrint('[ClipboardService] 剪贴板自动读取已禁用');
       return false;
     }
 
@@ -174,7 +166,6 @@ class ClipboardService {
       // 查找处理器
       final handler = _handlers[data.method];
       if (handler == null) {
-        debugPrint('[ClipboardService] 未找到处理器: ${data.method}');
         return false;
       }
 
@@ -182,11 +173,9 @@ class ClipboardService {
       _lastProcessedContent = text;
 
       // 调用处理器
-      debugPrint('[ClipboardService] 处理剪贴板数据: ${data.method}');
       await handler(data.args);
       return true;
     } catch (e) {
-      debugPrint('[ClipboardService] 处理剪贴板失败: $e');
       return false;
     }
   }

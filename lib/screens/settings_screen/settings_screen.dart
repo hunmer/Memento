@@ -604,6 +604,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pushNamed(context, '/live_activities_test');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.input),
+            title: const Text('表单字段组件测试'),
+            subtitle: const Text('测试 form_fields 组件库'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/form_fields_test');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.category),
+            title: const Text('通用组件示例'),
+            subtitle: const Text('查看 widgets 目录下的通用组件示例'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/widgets_gallery');
+            },
+          ),
           const Divider(),
 
           // 关于

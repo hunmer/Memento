@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:Memento/widgets/icon_picker_dialog.dart';
+import 'package:Memento/widgets/picker/icon_picker_dialog.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:flutter/material.dart';

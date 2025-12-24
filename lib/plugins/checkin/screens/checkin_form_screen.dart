@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:Memento/utils/date_time_utils.dart';
-import 'package:Memento/widgets/circle_icon_picker.dart';
+import 'package:Memento/widgets/picker/circle_icon_picker.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 
