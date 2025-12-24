@@ -63,13 +63,6 @@ class WidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'LocationPicker',
             route: '/widgets_gallery/location_picker',
           ),
-          _buildListItem(
-            context,
-            icon: Icons.access_time,
-            title: '备份时间选择器',
-            subtitle: 'BackupTimePicker',
-            route: '/widgets_gallery/backup_time_picker',
-          ),
 
           const Divider(),
 
