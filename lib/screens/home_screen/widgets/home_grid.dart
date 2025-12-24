@@ -343,7 +343,7 @@ class _HomeGridState extends State<HomeGrid> {
     final isDisabled = !enabledInConfig;
 
     final displayName =
-        plugin?.getPluginName(context) ?? widgetDef.name ?? pluginId;
+        plugin?.getPluginName(context) ?? widgetDef.name;
 
     return _PluginCardState(
       isPluginItem: true,

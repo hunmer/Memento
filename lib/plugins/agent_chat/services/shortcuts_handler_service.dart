@@ -4,8 +4,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:intelligence/intelligence.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
-import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
-import 'package:Memento/plugins/agent_chat/models/file_attachment.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
 import 'package:Memento/plugins/agent_chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';

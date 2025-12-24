@@ -47,7 +47,6 @@ class SwitchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     // inline 模式：无边框，适用于 FormFieldGroup
     if (inline) {
