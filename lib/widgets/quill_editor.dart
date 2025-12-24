@@ -339,5 +339,5 @@ class _QuillEditorWidgetState extends State<QuillEditorWidget> {
   }
 }
 
-// 为了向后兼容,提供 MarkdownEditor 别名
-typedef MarkdownEditor = QuillEditorWidget;
+// 为了向后兼容,提供 QuillEditor 别名
+typedef QuillEditor = QuillEditorWidget;

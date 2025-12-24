@@ -49,7 +49,7 @@ class _NoteEditScreenState extends State<NoteEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: MarkdownEditor(
+      body: QuillEditor(
         initialTitle: widget.note?.title,
         initialContent: widget.note?.content,
         onSave: (title, content) {

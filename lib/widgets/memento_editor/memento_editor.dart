@@ -107,21 +107,14 @@ class _MementoEditorState extends State<MementoEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final date = widget.date ?? DateTime.now();
     DateFormat.yMMMMd(Localizations.localeOf(context).toString()).format(date);
     DateFormat.EEEE(Localizations.localeOf(context).toString()).format(date);
-
-    // Custom Colors based on the design
-    // primary: #D8BFD8 -> Color(0xFFD8BFD8)
-    // background-light: #FAF8F5 -> Color(0xFFFAF8F5)
-    // background-dark: #1f1d1c -> Color(0xFF1F1D1C)
-    
-    final backgroundColor = isDark ? const Color(0xFF1F1D1C) : const Color(0xFFFAF8F5);
-    final surfaceColor = isDark ? Colors.black26 : Colors.white54;
     
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -135,7 +128,8 @@ class _MementoEditorState extends State<MementoEditor> {
                     onPressed: widget.onClose ?? () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close),
                     style: IconButton.styleFrom(
-                      backgroundColor: isDark ? Colors.grey[800] : Colors.white,
+                      backgroundColor: colorScheme.surfaceContainerHighest,
+                      foregroundColor: colorScheme.onSurface,
                       shape: const CircleBorder(),
                     ),
                   ),
@@ -205,10 +199,10 @@ class _MementoEditorState extends State<MementoEditor> {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: surfaceColor,
+                          color: colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+                            color: colorScheme.outlineVariant,
                           ),
                         ),
                         child: Column(
@@ -219,7 +213,7 @@ class _MementoEditorState extends State<MementoEditor> {
                               decoration: BoxDecoration(
                                 border: Border(
                                   bottom: BorderSide(
-                                    color: isDark ? Colors.grey[700]! : Colors.grey[200]!,
+                                    color: colorScheme.outlineVariant,
                                   ),
                                 ),
                               ),
@@ -317,8 +311,8 @@ class _MementoEditorState extends State<MementoEditor> {
                     widget.onSave(_titleController.text, _getContentAsJson());
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFD8BFD8), // Primary color from design
-                    foregroundColor: const Color(0xFF4A4A4A), // Primary text
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),

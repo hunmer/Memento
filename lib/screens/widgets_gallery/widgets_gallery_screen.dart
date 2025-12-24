@@ -77,20 +77,6 @@ class WidgetsGalleryScreen extends StatelessWidget {
           _buildSectionHeader(context, '编辑器类'),
           _buildListItem(
             context,
-            icon: Icons.edit_note,
-            title: 'Markdown 编辑器',
-            subtitle: 'MarkdownEditor',
-            route: '/widgets_gallery/markdown_editor',
-          ),
-          _buildListItem(
-            context,
-            icon: Icons.text_snippet,
-            title: 'Quill 富文本查看器',
-            subtitle: 'QuillViewer',
-            route: '/widgets_gallery/quill_viewer',
-          ),
-          _buildListItem(
-            context,
             icon: Icons.edit_document,
             title: 'Memento 编辑器',
             subtitle: 'MementoEditor',
