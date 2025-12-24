@@ -25,6 +25,7 @@ class ActivityTranslationsEn {
     'activity_endTime': 'End Time',
     'activity_activityName': 'Activity Name',
     'activity_activityDescription': 'Description',
+    'activity_content': 'Description',
     'activity_tags': 'Tags',
     'activity_addTag': 'Add Tag',
     'activity_deleteTag': 'Delete Tag',
