@@ -4,8 +4,8 @@
 library;
 
 import 'package:shared_models/shared_models.dart';
-import 'package:Memento/plugins/chat/services/channel_service.dart';
-import 'package:Memento/plugins/chat/services/user_service.dart';
+import 'package:Memento/plugins/chat/services/chat_data_service.dart';
+import 'package:Memento/plugins/chat/services/chat_config_service.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
 import 'package:Memento/plugins/chat/models/user.dart';
@@ -13,13 +13,13 @@ import 'package:flutter/material.dart';
 
 /// 客户端 Chat Repository 实现
 class ClientChatRepository extends IChatRepository {
-  final ChannelService channelService;
-  final UserService userService;
+  final ChatDataService dataService;
+  final ChatConfigService configService;
   final Color pluginColor;
 
   ClientChatRepository({
-    required this.channelService,
-    required this.userService,
+    required this.dataService,
+    required this.configService,
     required this.pluginColor,
   });
 
@@ -30,7 +30,7 @@ class ClientChatRepository extends IChatRepository {
     PaginationParams? pagination,
   }) async {
     try {
-      final channels = channelService.channels;
+      final channels = dataService.channels;
       final dtos = channels.map(_channelToDto).toList();
 
       if (pagination != null && pagination.hasPagination) {
@@ -52,7 +52,7 @@ class ClientChatRepository extends IChatRepository {
   Future<Result<ChannelDto?>> getChannelById(String id) async {
     try {
       final channel =
-          channelService.channels.where((c) => c.id == id).firstOrNull;
+          dataService.channels.where((c) => c.id == id).firstOrNull;
       if (channel == null) {
         return Result.success(null);
       }
@@ -89,7 +89,7 @@ class ClientChatRepository extends IChatRepository {
         priority: dto.priority,
         groups: dto.groups,
       );
-      await channelService.createChannel(channel);
+      await dataService.createChannel(channel);
       return Result.success(_channelToDto(channel));
     } catch (e) {
       return Result.failure('创建频道失败: $e', code: ErrorCodes.serverError);
@@ -101,7 +101,7 @@ class ClientChatRepository extends IChatRepository {
     try {
       // 获取现有频道
       final existingChannel =
-          channelService.channels.where((c) => c.id == id).firstOrNull;
+          dataService.channels.where((c) => c.id == id).firstOrNull;
       if (existingChannel == null) {
         return Result.failure('频道不存在', code: ErrorCodes.notFound);
       }
@@ -113,12 +113,12 @@ class ClientChatRepository extends IChatRepository {
           int.parse(dto.backgroundColor!.replaceFirst('#', ''), radix: 16) |
               0xFF000000,
         );
-        await channelService.updateChannelColor(id, color);
+        await dataService.updateChannelColor(id, color);
       }
 
       // 返回更新后的 DTO（实际上只更新了颜色）
       final updatedChannel =
-          channelService.channels.where((c) => c.id == id).first;
+          dataService.channels.where((c) => c.id == id).first;
       return Result.success(_channelToDto(updatedChannel));
     } catch (e) {
       return Result.failure('更新频道失败: $e', code: ErrorCodes.serverError);
@@ -128,7 +128,7 @@ class ClientChatRepository extends IChatRepository {
   @override
   Future<Result<bool>> deleteChannel(String id) async {
     try {
-      await channelService.deleteChannel(id);
+      await dataService.deleteChannel(id);
       return Result.success(true);
     } catch (e) {
       return Result.failure('删除频道失败: $e', code: ErrorCodes.serverError);
@@ -138,7 +138,7 @@ class ClientChatRepository extends IChatRepository {
   @override
   Future<Result<List<ChannelDto>>> findChannels(ChannelQuery query) async {
     try {
-      final channels = channelService.channels;
+      final channels = dataService.channels;
       final matches = <Channel>[];
 
       for (final channel in channels) {
@@ -201,7 +201,7 @@ class ClientChatRepository extends IChatRepository {
     PaginationParams? pagination,
   }) async {
     try {
-      final messages = await channelService.getChannelMessages(channelId);
+      final messages = await dataService.getChannelMessages(channelId);
       if (messages == null) {
         return Result.success([]);
       }
@@ -247,7 +247,7 @@ class ClientChatRepository extends IChatRepository {
         metadata: dto.metadata,
       );
 
-      await channelService.addMessage(channelId, message);
+      await dataService.addMessage(channelId, message);
       return Result.success(dto);
     } catch (e) {
       return Result.failure('发送消息失败: $e', code: ErrorCodes.serverError);
@@ -257,12 +257,12 @@ class ClientChatRepository extends IChatRepository {
   @override
   Future<Result<bool>> deleteMessage(String channelId, String messageId) async {
     try {
-      final message = channelService.getMessageById(messageId);
+      final message = dataService.getMessageById(messageId);
       if (message == null) {
         return Result.failure('消息不存在', code: ErrorCodes.notFound);
       }
 
-      final success = await channelService.deleteMessage(message);
+      final success = await dataService.deleteMessage(message);
       return Result.success(success);
     } catch (e) {
       return Result.failure('删除消息失败: $e', code: ErrorCodes.serverError);
@@ -272,7 +272,7 @@ class ClientChatRepository extends IChatRepository {
   @override
   Future<Result<List<MessageDto>>> findMessages(MessageQuery query) async {
     try {
-      final messages = await channelService.getChannelMessages(query.channelId);
+      final messages = await dataService.getChannelMessages(query.channelId);
       if (messages == null) {
         return Result.success([]);
       }
@@ -339,7 +339,7 @@ class ClientChatRepository extends IChatRepository {
   @override
   Future<Result<UserDto>> getCurrentUser() async {
     try {
-      final user = userService.currentUser;
+      final user = configService.currentUser;
       return Result.success(_userToDto(user));
     } catch (e) {
       return Result.failure('获取当前用户失败: $e', code: ErrorCodes.serverError);
@@ -360,7 +360,7 @@ class ClientChatRepository extends IChatRepository {
   @override
   Future<Result<List<UserDto>>> getUsers() async {
     try {
-      final users = userService.getAllUsers();
+      final users = configService.getAllUsers();
       return Result.success(users.map(_userToDto).toList());
     } catch (e) {
       return Result.failure('获取用户列表失败: $e', code: ErrorCodes.serverError);

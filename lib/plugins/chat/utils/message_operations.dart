@@ -129,7 +129,7 @@ class MessageOperations {
       await _chatPlugin.channelService.saveMessages(channelId, updatedMessages);
 
       // 触发 UI 更新
-      _chatPlugin.notifyListeners();
+      _chatPlugin.refresh();
     }
   }
 

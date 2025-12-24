@@ -561,6 +561,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.swipe),
+            title: const Text('SwipeAction 测试'),
+            subtitle: const Text('测试滑动操作组件'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/swipe_action_test');
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.widgets),
             title: Text('screens_jsonDynamicWidgetTest'.tr),
             subtitle: Text('screens_testAndPreviewDynamicUI'.tr),

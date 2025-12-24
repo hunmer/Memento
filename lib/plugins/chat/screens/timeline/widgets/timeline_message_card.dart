@@ -10,7 +10,7 @@ import 'package:Memento/plugins/chat/utils/date_formatter.dart';
 import 'package:Memento/widgets/file_preview/file_preview_screen.dart';
 import 'package:Memento/plugins/chat/widgets/image_message_widget.dart';
 import 'package:Memento/plugins/chat/widgets/audio_player_widget.dart';
-import 'package:Memento/plugins/chat/services/settings_service.dart';
+import 'package:Memento/plugins/chat/services/chat_config_service.dart';
 import 'package:Memento/plugins/chat/screens/timeline/utils/text_highlight.dart';
 import 'package:Memento/plugins/chat/screens/timeline/controllers/timeline_controller.dart';
 import 'package:Memento/plugins/chat/utils/message_options_handler.dart';
@@ -23,7 +23,7 @@ class TimelineMessageCard extends StatelessWidget {
   final Channel channel;
   final TimelineController controller;
   final bool isGridView;
-  final SettingsService? settingsService;
+  final ChatConfigService? settingsService;
 
   const TimelineMessageCard({
     super.key,

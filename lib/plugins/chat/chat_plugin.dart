@@ -13,11 +13,9 @@ import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:shared_models/shared_models.dart';
 import 'repositories/client_chat_repository.dart';
-import 'services/channel_service.dart';
-import 'services/message_service.dart';
-import 'services/settings_service.dart';
+import 'services/chat_data_service.dart';
+import 'services/chat_config_service.dart';
 import 'services/ui_service.dart';
-import 'services/user_service.dart';
 import 'services/widget_service.dart';
 import 'services/tag_service.dart';
 import 'package:shared_models/usecases/chat/chat_usecase.dart';
@@ -88,12 +86,16 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   // Services
-  late final ChannelService channelService;
-  late final MessageService messageService;
-  late final SettingsService settingsService;
+  late final ChatDataService dataService;
+  late final ChatConfigService configService;
   late final UIService uiService;
-  late final UserService userService;
   late final TagService tagService;
+
+  // 向后兼容的 getters (逐步迁移)
+  ChatDataService get channelService => dataService;
+  ChatDataService get messageService => dataService;
+  ChatConfigService get settingsService => configService;
+  ChatConfigService get userService => configService;
 
   // UseCase
   late final ChatUseCase chatUseCase;
@@ -111,18 +113,14 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   @override
   Future<void> initialize() async {
     // Initialize services
-    settingsService = SettingsService(this);
-    userService = UserService(this);
-    channelService = ChannelService(this);
-    messageService = MessageService(this);
-    tagService = TagService(messageService: messageService);
-    uiService = UIService(settingsService, userService, this);
+    dataService = ChatDataService(this);
+    configService = ChatConfigService(this);
+    tagService = TagService(messageService: dataService);
+    uiService = UIService(configService, configService, this);
 
     // Initialize all services
-    await settingsService.initialize();
-    await userService.initialize();
-    await channelService.initialize();
-    await messageService.initialize();
+    await configService.initialize();
+    await dataService.initialize();
     await uiService.initialize();
 
     // Initialize prompt controller
@@ -133,8 +131,8 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     // 创建 UseCase 实例
     chatUseCase = ChatUseCase(
       ClientChatRepository(
-        channelService: channelService,
-        userService: userService,
+        dataService: dataService,
+        configService: configService,
         pluginColor: color,
       ),
     );
@@ -164,7 +162,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
           isFinalStep: true,
           emptyText: '暂无频道，请先创建',
           dataLoader: (_) async {
-            return channelService.channels.map((channel) => SelectableItem(
+            return dataService.channels.map((channel) => SelectableItem(
               id: channel.id,
               title: channel.title,
               icon: channel.icon,
@@ -202,7 +200,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
           isFinalStep: false,
           emptyText: '暂无频道',
           dataLoader: (_) async {
-            return channelService.channels.map((channel) => SelectableItem(
+            return dataService.channels.map((channel) => SelectableItem(
               id: channel.id,
               title: channel.title,
               icon: channel.icon,
@@ -222,7 +220,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
           dataLoader: (previousSelections) async {
             final channel = previousSelections['channel'] as Channel;
             // 加载频道消息
-            final messages = await channelService.getChannelMessages(channel.id);
+            final messages = await dataService.getChannelMessages(channel.id);
             if (messages == null) return [];
 
             return messages.map((message) => SelectableItem(
@@ -285,9 +283,9 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 根据消息ID获取消息
-  /// 代理到 channelService.getMessageById
+  /// 代理到 dataService.getMessageById
   Future<Message?> getMessage(String messageId) async {
-    return channelService.getMessageById(messageId);
+    return dataService.getMessageById(messageId);
   }
 
   /// 手动触发刷新（用于外部事件变化时通知监听者）

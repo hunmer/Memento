@@ -11,6 +11,7 @@ import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart'
 import 'package:Memento/screens/notification_test/notification_test_page.dart';
 import 'package:Memento/screens/floating_widget_screen/floating_widget_screen.dart';
 import 'package:Memento/screens/data_selector_test/data_selector_test_screen.dart';
+import 'package:Memento/screens/test_screens/swipe_action_test_screen.dart';
 import 'package:Memento/screens/settings_screen/screens/live_activities_test_screen.dart';
 import 'package:Memento/screens/form_fields_test/form_fields_test_screen.dart';
 import 'package:Memento/screens/widgets_gallery/widgets_gallery_screen.dart';
@@ -424,6 +425,9 @@ class AppRoutes extends NavigatorObserver {
       case '/data_selector_test':
       case 'data_selector_test':
         return _createRoute(const DataSelectorTestScreen());
+      case '/swipe_action_test':
+      case 'swipe_action_test':
+        return _createRoute(const SwipeActionTestScreen());
       case '/live_activities_test':
       case 'live_activities_test':
         return _createRoute(const LiveActivitiesTestScreen());

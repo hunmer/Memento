@@ -7,16 +7,15 @@ import 'package:Memento/plugins/chat/screens/channel_list/channel_list_screen.da
 import 'package:Memento/plugins/chat/screens/timeline/timeline_screen.dart';
 import 'package:Memento/plugins/chat/screens/profile_edit_dialog.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
-import 'settings_service.dart';
-import 'user_service.dart';
+import 'chat_config_service.dart';
 
 /// 负责构建聊天插件的UI界面
 class UIService {
-  final SettingsService _settingsService;
-  final UserService _userService;
+  final ChatConfigService _configService;
   final ChatPlugin _plugin;
 
-  UIService(this._settingsService, this._userService, this._plugin);
+  UIService(ChatConfigService settingsService, ChatConfigService userService, this._plugin)
+      : _configService = settingsService;
 
   Future<void> initialize() async {
     // 初始化UI服务相关的内容
@@ -190,14 +189,14 @@ class UIService {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _userService.currentUser.username,
+                        _configService.currentUser.username,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        'ID: ${_userService.currentUser.id}',
+                        'ID: ${_configService.currentUser.id}',
                         style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
@@ -211,14 +210,14 @@ class UIService {
                       context: context,
                       builder:
                           (context) => ProfileEditDialog(
-                            user: _userService.currentUser,
+                            user: _configService.currentUser,
                             chatPlugin: _plugin,
                           ),
                     );
                     if (updatedUser != null) {
                       setState(() {
                         // 使用返回的更新后的用户对象刷新UI
-                        _userService.setCurrentUser(updatedUser);
+                        _configService.setCurrentUser(updatedUser);
                       });
                     }
                   },
@@ -232,7 +231,7 @@ class UIService {
   }
 
   Widget _buildUserAvatar(BuildContext context) {
-    final currentUser = _userService.currentUser;
+    final currentUser = _configService.currentUser;
     if (currentUser.iconPath != null) {
       return FutureBuilder<String>(
         future: ImageUtils.getAbsolutePath(currentUser.iconPath!),
@@ -257,8 +256,8 @@ class UIService {
   Widget _buildDefaultAvatar(BuildContext context) {
     return Center(
       child: Text(
-        _userService.currentUser.username.isNotEmpty
-            ? _userService.currentUser.username[0].toUpperCase()
+        _configService.currentUser.username.isNotEmpty
+            ? _configService.currentUser.username[0].toUpperCase()
             : '?',
         style: TextStyle(
           fontSize: 24,
@@ -284,28 +283,28 @@ class UIService {
           ),
           SwitchListTile(
             title: Text('chat_showAvatarInChat'.tr),
-            value: _settingsService.showAvatarInChat,
+            value: _configService.showAvatarInChat,
             onChanged: (bool value) {
               setState(() {
-                _settingsService.setShowAvatarInChat(value);
+                _configService.setShowAvatarInChat(value);
               });
             },
           ),
           SwitchListTile(
             title: Text('chat_playSoundOnSend'.tr),
-            value: _settingsService.playSoundOnSend,
+            value: _configService.playSoundOnSend,
             onChanged: (bool value) {
               setState(() {
-                _settingsService.setPlaySoundOnSend(value);
+                _configService.setPlaySoundOnSend(value);
               });
             },
           ),
           SwitchListTile(
             title: Text('chat_showAvatarInTimeline'.tr),
-            value: _settingsService.showAvatarInTimeline,
+            value: _configService.showAvatarInTimeline,
             onChanged: (bool value) {
               setState(() {
-                _settingsService.setShowAvatarInTimeline(value);
+                _configService.setShowAvatarInTimeline(value);
               });
             },
           ),

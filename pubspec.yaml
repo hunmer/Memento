@@ -49,6 +49,7 @@ dependencies:
   logging: ^1.2.0
   flutter_form_builder: ^10.2.0
   path: ^1.8.3
+  flutter_swipe_action_cell: ^3.1.6
   super_clipboard: ^0.9.1
   file_picker: ^6.1.1
   flutter_quill: ^11.0.0
