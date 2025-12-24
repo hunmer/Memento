@@ -5,6 +5,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper/index.dart';
+import 'package:Memento/widgets/folder_breadcrumbs.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
@@ -113,7 +114,7 @@ class _NotesMainViewState extends NotesMainViewState
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
       largeTitle: 'notes_myNotes'.tr,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       body: _buildBody(),
       enableLargeTitle: true,
       enableSearchBar: true,
@@ -143,9 +144,7 @@ class _NotesMainViewState extends NotesMainViewState
           },
         ),
       ],
-      largeTitleActions: [
-
-      ],
+      largeTitleActions: [],
       onCollapsed: (isCollapsed) {
         if (isCollapsed) {
           _saveScrollPosition();
@@ -199,7 +198,6 @@ class _NotesMainViewState extends NotesMainViewState
   void _saveScrollPosition() {
     // 实现滚动位置保存
   }
-
 
   Widget _buildExpandableFab() {
     return Column(
@@ -288,46 +286,51 @@ class _NotesMainViewState extends NotesMainViewState
     );
   }
 
+  /// 构建面包屑导航项
+  List<FolderBreadcrumbItem> _buildBreadcrumbItems() {
+    final path = plugin.controller.getFolderPath(currentFolderId);
+    return path.map((folder) {
+      return FolderBreadcrumbItem(id: folder.id, name: folder.name);
+    }).toList();
+  }
+
   Widget _buildBody() {
     return Stack(
       children: [
         CustomScrollView(
           slivers: [
-            // Subfolders Horizontal List (if any)
-            // 如果有子文件夹或不是根目录(需要显示返回按钮),则显示该区域
-            if (subFolders.isNotEmpty || currentFolder?.parentId != null)
+            // Folder Breadcrumbs (显示当前文件夹路径)
+            SliverToBoxAdapter(
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 16, top: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: FolderBreadcrumbs(
+                  folders: _buildBreadcrumbItems(),
+                  onFolderTap: (folderId) {
+                    // 点击面包屑导航到对应文件夹
+                    setState(() {
+                      currentFolderId = folderId;
+                      loadCurrentFolder();
+                    });
+                  },
+                ),
+              ),
+            ),
+
+            // Subfolders Horizontal List (子文件夹列表)
+            if (subFolders.isNotEmpty)
               SliverToBoxAdapter(
                 child: Container(
                   height: 50,
-                  margin: const EdgeInsets.only(bottom: 16, top: 16),
+                  margin: const EdgeInsets.only(bottom: 16),
                   child: ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     scrollDirection: Axis.horizontal,
-                    itemCount:
-                        subFolders.length +
-                        (currentFolder?.parentId != null ? 1 : 0),
+                    itemCount: subFolders.length,
                     separatorBuilder:
                         (context, index) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
-                      // 第一个位置显示返回按钮(如果不是根目录)
-                      if (currentFolder?.parentId != null && index == 0) {
-                        return ActionChip(
-                          avatar: const Icon(Icons.arrow_upward, size: 18),
-                          label: Text('notes_backToParent'.tr),
-                          onPressed: () => navigateBack(),
-                          backgroundColor:
-                              Theme.of(context).primaryColor.withOpacity(0.1),
-                          side: BorderSide(
-                            color:
-                                Theme.of(context).primaryColor.withOpacity(0.3),
-                          ),
-                        );
-                      }
-
-                      // 其他位置显示文件夹
-                      final folderIndex =
-                          currentFolder?.parentId != null ? index - 1 : index;
-                      final folder = subFolders[folderIndex];
+                      final folder = subFolders[index];
                       return ActionChip(
                         avatar: const Icon(Icons.folder, size: 18),
                         label: Text(folder.name),
@@ -399,10 +402,6 @@ class _NotesMainViewState extends NotesMainViewState
     );
   }
 
-
-
-
-
   /// 显示文件夹选择器
   Future<Folder?> _showFolderPicker() async {
     final rootFolder = plugin.controller.getFolder('root')!;
@@ -470,7 +469,10 @@ class _NotesMainViewState extends NotesMainViewState
                 IconButton(
                   icon: const Icon(Icons.clear, size: 16),
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                  constraints: const BoxConstraints(
+                    minWidth: 24,
+                    minHeight: 24,
+                  ),
                   onPressed: () => onChanged(null),
                 ),
             ],
@@ -544,48 +546,50 @@ class _NotesMainViewState extends NotesMainViewState
           (tagFilters != null && tagFilters.isNotEmpty) ||
           dateFilter != null) {
         // 对基础笔记列表应用额外过滤
-        notes = baseNotes.where((note) {
-          // 搜索文本过滤
-          if (searchController.text.isNotEmpty) {
-            final query = searchController.text.toLowerCase();
-            if (!note.title.toLowerCase().contains(query) &&
-                !note.content.toLowerCase().contains(query)) {
-              return false;
-            }
-          }
+        notes =
+            baseNotes.where((note) {
+              // 搜索文本过滤
+              if (searchController.text.isNotEmpty) {
+                final query = searchController.text.toLowerCase();
+                if (!note.title.toLowerCase().contains(query) &&
+                    !note.content.toLowerCase().contains(query)) {
+                  return false;
+                }
+              }
 
-          // 标签过滤
-          if (tagFilters != null && tagFilters.isNotEmpty) {
-            if (!tagFilters.any((tag) => note.tags.contains(tag))) {
-              return false;
-            }
-          }
+              // 标签过滤
+              if (tagFilters != null && tagFilters.isNotEmpty) {
+                if (!tagFilters.any((tag) => note.tags.contains(tag))) {
+                  return false;
+                }
+              }
 
-          // 日期过滤
-          if (dateFilter != null) {
-            final noteDate = DateTime(
-              note.createdAt.year,
-              note.createdAt.month,
-              note.createdAt.day,
-            );
-            final filterDate = DateTime(
-              dateFilter.year,
-              dateFilter.month,
-              dateFilter.day,
-            );
-            if (!noteDate.isAtSameMomentAs(filterDate)) {
-              return false;
-            }
-          }
+              // 日期过滤
+              if (dateFilter != null) {
+                final noteDate = DateTime(
+                  note.createdAt.year,
+                  note.createdAt.month,
+                  note.createdAt.day,
+                );
+                final filterDate = DateTime(
+                  dateFilter.year,
+                  dateFilter.month,
+                  dateFilter.day,
+                );
+                if (!noteDate.isAtSameMomentAs(filterDate)) {
+                  return false;
+                }
+              }
 
-          return true;
-        }).toList();
+              return true;
+            }).toList();
       } else {
         notes = baseNotes;
       }
 
       // 更新旧的状态变量（保持兼容性）
-      _selectedTag = tagFilters != null && tagFilters.isNotEmpty ? tagFilters.first : null;
+      _selectedTag =
+          tagFilters != null && tagFilters.isNotEmpty ? tagFilters.first : null;
       _selectedDate = dateFilter;
     });
 

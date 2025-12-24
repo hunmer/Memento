@@ -88,6 +88,7 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
       _filteredPresets = result;
     });
   }
+
   /// 处理搜索
   void _handleSearch(String query) {
     if (query.isEmpty) {
@@ -98,11 +99,12 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
     }
 
     final keyword = query.toLowerCase();
-    final filteredBySearch = _service.presets.where((preset) {
-      return preset.name.toLowerCase().contains(keyword) ||
-          preset.description.toLowerCase().contains(keyword) ||
-          preset.content.toLowerCase().contains(keyword);
-    }).toList();
+    final filteredBySearch =
+        _service.presets.where((preset) {
+          return preset.name.toLowerCase().contains(keyword) ||
+              preset.description.toLowerCase().contains(keyword) ||
+              preset.content.toLowerCase().contains(keyword);
+        }).toList();
 
     setState(() {
       _filteredPresets = filteredBySearch;
@@ -165,8 +167,7 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
       title: Text('openai_promptPresetManagement'.tr),
       largeTitle: 'openai_promptPresetManagement'.tr,
       enableLargeTitle: false,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
-    
+
       // 启用多条件过滤
       enableMultiFilter: true,
       multiFilterItems: _buildFilterItems(),
@@ -186,9 +187,7 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
         animation: _service,
         builder: (context, _) {
           if (_isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (_service.presets.isEmpty) {
@@ -209,9 +208,9 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
                   const SizedBox(height: 8),
                   Text(
                     'openai_createFirstPreset'.tr,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
@@ -277,20 +276,21 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
                           child: Wrap(
                             spacing: 4,
                             runSpacing: 4,
-                            children: preset.tags
-                                .map(
-                                  (tag) => Chip(
-                                    label: Text(
-                                      tag,
-                                      style: const TextStyle(fontSize: 10),
-                                    ),
-                                    materialTapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
-                                  ),
-                                )
-                                .toList(),
+                            children:
+                                preset.tags
+                                    .map(
+                                      (tag) => Chip(
+                                        label: Text(
+                                          tag,
+                                          style: const TextStyle(fontSize: 10),
+                                        ),
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        visualDensity: VisualDensity.compact,
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                    )
+                                    .toList(),
                           ),
                         ),
                     ],
@@ -303,31 +303,36 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
                         await _deletePreset(preset);
                       }
                     },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.edit, size: 20),
-                            const SizedBox(width: 8),
-                            Text('openai_editPreset'.tr),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.delete, size: 20, color: Colors.red),
-                            const SizedBox(width: 8),
-                            Text(
-                              'openai_deletePreset'.tr,
-                              style: const TextStyle(color: Colors.red),
+                    itemBuilder:
+                        (context) => [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.edit, size: 20),
+                                const SizedBox(width: 8),
+                                Text('openai_editPreset'.tr),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.delete,
+                                  size: 20,
+                                  color: Colors.red,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'openai_deletePreset'.tr,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                   ),
                   onTap: () => _showEditDialog(preset: preset),
                 ),

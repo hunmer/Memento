@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:io';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
+import 'package:Memento/widgets/swipe_action/swipe_action_wrapper.dart';
+import 'package:Memento/plugins/goods/goods_plugin.dart';
 
 class GoodsItemListTile extends StatefulWidget {
   final GoodsItem item;
   final String? warehouseTitle;
+  final String? warehouseId;
   final VoidCallback? onTap;
 
   const GoodsItemListTile({
     super.key,
     required this.item,
     this.warehouseTitle,
+    this.warehouseId,
     this.onTap,
   });
 
@@ -48,9 +53,46 @@ class _GoodsItemListTileState extends State<GoodsItemListTile> {
     }
   }
 
+  /// 删除物品
+  Future<void> _deleteItem() async {
+    if (widget.warehouseId == null) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('goods_confirmDelete'.tr),
+        content: Text('goods_confirmDeleteItem'.tr),
+        actions: [
+          TextButton(
+            child: Text('goods_cancel'.tr),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          TextButton(
+            child: Text(
+              'goods_delete'.tr,
+              style: const TextStyle(color: Colors.red),
+            ),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await GoodsPlugin.instance.deleteGoodsItem(widget.warehouseId!, widget.item.id);
+      if (mounted) {
+        Get.snackbar(
+          'goods_delete'.tr,
+          '${widget.item.title} 已被删除',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListTile(
+    final listTile = ListTile(
       leading: _buildLeading(),
       title: Text(widget.item.title),
       subtitle: _buildSubtitle(context),
@@ -64,6 +106,27 @@ class _GoodsItemListTileState extends State<GoodsItemListTile> {
               )
               : null,
       onTap: widget.onTap,
+    );
+
+    // 如果没有 warehouseId，返回普通的 ListTile
+    if (widget.warehouseId == null) {
+      return listTile;
+    }
+
+    // 有 warehouseId 时，包装 SwipeAction
+    return SwipeActionWrapper(
+      key: ValueKey(widget.item.id),
+      leadingActions: [
+        SwipeActionPresets.edit(
+          onTap: widget.onTap ?? () {},
+        ),
+      ],
+      trailingActions: [
+        SwipeActionPresets.delete(
+          onTap: _deleteItem,
+        ),
+      ],
+      child: listTile,
     );
   }
 

@@ -977,7 +977,7 @@ class ContactMainViewState extends State<ContactMainView> {
     return SuperCupertinoNavigationWrapper(
       title: Text('contact_contacts'.tr),
       largeTitle: 'contact_contactListTitle'.tr,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       // ========== 搜索相关配置 ==========
       enableSearchBar: true,
       searchPlaceholder: 'contact_searchPlaceholder'.tr,

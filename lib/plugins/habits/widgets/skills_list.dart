@@ -70,7 +70,10 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
     if (mounted) {
       setState(() {
         _skills = skills;
-        _filteredSkills = _searchQuery.isEmpty ? skills : _filterSkillsList(skills, _searchQuery);
+        _filteredSkills =
+            _searchQuery.isEmpty
+                ? skills
+                : _filterSkillsList(skills, _searchQuery);
         _refreshKey++; // 增加 key 强制刷新 FutureBuilder
       });
     }
@@ -87,8 +90,8 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
       final group = (skill.group ?? '').toLowerCase();
       final searchLower = query.toLowerCase();
       return title.contains(searchLower) ||
-             description.contains(searchLower) ||
-             group.contains(searchLower);
+          description.contains(searchLower) ||
+          group.contains(searchLower);
     }).toList();
   }
 
@@ -121,7 +124,6 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-
     return SuperCupertinoNavigationWrapper(
       title: Text('habits_skills'.tr),
       largeTitle: 'habits_skills'.tr,
@@ -131,12 +133,9 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
       onSearchChanged: _filterSkills,
       onSearchSubmitted: _filterSkills,
       searchBody: _buildSearchResults(),
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       actions: [
-        IconButton(
-          icon: const Icon(Icons.sort),
-          onPressed: _showSortMenu,
-        ),
+        IconButton(icon: const Icon(Icons.sort), onPressed: _showSortMenu),
       ],
       body: _buildCardView(_skills),
     );
@@ -149,18 +148,11 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.search, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               '输入关键词搜索技能',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -172,26 +164,16 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.inbox,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.inbox, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               '未找到匹配的技能',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             Text(
               '搜索词: $_searchQuery',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           ],
         ),
@@ -203,7 +185,6 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
 
   /// 显示排序菜单
   void _showSortMenu() {
-
     SmoothBottomSheet.show(
       context: context,
       builder:
@@ -318,11 +299,13 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
                         return Card(
                           child: InkWell(
                             onTap: () async {
-                              await NavigationHelper.push(context, SkillDetailPage(
-                                        skill: skill,
-                                        skillController: widget.skillController,
-                                        recordController:
-                                            widget.recordController,),
+                              await NavigationHelper.push(
+                                context,
+                                SkillDetailPage(
+                                  skill: skill,
+                                  skillController: widget.skillController,
+                                  recordController: widget.recordController,
+                                ),
                               );
                               if (mounted) _loadSkills();
                             },
@@ -468,5 +451,4 @@ class _SkillsListState extends State<SkillsList> with WidgetsBindingObserver {
           }).toList(),
     );
   }
-
 }

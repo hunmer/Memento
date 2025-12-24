@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
@@ -76,24 +75,6 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
     }
   }
 
-  // 切换仓库筛选
-  void _onWarehouseFilterChanged(String? warehouseId) {
-    setState(() {
-      // 处理特殊的\"所有仓库\"标记
-      if (warehouseId == "all_warehouses") {
-        _filterWarehouseId = null;
-      }
-      // 如果选择的是当前已选中的仓库，则清除筛选
-      else if (_filterWarehouseId == warehouseId) {
-        _filterWarehouseId = null;
-      } else {
-        _filterWarehouseId = warehouseId;
-      }
-    });
-
-    // 更新路由上下文
-    _updateRouteContext();
-  }
 
   /// 获取所有物品的标签列表
   List<String> _getAllTags() {
@@ -122,8 +103,36 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
   List<FilterItem> _buildFilterItems() {
     final availableTags = _getAllTags();
 
+    // 获取仓库选项（不包含"所有仓库"，因为 builder 会自动添加）
+    final warehouseOptions = {
+      for (var warehouse in GoodsPlugin.instance.warehouses)
+        warehouse.id: warehouse.title,
+    };
+
     return [
-      // 1. 标签多选过滤
+      // 1. 仓库筛选
+      if (warehouseOptions.isNotEmpty)
+        FilterItem(
+          id: 'warehouse',
+          title: 'goods_warehouse'.tr,
+          type: FilterType.tagsSingle,
+          builder: (context, currentValue, onChanged) {
+            return FilterBuilders.buildSingleChoiceFilter(
+              context: context,
+              currentValue: currentValue,
+              onChanged: onChanged,
+              options: warehouseOptions,
+              allItemsKey: 'all',
+              allItemsLabel: 'goods_allWarehouses'.tr,
+            );
+          },
+          getBadge: (value) => FilterBuilders.singleChoiceBadge(
+            value,
+            warehouseOptions,
+          ),
+        ),
+
+      // 2. 标签多选过滤
       if (availableTags.isNotEmpty)
         FilterItem(
           id: 'tags',
@@ -233,7 +242,8 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
     required dynamic currentValue,
     required ValueChanged<dynamic> onChanged,
   }) {
-    final range = (currentValue as Map<String, double?>?) ?? {'min': null, 'max': null};
+    final range =
+        (currentValue as Map<String, double?>?) ?? {'min': null, 'max': null};
     final minController = TextEditingController(
       text: range['min']?.toString() ?? '',
     );
@@ -304,7 +314,11 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
       if (mounted) {
         setState(() {
           _multiFilters = filters;
+          // 从 MultiFilter 中提取仓库筛选值
+          _filterWarehouseId = filters['warehouse'] as String?;
         });
+        // 更新路由上下文
+        _updateRouteContext();
       }
     });
   }
@@ -313,8 +327,11 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
   bool _passesMultiFilters(GoodsItem item) {
     if (_multiFilters.isEmpty) return true;
 
+    // 注意：仓库筛选已在 _getAllItems() 中处理，这里不需要再检查
+
     // 1. 标签过滤
-    if (_multiFilters['tags'] != null && (_multiFilters['tags'] as List).isNotEmpty) {
+    if (_multiFilters['tags'] != null &&
+        (_multiFilters['tags'] as List).isNotEmpty) {
       final selectedTags = (_multiFilters['tags'] as List).cast<String>();
       final hasAnyTag = item.tags.any((tag) => selectedTags.contains(tag));
       if (!hasAnyTag) return false;
@@ -335,7 +352,9 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
       final range = _multiFilters['expirationDateRange'] as DateTimeRange;
       if (item.expirationDate == null) return false;
       if (item.expirationDate!.isBefore(range.start) ||
-          item.expirationDate!.isAfter(range.end.add(const Duration(days: 1)))) {
+          item.expirationDate!.isAfter(
+            range.end.add(const Duration(days: 1)),
+          )) {
         return false;
       }
     }
@@ -454,23 +473,9 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
   @override
   Widget build(BuildContext context) {
     final allItems = _getAllItems();
-    // 获取仓库列表并添加"所有仓库"选项
-    final List<Map<String, String>> warehouses = [
-      // 添加"所有仓库"选项
-      {
-        'id': 'all_warehouses',
-        'title': 'goods_allWarehouses'.tr,
-      },
-      // 将现有仓库转换为简单的id和title映射
-      ...GoodsPlugin.instance.warehouses.map(
-        (w) => {'id': w.id, 'title': w.title},
-      ),
-    ];
 
     return SuperCupertinoNavigationWrapper(
-      title: Text(
-        '${'goods_allItems'.tr} (${allItems.length})',
-      ),
+      title: Text('${'goods_allItems'.tr} (${allItems.length})'),
       largeTitle: '物品',
       enableLargeTitle: true,
       enableSearchBar: true,
@@ -480,7 +485,6 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
           _searchQuery = value;
         });
       },
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
 
       // 启用多条件过滤
       enableMultiFilter: true,
@@ -489,50 +493,12 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
       onMultiFilterChanged: _applyMultiFilters,
       // 将原有的 AppBar actions 移到右上角
       actions: [
-        // 仓库筛选按钮
-        PopupMenuButton<String?>(
-          icon: Icon(
-            Icons.filter_list,
-            semanticLabel: 'goods_filter'.tr,
-            // 当有筛选时显示不同的图标颜色
-            color:
-                _filterWarehouseId != null
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
-          ),
-          initialValue: _filterWarehouseId,
-          onSelected: _onWarehouseFilterChanged,
-          itemBuilder:
-              (context) => [
-                ...warehouses.map(
-                  (warehouse) => PopupMenuItem(
-                    value: warehouse['id'],
-                    child: Row(
-                      children: [
-                        Text(warehouse['title']!),
-                        if (_filterWarehouseId == warehouse['id'])
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Icon(
-                              Icons.check,
-                              color: Theme.of(context).colorScheme.primary,
-                              size: 20,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-        ),
         // 视图切换按钮
         IconButton(
           icon: Icon(
             _isGridView ? Icons.view_list : Icons.grid_view,
             semanticLabel:
-                _isGridView
-                    ? 'goods_viewAsList'.tr
-                    : 'goods_viewAsGrid'.tr,
+                _isGridView ? 'goods_viewAsList'.tr : 'goods_viewAsGrid'.tr,
           ),
           onPressed: () {
             setState(() {
@@ -560,9 +526,7 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
                 ),
                 PopupMenuItem(
                   value: 'lastUsed',
-                  child: Text(
-                    'goods_sortByLastUsedTime'.tr,
-                  ),
+                  child: Text('goods_sortByLastUsedTime'.tr),
                 ),
               ],
         ),
@@ -572,31 +536,31 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
               ? Center(child: Text('goods_noItems'.tr))
               : _isGridView
               ? LayoutBuilder(
-                  builder: (context, constraints) {
-                    return GridView.builder(
-                      padding: const EdgeInsets.all(16),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount:
-                            constraints.maxWidth > 600 ? 3 : 2, // 响应式列数
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 0.75, // 调整卡片比例
-                      ),
-                      itemCount: allItems.length,
-                      itemBuilder: (context, index) {
-                        final item = allItems[index]['item'] as GoodsItem;
-                        final warehouse =
-                            allItems[index]['warehouse'] as Warehouse;
-                        return GoodsItemCard(
-                          item: item,
-                          warehouseTitle: warehouse.title,
-                          warehouseId: warehouse.id,
-                          onTap: () => _showEditItemDialog(item, warehouse),
-                        );
-                      },
-                    );
-                  },
-                )
+                builder: (context, constraints) {
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount:
+                          constraints.maxWidth > 600 ? 3 : 2, // 响应式列数
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.75, // 调整卡片比例
+                    ),
+                    itemCount: allItems.length,
+                    itemBuilder: (context, index) {
+                      final item = allItems[index]['item'] as GoodsItem;
+                      final warehouse =
+                          allItems[index]['warehouse'] as Warehouse;
+                      return GoodsItemCard(
+                        item: item,
+                        warehouseTitle: warehouse.title,
+                        warehouseId: warehouse.id,
+                        onTap: () => _showEditItemDialog(item, warehouse),
+                      );
+                    },
+                  );
+                },
+              )
               : ListView.builder(
                 padding: EdgeInsets.zero,
                 itemCount: allItems.length,
@@ -606,6 +570,7 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
                   return GoodsItemListTile(
                     item: item,
                     warehouseTitle: warehouse.title,
+                    warehouseId: warehouse.id,
                     onTap: () => _showEditItemDialog(item, warehouse),
                   );
                 },

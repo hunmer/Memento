@@ -1,40 +1,69 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:Memento/plugins/openai/screens/agent_edit_screen.dart';
+import 'package:Memento/widgets/swipe_action/swipe_action_wrapper.dart';
+import 'package:Memento/plugins/openai/openai_plugin.dart';
 
 class AgentListItem extends StatelessWidget {
   final AIAgent agent;
 
   const AgentListItem({super.key, required this.agent});
 
+  /// 编辑 Agent
+  void _editAgent(BuildContext context) {
+    NavigationHelper.push(context, AgentEditScreen(agent: agent));
+  }
+
+  /// 删除 Agent
+  Future<void> _deleteAgent(BuildContext context) async {
+    final controller = OpenAIPlugin.instance.controller;
+    await controller.deleteAgent(agent.id);
+    Get.snackbar(
+      'openai_agentDeleted'.tr,
+      '${agent.name} 已被删除',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: ListTile(
-        leading: _buildAgentIcon(),
-        title: Text(
-          agent.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+    return SwipeActionWrapper(
+      key: ValueKey(agent.id),
+      leadingActions: [
+        SwipeActionPresets.edit(
+          onTap: () => _editAgent(context),
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '服务商: ${agent.serviceProviderId}',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 4),
-            _buildTags(),
-          ],
+      ],
+      trailingActions: [
+        SwipeActionPresets.delete(
+          onTap: () => _deleteAgent(context),
         ),
-        onTap: () {
-          NavigationHelper.push(context, AgentEditScreen(agent: agent),
-          );
-        },
+      ],
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        child: ListTile(
+          leading: _buildAgentIcon(),
+          title: Text(
+            agent.name,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '服务商: ${agent.serviceProviderId}',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 4),
+              _buildTags(),
+            ],
+          ),
+          onTap: () => _editAgent(context),
+        ),
       ),
     );
   }

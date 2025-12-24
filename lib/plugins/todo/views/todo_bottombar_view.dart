@@ -254,7 +254,10 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                 _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
             unselectedLabelColor: unselectedColor,
             tabs: [
-              Tab(icon: const Icon(Icons.check_box_outlined), text: 'todo_todoTab'.tr),
+              Tab(
+                icon: const Icon(Icons.check_box_outlined),
+                text: 'todo_todoTab'.tr,
+              ),
               Tab(icon: const Icon(Icons.history), text: 'todo_historyTab'.tr),
             ],
           ),
@@ -279,9 +282,10 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                   },
                   child: Icon(
                     Icons.add,
-                    color: fabColor.computeLuminance() < 0.5
-                        ? Colors.white
-                        : Colors.black,
+                    color:
+                        fabColor.computeLuminance() < 0.5
+                            ? Colors.white
+                            : Colors.black,
                     size: 32,
                   ),
                 );
@@ -350,14 +354,12 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
             },
           );
         },
-        getBadge: (value) => FilterBuilders.priorityBadge(
-          value,
-          {
-            TaskPriority.low: 'todo_low'.tr,
-            TaskPriority.medium: 'todo_medium'.tr,
-            TaskPriority.high: 'todo_high'.tr,
-          },
-        ),
+        getBadge:
+            (value) => FilterBuilders.priorityBadge(value, {
+              TaskPriority.low: 'todo_low'.tr,
+              TaskPriority.medium: 'todo_medium'.tr,
+              TaskPriority.high: 'todo_high'.tr,
+            }),
       ),
 
       // 3. 日期范围过滤
@@ -392,10 +394,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
           );
         },
         getBadge: FilterBuilders.checkboxBadge,
-        initialValue: const {
-          'showCompleted': true,
-          'showIncomplete': true,
-        },
+        initialValue: const {'showCompleted': true, 'showIncomplete': true},
       ),
     ];
   }
@@ -441,11 +440,10 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   // 构建任务列表视图（第一个tab）
   Widget _buildTaskListView() {
-
     return SuperCupertinoNavigationWrapper(
       title: Text('todo_todoTasks'.tr),
       largeTitle: 'todo_todoTasks'.tr,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       enableSearchBar: true,
       searchPlaceholder: 'todo_searchTasksHint'.tr,
       enableSearchFilter: true,
@@ -563,11 +561,10 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   // 构建历史记录视图（第二个tab）
   Widget _buildHistoryView() {
-
     return SuperCupertinoNavigationWrapper(
       title: Text('todo_historyTitle'.tr),
       largeTitle: 'todo_historyTitle'.tr,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       actions: [
         IconButton(
           icon: const Icon(Icons.delete_sweep),
@@ -612,16 +609,16 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
     SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      builder: (context) => TodoItemDetail(
-        task: task,
-        taskController: _plugin.taskController,
-      ),
+      builder:
+          (context) => TodoItemDetail(
+            task: task,
+            taskController: _plugin.taskController,
+          ),
     );
   }
 
   // 构建搜索结果视图
   Widget _buildSearchResults() {
-
     return AnimatedBuilder(
       animation: _plugin.taskController,
       builder: (context, _) {
@@ -632,26 +629,16 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.search,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.search, size: 64, color: Colors.grey[400]),
                 const SizedBox(height: 16),
                 Text(
                   'todo_searchInputHint'.tr,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'todo_searchSupportHint'.tr,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                 ),
               ],
             ),
@@ -663,26 +650,16 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.inbox,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.inbox, size: 64, color: Colors.grey[400]),
                 const SizedBox(height: 16),
                 Text(
                   'todo_noMatchingTasks'.tr,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'todo_tryOtherKeywords'.tr,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                 ),
               ],
             ),

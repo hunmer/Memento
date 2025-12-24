@@ -7,6 +7,7 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/models/account.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/widgets/swipe_action/index.dart';
 import 'account_edit_screen.dart';
 
 class AccountListScreen extends StatefulWidget {
@@ -65,7 +66,6 @@ class _AccountListScreenState extends State<AccountListScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
         leading:
             (Platform.isAndroid || Platform.isIOS)
                 ? null
@@ -82,13 +82,14 @@ class _AccountListScreenState extends State<AccountListScreen> {
         width: 64,
         height: 64,
         child: FloatingActionButton(
-          onPressed: () => SmoothBottomSheet.show(
-            context: context,
-            isScrollControlled: true,
-            builder: (context) => AccountEditScreen(
-              billPlugin: widget.billPlugin,
-            ),
-          ),
+          onPressed:
+              () => SmoothBottomSheet.show(
+                context: context,
+                isScrollControlled: true,
+                builder:
+                    (context) =>
+                        AccountEditScreen(billPlugin: widget.billPlugin),
+              ),
           backgroundColor: Theme.of(context).primaryColor,
           elevation: 4,
           shape: const CircleBorder(),
@@ -113,53 +114,50 @@ class _AccountListScreenState extends State<AccountListScreen> {
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final account = widget.billPlugin.accounts[index];
-        return Dismissible(
-          key: Key(account.id),
-          background: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.error,
-              borderRadius: BorderRadius.circular(12),
+        return SwipeActionWrapper(
+          key: ValueKey(account.id),
+          leadingActions: [
+            SwipeActionPresets.edit(
+              onTap: () => _editAccount(context, account),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            alignment: Alignment.centerRight,
-            child: Icon(
-              Icons.delete,
-              color: Theme.of(context).colorScheme.onError,
-            ),
-          ),
-          direction: DismissDirection.endToStart,
-          confirmDismiss: (direction) async {
-            return await showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: Text('bill_confirmDelete'.tr),
-                  content: Text(
-                    '确定要删除账户"${account.title}"吗？\n删除后该账户下的所有账单记录都将被删除！',
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: Text('bill_cancel'.tr),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      child: Text(
-                        '删除',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
+          ],
+          trailingActions: [
+            SwipeActionPresets.delete(
+              onTap: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('bill_confirmDelete'.tr),
+                      content: Text(
+                        '确定要删除账户"${account.title}"吗？\n删除后该账户下的所有账单记录都将被删除！',
                       ),
-                    ),
-                  ],
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: Text('bill_cancel'.tr),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: Text(
+                            '删除',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 );
+
+                if (confirmed == true) {
+                  widget.billPlugin.controller.deleteAccount(account.id);
+                  Toast.success('${'bill_accountDeleted'.tr} "${account.title}"');
+                }
               },
-            );
-          },
-          onDismissed: (direction) {
-            widget.billPlugin.controller.deleteAccount(account.id);
-            Toast.success('${'bill_accountDeleted'.tr} "${account.title}"');
-          },
+            ),
+          ],
           child: _buildAccountCard(context, account),
         );
       },
@@ -264,10 +262,11 @@ class _AccountListScreenState extends State<AccountListScreen> {
     SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      builder: (context) => AccountEditScreen(
-        billPlugin: widget.billPlugin,
-        account: account,
-      ),
+      builder:
+          (context) => AccountEditScreen(
+            billPlugin: widget.billPlugin,
+            account: account,
+          ),
     );
   }
 }

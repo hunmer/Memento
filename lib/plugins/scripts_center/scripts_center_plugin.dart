@@ -446,7 +446,7 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
       searchPlaceholder: 'scripts_center_search'.tr,
       onSearchChanged: _setSearchQuery,
       onSearchSubmitted: _setSearchQuery,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       actions: [
         IconButton(
           icon: const Icon(Icons.add_circle_outline, size: 24),
@@ -465,10 +465,7 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
   Future<void> _showCreateScriptDialog(BuildContext context) async {
     final result = await NavigationHelper.push<Map<String, dynamic>>(
       context,
-      ScriptEditScreen(
-        script: null,
-        scriptManager: _plugin.scriptManager,
-      ),
+      ScriptEditScreen(script: null, scriptManager: _plugin.scriptManager),
     );
 
     if (result != null && result['success'] == true) {

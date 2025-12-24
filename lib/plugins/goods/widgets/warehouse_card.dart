@@ -66,9 +66,8 @@ class WarehouseCard extends StatelessWidget {
                     children: [
                       Text(
                         warehouse.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -83,9 +82,8 @@ class WarehouseCard extends StatelessWidget {
                           const SizedBox(width: 6),
                           Text(
                             '${warehouse.items.length} 件物品',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).hintColor,
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: Theme.of(context).hintColor),
                           ),
                         ],
                       ),
@@ -95,9 +93,8 @@ class WarehouseCard extends StatelessWidget {
                         children: [
                           Text(
                             '总价值',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).hintColor,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: Theme.of(context).hintColor),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(

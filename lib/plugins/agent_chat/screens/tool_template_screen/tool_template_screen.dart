@@ -9,6 +9,7 @@ import 'components/template_execution_dialog.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+
 /// 工具模板管理界面
 class ToolTemplateScreen extends StatefulWidget {
   final ToolTemplateService templateService;
@@ -84,7 +85,6 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
           _searchQuery = query;
         });
       },
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         // 标签过滤按钮
         if (allTags.isNotEmpty)
@@ -113,13 +113,15 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
           if (_selectedTags.isNotEmpty)
             Container(
               color: Theme.of(context).scaffoldBackgroundColor,
-              padding: const EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 8),
+              padding: const EdgeInsets.only(
+                left: 8,
+                right: 8,
+                top: 8,
+                bottom: 8,
+              ),
               child: Row(
                 children: [
-                  const Text(
-                    '当前过滤：',
-                    style: TextStyle(fontSize: 12),
-                  ),
+                  const Text('当前过滤：', style: TextStyle(fontSize: 12)),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Scrollbar(
@@ -129,22 +131,26 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                         controller: _tagsScrollController,
                         scrollDirection: Axis.horizontal,
                         child: Row(
-                          children: _selectedTags.map((tag) {
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 6),
-                              child: Chip(
-                                avatar: const Icon(Icons.label, size: 16),
-                                label: Text(tag),
-                                onDeleted: () {
-                                  setState(() {
-                                    _selectedTags.remove(tag);
-                                  });
-                                },
-                                deleteIcon: const Icon(Icons.close, size: 16),
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            );
-                          }).toList(),
+                          children:
+                              _selectedTags.map((tag) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 6),
+                                  child: Chip(
+                                    avatar: const Icon(Icons.label, size: 16),
+                                    label: Text(tag),
+                                    onDeleted: () {
+                                      setState(() {
+                                        _selectedTags.remove(tag);
+                                      });
+                                    },
+                                    deleteIcon: const Icon(
+                                      Icons.close,
+                                      size: 16,
+                                    ),
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                );
+                              }).toList(),
                         ),
                       ),
                     ),
@@ -167,16 +173,17 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
             ),
           // 模板列表
           Expanded(
-            child: templates.isEmpty
-                ? _buildEmptyState()
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: templates.length,
-                    itemBuilder: (context, index) {
-                      final template = templates[index];
-                      return _buildTemplateCard(template);
-                    },
-                  ),
+            child:
+                templates.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: templates.length,
+                      itemBuilder: (context, index) {
+                        final template = templates[index];
+                        return _buildTemplateCard(template);
+                      },
+                    ),
           ),
         ],
       ),
@@ -189,27 +196,17 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.inventory_2_outlined,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             _searchQuery.isEmpty ? '暂无保存的工具模板' : '未找到匹配的模板',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
           if (_searchQuery.isEmpty) ...[
             const SizedBox(height: 8),
             Text(
               '在AI工具调用消息中点击"保存工具"即可保存',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           ],
         ],
@@ -278,11 +275,12 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                           break;
                       }
                     },
-                    itemBuilder: (context) => [
+                    itemBuilder:
+                        (context) => [
                           PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
+                            value: 'edit',
+                            child: Row(
+                              children: [
                                 const Icon(
                                   Icons.edit,
                                   size: 18,
@@ -293,13 +291,13 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                                   'agent_chat_edit'.tr,
                                   style: const TextStyle(color: Colors.blue),
                                 ),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
                                 const Icon(
                                   Icons.delete,
                                   size: 18,
@@ -310,10 +308,10 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                                   'agent_chat_delete'.tr,
                                   style: const TextStyle(color: Colors.red),
                                 ),
-                          ],
-                        ),
-                      ),
-                    ],
+                              ],
+                            ),
+                          ),
+                        ],
                   ),
                 ],
               ),
@@ -323,10 +321,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                 const SizedBox(height: 8),
                 Text(
                   template.description!,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -370,37 +365,38 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
-                  children: template.tags.map((tag) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.blue.shade200),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.label,
-                            size: 12,
-                            color: Colors.blue.shade700,
+                  children:
+                      template.tags.map((tag) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            tag,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.blue.shade700,
-                            ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.blue.shade200),
                           ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.label,
+                                size: 12,
+                                color: Colors.blue.shade700,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                tag,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.blue.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                 ),
               ],
             ],
@@ -417,13 +413,7 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
       children: [
         Icon(icon, size: 14, color: color),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: color,
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 12, color: color)),
       ],
     );
   }
@@ -460,27 +450,26 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
   Future<void> _deleteTemplate(SavedToolTemplate template) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder:
+          (context) => AlertDialog(
             title: Text('agent_chat_deleteConfirmation'.tr),
             content: Text(
               'agent_chat_confirmDeleteTemplate'.trParams({
                 'templateName': template.name,
               }),
             ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
                 child: Text('agent_chat_cancel'.tr),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: FilledButton.styleFrom(backgroundColor: Colors.red),
                 child: Text('agent_chat_delete'.tr),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -505,10 +494,11 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => TemplateExecutionDialog(
-        templateName: template.name,
-        steps: steps,
-      ),
+      builder:
+          (context) => TemplateExecutionDialog(
+            templateName: template.name,
+            steps: steps,
+          ),
     );
   }
 
@@ -535,34 +525,33 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
   Future<void> _resetToDefaultTemplates() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder:
+          (context) => AlertDialog(
             title: Row(
-          children: [
+              children: [
                 const Icon(Icons.warning_amber_rounded, color: Colors.orange),
                 const SizedBox(width: 8),
                 Text('agent_chat_resetConfirmation'.tr),
-          ],
-        ),
-        content: const Text(
-          '此操作将强制恢复所有默认工具模板到初始状态。\n\n'
-          '⚠️ 注意：如果您修改过默认模板，这些修改将会被覆盖！\n\n'
-          '自定义模板不会受到影响。',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-                child: Text('agent_chat_cancel'.tr),
-          ),
-          FilledButton.icon(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.orange,
+              ],
             ),
-            icon: const Icon(Icons.restore),
+            content: const Text(
+              '此操作将强制恢复所有默认工具模板到初始状态。\n\n'
+              '⚠️ 注意：如果您修改过默认模板，这些修改将会被覆盖！\n\n'
+              '自定义模板不会受到影响。',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text('agent_chat_cancel'.tr),
+              ),
+              FilledButton.icon(
+                onPressed: () => Navigator.pop(context, true),
+                style: FilledButton.styleFrom(backgroundColor: Colors.orange),
+                icon: const Icon(Icons.restore),
                 label: Text('agent_chat_reset'.tr),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirmed != true) return;
@@ -575,22 +564,20 @@ class _ToolTemplateScreenState extends State<ToolTemplateScreen> {
           barrierDismissible: false,
           builder:
               (context) => Center(
-            child: Card(
-              child: Padding(
+                child: Card(
+                  child: Padding(
                     padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                         const CircularProgressIndicator(),
                         const SizedBox(height: 16),
-                        Text(
-                          'agent_chat_resettingDefaultTemplates'.tr,
-                        ),
-                  ],
+                        Text('agent_chat_resettingDefaultTemplates'.tr),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
         );
       }
 
@@ -670,66 +657,72 @@ class _TagFilterDialogState extends State<_TagFilterDialog> {
           child: Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: widget.allTags.map((tag) {
-              final count =
-                  widget.templateService.templates
-                      .where((t) => t.tags.contains(tag))
-                      .length;
-              final isSelected = _selectedTags.contains(tag);
+            children:
+                widget.allTags.map((tag) {
+                  final count =
+                      widget.templateService.templates
+                          .where((t) => t.tags.contains(tag))
+                          .length;
+                  final isSelected = _selectedTags.contains(tag);
 
-              return FilterChip(
-                avatar: Icon(
-                  Icons.label,
-                  size: 18,
-                  color: isSelected ? Colors.blue : Colors.grey,
-                ),
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(tag),
-                    const SizedBox(width: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            isSelected ? Colors.blue.shade100 : Colors.grey[300],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        count.toString(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color:
-                              isSelected
-                                  ? Colors.blue.shade800
-                                  : Colors.grey.shade700,
-                        ),
-                      ),
+                  return FilterChip(
+                    avatar: Icon(
+                      Icons.label,
+                      size: 18,
+                      color: isSelected ? Colors.blue : Colors.grey,
                     ),
-                  ],
-                ),
-                selected: isSelected,
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _selectedTags.add(tag);
-                    } else {
-                      _selectedTags.remove(tag);
-                    }
-                  });
-                },
-                showCheckmark: false,
-                selectedColor: Colors.blue.shade50,
-                side: BorderSide(
-                  color: isSelected ? Colors.blue.shade300 : Colors.grey.shade400,
-                  width: 1,
-                ),
-              );
-            }).toList(),
+                    label: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(tag),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected
+                                    ? Colors.blue.shade100
+                                    : Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            count.toString(),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  isSelected
+                                      ? Colors.blue.shade800
+                                      : Colors.grey.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          _selectedTags.add(tag);
+                        } else {
+                          _selectedTags.remove(tag);
+                        }
+                      });
+                    },
+                    showCheckmark: false,
+                    selectedColor: Colors.blue.shade50,
+                    side: BorderSide(
+                      color:
+                          isSelected
+                              ? Colors.blue.shade300
+                              : Colors.grey.shade400,
+                      width: 1,
+                    ),
+                  );
+                }).toList(),
           ),
         ),
       ),

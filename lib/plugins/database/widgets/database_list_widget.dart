@@ -40,7 +40,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
       title: Text('database_database_list_title'.tr),
       largeTitle: 'database_database_list_title'.tr,
       enableLargeTitle: true,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       body: FutureBuilder<List<DatabaseModel>>(
         future: _databasesFuture,
         builder: (context, snapshot) {
@@ -57,7 +57,9 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   const SizedBox(height: 16),
                   Text(
                     'database_load_failed_message'.tr,
-                    style: theme.textTheme.titleMedium?.copyWith(color: Colors.red),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.red,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -254,9 +256,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                     context: context,
                     builder:
                         (context) => AlertDialog(
-                          title: Text(
-                            'database_confirm_delete_title'.tr,
-                          ),
+                          title: Text('database_confirm_delete_title'.tr),
                           content: Text(
                             'database_confirm_delete_message'.trParams({
                               'name': database.name,
@@ -288,9 +288,11 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                       }
                     } catch (e) {
                       if (mounted) {
-                        Toast.error('database_delete_failed_message'.trParams({
-                          'error': e.toString(),
-                        }));
+                        Toast.error(
+                          'database_delete_failed_message'.trParams({
+                            'error': e.toString(),
+                          }),
+                        );
                       }
                     }
                   }

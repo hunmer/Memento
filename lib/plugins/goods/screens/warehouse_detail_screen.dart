@@ -363,6 +363,7 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
                   final item = items[index];
                   return GoodsItemListTile(
                     item: item,
+                    warehouseId: _warehouse.id,
                     onTap: () => _showEditItemDialog(item),
                   );
                 },

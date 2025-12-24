@@ -176,20 +176,21 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
       });
     } else {
       setState(() {
-        _filteredHabits = _habits
-            .where((habit) => habit.title.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+        _filteredHabits =
+            _habits
+                .where(
+                  (habit) =>
+                      habit.title.toLowerCase().contains(query.toLowerCase()),
+                )
+                .toList();
       });
     }
   }
 
   /// 获取所有分组(用于过滤栏)
   List<String> get _groups {
-    final g = _habits
-        .map((habit) => habit.group ?? '未分组')
-        .toSet()
-        .toList()
-      ..sort();
+    final g =
+        _habits.map((habit) => habit.group ?? '未分组').toSet().toList()..sort();
     return ['全部', ...g];
   }
 
@@ -214,30 +215,34 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
   }
 
   Future<void> _showHabitForm(BuildContext context, [Habit? habit]) async {
-
-    await NavigationHelper.push(context, Scaffold(
-              appBar: AppBar(
-                title: Text(habit == null ? 'habits_createHabit'.tr : 'habits_editHabit'.tr),
-                actions: [
-                  if (habit != null)
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () async {
-                        await widget.controller.deleteHabit(habit.id);
-                        Navigator.pop(context);
-                        _loadHabits();
-                      },
-                    ),
-                ],
-              ),
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              body: HabitForm(
-                initialHabit: habit,
-                onSave: (habit) async {
-                  await widget.controller.saveHabit(habit);
+    await NavigationHelper.push(
+      context,
+      Scaffold(
+        appBar: AppBar(
+          title: Text(
+            habit == null ? 'habits_createHabit'.tr : 'habits_editHabit'.tr,
+          ),
+          actions: [
+            if (habit != null)
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () async {
+                  await widget.controller.deleteHabit(habit.id);
                   Navigator.pop(context);
                   _loadHabits();
-                },),
+                },
+              ),
+          ],
+        ),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: HabitForm(
+          initialHabit: habit,
+          onSave: (habit) async {
+            await widget.controller.saveHabit(habit);
+            Navigator.pop(context);
+            _loadHabits();
+          },
+        ),
       ),
     );
   }
@@ -310,12 +315,11 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
 
   @override
   Widget build(BuildContext context) {
-
     return SuperCupertinoNavigationWrapper(
       title: Text('habits_habits'.tr),
       largeTitle: 'habits_habits'.tr,
       enableLargeTitle: true,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       // ========== 搜索相关配置 ==========
       enableSearchBar: true, // 启用搜索栏
       searchPlaceholder: 'habits_searchHabitPlaceholder'.tr, // 搜索栏占位符
@@ -335,9 +339,7 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
       // ========== 过滤栏配置 ==========
       enableFilterBar: true,
       filterBarChild: _buildFilterBar(),
-      actions: [
-
-      ],
+      actions: [],
       body: _buildCardView(_filteredByGroup),
     );
   }

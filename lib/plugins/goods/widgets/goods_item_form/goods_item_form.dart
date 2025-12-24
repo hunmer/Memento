@@ -39,7 +39,9 @@ class _GoodsItemFormState extends State<GoodsItemForm> {
   /// 更新路由上下文,使"询问当前上下文"功能能获取到当前编辑的物品信息
   void _updateRouteContext() {
     if (widget.initialData != null) {
-      final result = GoodsPlugin.instance.findGoodsItemById(widget.initialData!.id);
+      final result = GoodsPlugin.instance.findGoodsItemById(
+        widget.initialData!.id,
+      );
       RouteHistoryManager.updateCurrentContext(
         pageId: "/goods/item_dialog_edit",
         title: '物品 - 编辑: ${widget.initialData!.title}',
@@ -83,14 +85,11 @@ class _GoodsItemFormState extends State<GoodsItemForm> {
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
         elevation: 0,
         title: Text(
-          widget.initialData == null
-              ? 'goods_addItem'.tr
-              : 'goods_editItem'.tr,
+          widget.initialData == null ? 'goods_addItem'.tr : 'goods_editItem'.tr,
         ),
         centerTitle: true,
         leading: IconButton(

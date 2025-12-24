@@ -10,6 +10,7 @@ import 'package:Memento/plugins/bill/models/bill_model.dart';
 import 'package:Memento/plugins/bill/models/bill.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
+import 'package:Memento/widgets/swipe_action/index.dart';
 import 'bill_edit_screen.dart';
 import 'account_list_screen.dart';
 import 'subscription_list_screen.dart';
@@ -25,10 +26,12 @@ class BillListScreenSupercupertino extends StatefulWidget {
   });
 
   @override
-  State<BillListScreenSupercupertino> createState() => _BillListScreenSupercupertinoState();
+  State<BillListScreenSupercupertino> createState() =>
+      _BillListScreenSupercupertinoState();
 }
 
-class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupertino> {
+class _BillListScreenSupercupertinoState
+    extends State<BillListScreenSupercupertino> {
   late final void Function() _billPluginListener;
   late CalendarController _calendarController;
 
@@ -40,13 +43,14 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
   List<BillModel> _allMonthBills = []; // All bills for the focused month
   Map<DateTime, _DailyStats> _dailyStats = {};
 
-  String _filterCategory = 'all'; // 'all', 'income', 'expense', or specific category name
+  String _filterCategory =
+      'all'; // 'all', 'income', 'expense', or specific category name
   String _searchQuery = '';
 
   // 搜索过滤器状态
   final Map<String, bool> _searchFilters = {
     'category': true, // 是否搜索分类
-    'note': true,     // 是否搜索笔记
+    'note': true, // 是否搜索笔记
   };
 
   // Colors
@@ -179,7 +183,8 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
 
     if (selectedDay != null) {
       // 如果有选中的具体日期，显示完整日期（YYYY-MM-DD）
-      dateStr = '${selectedDay.year}-${selectedDay.month.toString().padLeft(2, '0')}-${selectedDay.day.toString().padLeft(2, '0')}';
+      dateStr =
+          '${selectedDay.year}-${selectedDay.month.toString().padLeft(2, '0')}-${selectedDay.day.toString().padLeft(2, '0')}';
       title = '账单列表 - $dateStr';
     } else {
       // 否则只显示月份（YYYY-MM）
@@ -307,7 +312,11 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
   List<BillModel> get _selectedDayBills {
     if (_selectedDay == null) return [];
 
-    final selectedDate = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+    final selectedDate = DateTime(
+      _selectedDay!.year,
+      _selectedDay!.month,
+      _selectedDay!.day,
+    );
 
     return _allMonthBills.where((bill) {
       final billDate = DateTime(bill.date.year, bill.date.month, bill.date.day);
@@ -332,10 +341,7 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
         });
       },
       enableSearchFilter: true,
-      filterLabels: const {
-        'category': '分类',
-        'note': '笔记',
-      },
+      filterLabels: const {'category': '分类', 'note': '笔记'},
       onSearchFilterChanged: (filters) {
         setState(() {
           _searchFilters.addAll(filters);
@@ -344,7 +350,6 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
       searchBody: _buildSearchBody(),
       body: _buildMainBody(),
       enableLargeTitle: true,
-      automaticallyImplyLeading: true,
       actions: [
         IconButton(
           icon: const Icon(Icons.account_balance_wallet),
@@ -353,9 +358,9 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AccountListScreen(
-                  billPlugin: widget.billPlugin,
-                ),
+                builder:
+                    (context) =>
+                        AccountListScreen(billPlugin: widget.billPlugin),
               ),
             );
           },
@@ -367,9 +372,9 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => SubscriptionListScreen(
-                  billPlugin: widget.billPlugin,
-                ),
+                builder:
+                    (context) =>
+                        SubscriptionListScreen(billPlugin: widget.billPlugin),
               ),
             );
           },
@@ -438,7 +443,8 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
             todayHighlightColor: Colors.transparent,
             monthCellBuilder: (BuildContext context, MonthCellDetails details) {
               final day = details.date;
-              final isSelected = _selectedDay != null && _isSameDay(day, _selectedDay!);
+              final isSelected =
+                  _selectedDay != null && _isSameDay(day, _selectedDay!);
               return _buildCalendarCell(day, isSelected);
             },
             onTap: (CalendarTapDetails details) {
@@ -454,7 +460,8 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
             },
             onViewChanged: (ViewChangedDetails details) {
               if (details.visibleDates.isNotEmpty) {
-                final newFocusedDay = details.visibleDates[details.visibleDates.length ~/ 2];
+                final newFocusedDay =
+                    details.visibleDates[details.visibleDates.length ~/ 2];
                 _focusedDay = newFocusedDay;
                 _loadMonthBills();
                 // 更新路由上下文
@@ -482,16 +489,13 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.calendar_today,
-                    color: _primaryColor,
-                  ),
+                  Icon(Icons.calendar_today, color: _primaryColor),
                   const SizedBox(width: 8),
                   Text(
                     DateFormat('yyyy年MM月dd日').format(_selectedDay!),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -509,10 +513,7 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                     const SizedBox(height: 16),
                     Text(
                       '这一天没有账单',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
                     ),
                   ],
                 ),
@@ -526,54 +527,90 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                 itemBuilder: (context, index) {
                   final bill = _selectedDayBills[index];
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    child: Dismissible(
-                      key: Key(bill.id),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        color: Colors.red,
-                        child: const Icon(
-                          Icons.delete,
-                          color: Colors.white,
-                        ),
-                      ),
-                      confirmDismiss: (direction) async {
-                        return await showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                              return AlertDialog(
-                              title: Text('bill_confirmDelete'.tr),
-                              content: Text('bill_confirmDeleteThisBill'.tr),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(false),
-                                  child: Text('bill_cancel'.tr),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(true),
-                                  child: Text('bill_delete'.tr),
-                                ),
-                              ],
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    child: SwipeActionWrapper(
+                      key: ValueKey(bill.id),
+                      leadingActions: [
+                        SwipeActionPresets.edit(
+                          onTap: () {
+                            final billObject = Bill(
+                              id: bill.id,
+                              title: bill.title,
+                              amount: bill.isExpense ? -bill.amount : bill.amount,
+                              accountId: widget.accountId,
+                              category: bill.category,
+                              date: bill.date,
+                              tag: bill.category,
+                              note: bill.note ?? '',
+                              createdAt: bill.date,
+                              icon: bill.icon,
+                              iconColor: bill.color,
+                            );
+                            NavigationHelper.openContainer<bool>(
+                              context,
+                              (BuildContext context) {
+                                return BillEditScreen(
+                                  billPlugin: widget.billPlugin,
+                                  accountId: widget.accountId,
+                                  bill: billObject,
+                                  onSaved: () {
+                                    _loadMonthBills();
+                                  },
+                                );
+                              },
+                              closedColor: Colors.transparent,
+                              closedElevation: 0.0,
+                              closedShape: const RoundedRectangleBorder(),
                             );
                           },
-                        );
-                      },
-                      onDismissed: (direction) async {
-                        try {
-                          final currentAccount = widget.billPlugin.accounts.firstWhere(
-                            (account) => account.id == widget.accountId,
-                          );
-                          await widget.billPlugin.controller.deleteBill(
-                            currentAccount.id,
-                            bill.id,
-                          );
-                          _loadMonthBills();
-                        } catch (e) {
-                          Toast.error('删除失败: $e');
-                        }
-                      },
+                        ),
+                      ],
+                      trailingActions: [
+                        SwipeActionPresets.delete(
+                          onTap: () async {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('bill_confirmDelete'.tr),
+                                  content: Text('bill_confirmDeleteThisBill'.tr),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: Text('bill_cancel'.tr),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true),
+                                      child: Text('bill_delete'.tr),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            if (confirmed == true) {
+                              try {
+                                final currentAccount = widget.billPlugin.accounts
+                                    .firstWhere(
+                                      (account) => account.id == widget.accountId,
+                                    );
+                                await widget.billPlugin.controller.deleteBill(
+                                  currentAccount.id,
+                                  bill.id,
+                                );
+                                _loadMonthBills();
+                              } catch (e) {
+                                Toast.error('删除失败: $e');
+                              }
+                            }
+                          },
+                        ),
+                      ],
                       child: ListTile(
                         leading: CircleAvatar(
                           backgroundColor: bill.color.withOpacity(0.2),
@@ -587,9 +624,7 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                           '${bill.isExpense ? '-' : '+'}${_formatCurrency(bill.amount)}',
                           style: TextStyle(
                             color:
-                                bill.isExpense
-                                    ? _expenseColor
-                                    : _incomeColor,
+                                bill.isExpense ? _expenseColor : _incomeColor,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -600,7 +635,8 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                               final billObject = Bill(
                                 id: bill.id,
                                 title: bill.title,
-                                amount: bill.isExpense ? -bill.amount : bill.amount,
+                                amount:
+                                    bill.isExpense ? -bill.amount : bill.amount,
                                 accountId: widget.accountId,
                                 category: bill.category,
                                 date: bill.date,
@@ -642,10 +678,7 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
                   const SizedBox(height: 16),
                   Text(
                     '请选择一天查看账单',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
                   ),
                 ],
               ),
@@ -660,23 +693,26 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
     List<BillModel> filteredBills = _allMonthBills;
 
     if (_searchQuery.isNotEmpty) {
-      filteredBills = filteredBills.where((bill) {
-        final query = _searchQuery.toLowerCase();
+      filteredBills =
+          filteredBills.where((bill) {
+            final query = _searchQuery.toLowerCase();
 
-        // 按名称搜索
-        final matchTitle = bill.title.toLowerCase().contains(query);
+            // 按名称搜索
+            final matchTitle = bill.title.toLowerCase().contains(query);
 
-        // 按分类搜索（如果启用）
-        final matchCategory = (_searchFilters['category'] ?? true) &&
-            bill.category.toLowerCase().contains(query);
+            // 按分类搜索（如果启用）
+            final matchCategory =
+                (_searchFilters['category'] ?? true) &&
+                bill.category.toLowerCase().contains(query);
 
-        // 按笔记搜索（如果启用）
-        final matchNote = (_searchFilters['note'] ?? true) &&
-            (bill.note?.toLowerCase().contains(query) ?? false);
+            // 按笔记搜索（如果启用）
+            final matchNote =
+                (_searchFilters['note'] ?? true) &&
+                (bill.note?.toLowerCase().contains(query) ?? false);
 
-        // 满足任一条件即匹配
-        return matchTitle || matchCategory || matchNote;
-      }).toList();
+            // 满足任一条件即匹配
+            return matchTitle || matchCategory || matchNote;
+          }).toList();
     }
 
     if (_searchQuery.isNotEmpty && filteredBills.isEmpty) {
@@ -684,18 +720,11 @@ class _BillListScreenSupercupertinoState extends State<BillListScreenSupercupert
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               '未找到匹配的账单',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
             ),
           ],
         ),

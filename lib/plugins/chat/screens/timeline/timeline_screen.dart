@@ -5,12 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/index.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/chat/utils/message_operations.dart';
 import 'controllers/timeline_controller.dart';
-import 'models/timeline_filter.dart';
 import 'widgets/timeline_message_card.dart';
-import 'widgets/filter_dialog.dart';
 
 /// Timeline 主屏幕，显示所有频道的消息时间线
 class TimelineScreen extends StatefulWidget {
@@ -105,7 +104,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return SuperCupertinoNavigationWrapper(
       title: Text('chat_timelineTab'.tr),
       largeTitle: 'chat_timelineTab'.tr,
@@ -118,14 +116,12 @@ class _TimelineScreenState extends State<TimelineScreen> {
       onSearchSubmitted: (query) {
         _controller.searchController.text = query;
       },
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
+      // 启用多条件过滤
+      enableMultiFilter: true,
+      multiFilterItems: _buildFilterItems(),
+      onMultiFilterChanged: _applyMultiFilters,
       actions: [
-        // 过滤器按钮
-        IconButton(
-          icon: Icon(Icons.filter_list),
-          tooltip: '过滤器',
-          onPressed: () => _showFilterDialog(context),
-        ),
         // 视图切换按钮
         IconButton(
           icon: Icon(_isGridView ? Icons.view_agenda : Icons.grid_view),
@@ -202,10 +198,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
         return Animate(
           key: ValueKey(message.id),
           effects: [
-            FadeEffect(
-              duration: 300.ms,
-              delay: animationDelay,
-            ),
+            FadeEffect(duration: 300.ms, delay: animationDelay),
             SlideEffect(
               begin: const Offset(0, 0.3),
               end: Offset.zero,
@@ -294,10 +287,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
     return Animate(
       key: ValueKey(message.id),
       effects: [
-        FadeEffect(
-          duration: 300.ms,
-          delay: animationDelay,
-        ),
+        FadeEffect(duration: 300.ms, delay: animationDelay),
         SlideEffect(
           begin: const Offset(0, 0.3),
           end: Offset.zero,
@@ -316,22 +306,119 @@ class _TimelineScreenState extends State<TimelineScreen> {
     );
   }
 
-  /// 显示高级过滤器对话框
-  Future<void> _showFilterDialog(BuildContext context) async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder:
-          (context) => FilterDialog(
-            filter: _controller.filter,
-            chatPlugin: widget.chatPlugin,
-          ),
-    );
+  /// 构建过滤条件列表
+  List<FilterItem> _buildFilterItems() {
+    // 获取所有可用频道
+    final channels = widget.chatPlugin.channelService.channels;
 
-    if (result != null) {
-      // 从 Map 更新过滤器
-      _controller.filter.updateFrom(TimelineFilter.fromJson(result));
-      // 应用过滤器
-      _controller.applyFilter(_controller.filter);
+    return [
+      // 1. 频道多选过滤
+      FilterItem(
+        id: 'channels',
+        title: 'chat_selectChannels'.tr,
+        type: FilterType.tagsMultiple,
+        builder: (context, currentValue, onChanged) {
+          return FilterBuilders.buildTagsFilter(
+            context: context,
+            currentValue: currentValue,
+            onChanged: onChanged,
+            availableTags: channels.map((c) => c.title).toList(),
+          );
+        },
+        getBadge: FilterBuilders.tagsBadge,
+      ),
+
+      // 2. 日期范围过滤
+      FilterItem(
+        id: 'dateRange',
+        title: 'chat_dateRange'.tr,
+        type: FilterType.dateRange,
+        builder: (context, currentValue, onChanged) {
+          return FilterBuilders.buildDateRangeFilter(
+            context: context,
+            currentValue: currentValue,
+            onChanged: onChanged,
+          );
+        },
+        getBadge: FilterBuilders.dateRangeBadge,
+      ),
+
+      // 3. 消息类型过滤
+      FilterItem(
+        id: 'messageType',
+        title: 'chat_metadataFilters'.tr,
+        type: FilterType.checkbox,
+        builder: (context, currentValue, onChanged) {
+          return FilterBuilders.buildCheckboxFilter(
+            context: context,
+            currentValue: currentValue,
+            onChanged: onChanged,
+            options: {
+              'isAI': 'chat_aiMessages'.tr,
+              'isFavorite': 'chat_favoriteMessages'.tr,
+            },
+          );
+        },
+        getBadge: FilterBuilders.checkboxBadge,
+        initialValue: <String, bool>{},
+      ),
+    ];
+  }
+
+  /// 应用多条件过滤
+  void _applyMultiFilters(Map<String, dynamic> filters) {
+    debugPrint('Timeline: 开始应用多条件过滤，filters = $filters');
+
+    // 创建一个新的过滤器副本
+    final newFilter = _controller.filter.copyWith();
+
+    // 1. 处理频道过滤
+    if (filters['channels'] != null &&
+        (filters['channels'] as List).isNotEmpty) {
+      final selectedChannelNames = filters['channels'] as List<String>;
+      final allChannels = widget.chatPlugin.channelService.channels;
+      final selectedIds =
+          allChannels
+              .where((c) => selectedChannelNames.contains(c.title))
+              .map((c) => c.id)
+              .toSet();
+      newFilter.selectedChannelIds = selectedIds;
+      debugPrint('Timeline: 选中的频道: $selectedChannelNames -> IDs: $selectedIds');
+    } else {
+      newFilter.selectedChannelIds = {};
+      debugPrint('Timeline: 清空频道过滤');
     }
+
+    // 2. 处理日期范围
+    if (filters['dateRange'] != null) {
+      final range = filters['dateRange'] as DateTimeRange;
+      newFilter.startDate = range.start;
+      newFilter.endDate = range.end;
+    } else {
+      newFilter.startDate = null;
+      newFilter.endDate = null;
+    }
+
+    // 3. 处理消息类型
+    if (filters['messageType'] != null) {
+      final types = Map<String, bool>.from(filters['messageType'] as Map);
+      // 只有选中时才设置为 true，未选中或未勾选时设置为 null
+      newFilter.isAI = types['isAI'] == true ? true : null;
+      newFilter.isFavorite = types['isFavorite'] == true ? true : null;
+      debugPrint(
+        'Timeline: 消息类型过滤 - isAI: ${newFilter.isAI}, isFavorite: ${newFilter.isFavorite}',
+      );
+    } else {
+      newFilter.isAI = null;
+      newFilter.isFavorite = null;
+    }
+
+    // 4. 应用过滤器（内部会调用 notifyListeners）
+    debugPrint(
+      'Timeline: 过滤器配置 - channels: ${newFilter.selectedChannelIds}, '
+      'dateRange: ${newFilter.startDate} ~ ${newFilter.endDate}, '
+      'messageType: [isAI=${newFilter.isAI}, isFavorite=${newFilter.isFavorite}]',
+    );
+    _controller.applyFilter(newFilter);
   }
 }

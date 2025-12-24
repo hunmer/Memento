@@ -11,8 +11,14 @@ import 'chart_components.dart';
 /// 通用的统计屏幕组件
 class StatisticsScreen extends StatefulWidget {
   final StatisticsConfig config;
-  final Future<StatisticsData> Function(DateRangeOption range, DateTime? startDate, DateTime? endDate) dataLoader;
-  final List<Widget> Function(BuildContext context, StatisticsData data)? customSections;
+  final Future<StatisticsData> Function(
+    DateRangeOption range,
+    DateTime? startDate,
+    DateTime? endDate,
+  )
+  dataLoader;
+  final List<Widget> Function(BuildContext context, StatisticsData data)?
+  customSections;
   final Function(DateRangeState)? onDateRangeChanged;
   final Function(RankingData)? onRankingItemTap;
 
@@ -82,7 +88,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           break;
       }
 
-      final data = await widget.dataLoader(_state.selectedRange, startDate, endDate);
+      final data = await widget.dataLoader(
+        _state.selectedRange,
+        startDate,
+        endDate,
+      );
 
       // 如果是首次加载，先设置数值为 0，然后在下一帧更新为实际值以触发动画
       if (_isFirstLoad && mounted) {
@@ -95,12 +105,28 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             endDate: endDate,
             totalValue: 0, // 首次加载先设为 0
             totalValueLabel: data.totalValueLabel,
-            distributionData: data.distributionData?.map((item) =>
-              DistributionData(label: item.label, value: 0, color: item.color)
-            ).toList(),
-            rankingData: data.rankingData?.map((item) =>
-              RankingData(label: item.label, value: 0, icon: item.icon, color: item.color, extraData: item.extraData)
-            ).toList(),
+            distributionData:
+                data.distributionData
+                    ?.map(
+                      (item) => DistributionData(
+                        label: item.label,
+                        value: 0,
+                        color: item.color,
+                      ),
+                    )
+                    .toList(),
+            rankingData:
+                data.rankingData
+                    ?.map(
+                      (item) => RankingData(
+                        label: item.label,
+                        value: 0,
+                        icon: item.icon,
+                        color: item.color,
+                        extraData: item.extraData,
+                      ),
+                    )
+                    .toList(),
             timeSeriesData: data.timeSeriesData,
             hourlyDistribution: data.hourlyDistribution,
             hourlyMainTags: data.hourlyMainTags,
@@ -177,16 +203,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Future<void> _handleRangeChanged(DateRangeOption range) async {
     setState(() {
-      _state = _state.copyWith(
-        selectedRange: range,
-        isLoading: true,
-      );
+      _state = _state.copyWith(selectedRange: range, isLoading: true);
     });
 
     await _loadData();
   }
 
-  Future<void> _handleCustomRangeChanged(DateTime startDate, DateTime endDate) async {
+  Future<void> _handleCustomRangeChanged(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     setState(() {
       _state = _state.copyWith(
         selectedRange: DateRangeOption.custom,
@@ -204,7 +230,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return SuperCupertinoNavigationWrapper(
       title: Text(widget.config.title),
       largeTitle: widget.config.title,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       body: Column(
         children: [
           if (widget.config.showDateRange) ...[
@@ -227,9 +253,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             widget.config.emptyWidget ??
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Center(
-                    child: Text('widget_noData'.tr),
-                  ),
+                  child: Center(child: Text('widget_noData'.tr)),
                 )
           else
             Expanded(
@@ -262,7 +286,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                                     _data!.totalValueLabel!,
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Theme.of(context).textTheme.bodySmall?.color,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.bodySmall?.color,
                                     ),
                                   ),
                               ],
@@ -273,7 +300,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     if (_data!.totalValue != null) const SizedBox(height: 16),
 
                     // 时间序列趋势图
-                    if (_data!.timeSeriesData != null && _data!.timeSeriesData!.isNotEmpty)
+                    if (_data!.timeSeriesData != null &&
+                        _data!.timeSeriesData!.isNotEmpty)
                       buildStatisticsCard(
                         context: context,
                         title: 'widget_statisticsTrends'.tr,
@@ -282,11 +310,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           colorPalette: widget.config.chartColors,
                         ),
                       ),
-                    if (_data!.timeSeriesData != null && _data!.timeSeriesData!.isNotEmpty)
+                    if (_data!.timeSeriesData != null &&
+                        _data!.timeSeriesData!.isNotEmpty)
                       const SizedBox(height: 16),
 
                     // 分布饼图
-                    if (_data!.distributionData != null && _data!.distributionData!.isNotEmpty)
+                    if (_data!.distributionData != null &&
+                        _data!.distributionData!.isNotEmpty)
                       buildStatisticsCard(
                         context: context,
                         title: 'widget_statisticsDistribution'.tr,
@@ -297,7 +327,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           centerSubtext: _data!.totalValueLabel,
                         ),
                       ),
-                    if (_data!.distributionData != null && _data!.distributionData!.isNotEmpty)
+                    if (_data!.distributionData != null &&
+                        _data!.distributionData!.isNotEmpty)
                       const SizedBox(height: 16),
 
                     // 24小时分布（仅单日有效）
@@ -321,7 +352,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       const SizedBox(height: 16),
 
                     // 排行榜
-                    if (_data!.rankingData != null && _data!.rankingData!.isNotEmpty)
+                    if (_data!.rankingData != null &&
+                        _data!.rankingData!.isNotEmpty)
                       buildStatisticsCard(
                         context: context,
                         title: 'widget_statisticsRanking'.tr,
@@ -332,7 +364,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           valueLabel: _data!.totalValueLabel,
                         ),
                       ),
-                    if (_data!.rankingData != null && _data!.rankingData!.isNotEmpty)
+                    if (_data!.rankingData != null &&
+                        _data!.rankingData!.isNotEmpty)
                       const SizedBox(height: 16),
 
                     // 自定义部分

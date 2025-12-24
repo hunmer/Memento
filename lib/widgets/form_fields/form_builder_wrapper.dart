@@ -67,6 +67,9 @@ enum FormFieldType {
 
   // 日记相册专用字段
   chipSelector,        // Chip 选择器（心情、天气等）
+
+  // 订阅专用字段
+  subscriptionCycle,   // 订阅周期选择器（月度/季度/年度）
 }
 
 /// 表单字段配置
@@ -534,6 +537,10 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
       // 日记相册专用字段
       case FormFieldType.chipSelector:
         return _buildChipSelectorField(config, fieldKey!);
+
+      // 订阅专用字段
+      case FormFieldType.subscriptionCycle:
+        return _buildSubscriptionCycleField(config, fieldKey!);
     }
   }
 
@@ -1079,6 +1086,8 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
   Widget _buildCircleIconPickerField(FormFieldConfig config, GlobalKey fieldKey) {
     final extra = config.extra ?? {};
     final initialBackgroundColor = extra['initialBackgroundColor'] as Color? ?? Colors.blue;
+    final showLabel = extra['showLabel'] as bool? ?? false;
+    final labelText = extra['labelText'] as String? ?? config.labelText;
 
     return WrappedFormField(
       key: fieldKey,
@@ -1097,6 +1106,8 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
           currentIcon: data['icon'] as IconData? ?? Icons.star,
           currentBackgroundColor: data['color'] as Color? ?? Colors.blue,
           enabled: config.enabled,
+          showLabel: showLabel,
+          labelText: labelText,
           onValueChanged: setValue,
         );
       },
@@ -1532,6 +1543,35 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
             newValue['lastName'] = name;
             fieldState.didChange(newValue);
             config.onChanged?.call(newValue);
+          },
+        );
+      },
+    );
+  }
+
+  // ============ 订阅专用字段（新增）============
+
+  // 构建订阅周期选择器字段
+  Widget _buildSubscriptionCycleField(FormFieldConfig config, GlobalKey fieldKey) {
+    final extra = config.extra ?? {};
+
+    return FormBuilderField<int>(
+      key: fieldKey,
+      name: config.name,
+      initialValue: config.initialValue as int? ?? 30,
+      enabled: config.enabled,
+      builder: (fieldState) {
+        final currentDays = fieldState.value ?? 30;
+
+        return SubscriptionCycleField(
+          currentDays: currentDays,
+          enabled: config.enabled,
+          monthlyLabel: extra['monthlyLabel'] as String? ?? '月度',
+          quarterlyLabel: extra['quarterlyLabel'] as String? ?? '季度',
+          yearlyLabel: extra['yearlyLabel'] as String? ?? '年度',
+          onDaysChanged: (days) {
+            fieldState.didChange(days);
+            config.onChanged?.call(days);
           },
         );
       },

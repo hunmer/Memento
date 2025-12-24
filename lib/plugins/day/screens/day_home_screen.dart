@@ -108,7 +108,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
               style: TextStyle(color: theme.textTheme.titleLarge?.color),
             ),
             largeTitle: 'day_memorialDaysListTitle'.tr,
-            automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
             // 启用搜索栏
             enableSearchBar: true,
             searchPlaceholder: 'day_searchPlaceholder'.tr,
@@ -133,9 +133,7 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
                     (context) => [
                       PopupMenuItem(
                         value: SortMode.upcoming,
-                        child: Text(
-                          'day_upcomingSort'.tr,
-                        ),
+                        child: Text('day_upcomingSort'.tr),
                       ),
                       PopupMenuItem(
                         value: SortMode.recent,
@@ -330,18 +328,20 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
     }
 
     // 过滤纪念日（标题和笔记中包含搜索关键词）
-    final filteredDays = controller.memorialDays.where((memorialDay) {
-      // 检查标题是否匹配
-      final titleMatch = memorialDay.title
-          .toLowerCase()
-          .contains(_searchQuery.toLowerCase());
+    final filteredDays =
+        controller.memorialDays.where((memorialDay) {
+          // 检查标题是否匹配
+          final titleMatch = memorialDay.title.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          );
 
-      // 检查笔记是否匹配（笔记列表中的任意一个笔记包含关键词）
-      final notesMatch = memorialDay.notes.any((note) =>
-          note.toLowerCase().contains(_searchQuery.toLowerCase()));
+          // 检查笔记是否匹配（笔记列表中的任意一个笔记包含关键词）
+          final notesMatch = memorialDay.notes.any(
+            (note) => note.toLowerCase().contains(_searchQuery.toLowerCase()),
+          );
 
-      return titleMatch || notesMatch;
-    }).toList();
+          return titleMatch || notesMatch;
+        }).toList();
 
     // 如果没有搜索结果，显示空状态
     if (filteredDays.isEmpty) {

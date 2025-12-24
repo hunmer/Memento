@@ -322,4 +322,61 @@ class FilterBuilders {
     }
     return null;
   }
+
+  /// 构建单选项过滤器（适用于仓库、分类等）
+  /// [options] 格式：{'id': 'title'}
+  static Widget buildSingleChoiceFilter({
+    required BuildContext context,
+    required dynamic currentValue,
+    required ValueChanged<dynamic> onChanged,
+    required Map<String, String> options,
+    String? allItemsKey,
+    String? allItemsLabel,
+  }) {
+    final selectedValue = currentValue as String?;
+
+    // 构建选项列表，包含"所有"选项
+    final List<MapEntry<String, String>> allOptions = [
+      if (allItemsKey != null && allItemsLabel != null)
+        MapEntry(allItemsKey, allItemsLabel),
+      ...options.entries,
+    ];
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: allOptions.map((entry) {
+        final key = entry.key;
+        final label = entry.value;
+        final isSelected = selectedValue == key ||
+                          (selectedValue == null && key == allItemsKey);
+
+        return FilterChip(
+          label: Text(label),
+          selected: isSelected,
+          onSelected: (selected) {
+            if (selected) {
+              // 如果选择的是"所有"选项，传递 null
+              onChanged(key == allItemsKey ? null : key);
+            } else {
+              // 取消选择时，恢复到"所有"
+              onChanged(null);
+            }
+          },
+          visualDensity: VisualDensity.compact,
+        );
+      }).toList(),
+    );
+  }
+
+  /// 生成单选项过滤的 badge 文本
+  static String? singleChoiceBadge(
+    dynamic value,
+    Map<String, String> options,
+  ) {
+    if (value is String && options.containsKey(value)) {
+      return options[value];
+    }
+    return null;
+  }
 }
