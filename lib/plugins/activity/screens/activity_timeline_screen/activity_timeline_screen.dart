@@ -5,7 +5,7 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
-import 'package:Memento/widgets/calendar_strip_date_picker.dart';
+import 'package:Memento/widgets/picker/calendar_strip_date_picker.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/plugins/activity/widgets/activity_timeline.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';

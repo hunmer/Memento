@@ -18,21 +18,19 @@ class SimpleGroupSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('app_selectGroup'.tr),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: groups.length,
-          itemBuilder: (context, index) {
-            final group = groups[index];
-            return ListTile(
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 400),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: groups.map((group) => ListTile(
               title: Text(group),
               onTap: () {
                 onGroupSelected(group);
                 Navigator.of(context).pop();
               },
-            );
-          },
+            )).toList(),
+          ),
         ),
       ),
       actions: [

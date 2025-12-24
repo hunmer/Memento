@@ -12,6 +12,35 @@ import 'package:Memento/screens/notification_test/notification_test_page.dart';
 import 'package:Memento/screens/floating_widget_screen/floating_widget_screen.dart';
 import 'package:Memento/screens/data_selector_test/data_selector_test_screen.dart';
 import 'package:Memento/screens/settings_screen/screens/live_activities_test_screen.dart';
+import 'package:Memento/screens/form_fields_test/form_fields_test_screen.dart';
+import 'package:Memento/screens/widgets_gallery/widgets_gallery_screen.dart';
+import 'package:Memento/screens/widgets_gallery/screens/color_picker_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/icon_picker_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/avatar_picker_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/circle_icon_picker_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/calendar_strip_picker_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/image_picker_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/location_picker_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/backup_time_picker_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/markdown_editor_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/quill_viewer_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/memento_editor_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/data_selector_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/enhanced_calendar_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/group_selector_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/simple_group_selector_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/tag_manager_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/statistics_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/custom_dialog_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/smooth_bottom_sheet_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/file_preview_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/tts_settings_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/import_dialog_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/route_history_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/app_drawer_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/widget_config_editor_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/preset_edit_form_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/super_cupertino_navigation_example.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:get/get.dart';
@@ -90,6 +119,8 @@ class AppRoutes extends NavigatorObserver {
   static const String notificationTest = '/notification_test';
   static const String superCupertinoTest = '/super_cupertino_test';
   static const String overlayTest = '/overlay_test';
+  static const String formFieldsTest = '/form_fields_test';
+  static const String widgetsGallery = '/widgets_gallery';
 
   // 插件路由路径
   static const String agentChat = '/agent_chat';
@@ -401,6 +432,66 @@ class AppRoutes extends NavigatorObserver {
       case '/live_activities_test':
       case 'live_activities_test':
         return _createRoute(const LiveActivitiesTestScreen());
+      case '/form_fields_test':
+      case 'form_fields_test':
+        return _createRoute(const FormFieldsTestScreen());
+      case '/widgets_gallery':
+      case 'widgets_gallery':
+        return _createRoute(const WidgetsGalleryScreen());
+      case '/widgets_gallery/color_picker':
+        return _createRoute(const ColorPickerExample());
+      case '/widgets_gallery/icon_picker':
+        return _createRoute(const IconPickerExample());
+      case '/widgets_gallery/avatar_picker':
+        return _createRoute(const AvatarPickerExample());
+      case '/widgets_gallery/circle_icon_picker':
+        return _createRoute(const CircleIconPickerExample());
+      case '/widgets_gallery/calendar_strip_picker':
+        return _createRoute(const CalendarStripPickerExample());
+      case '/widgets_gallery/image_picker':
+        return _createRoute(const ImagePickerExample());
+      case '/widgets_gallery/location_picker':
+        return _createRoute(const LocationPickerExample());
+      case '/widgets_gallery/backup_time_picker':
+        return _createRoute(const BackupTimePickerExample());
+      case '/widgets_gallery/markdown_editor':
+        return _createRoute(const MarkdownEditorExample());
+      case '/widgets_gallery/quill_viewer':
+        return _createRoute(const QuillViewerExample());
+      case '/widgets_gallery/memento_editor':
+        return _createRoute(const MementoEditorExample());
+      case '/widgets_gallery/data_selector':
+        return _createRoute(const DataSelectorExample());
+      case '/widgets_gallery/enhanced_calendar':
+        return _createRoute(const EnhancedCalendarExample());
+      case '/widgets_gallery/group_selector':
+        return _createRoute(const GroupSelectorExample());
+      case '/widgets_gallery/simple_group_selector':
+        return _createRoute(const SimpleGroupSelectorExample());
+      case '/widgets_gallery/tag_manager':
+        return _createRoute(const TagManagerExample());
+      case '/widgets_gallery/statistics':
+        return _createRoute(const StatisticsExample());
+      case '/widgets_gallery/custom_dialog':
+        return _createRoute(const CustomDialogExample());
+      case '/widgets_gallery/smooth_bottom_sheet':
+        return _createRoute(const SmoothBottomSheetExample());
+      case '/widgets_gallery/file_preview':
+        return _createRoute(const FilePreviewExample());
+      case '/widgets_gallery/tts_settings':
+        return _createRoute(const TTSSettingsExample());
+      case '/widgets_gallery/import_dialog':
+        return _createRoute(const ImportDialogExample());
+      case '/widgets_gallery/route_history':
+        return _createRoute(const RouteHistoryExample());
+      case '/widgets_gallery/app_drawer':
+        return _createRoute(const AppDrawerExample());
+      case '/widgets_gallery/widget_config_editor':
+        return _createRoute(const WidgetConfigEditorExample());
+      case '/widgets_gallery/preset_edit_form':
+        return _createRoute(const PresetEditFormExample());
+      case '/widgets_gallery/super_cupertino_navigation':
+        return _createRoute(const SuperCupertinoNavigationExample());
       case '/chat':
       case 'chat':
         // 支持通过 channelId 参数直接打开指定频道

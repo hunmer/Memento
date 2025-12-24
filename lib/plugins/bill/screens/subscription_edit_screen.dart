@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
-import 'package:Memento/widgets/circle_icon_picker.dart';
+import 'package:Memento/widgets/picker/circle_icon_picker.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 import '../models/subscription.dart';
 import '../bill_plugin.dart';

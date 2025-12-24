@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
-import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/widgets/picker/image_picker_dialog.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/controllers/form_controller.dart';

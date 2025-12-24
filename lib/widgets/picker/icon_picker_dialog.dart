@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'custom_dialog.dart';
+import '../custom_dialog.dart';
 import 'package:Memento/constants/app_icons.dart';
 
 class IconPickerDialog extends StatefulWidget {
@@ -127,10 +127,7 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
       final bytes = byteData?.buffer.asUint8List();
 
       if (bytes != null) {
-        return {
-          'bytes': bytes,
-          'icon': icon,
-        };
+        return {'bytes': bytes, 'icon': icon};
       }
       return null;
     } catch (e) {
@@ -186,28 +183,23 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
                     });
                   },
                 ),
-                Expanded(
-                  child: Text(
-                    'widget_convertIconToImage'.tr,
-                  ),
-                ),
+                Expanded(child: Text('widget_convertIconToImage'.tr)),
                 IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (context) => AlertDialog(
-                            title: Text(
-                              'widget_iconToImage'.tr,
-                            ),
-                        content: Text('widget_iconToImageDescription'.tr),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
+                      builder:
+                          (context) => AlertDialog(
+                            title: Text('widget_iconToImage'.tr),
+                            content: Text('widget_iconToImageDescription'.tr),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
                                 child: Text('widget_confirm'.tr),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
                     );
                   },
                   tooltip: 'widget_whatIsIconToImage'.tr,
@@ -302,11 +294,7 @@ class IconPainter extends CustomPainter {
   final double size;
   final Color color;
 
-  IconPainter({
-    required this.icon,
-    required this.size,
-    required this.color,
-  });
+  IconPainter({required this.icon, required this.size, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -347,9 +335,10 @@ Future<dynamic> showIconPickerDialog(
     barrierColor: Colors.black54,
     useSafeArea: true,
     useRootNavigator: true, // 确保在根Navigator上显示，这样会在所有其他对话框之上
-    builder: (context) => IconPickerDialog(
-      currentIcon: currentIcon,
-      enableIconToImage: enableIconToImage,
-    ),
+    builder:
+        (context) => IconPickerDialog(
+          currentIcon: currentIcon,
+          enableIconToImage: enableIconToImage,
+        ),
   );
 }

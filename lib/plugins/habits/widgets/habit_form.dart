@@ -7,10 +7,10 @@ import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/utils/image_utils.dart';
-import 'package:Memento/widgets/circle_icon_picker.dart';
+import 'package:Memento/widgets/picker/circle_icon_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
-import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/widgets/picker/image_picker_dialog.dart';
 import 'package:path/path.dart' as path;
 
 class HabitForm extends StatefulWidget {

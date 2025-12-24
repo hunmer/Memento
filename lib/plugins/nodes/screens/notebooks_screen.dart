@@ -9,7 +9,7 @@ import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
 import 'package:Memento/plugins/nodes/models/notebook.dart';
 import 'nodes_screen.dart';
-import 'package:Memento/widgets/circle_icon_picker.dart';
+import 'package:Memento/widgets/picker/circle_icon_picker.dart';
 
 class NotebooksScreen extends StatefulWidget {
   const NotebooksScreen({super.key});

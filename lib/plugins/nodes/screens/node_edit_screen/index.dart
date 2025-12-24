@@ -1,6 +1,6 @@
 export 'node_edit_screen.dart';
 export 'components/breadcrumbs.dart';
-export '../../../../widgets/color_picker_section.dart';
+export '../../../../widgets/picker/color_picker_section.dart';
 export 'components/custom_fields_section.dart';
 export 'components/date_section.dart';
 export 'components/status_dropdown.dart';

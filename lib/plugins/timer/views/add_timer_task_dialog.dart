@@ -6,7 +6,7 @@ import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:uuid/uuid.dart';
 import '../models/timer_task.dart' show TimerTask;
 import 'package:Memento/plugins/timer/models/timer_item.dart';
-import 'package:Memento/widgets/icon_picker_dialog.dart';
+import 'package:Memento/widgets/picker/icon_picker_dialog.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 
 class AddTimerTaskDialog extends StatefulWidget {

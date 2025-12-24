@@ -32,8 +32,8 @@ class SliderField extends StatelessWidget {
   /// 是否启用
   final bool enabled;
 
-  /// 主题色
-  final Color primaryColor;
+  /// 主题色（默认使用主题 primary 颜色）
+  final Color? primaryColor;
 
   /// 快捷值列表（可选）
   final List<double>? quickValues;
@@ -54,7 +54,7 @@ class SliderField extends StatelessWidget {
     this.divisions,
     this.onChanged,
     this.enabled = true,
-    this.primaryColor = const Color(0xFF607AFB),
+    this.primaryColor,
     this.quickValues,
     this.quickValueLabel,
     this.onQuickValueTap,
@@ -63,6 +63,7 @@ class SliderField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final effectivePrimary = primaryColor ?? colorScheme.primary;
 
     return Container(
       width: double.infinity,
@@ -103,10 +104,10 @@ class SliderField extends StatelessWidget {
           // Slider
           SliderTheme(
             data: SliderThemeData(
-              activeTrackColor: primaryColor,
-              inactiveTrackColor: primaryColor.withOpacity(0.2),
-              thumbColor: primaryColor,
-              overlayColor: primaryColor.withOpacity(0.2),
+              activeTrackColor: effectivePrimary,
+              inactiveTrackColor: effectivePrimary.withOpacity(0.2),
+              thumbColor: effectivePrimary,
+              overlayColor: effectivePrimary.withOpacity(0.2),
               trackHeight: 4,
             ),
             child: Slider(
@@ -146,21 +147,21 @@ class SliderField extends StatelessWidget {
                           decoration: BoxDecoration(
                             color:
                                 isSelected
-                                    ? primaryColor
-                                    : primaryColor.withOpacity(0.1),
+                                    ? effectivePrimary
+                                    : effectivePrimary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color:
                                   isSelected
-                                      ? primaryColor
-                                      : primaryColor.withOpacity(0.3),
+                                      ? effectivePrimary
+                                      : effectivePrimary.withOpacity(0.3),
                               width: 1,
                             ),
                           ),
                           child: Text(
                             quickValueLabel!(quickValue),
                             style: TextStyle(
-                              color: isSelected ? Colors.white : primaryColor,
+                              color: isSelected ? Colors.white : effectivePrimary,
                               fontSize: 13,
                               fontWeight:
                                   isSelected

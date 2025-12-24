@@ -4,10 +4,10 @@ import 'dart:io';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/utils/image_utils.dart';
-import 'package:Memento/widgets/circle_icon_picker.dart';
+import 'package:Memento/widgets/picker/circle_icon_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
-import 'package:Memento/widgets/image_picker_dialog.dart';
+import 'package:Memento/widgets/picker/image_picker_dialog.dart';
 
 class SkillForm extends StatefulWidget {
   final Skill? initialSkill;
