@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 /// 表单字段组件测试页面
 ///
 /// 按 Tab 分类展示 form_fields 目录下的各种组件
+/// 使用 FormBuilderWrapper 进行统一管理
 class FormFieldsTestScreen extends StatefulWidget {
   const FormFieldsTestScreen({super.key});
 
@@ -18,61 +19,15 @@ class _FormFieldsTestScreenState extends State<FormFieldsTestScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // 文本输入类状态
-  final _textController = TextEditingController(text: '示例文本');
-  final _textAreaController = TextEditingController(text: '多行文本示例\n第二行内容');
-  bool _obscureText = false;
-
-  // 选择器类状态
-  String? _selectedValue = 'option1';
-  DateTime? _selectedDate;
-  TimeOfDay _selectedTime = TimeOfDay.now();
-  Color _selectedColor = Colors.blue;
-
-  // 开关和滑块类状态
-  bool _switchValue = true;
-  double _sliderValue = 50.0;
-
-  // 列表和标签类状态
-  final List<String> _tags = ['工作', '重要', '紧急'];
-  final List<TodoItem> _todoItems = [
-    TodoItem(title: '完成项目文档', completed: false),
-    TodoItem(title: '代码审查', completed: true),
-    TodoItem(title: '更新依赖', completed: false),
-  ];
-  final _todoController = TextEditingController();
-  final List<CustomField> _customFields = [
-    CustomField(key: '品牌', value: 'Apple'),
-    CustomField(key: '型号', value: 'MacBook Pro'),
-    CustomField(key: '购买年份', value: '2024'),
-  ];
-
-  // 其他组件状态
-  final _iconTitleController = TextEditingController(text: '我的文件夹');
-  IconData? _selectedIcon = Icons.folder;
-  String? _selectedCategory = '工作';
-  final List<String> _categories = ['工作', '生活', '学习', '娱乐'];
-  final Map<String, IconData> _categoryIcons = {
-    '工作': Icons.work,
-    '生活': Icons.home,
-    '学习': Icons.school,
-    '娱乐': Icons.sports_esports,
-  };
-
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
-    _selectedDate = DateTime.now();
+    _tabController = TabController(length: 6, vsync: this);
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    _textController.dispose();
-    _textAreaController.dispose();
-    _todoController.dispose();
-    _iconTitleController.dispose();
     super.dispose();
   }
 
@@ -95,6 +50,7 @@ class _FormFieldsTestScreenState extends State<FormFieldsTestScreen>
                 Tab(text: '开关滑块'),
                 Tab(text: '列表标签'),
                 Tab(text: '其他'),
+                Tab(text: 'Picker选择器'),
               ],
             ),
           ),
@@ -108,6 +64,7 @@ class _FormFieldsTestScreenState extends State<FormFieldsTestScreen>
                 _buildSwitchSliderTab(),
                 _buildListTagsTab(),
                 _buildOtherTab(),
+                _buildPickerTab(),
               ],
             ),
           ),
@@ -118,374 +75,436 @@ class _FormFieldsTestScreenState extends State<FormFieldsTestScreen>
 
   /// 文本输入类组件
   Widget _buildTextInputTab() {
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      children: [
-        _buildSectionTitle('TextInputField - 单行文本输入'),
-        const SizedBox(height: 8),
-        TextInputField(
-          controller: _textController,
-          labelText: '用户名',
-          hintText: '请输入用户名',
-          prefixIcon: const Icon(Icons.person),
-        ),
-        const SizedBox(height: 16),
+      child: FormBuilderWrapper(
+        config: FormConfig(
+          fields: [
+            // 单行文本输入 - 用户名
+            FormFieldConfig(
+              name: 'username',
+              type: FormFieldType.text,
+              labelText: '用户名',
+              hintText: '请输入用户名',
+              initialValue: '示例文本',
+              prefixIcon: Icons.person,
+            ),
 
-        TextInputField(
-          controller: TextEditingController(),
-          labelText: '密码',
-          hintText: '请输入密码',
-          obscureText: _obscureText,
-          prefixIcon: const Icon(Icons.lock),
-          suffixIcon: IconButton(
-            icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
-            onPressed: () {
-              setState(() => _obscureText = !_obscureText);
-            },
-          ),
-        ),
-        const SizedBox(height: 16),
+            // 密码输入
+            FormFieldConfig(
+              name: 'password',
+              type: FormFieldType.password,
+              labelText: '密码',
+              hintText: '请输入密码',
+              prefixIcon: Icons.lock,
+            ),
 
-        TextInputField(
-          controller: TextEditingController(),
-          labelText: '邮箱',
-          hintText: 'example@mail.com',
-          prefixIcon: const Icon(Icons.email),
-          keyboardType: TextInputType.emailAddress,
-        ),
-        const SizedBox(height: 24),
+            // 邮箱输入
+            FormFieldConfig(
+              name: 'email',
+              type: FormFieldType.email,
+              labelText: '邮箱',
+              hintText: 'example@mail.com',
+              prefixIcon: Icons.email,
+              required: true,
+              validationMessage: '请输入有效的邮箱地址',
+            ),
 
-        _buildSectionTitle('TextAreaField - 多行文本输入'),
-        const SizedBox(height: 8),
-        TextAreaField(
-          controller: _textAreaController,
-          labelText: '描述',
-          hintText: '请输入详细描述',
-          minLines: 3,
-          maxLines: 6,
-        ),
-        const SizedBox(height: 16),
+            // 多行文本输入 - 描述
+            FormFieldConfig(
+              name: 'description',
+              type: FormFieldType.textArea,
+              labelText: '描述',
+              hintText: '请输入详细描述',
+              initialValue: '多行文本示例\n第二行内容',
+              extra: {'minLines': 3, 'maxLines': 6},
+            ),
 
-        // inline 模式示例
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: TextAreaField(
-            controller: TextEditingController(),
-            hintText: '无边框模式的多行输入',
-            minLines: 2,
-            maxLines: 4,
-            inline: true,
-          ),
+            // 无边框模式多行输入
+            FormFieldConfig(
+              name: 'notes',
+              type: FormFieldType.textArea,
+              hintText: '无边框模式的多行输入',
+              extra: {
+                'minLines': 2,
+                'maxLines': 4,
+                'inline': true,
+              },
+            ),
+          ],
+          submitButtonText: '提交文本表单',
+          showResetButton: true,
+          onSubmit: (values) => _showResult('文本输入表单', values),
         ),
-      ],
+      ),
     );
   }
 
   /// 选择器类组件
   Widget _buildSelectorTab() {
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      children: [
-        _buildSectionTitle('SelectField - 下拉选择'),
-        const SizedBox(height: 8),
-        SelectField<String>(
-          value: _selectedValue,
-          labelText: '选择选项',
-          hintText: '请选择',
-          items: const [
-            DropdownMenuItem(value: 'option1', child: Text('选项一')),
-            DropdownMenuItem(value: 'option2', child: Text('选项二')),
-            DropdownMenuItem(value: 'option3', child: Text('选项三')),
+      child: FormBuilderWrapper(
+        config: FormConfig(
+          fields: [
+            // 下拉选择
+            FormFieldConfig(
+              name: 'option',
+              type: FormFieldType.select,
+              labelText: '选择选项',
+              hintText: '请选择',
+              initialValue: 'option1',
+              required: true,
+              items: const [
+                DropdownMenuItem(value: 'option1', child: Text('选项一')),
+                DropdownMenuItem(value: 'option2', child: Text('选项二')),
+                DropdownMenuItem(value: 'option3', child: Text('选项三')),
+              ],
+            ),
+
+            // 日期选择
+            FormFieldConfig(
+              name: 'date',
+              type: FormFieldType.date,
+              labelText: '出生日期',
+              hintText: '选择日期',
+              initialValue: DateTime.now(),
+              extra: {
+                'format': 'yyyy-MM-dd',
+                'firstDate': DateTime(2000),
+                'lastDate': DateTime(2100),
+              },
+            ),
+
+            // 时间选择
+            FormFieldConfig(
+              name: 'time',
+              type: FormFieldType.time,
+              labelText: '选择时间',
+              initialValue: TimeOfDay.now(),
+            ),
+
+            // 颜色选择
+            FormFieldConfig(
+              name: 'color',
+              type: FormFieldType.color,
+              labelText: '选择颜色',
+              initialValue: Colors.blue,
+            ),
           ],
-          onChanged: (value) {
-            setState(() => _selectedValue = value);
-          },
+          submitButtonText: '提交选择器表单',
+          showResetButton: true,
+          onSubmit: (values) => _showResult('选择器表单', values),
         ),
-        const SizedBox(height: 24),
-
-        _buildSectionTitle('DatePickerField - 日期选择'),
-        const SizedBox(height: 8),
-        DatePickerField(
-          date: _selectedDate,
-          formattedDate:
-              _selectedDate != null
-                  ? DateFormat('yyyy-MM-dd').format(_selectedDate!)
-                  : '',
-          placeholder: '选择日期',
-          onTap: () async {
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: _selectedDate ?? DateTime.now(),
-              firstDate: DateTime(2000),
-              lastDate: DateTime(2100),
-            );
-            if (picked != null) {
-              setState(() => _selectedDate = picked);
-            }
-          },
-        ),
-        const SizedBox(height: 24),
-
-        _buildSectionTitle('TimePickerField - 时间选择'),
-        const SizedBox(height: 8),
-        TimePickerField(
-          label: '选择时间',
-          time: _selectedTime,
-          onTimeChanged: (time) {
-            setState(() => _selectedTime = time);
-          },
-        ),
-        const SizedBox(height: 24),
-
-        _buildSectionTitle('ColorSelectorField - 颜色选择'),
-        const SizedBox(height: 8),
-        ColorSelectorField(
-          labelText: '选择颜色',
-          selectedColor: _selectedColor,
-          onColorChanged: (color) {
-            setState(() => _selectedColor = color);
-          },
-        ),
-      ],
+      ),
     );
   }
 
   /// 开关和滑块类组件
   Widget _buildSwitchSliderTab() {
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      children: [
-        _buildSectionTitle('SwitchField - 开关选择'),
-        const SizedBox(height: 8),
-        SwitchField(
-          value: _switchValue,
-          title: '启用通知',
-          subtitle: '接收推送通知消息',
-          icon: Icons.notifications,
-          onChanged: (value) {
-            setState(() => _switchValue = value);
-          },
-        ),
-        const SizedBox(height: 16),
+      child: FormBuilderWrapper(
+        config: FormConfig(
+          fields: [
+            // 开关 - 启用通知
+            FormFieldConfig(
+              name: 'notifications',
+              type: FormFieldType.switchField,
+              labelText: '启用通知',
+              hintText: '接收推送通知消息',
+              initialValue: true,
+              prefixIcon: Icons.notifications,
+            ),
 
-        SwitchField(
-          value: false,
-          title: '自动保存',
-          subtitle: '编辑时自动保存更改',
-          icon: Icons.save,
-          onChanged: (value) {},
-        ),
-        const SizedBox(height: 24),
+            // 开关 - 自动保存
+            FormFieldConfig(
+              name: 'autoSave',
+              type: FormFieldType.switchField,
+              labelText: '自动保存',
+              hintText: '编辑时自动保存更改',
+              initialValue: false,
+              prefixIcon: Icons.save,
+            ),
 
-        _buildSectionTitle('SliderField - 滑块选择'),
-        const SizedBox(height: 8),
-        SliderField(
-          label: '音量',
-          valueText: '${_sliderValue.toInt()}%',
-          min: 0,
-          max: 100,
-          value: _sliderValue,
-          divisions: 20,
-          onChanged: (value) {
-            setState(() => _sliderValue = value);
-          },
-          quickValues: [0, 25, 50, 75, 100],
-          quickValueLabel: (v) => '${v.toInt()}%',
-          onQuickValueTap: (value) {
-            setState(() => _sliderValue = value);
-          },
-        ),
-        const SizedBox(height: 16),
+            // 滑块 - 音量
+            FormFieldConfig(
+              name: 'volume',
+              type: FormFieldType.slider,
+              labelText: '音量',
+              initialValue: 50.0,
+              min: 0,
+              max: 100,
+              divisions: 20,
+              quickValues: [0, 25, 50, 75, 100],
+              extra: {
+                'valueText': '%',
+                'quickValueLabel': (v) => '${v.toInt()}%',
+              },
+            ),
 
-        SliderField(
-          label: '亮度',
-          valueText: '${(_sliderValue / 100 * 50).toInt()}%',
-          min: 0,
-          max: 100,
-          value: _sliderValue / 2,
-          onChanged: (value) {
-            setState(() => _sliderValue = value * 2);
-          },
+            // 滑块 - 亮度
+            FormFieldConfig(
+              name: 'brightness',
+              type: FormFieldType.slider,
+              labelText: '亮度',
+              initialValue: 25.0,
+              min: 0,
+              max: 100,
+              extra: {
+                'valueText': '%',
+              },
+            ),
+          ],
+          submitButtonText: '提交开关滑块表单',
+          showResetButton: true,
+          onSubmit: (values) => _showResult('开关滑块表单', values),
         ),
-      ],
+      ),
     );
   }
 
   /// 列表和标签类组件
   Widget _buildListTagsTab() {
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      children: [
-        _buildSectionTitle('TagsField - 标签选择'),
-        const SizedBox(height: 8),
-        TagsField(
-          tags: _tags,
-          addButtonText: '添加标签',
-          onAddTag: () {
-            // 显示添加标签对话框
-            showDialog(
-              context: context,
-              builder:
-                  (context) => AlertDialog(
-                    title: const Text('添加标签'),
-                    content: TextField(
-                      decoration: const InputDecoration(hintText: '标签名称'),
-                      onSubmitted: (value) {
-                        if (value.isNotEmpty) {
-                          setState(() => _tags.add(value));
-                          Navigator.pop(context);
-                        }
-                      },
-                    ),
-                  ),
-            );
-          },
-          onRemoveTag: (tag) {
-            setState(() => _tags.remove(tag));
-          },
-        ),
-        const SizedBox(height: 24),
+      child: FormBuilderWrapper(
+        config: FormConfig(
+          fields: [
+            // 标签选择
+            FormFieldConfig(
+              name: 'tags',
+              type: FormFieldType.tags,
+              labelText: '标签管理',
+              hintText: '添加标签',
+              initialTags: ['工作', '重要', '紧急'],
+            ),
 
-        _buildSectionTitle('ListAddField - 列表添加'),
-        const SizedBox(height: 8),
-        ListAddField<TodoItem>(
-          items: _todoItems,
-          controller: _todoController,
-          addButtonText: '添加待办',
-          onAdd: () {
-            if (_todoController.text.isNotEmpty) {
-              setState(() {
-                _todoItems.add(
-                  TodoItem(title: _todoController.text, completed: false),
-                );
-                _todoController.clear();
-              });
-            }
-          },
-          onToggle: (index) {
-            setState(() {
-              _todoItems[index].completed = !_todoItems[index].completed;
-            });
-          },
-          onRemove: (index) {
-            setState(() => _todoItems.removeAt(index));
-          },
-          getTitle: (item) => item.title,
-          getIsCompleted: (item) => item.completed,
-        ),
-        const SizedBox(height: 24),
+            // 列表添加 - 待办事项
+            FormFieldConfig(
+              name: 'todos',
+              type: FormFieldType.listAdd,
+              labelText: '待办事项',
+              hintText: '添加待办',
+              extra: {
+                'initialItems': [
+                  TodoItem(title: '完成项目文档', completed: false),
+                  TodoItem(title: '代码审查', completed: true),
+                  TodoItem(title: '更新依赖', completed: false),
+                ],
+                'getTitle': (TodoItem item) => item.title,
+                'getIsCompleted': (TodoItem item) => item.completed,
+                'onToggle': (int index, TodoItem item) {
+                  item.completed = !item.completed;
+                },
+              },
+            ),
 
-        _buildSectionTitle('CustomFieldsField - 自定义字段'),
-        const SizedBox(height: 8),
-        CustomFieldsField(
-          fields: _customFields,
-          labelText: '物品属性',
-          addButtonText: '添加字段',
-          onFieldsChanged: (fields) {
-            setState(() {
-              _customFields.clear();
-              _customFields.addAll(fields);
-            });
-          },
+            // 自定义字段
+            FormFieldConfig(
+              name: 'customFields',
+              type: FormFieldType.customFields,
+              labelText: '物品属性',
+              hintText: '添加字段',
+              initialCustomFields: [
+                CustomField(key: '品牌', value: 'Apple'),
+                CustomField(key: '型号', value: 'MacBook Pro'),
+                CustomField(key: '购买年份', value: '2024'),
+              ],
+            ),
+          ],
+          submitButtonText: '提交列表标签表单',
+          showResetButton: true,
+          onSubmit: (values) => _showResult('列表标签表单', values),
         ),
-      ],
+      ),
     );
   }
 
   /// 其他组件
   Widget _buildOtherTab() {
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      children: [
-        _buildSectionTitle('IconTitleField - 图标标题'),
-        const SizedBox(height: 8),
-        IconTitleField(
-          controller: _iconTitleController,
-          icon: _selectedIcon,
-          hintText: '输入标题',
-          onIconTap: () {
-            // 简单演示图标切换
-            setState(() {
-              _selectedIcon =
-                  _selectedIcon == Icons.folder
-                      ? Icons.folder_open
-                      : Icons.folder;
-            });
-          },
-        ),
-        const SizedBox(height: 24),
-
-        _buildSectionTitle('CategorySelectorField - 类别选择'),
-        const SizedBox(height: 8),
-        CategorySelectorField(
-          categories: _categories,
-          selectedCategory: _selectedCategory,
-          categoryIcons: _categoryIcons,
-          onCategoryChanged: (category) {
-            setState(() => _selectedCategory = category);
-          },
-        ),
-        const SizedBox(height: 24),
-
-        _buildSectionTitle('FormFieldGroup - 表单字段组'),
-        const SizedBox(height: 8),
-        FormFieldGroup(
-          children: [
-            TextInputField(
-              controller: TextEditingController(),
-              labelText: '姓名',
-              hintText: '请输入姓名',
-              inline: true,
+      child: FormBuilderWrapper(
+        config: FormConfig(
+          fields: [
+            // 图标标题
+            FormFieldConfig(
+              name: 'iconTitle',
+              type: FormFieldType.iconTitle,
+              hintText: '输入标题',
+              initialValue: '我的文件夹',
+              prefixIcon: Icons.folder,
             ),
-            DatePickerField(
-              date: _selectedDate,
-              formattedDate:
-                  _selectedDate != null
-                      ? DateFormat('yyyy-MM-dd').format(_selectedDate!)
-                      : '',
-              placeholder: '选择生日',
-              labelText: '生日',
-              inline: true,
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(1900),
-                  lastDate: DateTime.now(),
-                );
-                if (picked != null) {
-                  setState(() => _selectedDate = picked);
-                }
+
+            // 类别选择
+            FormFieldConfig(
+              name: 'category',
+              type: FormFieldType.categorySelector,
+              labelText: '选择类别',
+              hintText: '请选择类别',
+              initialValue: '工作',
+              required: true,
+              categories: ['工作', '生活', '学习', '娱乐'],
+              categoryIcons: {
+                '工作': Icons.work,
+                '生活': Icons.home,
+                '学习': Icons.school,
+                '娱乐': Icons.sports_esports,
               },
             ),
-            SwitchField(
-              value: true,
-              title: '公开资料',
-              inline: true,
-              onChanged: (value) {},
-            ),
           ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary,
+          submitButtonText: '提交其他表单',
+          showResetButton: true,
+          onSubmit: (values) => _showResult('其他表单', values),
         ),
       ),
     );
+  }
+
+  /// Picker 选择器类组件（新增）
+  Widget _buildPickerTab() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: FormBuilderWrapper(
+        config: FormConfig(
+          fields: [
+            // 图标选择器
+            FormFieldConfig(
+              name: 'icon',
+              type: FormFieldType.iconPicker,
+              labelText: '选择图标',
+              initialValue: Icons.star,
+              extra: {'enableIconToImage': false},
+            ),
+
+            // 头像选择器
+            FormFieldConfig(
+              name: 'avatar',
+              type: FormFieldType.avatarPicker,
+              extra: {
+                'username': 'Memento',
+                'size': 80.0,
+                'saveDirectory': 'avatars',
+              },
+            ),
+
+            // 圆形图标选择器
+            FormFieldConfig(
+              name: 'circleIcon',
+              type: FormFieldType.circleIconPicker,
+              initialValue: {'icon': Icons.favorite, 'color': Colors.pink},
+              extra: {'initialBackgroundColor': Colors.pink},
+            ),
+
+            // 日历条日期选择器
+            FormFieldConfig(
+              name: 'calendarDate',
+              type: FormFieldType.calendarStripPicker,
+              initialValue: DateTime.now(),
+              extra: {
+                'allowFutureDates': false,
+                'useShortWeekDay': false,
+              },
+            ),
+
+            // 图片选择器
+            FormFieldConfig(
+              name: 'image',
+              type: FormFieldType.imagePicker,
+              labelText: '选择图片',
+              hintText: '点击选择图片',
+              extra: {
+                'saveDirectory': 'test_images',
+                'enableCrop': false,
+                'multiple': false,
+                'enableCompression': false,
+              },
+            ),
+
+            // 位置选择器
+            FormFieldConfig(
+              name: 'location',
+              type: FormFieldType.locationPicker,
+              labelText: '选择位置',
+              hintText: '点击选择位置',
+            ),
+          ],
+          submitButtonText: '提交 Picker 表单',
+          showResetButton: true,
+          onSubmit: (values) => _showResult('Picker 选择器表单', values),
+        ),
+      ),
+    );
+  }
+
+  /// 显示提交结果
+  void _showResult(String title, Map<String, dynamic> values) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('$title - 提交结果'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: values.entries.map((entry) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${entry.key}: ',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Expanded(
+                      child: Text(
+                        _formatValue(entry.value),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('关闭'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // 可以复制到剪贴板或其他操作
+            },
+            child: const Text('复制'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 格式化值用于显示
+  String _formatValue(dynamic value) {
+    if (value == null) return '空';
+    if (value is DateTime) {
+      return DateFormat('yyyy-MM-dd HH:mm:ss').format(value);
+    }
+    if (value is TimeOfDay) {
+      return '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
+    }
+    if (value is Color) {
+      return '#${value.value.toRadixString(16).substring(2).toUpperCase()}';
+    }
+    if (value is List || value is Map) {
+      return value.toString();
+    }
+    return value.toString();
   }
 }
 
@@ -495,4 +514,7 @@ class TodoItem {
   bool completed;
 
   TodoItem({required this.title, this.completed = false});
+
+  @override
+  String toString() => '$title ${completed ? "✓" : ""}';
 }
