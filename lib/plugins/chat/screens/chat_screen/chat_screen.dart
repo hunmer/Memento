@@ -20,12 +20,15 @@ import 'package:Memento/plugins/chat/screens/profile_edit_dialog.dart';
 import 'package:Memento/plugins/chat/utils/message_operations.dart';
 // 移除未使用的导入
 import 'controllers/chat_screen_controller.dart';
-import 'widgets/chat_app_bar.dart';
 import 'widgets/message_list.dart';
 import 'widgets/message_input/index.dart';
 import 'dialogs/clear_messages_dialog.dart';
 import 'dialogs/calendar_date_picker_dialog.dart';
 import 'utils/message_list_builder.dart';
+// SuperCupertino 导航包装器
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/filter_models.dart';
+import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
   final Channel channel;
@@ -52,6 +55,11 @@ class _ChatScreenState extends State<ChatScreen> {
   String? _backgroundPath; // 存储背景图片的绝对路径
   bool _isLoadingBackground = true; // 标记背景图片是否正在加载
   final eventManager = EventManager.instance; // 获取事件管理器实例
+
+  // 搜索和过滤状态
+  String _searchQuery = '';
+  final MultiFilterState _filterState = MultiFilterState();
+  List<Message> _filteredMessages = [];
 
   @override
   void initState() {
@@ -114,6 +122,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // 取消订阅消息更新事件
     eventManager.unsubscribe('onMessageUpdated', _handleMessageUpdated);
     _controller.dispose();
+    _filterState.dispose();
     // MessageOperations不需要dispose
     super.dispose();
   }
@@ -315,6 +324,237 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  /// 搜索回调
+  void _handleSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+      _applyFiltersAndSearch();
+    });
+  }
+
+  /// 过滤回调
+  void _handleFilterChanged(Map<String, dynamic> filters) {
+    debugPrint('Filter changed: $filters');
+    _applyFiltersAndSearch();
+  }
+
+  /// 应用搜索和过滤
+  void _applyFiltersAndSearch() {
+    List<Message> result = List.from(_controller.messages);
+
+    // 应用搜索
+    if (_searchQuery.isNotEmpty) {
+      result = result.where((msg) {
+        return msg.content.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            msg.user.username.toLowerCase().contains(_searchQuery.toLowerCase());
+      }).toList();
+    }
+
+    // 应用发送人过滤
+    final selectedUser = _filterState.getValue('sender');
+    if (selectedUser != null && selectedUser is String && selectedUser.isNotEmpty) {
+      result = result.where((msg) => msg.user.id == selectedUser).toList();
+    }
+
+    // 应用日期范围过滤
+    final dateRange = _filterState.getValue('dateRange');
+    if (dateRange != null && dateRange is Map<String, DateTime?>) {
+      final startDate = dateRange['start'];
+      final endDate = dateRange['end'];
+
+      result = result.where((msg) {
+        if (startDate != null && msg.date.isBefore(startDate)) return false;
+        if (endDate != null) {
+          final endOfDay = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+          if (msg.date.isAfter(endOfDay)) return false;
+        }
+        return true;
+      }).toList();
+    }
+
+    // 应用标签过滤
+    final selectedTags = _filterState.getValue('tags');
+    if (selectedTags != null && selectedTags is List && selectedTags.isNotEmpty) {
+      result = result.where((msg) {
+        final messageTags = msg.metadata?['tags'] as List<String>?;
+        if (messageTags == null || messageTags.isEmpty) return false;
+        // 检查消息是否包含任意一个选中的标签
+        return selectedTags.any((tag) => messageTags.contains(tag));
+      }).toList();
+    }
+
+    setState(() {
+      _filteredMessages = result;
+    });
+  }
+
+  /// 获取所有唯一用户列表
+  List<User> _getAllUsers() {
+    final users = <String, User>{};
+    for (var message in _controller.messages) {
+      users[message.user.id] = message.user;
+    }
+    return users.values.toList();
+  }
+
+  /// 获取所有唯一标签列表
+  List<String> _getAllTags() {
+    final tags = <String>{};
+    for (var message in _controller.messages) {
+      final messageTags = message.metadata?['tags'] as List?;
+      if (messageTags != null) {
+        for (var tag in messageTags) {
+          if (tag is String) tags.add(tag);
+        }
+      }
+    }
+    return tags.toList()..sort();
+  }
+
+  /// 构建过滤器配置
+  List<FilterItem> _buildFilterItems() {
+    final allUsers = _getAllUsers();
+    final allTags = _getAllTags();
+
+    return [
+      // 发送人过滤
+      FilterItem(
+        id: 'sender',
+        title: '发送人',
+        type: FilterType.custom,
+        builder: (context, currentValue, onChanged) {
+          return Wrap(
+            spacing: 8,
+            children: allUsers.map((user) {
+              final isSelected = currentValue == user.id;
+              return FilterChip(
+                label: Text(user.username),
+                selected: isSelected,
+                onSelected: (selected) {
+                  onChanged(selected ? user.id : null);
+                },
+                showCheckmark: true,
+              );
+            }).toList(),
+          );
+        },
+        getBadge: (value) {
+          if (value == null) return null;
+          final user = allUsers.firstWhere((u) => u.id == value, orElse: () => allUsers.first);
+          return user.username;
+        },
+      ),
+
+      // 日期范围过滤
+      FilterItem(
+        id: 'dateRange',
+        title: '日期',
+        type: FilterType.dateRange,
+        builder: (context, currentValue, onChanged) {
+          final Map<String, DateTime?> range = currentValue ?? {'start': null, 'end': null};
+          final startDate = range['start'];
+          final endDate = range['end'];
+
+          return Wrap(
+            spacing: 8,
+            children: [
+              // 开始日期
+              ActionChip(
+                avatar: Icon(Icons.calendar_today, size: 18),
+                label: Text(startDate == null ? '开始日期' : DateFormat('MM/dd').format(startDate)),
+                onPressed: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: startDate ?? DateTime.now(),
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime.now(),
+                  );
+                  if (picked != null) {
+                    onChanged({'start': picked, 'end': endDate});
+                  }
+                },
+              ),
+              // 结束日期
+              ActionChip(
+                avatar: Icon(Icons.calendar_today, size: 18),
+                label: Text(endDate == null ? '结束日期' : DateFormat('MM/dd').format(endDate)),
+                onPressed: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: endDate ?? DateTime.now(),
+                    firstDate: startDate ?? DateTime(2020),
+                    lastDate: DateTime.now(),
+                  );
+                  if (picked != null) {
+                    onChanged({'start': startDate, 'end': picked});
+                  }
+                },
+              ),
+              // 清除按钮
+              if (startDate != null || endDate != null)
+                IconButton(
+                  icon: Icon(Icons.clear, size: 18),
+                  onPressed: () => onChanged(null),
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(minWidth: 32, minHeight: 32),
+                ),
+            ],
+          );
+        },
+        getBadge: (value) {
+          if (value == null) return null;
+          final Map<String, DateTime?> range = value;
+          final start = range['start'];
+          final end = range['end'];
+          if (start != null && end != null) {
+            return '${DateFormat('MM/dd').format(start)}-${DateFormat('MM/dd').format(end)}';
+          } else if (start != null) {
+            return '从${DateFormat('MM/dd').format(start)}';
+          } else if (end != null) {
+            return '至${DateFormat('MM/dd').format(end)}';
+          }
+          return null;
+        },
+      ),
+
+      // 标签过滤
+      if (allTags.isNotEmpty)
+        FilterItem(
+          id: 'tags',
+          title: '标签',
+          type: FilterType.tagsMultiple,
+          builder: (context, currentValue, onChanged) {
+            final List<String> selectedTags = currentValue ?? [];
+            return Wrap(
+              spacing: 8,
+              children: allTags.map((tag) {
+                final isSelected = selectedTags.contains(tag);
+                return FilterChip(
+                  label: Text(tag),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    final newTags = List<String>.from(selectedTags);
+                    if (selected) {
+                      newTags.add(tag);
+                    } else {
+                      newTags.remove(tag);
+                    }
+                    onChanged(newTags.isEmpty ? null : newTags);
+                  },
+                  showCheckmark: true,
+                );
+              }).toList(),
+            );
+          },
+          getBadge: (value) {
+            if (value == null || (value as List).isEmpty) return null;
+            final tags = value as List<String>;
+            return tags.length == 1 ? tags[0] : '${tags.length}个标签';
+          },
+        ),
+    ];
+  }
+
   // 加载背景图片路径
   Future<void> _loadBackgroundPath() async {
     // 获取最新的频道数据
@@ -431,246 +671,270 @@ class _ChatScreenState extends State<ChatScreen> {
           // 加载指示器
           if (_isLoadingBackground)
             const Center(child: CircularProgressIndicator()),
-          // 内容层
-          ListenableBuilder(
-            listenable: _controller,
-            builder:
-                (context, _) => FutureBuilder<List<dynamic>>(
-                  future: MessageListBuilder.buildMessageListWithDateSeparators(
-                    _controller.messages,
-                    _controller.selectedDate,
-                  ),
-                  builder: (context, snapshot) {
-                    final messageItems = snapshot.data ?? [];
-                    final messageIndexMap = <String, int>{};
-                    for (var i = 0; i < _controller.messages.length; i++) {
-                      messageIndexMap[_controller.messages[i].id] = i;
-                    }
+          // 使用 SuperCupertinoNavigationWrapper 的主内容
+          _buildSuperCupertinoContent(backgroundPath),
+        ],
+      ),
+    );
+  }
 
-                    // 根据是否有背景图片决定内容层Scaffold的背景颜色
-                    return Scaffold(
-                      backgroundColor:
-                          backgroundPath != null
-                              ? Colors.transparent
-                              : null, // 有背景时透明，无背景时使用默认颜色
-                      appBar: ChatAppBar(
-                        channel: widget.channel,
-                        isMultiSelectMode: _controller.isMultiSelectMode,
-                        selectedCount: _controller.selectedMessageIds.value.length,
-                        onShowDatePicker: _showDatePickerDialog,
-                        onCopySelected: _copySelectedMessages,
-                        onDeleteSelected: _deleteSelectedMessages,
-                        onShowClearConfirmation: _showClearConfirmationDialog,
-                        onExitMultiSelect: _controller.toggleMultiSelectMode,
-                        onEnterMultiSelect: _controller.toggleMultiSelectMode,
-                      ),
-                      body: Column(
-                        children: [
-                          if (_replyToMessage != null)
-                            Container(
-                              padding: const EdgeInsets.all(8.0),
-                              decoration: BoxDecoration(
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.surfaceContainerHighest,
-                                border: Border(
-                                  top: BorderSide(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.outline.withAlpha(51),
-                                  ),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          '回复 ${_replyToMessage!.user.username}',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                Theme.of(
-                                                  context,
-                                                ).colorScheme.primary,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          _replyToMessage!.content,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color:
-                                                Theme.of(
-                                                  context,
-                                                ).colorScheme.onSurfaceVariant,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.close),
-                                    onPressed: _clearReply,
-                                    visualDensity: VisualDensity.compact,
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 32,
-                                      minHeight: 32,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          Expanded(
-                            child: MessageList(
-                              items: messageItems,
-                              isMultiSelectMode: _controller.isMultiSelectMode,
-                              selectedMessageIds:
-                                  _controller.selectedMessageIds,
-                              onMessageEdit: _showEditDialog,
-                              onMessageDelete: _controller.deleteMessage,
-                              onMessageCopy:
-                                  (message) =>
-                                      _messageOperations.copyMessage(message),
-                              onSetFixedSymbol:
-                                  (message, symbol) => _messageOperations
-                                      .setFixedSymbol(message, symbol),
-                              onSetBubbleColor:
-                                  (message, color) => _messageOperations
-                                      .setBubbleColor(message, color),
-                              onReply: _handleReply,
-                              onToggleFavorite: _handleToggleFavorite,
-                              onToggleMessageSelection:
-                                  _controller.toggleMessageSelection,
-                              onReplyTap: _handleReplyTap,
-                              scrollController: _controller.scrollController,
-                              currentUserId:
-                                  ChatPlugin
-                                      .instance
-                                      .userService
-                                      .currentUser
-                                      .id,
-                              highlightedMessage: widget.highlightMessage,
-                              shouldHighlight: widget.highlightMessage != null,
-                              messageIndexMap: messageIndexMap,
-                              onAvatarTap: (message) async {
-                                // 检查是否为AI消息
-                                final metadata = message.metadata;
-                                if (metadata != null &&
-                                    metadata.containsKey('isAI') &&
-                                    metadata['isAI'] == true &&
-                                    metadata.containsKey('agentId')) {
-                                  final agentId = metadata['agentId'] as String;
+  /// 构建 SuperCupertinoNavigationWrapper 内容
+  Widget _buildSuperCupertinoContent(String? backgroundPath) {
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) {
+        // 获取显示的消息（根据是否有搜索/过滤来决定）
+        final displayMessages = _searchQuery.isNotEmpty || _filterState.hasAnyFilter
+            ? _filteredMessages
+            : _controller.messages;
 
-                                  if (mounted) {
-                                    try {
-                                      // 获取OpenAI插件并转换类型
-                                      final openaiPlugin =
-                                          PluginManager.instance.getPlugin(
-                                                'openai',
-                                              )
-                                              as OpenAIPlugin;
-                                      // 获取agent
-                                      final agent = await openaiPlugin
-                                          .controller
-                                          .getAgent(agentId);
-                                      if (agent != null) {
-                                        NavigationHelper.push(context, AgentEditScreen(
-                                                  agent: agent,),
-                                        );
-                                      } else {
-                                        Toast.error('chat_aiAssistantNotFound'.tr);
-                                      }
-                                    } catch (e) {
-                                      // 插件不可用或类型转换失败时显示提示
-                                      Toast.error('无法访问AI编辑界面，OpenAI插件可能未加载');
-                                    }
-                                  }
-                                } else {
-                                  // 如果不是AI消息，显示用户资料编辑对话框
-                                  final chatPlugin = ChatPlugin.instance;
-                                  final users =
-                                      chatPlugin.userService.getAllUsers();
-                                  final targetUser = users.firstWhere(
-                                    (user) => user.id == message.user.id,
-                                    orElse: () => message.user,
-                                  );
+        return FutureBuilder<List<dynamic>>(
+          future: MessageListBuilder.buildMessageListWithDateSeparators(
+            displayMessages,
+            _controller.selectedDate,
+          ),
+          builder: (context, snapshot) {
+            final messageItems = snapshot.data ?? [];
+            final messageIndexMap = <String, int>{};
+            for (var i = 0; i < displayMessages.length; i++) {
+              messageIndexMap[displayMessages[i].id] = i;
+            }
 
-                                  final updatedUser = await showDialog<User>(
-                                    context: context,
-                                    builder:
-                                        (context) => ProfileEditDialog(
-                                          user: targetUser,
-                                          chatPlugin: chatPlugin,
-                                        ),
-                                  );
+            return SuperCupertinoNavigationWrapper(
+              title: Text(widget.channel.title),
+              largeTitle: widget.channel.title,
+              body: _buildChatBody(messageItems, messageIndexMap, displayMessages, backgroundPath),
+              enableLargeTitle: true,
+              enableSearchBar: true,
+              searchPlaceholder: '搜索消息内容、发送人...',
+              onSearchChanged: _handleSearchChanged,
+              enableMultiFilter: true,
+              multiFilterItems: _buildFilterItems(),
+              multiFilterBarHeight: 50,
+              onMultiFilterChanged: _handleFilterChanged,
+              backgroundColor: backgroundPath != null ? Colors.transparent : null,
+              actions: _buildActions(),
+            );
+          },
+        );
+      },
+    );
+  }
 
-                                  if (updatedUser != null && mounted) {
-                                    // 如果是当前用户，则更新当前用户信息
-                                    if (targetUser.id ==
-                                        chatPlugin.userService.currentUser.id) {
-                                      chatPlugin.userService.setCurrentUser(
-                                        updatedUser,
-                                      );
-                                    }
-                                    // 否则只更新用户列表中的用户信息
-                                    else {
-                                      await chatPlugin.userService.updateUser(
-                                        updatedUser,
-                                      );
-                                    }
-                                  }
-                                }
-                              },
-                              showAvatar:
-                                  ChatPlugin
-                                      .instance
-                                      .settingsService
-                                      .showAvatarInChat,
-                            ),
-                          ),
-                          MessageInput(
-                            controller: _controller.draftController,
-                            onSendMessage: (
-                              content, {
-                              metadata,
-                              String type = 'text',
-                              replyTo,
-                            }) {
-                              _controller.sendMessage(
-                                content,
-                                metadata: metadata,
-                                type: type,
-                                replyTo: _replyToMessage,
-                              );
-                              // 发送后清除回复状态
-                              if (_replyToMessage != null) {
-                                setState(() {
-                                  _replyToMessage = null;
-                                });
-                              }
-                            },
-                            onSaveDraft: _controller.saveDraft,
-                            replyTo: _replyToMessage,
-                            focusNode: _controller.focusNode,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+  /// 构建 Actions 按钮
+  List<Widget> _buildActions() {
+    if (_controller.isMultiSelectMode) {
+      return [
+        IconButton(
+          icon: const Icon(Icons.copy),
+          onPressed: _copySelectedMessages,
+          tooltip: '复制选中消息',
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete),
+          onPressed: _deleteSelectedMessages,
+          tooltip: '删除选中消息',
+        ),
+        IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: _controller.toggleMultiSelectMode,
+          tooltip: '退出多选模式',
+        ),
+      ];
+    }
+
+    return [
+      IconButton(
+        icon: const Icon(Icons.calendar_today),
+        onPressed: _showDatePickerDialog,
+        tooltip: '选择日期',
+      ),
+      IconButton(
+        icon: const Icon(Icons.select_all),
+        onPressed: _controller.toggleMultiSelectMode,
+        tooltip: '多选模式',
+      ),
+      PopupMenuButton<String>(
+        onSelected: (value) {
+          if (value == 'clear') {
+            _showClearConfirmationDialog();
+          }
+        },
+        itemBuilder: (context) => [
+          const PopupMenuItem(
+            value: 'clear',
+            child: Text('清空消息'),
           ),
         ],
       ),
+    ];
+  }
+
+  /// 构建聊天主体内容
+  Widget _buildChatBody(
+    List<dynamic> messageItems,
+    Map<String, int> messageIndexMap,
+    List<Message> displayMessages,
+    String? backgroundPath,
+  ) {
+    return Column(
+      children: [
+        if (_replyToMessage != null)
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              border: Border(
+                top: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withAlpha(51),
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '回复 ${_replyToMessage!.user.username}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _replyToMessage!.content,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: _clearReply,
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        Expanded(
+          child: MessageList(
+            items: messageItems,
+            isMultiSelectMode: _controller.isMultiSelectMode,
+            selectedMessageIds: _controller.selectedMessageIds,
+            onMessageEdit: _showEditDialog,
+            onMessageDelete: _controller.deleteMessage,
+            onMessageCopy: (message) => _messageOperations.copyMessage(message),
+            onSetFixedSymbol: (message, symbol) =>
+                _messageOperations.setFixedSymbol(message, symbol),
+            onSetBubbleColor: (message, color) =>
+                _messageOperations.setBubbleColor(message, color),
+            onReply: _handleReply,
+            onToggleFavorite: _handleToggleFavorite,
+            onToggleMessageSelection: _controller.toggleMessageSelection,
+            onReplyTap: _handleReplyTap,
+            scrollController: _controller.scrollController,
+            currentUserId: ChatPlugin.instance.userService.currentUser.id,
+            highlightedMessage: widget.highlightMessage,
+            shouldHighlight: widget.highlightMessage != null,
+            messageIndexMap: messageIndexMap,
+            onAvatarTap: (message) async {
+              // 检查是否为AI消息
+              final metadata = message.metadata;
+              if (metadata != null &&
+                  metadata.containsKey('isAI') &&
+                  metadata['isAI'] == true &&
+                  metadata.containsKey('agentId')) {
+                final agentId = metadata['agentId'] as String;
+
+                if (mounted) {
+                  try {
+                    // 获取OpenAI插件并转换类型
+                    final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
+                    // 获取agent
+                    final agent = await openaiPlugin.controller.getAgent(agentId);
+                    if (agent != null) {
+                      NavigationHelper.push(context, AgentEditScreen(agent: agent));
+                    } else {
+                      Toast.error('chat_aiAssistantNotFound'.tr);
+                    }
+                  } catch (e) {
+                    // 插件不可用或类型转换失败时显示提示
+                    Toast.error('无法访问AI编辑界面，OpenAI插件可能未加载');
+                  }
+                }
+              } else {
+                // 如果不是AI消息，显示用户资料编辑对话框
+                final chatPlugin = ChatPlugin.instance;
+                final users = chatPlugin.userService.getAllUsers();
+                final targetUser = users.firstWhere(
+                  (user) => user.id == message.user.id,
+                  orElse: () => message.user,
+                );
+
+                final updatedUser = await showDialog<User>(
+                  context: context,
+                  builder: (context) => ProfileEditDialog(
+                    user: targetUser,
+                    chatPlugin: chatPlugin,
+                  ),
+                );
+
+                if (updatedUser != null && mounted) {
+                  // 如果是当前用户，则更新当前用户信息
+                  if (targetUser.id == chatPlugin.userService.currentUser.id) {
+                    chatPlugin.userService.setCurrentUser(updatedUser);
+                  }
+                  // 否则只更新用户列表中的用户信息
+                  else {
+                    await chatPlugin.userService.updateUser(updatedUser);
+                  }
+                }
+              }
+            },
+            showAvatar: ChatPlugin.instance.settingsService.showAvatarInChat,
+          ),
+        ),
+        MessageInput(
+          controller: _controller.draftController,
+          onSendMessage: (
+            content, {
+            metadata,
+            String type = 'text',
+            replyTo,
+          }) {
+            _controller.sendMessage(
+              content,
+              metadata: metadata,
+              type: type,
+              replyTo: _replyToMessage,
+            );
+            // 发送后清除回复状态
+            if (_replyToMessage != null) {
+              setState(() {
+                _replyToMessage = null;
+              });
+            }
+          },
+          onSaveDraft: _controller.saveDraft,
+          replyTo: _replyToMessage,
+          focusNode: _controller.focusNode,
+        ),
+      ],
     );
   }
 }

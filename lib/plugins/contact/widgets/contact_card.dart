@@ -49,7 +49,6 @@ class ContactCard extends StatelessWidget {
             context,
             (context) => ContactForm(
               contact: contact,
-              controller: controller,
               onSave: (savedContact) async {
                 await controller.updateContact(savedContact);
                 onContactUpdated?.call();
@@ -67,11 +66,7 @@ class ContactCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopSection(
-                context,
-                primaryTextColor,
-                secondaryTextColor,
-              ),
+              _buildTopSection(context, primaryTextColor, secondaryTextColor),
               if (contact.notes != null && contact.notes!.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Text(

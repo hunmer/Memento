@@ -871,7 +871,6 @@ class ContactMainViewState extends State<ContactMainView> {
     await NavigationHelper.push(
       context,
       ContactForm(
-        controller: _controller,
         contact: contact,
         onSave: (savedContact) async {
           try {
@@ -1050,7 +1049,6 @@ class ContactMainViewState extends State<ContactMainView> {
             NavigationHelper.openContainerWithHero(
               context,
               (context) => ContactForm(
-                controller: _controller,
                 onSave: (savedContact) async {
                   await _controller.addContact(savedContact);
                   setState(() {});
