@@ -4,23 +4,118 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
-import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
+import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart';
 import 'activity_form_utils.dart';
 import '../../../../../../core/services/toast_service.dart';
 
 class ActivityFormState extends State<ActivityFormWidget> {
-  late TextEditingController _titleController;
-  late TextEditingController _descriptionController;
-  late TextEditingController _durationController;
-  late TimeOfDay _startTime;
-  late TimeOfDay _endTime;
-  String? _selectedMood;
-  List<String> _selectedTags = [];
+  // 存储时间和滑块值的引用，用于联动
+  TimeOfDay? _currentStartTime;
+  TimeOfDay? _currentEndTime;
+  int? _currentDuration;
+
+  // 存储字段值
+  String? _titleValue;
+  String? _descriptionValue;
+  String? _moodValue;
+  List<String>? _tagsValue;
 
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).primaryColor;
+
+    // 初始化时间
+    final initialStartTime = getInitialTime(
+      activityTime: widget.activity?.startTime,
+      initialTime: widget.initialStartTime,
+      lastActivityEndTime: widget.lastActivityEndTime,
+      selectedDate: widget.selectedDate,
+      isStartTime: true,
+    );
+
+    final initialEndTime = getInitialTime(
+      activityTime: widget.activity?.endTime,
+      initialTime: widget.initialEndTime,
+      selectedDate: widget.selectedDate,
+      isStartTime: false,
+    );
+
+    _currentStartTime ??= initialStartTime;
+    _currentEndTime ??= initialEndTime;
+    _currentDuration ??= calculateDuration(
+      widget.selectedDate,
+      initialStartTime,
+      initialEndTime,
+    );
+
+    // 初始化字段值
+    _titleValue ??= widget.activity?.title ?? '';
+    _descriptionValue ??= widget.activity?.description;
+    _moodValue ??=
+        widget.activity?.mood ??
+        (widget.recentMoods?.isNotEmpty == true
+            ? widget.recentMoods!.first
+            : '😊');
+    _tagsValue ??= widget.activity?.tags ?? widget.recentTags;
+
+    // 构建字段配置
+    final fieldConfigs = [
+      // 标题输入
+      FormFieldConfig(
+        name: 'title',
+        type: FormFieldType.text,
+        labelText: 'activity_activityName'.tr,
+        hintText: 'activity_activityName'.tr,
+        initialValue: widget.activity?.title ?? '',
+        prefixIcon: Icons.edit,
+        onChanged: (value) => _titleValue = value as String?,
+      ),
+
+      // 心情选择
+      FormFieldConfig(
+        name: 'mood',
+        type: FormFieldType.optionSelector,
+        labelText: 'activity_mood'.tr,
+        initialValue:
+            widget.activity?.mood ??
+            (widget.recentMoods?.isNotEmpty == true
+                ? widget.recentMoods!.first
+                : '😊'),
+        options: _buildMoodOptions(),
+        useHorizontalScroll: true,
+        optionWidth: 80,
+        optionHeight: 80,
+        primaryColor: primaryColor,
+        onChanged: (value) => _moodValue = value as String?,
+      ),
+
+      // 描述输入
+      FormFieldConfig(
+        name: 'description',
+        type: FormFieldType.textArea,
+        labelText: 'activity_content'.tr,
+        hintText: 'activity_contentHint'.tr,
+        initialValue: widget.activity?.description ?? '',
+        extra: {'minLines': 4, 'maxLines': 4},
+        onChanged: (value) => _descriptionValue = value as String?,
+      ),
+
+      // 标签选择
+      FormFieldConfig(
+        name: 'tags',
+        type: FormFieldType.tags,
+        labelText: 'activity_tags'.tr,
+        hintText: '添加标签',
+        initialTags: widget.activity?.tags ?? [],
+        extra: {
+          'primaryColor': primaryColor,
+          'labelText': 'activity_tags'.tr,
+          'quickSelectTags': widget.recentTags ?? [],
+        },
+        onChanged: (value) => _tagsValue = value as List<String>?,
+      ),
+    ];
 
     return Column(
       children: [
@@ -29,156 +124,111 @@ class ActivityFormState extends State<ActivityFormWidget> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             children: [
-              // Title Card
-              TextInputField(
-                controller: _titleController,
-                labelText: 'activity_activityName'.tr,
-                hintText: 'activity_activityName'.tr,
-                prefixIcon: const Icon(Icons.edit),
+              FormBuilderWrapper(
+                config: FormConfig(
+                  fieldSpacing: 16,
+                  showSubmitButton: false,
+                  showResetButton: false,
+                  fields: fieldConfigs,
+                  onSubmit: (values) {},
               ),
-              const SizedBox(height: 16),
+                contentBuilder: (context, fields) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 标题输入 (fields[0])
+                      fields[0],
+                      const SizedBox(height: 16),
 
-              // Time Card
-              Row(
-                children: [
-                  Expanded(
-                    child: TimePickerField(
-                      label: 'activity_startTime'.tr,
-                      time: _startTime,
-                      onTimeChanged: (time) {
-                        setState(() {
-                          _startTime = time;
-                          _syncDurationWithTimes();
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TimePickerField(
-                      label: 'activity_endTime'.tr,
-                      time: _endTime,
-                      onTimeChanged: (time) {
-                        setState(() {
-                          _endTime = time;
-                          _syncDurationWithTimes();
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // Duration Slider Section
-              SliderField(
-                label: 'activity_duration'.tr,
-                valueText: _calculateDurationString(context),
-                min: 1,
-                max: _getMaxDuration().toDouble(),
-                value: _getCurrentDuration().toDouble().clamp(
-                  1.0,
-                  _getMaxDuration().toDouble(),
-                ),
-                divisions: _getMaxDuration() > 1 ? _getMaxDuration() - 1 : 1,
-                onChanged: (value) {
-                  _updateDurationFromSlider(value.toInt());
-                },
-                quickValues:
-                    [15, 30, 60, 90, 120, 180, 240, 300, 360, 480]
-                        .where((duration) => duration <= _getMaxDuration())
-                        .map((e) => e.toDouble())
-                        .toList(),
-                quickValueLabel: (value) {
-                  final duration = value.toInt();
-                  final hours = duration ~/ 60;
-                  final minutes = duration % 60;
-                  if (hours > 0 && minutes > 0) {
-                    return '${hours}h${minutes}m';
-                  } else if (hours > 0) {
-                    return '${hours}h';
-                  } else {
-                    return '${minutes}m';
-                  }
-                },
-                onQuickValueTap: (value) {
-                  _updateDurationFromSlider(value.toInt());
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Mood Card
-              FormFieldGroup(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  OptionSelectorField(
-                    labelText: 'activity_mood'.tr,
-                    options: _buildMoodOptions(),
-                    selectedId: _selectedMood,
-                    onSelectionChanged: (optionId) {
-                      setState(() {
-                        _selectedMood = optionId;
-                      });
-                    },
-                    useHorizontalScroll: true,
-                    optionWidth: 80,
-                    optionHeight: 80,
-                    primaryColor: primaryColor,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-
-              // Description Card
-              FormFieldGroup(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  TextAreaField(
-                    controller: _descriptionController,
-                    hintText: 'activity_contentHint'.tr,
-                    minLines: 4,
-                    maxLines: 4,
-                    inline: true,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-
-              // Tags Card
-              FormFieldGroup(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'activity_tags'.tr,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                            color: Theme.of(context).colorScheme.onSurface,
+                      // 时间选择行（自定义，不在 fields 中）
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TimePickerField(
+                              label: 'activity_startTime'.tr,
+                              time: _currentStartTime!,
+                              onTimeChanged: (time) {
+                                setState(() {
+                                  _currentStartTime = time;
+                                  _updateDurationFromTimes();
+                                });
+                              },
+                            ),
                           ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TimePickerField(
+                              label: 'activity_endTime'.tr,
+                              time: _currentEndTime!,
+                              onTimeChanged: (time) {
+                                setState(() {
+                                  _currentEndTime = time;
+                                  _updateDurationFromTimes();
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // 持续时间滑块（自定义，不在 fields 中）
+                      SliderField(
+                        label: 'activity_duration'.tr,
+                        valueText: _calculateDurationString(context),
+                        min: 1,
+                        max: _getMaxDuration().toDouble(),
+                        value: _currentDuration!.toDouble().clamp(
+                          1.0,
+                          _getMaxDuration().toDouble(),
                         ),
-                        const SizedBox(height: 8),
-                        TagsField(
-                          tags: _selectedTags,
-                          onAddTag: _showAddTagDialog,
-                          onRemoveTag: (tag) {
-                            setState(() {
-                              _selectedTags.remove(tag);
-                            });
-                          },
-                          addButtonText: '添加标签',
-                          primaryColor: primaryColor,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                        divisions:
+                            _getMaxDuration() > 1 ? _getMaxDuration() - 1 : 1,
+                        onChanged: (value) {
+                          setState(() {
+                            _updateDurationFromSlider(value.toInt());
+                          });
+                        },
+                        quickValues:
+                            [15, 30, 60, 90, 120, 180, 240, 300, 360, 480]
+                                .where(
+                                  (duration) => duration <= _getMaxDuration(),
+                                )
+                                .map((e) => e.toDouble())
+                                .toList(),
+                        quickValueLabel: (value) {
+                          final duration = value.toInt();
+                          final hours = duration ~/ 60;
+                          final minutes = duration % 60;
+                          if (hours > 0 && minutes > 0) {
+                            return '${hours}h${minutes}m';
+                          } else if (hours > 0) {
+                            return '${hours}h';
+                          } else {
+                            return '${minutes}m';
+                          }
+                        },
+                        onQuickValueTap: (value) {
+                          setState(() {
+                            _updateDurationFromSlider(value.toInt());
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 心情选择 (fields[1])
+                      fields[1],
+                      const SizedBox(height: 16),
+
+                      // 描述输入 (fields[2])
+                      fields[2],
+                      const SizedBox(height: 16),
+
+                      // 标签选择 (fields[3])
+                      fields[3],
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -202,7 +252,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
             width: double.infinity,
             height: 56,
             child: ElevatedButton(
-              onPressed: _handleSave,
+              onPressed: _handleSaveWithValidation,
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 foregroundColor: Colors.white,
@@ -225,186 +275,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
     );
   }
 
-  String _calculateDurationString(BuildContext context) {
-    final startDateTime = DateTime(
-      widget.selectedDate.year,
-      widget.selectedDate.month,
-      widget.selectedDate.day,
-      _startTime.hour,
-      _startTime.minute,
-    );
-    var endDateTime = DateTime(
-      widget.selectedDate.year,
-      widget.selectedDate.month,
-      widget.selectedDate.day,
-      _endTime.hour,
-      _endTime.minute,
-    );
-
-    if (endDateTime.isBefore(startDateTime)) {
-      endDateTime = endDateTime.add(const Duration(days: 1));
-    }
-
-    final duration = endDateTime.difference(startDateTime);
-    final hours = duration.inHours;
-    final minutes = duration.inMinutes % 60;
-
-    // Simple localized string construction
-    // Ideally use l10n methods if available for "hours" and "minutes"
-    // Assuming standard format for now matching the UI: "7小时 41分钟"
-    // We can use 'h ' and 'm' if l10n not precise, but let's try to be generic or use hardcoded for Chinese context as requested by image style if l10n fails?
-    // Actually, the project has l10n. Let's use it if possible.
-
-    if (hours > 0) {}
-
-    // Fallback if l10n regex fails (it might be risky).
-    // The prompt image shows "7小时 41分钟".
-    // Let's just use "h" and "m" or try to get "小时" "分钟" if we know the locale is Chinese.
-    // Or just use 'activity_hours'.tr and 'activity_minutes'.tr if they exist as standalone words.
-    // seems to have `hoursFormat` which returns "x hours".
-
-    // Safe approach:
-    return '${hours}h ${minutes}m';
-  }
-
-  /// 获取当前持续时间（分钟）
-  int _getCurrentDuration() {
-    final startDateTime = DateTime(
-      widget.selectedDate.year,
-      widget.selectedDate.month,
-      widget.selectedDate.day,
-      _startTime.hour,
-      _startTime.minute,
-    );
-    var endDateTime = DateTime(
-      widget.selectedDate.year,
-      widget.selectedDate.month,
-      widget.selectedDate.day,
-      _endTime.hour,
-      _endTime.minute,
-    );
-
-    if (endDateTime.isBefore(startDateTime)) {
-      endDateTime = endDateTime.add(const Duration(days: 1));
-    }
-
-    final duration = endDateTime.difference(startDateTime).inMinutes;
-    // 确保至少为1分钟
-    return duration > 0 ? duration : 1;
-  }
-
-  /// 获取最大持续时间（分钟）
-  /// 最大值为当前时间 - 开始时间，但不超过当天结束时间
-  int _getMaxDuration() {
-    final startDateTime = DateTime(
-      widget.selectedDate.year,
-      widget.selectedDate.month,
-      widget.selectedDate.day,
-      _startTime.hour,
-      _startTime.minute,
-    );
-
-    final now = DateTime.now();
-    final dayEnd = DateTime(
-      widget.selectedDate.year,
-      widget.selectedDate.month,
-      widget.selectedDate.day,
-      23,
-      59,
-    );
-
-    // 如果选择的日期是今天，则限制为当前时间
-    // 否则限制为当天结束时间
-    final maxEndTime =
-        widget.selectedDate.year == now.year &&
-                widget.selectedDate.month == now.month &&
-                widget.selectedDate.day == now.day
-            ? (now.isBefore(dayEnd) ? now : dayEnd)
-            : dayEnd;
-
-    final maxDuration = maxEndTime.difference(startDateTime).inMinutes;
-
-    // 确保最小值为1分钟
-    return maxDuration > 1 ? maxDuration : 1;
-  }
-
-  /// 从Slider更新持续时间
-  void _updateDurationFromSlider(int durationMinutes) {
-    final startDateTime = DateTime(
-      widget.selectedDate.year,
-      widget.selectedDate.month,
-      widget.selectedDate.day,
-      _startTime.hour,
-      _startTime.minute,
-    );
-
-    final newEndDateTime = startDateTime.add(
-      Duration(minutes: durationMinutes),
-    );
-
-    setState(() {
-      _endTime = TimeOfDay(
-        hour: newEndDateTime.hour,
-        minute: newEndDateTime.minute,
-      );
-      _syncDurationWithTimes();
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    final activity = widget.activity;
-
-    _titleController = TextEditingController(text: activity?.title ?? '');
-    _descriptionController = TextEditingController(
-      text: activity?.description ?? '',
-    );
-    _selectedTags = activity?.tags ?? [];
-    _durationController = TextEditingController(text: '60');
-    _selectedMood = activity?.mood;
-
-    // 加载最近使用的心情和标签
-    if (widget.recentMoods != null && widget.recentMoods!.isNotEmpty) {
-      _selectedMood ??= widget.recentMoods!.first;
-    }
-
-    // 设置开始时间
-    _startTime = getInitialTime(
-      activityTime: activity?.startTime,
-      initialTime: widget.initialStartTime,
-      lastActivityEndTime: widget.lastActivityEndTime,
-      selectedDate: widget.selectedDate,
-      isStartTime: true,
-    );
-
-    // 设置结束时间
-    _endTime = getInitialTime(
-      activityTime: activity?.endTime,
-      initialTime: widget.initialEndTime,
-      selectedDate: widget.selectedDate,
-      isStartTime: false,
-    );
-    _syncDurationWithTimes();
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    _durationController.dispose();
-    super.dispose();
-  }
-
-  void _syncDurationWithTimes() {
-    final minutes = calculateDuration(
-      widget.selectedDate,
-      _startTime,
-      _endTime,
-    );
-    _durationController.text = minutes.toString();
-  }
-
+  /// 构建心情选项列表
   List<OptionItem> _buildMoodOptions() {
     final List<String> combinedMoods = [];
 
@@ -436,30 +307,159 @@ class ActivityFormState extends State<ActivityFormWidget> {
     return combinedMoods.map((mood) {
       return OptionItem(
         id: mood,
-        icon: Icons.emoji_emotions, // 默认图标（不会被使用）
-        label: mood, // 使用 emoji 作为标签
-        useTextAsIcon: true, // 启用文本模式
+        icon: Icons.emoji_emotions,
+        label: mood,
+        useTextAsIcon: true,
       );
     }).toList();
   }
 
-  Future<void> _handleSave() async {
-    if (!mounted) return;
-    // 创建DateTime对象
+  /// 计算持续时间字符串
+  String _calculateDurationString(BuildContext context) {
+    if (_currentStartTime == null || _currentEndTime == null) {
+      return '0h 0m';
+    }
+
+    final startDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      _currentStartTime!.hour,
+      _currentStartTime!.minute,
+    );
+    var endDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      _currentEndTime!.hour,
+      _currentEndTime!.minute,
+    );
+
+    if (endDateTime.isBefore(startDateTime)) {
+      endDateTime = endDateTime.add(const Duration(days: 1));
+    }
+
+    final duration = endDateTime.difference(startDateTime);
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+
+    return '${hours}h ${minutes}m';
+  }
+
+  /// 获取当前持续时间（分钟）
+  int _getCurrentDuration() {
+    if (_currentStartTime == null || _currentEndTime == null) {
+      return 60;
+    }
+
+    final startDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      _currentStartTime!.hour,
+      _currentStartTime!.minute,
+    );
+    var endDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      _currentEndTime!.hour,
+      _currentEndTime!.minute,
+    );
+
+    if (endDateTime.isBefore(startDateTime)) {
+      endDateTime = endDateTime.add(const Duration(days: 1));
+    }
+
+    final duration = endDateTime.difference(startDateTime).inMinutes;
+    return duration > 0 ? duration : 1;
+  }
+
+  /// 获取最大持续时间（分钟）
+  int _getMaxDuration() {
+    if (_currentStartTime == null) {
+      return 60;
+    }
+
+    final startDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      _currentStartTime!.hour,
+      _currentStartTime!.minute,
+    );
+
+    final now = DateTime.now();
+    final dayEnd = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      23,
+      59,
+    );
+
+    final maxEndTime =
+        widget.selectedDate.year == now.year &&
+                widget.selectedDate.month == now.month &&
+                widget.selectedDate.day == now.day
+            ? (now.isBefore(dayEnd) ? now : dayEnd)
+            : dayEnd;
+
+    final maxDuration = maxEndTime.difference(startDateTime).inMinutes;
+    return maxDuration > 1 ? maxDuration : 1;
+  }
+
+  /// 从滑块更新持续时间
+  void _updateDurationFromSlider(int durationMinutes) {
+    if (_currentStartTime == null) return;
+
+    final startDateTime = DateTime(
+      widget.selectedDate.year,
+      widget.selectedDate.month,
+      widget.selectedDate.day,
+      _currentStartTime!.hour,
+      _currentStartTime!.minute,
+    );
+
+    final newEndDateTime = startDateTime.add(
+      Duration(minutes: durationMinutes),
+    );
+
+    _currentEndTime = TimeOfDay(
+      hour: newEndDateTime.hour,
+      minute: newEndDateTime.minute,
+    );
+    _currentDuration = durationMinutes;
+  }
+
+  /// 从时间更新持续时间
+  void _updateDurationFromTimes() {
+    _currentDuration = _getCurrentDuration();
+  }
+
+  /// 带验证的保存处理
+  void _handleSaveWithValidation() async {
+
+    // 验证时间
+    if (_currentEndTime == null || _currentStartTime == null) {
+      toastService.showToast('请选择活动时间');
+      return;
+    }
+
     final now = widget.selectedDate;
     final startDateTime = DateTime(
       now.year,
       now.month,
       now.day,
-      _startTime.hour,
-      _startTime.minute,
+      _currentStartTime!.hour,
+      _currentStartTime!.minute,
     );
     final endDateTime = DateTime(
       now.year,
       now.month,
       now.day,
-      _endTime.hour,
-      _endTime.minute,
+      _currentEndTime!.hour,
+      _currentEndTime!.minute,
     );
 
     // 检查时间是否有效
@@ -482,8 +482,40 @@ class ActivityFormState extends State<ActivityFormWidget> {
       return;
     }
 
+    // 准备表单值
+    final values = <String, dynamic>{
+      'title': _titleValue!.trim(),
+      'description': _descriptionValue,
+      'mood': _moodValue,
+      'tags': _tagsValue ?? [],
+    };
+
+    // 调用实际保存方法
+    await _handleSave(values);
+  }
+
+  /// 实际保存处理
+  Future<void> _handleSave(Map<String, dynamic> values) async {
+    if (!mounted) return;
+
+    final now = widget.selectedDate;
+    final startDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      _currentStartTime!.hour,
+      _currentStartTime!.minute,
+    );
+    final endDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      _currentEndTime!.hour,
+      _currentEndTime!.minute,
+    );
+
     // 处理标签
-    final inputTags = _selectedTags;
+    final inputTags = values['tags'] as List<String>? ?? [];
 
     // 获取标签组服务
     final storage = StorageManager();
@@ -491,18 +523,16 @@ class ActivityFormState extends State<ActivityFormWidget> {
     final activityService = ActivityService(storage, 'activity');
 
     // 加载标签组
-    List<TagGroup> tagGroups = await activityService.getTagGroups();
+    final tagGroups = await activityService.getTagGroups();
 
     // 确保有未分组标签组
-    TagGroup? unGroupedTags = tagGroups.firstWhere(
+    var unGroupedTags = tagGroups.firstWhere(
       (group) => group.name == 'activity_ungrouped'.tr,
       orElse: () {
         final newGroup = TagGroup(name: 'activity_ungrouped'.tr, tags: []);
-        // 如果列表为空，直接添加；否则在合适的位置插入
         if (tagGroups.isEmpty) {
           tagGroups.add(newGroup);
         } else {
-          // 在"所有"标签组后面插入（如果存在），否则插入到开头
           final allTagsIndex = tagGroups.indexWhere(
             (group) => group.name == 'activity_all'.tr,
           );
@@ -537,68 +567,29 @@ class ActivityFormState extends State<ActivityFormWidget> {
     final activity = ActivityRecord(
       startTime: startDateTime,
       endTime: endDateTime,
-      title: _titleController.text.trim(),
+      title: values['title'] as String,
       description:
-          _descriptionController.text.isEmpty
+          (values['description'] as String?)?.isEmpty == true
               ? null
-              : _descriptionController.text,
+              : values['description'] as String?,
       tags: inputTags,
-      mood: _selectedMood,
+      mood: values['mood'] as String?,
     );
 
-    widget.onSave(activity);
-    Navigator.of(context).pop();
+    await widget.onSave(activity);
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
-  void _showAddTagDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final controller = TextEditingController();
-        return AlertDialog(
-          title: Text('添加标签'),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: '输入标签名称',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            autofocus: true,
-            onSubmitted: (value) {
-              if (value.trim().isNotEmpty) {
-                Navigator.pop(context);
-                _addTag(value.trim());
-              }
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('取消'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final value = controller.text.trim();
-                if (value.isNotEmpty) {
-                  Navigator.pop(context);
-                  _addTag(value);
-                }
-              },
-              child: Text('添加'),
-            ),
-          ],
-        );
-      },
-    );
+  @override
+  void initState() {
+    super.initState();
+    // 时间和字段值在 build 方法中初始化
   }
 
-  void _addTag(String tag) {
-    setState(() {
-      if (!_selectedTags.contains(tag)) {
-        _selectedTags.add(tag);
-      }
-    });
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

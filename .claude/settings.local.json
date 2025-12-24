@@ -30,7 +30,8 @@
       "WebFetch(domain:pub.dev)",
       "Skill(skill-creator)",
       "Skill(add-route-context)",
-      "Skill(add-multi-filter)"
+      "Skill(add-multi-filter)",
+      "Skill(refactor-form-to-builder)"
     ],
     "deny": [],
     "ask": []

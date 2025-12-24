@@ -25,6 +25,7 @@ class ActivityTranslationsZh {
     'activity_endTime': '结束时间',
     'activity_activityName': '活动名称',
     'activity_activityDescription': '描述',
+    'activity_content': '描述',
     'activity_tags': '标签',
     'activity_addTag': '添加标签',
     'activity_deleteTag': '删除标签',

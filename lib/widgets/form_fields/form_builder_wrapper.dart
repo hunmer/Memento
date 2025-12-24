@@ -28,6 +28,7 @@ enum FormFieldType {
   tags,
   iconTitle,
   categorySelector,
+  optionSelector,
   customFields,
   listAdd,
 
@@ -90,6 +91,24 @@ class FormFieldConfig {
   /// 类别图标（用于 categorySelector）
   final Map<String, IconData>? categoryIcons;
 
+  /// 选项列表（用于 optionSelector）
+  final List<OptionItem>? options;
+
+  /// 是否使用水平滚动（用于 optionSelector）
+  final bool useHorizontalScroll;
+
+  /// 选项卡片宽度（用于 optionSelector）
+  final double? optionWidth;
+
+  /// 选项卡片高度（用于 optionSelector）
+  final double? optionHeight;
+
+  /// 网格列数（用于 optionSelector）
+  final int? gridColumns;
+
+  /// 主题色（用于 optionSelector）
+  final Color? primaryColor;
+
   /// 标签（用于 tags）
   final List<String>? initialTags;
 
@@ -119,6 +138,12 @@ class FormFieldConfig {
     this.quickValues,
     this.categories,
     this.categoryIcons,
+    this.options,
+    this.useHorizontalScroll = true,
+    this.optionWidth,
+    this.optionHeight,
+    this.gridColumns,
+    this.primaryColor,
     this.initialTags,
     this.initialCustomFields,
     this.onChanged,
@@ -336,6 +361,9 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
 
       case FormFieldType.categorySelector:
         return _buildCategorySelectorField(config, fieldKey!);
+
+      case FormFieldType.optionSelector:
+        return _buildOptionSelectorField(config, fieldKey!);
 
       case FormFieldType.customFields:
         return _buildCustomFieldsField(config, fieldKey!);
@@ -591,6 +619,8 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
   // 构建标签字段
   Widget _buildTagsField(FormFieldConfig config, GlobalKey fieldKey) {
     final initialTags = config.initialTags ?? [];
+    final extra = config.extra ?? {};
+    final quickSelectTags = extra['quickSelectTags'] as List<String>?;
 
     return WrappedFormField(
       key: fieldKey,
@@ -604,6 +634,13 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
         return TagsField(
           tags: tags,
           addButtonText: config.hintText ?? '添加标签',
+          primaryColor: (extra['primaryColor'] as Color?) ?? const Color(0xFF607AFB),
+          quickSelectTags: quickSelectTags,
+          onQuickSelectTag: (tag) {
+            if (!tags.contains(tag)) {
+              setValue([...tags, tag]);
+            }
+          },
           onAddTag: () async {
             final result = await showDialog<String>(
               context: context,
@@ -685,6 +722,36 @@ class _FormBuilderWrapperState extends State<FormBuilderWrapper> {
         categoryIcons: config.categoryIcons ?? {},
         onCategoryChanged: config.enabled ? setValue : (category) {},
       ),
+    );
+  }
+
+  // 构建选项选择器
+  Widget _buildOptionSelectorField(FormFieldConfig config, GlobalKey fieldKey) {
+    return WrappedFormField(
+      key: fieldKey,
+      name: config.name,
+      initialValue: config.initialValue as String?,
+      enabled: config.enabled,
+      onChanged: config.onChanged,
+      builder: (context, value, setValue) {
+        // 需要包装在 FormFieldGroup 中以匹配原始样式
+        return FormFieldGroup(
+          padding: const EdgeInsets.all(16),
+          children: [
+            OptionSelectorField(
+              options: config.options ?? [],
+              selectedId: value,
+              labelText: config.labelText,
+              useHorizontalScroll: config.useHorizontalScroll,
+              optionWidth: config.optionWidth ?? 80,
+              optionHeight: config.optionHeight ?? 80,
+              gridColumns: config.gridColumns ?? 4,
+              primaryColor: config.primaryColor ?? const Color(0xFF607AFB),
+              onSelectionChanged: config.enabled ? setValue : (id) {},
+            ),
+          ],
+        );
+      },
     );
   }
 
