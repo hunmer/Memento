@@ -15,27 +15,22 @@ class _SwipeActionTestScreenState extends State<SwipeActionTestScreen> {
   // 测试数据
   final List<TaskItem> _tasks = [
     TaskItem(id: '1', title: '完成项目文档', isCompleted: false),
-    TaskItem(id: '2', title: '准备会议材料', isCompleted: false),
-    TaskItem(id: '3', title: '代码审查', isCompleted: true),
-    TaskItem(id: '4', title: '修复 Bug #123', isCompleted: false),
+    TaskItem(id: '2', title: '准备会议材料', isCompleted: true),
   ];
 
   final List<MessageItem> _messages = [
     MessageItem(id: '1', sender: '张三', content: '今天下午开会', isRead: false),
-    MessageItem(id: '2', sender: '李四', content: '文档已发送', isRead: false),
-    MessageItem(id: '3', sender: '王五', content: '项目进度更新', isRead: true),
+    MessageItem(id: '2', sender: '李四', content: '文档已发送', isRead: true),
   ];
 
   final List<NoteItem> _notes = [
     NoteItem(id: '1', title: '学习笔记', isPinned: false),
     NoteItem(id: '2', title: '工作计划', isPinned: true),
-    NoteItem(id: '3', title: '灵感记录', isPinned: false),
   ];
 
   final List<EmailItem> _emails = [
     EmailItem(id: '1', subject: '季度报告', sender: '财务部', isImportant: false),
     EmailItem(id: '2', subject: '紧急会议通知', sender: '总经理', isImportant: true),
-    EmailItem(id: '3', subject: '周报提醒', sender: '人力资源', isImportant: false),
   ];
 
   // 编辑模式状态
@@ -49,6 +44,9 @@ class _SwipeActionTestScreenState extends State<SwipeActionTestScreen> {
       ),
       body: ListView(
         children: [
+          _buildSectionHeader('0. 非列表项测试 - 独立组件'),
+          _buildStandaloneExample(),
+          const Divider(height: 32, thickness: 8),
           _buildSectionHeader('1. 基础用法 - 单个操作'),
           _buildBasicExample(),
           const Divider(height: 32, thickness: 8),
@@ -67,7 +65,10 @@ class _SwipeActionTestScreenState extends State<SwipeActionTestScreen> {
           _buildSectionHeader('6. 全滑动执行操作（类似微信）'),
           _buildFullSwipeExample(),
           const Divider(height: 32, thickness: 8),
-          _buildSectionHeader('7. 编辑模式切换'),
+          _buildSectionHeader('7. 圆形按钮样式'),
+          _buildCircleButtonExample(),
+          const Divider(height: 32, thickness: 8),
+          _buildSectionHeader('8. 编辑模式切换'),
           _buildEditModeExample(),
           const SizedBox(height: 32),
         ],
@@ -85,6 +86,42 @@ class _SwipeActionTestScreenState extends State<SwipeActionTestScreen> {
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
+      ),
+    );
+  }
+
+  /// 0. 非列表项测试 - 独立组件
+  Widget _buildStandaloneExample() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: SwipeActionWrapper(
+          trailingActions: [
+            SwipeActionOption(
+              label: '删除',
+              icon: Icons.delete,
+              backgroundColor: Colors.red,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('删除操作触发')),
+                );
+              },
+            ),
+          ],
+          child: Container(
+            width: 300,
+            height: 100,
+            decoration: BoxDecoration(
+              color: Colors.blue[100],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            child: const Text(
+              "滑动我试试",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -357,7 +394,98 @@ class _SwipeActionTestScreenState extends State<SwipeActionTestScreen> {
     );
   }
 
-  /// 7. 编辑模式示例
+  /// 7. 圆形按钮样式示例
+  Widget _buildCircleButtonExample() {
+    return Column(
+      children: [
+        SwipeActionWrapper(
+          trailingActions: [
+            SwipeActionOption(
+              label: '删除',
+              icon: Icons.delete,
+              backgroundColor: Colors.red,
+              onTap: () => _showMessage('删除'),
+              isDestructive: true,
+              useCircleButton: true,
+              circleButtonSize: 50,
+            ),
+            SwipeActionOption(
+              label: '置顶',
+              icon: Icons.vertical_align_top,
+              backgroundColor: Colors.blue,
+              onTap: () => _showMessage('置顶'),
+              useCircleButton: true,
+              circleButtonSize: 50,
+            ),
+          ],
+          child: const ListTile(
+            leading: Icon(Icons.photo_album),
+            title: Text('圆形按钮示例 1'),
+            subtitle: Text('50px 圆形按钮，删除带确认效果'),
+            trailing: Icon(Icons.arrow_back_ios, size: 16),
+          ),
+        ),
+        SwipeActionWrapper(
+          trailingActions: [
+            SwipeActionOption(
+              label: '喜欢',
+              icon: Icons.favorite,
+              backgroundColor: Colors.pink,
+              onTap: () => _showMessage('喜欢'),
+              useCircleButton: true,
+              circleButtonSize: 45,
+            ),
+            SwipeActionOption(
+              label: '分享',
+              icon: Icons.share,
+              backgroundColor: Colors.green,
+              onTap: () => _showMessage('分享'),
+              useCircleButton: true,
+              circleButtonSize: 45,
+            ),
+            SwipeActionOption(
+              label: '更多',
+              icon: Icons.more_horiz,
+              backgroundColor: Colors.grey,
+              onTap: () => _showMessage('更多'),
+              useCircleButton: true,
+              circleButtonSize: 45,
+            ),
+          ],
+          child: const ListTile(
+            leading: Icon(Icons.image),
+            title: Text('圆形按钮示例 2'),
+            subtitle: Text('45px 圆形按钮，三个操作'),
+            trailing: Icon(Icons.arrow_back_ios, size: 16),
+          ),
+        ),
+        SwipeActionWrapper(
+          performFirstActionWithFullSwipe: true,
+          trailingActions: [
+            SwipeActionOption(
+              label: '删除',
+              icon: Icons.delete,
+              backgroundColor: Colors.red,
+              onTap: () => _showMessage('删除'),
+              useCircleButton: true,
+              circleButtonSize: 55,
+            ),
+          ],
+          child: const ListTile(
+            leading: Icon(Icons.music_note),
+            title: Text('圆形按钮 + 全滑动'),
+            subtitle: Text('55px 大圆形按钮，完全滑动快速删除'),
+            trailing: Text(
+              '← 完全滑动',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 8. 编辑模式示例
   Widget _buildEditModeExample() {
     return Column(
       children: [
@@ -381,7 +509,7 @@ class _SwipeActionTestScreenState extends State<SwipeActionTestScreen> {
             ],
           ),
         ),
-        ...List.generate(3, (index) {
+        ...List.generate(2, (index) {
           return SwipeActionWrapper(
             isEditMode: _isEditMode, // 根据状态禁用/启用滑动
             trailingActions: [

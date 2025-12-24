@@ -42,7 +42,10 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     _selectedDate = DateTime.now();
 
     // 监听通知点击事件
-    eventManager.subscribe('activity_notification_tapped', _onNotificationTapped);
+    eventManager.subscribe(
+      'activity_notification_tapped',
+      _onNotificationTapped,
+    );
 
     _initializeService().then((_) {
       if (mounted) {
@@ -110,7 +113,10 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   @override
   void dispose() {
     // 清理事件监听
-    eventManager.unsubscribe('activity_notification_tapped', _onNotificationTapped);
+    eventManager.unsubscribe(
+      'activity_notification_tapped',
+      _onNotificationTapped,
+    );
 
     // 清理控制器
     _viewModeController.dispose();
@@ -239,7 +245,10 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     // 搜索注释/描述
     if (_searchFilters['comment'] == true) {
       for (final activity in _activityController.activities) {
-        if (activity.description?.toLowerCase().contains(_searchQuery.toLowerCase()) == true) {
+        if (activity.description?.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ) ==
+            true) {
           results.add({
             'type': 'activity_comment',
             'data': activity,
@@ -271,26 +280,16 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               _searchQuery.isEmpty ? '输入关键词搜索' : '未找到匹配结果',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             Text(
               '尝试调整搜索条件或过滤器',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           ],
         ),
@@ -312,16 +311,11 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: _getActivityColor(activity),
-              child: Icon(
-                _getActivityIcon(type),
-                color: Colors.white,
-              ),
+              child: Icon(_getActivityIcon(type), color: Colors.white),
             ),
             title: Text(
               title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,10 +338,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
                       result['description'],
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -356,10 +347,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
             ),
             trailing: Text(
               '${activity.startTime.hour.toString().padLeft(2, '0')}:${activity.startTime.minute.toString().padLeft(2, '0')}',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
             ),
             onTap: () {
               _activityController.editActivity(context, activity);
@@ -395,16 +383,13 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return SuperCupertinoNavigationWrapper(
       title: Text(
-        _viewModeController.isGridMode && _viewModeController.selectedMinutes > 0
+        _viewModeController.isGridMode &&
+                _viewModeController.selectedMinutes > 0
             ? '${_viewModeController.selectedMinutes}分钟已选择'
             : 'activity_myActivities'.tr,
       ),
@@ -433,53 +418,80 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
               Expanded(
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    );
+                  transitionBuilder: (
+                    Widget child,
+                    Animation<double> animation,
+                  ) {
+                    return FadeTransition(opacity: animation, child: child);
                   },
-                  child: _viewModeController.isGridMode
-                      ? ActivityGridView(
-                          key: ValueKey('grid_${_selectedDate.millisecondsSinceEpoch}'),
-                          activities: _activityController.activities,
-                          selectedDate: _selectedDate,
-                          onActivityTap: (activity) => _activityController.editActivity(context, activity),
-                          onUnrecordedTimeTap: (start, end) {
-                            _activityController.addActivity(
-                              context,
-                              _selectedDate,
-                              TimeOfDay(hour: start.hour, minute: start.minute),
-                              TimeOfDay(hour: end.hour, minute: end.minute),
-                              _tagController.updateRecentTags,
-                            ).then((_) {
-                              _viewModeController.clearSelectedMinutes();
-                            });
-                          },
-                          onSelectionChanged: (start, end) {
-                            if (start != null && end != null) {
-                              final minutes = end.difference(start).inMinutes;
-                              _viewModeController.updateSelectedMinutes(minutes);
-                            } else {
-                              _viewModeController.clearSelectedMinutes();
-                            }
-                          },
-                        )
-                      : ActivityTimeline(
-                          key: ValueKey('timeline_${_selectedDate.millisecondsSinceEpoch}'),
-                          activities: _activityController.activities,
-                          onDeleteActivity: _activityController.deleteActivity,
-                          onActivityTap: (activity) => _activityController.editActivity(context, activity),
-                          onUnrecordedTimeTap: (start, end) {
-                            _activityController.addActivity(
-                              context,
-                              _selectedDate,
-                              TimeOfDay(hour: start.hour, minute: start.minute),
-                              TimeOfDay(hour: end.hour, minute: end.minute),
-                              _tagController.updateRecentTags,
-                            );
-                          },
-                        ),
+                  child:
+                      _viewModeController.isGridMode
+                          ? ActivityGridView(
+                            key: ValueKey(
+                              'grid_${_selectedDate.millisecondsSinceEpoch}',
+                            ),
+                            activities: _activityController.activities,
+                            selectedDate: _selectedDate,
+                            onActivityTap:
+                                (activity) => _activityController.editActivity(
+                                  context,
+                                  activity,
+                                ),
+                            onUnrecordedTimeTap: (start, end) {
+                              _activityController
+                                  .addActivity(
+                                    context,
+                                    _selectedDate,
+                                    TimeOfDay(
+                                      hour: start.hour,
+                                      minute: start.minute,
+                                    ),
+                                    TimeOfDay(
+                                      hour: end.hour,
+                                      minute: end.minute,
+                                    ),
+                                    _tagController.updateRecentTags,
+                                  )
+                                  .then((_) {
+                                    _viewModeController.clearSelectedMinutes();
+                                  });
+                            },
+                            onSelectionChanged: (start, end) {
+                              if (start != null && end != null) {
+                                final minutes = end.difference(start).inMinutes;
+                                _viewModeController.updateSelectedMinutes(
+                                  minutes,
+                                );
+                              } else {
+                                _viewModeController.clearSelectedMinutes();
+                              }
+                            },
+                          )
+                          : ActivityTimeline(
+                            key: ValueKey(
+                              'timeline_${_selectedDate.millisecondsSinceEpoch}',
+                            ),
+                            activities: _activityController.activities,
+                            onDeleteActivity:
+                                _activityController.deleteActivity,
+                            onActivityTap:
+                                (activity) => _activityController.editActivity(
+                                  context,
+                                  activity,
+                                ),
+                            onUnrecordedTimeTap: (start, end) {
+                              _activityController.addActivity(
+                                context,
+                                _selectedDate,
+                                TimeOfDay(
+                                  hour: start.hour,
+                                  minute: start.minute,
+                                ),
+                                TimeOfDay(hour: end.hour, minute: end.minute),
+                                _tagController.updateRecentTags,
+                              );
+                            },
+                          ),
                 ),
               ),
             ],
@@ -490,8 +502,6 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       // 搜索结果页面
       searchBody: _buildSearchResults(),
       enableLargeTitle: true,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
-      // 将原有的 AppBar actions 移到右上角
       actions: [
         // 视图切换按钮
         Padding(
@@ -518,51 +528,53 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
           onSelected: (int index) {
             _activityController.setSortMode(index);
           },
-          itemBuilder: (context) => [
+          itemBuilder:
+              (context) => [
                 PopupMenuItem(
-              value: 0,
-              child: Row(
-                children: [
+                  value: 0,
+                  child: Row(
+                    children: [
                       const Icon(Icons.arrow_upward, size: 16),
                       const SizedBox(width: 8),
-                  Text('activity_sortByStartTimeAsc'.tr),
-                ],
-              ),
-            ),
+                      Text('activity_sortByStartTimeAsc'.tr),
+                    ],
+                  ),
+                ),
                 PopupMenuItem(
-              value: 1,
-              child: Row(
-                children: [
+                  value: 1,
+                  child: Row(
+                    children: [
                       const Icon(Icons.timer, size: 16),
                       const SizedBox(width: 8),
-                  Text('activity_sortByDuration'.tr),
-                ],
-              ),
-            ),
+                      Text('activity_sortByDuration'.tr),
+                    ],
+                  ),
+                ),
                 PopupMenuItem(
-              value: 2,
-              child: Row(
-                children: [
+                  value: 2,
+                  child: Row(
+                    children: [
                       const Icon(Icons.arrow_downward, size: 16),
                       const SizedBox(width: 8),
-                  Text('activity_sortByStartTimeDesc'.tr),
-                ],
-              ),
-            ),
-          ],
+                      Text('activity_sortByStartTimeDesc'.tr),
+                    ],
+                  ),
+                ),
+              ],
         ),
         // 添加活动的按钮（使用IconButton避免Hero冲突）
         Padding(
           padding: const EdgeInsets.only(right: 8.0),
           child: IconButton(
             icon: const Icon(Icons.add_circle_outline, size: 28),
-            onPressed: () => _activityController.addActivity(
-              context,
-              _selectedDate,
-              null,
-              null,
-              _tagController.updateRecentTags,
-            ),
+            onPressed:
+                () => _activityController.addActivity(
+                  context,
+                  _selectedDate,
+                  null,
+                  null,
+                  _tagController.updateRecentTags,
+                ),
             tooltip: '添加活动',
           ),
         ),

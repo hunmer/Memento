@@ -92,38 +92,40 @@ class _ChannelListScreenState extends State<ChannelListScreen> {
             },
           ),
           Expanded(
-            child: _controller.filteredChannels.isEmpty
-                ? EmptyChannelView(onAddChannel: widget.onAddChannel ?? () {})
-                : ReorderableListView.builder(
-                    padding: EdgeInsets.zero,
-                    itemCount: _controller.filteredChannels.length,
-                    onReorder: _controller.reorderChannels,
-                    itemBuilder: (context, index) {
-                      final channel = _controller.filteredChannels[index];
-                      return Padding(
-                        key: ValueKey(channel.id),
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: ChannelTile(
-                          channel: channel,
-                          onBeforeOpen: () {
-                            // 在打开聊天页面之前设置当前频道
-                            widget.chatPlugin.channelService
-                                .setCurrentChannel(channel);
-                          },
-                          onEdit: (channel) =>
-                              _showEditChannelDialog(channel),
-                          onDelete: (channel) =>
-                              _showDeleteChannelDialog(channel),
-                        ),
-                      );
-                    },
-                    buildDefaultDragHandles: false,
-                  ),
+            child:
+                _controller.filteredChannels.isEmpty
+                    ? EmptyChannelView(
+                      onAddChannel: widget.onAddChannel ?? () {},
+                    )
+                    : ReorderableListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: _controller.filteredChannels.length,
+                      onReorder: _controller.reorderChannels,
+                      itemBuilder: (context, index) {
+                        final channel = _controller.filteredChannels[index];
+                        return Padding(
+                          key: ValueKey(channel.id),
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: ChannelTile(
+                            channel: channel,
+                            onBeforeOpen: () {
+                              // 在打开聊天页面之前设置当前频道
+                              widget.chatPlugin.channelService
+                                  .setCurrentChannel(channel);
+                            },
+                            onEdit:
+                                (channel) => _showEditChannelDialog(channel),
+                            onDelete:
+                                (channel) => _showDeleteChannelDialog(channel),
+                          ),
+                        );
+                      },
+                      buildDefaultDragHandles: false,
+                    ),
           ),
         ],
       ),
       enableLargeTitle: true,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       previousPageTitle: '返回',
     );
   }

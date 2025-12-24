@@ -50,7 +50,7 @@ class _TrackerMainViewState extends State<TrackerMainView> {
     return SuperCupertinoNavigationWrapper(
       title: Text('tracker_goalTracking'.tr),
       largeTitle: 'tracker_goalTracking'.tr,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       enableSearchBar: true,
       searchPlaceholder: 'tracker_searchPlaceholder'.tr,
       onSearchChanged: _onSearchChanged,
@@ -60,7 +60,8 @@ class _TrackerMainViewState extends State<TrackerMainView> {
           onPressed: () {
             NavigationHelper.openContainerWithHero(
               context,
-              (context) => GoalEditPage(controller: TrackerPlugin.instance.controller),
+              (context) =>
+                  GoalEditPage(controller: TrackerPlugin.instance.controller),
             );
           },
           tooltip: '添加目标',

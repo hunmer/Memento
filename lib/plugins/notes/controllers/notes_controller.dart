@@ -133,6 +133,24 @@ class NotesController {
         .toList();
   }
 
+  /// 获取文件夹的完整路径(从根文件夹到当前文件夹)
+  /// 返回包含所有祖先文件夹的列表,顺序为:根 -> ... -> 父 -> 当前
+  List<Folder> getFolderPath(String folderId) {
+    final path = <Folder>[];
+    String? currentId = folderId;
+
+    // 向上遍历,直到根文件夹
+    while (currentId != null) {
+      final folder = _folders[currentId];
+      if (folder == null) break;
+
+      path.insert(0, folder); // 在开头插入,保证顺序正确
+      currentId = folder.parentId;
+    }
+
+    return path;
+  }
+
   // 获取文件夹中的笔记
   List<Note> getFolderNotes(String folderId) {
     return _notes[folderId] ?? [];

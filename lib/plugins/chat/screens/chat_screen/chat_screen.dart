@@ -234,46 +234,12 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _showDatePickerDialog() {
-    // 从消息中提取唯一的日期
-    final dates =
-        _controller.messages
-            .map((msg) {
-              return DateTime(msg.date.year, msg.date.month, msg.date.day);
-            })
-            .toSet()
-            .toList();
-
-    // 计算每个日期的消息数量
-    final dateCountMap = <DateTime, int>{};
-    for (final msg in _controller.messages) {
-      final date = DateTime(msg.date.year, msg.date.month, msg.date.day);
-      dateCountMap[date] = (dateCountMap[date] ?? 0) + 1;
-    }
-
-    // 按日期降序排序
-    dates.sort((a, b) => b.compareTo(a));
-
-    showDialog(
-      context: context,
-      builder:
-          (context) => CalendarDatePickerDialog(
-            availableDates: dates,
-            selectedDate: _controller.selectedDate,
-            dateCountMap: dateCountMap,
-            onDateSelected: (date) {
-              setState(() {
-                _controller.selectedDate = date;
-              });
-            },
-          ),
-    );
-  }
-
   void _copySelectedMessages() {
     final selectedMessages =
         _controller.messages
-            .where((msg) => _controller.selectedMessageIds.value.contains(msg.id))
+            .where(
+              (msg) => _controller.selectedMessageIds.value.contains(msg.id),
+            )
             .toList();
 
     if (selectedMessages.isEmpty) return;
@@ -300,7 +266,9 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _deleteSelectedMessages() async {
     final selectedMessages =
         _controller.messages
-            .where((msg) => _controller.selectedMessageIds.value.contains(msg.id))
+            .where(
+              (msg) => _controller.selectedMessageIds.value.contains(msg.id),
+            )
             .toList();
 
     for (var message in selectedMessages) {
@@ -335,6 +303,10 @@ class _ChatScreenState extends State<ChatScreen> {
   /// 过滤回调
   void _handleFilterChanged(Map<String, dynamic> filters) {
     debugPrint('Filter changed: $filters');
+    // 更新 _filterState 中的值
+    filters.forEach((key, value) {
+      _filterState.setValue(key, value);
+    });
     _applyFiltersAndSearch();
   }
 
@@ -344,15 +316,22 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // 应用搜索
     if (_searchQuery.isNotEmpty) {
-      result = result.where((msg) {
-        return msg.content.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            msg.user.username.toLowerCase().contains(_searchQuery.toLowerCase());
-      }).toList();
+      result =
+          result.where((msg) {
+            return msg.content.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ||
+                msg.user.username.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                );
+          }).toList();
     }
 
     // 应用发送人过滤
     final selectedUser = _filterState.getValue('sender');
-    if (selectedUser != null && selectedUser is String && selectedUser.isNotEmpty) {
+    if (selectedUser != null &&
+        selectedUser is String &&
+        selectedUser.isNotEmpty) {
       result = result.where((msg) => msg.user.id == selectedUser).toList();
     }
 
@@ -362,25 +341,36 @@ class _ChatScreenState extends State<ChatScreen> {
       final startDate = dateRange['start'];
       final endDate = dateRange['end'];
 
-      result = result.where((msg) {
-        if (startDate != null && msg.date.isBefore(startDate)) return false;
-        if (endDate != null) {
-          final endOfDay = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
-          if (msg.date.isAfter(endOfDay)) return false;
-        }
-        return true;
-      }).toList();
+      result =
+          result.where((msg) {
+            if (startDate != null && msg.date.isBefore(startDate)) return false;
+            if (endDate != null) {
+              final endOfDay = DateTime(
+                endDate.year,
+                endDate.month,
+                endDate.day,
+                23,
+                59,
+                59,
+              );
+              if (msg.date.isAfter(endOfDay)) return false;
+            }
+            return true;
+          }).toList();
     }
 
     // 应用标签过滤
     final selectedTags = _filterState.getValue('tags');
-    if (selectedTags != null && selectedTags is List && selectedTags.isNotEmpty) {
-      result = result.where((msg) {
-        final messageTags = msg.metadata?['tags'] as List<String>?;
-        if (messageTags == null || messageTags.isEmpty) return false;
-        // 检查消息是否包含任意一个选中的标签
-        return selectedTags.any((tag) => messageTags.contains(tag));
-      }).toList();
+    if (selectedTags != null &&
+        selectedTags is List &&
+        selectedTags.isNotEmpty) {
+      result =
+          result.where((msg) {
+            final messageTags = msg.metadata?['tags'] as List<String>?;
+            if (messageTags == null || messageTags.isEmpty) return false;
+            // 检查消息是否包含任意一个选中的标签
+            return selectedTags.any((tag) => messageTags.contains(tag));
+          }).toList();
     }
 
     setState(() {
@@ -425,22 +415,26 @@ class _ChatScreenState extends State<ChatScreen> {
         builder: (context, currentValue, onChanged) {
           return Wrap(
             spacing: 8,
-            children: allUsers.map((user) {
-              final isSelected = currentValue == user.id;
-              return FilterChip(
-                label: Text(user.username),
-                selected: isSelected,
-                onSelected: (selected) {
-                  onChanged(selected ? user.id : null);
-                },
-                showCheckmark: true,
-              );
-            }).toList(),
+            children:
+                allUsers.map((user) {
+                  final isSelected = currentValue == user.id;
+                  return FilterChip(
+                    label: Text(user.username),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      onChanged(selected ? user.id : null);
+                    },
+                    showCheckmark: true,
+                  );
+                }).toList(),
           );
         },
         getBadge: (value) {
           if (value == null) return null;
-          final user = allUsers.firstWhere((u) => u.id == value, orElse: () => allUsers.first);
+          final user = allUsers.firstWhere(
+            (u) => u.id == value,
+            orElse: () => allUsers.first,
+          );
           return user.username;
         },
       ),
@@ -451,7 +445,8 @@ class _ChatScreenState extends State<ChatScreen> {
         title: '日期',
         type: FilterType.dateRange,
         builder: (context, currentValue, onChanged) {
-          final Map<String, DateTime?> range = currentValue ?? {'start': null, 'end': null};
+          final Map<String, DateTime?> range =
+              currentValue ?? {'start': null, 'end': null};
           final startDate = range['start'];
           final endDate = range['end'];
 
@@ -461,7 +456,11 @@ class _ChatScreenState extends State<ChatScreen> {
               // 开始日期
               ActionChip(
                 avatar: Icon(Icons.calendar_today, size: 18),
-                label: Text(startDate == null ? '开始日期' : DateFormat('MM/dd').format(startDate)),
+                label: Text(
+                  startDate == null
+                      ? '开始日期'
+                      : DateFormat('MM/dd').format(startDate),
+                ),
                 onPressed: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -477,7 +476,11 @@ class _ChatScreenState extends State<ChatScreen> {
               // 结束日期
               ActionChip(
                 avatar: Icon(Icons.calendar_today, size: 18),
-                label: Text(endDate == null ? '结束日期' : DateFormat('MM/dd').format(endDate)),
+                label: Text(
+                  endDate == null
+                      ? '结束日期'
+                      : DateFormat('MM/dd').format(endDate),
+                ),
                 onPressed: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -527,23 +530,24 @@ class _ChatScreenState extends State<ChatScreen> {
             final List<String> selectedTags = currentValue ?? [];
             return Wrap(
               spacing: 8,
-              children: allTags.map((tag) {
-                final isSelected = selectedTags.contains(tag);
-                return FilterChip(
-                  label: Text(tag),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    final newTags = List<String>.from(selectedTags);
-                    if (selected) {
-                      newTags.add(tag);
-                    } else {
-                      newTags.remove(tag);
-                    }
-                    onChanged(newTags.isEmpty ? null : newTags);
-                  },
-                  showCheckmark: true,
-                );
-              }).toList(),
+              children:
+                  allTags.map((tag) {
+                    final isSelected = selectedTags.contains(tag);
+                    return FilterChip(
+                      label: Text(tag),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        final newTags = List<String>.from(selectedTags);
+                        if (selected) {
+                          newTags.add(tag);
+                        } else {
+                          newTags.remove(tag);
+                        }
+                        onChanged(newTags.isEmpty ? null : newTags);
+                      },
+                      showCheckmark: true,
+                    );
+                  }).toList(),
             );
           },
           getBadge: (value) {
@@ -684,9 +688,10 @@ class _ChatScreenState extends State<ChatScreen> {
       listenable: _controller,
       builder: (context, _) {
         // 获取显示的消息（根据是否有搜索/过滤来决定）
-        final displayMessages = _searchQuery.isNotEmpty || _filterState.hasAnyFilter
-            ? _filteredMessages
-            : _controller.messages;
+        final displayMessages =
+            _searchQuery.isNotEmpty || _filterState.hasAnyFilter
+                ? _filteredMessages
+                : _controller.messages;
 
         return FutureBuilder<List<dynamic>>(
           future: MessageListBuilder.buildMessageListWithDateSeparators(
@@ -703,7 +708,12 @@ class _ChatScreenState extends State<ChatScreen> {
             return SuperCupertinoNavigationWrapper(
               title: Text(widget.channel.title),
               largeTitle: widget.channel.title,
-              body: _buildChatBody(messageItems, messageIndexMap, displayMessages, backgroundPath),
+              body: _buildChatBody(
+                messageItems,
+                messageIndexMap,
+                displayMessages,
+                backgroundPath,
+              ),
               enableLargeTitle: true,
               enableSearchBar: true,
               searchPlaceholder: '搜索消息内容、发送人...',
@@ -712,7 +722,8 @@ class _ChatScreenState extends State<ChatScreen> {
               multiFilterItems: _buildFilterItems(),
               multiFilterBarHeight: 50,
               onMultiFilterChanged: _handleFilterChanged,
-              backgroundColor: backgroundPath != null ? Colors.transparent : null,
+              backgroundColor:
+                  backgroundPath != null ? Colors.transparent : null,
               actions: _buildActions(),
             );
           },
@@ -745,11 +756,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
     return [
       IconButton(
-        icon: const Icon(Icons.calendar_today),
-        onPressed: _showDatePickerDialog,
-        tooltip: '选择日期',
-      ),
-      IconButton(
         icon: const Icon(Icons.select_all),
         onPressed: _controller.toggleMultiSelectMode,
         tooltip: '多选模式',
@@ -760,12 +766,10 @@ class _ChatScreenState extends State<ChatScreen> {
             _showClearConfirmationDialog();
           }
         },
-        itemBuilder: (context) => [
-          const PopupMenuItem(
-            value: 'clear',
-            child: Text('清空消息'),
-          ),
-        ],
+        itemBuilder:
+            (context) => [
+              const PopupMenuItem(value: 'clear', child: Text('清空消息')),
+            ],
       ),
     ];
   }
@@ -839,10 +843,12 @@ class _ChatScreenState extends State<ChatScreen> {
             onMessageEdit: _showEditDialog,
             onMessageDelete: _controller.deleteMessage,
             onMessageCopy: (message) => _messageOperations.copyMessage(message),
-            onSetFixedSymbol: (message, symbol) =>
-                _messageOperations.setFixedSymbol(message, symbol),
-            onSetBubbleColor: (message, color) =>
-                _messageOperations.setBubbleColor(message, color),
+            onSetFixedSymbol:
+                (message, symbol) =>
+                    _messageOperations.setFixedSymbol(message, symbol),
+            onSetBubbleColor:
+                (message, color) =>
+                    _messageOperations.setBubbleColor(message, color),
             onReply: _handleReply,
             onToggleFavorite: _handleToggleFavorite,
             onToggleMessageSelection: _controller.toggleMessageSelection,
@@ -864,11 +870,18 @@ class _ChatScreenState extends State<ChatScreen> {
                 if (mounted) {
                   try {
                     // 获取OpenAI插件并转换类型
-                    final openaiPlugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
+                    final openaiPlugin =
+                        PluginManager.instance.getPlugin('openai')
+                            as OpenAIPlugin;
                     // 获取agent
-                    final agent = await openaiPlugin.controller.getAgent(agentId);
+                    final agent = await openaiPlugin.controller.getAgent(
+                      agentId,
+                    );
                     if (agent != null) {
-                      NavigationHelper.push(context, AgentEditScreen(agent: agent));
+                      NavigationHelper.push(
+                        context,
+                        AgentEditScreen(agent: agent),
+                      );
                     } else {
                       Toast.error('chat_aiAssistantNotFound'.tr);
                     }
@@ -888,10 +901,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 final updatedUser = await showDialog<User>(
                   context: context,
-                  builder: (context) => ProfileEditDialog(
-                    user: targetUser,
-                    chatPlugin: chatPlugin,
-                  ),
+                  builder:
+                      (context) => ProfileEditDialog(
+                        user: targetUser,
+                        chatPlugin: chatPlugin,
+                      ),
                 );
 
                 if (updatedUser != null && mounted) {
@@ -911,12 +925,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         MessageInput(
           controller: _controller.draftController,
-          onSendMessage: (
-            content, {
-            metadata,
-            String type = 'text',
-            replyTo,
-          }) {
+          onSendMessage: (content, {metadata, String type = 'text', replyTo}) {
             _controller.sendMessage(
               content,
               metadata: metadata,

@@ -59,7 +59,8 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
   final Color? backgroundColor;
 
   /// 是否自动显示返回按钮
-  final bool automaticallyImplyLeading;
+  /// 当为 null 时,非移动端(桌面平台)默认不显示,移动端默认显示
+  final bool? automaticallyImplyLeading;
 
   /// 返回按钮标题
   final String? previousPageTitle;
@@ -124,6 +125,11 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
   /// 多条件过滤变更回调
   final ValueChanged<Map<String, dynamic>>? onMultiFilterChanged;
 
+  /// 是否启用多条件过滤切换按钮
+  /// 当为 true 时，会在 actions 中自动添加一个切换按钮
+  /// 点击按钮可以显示/隐藏过滤栏，切换时会清空已有的过滤条件
+  final bool multiFilterToggleable;
+
   const SuperCupertinoNavigationWrapper({
     super.key,
     required this.title,
@@ -141,7 +147,7 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
     this.actions,
     this.largeTitleActions,
     this.backgroundColor,
-    this.automaticallyImplyLeading = true,
+    this.automaticallyImplyLeading,
     this.previousPageTitle,
     this.onCollapsed,
     this.stretch = true,
@@ -164,6 +170,7 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
     this.multiFilterItems,
     this.multiFilterBarHeight = 50,
     this.onMultiFilterChanged,
+    this.multiFilterToggleable = true,
   });
 
   @override
@@ -185,6 +192,9 @@ class _SuperCupertinoNavigationWrapperState
 
   /// 多条件过滤状态
   late MultiFilterState _multiFilterState;
+
+  /// 多条件过滤栏显示状态
+  bool _isMultiFilterVisible = true;
 
   /// 获取国际化文本
   @override
@@ -404,11 +414,12 @@ class _SuperCupertinoNavigationWrapperState
             // 搜索过滤器 - 依赖 _isSearchFocused 状态
             if (widget.enableSearchFilter && _isSearchFocused)
               _buildSearchFilter(),
-            // 多条件过滤栏 - 只在非搜索状态下显示
+            // 多条件过滤栏 - 只在非搜索状态下且可见时显示
             if (widget.enableMultiFilter &&
                 widget.multiFilterItems != null &&
                 widget.multiFilterItems!.isNotEmpty &&
-                !_isSearchFocused)
+                !_isSearchFocused &&
+                _isMultiFilterVisible)
               MultiFilterBar(
                 filterItems: widget.multiFilterItems!,
                 filterState: _multiFilterState,
@@ -434,6 +445,56 @@ class _SuperCupertinoNavigationWrapperState
     );
   }
 
+  /// 构建 actions
+  Widget? _buildActions() {
+    final List<Widget> actionsList = [];
+
+    // 如果启用了多条件过滤切换,将其添加到最前面
+    if (widget.enableMultiFilter &&
+        widget.multiFilterToggleable &&
+        widget.multiFilterItems != null &&
+        widget.multiFilterItems!.isNotEmpty) {
+      actionsList.add(
+        IconButton(
+          icon: Icon(
+            _isMultiFilterVisible ? Icons.filter_list : Icons.filter_list_off,
+          ),
+          tooltip: _isMultiFilterVisible ? '隐藏过滤' : '显示过滤',
+          onPressed: _toggleMultiFilter,
+        ),
+      );
+    }
+
+    // 添加用户自定义的 actions
+    if (widget.actions != null && widget.actions!.isNotEmpty) {
+      actionsList.addAll(widget.actions!);
+    }
+
+    if (actionsList.isEmpty) {
+      return null;
+    }
+
+    return Wrap(
+      spacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: actionsList,
+    );
+  }
+
+  /// 切换多条件过滤栏显示状态
+  void _toggleMultiFilter() {
+    setState(() {
+      _isMultiFilterVisible = !_isMultiFilterVisible;
+
+      // 切换时清空所有过滤条件
+      if (!_isMultiFilterVisible) {
+        _multiFilterState.clearAll();
+        // 通知外部过滤条件已清空
+        widget.onMultiFilterChanged?.call({});
+      }
+    });
+  }
+
   /// 构建 SuperAppBar，根据 enableSearchBar 条件决定是否包含 searchBar
   SuperAppBar _buildSuperAppBar() {
     // 构建 searchBar，当 enableSearchBar 为 false 时传入 disabled 的 SuperSearchBar
@@ -446,12 +507,17 @@ class _SuperCupertinoNavigationWrapperState
               resultBehavior: SearchBarResultBehavior.neverVisible,
             );
 
+    // 当 automaticallyImplyLeading 为 null 时,根据平台自动设置
+    // 非移动端(桌面平台)默认不显示返回按钮,移动端默认显示
+    final bool effectiveAutomaticallyImplyLeading =
+        widget.automaticallyImplyLeading ?? !(Platform.isAndroid || Platform.isIOS);
+
     return SuperAppBar(
       backgroundColor:
           widget.backgroundColor ??
           Theme.of(context).appBarTheme.backgroundColor ??
           Theme.of(context).colorScheme.surface,
-      automaticallyImplyLeading: widget.automaticallyImplyLeading,
+      automaticallyImplyLeading: effectiveAutomaticallyImplyLeading,
       leading:
           (Platform.isAndroid || Platform.isIOS)
               ? null
@@ -463,14 +529,7 @@ class _SuperCupertinoNavigationWrapperState
                   : null),
       title: widget.title,
       previousPageTitle: widget.previousPageTitle ?? 'core_back'.tr,
-      actions:
-          widget.actions != null && widget.actions!.isNotEmpty
-              ? Wrap(
-                spacing: 4,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: widget.actions!,
-              )
-              : null,
+      actions: _buildActions(),
       bottom: _buildBottomBar(),
       largeTitle: SuperLargeTitle(
         height: 50,

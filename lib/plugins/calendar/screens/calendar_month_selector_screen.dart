@@ -114,14 +114,12 @@ class _CalendarMonthSelectorScreenState
           }
         }
 
-        final newOpacity = opacityStr != null
-            ? (double.tryParse(opacityStr) ?? 0.95)
-            : _widgetConfig.opacity;
+        final newOpacity =
+            opacityStr != null
+                ? (double.tryParse(opacityStr) ?? 0.95)
+                : _widgetConfig.opacity;
 
-        _widgetConfig = WidgetConfig(
-          colors: colors,
-          opacity: newOpacity,
-        );
+        _widgetConfig = WidgetConfig(colors: colors, opacity: newOpacity);
       });
     } catch (e) {
       debugPrint('加载配置失败: $e');
@@ -161,21 +159,17 @@ class _CalendarMonthSelectorScreenState
       final isFuture = day > now.day;
 
       // 获取当日事件数量
-      final events = _controller.getAllEvents().where((event) {
-        final eventDate = event.startTime;
-        return eventDate.year == date.year &&
-            eventDate.month == date.month &&
-            eventDate.day == date.day;
-      }).length;
+      final events =
+          _controller.getAllEvents().where((event) {
+            final eventDate = event.startTime;
+            return eventDate.year == date.year &&
+                eventDate.month == date.month &&
+                eventDate.day == date.day;
+          }).length;
 
-      dayWidgets.add(_buildDayCell(
-        day,
-        events,
-        isToday,
-        isFuture,
-        primaryColor,
-        opacity,
-      ));
+      dayWidgets.add(
+        _buildDayCell(day, events, isToday, isFuture, primaryColor, opacity),
+      );
     }
 
     return Container(
@@ -219,19 +213,22 @@ class _CalendarMonthSelectorScreenState
 
           // 星期标题
           Row(
-            children: ['一', '二', '三', '四', '五', '六', '日']
-                .map((day) => Expanded(
-                      child: Center(
-                        child: Text(
-                          day,
-                          style: TextStyle(
-                            color: accentColor.withOpacity(0.6),
-                            fontSize: 8,
+            children:
+                ['一', '二', '三', '四', '五', '六', '日']
+                    .map(
+                      (day) => Expanded(
+                        child: Center(
+                          child: Text(
+                            day,
+                            style: TextStyle(
+                              color: accentColor.withOpacity(0.6),
+                              fontSize: 8,
+                            ),
                           ),
                         ),
                       ),
-                    ))
-                .toList(),
+                    )
+                    .toList(),
           ),
           const SizedBox(height: 2),
 
@@ -312,9 +309,8 @@ class _CalendarMonthSelectorScreenState
                 width: 4,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: isToday || eventCount > 0
-                      ? Colors.white
-                      : primaryColor,
+                  color:
+                      isToday || eventCount > 0 ? Colors.white : primaryColor,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -388,14 +384,15 @@ class _CalendarMonthSelectorScreenState
 
       // 获取本月所有事件
       final allEvents = _controller.getAllEvents();
-      final monthEvents = allEvents.where((event) {
-        return event.startTime.isAfter(
-              firstDayOfMonth.subtract(const Duration(seconds: 1)),
-            ) &&
-            event.startTime.isBefore(
-              lastDayOfMonth.add(const Duration(days: 1)),
-            );
-      }).toList();
+      final monthEvents =
+          allEvents.where((event) {
+            return event.startTime.isAfter(
+                  firstDayOfMonth.subtract(const Duration(seconds: 1)),
+                ) &&
+                event.startTime.isBefore(
+                  lastDayOfMonth.add(const Duration(days: 1)),
+                );
+          }).toList();
 
       // 构建每日事件数据
       final Map<int, List<Map<String, dynamic>>> dayEventsMap = {};
@@ -500,22 +497,21 @@ class _CalendarMonthSelectorScreenState
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
       largeTitle: 'calendar_widgetSelector'.tr,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: Stack(
         children: [
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : WidgetConfigEditor(
-                  widgetSize: WidgetSize.extraLarge,
-                  initialConfig: _widgetConfig,
-                  previewBuilder: _buildPreview,
-                  onConfigChanged: (newConfig) {
-                    setState(() => _widgetConfig = newConfig);
-                  },
-                  previewTitle: '小组件预览',
-                  themeSettingsLabel: '主题设置',
-                  opacityLabel: '背景透明度',
-                ),
+                widgetSize: WidgetSize.extraLarge,
+                initialConfig: _widgetConfig,
+                previewBuilder: _buildPreview,
+                onConfigChanged: (newConfig) {
+                  setState(() => _widgetConfig = newConfig);
+                },
+                previewTitle: '小组件预览',
+                themeSettingsLabel: '主题设置',
+                opacityLabel: '背景透明度',
+              ),
           // FAB 覆盖层
           if (!_isLoading)
             Positioned(

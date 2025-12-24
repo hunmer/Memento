@@ -58,160 +58,167 @@ class _TodoMainViewState extends State<TodoMainView> {
   void _showTaskDetailDialog(BuildContext context, Task task) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(task.title),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (task.description != null && task.description!.isNotEmpty) ...[
-                Text(
-                  'todo_description'.tr,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(task.description!),
-                const SizedBox(height: 16),
-              ],
-              if (task.tags.isNotEmpty) ...[
-                Text(
-                  'todo_tags'.tr,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 4.0,
-                  children: task.tags
-                      .map((tag) => Chip(
-                            label: Text(tag),
-                            backgroundColor: Colors.blue.shade100,
-                          ))
-                      .toList(),
-                ),
-                const SizedBox(height: 16),
-              ],
-              Text(
-                'todo_timer'.tr,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                task.formattedDuration,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: task.status == TaskStatus.inProgress
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      builder:
+          (context) => AlertDialog(
+            title: Text(task.title),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.play_arrow),
-                    label: Text('todo_start'.tr),
-                    onPressed: task.status != TaskStatus.inProgress
-                        ? () {
-                            _plugin.taskController.updateTaskStatus(
-                              task.id,
-                              TaskStatus.inProgress,
-                            );
-                            Navigator.of(context).pop();
-                          }
-                        : null,
+                  if (task.description != null &&
+                      task.description!.isNotEmpty) ...[
+                    Text(
+                      'todo_description'.tr,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(task.description!),
+                    const SizedBox(height: 16),
+                  ],
+                  if (task.tags.isNotEmpty) ...[
+                    Text(
+                      'todo_tags'.tr,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 4.0,
+                      children:
+                          task.tags
+                              .map(
+                                (tag) => Chip(
+                                  label: Text(tag),
+                                  backgroundColor: Colors.blue.shade100,
+                                ),
+                              )
+                              .toList(),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  Text(
+                    'todo_timer'.tr,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.pause),
-                    label: Text('todo_pause'.tr),
-                    onPressed: task.status == TaskStatus.inProgress
-                        ? () {
-                            _plugin.taskController.updateTaskStatus(
-                              task.id,
-                              TaskStatus.todo,
-                            );
-                            Navigator.of(context).pop();
-                          }
-                        : null,
+                  const SizedBox(height: 8),
+                  Text(
+                    task.formattedDuration,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color:
+                          task.status == TaskStatus.inProgress
+                              ? Theme.of(context).colorScheme.primary
+                              : null,
+                    ),
                   ),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.check),
-                    label: Text('todo_complete'.tr),
-                    onPressed: task.status != TaskStatus.done
-                        ? () {
-                            _plugin.taskController.updateTaskStatus(
-                              task.id,
-                              TaskStatus.done,
-                            );
-                            Navigator.of(context).pop();
-                          }
-                        : null,
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.play_arrow),
+                        label: Text('todo_start'.tr),
+                        onPressed:
+                            task.status != TaskStatus.inProgress
+                                ? () {
+                                  _plugin.taskController.updateTaskStatus(
+                                    task.id,
+                                    TaskStatus.inProgress,
+                                  );
+                                  Navigator.of(context).pop();
+                                }
+                                : null,
+                      ),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.pause),
+                        label: Text('todo_pause'.tr),
+                        onPressed:
+                            task.status == TaskStatus.inProgress
+                                ? () {
+                                  _plugin.taskController.updateTaskStatus(
+                                    task.id,
+                                    TaskStatus.todo,
+                                  );
+                                  Navigator.of(context).pop();
+                                }
+                                : null,
+                      ),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.check),
+                        label: Text('todo_complete'.tr),
+                        onPressed:
+                            task.status != TaskStatus.done
+                                ? () {
+                                  _plugin.taskController.updateTaskStatus(
+                                    task.id,
+                                    TaskStatus.done,
+                                  );
+                                  Navigator.of(context).pop();
+                                }
+                                : null,
+                      ),
+                    ],
                   ),
                 ],
               ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('todo_close'.tr),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  NavigationHelper.push(
+                    context,
+                    TaskForm(
+                      task: task,
+                      taskController: _plugin.taskController,
+                      reminderController: _plugin.reminderController,
+                    ),
+                  );
+                },
+                child: Text('todo_edit'.tr),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder:
+                        (context) => AlertDialog(
+                          title: Text('todo_deleteTask'.tr),
+                          content: Text('todo_confirmDeleteThisTask'.tr),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text('todo_cancel'.tr),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text('todo_delete'.tr),
+                            ),
+                          ],
+                        ),
+                  );
+
+                  if (confirmed == true) {
+                    await _plugin.taskController.deleteTask(task.id);
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Text('删除', style: TextStyle(color: Colors.red)),
+              ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('todo_close'.tr),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              NavigationHelper.push(
-                context,
-                TaskForm(
-                  task: task,
-                  taskController: _plugin.taskController,
-                  reminderController: _plugin.reminderController,
-                ),
-              );
-            },
-            child: Text('todo_edit'.tr),
-          ),
-          TextButton(
-            onPressed: () async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('todo_deleteTask'.tr),
-                  content: Text('todo_confirmDeleteThisTask'.tr),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text('todo_cancel'.tr),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: Text('todo_delete'.tr),
-                    ),
-                  ],
-                ),
-              );
-
-              if (confirmed == true) {
-                await _plugin.taskController.deleteTask(task.id);
-                Navigator.of(context).pop();
-              }
-            },
-            child: const Text(
-              '删除',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -219,7 +226,6 @@ class _TodoMainViewState extends State<TodoMainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
         leading:
             (Platform.isAndroid || Platform.isIOS)
                 ? null
@@ -264,9 +270,12 @@ class _TodoMainViewState extends State<TodoMainView> {
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () {
-              NavigationHelper.push(context, HistoryCompletedView(
-                        completedTasks: _plugin.taskController.completedTasks,
-                        taskController: _plugin.taskController,),
+              NavigationHelper.push(
+                context,
+                HistoryCompletedView(
+                  completedTasks: _plugin.taskController.completedTasks,
+                  taskController: _plugin.taskController,
+                ),
               );
             },
           ),
@@ -336,9 +345,12 @@ class _TodoMainViewState extends State<TodoMainView> {
       // 添加任务按钮
       floatingActionButton: AddTaskButton(
         onPressed: () {
-          NavigationHelper.push(context, TaskForm(
-                    taskController: _plugin.taskController,
-                    reminderController: _plugin.reminderController,),
+          NavigationHelper.push(
+            context,
+            TaskForm(
+              taskController: _plugin.taskController,
+              reminderController: _plugin.reminderController,
+            ),
           );
         },
       ),

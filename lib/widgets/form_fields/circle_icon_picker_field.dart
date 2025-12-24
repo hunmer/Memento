@@ -14,6 +14,12 @@ class CircleIconPickerField extends StatelessWidget {
   /// 是否启用
   final bool enabled;
 
+  /// 标签文本（可选）
+  final String? labelText;
+
+  /// 是否显示标签
+  final bool showLabel;
+
   /// 值变化回调（返回 Map {'icon': IconData, 'color': Color}）
   final ValueChanged<Map<String, dynamic>> onValueChanged;
 
@@ -23,29 +29,46 @@ class CircleIconPickerField extends StatelessWidget {
     required this.currentBackgroundColor,
     required this.onValueChanged,
     this.enabled = true,
+    this.labelText,
+    this.showLabel = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: CircleIconPicker(
-        currentIcon: currentIcon,
-        backgroundColor: currentBackgroundColor,
-        onIconSelected:
-            enabled
-                ? (icon) {
-                  onValueChanged({
-                    'icon': icon,
-                    'color': currentBackgroundColor,
-                  });
-                }
-                : (icon) {},
-        onColorSelected:
-            enabled
-                ? (color) {
-                  onValueChanged({'icon': currentIcon, 'color': color});
-                }
-                : (color) {},
+      child: Column(
+        children: [
+          CircleIconPicker(
+            currentIcon: currentIcon,
+            backgroundColor: currentBackgroundColor,
+            onIconSelected:
+                enabled
+                    ? (icon) {
+                      onValueChanged({
+                        'icon': icon,
+                        'color': currentBackgroundColor,
+                      });
+                    }
+                    : (icon) {},
+            onColorSelected:
+                enabled
+                    ? (color) {
+                      onValueChanged({'icon': currentIcon, 'color': color});
+                    }
+                    : (color) {},
+          ),
+          if (showLabel && labelText != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              labelText!,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

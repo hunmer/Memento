@@ -50,7 +50,8 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
   }
 
   /// 检查是否有活动的筛选条件
-  bool get _hasActiveFilters => _searchQuery.isNotEmpty || _selectedSizes.isNotEmpty;
+  bool get _hasActiveFilters =>
+      _searchQuery.isNotEmpty || _selectedSizes.isNotEmpty;
 
   /// 获取所有组件的扁平列表
   List<HomeWidget> get _allWidgets {
@@ -73,8 +74,9 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
 
       // 尺寸过滤
       if (_selectedSizes.isNotEmpty) {
-        final hasMatchingSize = widget.supportedSizes
-            .any((size) => _selectedSizes.contains(size));
+        final hasMatchingSize = widget.supportedSizes.any(
+          (size) => _selectedSizes.contains(size),
+        );
         if (!hasMatchingSize) return false;
       }
 
@@ -116,44 +118,52 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
         child: Scaffold(
           appBar: AppBar(
             title: Text('screens_addWidget'.tr),
-            automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
             actions: [
               IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],
-            bottom: _categories.isNotEmpty && !_hasActiveFilters
-                ? TabBar(
-                    controller: _tabController,
-                    isScrollable: true,
-                    tabs: _categories
-                        .map((category) => Tab(text: category))
-                        .toList(),
-                  )
-                : null,
+            bottom:
+                _categories.isNotEmpty && !_hasActiveFilters
+                    ? TabBar(
+                      controller: _tabController,
+                      isScrollable: true,
+                      tabs:
+                          _categories
+                              .map((category) => Tab(text: category))
+                              .toList(),
+                    )
+                    : null,
           ),
-          body: _categories.isEmpty
-              ? _buildEmptyState()
-              : Column(
-                  children: [
-                    // 搜索框和筛选器
-                    _buildFilterBar(),
+          body:
+              _categories.isEmpty
+                  ? _buildEmptyState()
+                  : Column(
+                    children: [
+                      // 搜索框和筛选器
+                      _buildFilterBar(),
 
-                    // 内容区域
-                    Expanded(
-                      child: _hasActiveFilters
-                          ? _buildFilteredView()
-                          : TabBarView(
-                              controller: _tabController,
-                              children: _categories
-                                  .map((category) => _buildCategoryView(
-                                      _widgetsByCategory[category]!))
-                                  .toList(),
-                            ),
-                    ),
-                  ],
-                ),
+                      // 内容区域
+                      Expanded(
+                        child:
+                            _hasActiveFilters
+                                ? _buildFilteredView()
+                                : TabBarView(
+                                  controller: _tabController,
+                                  children:
+                                      _categories
+                                          .map(
+                                            (category) => _buildCategoryView(
+                                              _widgetsByCategory[category]!,
+                                            ),
+                                          )
+                                          .toList(),
+                                ),
+                      ),
+                    ],
+                  ),
         ),
       ),
     );
@@ -167,12 +177,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: theme.dividerColor,
-            width: 1,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: theme.dividerColor, width: 1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,17 +188,18 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
             decoration: InputDecoration(
               hintText: '搜索组件...',
               prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searchQuery.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        setState(() {
-                          _searchQuery = '';
-                          _searchController.clear();
-                        });
-                      },
-                    )
-                  : null,
+              suffixIcon:
+                  _searchQuery.isNotEmpty
+                      ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            _searchQuery = '';
+                            _searchController.clear();
+                          });
+                        },
+                      )
+                      : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -278,16 +284,14 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
             Text(
               '没有找到匹配的组件',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).disabledColor,
-                  ),
+                color: Theme.of(context).disabledColor,
+              ),
             ),
             const SizedBox(height: 8),
             TextButton.icon(
               onPressed: _clearFilters,
               icon: const Icon(Icons.clear_all),
-              label: Text(
-                'screens_clearFilterConditions'.tr,
-              ),
+              label: Text('screens_clearFilterConditions'.tr),
             ),
           ],
         ),
@@ -337,11 +341,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
                   color: widget.color?.withValues(alpha: 0.1),
                   child: Column(
                     children: [
-                      Icon(
-                        widget.icon,
-                        size: 48,
-                        color: widget.color,
-                      ),
+                      Icon(widget.icon, size: 48, color: widget.color),
                       const SizedBox(height: 8),
                       Text(
                         widget.name,
@@ -360,14 +360,15 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
-                    child: widget.description != null
-                        ? Text(
-                            widget.description!,
-                            style: theme.textTheme.bodySmall,
-                            maxLines: 4,
-                            overflow: TextOverflow.ellipsis,
-                          )
-                        : const SizedBox.shrink(),
+                    child:
+                        widget.description != null
+                            ? Text(
+                              widget.description!,
+                              style: theme.textTheme.bodySmall,
+                              maxLines: 4,
+                              overflow: TextOverflow.ellipsis,
+                            )
+                            : const SizedBox.shrink(),
                   ),
                 ),
               ],
@@ -380,22 +381,28 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
               child: Wrap(
                 spacing: 4,
                 runSpacing: 4,
-                children: widget.supportedSizes
-                    .map((size) => Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            '${size.width}×${size.height}',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.onPrimaryContainer,
-                              fontWeight: FontWeight.bold,
+                children:
+                    widget.supportedSizes
+                        .map(
+                          (size) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '${size.width}×${size.height}',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onPrimaryContainer,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ))
-                    .toList(),
+                        )
+                        .toList(),
               ),
             ),
           ],
@@ -447,8 +454,8 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
           Text(
             '没有可用的小组件',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).disabledColor,
-                ),
+              color: Theme.of(context).disabledColor,
+            ),
           ),
         ],
       ),

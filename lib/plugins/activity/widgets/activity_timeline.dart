@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
+import 'package:Memento/widgets/swipe_action/index.dart';
 
 // Custom painter for the dashed timeline
 class DashedLinePainter extends CustomPainter {
@@ -104,47 +105,18 @@ class ActivityTimeline extends StatelessWidget {
     final double height = (duration.inMinutes * 1.5).clamp(64.0, 400.0);
     final capsuleColor = _getColorFromTag(context, activity);
 
-    return Dismissible(
-        key: Key('activity_${activity.id}'),
-        direction: DismissDirection.endToStart,
-        confirmDismiss: (direction) async {
-            return await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-                return AlertDialog(
-                title: Text('activity_confirmDelete'.tr),
-                content: Text(
-                    '${'activity_confirmDelete'.tr.replaceFirst('确定要删除', '确定要删除活动 ')}"${activity.title}"吗?',
-                ),
-                actions: <Widget>[
-                    TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: Text('app_cancel'.tr),
-                    ),
-                    TextButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: Text('activity_deleteActivity'.tr),
-                    ),
-                ],
-                );
-            },
-            );
-        },
-        onDismissed: (direction) {
-            if (onDeleteActivity != null) {
-            onDeleteActivity!(activity);
-            }
-        },
-        background: Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20.0),
-            margin: const EdgeInsets.only(bottom: 8.0),
-            decoration: BoxDecoration(
-            color: Colors.red,
-            borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.delete, color: Colors.white),
-        ),
+    return SwipeActionWrapper(
+        key: ValueKey(activity.id),
+        leadingActions: [
+          SwipeActionPresets.edit(
+            onTap: () => onActivityTap?.call(activity),
+          ),
+        ],
+        trailingActions: [
+          SwipeActionPresets.delete(
+            onTap: () => onDeleteActivity?.call(activity),
+          ),
+        ],
         child: InkWell(
             onTap: () => onActivityTap?.call(activity),
             borderRadius: BorderRadius.circular(12),

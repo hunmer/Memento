@@ -15,6 +15,7 @@ import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_tem
 import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/widgets/swipe_action/index.dart';
 
 /// 会话列表屏幕
 class ConversationListScreen extends StatefulWidget {
@@ -98,10 +99,14 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
   /// 计算会话列表的哈希值，用于快速检测变化
   int _computeConversationHash(List<Conversation> conversations) {
     if (conversations.isEmpty) return 0;
-    // 基于会话ID和最后消息时间计算哈希
+    // 基于会话ID、最后消息时间、置顶状态等计算哈希
     int hash = 0;
     for (final conv in conversations) {
-      hash = hash ^ conv.id.hashCode ^ conv.lastMessageAt.hashCode;
+      hash =
+          hash ^
+          conv.id.hashCode ^
+          conv.lastMessageAt.hashCode ^
+          conv.isPinned.hashCode;
       if (conv.lastMessagePreview != null) {
         hash = hash ^ conv.lastMessagePreview.hashCode;
       }
@@ -143,7 +148,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       ToolTemplateScreen(templateService: _templateService),
     );
   }
-
 
   /// 构建分组过滤的 FilterItem
   List<FilterItem> _buildGroupFilterItems() {
@@ -270,7 +274,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final hasAnyConversations =
@@ -289,7 +292,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       onSearchSubmitted: (query) {
         _controller.setSearchQuery(query);
       },
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         // 添加按钮
         IconButton(
@@ -417,142 +419,121 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
     );
   }
 
-
   /// 会话卡片
   Widget _buildConversationCard(Conversation conversation) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          NavigationHelper.openContainerWithHero(
-            context,
-            (context) => ChatScreen(
-              conversation: conversation,
-              storage: _controller.storage,
-              conversationService: _controller.conversationService,
-              getSettings: () => AgentChatPlugin.instance.settings,
-            ),
-          );
-        },
-        highlightColor: Colors.transparent,
-        splashColor: Colors.transparent,
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300, width: 1.0),
-            borderRadius: BorderRadius.circular(12),
+      child: SwipeActionWrapper(
+        key: ValueKey(conversation.id),
+        leadingActions: [
+          SwipeActionPresets.edit(
+            onTap: () => _showEditConversationDialog(conversation),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: Colors.blue[100],
-                  child: Icon(
-                    conversation.isPinned ? Icons.push_pin : Icons.chat,
-                    color: Colors.blue[700],
+          SwipeActionOption(
+            label: conversation.isPinned ? '取消置顶' : '置顶',
+            icon:
+                conversation.isPinned
+                    ? Icons.push_pin_outlined
+                    : Icons.push_pin,
+            backgroundColor: Colors.purple,
+            onTap: () => _controller.togglePin(conversation.id),
+          ),
+        ],
+        trailingActions: [
+          SwipeActionPresets.delete(
+            onTap: () => _showDeleteConfirmDialog(conversation),
+          ),
+        ],
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            NavigationHelper.openContainerWithHero(
+              context,
+              (context) => ChatScreen(
+                conversation: conversation,
+                storage: _controller.storage,
+                conversationService: _controller.conversationService,
+                getSettings: () => AgentChatPlugin.instance.settings,
+              ),
+            );
+          },
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300, width: 1.0),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.blue[100],
+                    child: Icon(
+                      conversation.isPinned ? Icons.push_pin : Icons.chat,
+                      color: Colors.blue[700],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              conversation.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (conversation.unreadCount > 0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
                               child: Text(
-                                '${conversation.unreadCount}',
+                                conversation.title,
                                 style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (conversation.unreadCount > 0)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '${conversation.unreadCount}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ),
-                            ),
+                          ],
+                        ),
+                        if (conversation.lastMessagePreview != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            conversation.lastMessagePreview!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
                         ],
-                      ),
-                      if (conversation.lastMessagePreview != null) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         Text(
-                          conversation.lastMessagePreview!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.grey[600]),
+                          _formatDateTime(conversation.lastMessageAt),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[500],
+                          ),
                         ),
                       ],
-                      const SizedBox(height: 4),
-                      Text(
-                        _formatDateTime(conversation.lastMessageAt),
-                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                PopupMenuButton<String>(
-                  onSelected:
-                      (value) =>
-                          _onConversationMenuSelected(value, conversation),
-                  itemBuilder:
-                      (context) => [
-                        PopupMenuItem(
-                          value: 'pin',
-                          child: Row(
-                            children: [
-                              Icon(
-                                conversation.isPinned
-                                    ? Icons.push_pin_outlined
-                                    : Icons.push_pin,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(conversation.isPinned ? '取消置顶' : '置顶'),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              const Icon(Icons.edit),
-                              const SizedBox(width: 8),
-                              Text('agent_chat_edit'.tr),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              const Icon(Icons.delete, color: Colors.red),
-                              const SizedBox(width: 8),
-                              Text(
-                                'agent_chat_delete'.tr,
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -575,26 +556,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       return '${difference.inDays}天前';
     } else {
       return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
-    }
-  }
-
-  /// 会话菜单选择
-  Future<void> _onConversationMenuSelected(
-    String value,
-    Conversation conversation,
-  ) async {
-    switch (value) {
-      case 'pin':
-        await _controller.togglePin(conversation.id);
-        break;
-
-      case 'edit':
-        _showEditConversationDialog(conversation);
-        break;
-
-      case 'delete':
-        _showDeleteConfirmDialog(conversation);
-        break;
     }
   }
 
@@ -645,13 +606,14 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
       if (result == true && titleController.text.isNotEmpty) {
         // 解析分组字符串
         final groupsText = groupsController.text.trim();
-        final groups = groupsText.isEmpty
-            ? <String>[]
-            : groupsText
-                .split(',')
-                .map((g) => g.trim())
-                .where((g) => g.isNotEmpty)
-                .toList();
+        final groups =
+            groupsText.isEmpty
+                ? <String>[]
+                : groupsText
+                    .split(',')
+                    .map((g) => g.trim())
+                    .where((g) => g.isNotEmpty)
+                    .toList();
 
         final updated = conversation.copyWith(
           title: titleController.text,
@@ -689,7 +651,6 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 child: Text('agent_chat_delete'.tr),
               ),
             ],

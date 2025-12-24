@@ -21,6 +21,12 @@ class SwipeActionOption {
   /// 是否为删除操作（会显示确认对话框）
   final bool isDestructive;
 
+  /// 是否使用圆形按钮样式
+  final bool useCircleButton;
+
+  /// 圆形按钮大小
+  final double circleButtonSize;
+
   const SwipeActionOption({
     required this.label,
     this.icon,
@@ -28,6 +34,8 @@ class SwipeActionOption {
     this.textColor = Colors.white,
     required this.onTap,
     this.isDestructive = false,
+    this.useCircleButton = false,
+    this.circleButtonSize = 50,
   });
 }
 
@@ -71,6 +79,25 @@ class SwipeActionWrapper extends StatelessWidget {
 
   /// 构建滑动操作按钮
   SwipeAction _buildSwipeAction(SwipeActionOption option, BuildContext context, {bool isFirst = false}) {
+    // 圆形按钮样式
+    if (option.useCircleButton) {
+      return SwipeAction(
+        color: Colors.transparent,
+        content: _buildCircleButton(option),
+        performsFirstActionWithFullSwipe: isFirst && performFirstActionWithFullSwipe,
+        nestedAction: option.isDestructive
+            ? SwipeNestedAction(
+                content: _buildNestedConfirmButton(option),
+              )
+            : null,
+        onTap: (handler) async {
+          option.onTap();
+          await handler(false);
+        },
+      );
+    }
+
+    // 默认矩形按钮样式
     return SwipeAction(
       title: option.label,
       icon: option.icon != null ? Icon(option.icon, color: option.textColor, size: 20) : null,
@@ -88,9 +115,57 @@ class SwipeActionWrapper extends StatelessWidget {
           : null,
       onTap: (handler) async {
         option.onTap();
-        // 关闭滑动
         await handler(false);
       },
+    );
+  }
+
+  /// 构建圆形按钮
+  Widget _buildCircleButton(SwipeActionOption option) {
+    return Container(
+      width: option.circleButtonSize,
+      height: option.circleButtonSize,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(option.circleButtonSize / 2),
+        color: option.backgroundColor,
+      ),
+      child: Icon(
+        option.icon ?? Icons.circle,
+        color: option.textColor,
+        size: option.circleButtonSize * 0.5,
+      ),
+    );
+  }
+
+  /// 构建嵌套确认按钮（圆角矩形）
+  Widget _buildNestedConfirmButton(SwipeActionOption option) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        color: option.backgroundColor,
+      ),
+      width: 130,
+      height: 60,
+      child: OverflowBox(
+        maxWidth: double.infinity,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              option.icon ?? Icons.delete,
+              color: option.textColor,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              deleteConfirmContent,
+              style: TextStyle(
+                color: option.textColor,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

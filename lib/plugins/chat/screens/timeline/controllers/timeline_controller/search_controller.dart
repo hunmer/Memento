@@ -76,12 +76,13 @@ mixin SearchControllerMixin on BaseTimelineController {
       // 过滤频道
       if (filter.selectedChannelIds.isNotEmpty) {
         result = result.where((message) {
-          final channelInfo =
-              message.metadata?['channelInfo'] as Map<String, dynamic>?;
-          final channelId = channelInfo?['channelId'] as String?;
+          // 优先从 message.channelId 获取，如果没有则从 metadata 获取
+          final channelId = message.channelId ??
+              (message.metadata?['channelInfo'] as Map<String, dynamic>?)?['channelId'] as String?;
           return channelId != null &&
               filter.selectedChannelIds.contains(channelId);
         }).toList();
+        debugPrint('Timeline: 频道过滤后剩余 ${result.length} 条消息');
       }
 
       // 过滤用户

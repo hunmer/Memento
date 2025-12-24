@@ -18,10 +18,7 @@ enum SortType {
 class TagsScreen extends StatefulWidget {
   final ChatPlugin chatPlugin;
 
-  const TagsScreen({
-    super.key,
-    required this.chatPlugin,
-  });
+  const TagsScreen({super.key, required this.chatPlugin});
 
   @override
   State<TagsScreen> createState() => _TagsScreenState();
@@ -62,9 +59,10 @@ class _TagsScreenState extends State<TagsScreen> {
 
   /// 获取过滤和排序后的标签列表
   List<MessageTag> get _filteredTags {
-    var filtered = _tags.where((tag) {
-      return tag.name.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
+    var filtered =
+        _tags.where((tag) {
+          return tag.name.toLowerCase().contains(_searchQuery.toLowerCase());
+        }).toList();
 
     // 应用排序
     if (_sortType == SortType.byMessageCount) {
@@ -78,21 +76,22 @@ class _TagsScreenState extends State<TagsScreen> {
 
   /// 打开标签消息列表页面
   void _openTagMessages(MessageTag tag) async {
-    final messages =
-        await widget.chatPlugin.tagService.getMessagesByTag(tag.name);
+    final messages = await widget.chatPlugin.tagService.getMessagesByTag(
+      tag.name,
+    );
     if (!mounted) return;
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => TagMessagesScreen(
-          tagName: tag.name,
-          messages: messages,
-          chatPlugin: widget.chatPlugin,
-        ),
+        builder:
+            (_) => TagMessagesScreen(
+              tagName: tag.name,
+              messages: messages,
+              chatPlugin: widget.chatPlugin,
+            ),
       ),
     );
   }
-
 
   /// 构建排序按钮
   Widget _buildSortButton() {
@@ -101,38 +100,41 @@ class _TagsScreenState extends State<TagsScreen> {
       onSelected: (SortType type) {
         setState(() => _sortType = type);
       },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: SortType.byMessageCount,
-          child: Row(
-            children: [
-              Icon(
-                Icons.numbers,
-                color: _sortType == SortType.byMessageCount
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
+      itemBuilder:
+          (context) => [
+            PopupMenuItem(
+              value: SortType.byMessageCount,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.numbers,
+                    color:
+                        _sortType == SortType.byMessageCount
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                  ),
+                  const SizedBox(width: 8),
+                  Text('chat_sortByCount'.tr),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text('chat_sortByCount'.tr),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: SortType.byLastUsed,
-          child: Row(
-            children: [
-              Icon(
-                Icons.access_time,
-                color: _sortType == SortType.byLastUsed
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
+            ),
+            PopupMenuItem(
+              value: SortType.byLastUsed,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.access_time,
+                    color:
+                        _sortType == SortType.byLastUsed
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                  ),
+                  const SizedBox(width: 8),
+                  Text('chat_sortByTime'.tr),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text('chat_sortByTime'.tr),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
     );
   }
 
@@ -159,9 +161,8 @@ class _TagsScreenState extends State<TagsScreen> {
   /// 构建空状态
   Widget _buildEmptyState() {
     final colorScheme = Theme.of(context).colorScheme;
-    final message = _searchQuery.isEmpty
-        ? 'chat_noTagsFound'.tr
-        : 'chat_noMatchingTags'.tr;
+    final message =
+        _searchQuery.isEmpty ? 'chat_noTagsFound'.tr : 'chat_noMatchingTags'.tr;
 
     return Center(
       child: Column(
@@ -198,7 +199,7 @@ class _TagsScreenState extends State<TagsScreen> {
       onSearchSubmitted: (query) {
         setState(() => _searchQuery = query);
       },
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       actions: [
         // 排序按钮
         _buildSortButton(),
@@ -209,9 +210,10 @@ class _TagsScreenState extends State<TagsScreen> {
           tooltip: 'chat_refresh'.tr,
         ),
       ],
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _filteredTags.isEmpty
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _filteredTags.isEmpty
               ? _buildEmptyState()
               : _buildTagsGrid(),
     );

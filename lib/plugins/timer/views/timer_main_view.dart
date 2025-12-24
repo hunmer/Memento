@@ -64,11 +64,16 @@ class _TimerMainViewState extends State<TimerMainView> {
       if (query.isEmpty) {
         _searchResults = [];
       } else {
-        _searchResults = _tasks.where((task) {
-          final nameMatch = task.name.toLowerCase().contains(query.toLowerCase());
-          final groupMatch = task.group.toLowerCase().contains(query.toLowerCase());
-          return nameMatch || groupMatch;
-        }).toList();
+        _searchResults =
+            _tasks.where((task) {
+              final nameMatch = task.name.toLowerCase().contains(
+                query.toLowerCase(),
+              );
+              final groupMatch = task.group.toLowerCase().contains(
+                query.toLowerCase(),
+              );
+              return nameMatch || groupMatch;
+            }).toList();
       }
     });
   }
@@ -156,7 +161,7 @@ class _TimerMainViewState extends State<TimerMainView> {
       // ========== 过滤栏配置 ==========
       enableFilterBar: true,
       filterBarChild: _buildFilterBar(),
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       backgroundColor: Theme.of(context).colorScheme.surface,
       actions: [
         IconButton(
@@ -197,16 +202,19 @@ class _TimerMainViewState extends State<TimerMainView> {
   }
 
   void _showTaskDetails(TimerTask task) async {
-    await NavigationHelper.push(context, TimerTaskDetailsPage(
-              task: task,
-              onReset: () {
-                task.reset();
-                setState(() {});
-              },
-              onResume: () {
-                task.toggle();
-                setState(() {});
-              },),
+    await NavigationHelper.push(
+      context,
+      TimerTaskDetailsPage(
+        task: task,
+        onReset: () {
+          task.reset();
+          setState(() {});
+        },
+        onResume: () {
+          task.toggle();
+          setState(() {});
+        },
+      ),
     );
     setState(() {
       _updateTasksAndGroups();
@@ -441,7 +449,8 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
                           task.group,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -455,9 +464,10 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
             // Body
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: useGridLayout
-                  ? _buildGridLayout(task)
-                  : _buildListLayout(task),
+              child:
+                  useGridLayout
+                      ? _buildGridLayout(task)
+                      : _buildListLayout(task),
             ),
           ],
         ),
@@ -490,7 +500,11 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.pause, size: 18, color: Theme.of(context).colorScheme.onSurface),
+                Icon(
+                  Icons.pause,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   timerText,
@@ -744,7 +758,10 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
             alignment: Alignment.centerRight,
             child: Text(
               item.formattedRemainingTime, // Or total duration? HTML shows total duration e.g. "50 min"
-              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],

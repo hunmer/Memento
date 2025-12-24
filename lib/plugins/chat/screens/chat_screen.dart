@@ -48,11 +48,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return SuperCupertinoNavigationWrapper(
       title: Text('chat_chatRoom'.tr),
       largeTitle: 'chat_chatRoom'.tr,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       body: Column(
         children: [
           Expanded(

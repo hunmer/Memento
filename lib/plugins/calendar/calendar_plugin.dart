@@ -1152,7 +1152,6 @@ class _CalendarMainViewState extends State<CalendarMainView> {
             style: TextStyle(color: theme.textTheme.titleLarge?.color),
           ),
           largeTitle: 'calendar_calendar'.tr,
-          automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
           body: Stack(
             children: [
               Column(

@@ -39,7 +39,7 @@ class _NodesScreenState extends State<NodesScreen> {
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
       largeTitle: '节点',
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       enableSearchBar: true,
       searchPlaceholder: '搜索节点标题或笔记',
       onSearchChanged: (value) {
@@ -157,7 +157,6 @@ class _NodesScreenState extends State<NodesScreen> {
     NodesController controller,
     Notebook notebook,
   ) {
-
     showDialog(
       context: context,
       builder:
@@ -191,18 +190,25 @@ class _NodesScreenState extends State<NodesScreen> {
       createdAt: DateTime.now(),
     );
 
-    NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
-              value: controller,
-              child: NodeEditScreen(
-                notebookId: widget.notebook.id,
-                node: newNode,
-                isNew: true,),
+    NavigationHelper.push(
+      context,
+      ChangeNotifierProvider<NodesController>.value(
+        value: controller,
+        child: NodeEditScreen(
+          notebookId: widget.notebook.id,
+          node: newNode,
+          isNew: true,
+        ),
       ),
     );
   }
 
   /// 构建搜索结果页面
-  Widget _buildSearchBody(NodesController controller, Notebook? currentNotebook, String query) {
+  Widget _buildSearchBody(
+    NodesController controller,
+    Notebook? currentNotebook,
+    String query,
+  ) {
     if (query.isEmpty) {
       return Center(
         child: Column(
@@ -221,10 +227,11 @@ class _NodesScreenState extends State<NodesScreen> {
 
     // 执行搜索：匹配节点标题或笔记内容
     final allNodes = _getAllNodes(currentNotebook?.nodes ?? []);
-    final matchedNodes = allNodes.where((node) {
-      return node.title.toLowerCase().contains(query.toLowerCase()) ||
-             node.notes.toLowerCase().contains(query.toLowerCase());
-    }).toList();
+    final matchedNodes =
+        allNodes.where((node) {
+          return node.title.toLowerCase().contains(query.toLowerCase()) ||
+              node.notes.toLowerCase().contains(query.toLowerCase());
+        }).toList();
 
     if (matchedNodes.isEmpty) {
       return Center(
@@ -283,10 +290,7 @@ class _NodesScreenState extends State<NodesScreen> {
                 if (pathText.isNotEmpty) ...[
                   Text(
                     pathText,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
                   ),
                   const SizedBox(height: 4),
                 ],
@@ -296,10 +300,7 @@ class _NodesScreenState extends State<NodesScreen> {
                     padding: const EdgeInsets.only(top: 4, bottom: 4),
                     child: ClipRect(
                       child: SingleChildScrollView(
-                        child: QuillViewer(
-                          data: node.notes,
-                          selectable: false,
-                        ),
+                        child: QuillViewer(data: node.notes, selectable: false),
                       ),
                     ),
                   ),
@@ -309,25 +310,34 @@ class _NodesScreenState extends State<NodesScreen> {
                   spacing: 8,
                   children: [
                     if (node.tags.isNotEmpty)
-                      ...node.tags.map((tag) => Chip(
-                        label: Text(tag, style: const TextStyle(fontSize: 11)),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: VisualDensity.compact,
-                      )),
+                      ...node.tags.map(
+                        (tag) => Chip(
+                          label: Text(
+                            tag,
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
                   ],
                 ),
               ],
             ),
             onTap: () {
               // 点击搜索结果进入编辑界面
-              NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
-                value: controller,
-                child: NodeEditScreen(
-                  notebookId: widget.notebook.id,
-                  node: node,
-                  isNew: false,
+              NavigationHelper.push(
+                context,
+                ChangeNotifierProvider<NodesController>.value(
+                  value: controller,
+                  child: NodeEditScreen(
+                    notebookId: widget.notebook.id,
+                    node: node,
+                    isNew: false,
+                  ),
                 ),
-              ));
+              );
             },
           ),
         );

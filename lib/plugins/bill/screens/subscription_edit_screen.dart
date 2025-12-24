@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
-import 'package:Memento/widgets/picker/circle_icon_picker.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 import '../models/subscription.dart';
 import '../bill_plugin.dart';
@@ -23,59 +21,16 @@ class SubscriptionEditScreen extends StatefulWidget {
 }
 
 class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
-  late final GlobalKey<FormState> _formKey;
-  late final TextEditingController _nameController;
-  late final TextEditingController _totalAmountController;
-  late final TextEditingController _daysController;
-  late final TextEditingController _noteController;
-
-  String _category = '订阅';
-  DateTime _startDate = DateTime.now();
-  DateTime? _endDate;
-  IconData _selectedIcon = Icons.subscriptions;
-  Color _selectedColor = Colors.blue;
-  bool _isActive = true;
-
   @override
   void initState() {
     super.initState();
-    _formKey = GlobalKey<FormState>();
-    _nameController = TextEditingController();
-    _totalAmountController = TextEditingController();
-    _daysController = TextEditingController();
-    _noteController = TextEditingController();
 
+    // 设置路由上下文
     if (widget.subscription != null) {
-      final sub = widget.subscription!;
-      _nameController.text = sub.name;
-      _totalAmountController.text = sub.totalAmount.toString();
-      _daysController.text = sub.days.toString();
-      _noteController.text = sub.note ?? '';
-      _category = sub.category;
-      _startDate = sub.startDate;
-      _endDate = sub.endDate;
-      _selectedIcon = sub.icon;
-      _selectedColor = sub.iconColor;
-      _isActive = sub.isActive;
-
-      // 设置编辑模式的路由上下文
-      _updateRouteContext(isEdit: true, subscriptionId: sub.id);
+      _updateRouteContext(isEdit: true, subscriptionId: widget.subscription!.id);
     } else {
-      // Defaults
-      _daysController.text = '30'; // Default to Monthly
-
-      // 设置新建模式的路由上下文
       _updateRouteContext(isEdit: false);
     }
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _totalAmountController.dispose();
-    _daysController.dispose();
-    _noteController.dispose();
-    super.dispose();
   }
 
   /// 更新路由上下文,使"询问当前上下文"功能能获取到当前状态
@@ -95,57 +50,50 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
     }
   }
 
-  void _setCycle(int days) {
-    setState(() {
-      _daysController.text = days.toString();
-      // Optional: Auto-calculate End Date if needed, 
-      // but for now we follow the logic that days defines the cycle duration.
-    });
-  }
+  Future<void> _saveSubscription(Map<String, dynamic> values) async {
+    try {
+      // 从表单值中提取数据
+      final iconData = values['iconData'] as Map<String, dynamic>?;
+      final icon = iconData?['icon'] as IconData? ?? Icons.subscriptions;
+      final iconColor = iconData?['color'] as Color? ?? Colors.blue;
 
-  Future<void> _saveSubscription() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        final totalAmount = double.parse(_totalAmountController.text);
-        final days = int.parse(_daysController.text);
+      final subscription = Subscription(
+        id: widget.subscription?.id,
+        name: values['name'] as String,
+        totalAmount: double.parse(values['totalAmount'].toString()),
+        days: values['days'] as int,
+        category: '订阅',
+        startDate: values['startDate'] as DateTime,
+        endDate: values['endDate'] as DateTime?,
+        note: (values['note'] as String?)?.isEmpty == true ? null : values['note'] as String?,
+        icon: icon,
+        iconColor: iconColor,
+        isActive: values['isActive'] as bool,
+      );
 
-        if (days <= 0) {
-          Toast.error('bill_subscriptionDaysError'.tr);
-          return;
-        }
-
-        final subscription = Subscription(
-          id: widget.subscription?.id,
-          name: _nameController.text,
-          totalAmount: totalAmount,
-          days: days,
-          category: _category,
-          startDate: _startDate,
-          endDate: _endDate,
-          note: _noteController.text.isEmpty ? null : _noteController.text,
-          icon: _selectedIcon,
-          iconColor: _selectedColor,
-          isActive: _isActive,
-        );
-
-        if (widget.subscription == null) {
-          await widget.billPlugin.controller.subscriptions.createSubscription(subscription);
-          Toast.success('bill_subscriptionCreated'.tr);
-        } else {
-          await widget.billPlugin.controller.subscriptions.updateSubscription(subscription);
-          Toast.success('bill_subscriptionUpdated'.tr);
-        }
-
-        if (mounted) Navigator.of(context).pop();
-      } catch (e) {
-        Toast.error('bill_saveFailed'.tr);
+      // 验证天数
+      if (subscription.days <= 0) {
+        Toast.error('bill_subscriptionDaysError'.tr);
+        return;
       }
+
+      if (widget.subscription == null) {
+        await widget.billPlugin.controller.subscriptions.createSubscription(subscription);
+        Toast.success('bill_subscriptionCreated'.tr);
+      } else {
+        await widget.billPlugin.controller.subscriptions.updateSubscription(subscription);
+        Toast.success('bill_subscriptionUpdated'.tr);
+      }
+
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      Toast.error('bill_saveFailed'.tr);
     }
   }
 
   Future<void> _deleteSubscription() async {
     if (widget.subscription == null) return;
-    
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -173,8 +121,7 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine selected cycle for UI highlights
-    final currentDays = int.tryParse(_daysController.text) ?? 0;
+    final sub = widget.subscription;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -194,263 +141,235 @@ class _SubscriptionEditScreenState extends State<SubscriptionEditScreen> {
         ),
         leadingWidth: 80,
         title: Text(
-          widget.subscription == null ? 'bill_addSubscription'.tr : 'bill_editSubscription'.tr,
+          sub == null ? 'bill_addSubscription'.tr : 'bill_editSubscription'.tr,
           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17, color: Theme.of(context).colorScheme.onSurface),
         ),
         centerTitle: true,
-        actions: [
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 8),
-            child: TextButton(
-              onPressed: _saveSubscription,
-              style: TextButton.styleFrom(
-                minimumSize: const Size(48, 48),
-                padding: EdgeInsets.zero,
-              ),
-              child: Text('bill_save'.tr, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
-            ),
-          ),
-        ],
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          children: [
-            // Icon Picker
-            Center(
-              child: Column(
-                children: [
-                  CircleIconPicker(
-                    currentIcon: _selectedIcon,
-                    backgroundColor: _selectedColor,
-                    onIconSelected: (icon) => setState(() => _selectedIcon = icon),
-                    onColorSelected: (color) => setState(() => _selectedColor = color),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'bill_chooseIcon'.tr,
-                    style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 14, fontWeight: FontWeight.w500),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Name & Price Group
-            FormFieldGroup(
-              children: [
-                TextInputField(
-                  controller: _nameController,
-                  labelText: 'bill_subscriptionName'.tr,
-                  hintText: 'Netflix',
-                  inline: true,
-                  validator:
-                      (v) =>
-                          v?.isEmpty == true ? 'bill_requiredField'.tr : null,
-                ),
-                TextInputField(
-                  controller: _totalAmountController,
-                  labelText: 'bill_subscriptionPrice'.tr,
-                  hintText: '0.00',
-                  keyboardType: TextInputType.number,
-                  inline: true,
-                  validator:
-                      (v) =>
-                          v?.isEmpty == true ? 'bill_requiredField'.tr : null,
-                  suffix: Padding(
-                    padding: const EdgeInsets.only(right: 4),
+      body: FormBuilderWrapper(
+        buttonBuilder: (context, onSubmit, onReset) {
+          // 自定义按钮区域：保存按钮在 AppBar，底部显示删除按钮
+          return Column(
+            children: [
+              if (widget.subscription != null) ...[
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: _deleteSubscription,
+                    style: TextButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                     child: Text(
-                      '¥',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontSize: 17,
-                      ),
+                      'bill_deleteSubscription'.tr,
+                      style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 17, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 32),
+            ],
+          );
+        },
+        contentBuilder: (context, fields) {
+          // 自定义布局：保存按钮在 AppBar
+          return ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            children: [
+              // 图标选择器（居中）
+              fields[0],
+              const SizedBox(height: 24),
 
-            // Timing Group
-            Container(
-              padding: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
+              // 名称和价格组
+              FormFieldGroup(
                 children: [
-                  // Start & End Date
-                  FormFieldGroup(
-                    showDividers: true,
-                    children: [
-                      DatePickerField(
-                        date: _startDate,
-                        formattedDate: DateFormat(
-                          'yyyy-MM-dd',
-                        ).format(_startDate),
-                        placeholder: '',
-                        labelText: 'bill_startDate'.tr,
-                        inline: true,
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate: _startDate,
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2100),
-                          );
-                          if (picked != null)
-                            setState(() => _startDate = picked);
-                        },
-                      ),
-                      DatePickerField(
-                        date: _endDate,
-                        formattedDate:
-                            _endDate != null
-                                ? DateFormat('yyyy-MM-dd').format(_endDate!)
-                                : '',
-                        placeholder: 'bill_none'.tr,
-                        labelText: 'bill_endDate'.tr,
-                        inline: true,
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate:
-                                _endDate ??
-                                _startDate.add(
-                                  Duration(
-                                    days: currentDays > 0 ? currentDays : 30,
-                                  ),
-                                ),
-                            firstDate: _startDate,
-                            lastDate: DateTime(2100),
-                          );
-                          if (picked != null) setState(() => _endDate = picked);
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
+                  fields[1], // 名称
+                  fields[2], // 价格
+                ],
+              ),
+              const SizedBox(height: 24),
 
-                  // Cycle Buttons
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
+              // 时间组
+              Container(
+                padding: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    // 开始和结束日期
+                    FormFieldGroup(
+                      showDividers: true,
                       children: [
-                        Expanded(
-                          child: _buildCycleButton(
-                            'bill_monthly'.tr,
-                            30,
-                            currentDays == 30,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildCycleButton(
-                            'bill_quarterly'.tr,
-                            90,
-                            currentDays == 90,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: _buildCycleButton(
-                            'bill_yearly'.tr,
-                            365,
-                            currentDays >= 360,
-                          ),
-                        ),
+                        fields[3], // 开始日期
+                        fields[4], // 结束日期
                       ],
                     ),
+                    const SizedBox(height: 16),
+
+                    // 周期按钮
+                    fields[5], // 订阅周期
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // 自动订阅开关
+              FormFieldGroup(
+                showDividers: false,
+                children: [
+                  fields[6], // isActive
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // 备注
+              FormFieldGroup(
+                showDividers: false,
+                children: [
+                  fields[7], // 备注
+                ],
+              ),
+
+              // 自定义按钮区域（删除按钮）
+              ButtonBar(
+                alignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    child: TextButton(
+                      onPressed: () {
+                        // 触发表单提交
+                        final wrapper = context.findAncestorStateOfType<FormBuilderWrapperState>();
+                        wrapper?.submitForm();
+                      },
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: Text('bill_save'.tr, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+                    ),
                   ),
                 ],
               ),
+            ],
+          );
+        },
+        config: FormConfig(
+          showSubmitButton: false, // 不显示默认提交按钮
+          fieldSpacing: 0, // 使用自定义间距
+          fields: [
+            // 图标和颜色选择器
+            FormFieldConfig(
+              name: 'iconData',
+              type: FormFieldType.circleIconPicker,
+              initialValue: {
+                'icon': sub?.icon ?? Icons.subscriptions,
+                'color': sub?.iconColor ?? Colors.blue,
+              },
+              extra: {
+                'showLabel': true,
+                'labelText': 'bill_chooseIcon'.tr,
+              },
             ),
-            const SizedBox(height: 24),
 
-            // Auto-subscribe
-            FormFieldGroup(
-              showDividers: false,
-              children: [
-                SwitchField(
-                  value: _isActive,
-                  onChanged: (val) => setState(() => _isActive = val),
-                  title: 'bill_autoSubscribe'.tr,
-                  subtitle: 'bill_autoSubscribeDesc'.tr,
-                  inline: true,
-                ),
-              ],
+            // 名称
+            FormFieldConfig(
+              name: 'name',
+              type: FormFieldType.text,
+              labelText: 'bill_subscriptionName'.tr,
+              hintText: 'Netflix',
+              initialValue: sub?.name ?? '',
+              required: true,
+              validationMessage: 'bill_requiredField'.tr,
+              extra: {'inline': true},
             ),
-            const SizedBox(height: 24),
 
-            // Notes
-            FormFieldGroup(
-              showDividers: false,
-              children: [
-                TextAreaField(
-                  controller: _noteController,
-                  labelText: 'bill_notes'.tr,
-                  hintText: 'bill_notesHint'.tr,
-                  maxLines: 4,
-                  inline: true,
-                ),
-              ],
+            // 价格
+            FormFieldConfig(
+              name: 'totalAmount',
+              type: FormFieldType.number,
+              labelText: 'bill_subscriptionPrice'.tr,
+              hintText: '0.00',
+              initialValue: sub?.totalAmount ?? 0.0,
+              required: true,
+              validationMessage: 'bill_requiredField'.tr,
+              extra: {
+                'inline': true,
+                'suffix': '¥',
+              },
             ),
-            const SizedBox(height: 24),
 
-            // Delete Button
-            if (widget.subscription != null)
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: _deleteSubscription,
-                  style: TextButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: Text(
-                    'bill_deleteSubscription'.tr,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 17, fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ),
-            const SizedBox(height: 32),
+            // 开始日期
+            FormFieldConfig(
+              name: 'startDate',
+              type: FormFieldType.date,
+              labelText: 'bill_startDate'.tr,
+              initialValue: sub?.startDate ?? DateTime.now(),
+              extra: {
+                'inline': true,
+                'format': 'yyyy-MM-dd',
+                'firstDate': DateTime(2000),
+                'lastDate': DateTime(2100),
+              },
+            ),
+
+            // 结束日期
+            FormFieldConfig(
+              name: 'endDate',
+              type: FormFieldType.date,
+              labelText: 'bill_endDate'.tr,
+              hintText: 'bill_none'.tr,
+              initialValue: sub?.endDate,
+              extra: {
+                'inline': true,
+                'format': 'yyyy-MM-dd',
+                'firstDate': sub?.startDate ?? DateTime.now(),
+                'lastDate': DateTime(2100),
+              },
+            ),
+
+            // 订阅周期
+            FormFieldConfig(
+              name: 'days',
+              type: FormFieldType.subscriptionCycle,
+              initialValue: sub?.days ?? 30,
+              extra: {
+                'monthlyLabel': 'bill_monthly'.tr,
+                'quarterlyLabel': 'bill_quarterly'.tr,
+                'yearlyLabel': 'bill_yearly'.tr,
+              },
+            ),
+
+            // 自动订阅开关
+            FormFieldConfig(
+              name: 'isActive',
+              type: FormFieldType.switchField,
+              labelText: 'bill_autoSubscribe'.tr,
+              hintText: 'bill_autoSubscribeDesc'.tr,
+              initialValue: sub?.isActive ?? true,
+              extra: {'inline': true},
+            ),
+
+            // 备注
+            FormFieldConfig(
+              name: 'note',
+              type: FormFieldType.textArea,
+              labelText: 'bill_notes'.tr,
+              hintText: 'bill_notesHint'.tr,
+              initialValue: sub?.note ?? '',
+              extra: {
+                'inline': true,
+                'maxLines': 4,
+              },
+            ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCycleButton(String label, int days, bool isSelected) {
-    return GestureDetector(
-      onTap: () => _setCycle(days),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected
-            ? Theme.of(context).colorScheme.primaryContainer
-            : Theme.of(context).colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(8),
-          border: isSelected
-            ? Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3))
-            : null,
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected
-              ? Theme.of(context).colorScheme.onPrimaryContainer
-              : Theme.of(context).colorScheme.onSurfaceVariant,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
+          onSubmit: _saveSubscription,
         ),
       ),
     );
   }
 }
-

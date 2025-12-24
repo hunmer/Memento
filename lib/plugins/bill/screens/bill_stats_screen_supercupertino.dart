@@ -22,10 +22,12 @@ class BillStatsScreenSupercupertino extends StatefulWidget {
   });
 
   @override
-  State<BillStatsScreenSupercupertino> createState() => _BillStatsScreenSupercupertinoState();
+  State<BillStatsScreenSupercupertino> createState() =>
+      _BillStatsScreenSupercupertinoState();
 }
 
-class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupertino> {
+class _BillStatsScreenSupercupertinoState
+    extends State<BillStatsScreenSupercupertino> {
   late DateTime _selectedMonth;
   bool _isExpenseSelected = true;
   final Set<String> _expandedCategories = {};
@@ -171,7 +173,8 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
     final balance = totalIncome - totalExpense;
 
     // Filter bills for the list based on toggle
-    final listBills = bills.where((b) => b.isExpense == _isExpenseSelected).toList();
+    final listBills =
+        bills.where((b) => b.isExpense == _isExpenseSelected).toList();
     final totalListAmount = _isExpenseSelected ? totalExpense : totalIncome;
 
     // Group by Category
@@ -193,8 +196,9 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
       subMap[key] = (subMap[key] ?? 0) + bill.amount;
     }
 
-    final sortedCategories = categoryStats.values.toList()
-      ..sort((a, b) => b.amount.compareTo(a.amount));
+    final sortedCategories =
+        categoryStats.values.toList()
+          ..sort((a, b) => b.amount.compareTo(a.amount));
 
     return SuperCupertinoNavigationWrapper(
       title: Text('bill_statisticsAnalysis'.tr),
@@ -238,7 +242,10 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
                             children: [
                               Container(
                                 decoration: BoxDecoration(
-                                  color: isDark ? Colors.grey[800] : Colors.grey[100],
+                                  color:
+                                      isDark
+                                          ? Colors.grey[800]
+                                          : Colors.grey[100],
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 padding: const EdgeInsets.all(4),
@@ -254,7 +261,10 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.grey[400] : Colors.grey[500],
+                                  color:
+                                      isDark
+                                          ? Colors.grey[400]
+                                          : Colors.grey[500],
                                 ),
                               ),
                             ],
@@ -267,7 +277,12 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
                             padding: const EdgeInsets.all(32),
                             child: Text(
                               '暂无数据',
-                              style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[400]),
+                              style: TextStyle(
+                                color:
+                                    isDark
+                                        ? Colors.grey[500]
+                                        : Colors.grey[400],
+                              ),
                             ),
                           )
                         else
@@ -276,13 +291,19 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
                             physics: const NeverScrollableScrollPhysics(),
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                             itemCount: sortedCategories.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 16),
+                            separatorBuilder:
+                                (_, __) => const SizedBox(height: 16),
                             itemBuilder: (context, index) {
                               final category = sortedCategories[index];
-                              final percentage = totalListAmount > 0
-                                  ? category.amount / totalListAmount
-                                  : 0.0;
-                              return _buildCategoryItem(category, percentage, isDark);
+                              final percentage =
+                                  totalListAmount > 0
+                                      ? category.amount / totalListAmount
+                                      : 0.0;
+                              return _buildCategoryItem(
+                                category,
+                                percentage,
+                                isDark,
+                              );
                             },
                           ),
                       ],
@@ -295,13 +316,15 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
         ),
       ),
       enableLargeTitle: true,
-      automaticallyImplyLeading: true,
     );
   }
 
   Widget _buildHeader(bool isDark) {
     return Container(
-      color: isDark ? Colors.white.withAlpha(10) : Colors.white.withAlpha(200), // Glassmorphism-ish
+      color:
+          isDark
+              ? Colors.white.withAlpha(10)
+              : Colors.white.withAlpha(200), // Glassmorphism-ish
       child: Column(
         children: [
           // Year and Nav
@@ -326,7 +349,10 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
                         '${_selectedMonth.year}',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     IconButton(
@@ -360,22 +386,22 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
     );
   }
 
-  Widget _buildSummaryCard(bool isDark, double totalIncome, double totalExpense, double balance) {
+  Widget _buildSummaryCard(
+    bool isDark,
+    double totalIncome,
+    double totalExpense,
+    double balance,
+  ) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: isDark
-              ? [
-                  const Color(0xFF1E293B),
-                  const Color(0xFF334155),
-                ]
-              : [
-                  const Color(0xFF3B82F6),
-                  const Color(0xFF2563EB),
-                ],
+          colors:
+              isDark
+                  ? [const Color(0xFF1E293B), const Color(0xFF334155)]
+                  : [const Color(0xFF3B82F6), const Color(0xFF2563EB)],
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
@@ -398,20 +424,30 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.grey[300] : Colors.white.withOpacity(0.9),
+                  color:
+                      isDark ? Colors.grey[300] : Colors.white.withOpacity(0.9),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.2),
+                  color:
+                      isDark
+                          ? Colors.white.withOpacity(0.1)
+                          : Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   DateFormat('yyyy年MM月').format(_selectedMonth),
                   style: TextStyle(
                     fontSize: 14,
-                    color: isDark ? Colors.grey[300] : Colors.white.withOpacity(0.9),
+                    color:
+                        isDark
+                            ? Colors.grey[300]
+                            : Colors.white.withOpacity(0.9),
                   ),
                 ),
               ),
@@ -431,7 +467,10 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
               Container(
                 width: 1,
                 height: 40,
-                color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.2),
+                color:
+                    isDark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.white.withOpacity(0.2),
               ),
               _buildSummaryItem(
                 '支出',
@@ -443,7 +482,10 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
               Container(
                 width: 1,
                 height: 40,
-                color: isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.2),
+                color:
+                    isDark
+                        ? Colors.white.withOpacity(0.1)
+                        : Colors.white.withOpacity(0.2),
               ),
               _buildSummaryItem(
                 '结余',
@@ -459,14 +501,16 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
     );
   }
 
-  Widget _buildSummaryItem(String label, String amount, Color color, IconData icon, bool isDark) {
+  Widget _buildSummaryItem(
+    String label,
+    String amount,
+    Color color,
+    IconData icon,
+    bool isDark,
+  ) {
     return Column(
       children: [
-        Icon(
-          icon,
-          color: color,
-          size: 24,
-        ),
+        Icon(icon, color: color, size: 24),
         const SizedBox(height: 8),
         Text(
           label,
@@ -489,7 +533,9 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
   }
 
   Widget _buildToggleButton(String label, bool isExpense, bool isDark) {
-    final isSelected = (_isExpenseSelected && isExpense) || (!_isExpenseSelected && !isExpense);
+    final isSelected =
+        (_isExpenseSelected && isExpense) ||
+        (!_isExpenseSelected && !isExpense);
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -499,17 +545,19 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (isDark ? const Color(0xFF0F172A) : Colors.white)
-              : Colors.transparent,
+          color:
+              isSelected
+                  ? (isDark ? const Color(0xFF0F172A) : Colors.white)
+                  : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected
-                ? (isDark ? Colors.white : const Color(0xFF0F172A))
-                : (isDark ? Colors.grey[400] : Colors.grey[600]),
+            color:
+                isSelected
+                    ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                    : (isDark ? Colors.grey[400] : Colors.grey[600]),
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
@@ -517,7 +565,11 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
     );
   }
 
-  Widget _buildCategoryItem(_CategoryData category, double percentage, bool isDark) {
+  Widget _buildCategoryItem(
+    _CategoryData category,
+    double percentage,
+    bool isDark,
+  ) {
     final isExpanded = _expandedCategories.contains(category.name);
 
     return Container(
@@ -525,7 +577,10 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
         color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+          color:
+              isDark
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.black.withOpacity(0.05),
         ),
       ),
       child: Column(
@@ -533,10 +588,7 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
           ListTile(
             leading: CircleAvatar(
               backgroundColor: category.color.withOpacity(0.2),
-              child: Icon(
-                category.icon,
-                color: category.color,
-              ),
+              child: Icon(category.icon, color: category.color),
             ),
             title: Text(
               category.name,
@@ -573,31 +625,38 @@ class _BillStatsScreenSupercupertinoState extends State<BillStatsScreenSupercupe
             Container(
               margin: const EdgeInsets.only(left: 64, right: 16, bottom: 12),
               child: Column(
-                children: category.subItems.entries.map((entry) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            entry.key,
-                            style: TextStyle(
-                              color: isDark ? Colors.grey[400] : Colors.grey[600],
+                children:
+                    category.subItems.entries.map((entry) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                entry.key,
+                                style: TextStyle(
+                                  color:
+                                      isDark
+                                          ? Colors.grey[400]
+                                          : Colors.grey[600],
+                                ),
+                              ),
                             ),
-                          ),
+                            Text(
+                              _formatCurrency(entry.value),
+                              style: TextStyle(
+                                color:
+                                    isDark
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          _formatCurrency(entry.value),
-                          style: TextStyle(
-                            color: isDark ? Colors.grey[400] : Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                      );
+                    }).toList(),
               ),
             ),
         ],

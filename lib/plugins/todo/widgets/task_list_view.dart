@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
 import 'package:Memento/plugins/todo/widgets/task_action_sheet.dart';
+import 'package:Memento/widgets/swipe_action/index.dart';
 
 class TaskListView extends StatefulWidget {
   final List<Task> tasks;
@@ -304,61 +305,50 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
           },
         );
       },
-      child: Dismissible(
+      child: SwipeActionWrapper(
         key: widget.key!,
-        direction: DismissDirection.horizontal,
-        background: Container(
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.only(left: 20.0),
-          color: Colors.blue,
-          child: const Icon(Icons.edit, color: Colors.white),
-        ),
-        secondaryBackground: Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 20.0),
-          color: Colors.red,
-          child: const Icon(Icons.delete, color: Colors.white),
-        ),
-        confirmDismiss: (direction) async {
-        if (direction == DismissDirection.startToEnd) {
-          // 左滑进入编辑页面 - 不移除任务
-          if (widget.onTaskEdit != null) {
-            widget.onTaskEdit!(widget.task);
-          }
-          return false;
-        } else if (direction == DismissDirection.endToStart) {
-          // 右滑删除任务 - 显示确认对话框
-          return await showDialog<bool>(
-            context: context,
-            builder: (BuildContext context) {
-
-                return AlertDialog(
-                title: Text('todo_deleteTaskTitle'.tr),
-                content: Text('${'todo_deleteTaskMessage'.tr.replaceFirst('此任务', '')}"${widget.task.title}" 吗？'),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: Text('todo_cancel'.tr),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    style: TextButton.styleFrom(foregroundColor: Colors.red),
-                    child: Text('todo_delete'.tr),
-                  ),
-                ],
-              );
+        leadingActions: [
+          SwipeActionPresets.edit(
+            onTap: () {
+              // 左滑进入编辑页面
+              if (widget.onTaskEdit != null) {
+                widget.onTaskEdit!(widget.task);
+              }
             },
-          ) ?? false;
-        }
-        return false;
-      },
-      onDismissed: (direction) {
-        // 只在确认删除后才执行删除操作
-        if (direction == DismissDirection.endToStart) {
-          widget.onDismissed();
-        }
-      },
-      child: Container(
+          ),
+        ],
+        trailingActions: [
+          SwipeActionPresets.delete(
+            onTap: () async {
+              // 右滑删除任务 - 显示确认对话框
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('todo_deleteTaskTitle'.tr),
+                    content: Text('${'todo_deleteTaskMessage'.tr.replaceFirst('此任务', '')}"${widget.task.title}" 吗？'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: Text('todo_cancel'.tr),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        style: TextButton.styleFrom(foregroundColor: Colors.red),
+                        child: Text('todo_delete'.tr),
+                      ),
+                    ],
+                  );
+                },
+              ) ?? false;
+
+              if (confirmed) {
+                widget.onDismissed();
+              }
+            },
+          ),
+        ],
+        child: Container(
         decoration: BoxDecoration(
           color: isDark ? Colors.white.withOpacity(0.1) : Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -815,7 +805,7 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
           ),
         ),
       ),
-    ),
+      ),
     );
   }
 

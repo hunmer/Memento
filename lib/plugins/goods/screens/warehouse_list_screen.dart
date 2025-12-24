@@ -70,35 +70,37 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
     return SuperCupertinoNavigationWrapper(
       title: Text('goods_allWarehouses'.tr),
       largeTitle: 'goods_allWarehouses'.tr,
-      body: filteredWarehouses.isEmpty && _searchQuery.isNotEmpty
-          ? _buildEmptySearchView()
-          : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 96),
-              itemCount: filteredWarehouses.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final warehouse = filteredWarehouses[index];
-                return WarehouseCard(
-                  warehouse: warehouse,
-                  onTap: () {
-                    if (widget.onWarehouseTap != null) {
-                      widget.onWarehouseTap!(warehouse.id);
-                    } else {
-                      NavigationHelper.push(
-                        context,
-                        WarehouseDetailScreen(warehouse: warehouse),
-                      );
-                    }
-                  },
-                  onEdit: () {
-                    _showEditWarehouse(context, warehouse);
-                  },
-                  onDelete: () {
-                    _showDeleteWarehouseDialog(context, warehouse);
-                  },
-                );
-              },
-            ),
+      body:
+          filteredWarehouses.isEmpty && _searchQuery.isNotEmpty
+              ? _buildEmptySearchView()
+              : ListView.separated(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                itemCount: filteredWarehouses.length,
+                separatorBuilder:
+                    (context, index) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final warehouse = filteredWarehouses[index];
+                  return WarehouseCard(
+                    warehouse: warehouse,
+                    onTap: () {
+                      if (widget.onWarehouseTap != null) {
+                        widget.onWarehouseTap!(warehouse.id);
+                      } else {
+                        NavigationHelper.push(
+                          context,
+                          WarehouseDetailScreen(warehouse: warehouse),
+                        );
+                      }
+                    },
+                    onEdit: () {
+                      _showEditWarehouse(context, warehouse);
+                    },
+                    onDelete: () {
+                      _showDeleteWarehouseDialog(context, warehouse);
+                    },
+                  );
+                },
+              ),
       enableLargeTitle: true,
       enableSearchBar: true,
       searchPlaceholder: 'goods_searchWarehouse'.tr,
@@ -107,7 +109,6 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
           _searchQuery = query;
         });
       },
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
     );
   }
 
@@ -138,33 +139,32 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
   void _showDeleteWarehouseDialog(BuildContext context, dynamic warehouse) {
     showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('goods_confirmDelete'.tr),
-        content: Text(
-          'goods_confirmDeleteWarehouseMessage'.trParams(
-            {'warehouseName': warehouse.title},
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Text('goods_cancel'.tr),
-            onPressed: () => Navigator.pop(context, false),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+      builder:
+          (context) => AlertDialog(
+            title: Text('goods_confirmDelete'.tr),
+            content: Text(
+              'goods_confirmDeleteWarehouseMessage'.trParams({
+                'warehouseName': warehouse.title,
+              }),
             ),
-            onPressed: () async {
-              Navigator.pop(context, true);
-              await GoodsPlugin.instance.deleteWarehouse(warehouse.id);
-              if (context.mounted) {
-                setState(() {});
-              }
-            },
-            child: Text('goods_delete'.tr),
+            actions: [
+              TextButton(
+                child: Text('goods_cancel'.tr),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                onPressed: () async {
+                  Navigator.pop(context, true);
+                  await GoodsPlugin.instance.deleteWarehouse(warehouse.id);
+                  if (context.mounted) {
+                    setState(() {});
+                  }
+                },
+                child: Text('goods_delete'.tr),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -174,26 +174,16 @@ class _WarehouseListScreenState extends State<WarehouseListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.search_off,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             '未找到匹配的仓库',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
           const SizedBox(height: 8),
           Text(
             '请尝试其他搜索关键词',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],
       ),

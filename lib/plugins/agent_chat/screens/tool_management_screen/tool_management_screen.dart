@@ -403,7 +403,6 @@ class _ToolManagementScreenState extends State<ToolManagementScreen> {
       onSearchSubmitted: (query) {
         _onSearchChanged(query);
       },
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
       actions: [
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),

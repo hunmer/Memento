@@ -4,6 +4,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/chat/utils/date_formatter.dart';
+import 'package:Memento/widgets/swipe_action/index.dart';
 
 class ChannelTile extends StatelessWidget {
   final Channel channel;
@@ -25,20 +26,33 @@ class ChannelTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: () {
-          // 在打开之前执行回调（如设置当前频道）
-          onBeforeOpen?.call();
-          // 打开聊天页面
-          NavigationHelper.openContainerWithHero(
-            context,
-            (context) => ChatScreen(channel: channel),
-            transitionDuration: const Duration(milliseconds: 400),
-          );
-        },
-        child: _buildTileContent(context),
+    return SwipeActionWrapper(
+      key: ValueKey(channel.id),
+      leadingActions: [
+        SwipeActionPresets.edit(
+          onTap: () => onEdit(channel),
+        ),
+      ],
+      trailingActions: [
+        SwipeActionPresets.delete(
+          onTap: () => onDelete(channel),
+        ),
+      ],
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: () {
+            // 在打开之前执行回调（如设置当前频道）
+            onBeforeOpen?.call();
+            // 打开聊天页面
+            NavigationHelper.openContainerWithHero(
+              context,
+              (context) => ChatScreen(channel: channel),
+              transitionDuration: const Duration(milliseconds: 400),
+            );
+          },
+          child: _buildTileContent(context),
+        ),
       ),
     );
   }
@@ -69,40 +83,6 @@ class ChannelTile extends StatelessWidget {
                 _buildSubtitle(context),
               ],
             ),
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, size: 20),
-            onSelected: (value) {
-              if (value == 'edit') {
-                onEdit(channel);
-              } else if (value == 'delete') {
-                onDelete(channel);
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem<String>(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    const Icon(Icons.edit, size: 20),
-                    const SizedBox(width: 8),
-                    Text('chat_edit'.tr),
-                  ],
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    const Icon(Icons.delete, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'chat_delete'.tr,
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ),
         ],
       ),

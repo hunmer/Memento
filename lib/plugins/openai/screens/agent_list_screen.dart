@@ -3,11 +3,14 @@ import 'dart:io' show Platform;
 import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/filter_models.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/filter_builders.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/openai/widgets/agent_list_view.dart';
 import 'package:Memento/plugins/openai/widgets/agent_grid_view.dart';
-import 'package:Memento/plugins/openai/widgets/filter_dialog.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
+import 'package:Memento/plugins/openai/models/service_provider.dart';
+import 'package:Memento/plugins/openai/controllers/provider_controller.dart';
 import 'package:Memento/plugins/openai/screens/agent_marketplace_screen.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 
@@ -20,10 +23,11 @@ class AgentListScreen extends StatefulWidget {
 
 class _AgentListScreenState extends State<AgentListScreen> {
   late AgentController _agentController;
+  final ProviderController _providerController = ProviderController();
+
   bool _isGridView = true;
-  Set<String> _selectedProviders = {};
-  Set<String> _selectedTags = {};
   List<String> _allTags = []; // 所有可用的类别
+  List<ServiceProvider> _allProviders = []; // 所有可用的服务商
 
   // 搜索相关状态
   final TextEditingController _searchController = TextEditingController();
@@ -33,6 +37,9 @@ class _AgentListScreenState extends State<AgentListScreen> {
     'tags': true,
   };
   String _searchQuery = '';
+
+  // MultiFilter 过滤值
+  Map<String, dynamic> _multiFilterValues = {};
 
   @override
   void initState() {
@@ -75,43 +82,38 @@ class _AgentListScreenState extends State<AgentListScreen> {
     await _agentController.loadAgents();
     // 加载所有类别
     _allTags = await _agentController.getAllTags();
+    // 加载所有服务商
+    _allProviders = await _providerController.getProviders();
     if (mounted) {
       setState(() {});
     }
-  }
-
-  void _showFilterDialog() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => FilterDialog(
-            selectedProviders: _selectedProviders,
-            selectedTags: _selectedTags,
-            onApply: (providers, tags) {
-              setState(() {
-                _selectedProviders = providers;
-                _selectedTags = tags;
-              });
-            },
-          ),
-    );
   }
 
   void _openMarketplace() {
     NavigationHelper.push(context, const AgentMarketplaceScreen());
   }
 
+  /// 处理 MultiFilter 变化
+  void _onMultiFilterChanged(Map<String, dynamic> filters) {
+    setState(() {
+      _multiFilterValues = filters;
+    });
+  }
+
   List<AIAgent> _getFilteredAgents() {
     return _agentController.agents.where((agent) {
-      // 服务商筛选
+      // 服务商筛选 - 从 MultiFilter 获取
+      final selectedProviders =
+          _multiFilterValues['providers'] as List<String>? ?? [];
       bool providerMatch =
-          _selectedProviders.isEmpty ||
-          _selectedProviders.contains(agent.serviceProviderId);
+          selectedProviders.isEmpty ||
+          selectedProviders.contains(agent.serviceProviderId);
 
-      // 标签筛选
+      // 标签筛选 - 从 MultiFilter 获取
+      final selectedTags = _multiFilterValues['tags'] as List<String>? ?? [];
       bool tagMatch =
-          _selectedTags.isEmpty ||
-          agent.tags.any((tag) => _selectedTags.contains(tag));
+          selectedTags.isEmpty ||
+          agent.tags.any((tag) => selectedTags.contains(tag));
 
       // 搜索筛选
       bool searchMatch = true;
@@ -151,45 +153,44 @@ class _AgentListScreenState extends State<AgentListScreen> {
     }).toList();
   }
 
-  /// 构建类别过滤器
-  Widget _buildCategoryFilter() {
-    if (_allTags.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children:
-                  _allTags.map((tag) {
-                    final isSelected = _selectedTags.contains(tag);
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: FilterChip(
-                        label: Text(tag),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            if (selected) {
-                              _selectedTags.add(tag);
-                            } else {
-                              _selectedTags.remove(tag);
-                            }
-                          });
-                        },
-                      ),
-                    );
-                  }).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
+  /// 构建 MultiFilter 过滤项
+  List<FilterItem> _buildMultiFilterItems() {
+    return [
+      // 服务商筛选
+      if (_allProviders.isNotEmpty)
+        FilterItem(
+          id: 'providers',
+          title: 'openai_serviceProvider'.tr,
+          type: FilterType.tagsMultiple,
+          builder: (context, currentValue, onChanged) {
+            return FilterBuilders.buildTagsFilter(
+              context: context,
+              currentValue: currentValue,
+              onChanged: onChanged,
+              availableTags: _allProviders.map((p) => p.id).toList(),
+            );
+          },
+          getBadge: FilterBuilders.tagsBadge,
+          initialValue: <String>[],
+        ),
+      // 标签筛选
+      if (_allTags.isNotEmpty)
+        FilterItem(
+          id: 'tags',
+          title: 'openai_tags'.tr,
+          type: FilterType.tagsMultiple,
+          builder: (context, currentValue, onChanged) {
+            return FilterBuilders.buildTagsFilter(
+              context: context,
+              currentValue: currentValue,
+              onChanged: onChanged,
+              availableTags: _allTags,
+            );
+          },
+          getBadge: FilterBuilders.tagsBadge,
+          initialValue: <String>[],
+        ),
+    ];
   }
 
   @override
@@ -197,19 +198,11 @@ class _AgentListScreenState extends State<AgentListScreen> {
     return SuperCupertinoNavigationWrapper(
       title: Text('openai_agentListTitle'.tr),
       largeTitle: 'openai_agentListTitle'.tr,
-      body: Column(
-        children: [
-          _buildCategoryFilter(),
-          Expanded(
-            child:
-                _isGridView
-                    ? AgentGridView(agents: _getFilteredAgents())
-                    : AgentListView(agents: _getFilteredAgents()),
-          ),
-        ],
-      ),
+      body:
+          _isGridView
+              ? AgentGridView(agents: _getFilteredAgents())
+              : AgentListView(agents: _getFilteredAgents()),
       enableLargeTitle: false,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
 
       // 启用搜索栏
       enableSearchBar: true,
@@ -221,16 +214,17 @@ class _AgentListScreenState extends State<AgentListScreen> {
       filterLabels: const {'name': '名称', 'description': '描述', 'tags': '标签'},
       onSearchFilterChanged: _onSearchFilterChanged,
 
+      // 启用 MultiFilter
+      enableMultiFilter: true,
+      multiFilterItems: _buildMultiFilterItems(),
+      multiFilterBarHeight: 50,
+      onMultiFilterChanged: _onMultiFilterChanged,
+
       actions: [
         IconButton(
           icon: const Icon(Icons.store),
           onPressed: _openMarketplace,
           tooltip: '商场',
-        ),
-        IconButton(
-          icon: const Icon(Icons.filter_list),
-          onPressed: _showFilterDialog,
-          tooltip: '筛选',
         ),
         IconButton(
           icon: Icon(_isGridView ? Icons.view_list : Icons.grid_view),

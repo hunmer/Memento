@@ -28,13 +28,14 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
     final theme = Theme.of(context);
 
     // 过滤笔记本列表
-    final filteredNotebooks = _searchQuery.isEmpty
-        ? controller.notebooks
-        : controller.notebooks.where((notebook) {
-            return notebook.title.toLowerCase().contains(
-                  _searchQuery.toLowerCase(),
-                );
-          }).toList();
+    final filteredNotebooks =
+        _searchQuery.isEmpty
+            ? controller.notebooks
+            : controller.notebooks.where((notebook) {
+              return notebook.title.toLowerCase().contains(
+                _searchQuery.toLowerCase(),
+              );
+            }).toList();
 
     return SuperCupertinoNavigationWrapper(
       title: Text(
@@ -42,7 +43,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
         style: TextStyle(color: theme.textTheme.titleLarge?.color),
       ),
       largeTitle: 'nodes_notebooks'.tr,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
+
       enableSearchBar: true,
       searchPlaceholder: 'nodes_searchNotebooks'.tr,
       onSearchChanged: (query) {
@@ -89,8 +90,10 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                     (context) => AlertDialog(
                       title: Text('nodes_deleteNotebook'.tr),
                       content: Text(
-                        'nodes_deleteNotebookConfirmation'.tr
-                            .replaceAll('{notebook.title}', notebook.title),
+                        'nodes_deleteNotebookConfirmation'.tr.replaceAll(
+                          '{notebook.title}',
+                          notebook.title,
+                        ),
                       ),
                       actions: [
                         TextButton(
@@ -130,9 +133,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                   child: Icon(notebook.icon, color: notebook.color),
                 ),
                 title: Text(notebook.title),
-                subtitle: Text(
-                  '${notebook.nodes.length} ${'nodes_nodes'.tr}',
-                ),
+                subtitle: Text('${notebook.nodes.length} ${'nodes_nodes'.tr}'),
                 selected: notebook.id == controller.selectedNotebook?.id,
                 trailing: IconButton(
                   icon: const Icon(Icons.more_vert),
@@ -176,18 +177,11 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               'nodes_noResultsFound'.tr,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -200,10 +194,7 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
       itemBuilder: (context, index) {
         final notebook = notebooks[index];
         return Card(
-          margin: const EdgeInsets.symmetric(
-            horizontal: 8.0,
-            vertical: 4.0,
-          ),
+          margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
           child: ListTile(
             leading: Icon(notebook.icon, color: notebook.color),
             title: Text(
@@ -211,19 +202,19 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            subtitle: Text(
-              '${notebook.nodes.length} ${'nodes_nodes'.tr}',
-            ),
+            subtitle: Text('${notebook.nodes.length} ${'nodes_nodes'.tr}'),
             trailing: IconButton(
               icon: const Icon(Icons.more_vert),
               onPressed: () => _showNotebookActions(context, notebook),
             ),
             onTap: () {
               controller.selectNotebook(notebook);
-              NavigationHelper.push(context, ChangeNotifierProvider<NodesController>.value(
-                            value: controller,
-                            child: NodesScreen(notebook: notebook),
-                  ),
+              NavigationHelper.push(
+                context,
+                ChangeNotifierProvider<NodesController>.value(
+                  value: controller,
+                  child: NodesScreen(notebook: notebook),
+                ),
               );
             },
           ),
@@ -233,7 +224,6 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
   }
 
   void _showAddNotebookDialog(BuildContext context) {
-
     final nodesController = Provider.of<NodesController>(
       context,
       listen: false,
@@ -269,7 +259,9 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: titleController,
-                    decoration: InputDecoration(labelText: 'nodes_notebookTitle'.tr),
+                    decoration: InputDecoration(
+                      labelText: 'nodes_notebookTitle'.tr,
+                    ),
                   ),
                 ],
               ),
@@ -300,35 +292,33 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
   }
 
   void _showNotebookActions(BuildContext parentContext, Notebook notebook) {
-
     SmoothBottomSheet.show(
       context: parentContext,
       builder:
           (BuildContext context) => Wrap(
             children: [
-                ListTile(
-                  leading: const Icon(Icons.edit),
-                  title: Text('nodes_editNotebook'.tr),
-                  onTap: () {
-                    Navigator.pop(context); // 关闭 BottomSheet
-                    _showEditNotebookDialog(parentContext, notebook);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.delete),
-                  title: Text('nodes_deleteNotebook'.tr),
-                  onTap: () {
-                    Navigator.pop(context); // 关闭 BottomSheet
-                    _showDeleteNotebookDialog(parentContext, notebook);
-                  },
-                ),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: Text('nodes_editNotebook'.tr),
+                onTap: () {
+                  Navigator.pop(context); // 关闭 BottomSheet
+                  _showEditNotebookDialog(parentContext, notebook);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: Text('nodes_deleteNotebook'.tr),
+                onTap: () {
+                  Navigator.pop(context); // 关闭 BottomSheet
+                  _showDeleteNotebookDialog(parentContext, notebook);
+                },
+              ),
             ],
           ),
     );
   }
 
   void _showEditNotebookDialog(BuildContext context, Notebook notebook) {
-
     final nodesController = Provider.of<NodesController>(
       context,
       listen: false,
@@ -364,7 +354,9 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: titleController,
-                    decoration: InputDecoration(labelText: 'nodes_notebookTitle'.tr),
+                    decoration: InputDecoration(
+                      labelText: 'nodes_notebookTitle'.tr,
+                    ),
                   ),
                 ],
               ),
@@ -398,7 +390,6 @@ class _NotebooksScreenState extends State<NotebooksScreen> {
   }
 
   void _showDeleteNotebookDialog(BuildContext context, Notebook notebook) {
-
     final nodesController = Provider.of<NodesController>(
       context,
       listen: false,

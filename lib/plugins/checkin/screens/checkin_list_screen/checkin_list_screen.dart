@@ -12,8 +12,10 @@ import 'components/checkin_item_card.dart';
 
 class CheckinListScreen extends StatefulWidget {
   final CheckinListController controller;
+
   /// 可选的打卡项目ID，用于从小组件跳转时自动打开打卡记录对话框
   final String? initialItemId;
+
   /// 可选的目标日期（格式：YYYY-MM-DD），用于打开指定日期的打卡记录
   final String? targetDate;
 
@@ -137,7 +139,6 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
         ),
       ],
       enableLargeTitle: false,
-      automaticallyImplyLeading: !(Platform.isAndroid || Platform.isIOS),
     );
   }
 
@@ -148,26 +149,16 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               '未找到相关打卡项目',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             Text(
               '尝试使用其他关键词搜索',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           ],
         ),
@@ -183,22 +174,22 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
             crossAxisCount: 2,
             crossAxisSpacing: 0,
             mainAxisSpacing: 0,
-            children: searchResults.asMap().entries.map((entry) {
-              final index = entry.key;
-              final item = entry.value;
-              return StaggeredGridTile.fit(
-                crossAxisCellCount: item.cardStyle == CheckinCardStyle.small
-                    ? 1
-                    : 2,
-                child: CheckinItemCard(
-                  item: item,
-                  index: index,
-                  itemIndex: index,
-                  controller: controller,
-                  onStateChanged: _handleStateChanged,
-                ),
-              );
-            }).toList(),
+            children:
+                searchResults.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final item = entry.value;
+                  return StaggeredGridTile.fit(
+                    crossAxisCellCount:
+                        item.cardStyle == CheckinCardStyle.small ? 1 : 2,
+                    child: CheckinItemCard(
+                      item: item,
+                      index: index,
+                      itemIndex: index,
+                      controller: controller,
+                      onStateChanged: _handleStateChanged,
+                    ),
+                  );
+                }).toList(),
           ),
         ),
       );
@@ -277,12 +268,13 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
 
       showDialog(
         context: context,
-        builder: (context) => CheckinRecordDialog(
-          item: item,
-          controller: controller,
-          onCheckinCompleted: _handleStateChanged,
-          selectedDate: selectedDate,
-        ),
+        builder:
+            (context) => CheckinRecordDialog(
+              item: item,
+              controller: controller,
+              onCheckinCompleted: _handleStateChanged,
+              selectedDate: selectedDate,
+            ),
       );
     });
   }
