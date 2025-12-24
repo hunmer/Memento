@@ -18,3 +18,4 @@ export 'slider_field.dart';
 export 'category_selector_field.dart';
 export 'custom_fields_field.dart';
 export 'option_selector_field.dart';
+export 'color_selector_field.dart';

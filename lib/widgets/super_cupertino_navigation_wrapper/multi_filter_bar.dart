@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'filter_models.dart';
 
 /// 多条件过滤栏组件

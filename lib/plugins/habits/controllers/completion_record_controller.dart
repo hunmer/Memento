@@ -117,7 +117,6 @@ class CompletionRecordController {
 
   Future<void> deleteCompletionRecord(String recordId) async {
     bool recordFound = false;
-    String? affectedHabitId;
 
     for (final habitId in getHabitIds()) {
       final records = await getHabitCompletionRecords(habitId);
@@ -126,7 +125,6 @@ class CompletionRecordController {
 
       if (records.length < initialLength) {
         recordFound = true;
-        affectedHabitId = habitId;
         await storage.writeJson(
           'habits/records/$habitId.json',
           records.map((r) => r.toMap()).toList(),

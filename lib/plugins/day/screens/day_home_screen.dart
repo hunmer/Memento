@@ -7,7 +7,7 @@ import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/day/controllers/day_controller.dart';
 import 'package:Memento/plugins/day/widgets/memorial_day_card.dart';
 import 'package:Memento/plugins/day/widgets/memorial_day_list_item.dart';
-import 'package:Memento/plugins/day/widgets/edit_memorial_day_dialog/edit_memorial_day_dialog.dart';
+import 'package:Memento/plugins/day/widgets/edit_memorial_day_dialog/edit_memorial_day_page.dart';
 import 'package:Memento/plugins/day/models/memorial_day.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 
@@ -27,13 +27,16 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
     MemorialDay? memorialDay,
   ]) async {
     if (!mounted) return;
-    final result = await showDialog<DialogResult>(
-      context: context,
-      builder: (context) => EditMemorialDayDialog(memorialDay: memorialDay),
+
+    final result = await Navigator.push<DialogResult>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditMemorialDayPage(memorialDay: memorialDay),
+      ),
     );
 
     if (result == null) {
-      return; // 对话框被异常关闭
+      return; // 页面被异常关闭
     }
 
     if (!mounted) return;
@@ -54,35 +57,8 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
 
       case DialogAction.delete:
         if (memorialDay != null) {
-          // 用户请求删除，显示确认对话框
-          final confirmed = await showDialog<bool>(
-            context: context,
-            builder:
-                (context) => AlertDialog(
-                  title: Text('day_deleteMemorialDay'.tr),
-                  content: Text(
-                    'day_deleteConfirmation'.tr,
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: Text('day_cancel'.tr),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      child: Text(
-                        'day_delete'.tr,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  ],
-                ),
-          );
-
-          if (confirmed == true && mounted) {
-            // 确认删除后，调用控制器的删除方法
-            await _controller.deleteMemorialDay(memorialDay.id);
-          }
+          // 用户请求删除，调用控制器的删除方法
+          await _controller.deleteMemorialDay(memorialDay.id);
         }
         break;
 
