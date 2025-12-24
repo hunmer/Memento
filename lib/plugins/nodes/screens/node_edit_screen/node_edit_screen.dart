@@ -6,11 +6,8 @@ import 'dart:convert';
 import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
 import 'package:Memento/plugins/nodes/models/node.dart';
 import 'components/breadcrumbs.dart';
-import 'package:Memento/widgets/color_picker_section.dart';
-import 'components/tags_section.dart';
-import 'components/status_dropdown.dart';
-import 'components/date_section.dart';
 import 'components/custom_fields_section.dart';
+import 'package:Memento/widgets/form_fields/index.dart';
 
 class NodeEditScreen extends StatefulWidget {
   final String notebookId;
@@ -145,46 +142,65 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
           const SizedBox(height: 16),
 
           // 标题输入框
-          TextField(
+          TextInputField(
             controller: _titleController,
-            decoration: InputDecoration(
-              labelText: 'nodes_nodeTitle'.tr,
-              border: const OutlineInputBorder(),
-            ),
+            labelText: 'nodes_nodeTitle'.tr,
+            hintText: '请输入节点标题',
           ),
           const SizedBox(height: 16),
 
           // 标签部分
-          TagsSection(
+          TagsField(
             tags: _tags,
-            onTagRemoved: (tag) {
+            onAddTag: () => _showAddTagDialog(context),
+            onRemoveTag: (tag) {
               setState(() => _tags.remove(tag));
             },
-            onTagAdded: (tag) {
-              if (!_tags.contains(tag)) {
-                setState(() => _tags.add(tag));
-              }
-            },
+            addButtonText: '添加标签',
           ),
           const SizedBox(height: 16),
 
           // 颜色选择器
-          ColorPickerSection(
+          ColorSelectorField(
             selectedColor: _color,
             onColorChanged: (color) {
               setState(() => _color = color);
             },
+            labelText: 'nodes_nodeColor'.tr,
           ),
           const SizedBox(height: 16),
 
           // 状态下拉框
-          StatusDropdown(
+          SelectField<NodeStatus>(
             value: _status,
             onChanged: (value) {
               if (value != null) {
                 setState(() => _status = value);
               }
             },
+            labelText: 'nodes_status'.tr,
+            hintText: '请选择状态',
+            items: NodeStatus.values.map((status) {
+              String label;
+              switch (status) {
+                case NodeStatus.none:
+                  label = 'nodes_none'.tr;
+                  break;
+                case NodeStatus.todo:
+                  label = 'nodes_todo'.tr;
+                  break;
+                case NodeStatus.doing:
+                  label = 'nodes_doing'.tr;
+                  break;
+                case NodeStatus.done:
+                  label = 'nodes_done'.tr;
+                  break;
+              }
+              return DropdownMenuItem(
+                value: status,
+                child: Text(label),
+              );
+            }).toList(),
           ),
         ],
       ),
@@ -199,34 +215,52 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 日期部分
-          DateSection(
-            startDate: _startDate,
-            endDate: _endDate,
-            onStartDateChanged: (date) {
-              setState(() => _startDate = date);
-            },
-            onEndDateChanged: (date) {
-              setState(() => _endDate = date);
-            },
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'nodes_dateRange'.tr,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: DatePickerField(
+                      date: _startDate,
+                      onTap: () => _selectDate(context, true),
+                      formattedDate: _startDate != null
+                          ? '${_startDate!.year}/${_startDate!.month}/${_startDate!.day}'
+                          : '',
+                      placeholder: 'nodes_startDate'.tr,
+                      icon: Icons.calendar_today,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: DatePickerField(
+                      date: _endDate,
+                      onTap: () => _selectDate(context, false),
+                      formattedDate: _endDate != null
+                          ? '${_endDate!.year}/${_endDate!.month}/${_endDate!.day}'
+                          : '',
+                      placeholder: 'nodes_endDate'.tr,
+                      icon: Icons.calendar_today,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
           const SizedBox(height: 16),
 
           // 自定义字段部分
           CustomFieldsSection(
-            customFields: _customFields,
-            onCustomFieldValueChanged: (index, value) {
+            initialFields: _customFields,
+            onFieldsChanged: (fields) {
               setState(() {
-                _customFields[index] = CustomField(
-                  key: _customFields[index].key,
-                  value: value,
-                );
+                _customFields = fields;
               });
-            },
-            onCustomFieldAdded: (field) {
-              setState(() => _customFields.add(field));
-            },
-            onCustomFieldRemoved: (index) {
-              setState(() => _customFields.removeAt(index));
             },
           ),
         ],
@@ -366,6 +400,66 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
         ),
       ],
     );
+  }
+
+  Future<void> _selectDate(BuildContext context, bool isStart) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate:
+          isStart ? _startDate ?? DateTime.now() : _endDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _startDate = picked;
+        } else {
+          _endDate = picked;
+        }
+      });
+    }
+  }
+
+  void _showAddTagDialog(BuildContext context) async {
+    final TextEditingController controller = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('添加标签'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: '标签名称',
+            hintText: '请输入标签名称',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('cancel'.tr),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (controller.text.isNotEmpty) {
+                Navigator.pop(context, controller.text);
+              }
+            },
+            child: Text('confirm'.tr),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      setState(() {
+        if (!_tags.contains(result)) {
+          _tags.add(result);
+        }
+      });
+    }
   }
 
   void _saveNode(BuildContext context, NodesController controller) {

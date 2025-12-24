@@ -37,11 +37,16 @@ final Map<String, String> nodesTranslationsZh = {
   'nodes_done': '已完成',
   'nodes_startDate': '开始日期',
   'nodes_endDate': '结束日期',
+  'nodes_dateRange': '日期范围',
+  'nodes_nodeColor': '节点颜色',
   'nodes_customFields': '自定义字段',
   'nodes_addCustomField': '添加自定义字段',
+  'nodes_fieldName': '字段名',
+  'nodes_fieldValue': '字段值',
   'nodes_key': '键',
   'nodes_value': '值',
   'nodes_notes': '笔记',
+  'nodes_note': '笔记',
 
   // 操作
   'nodes_createNew': '创建新',
