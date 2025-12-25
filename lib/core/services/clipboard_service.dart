@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
 /// 剪贴板数据处理器类型
-typedef ClipboardMethodHandler = Future<void> Function(Map<String, dynamic> args);
+typedef ClipboardMethodHandler =
+    Future<void> Function(Map<String, dynamic> args);
 
 /// 剪贴板数据结构
 class ClipboardData {
@@ -19,10 +19,7 @@ class ClipboardData {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'method': method,
-    'args': args,
-  };
+  Map<String, dynamic> toJson() => {'method': method, 'args': args};
 }
 
 /// 剪贴板服务

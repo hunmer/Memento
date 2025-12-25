@@ -1,6 +1,4 @@
 import 'package:get/get.dart';
-import 'dart:io';
-
 import 'package:Memento/core/config_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';

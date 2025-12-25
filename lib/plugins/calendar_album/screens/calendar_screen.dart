@@ -1,20 +1,22 @@
-import 'dart:io' show Platform, File;
-import 'package:get/get.dart';
-import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
-import 'package:Memento/utils/image_utils.dart';
-import 'package:flutter/material.dart';
+import 'dart:io' show File;
+
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
-import 'package:provider/provider.dart';
-import 'package:Memento/widgets/enhanced_calendar/syncfusion_calendar.dart';
-import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
 import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
+import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
 import 'package:Memento/plugins/calendar_album/widgets/entry_list.dart';
+import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/widgets/enhanced_calendar/syncfusion_calendar.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
-import 'entry_editor_screen.dart';
-import 'entry_detail_screen.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import 'entry_detail_screen.dart';
+import 'entry_editor_screen.dart';
 
 final DateTime _calendarMinMonth = DateTime(2010, 1, 1);
 final DateTime _calendarMaxMonth = DateTime(2030, 12, 31);
