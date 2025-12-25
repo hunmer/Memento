@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'package:get/get.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:flutter/material.dart';

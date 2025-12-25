@@ -16,11 +16,20 @@
 		4B954B402EFB061F005F06E5 /* ConversationQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954B3E2EFB061F005F06E5 /* ConversationQuery.swift */; };
 		4B954B412EFB061F005F06E5 /* ConversationEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954B3D2EFB061F005F06E5 /* ConversationEntity.swift */; };
 		4B954B422EFB061F005F06E5 /* SendToAgentChatIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954B3F2EFB061F005F06E5 /* SendToAgentChatIntent.swift */; };
+		4B954C1C2EFD8DD9005F06E5 /* CreateBillIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954C172EFD8DD9005F06E5 /* CreateBillIntent.swift */; };
+		4B954C1D2EFD8DD9005F06E5 /* CreateDiaryIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954C182EFD8DD9005F06E5 /* CreateDiaryIntent.swift */; };
+		4B954C1E2EFD8DD9005F06E5 /* CreateHabitIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954C192EFD8DD9005F06E5 /* CreateHabitIntent.swift */; };
+		4B954C1F2EFD8DD9005F06E5 /* CreateTaskIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954C1B2EFD8DD9005F06E5 /* CreateTaskIntent.swift */; };
+		4B954C202EFD8DD9005F06E5 /* CreateActivityIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954C162EFD8DD9005F06E5 /* CreateActivityIntent.swift */; };
+		4B954C212EFD8DD9005F06E5 /* CallPluginMethodIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954C152EFD8DD9005F06E5 /* CallPluginMethodIntent.swift */; };
+		4B954C222EFD8DD9005F06E5 /* CreateNoteIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954C1A2EFD8DD9005F06E5 /* CreateNoteIntent.swift */; };
+		4B954C942EFD9899005F06E5 /* ShortcutResultStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B954C932EFD9899005F06E5 /* ShortcutResultStorage.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		B484A26E41DCCB60F6FADC10 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A58AC4AD02C9E3AB8837333B /* Pods_Runner.framework */; };
+		C9EF8AF9FF004C0EF01609EA /* ShortcutResultStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74DC11866C0EA7E4E9AEB383 /* ShortcutResultStorage.swift */; };
 		FF96134040E0346952FDEF3A /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34D46EAEC8305CCB9E9A97C /* Pods_RunnerTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -81,8 +90,17 @@
 		4B954B3D2EFB061F005F06E5 /* ConversationEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationEntity.swift; sourceTree = "<group>"; };
 		4B954B3E2EFB061F005F06E5 /* ConversationQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationQuery.swift; sourceTree = "<group>"; };
 		4B954B3F2EFB061F005F06E5 /* SendToAgentChatIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendToAgentChatIntent.swift; sourceTree = "<group>"; };
+		4B954C152EFD8DD9005F06E5 /* CallPluginMethodIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallPluginMethodIntent.swift; sourceTree = "<group>"; };
+		4B954C162EFD8DD9005F06E5 /* CreateActivityIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateActivityIntent.swift; sourceTree = "<group>"; };
+		4B954C172EFD8DD9005F06E5 /* CreateBillIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateBillIntent.swift; sourceTree = "<group>"; };
+		4B954C182EFD8DD9005F06E5 /* CreateDiaryIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateDiaryIntent.swift; sourceTree = "<group>"; };
+		4B954C192EFD8DD9005F06E5 /* CreateHabitIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateHabitIntent.swift; sourceTree = "<group>"; };
+		4B954C1A2EFD8DD9005F06E5 /* CreateNoteIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateNoteIntent.swift; sourceTree = "<group>"; };
+		4B954C1B2EFD8DD9005F06E5 /* CreateTaskIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTaskIntent.swift; sourceTree = "<group>"; };
+		4B954C932EFD9899005F06E5 /* ShortcutResultStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutResultStorage.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		74DC11866C0EA7E4E9AEB383 /* ShortcutResultStorage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ShortcutResultStorage.swift; path = Runner/ShortcutResultStorage.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		8A9FFCEE501F47DCD10D94D1 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		947717B0FBC8693163092CCD /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -100,7 +118,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		4B9549202EFAD220005F06E5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		4B9549202EFAD220005F06E5 /* Exceptions for "MyAppWidget" folder in "MyAppWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -110,7 +128,18 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		4B95490F2EFAD21F005F06E5 /* MyAppWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4B9549202EFAD220005F06E5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = MyAppWidget; sourceTree = "<group>"; };
+		4B95490F2EFAD21F005F06E5 /* MyAppWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4B9549202EFAD220005F06E5 /* Exceptions for "MyAppWidget" folder in "MyAppWidgetExtension" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = MyAppWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -201,6 +230,14 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				4B954C932EFD9899005F06E5 /* ShortcutResultStorage.swift */,
+				4B954C152EFD8DD9005F06E5 /* CallPluginMethodIntent.swift */,
+				4B954C162EFD8DD9005F06E5 /* CreateActivityIntent.swift */,
+				4B954C172EFD8DD9005F06E5 /* CreateBillIntent.swift */,
+				4B954C182EFD8DD9005F06E5 /* CreateDiaryIntent.swift */,
+				4B954C192EFD8DD9005F06E5 /* CreateHabitIntent.swift */,
+				4B954C1A2EFD8DD9005F06E5 /* CreateNoteIntent.swift */,
+				4B954C1B2EFD8DD9005F06E5 /* CreateTaskIntent.swift */,
 				4B954B3D2EFB061F005F06E5 /* ConversationEntity.swift */,
 				4B954B3E2EFB061F005F06E5 /* ConversationQuery.swift */,
 				4B954B3F2EFB061F005F06E5 /* SendToAgentChatIntent.swift */,
@@ -213,6 +250,7 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				74DC11866C0EA7E4E9AEB383 /* ShortcutResultStorage.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -266,8 +304,6 @@
 				4B95490F2EFAD21F005F06E5 /* MyAppWidget */,
 			);
 			name = MyAppWidgetExtension;
-			packageProductDependencies = (
-			);
 			productName = MyAppWidgetExtension;
 			productReference = 4B95490A2EFAD21F005F06E5 /* MyAppWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -504,8 +540,17 @@
 				4B954B402EFB061F005F06E5 /* ConversationQuery.swift in Sources */,
 				4B954B412EFB061F005F06E5 /* ConversationEntity.swift in Sources */,
 				4B954B422EFB061F005F06E5 /* SendToAgentChatIntent.swift in Sources */,
+				4B954C1C2EFD8DD9005F06E5 /* CreateBillIntent.swift in Sources */,
+				4B954C1D2EFD8DD9005F06E5 /* CreateDiaryIntent.swift in Sources */,
+				4B954C1E2EFD8DD9005F06E5 /* CreateHabitIntent.swift in Sources */,
+				4B954C1F2EFD8DD9005F06E5 /* CreateTaskIntent.swift in Sources */,
+				4B954C942EFD9899005F06E5 /* ShortcutResultStorage.swift in Sources */,
+				4B954C202EFD8DD9005F06E5 /* CreateActivityIntent.swift in Sources */,
+				4B954C212EFD8DD9005F06E5 /* CallPluginMethodIntent.swift in Sources */,
+				4B954C222EFD8DD9005F06E5 /* CreateNoteIntent.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+				C9EF8AF9FF004C0EF01609EA /* ShortcutResultStorage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

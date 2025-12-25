@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

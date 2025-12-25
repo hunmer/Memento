@@ -7,6 +7,7 @@ import intelligence
 @main
 @objc class AppDelegate: FlutterAppDelegate {
   private var timerMethodChannel: FlutterMethodChannel?
+  static var shortcutMethodChannel: FlutterMethodChannel?
 
   override func application(
     _ application: UIApplication,
@@ -21,6 +22,9 @@ import intelligence
 
     // 设置timer服务的MethodChannel
     setupTimerServiceChannel()
+
+    // 设置 Shortcut 调用的 MethodChannel
+    setupShortcutMethodChannel()
 
     // 设置 Intelligence 插件监听器
     setupIntelligencePlugin()
@@ -99,6 +103,50 @@ import intelligence
       default:
         result(FlutterMethodNotImplemented)
       }
+    }
+  }
+
+  private func setupShortcutMethodChannel() {
+    let controller = window?.rootViewController as? FlutterViewController
+    AppDelegate.shortcutMethodChannel = FlutterMethodChannel(
+      name: "github.hunmer.memento/shortcut_plugin_call",
+      binaryMessenger: controller!.binaryMessenger
+    )
+
+    // 设置方法处理器（用于写入共享文件）
+    AppDelegate.shortcutMethodChannel?.setMethodCallHandler { call, result in
+      switch call.method {
+      case "writeShortcutResult":
+        self.handleWriteShortcutResult(call: call, result: result)
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
+
+    print("[AppDelegate] Shortcut MethodChannel 已配置")
+  }
+
+  private func handleWriteShortcutResult(call: FlutterMethodCall, result: @escaping FlutterResult) {
+    guard let args = call.arguments as? [String: Any],
+          let callId = args["callId"] as? String,
+          let resultData = args["result"] as? [String: Any] else {
+      result(FlutterError(code: "INVALID_ARGS", message: "缺少必要参数", details: nil))
+      return
+    }
+
+    // 写入共享文件
+    if let fileURL = ShortcutResultStorage.shared.resultFileURL(for: callId) {
+      do {
+        let jsonData = try JSONSerialization.data(withJSONObject: resultData)
+        try jsonData.write(to: fileURL)
+        print("[AppDelegate] 已写入 Shortcut 结果: \(callId)")
+        result(true)
+      } catch {
+        print("[AppDelegate] 写入失败: \(error)")
+        result(FlutterError(code: "WRITE_FAILED", message: error.localizedDescription, details: nil))
+      }
+    } else {
+      result(FlutterError(code: "PATH_ERROR", message: "无法获取共享文件路径", details: nil))
     }
   }
 

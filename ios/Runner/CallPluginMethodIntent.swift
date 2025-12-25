@@ -50,11 +50,15 @@ struct CallPluginMethodIntent: AppIntent {
         print("[CallPluginMethod] 参数: \(paramsJson ?? "null")")
         print("[CallPluginMethod] 后台执行: \(runInBackground)")
 
-        // 构造发送到 Flutter 的 JSON 数据
+        // 生成唯一调用ID
+        let callId = "\(Date().timeIntervalSince1970)_\(Int.random(in: 10000...99999))"
+
+        // 构造发送到 Flutter 的数据
         var data: [String: Any] = [
             "action": "call_plugin_method",
             "pluginId": pluginId,
             "methodName": methodName,
+            "callId": callId,  // 添加调用ID
             "timestamp": Date().timeIntervalSince1970
         ]
 
@@ -70,24 +74,65 @@ struct CallPluginMethodIntent: AppIntent {
                 }
             } catch {
                 print("[CallPluginMethod] 参数 JSON 解析失败: \(error)")
-                // 继续执行，传递空参数
+                throw IntentError.message("参数 JSON 解析失败: \(error.localizedDescription)")
             }
         }
 
-        // 转换为 JSON 字符串并发送到 Flutter
+        // 写入"等待中"状态到共享文件
+        ShortcutResultStorage.shared.writePendingStatus(callId: callId)
+
+        // 通过 intelligence 插件推送消息到 Flutter
         if let jsonData = try? JSONSerialization.data(withJSONObject: data),
            let jsonString = String(data: jsonData, encoding: .utf8) {
-            // 通过 intelligence 插件通知 Flutter
             IntelligencePlugin.notifier.push(jsonString)
             print("[CallPluginMethod] 已发送数据到 Flutter: \(jsonString)")
-
-            // 返回成功消息
-            let resultMessage = "已调用 \(pluginId).\(methodName)"
-            return .result(value: resultMessage)
         } else {
-            print("[CallPluginMethod] JSON 序列化失败")
             throw IntentError.message("数据序列化失败")
         }
+
+        // 轮询读取结果（超时 30 秒）
+        print("[CallPluginMethod] 开始轮询结果，callId: \(callId)")
+        if let result = await ShortcutResultStorage.shared.pollResult(callId: callId, timeout: 30.0) {
+            print("[CallPluginMethod] 读取到结果: \(result)")
+
+            let success = result["success"] as? Bool ?? false
+
+            if success {
+                // 成功：格式化返回数据
+                let data = result["data"]
+                let resultMessage = formatResult(pluginId: pluginId, methodName: methodName, data: data)
+                return .result(value: resultMessage)
+            } else {
+                // 失败：返回错误信息
+                let error = result["error"] as? String ?? "未知错误"
+                throw IntentError.message("执行失败: \(error)")
+            }
+        } else {
+            // 超时
+            throw IntentError.message("执行超时，请确保应用已打开并正常运行")
+        }
+    }
+
+    /// 格式化返回结果
+    ///
+    /// 注意：为了让 Shortcuts 能够将结果作为 JSON 使用（例如提取字段），
+    /// 我们需要返回 JSON 字符串而不是格式化的文本。
+    /// Shortcuts 会自动识别 JSON 字符串并将其解析为字典/数组。
+    private func formatResult(pluginId: String, methodName: String, data: Any?) -> String {
+        guard let data = data else {
+            // 无数据，返回成功消息的 JSON
+            return "{\"success\":true,\"message\":\"\\(pluginId).\\(methodName) 执行成功\"}"
+        }
+
+        // 将数据转换为 JSON 字符串（紧凑格式，不带换行）
+        // Shortcuts 会自动解析此 JSON 字符串
+        if let jsonData = try? JSONSerialization.data(withJSONObject: data, options: []),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            return jsonString
+        }
+
+        // 如果无法转换为 JSON，返回字符串值的 JSON
+        return "{\"success\":true,\"value\":\"\(String(describing: data).replacingOccurrences(of: "\"", with: "\\\""))\"}"
     }
 
     static var parameterSummary: some ParameterSummary {

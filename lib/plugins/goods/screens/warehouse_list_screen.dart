@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
