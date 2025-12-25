@@ -7,7 +7,6 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/todo/controllers/controllers.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
-import 'package:Memento/widgets/picker/icon_picker_dialog.dart';
 
 /// 任务表单 - 使用 FormBuilderWrapper 重构版本
 ///
@@ -29,14 +28,11 @@ class TaskForm extends StatefulWidget {
 }
 
 class _TaskFormState extends State<TaskForm> {
-  /// 图标状态（需要单独管理，因为 IconTitleField 需要可变的图标状态）
-  IconData? _icon;
-
-  /// 标题控制器（用于同步 IconTitleField 和表单）
-  late final TextEditingController _titleController;
-
-  /// 表单 key（用于访问表单状态）
+  /// 表单 key（用于访问 FormBuilder 状态）
   final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
+
+  /// FormBuilderWrapper 状态引用
+  FormBuilderWrapperState? _wrapperState;
 
   // 优先级标签映射
   late final Map<TaskPriority, String> _priorityLabels = {
@@ -48,18 +44,11 @@ class _TaskFormState extends State<TaskForm> {
   @override
   void initState() {
     super.initState();
-    _icon = widget.task?.icon ?? Icons.assignment;
-    _titleController = TextEditingController(text: widget.task?.title ?? '');
-    _titleController.addListener(() {
-      // 同步标题到表单值
-      _formKey.currentState?.fields['title']?.didChange(_titleController.text);
-    });
     _updateRouteContext();
   }
 
   @override
   void dispose() {
-    _titleController.dispose();
     super.dispose();
   }
 
@@ -84,9 +73,12 @@ class _TaskFormState extends State<TaskForm> {
 
   /// 保存任务
   Future<void> _handleSubmit(Map<String, dynamic> values) async {
-    // 验证标题
-    final title = values['title'] as String?;
-    if (title == null || title.isEmpty) {
+    // 从 iconTitle 字段获取标题和图标
+    final titleIconData = values['titleIcon'] as Map?;
+    final title = titleIconData?['title'] as String? ?? '';
+    final icon = titleIconData?['icon'] as IconData?;
+
+    if (title.isEmpty) {
       Toast.error('todo_pleaseEnterTitle'.tr);
       return;
     }
@@ -117,7 +109,7 @@ class _TaskFormState extends State<TaskForm> {
         tags: tags,
         subtasks: subtasks,
         reminders: reminders,
-        icon: _icon,
+        icon: icon ?? Icons.assignment,
       );
     } else {
       // 更新现有任务
@@ -130,26 +122,13 @@ class _TaskFormState extends State<TaskForm> {
         tags: tags,
         subtasks: subtasks,
         reminders: reminders,
-        icon: _icon,
+        icon: icon ?? widget.task!.icon,
       );
       await widget.taskController.updateTask(updatedTask);
     }
 
     if (mounted) {
       Navigator.pop(context);
-    }
-  }
-
-  /// 选择图标
-  Future<void> _selectIcon() async {
-    final selectedIcon = await showIconPickerDialog(
-      context,
-      _icon ?? Icons.assignment,
-    );
-    if (selectedIcon != null && mounted) {
-      setState(() {
-        _icon = selectedIcon;
-      });
     }
   }
 
@@ -168,6 +147,7 @@ class _TaskFormState extends State<TaskForm> {
                 padding: const EdgeInsets.only(bottom: 80),
                 child: FormBuilderWrapper(
                   formKey: _formKey,
+                  onStateReady: (state) => _wrapperState = state,
                   config: FormConfig(
                     fieldSpacing: 0,
                     showSubmitButton: false,
@@ -208,13 +188,16 @@ class _TaskFormState extends State<TaskForm> {
   /// 构建表单字段配置
   List<FormFieldConfig> _buildFormFieldConfigs(String locale) {
     return [
-      // 标题（需要单独构建以支持图标选择）
+      // 图标标题字段（包含图标和标题）
       FormFieldConfig(
-        name: 'title',
-        type: FormFieldType.text,
-        initialValue: widget.task?.title ?? '',
+        name: 'titleIcon',
+        type: FormFieldType.iconTitle,
+        initialValue: widget.task != null
+            ? {'title': widget.task!.title, 'icon': widget.task!.icon}
+            : {'title': '', 'icon': Icons.assignment},
         required: true,
         validationMessage: 'todo_pleaseEnterTitle'.tr,
+        hintText: 'todo_title'.tr,
       ),
 
       // 描述
@@ -365,7 +348,20 @@ class _TaskFormState extends State<TaskForm> {
         ),
       ),
       child: ElevatedButton(
-        onPressed: () => _formKey.currentState?.save(),
+        onPressed: () async {
+          // 使用 FormBuilderWrapperState 保存并验证所有字段
+          if (_wrapperState != null) {
+            final isValid = _wrapperState!.saveAndValidate();
+            if (isValid) {
+              await _handleSubmit(_wrapperState!.currentValues);
+            }
+          } else {
+            final fbState = _formKey.currentState;
+            if (fbState != null && fbState.saveAndValidate()) {
+              await _handleSubmit(fbState.value);
+            }
+          }
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: _primaryColor,
           foregroundColor: Colors.white,
@@ -387,15 +383,10 @@ class _TaskFormState extends State<TaskForm> {
   Widget _buildBasicInfoGroup(List<Widget> fields) {
     return FormFieldGroup(
       children: [
-        // 标题输入（带图标选择）
+        // 图标标题字段
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: IconTitleField(
-            controller: _titleController,
-            icon: _icon,
-            onIconTap: _selectIcon,
-            hintText: 'todo_title'.tr,
-          ),
+          child: fields[0], // titleIcon field
         ),
         // 描述输入
         Padding(

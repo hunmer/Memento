@@ -7,6 +7,7 @@ import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:Memento/plugins/timer/views/add_timer_item_dialog.dart';
 import 'package:Memento/plugins/contact/models/custom_activity_event_model.dart';
 import 'form_field_wrapper.dart';
+import '../picker/icon_picker_dialog.dart';
 import 'index.dart';
 
 /// 表单字段类型枚举
@@ -282,8 +283,11 @@ class FormBuilderWrapper extends StatefulWidget {
   /// 表单配置
   final FormConfig config;
 
-  /// 表单 key（可外部提供以便访问表单状态）
+  /// 表单 key（用于 FormBuilder）
   final GlobalKey<FormBuilderState>? formKey;
+
+  /// 状态就绪回调（用于外部访问 wrapper 状态）
+  final void Function(FormBuilderWrapperState state)? onStateReady;
 
   /// 自定义按钮构建器
   final Widget Function(BuildContext context, VoidCallback onSubmit, VoidCallback onReset)? buttonBuilder;
@@ -295,6 +299,7 @@ class FormBuilderWrapper extends StatefulWidget {
     super.key,
     required this.config,
     this.formKey,
+    this.onStateReady,
     this.buttonBuilder,
     this.contentBuilder,
   });
@@ -320,6 +325,8 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
     for (final field in widget.config.fields) {
       _fieldKeys[field.name] = GlobalKey<WrappedFormFieldState>();
     }
+    // 回调通知状态已准备就绪
+    widget.onStateReady?.call(this);
   }
 
   @override
@@ -338,6 +345,22 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
 
   // 获取当前表单值（公共方法）
   Map<String, dynamic> get currentValues => _currentValues;
+
+  /// 保存并验证所有字段
+  /// 先调用 FormBuilder 的 saveAndValidate，然后保存所有 WrappedField 的值
+  bool saveAndValidate() {
+    // 先调用 FormBuilder 的 saveAndValidate
+    final fbState = _fbKey.currentState;
+    if (fbState != null) {
+      fbState.save();
+      // 触发所有 WrappedField 的 save()
+      for (final fieldKey in _fieldKeys.values) {
+        fieldKey.currentState?.save();
+      }
+      return fbState.validate();
+    }
+    return false;
+  }
 
   // 更新指定字段的值（公共方法）
   void patchValue(Map<String, dynamic> values) {
@@ -858,44 +881,48 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
 
   // 构建图标标题字段
   Widget _buildIconTitleField(FormFieldConfig config, GlobalKey fieldKey) {
-    final initialIcon = config.prefixIcon;
-
     return WrappedFormField(
       key: fieldKey,
       name: config.name,
-      initialValue: config.initialValue?.toString() ?? '',
+      initialValue: config.initialValue,
       enabled: config.enabled,
       onChanged: config.onChanged,
+      onSaved: (value) {
+        // 获取当前状态的值并同步到 FormBuilder
+        final state = (fieldKey as GlobalKey<WrappedFormFieldState>).currentState;
+        if (state != null) {
+          // 直接使用 getValue() 获取当前值
+          final currentValue = state.getValue();
+          state.setValue(currentValue);
+        }
+      },
       builder: (context, value, setValue) {
-        late TextEditingController controller;
-        try {
-          controller = TextEditingController(text: value.toString());
-          controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
-        } catch (e) {
-          controller = TextEditingController(text: value.toString());
+        // 从当前值中提取标题和图标
+        String currentTitle = '';
+        IconData? currentIcon;
+
+        if (value is Map) {
+          currentTitle = value['title']?.toString() ?? '';
+          currentIcon = value['icon'] as IconData?;
+        } else if (value is String) {
+          currentTitle = value;
         }
 
-        // 需要单独存储图标状态
-        IconData currentIcon = initialIcon ?? Icons.folder;
-
-        return IconTitleField(
-          controller: controller,
-          icon: currentIcon,
+        // 使用 StatefulWidget 来管理图标状态和 controller
+        return _IconTitleFieldWrapper(
+          initialTitle: currentTitle,
+          initialIcon: currentIcon ?? config.prefixIcon ?? Icons.assignment,
           hintText: config.hintText ?? '输入标题',
-          onIconTap: () {
-            // 简单演示，实际可以弹图标选择器
-            currentIcon = currentIcon == Icons.folder ? Icons.folder_open : Icons.folder;
-            setState(() {});
-            config.onChanged?.call(currentIcon);
-          },
+          onValueChanged: setValue,
         );
       },
       getValue: () {
-        // 返回文本值
-        return null;
+        // 直接从当前 state 获取值
+        return (fieldKey as GlobalKey<WrappedFormFieldState>).currentState?.getValue();
       },
       onReset: () {
-        // 重置逻辑
+        // 重置为初始值
+        (fieldKey as GlobalKey<WrappedFormFieldState>).currentState?.reset();
       },
     );
   }
@@ -1637,7 +1664,18 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
       return Padding(
         padding: const EdgeInsets.only(top: 16),
         child: InkWell(
-          onTap: submitForm,
+          onTap: () async {
+            // 同时调用 FormBuilder 的 saveAndValidate 和我们的 _submitFormInternal
+            final fbState = widget.formKey?.currentState;
+            if (fbState != null) {
+              final isValid = fbState.saveAndValidate();
+              if (isValid) {
+                _submitFormInternal();
+              }
+            } else {
+              _submitFormInternal();
+            }
+          },
           child: widget.config.submitButtonWidget,
         ),
       );
@@ -1659,11 +1697,101 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
             ),
           if (widget.config.showSubmitButton)
             FilledButton(
-              onPressed: submitForm,
+              onPressed: () async {
+                // 同时调用 FormBuilder 的 saveAndValidate 和我们的 _submitFormInternal
+                final fbState = widget.formKey?.currentState;
+                if (fbState != null) {
+                  final isValid = fbState.saveAndValidate();
+                  if (isValid) {
+                    _submitFormInternal();
+                  }
+                } else {
+                  _submitFormInternal();
+                }
+              },
               child: Text(widget.config.submitButtonText),
             ),
         ],
       ),
+    );
+  }
+}
+
+/// 图标标题字段包装器 - StatefulWidget 来管理图标状态
+class _IconTitleFieldWrapper extends StatefulWidget {
+  final String initialTitle;
+  final IconData initialIcon;
+  final String hintText;
+  final ValueChanged<Map<String, dynamic>> onValueChanged;
+
+  const _IconTitleFieldWrapper({
+    required this.initialTitle,
+    required this.initialIcon,
+    required this.hintText,
+    required this.onValueChanged,
+  });
+
+  @override
+  State<_IconTitleFieldWrapper> createState() => _IconTitleFieldWrapperState();
+}
+
+class _IconTitleFieldWrapperState extends State<_IconTitleFieldWrapper> {
+  late TextEditingController _controller;
+  late IconData _currentIcon;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialTitle);
+    _currentIcon = widget.initialIcon;
+    // 初始化时设置值
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateValue();
+    });
+  }
+
+  @override
+  void didUpdateWidget(_IconTitleFieldWrapper oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 如果初始图标变化，更新图标
+    if (oldWidget.initialIcon != widget.initialIcon) {
+      _currentIcon = widget.initialIcon;
+      _updateValue();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _updateValue() {
+    widget.onValueChanged({
+      'title': _controller.text,
+      'icon': _currentIcon,
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconTitleField(
+      controller: _controller,
+      icon: _currentIcon,
+      hintText: widget.hintText,
+      onChanged: (text) => _updateValue(),
+      onIconTap: () async {
+        final selectedIcon = await showIconPickerDialog(
+          context,
+          _currentIcon,
+        );
+        if (selectedIcon != null) {
+          setState(() {
+            _currentIcon = selectedIcon;
+          });
+          _updateValue();
+        }
+      },
     );
   }
 }

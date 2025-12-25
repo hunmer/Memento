@@ -12,7 +12,7 @@ class TaskListView extends StatefulWidget {
   final List<Task> tasks;
   final Function(Task) onTaskTap;
   final Function(Task, TaskStatus) onTaskStatusChanged;
-  final Function(Task) onTaskDismissed;
+  final Future<void> Function(Task) onTaskDismissed;
   final Function(Task)? onTaskEdit;
   final Function(String taskId, String subtaskId, bool isCompleted)?
   onSubtaskStatusChanged;
@@ -99,7 +99,7 @@ class _TaskCard extends StatefulWidget {
   final Task task;
   final VoidCallback onTap;
   final Function(TaskStatus) onStatusChanged;
-  final VoidCallback onDismissed;
+  final Future<void> Function() onDismissed;
   final Function(Task)? onTaskEdit;
   final Function(String taskId, String subtaskId, bool isCompleted)?
   onSubtaskStatusChanged;
@@ -277,31 +277,7 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
             }
           },
           onDelete: () async {
-            // 显示删除确认对话框
-            final confirmed = await showDialog<bool>(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: Text('todo_deleteTaskTitle'.tr),
-                  content: Text('${'todo_deleteTaskMessage'.tr.replaceFirst('此任务', '')}"${widget.task.title}" 吗？'),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: Text('todo_cancel'.tr),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
-                      child: Text('todo_delete'.tr),
-                    ),
-                  ],
-                );
-              },
-            ) ?? false;
-
-            if (confirmed) {
-              widget.onDismissed();
-            }
+            await widget.onDismissed();
           },
         );
       },
@@ -320,31 +296,7 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
         trailingActions: [
           SwipeActionPresets.delete(
             onTap: () async {
-              // 右滑删除任务 - 显示确认对话框
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('todo_deleteTaskTitle'.tr),
-                    content: Text('${'todo_deleteTaskMessage'.tr.replaceFirst('此任务', '')}"${widget.task.title}" 吗？'),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: Text('todo_cancel'.tr),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        style: TextButton.styleFrom(foregroundColor: Colors.red),
-                        child: Text('todo_delete'.tr),
-                      ),
-                    ],
-                  );
-                },
-              ) ?? false;
-
-              if (confirmed) {
-                widget.onDismissed();
-              }
+              await widget.onDismissed();
             },
           ),
         ],
