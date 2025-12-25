@@ -58,6 +58,11 @@ abstract class FormFieldWrapperState<T extends FormFieldWrapper> extends State<T
     }
   }
 
+  /// 保存值（由 onSaved 回调使用）
+  void save() {
+    // 默认实现为空，子类可以覆盖
+  }
+
   @override
   void initState() {
     super.initState();
@@ -75,9 +80,45 @@ abstract class FormFieldWrapperState<T extends FormFieldWrapper> extends State<T
 
 /// 表单字段包装器状态（公开类）
 class WrappedFormFieldState extends FormFieldWrapperState<WrappedFormField> {
+  /// 防止 setValue 中重复调用 save 的标志
+  bool _isSaving = false;
+
   @override
   Widget build(BuildContext context) {
     return widget.builder(context, _value, (value) => setValue(value));
+  }
+
+  @override
+  dynamic getValue() {
+    // 优先使用自定义的 getValue 回调
+    if (widget.getValue != null) {
+      return widget.getValue!();
+    }
+    return _value;
+  }
+
+  @override
+  void setValue(dynamic value) {
+    if (widget.enabled) {
+      final wasSaving = _isSaving;
+      _isSaving = true;
+      try {
+        setState(() {
+          _value = value;
+        });
+        widget.onChanged?.call(value);
+      } finally {
+        _isSaving = wasSaving;
+      }
+    }
+  }
+
+  @override
+  void save() {
+    // 如果不在 setValue 调用的 save 中，则调用 onSaved
+    if (!_isSaving) {
+      widget.onSaved?.call(_value);
+    }
   }
 }
 
@@ -91,6 +132,9 @@ class WrappedFormField extends FormFieldWrapper {
   /// 获取当前值的回调
   final dynamic Function()? getValue;
 
+  /// 保存回调（带当前值参数）
+  final void Function(dynamic value)? onSaved;
+
   /// 重置回调
   final VoidCallback? onReset;
 
@@ -102,6 +146,7 @@ class WrappedFormField extends FormFieldWrapper {
     super.enabled,
     required this.builder,
     this.getValue,
+    this.onSaved,
     this.onReset,
   });
 

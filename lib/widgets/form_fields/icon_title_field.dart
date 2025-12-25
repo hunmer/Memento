@@ -22,6 +22,9 @@ class IconTitleField extends StatelessWidget {
   /// 文本样式
   final TextStyle? textStyle;
 
+  /// 文本变化回调
+  final ValueChanged<String>? onChanged;
+
   const IconTitleField({
     super.key,
     required this.controller,
@@ -29,6 +32,7 @@ class IconTitleField extends StatelessWidget {
     required this.onIconTap,
     required this.hintText,
     this.textStyle,
+    this.onChanged,
   });
 
   @override
@@ -59,6 +63,7 @@ class IconTitleField extends StatelessWidget {
         Expanded(
           child: TextField(
             controller: controller,
+            onChanged: onChanged,
             style: textStyle ??
                 TextStyle(
                   fontSize: 20,

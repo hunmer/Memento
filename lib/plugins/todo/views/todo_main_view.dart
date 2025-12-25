@@ -319,8 +319,8 @@ class _TodoMainViewState extends State<TodoMainView> {
                 onTaskStatusChanged: (task, status) {
                   _plugin.taskController.updateTaskStatus(task.id, status);
                 },
-                onTaskDismissed: (task) {
-                  _plugin.taskController.deleteTask(task.id);
+                onTaskDismissed: (task) async {
+                  await _plugin.taskController.deleteTask(task.id);
                 },
                 onTaskEdit: (task) {
                   NavigationHelper.push(
