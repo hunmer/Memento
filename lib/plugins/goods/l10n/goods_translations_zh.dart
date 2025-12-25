@@ -112,6 +112,7 @@ const Map<String, String> goodsTranslationsZh = {
   'goods_dateTime': '日期时间',
   'goods_usageHistory': '使用历史',
   'goods_totalGoods': '物品总数',
+  'goods_warehouse': '仓库',
   'goods_warehouseActions': '仓库操作',
 
   // Home Widget Strings

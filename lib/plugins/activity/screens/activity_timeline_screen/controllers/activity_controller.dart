@@ -182,8 +182,22 @@ class ActivityController {
       }
 
       // 设置开始时间为最后一个活动的结束时间，如果没有活动则为当前时间前1小时
-      initialStartTime =
-          lastActivityEndTime ?? now.subtract(const Duration(hours: 1));
+      // 但不能早于当天的00:00
+      if (lastActivityEndTime != null) {
+        initialStartTime = lastActivityEndTime;
+      } else {
+        final oneHourBefore = now.subtract(const Duration(hours: 1));
+        final dayStart = DateTime(
+          selectedDate.year,
+          selectedDate.month,
+          selectedDate.day,
+          0,
+          0,
+        );
+        initialStartTime = oneHourBefore.isAfter(dayStart)
+            ? oneHourBefore
+            : dayStart;
+      }
 
       // 设置结束时间为当前时间
       initialEndTime = now;
@@ -195,30 +209,44 @@ class ActivityController {
     return SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      builder: (context) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.85,
-        child: ActivityForm(
-          selectedDate: selectedDate,
-          initialStartTime: initialStartTime,
-          initialEndTime: initialEndTime,
-          lastActivityEndTime: lastActivityEndTime,
-          recentMoods: recentMoods,
-          recentTags: recentTags,
-          onSave: (ActivityRecord activity) async {
-            await activityService.saveActivity(activity);
-            if (activity.tags.isNotEmpty) {
-              onTagsUpdated(activity.tags);
-              await _updateRecentTags(activity.tags);
-            }
-            if (activity.mood != null && activity.mood!.isNotEmpty) {
-              await _updateRecentMood(activity.mood!);
-            }
-            // 发送活动添加事件
-            _notifyEvent('added', activity);
-            await loadActivities(selectedDate);
-          },
-        ),
-      ),
+      builder: (context) {
+        final mediaQuery = MediaQuery.of(context);
+        final keyboardHeight = mediaQuery.viewInsets.bottom;
+        final screenHeight = mediaQuery.size.height;
+
+        // 计算内容高度：考虑键盘占用的空间
+        // 当键盘弹出时,使用剩余空间的85%,但不超过原始高度
+        final maxHeight = screenHeight * 0.85;
+        final availableHeight = screenHeight - keyboardHeight;
+        final contentHeight = availableHeight < maxHeight
+            ? availableHeight * 0.9  // 键盘弹出时使用剩余空间的90%
+            : maxHeight;             // 无键盘时使用屏幕的85%
+
+        return SizedBox(
+          height: contentHeight,
+          child: ActivityForm(
+            selectedDate: selectedDate,
+            initialStartTime: initialStartTime,
+            initialEndTime: initialEndTime,
+            lastActivityEndTime: lastActivityEndTime,
+            recentMoods: recentMoods,
+            recentTags: recentTags,
+            onSave: (ActivityRecord activity) async {
+              await activityService.saveActivity(activity);
+              if (activity.tags.isNotEmpty) {
+                onTagsUpdated(activity.tags);
+                await _updateRecentTags(activity.tags);
+              }
+              if (activity.mood != null && activity.mood!.isNotEmpty) {
+                await _updateRecentMood(activity.mood!);
+              }
+              // 发送活动添加事件
+              _notifyEvent('added', activity);
+              await loadActivities(selectedDate);
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -229,29 +257,45 @@ class ActivityController {
       SmoothBottomSheet.show(
         context: context,
         isScrollControlled: true,
-        builder: (context) => SizedBox(
-          height: MediaQuery.of(context).size.height * 0.85,
-          child: ActivityForm(
-            activity: activity,
-            recentMoods: recentMoods,
-            recentTags: recentTags,
-            onSave: (ActivityRecord updatedActivity) async {
-              await activityService.updateActivity(
-                activity,
-                updatedActivity,
-              );
-              if (updatedActivity.tags.isNotEmpty) {
-                await _updateRecentTags(updatedActivity.tags);
-              }
-              if (updatedActivity.mood != null &&
-                  updatedActivity.mood!.isNotEmpty) {
-                await _updateRecentMood(updatedActivity.mood!);
-              }
-              await loadActivities(activity.startTime);
-            },
-            selectedDate: activity.startTime,
-          ),
-        ),
+        builder: (context) {
+          final mediaQuery = MediaQuery.of(context);
+          final keyboardHeight = mediaQuery.viewInsets.bottom;
+          final screenHeight = mediaQuery.size.height;
+
+          // 计算内容高度：考虑键盘占用的空间
+          // 当键盘弹出时,使用剩余空间的85%,但不超过原始高度
+          final maxHeight = screenHeight * 0.85;
+          final availableHeight = screenHeight - keyboardHeight;
+          final contentHeight = availableHeight < maxHeight
+              ? availableHeight * 0.9  // 键盘弹出时使用剩余空间的90%
+              : maxHeight;             // 无键盘时使用屏幕的85%
+
+          return SizedBox(
+            height: contentHeight,
+            child: ActivityForm(
+              activity: activity,
+              recentMoods: recentMoods,
+              recentTags: recentTags,
+              onSave: (ActivityRecord updatedActivity) async {
+                await activityService.updateActivity(
+                  activity,
+                  updatedActivity,
+                );
+                if (updatedActivity.tags.isNotEmpty) {
+                  await _updateRecentTags(updatedActivity.tags);
+                }
+                if (updatedActivity.mood != null &&
+                    updatedActivity.mood!.isNotEmpty) {
+                  await _updateRecentMood(updatedActivity.mood!);
+                }
+                // 发送活动更新事件
+                _notifyEvent('updated', updatedActivity);
+                await loadActivities(activity.startTime);
+              },
+              selectedDate: activity.startTime,
+            ),
+          );
+        },
       );
     });
   }

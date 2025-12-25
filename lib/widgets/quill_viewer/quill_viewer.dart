@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 
 /// Quill 内容查看器（只读模式）
 /// 用于显示 Quill Delta 格式的内容
@@ -55,6 +57,9 @@ class QuillViewer extends StatelessWidget {
           config: quill.QuillEditorConfig(
             padding: EdgeInsets.zero,
             customStyles: customStyles,
+            embedBuilders: kIsWeb
+                ? FlutterQuillEmbeds.editorWebBuilders()
+                : FlutterQuillEmbeds.editorBuilders(),
           ),
         ),
       );

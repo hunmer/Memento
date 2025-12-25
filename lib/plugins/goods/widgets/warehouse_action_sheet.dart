@@ -24,12 +24,10 @@ class WarehouseActionSheet extends StatelessWidget {
     await Navigator.of(context).push(
       ModalSheetRoute(
         swipeDismissible: true,
-        builder: (context) => Sheet(
-          child: WarehouseActionSheet(
-            onEdit: onEdit,
-            onDelete: onDelete,
-          ),
-        ),
+        builder:
+            (context) => Sheet(
+              child: WarehouseActionSheet(onEdit: onEdit, onDelete: onDelete),
+            ),
       ),
     );
   }
@@ -44,80 +42,33 @@ class WarehouseActionSheet extends StatelessWidget {
         color: theme.scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 拖拽指示器
-            _buildDragHandle(theme),
-
-            // 标题
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-              child: Text(
-                'goods_warehouseActions'.tr,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            const Divider(height: 1),
-
-            // 操作选项
-            _buildActionItem(
-              context,
-              icon: Icons.edit,
-              label: 'goods_editWarehouse'.tr,
-              color: Colors.blue,
-              isDark: isDark,
-              onTap: () {
-                Navigator.pop(context);
-                onEdit();
-              },
-            ),
-
-            _buildActionItem(
-              context,
-              icon: Icons.delete,
-              label: 'goods_deleteWarehouse'.tr,
-              color: Colors.red,
-              isDark: isDark,
-              onTap: () {
-                Navigator.pop(context);
-                onDelete();
-              },
-            ),
-
-            // 取消按钮
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: Text('goods_cancel'.tr),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 构建拖拽指示器
-  Widget _buildDragHandle(ThemeData theme) {
-    return Container(
-      width: 40,
-      height: 4,
-      margin: const EdgeInsets.only(top: 12, bottom: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.outline.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(2),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 操作选项
+          _buildActionItem(
+            context,
+            icon: Icons.edit,
+            label: 'goods_editWarehouse'.tr,
+            color: Colors.blue,
+            isDark: isDark,
+            onTap: () {
+              Navigator.pop(context);
+              onEdit();
+            },
+          ),
+          _buildActionItem(
+            context,
+            icon: Icons.delete,
+            label: 'goods_deleteWarehouse'.tr,
+            color: Colors.red,
+            isDark: isDark,
+            onTap: () {
+              Navigator.pop(context);
+              onDelete();
+            },
+          ),
+        ],
       ),
     );
   }

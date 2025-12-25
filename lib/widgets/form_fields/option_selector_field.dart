@@ -106,14 +106,12 @@ class OptionSelectorField extends StatelessWidget {
   }
 
   Widget _buildHorizontalScroll(ThemeData theme) {
-    return Scrollbar(
-      thumbVisibility: true,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
-        child: Row(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      child: Row(
           children: options.map((option) {
             final isSelected = selectedId == option.id;
             return Padding(
@@ -179,7 +177,6 @@ class OptionSelectorField extends StatelessWidget {
               ),
             );
           }).toList(),
-        ),
       ),
     );
   }

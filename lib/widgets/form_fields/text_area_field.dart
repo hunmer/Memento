@@ -42,6 +42,9 @@ class TextAreaField extends StatelessWidget {
   /// 是否使用inline模式（无边框，适用于 FormFieldGroup）
   final bool inline;
 
+  /// 是否自动聚焦
+  final bool autofocus;
+
   const TextAreaField({
     super.key,
     required this.controller,
@@ -55,6 +58,7 @@ class TextAreaField extends StatelessWidget {
     this.helperText,
     this.helperStyle,
     this.inline = false,
+    this.autofocus = false,
   });
 
   @override
@@ -85,6 +89,7 @@ class TextAreaField extends StatelessWidget {
               minLines: minLines,
               enabled: enabled,
               validator: validator,
+              autofocus: autofocus,
               style: TextStyle(color: theme.colorScheme.onSurface),
               decoration: InputDecoration(
                 border: InputBorder.none,
@@ -108,6 +113,7 @@ class TextAreaField extends StatelessWidget {
       minLines: minLines,
       enabled: enabled,
       validator: validator,
+      autofocus: autofocus,
       style: TextStyle(color: theme.colorScheme.onSurface),
       decoration: InputDecoration(
         labelText: labelText,

@@ -116,11 +116,21 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
 
     if (confirmed == true) {
       for (var path in selectedPaths) {
-        final entity =
-            FileSystemEntity.isDirectorySync(path)
-                ? Directory(path)
-                : File(path);
-        await entity.delete(recursive: true);
+        try {
+          // 检查文件/目录是否存在
+          final exists = await FileSystemEntity.type(path) != FileSystemEntityType.notFound;
+          if (!exists) {
+            debugPrint('文件不存在，跳过删除: $path');
+            continue;
+          }
+          final entity =
+              FileSystemEntity.isDirectorySync(path)
+                  ? Directory(path)
+                  : File(path);
+          await entity.delete(recursive: true);
+        } catch (e) {
+          debugPrint('删除失败 $path: $e');
+        }
       }
       setState(() {
         selectedItems.clear();

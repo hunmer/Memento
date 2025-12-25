@@ -131,7 +131,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
                   showResetButton: false,
                   fields: fieldConfigs,
                   onSubmit: (values) {},
-              ),
+                ),
                 contentBuilder: (context, fields) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,6 +216,9 @@ class ActivityFormState extends State<ActivityFormWidget> {
                       ),
                       const SizedBox(height: 16),
 
+                      // 标签选择 (fields[3])
+                      fields[3],
+
                       // 心情选择 (fields[1])
                       fields[1],
                       const SizedBox(height: 16),
@@ -223,9 +226,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
                       // 描述输入 (fields[2])
                       fields[2],
                       const SizedBox(height: 16),
-
-                      // 标签选择 (fields[3])
-                      fields[3],
                     ],
                   );
                 },
@@ -439,7 +439,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
   /// 带验证的保存处理
   void _handleSaveWithValidation() async {
-
     // 验证时间
     if (_currentEndTime == null || _currentStartTime == null) {
       toastService.showToast('请选择活动时间');
@@ -464,7 +463,9 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
     // 检查时间是否有效
     if (endDateTime.isBefore(startDateTime)) {
-      toastService.showToast('${'activity_endTime'.tr}必须晚于${'activity_startTime'.tr}');
+      toastService.showToast(
+        '${'activity_endTime'.tr}必须晚于${'activity_startTime'.tr}',
+      );
       return;
     }
 
