@@ -4,7 +4,7 @@ import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:Memento/core/widgets/custom_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -1037,12 +1037,8 @@ class _BillMainViewState extends State<BillMainView>
   final List<Color> _colors = [
     Colors.green,
     Colors.blue,
-    Colors.orange,
-    Colors.purple,
   ];
-  static const double _bottomBarOffset = 12.0;
   final GlobalKey _bottomBarKey = GlobalKey(debugLabel: 'bill_bottom_bar');
-  double _bottomBarHeight = kBottomNavigationBarHeight + _bottomBarOffset * 2;
 
   @override
   void initState() {
@@ -1083,191 +1079,67 @@ class _BillMainViewState extends State<BillMainView>
     super.dispose();
   }
 
-  void _scheduleBottomBarHeightMeasurement() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final renderObject = _bottomBarKey.currentContext?.findRenderObject();
-      if (renderObject is RenderBox) {
-        final safeAreaBottom = MediaQuery.of(context).padding.bottom;
-        final newHeight =
-            renderObject.size.height + _bottomBarOffset * 2 + safeAreaBottom;
-        if ((newHeight - _bottomBarHeight).abs() > 0.5) {
-          setState(() {
-            _bottomBarHeight = newHeight;
-          });
-        }
-      }
-    });
+  /// 构建 FAB
+  Widget _buildFab() {
+    return FloatingActionButton(
+      onPressed: () {
+        NavigationHelper.openContainerWithHero(
+          context,
+          (context) => BillEditScreen(
+            billPlugin: billPlugin,
+            accountId: billPlugin.selectedAccount?.id ?? '',
+          ),
+        );
+      },
+      backgroundColor: const Color(0xFF3498DB),
+      elevation: 4,
+      shape: const CircleBorder(),
+      child: Icon(
+        Icons.add,
+        color: const Color(0xFF3498DB).computeLuminance() > 0.5
+            ? Colors.black
+            : Colors.white,
+        size: 32,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    _scheduleBottomBarHeightMeasurement();
-
     // 如果没有账户，显示加载指示器
     if (billPlugin.accounts.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color unselectedColor = colorScheme.onSurface.withOpacity(0.6);
-    final Color bottomAreaColor = colorScheme.surface;
-    final mediaQuery = MediaQuery.of(context);
-
-    return BottomBar(
-      fit: StackFit.expand,
-      icon:
-          (width, height) => Center(
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                // 滚动到顶部功能
-                if (_tabController.indexIsChanging) return;
-
-                // 这里可以添加滚动到顶部的逻辑
-                // 由于我们使用的是TabBarView，可以考虑切换到第一个tab
-                if (_currentPage != 0) {
-                  _tabController.animateTo(0);
-                }
-              },
-              icon: Icon(
-                Icons.keyboard_arrow_up,
-                color: _colors[_currentPage],
-                size: width,
-              ),
-            ),
-          ),
-      borderRadius: BorderRadius.circular(25),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.decelerate,
-      showIcon: true,
-      width: mediaQuery.size.width * 0.85,
-      barColor: colorScheme.surface,
-      start: 2,
-      end: 0,
-      offset: _bottomBarOffset,
-      barAlignment: Alignment.bottomCenter,
-      iconHeight: 35,
-      iconWidth: 35,
-      reverse: false,
-      barDecoration: BoxDecoration(
-        color: _colors[_currentPage].withOpacity(0.1),
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: _colors[_currentPage].withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      iconDecoration: BoxDecoration(
-        color: _colors[_currentPage].withOpacity(0.8),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: _colors[_currentPage].withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      hideOnScroll: true,
-      scrollOpposite: false,
-      onBottomBarHidden: () {},
-      onBottomBarShown: () {},
-      body:
-          (context, controller) => Stack(
-            children: [
-              Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: _bottomBarHeight),
-                  child: TabBarView(
-                    controller: _tabController,
-                    dragStartBehavior: DragStartBehavior.down,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      BillListScreenSupercupertino(
-                        billPlugin: billPlugin,
-                        accountId: billPlugin.selectedAccount?.id ?? '',
-                      ),
-                      BillStatsScreenSupercupertino(
-                        billPlugin: billPlugin,
-                        accountId: billPlugin.selectedAccount?.id ?? '',
-                        startDate: DateTime.now().subtract(
-                          const Duration(days: 30),
-                        ), // 默认显示最近30天
-                        endDate: DateTime.now(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  height: _bottomBarHeight,
-                  color: bottomAreaColor,
-                ),
-              ),
-            ],
-          ),
-      child: Stack(
-        key: _bottomBarKey,
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
+    return CustomBottomBar(
+      colors: _colors,
+      currentIndex: _currentPage,
+      tabController: _tabController,
+      bottomBarKey: _bottomBarKey,
+      body: (context, controller) => TabBarView(
+        controller: _tabController,
+        dragStartBehavior: DragStartBehavior.down,
+        physics: const NeverScrollableScrollPhysics(),
         children: [
-          TabBar(
-            controller: _tabController,
-            dividerColor: Colors.transparent,
-            overlayColor: WidgetStateProperty.all(Colors.transparent),
-            indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
-            indicator: UnderlineTabIndicator(
-              borderSide: BorderSide(
-                color:
-                    _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
-                width: 4,
-              ),
-              insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            ),
-            labelColor:
-                _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
-            unselectedLabelColor: unselectedColor,
-            tabs: const [
-              Tab(icon: Icon(Icons.receipt_long), text: '账单列表'),
-              Tab(icon: Icon(Icons.bar_chart), text: '统计分析'),
-            ],
+          BillListScreenSupercupertino(
+            billPlugin: billPlugin,
+            accountId: billPlugin.selectedAccount?.id ?? '',
           ),
-          Positioned(
-            top: -25,
-            child: Builder(
-              builder: (context) {
-                const fabColor = Color(0xFF3498DB);
-                return FloatingActionButton(
-                  onPressed: () {
-                    NavigationHelper.openContainerWithHero(
-                      context,
-                      (context) => BillEditScreen(
-                        billPlugin: billPlugin,
-                        accountId: billPlugin.selectedAccount?.id ?? '',
-                      ),
-                    );
-                  },
-                  backgroundColor: fabColor,
-                  elevation: 4,
-                  shape: const CircleBorder(),
-                  child: Icon(
-                    Icons.add,
-                    color: fabColor.computeLuminance() > 0.5
-                        ? Colors.black
-                        : Colors.white,
-                    size: 32,
-                  ),
-                );
-              },
-            ),
+          BillStatsScreenSupercupertino(
+            billPlugin: billPlugin,
+            accountId: billPlugin.selectedAccount?.id ?? '',
+            startDate: DateTime.now().subtract(
+              const Duration(days: 30),
+            ), // 默认显示最近30天
+            endDate: DateTime.now(),
           ),
         ],
       ),
+      fab: _buildFab(),
+      children: const [
+        Tab(icon: Icon(Icons.receipt_long), text: '账单列表'),
+        Tab(icon: Icon(Icons.bar_chart), text: '统计分析'),
+      ],
     );
   }
 

@@ -5,7 +5,7 @@ import 'package:Memento/core/app_initializer.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:Memento/core/widgets/custom_bottom_bar.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
@@ -851,9 +851,7 @@ class _ActivityMainViewState extends State<ActivityMainView>
     Colors.blue,
     Colors.orange,
   ];
-  static const double _bottomBarOffset = 12.0;
   final GlobalKey _bottomBarKey = GlobalKey(debugLabel: 'activity_bottom_bar');
-  double _bottomBarHeight = kBottomNavigationBarHeight + _bottomBarOffset * 2;
 
   @override
   void initState() {
@@ -902,195 +900,75 @@ class _ActivityMainViewState extends State<ActivityMainView>
     super.dispose();
   }
 
-  void _scheduleBottomBarHeightMeasurement() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final renderObject = _bottomBarKey.currentContext?.findRenderObject();
-      if (renderObject is RenderBox) {
-        final safeAreaBottom = MediaQuery.of(context).padding.bottom;
-        final newHeight =
-            renderObject.size.height + _bottomBarOffset * 2 + safeAreaBottom;
-        if ((newHeight - _bottomBarHeight).abs() > 0.5) {
-          setState(() {
-            _bottomBarHeight = newHeight;
-          });
-        }
-      }
-    });
+  /// 构建 FAB
+  Widget _buildFab() {
+    return FloatingActionButton(
+      backgroundColor: ActivityPlugin.instance.color,
+      elevation: 4,
+      shape: const CircleBorder(),
+      onPressed: () async {
+        final activityService = ActivityPlugin.instance.activityService;
+        final today = DateTime.now();
+
+        if (!context.mounted) return;
+
+        // 创建控制器实例并调用 addActivity 方法
+        final controller = ActivityController(
+          activityService: activityService,
+          onActivitiesChanged: () {},
+        );
+
+        await controller.addActivity(
+          context,
+          today,
+          null,
+          null,
+          (tags) async {
+            await activityService.saveRecentTags(tags);
+          },
+        );
+      },
+      child: Icon(
+        Icons.add,
+        color: ActivityPlugin.instance.color.computeLuminance() > 0.5
+            ? Colors.black
+            : Colors.white,
+        size: 32,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    _scheduleBottomBarHeightMeasurement();
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color unselectedColor = colorScheme.onSurface.withOpacity(0.6);
-    final Color bottomAreaColor = colorScheme.surface;
-    final mediaQuery = MediaQuery.of(context);
-
-    return BottomBar(
-      fit: StackFit.expand,
-      icon:
-          (width, height) => Center(
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                // 滚动到顶部功能
-                if (_tabController.indexIsChanging) return;
-
-                // 这里可以添加滚动到顶部的逻辑
-                // 由于我们使用的是TabBarView，可以考虑切换到第一个tab
-                if (_currentPage != 0) {
-                  _tabController.animateTo(0);
-                }
-              },
-              icon: Icon(
-                Icons.keyboard_arrow_up,
-                color: _colors[_currentPage],
-                size: width,
-              ),
-            ),
-          ),
-      borderRadius: BorderRadius.circular(25),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.decelerate,
-      showIcon: true,
-      width: mediaQuery.size.width * 0.85,
-      barColor: colorScheme.surface,
-      start: 2,
-      end: 0,
-      offset: _bottomBarOffset,
-      barAlignment: Alignment.bottomCenter,
-      iconHeight: 35,
-      iconWidth: 35,
-      reverse: false,
-      barDecoration: BoxDecoration(
-        color: _colors[_currentPage].withOpacity(0.1),
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: _colors[_currentPage].withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      iconDecoration: BoxDecoration(
-        color: _colors[_currentPage].withOpacity(0.8),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: _colors[_currentPage].withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      hideOnScroll: true,
-      scrollOpposite: false,
-      onBottomBarHidden: () {},
-      onBottomBarShown: () {},
-      body:
-          (context, controller) => Stack(
-            children: [
-              Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: _bottomBarHeight),
-                  child: TabBarView(
-                    controller: _tabController,
-                    dragStartBehavior: DragStartBehavior.down,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      const ActivityTimelineScreen(),
-                      // 懒加载统计页面：只在访问过后才初始化
-                      _visitedTabs.contains(1)
-                          ? ActivityStatisticsScreen(
-                              activityService:
-                                  ActivityPlugin.instance.activityService,
-                            )
-                          : const Center(child: CircularProgressIndicator()),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  height: _bottomBarHeight,
-                  color: bottomAreaColor,
-                ),
-              ),
-            ],
-          ),
-      child: Stack(
-        key: _bottomBarKey,
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
+    return CustomBottomBar(
+      colors: _colors,
+      currentIndex: _currentPage,
+      tabController: _tabController,
+      bottomBarKey: _bottomBarKey,
+      body: (context, controller) => TabBarView(
+        controller: _tabController,
+        dragStartBehavior: DragStartBehavior.down,
+        physics: const NeverScrollableScrollPhysics(),
         children: [
-          TabBar(
-            controller: _tabController,
-            dividerColor: Colors.transparent,
-            overlayColor: WidgetStateProperty.all(Colors.transparent),
-            indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
-            indicator: UnderlineTabIndicator(
-              borderSide: BorderSide(
-                color:
-                    _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
-                width: 4,
-              ),
-              insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            ),
-            labelColor:
-                _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
-            unselectedLabelColor: unselectedColor,
-            tabs: [
-              Tab(
-                icon: const Icon(Icons.timeline),
-                text: 'activity_timeline'.tr,
-              ),
-              Tab(
-                icon: const Icon(Icons.bar_chart),
-                text: 'activity_statistics'.tr,
-              ),
-            ],
-          ),
-          Positioned(
-            top: -25,
-            child: FloatingActionButton(
-              backgroundColor: ActivityPlugin.instance.color,
-              elevation: 4,
-              shape: const CircleBorder(),
-              child: Icon(
-                Icons.add,
-                color: ActivityPlugin.instance.color.computeLuminance() > 0.5
-                    ? Colors.black
-                    : Colors.white,
-                size: 32,
-              ),
-              onPressed: () async {
-                final activityService = ActivityPlugin.instance.activityService;
-                final today = DateTime.now();
-
-                if (!context.mounted) return;
-
-                // 创建控制器实例并调用 addActivity 方法
-                final controller = ActivityController(
-                  activityService: activityService,
-                  onActivitiesChanged: () {},
-                );
-
-                await controller.addActivity(
-                  context,
-                  today,
-                  null,
-                  null,
-                  (tags) async {
-                    await activityService.saveRecentTags(tags);
-                  },
-                );
-              },
-            ),
-          ),
+          const ActivityTimelineScreen(),
+          _visitedTabs.contains(1)
+              ? ActivityStatisticsScreen(
+                  activityService: ActivityPlugin.instance.activityService,
+                )
+              : const Center(child: CircularProgressIndicator()),
         ],
       ),
+      fab: _buildFab(),
+      children: [
+        Tab(
+          icon: const Icon(Icons.timeline),
+          text: 'activity_timeline'.tr,
+        ),
+        Tab(
+          icon: const Icon(Icons.bar_chart),
+          text: 'activity_statistics'.tr,
+        ),
+      ],
     );
   }
 }

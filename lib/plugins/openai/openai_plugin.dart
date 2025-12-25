@@ -6,9 +6,8 @@ import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'package:Memento/core/services/clipboard_service.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
-import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:Memento/core/widgets/custom_bottom_bar.dart';
 import 'package:flutter/gestures.dart';
-import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
@@ -744,7 +743,6 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late int _currentPage;
-  double _bottomBarHeight = 60; // 默认底部栏高度
   final GlobalKey _bottomBarKey = GlobalKey();
   final List<Color> _colors = [
     Colors.deepOrange,
@@ -774,22 +772,6 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
     super.dispose();
   }
 
-  /// 调度底部栏高度测量
-  void _scheduleBottomBarHeightMeasurement() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _bottomBarKey.currentContext != null) {
-        final RenderBox renderBox =
-            _bottomBarKey.currentContext!.findRenderObject() as RenderBox;
-        final newHeight = renderBox.size.height;
-        if (_bottomBarHeight != newHeight) {
-          setState(() {
-            _bottomBarHeight = newHeight;
-          });
-        }
-      }
-    });
-  }
-
   void _showPresetEditDialog() async {
     await showPresetEditDialog(
       context: context,
@@ -804,165 +786,55 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
     );
   }
 
+  /// 构建 FAB
+  Widget _buildFab() {
+    return FloatingActionButton(
+      onPressed: () {
+        if (_currentPage == 0) {
+          NavigationHelper.openContainerWithHero(context, (
+            BuildContext context,
+          ) {
+            return AgentEditScreen();
+          });
+        } else {
+          _showPresetEditDialog();
+        }
+      },
+      backgroundColor: Colors.deepOrange,
+      elevation: 4,
+      shape: const CircleBorder(),
+      child: Icon(
+        _currentPage == 0 ? Icons.smart_toy : Icons.text_snippet,
+        color: Colors.white,
+        size: 32,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    _scheduleBottomBarHeightMeasurement();
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color unselectedColor = colorScheme.onSurface.withOpacity(0.6);
-    final Color bottomAreaColor = colorScheme.surface;
-
-    return BottomBar(
-      fit: StackFit.expand,
-      icon:
-          (width, height) => Center(
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                // 滚动到顶部功能
-                if (_tabController.indexIsChanging) return;
-
-                // 切换到第一个tab
-                if (_currentPage != 0) {
-                  _tabController.animateTo(0);
-                }
-              },
-              icon: Icon(
-                Icons.keyboard_arrow_up,
-                color: _colors[_currentPage],
-                size: width,
-              ),
-            ),
-          ),
-      borderRadius: BorderRadius.circular(25),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.decelerate,
-      showIcon: true,
-      width: MediaQuery.of(context).size.width * 0.85,
-      barColor: colorScheme.surface,
-      start: 2,
-      end: 0,
-      offset: 12,
-      barAlignment: Alignment.bottomCenter,
-      iconHeight: 35,
-      iconWidth: 35,
-      reverse: false,
-      barDecoration: BoxDecoration(
-        color: _colors[_currentPage].withOpacity(0.1),
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(
-          color: _colors[_currentPage].withOpacity(0.3),
-          width: 1,
+    return CustomBottomBar(
+      colors: _colors,
+      currentIndex: _currentPage,
+      tabController: _tabController,
+      bottomBarKey: _bottomBarKey,
+      body: (context, controller) => TabBarView(
+        controller: _tabController,
+        dragStartBehavior: DragStartBehavior.down,
+        physics: const NeverScrollableScrollPhysics(),
+        children: const [AgentListScreen(), PromptPresetScreen()],
+      ),
+      fab: _buildFab(),
+      children: [
+        Tab(
+          icon: const Icon(Icons.smart_toy_outlined),
+          text: 'openai_agentsTab'.tr,
         ),
-      ),
-      iconDecoration: BoxDecoration(
-        color: _colors[_currentPage].withOpacity(0.8),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: _colors[_currentPage].withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      hideOnScroll: !UniversalPlatform.isDesktop,
-      scrollOpposite: false,
-      onBottomBarHidden: () {},
-      onBottomBarShown: () {},
-      body:
-          (context, controller) => Stack(
-            children: [
-              Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: _bottomBarHeight),
-                  child: TabBarView(
-                    controller: _tabController,
-                    dragStartBehavior: DragStartBehavior.down,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: const [AgentListScreen(), PromptPresetScreen()],
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  height: _bottomBarHeight,
-                  color: bottomAreaColor,
-                ),
-              ),
-            ],
-          ),
-      child: Stack(
-        key: _bottomBarKey,
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: [
-          TabBar(
-            controller: _tabController,
-            dividerColor: Colors.transparent,
-            overlayColor: WidgetStateProperty.all(Colors.transparent),
-            indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
-            indicator: UnderlineTabIndicator(
-              borderSide: BorderSide(
-                color:
-                    _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
-                width: 4,
-              ),
-              insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            ),
-            labelColor:
-                _currentPage < 2 ? _colors[_currentPage] : unselectedColor,
-            unselectedLabelColor: unselectedColor,
-            tabs: [
-              Tab(
-                icon: const Icon(Icons.smart_toy_outlined),
-                text: 'openai_agentsTab'.tr,
-              ),
-              Tab(
-                icon: const Icon(Icons.text_snippet_outlined),
-                text: 'openai_promptPreset'.tr,
-              ),
-            ],
-          ),
-          Positioned(
-            top: -25,
-            child:
-                _currentPage == 0
-                    ? FloatingActionButton(
-                      onPressed: () {
-                        NavigationHelper.openContainerWithHero(context, (
-                          BuildContext context,
-                        ) {
-                          return AgentEditScreen();
-                        });
-                      },
-                      backgroundColor: Colors.deepOrange,
-                      elevation: 4,
-                      shape: const CircleBorder(),
-                      child: const Icon(
-                        Icons.smart_toy,
-                        color: Colors.white,
-                        size: 32,
-                      ),
-                    )
-                    : FloatingActionButton(
-                      onPressed: () {
-                        _showPresetEditDialog();
-                      },
-                      backgroundColor: Colors.deepOrange,
-                      elevation: 4,
-                      shape: const CircleBorder(),
-                      child: const Icon(
-                        Icons.text_snippet,
-                        color: Colors.white,
-                        size: 32,
-                      ),
-                    ),
-          ),
-        ],
-      ),
+        Tab(
+          icon: const Icon(Icons.text_snippet_outlined),
+          text: 'openai_promptPreset'.tr,
+        ),
+      ],
     );
   }
 }
