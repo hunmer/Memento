@@ -615,6 +615,7 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
                               ? TextInputType.number
                               : TextInputType.text,
                       enabled: config.enabled,
+                      autofocus: false,
                       onChanged: (v) {
                         fieldState.didChange(v);
                         config.onChanged?.call(v);
@@ -653,6 +654,7 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
               ? TextInputType.number
               : TextInputType.text,
       enabled: config.enabled,
+      autofocus: false,
       onChanged: config.onChanged,
     );
   }
@@ -674,6 +676,7 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
       maxLines: (extra['maxLines'] as int?) ?? 6,
       keyboardType: TextInputType.multiline,
       enabled: config.enabled,
+      autofocus: false,
       onChanged: config.onChanged,
     );
   }

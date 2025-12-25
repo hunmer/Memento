@@ -46,6 +46,24 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       _onNotificationTapped,
     );
 
+    // 监听活动添加事件
+    eventManager.subscribe(
+      'activity_added',
+      _onActivityChanged,
+    );
+
+    // 监听活动删除事件
+    eventManager.subscribe(
+      'activity_deleted',
+      _onActivityChanged,
+    );
+
+    // 监听活动更新事件(如果存在)
+    eventManager.subscribe(
+      'activity_updated',
+      _onActivityChanged,
+    );
+
     _initializeService().then((_) {
       if (mounted) {
         setState(() {
@@ -116,10 +134,32 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       'activity_notification_tapped',
       _onNotificationTapped,
     );
+    eventManager.unsubscribe(
+      'activity_added',
+      _onActivityChanged,
+    );
+    eventManager.unsubscribe(
+      'activity_deleted',
+      _onActivityChanged,
+    );
+    eventManager.unsubscribe(
+      'activity_updated',
+      _onActivityChanged,
+    );
 
     // 清理控制器
     _viewModeController.dispose();
     super.dispose();
+  }
+
+  /// 处理活动变更事件(添加、删除、更新)
+  void _onActivityChanged(EventArgs args) {
+    debugPrint('[ActivityTimelineScreen] 收到活动变更事件: ${args.eventName}');
+
+    if (!_isInitialized || !mounted) return;
+
+    // 重新加载当前日期的活动列表
+    _activityController.loadActivities(_selectedDate);
   }
 
   /// 处理通知点击事件

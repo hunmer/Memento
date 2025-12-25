@@ -125,8 +125,10 @@ class _SheetContent extends StatelessWidget {
             // 拖拽指示器
             if (showDragHandle) _buildDragHandle(theme),
 
-            // 内容
-            builder(context),
+            // 内容 - 使用 Flexible 包裹以允许动态高度
+            Flexible(
+              child: builder(context),
+            ),
           ],
         ),
       ),

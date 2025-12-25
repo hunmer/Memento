@@ -91,7 +91,7 @@ Future<StatisticsData> loadStatisticsData(
           .map(
             (item) => RankingData(
               label: item.label,
-              value: item.value,
+              value: item.value / 60, // 转换为小时
               color: item.color,
               icon: item.icon,
             ),

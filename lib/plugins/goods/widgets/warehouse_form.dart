@@ -1,12 +1,9 @@
-import 'package:get/get.dart';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/goods/models/warehouse.dart';
-import 'package:Memento/widgets/picker/icon_picker_dialog.dart';
-import 'package:Memento/widgets/picker/image_picker_dialog.dart';
-import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 class WarehouseForm extends StatefulWidget {
@@ -26,198 +23,14 @@ class WarehouseForm extends StatefulWidget {
 }
 
 class _WarehouseFormState extends State<WarehouseForm> {
-  late TextEditingController _titleController;
-  late IconData _selectedIcon;
-  late Color _selectedColor;
-  String? _imageUrl;
-
-  @override
-  void initState() {
-    super.initState();
-    _titleController = TextEditingController(
-      text: widget.warehouse?.title ?? '',
-    );
-    _selectedIcon = widget.warehouse?.icon ?? Icons.inventory_2;
-    _selectedColor = widget.warehouse?.iconColor ?? Colors.blue;
-    _imageUrl = widget.warehouse?.imageUrl;
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pickIcon() async {
-    final IconData? result = await showIconPickerDialog(context, _selectedIcon);
-    if (result != null) {
-      setState(() {
-        _selectedIcon = result;
-      });
-    }
-  }
-
-  Future<void> _pickColor() async {
-    Color newColor = _selectedColor;
-    final Color? color = await showDialog<Color>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('app_selectBackgroundColor'.tr),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: _selectedColor,
-              onColorChanged: (color) => newColor = color,
-              showLabel: true,
-              pickerAreaHeightPercent: 0.8,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('app_ok'.tr),
-              onPressed: () {
-                Navigator.of(context).pop(newColor);
-              },
-            ),
-          ],
-        );
-      },
-    );
-    if (color != null) {
-      setState(() {
-        _selectedColor = color;
-      });
-    }
-  }
-
-  Future<void> _pickImage() async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder:
-          (context) => ImagePickerDialog(
-            initialUrl: _imageUrl,
-            saveDirectory: 'goods/warehouse_images',
-            enableCrop: true,
-            cropAspectRatio: 1 / 1,
-          ),
-    );
-    if (result != null) {
-      setState(() {
-        _imageUrl = result['url'] as String;
-      });
-    }
-  }
-
-  Widget _buildWarehouseImage() {
-    if (_imageUrl == null || _imageUrl!.isEmpty) {
-      return Icon(Icons.image, size: 24, color: _selectedColor);
-    }
-
-    if (_imageUrl!.startsWith('http://') || _imageUrl!.startsWith('https://')) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          _imageUrl!,
-          width: 24,
-          height: 24,
-          fit: BoxFit.cover,
-          errorBuilder:
-              (context, error, stackTrace) =>
-                  Icon(Icons.broken_image, size: 24, color: _selectedColor),
-        ),
-      );
-    }
-
-    return FutureBuilder<String>(
-      future: ImageUtils.getAbsolutePath(_imageUrl),
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          final file = File(snapshot.data!);
-          if (file.existsSync()) {
-            return ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.file(
-                file,
-                width: 24,
-                height: 24,
-                fit: BoxFit.cover,
-                errorBuilder:
-                    (context, error, stackTrace) => Icon(
-                      Icons.broken_image,
-                      size: 24,
-                      color: _selectedColor,
-                    ),
-              ),
-            );
-          }
-        }
-        return Icon(Icons.broken_image, size: 24, color: _selectedColor);
-      },
-    );
-  }
-
-  void _save() async {
-    final title = _titleController.text.trim();
-    if (title.isEmpty) {
-      toastService.showToast('goods_warehouseName'.tr);
-      return;
-    }
-
-    final warehouse = Warehouse(
-      id: widget.warehouse?.id ?? const Uuid().v4(),
-      title: title,
-      icon: _selectedIcon,
-      iconColor: _selectedColor,
-      imageUrl: _imageUrl,
-    );
-
-    await widget.onSave(warehouse);
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
-  }
-
-  void _delete() async {
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('goods_confirmDelete'.tr),
-            content: Text(
-              'goods_confirmDeleteWarehouseMessage'.tr.replaceFirst(
-                '%s',
-                widget.warehouse!.title,
-              ),
-            ),
-            actions: [
-              TextButton(
-                child: Text('app_cancel'.tr),
-                onPressed: () => Navigator.pop(context, false),
-              ),
-              TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.error,
-                ),
-                child: Text('app_delete'.tr),
-                onPressed: () => Navigator.pop(context, true),
-              ),
-            ],
-          ),
-    );
-
-    if (confirmed == true && widget.onDelete != null) {
-      await widget.onDelete!();
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    }
-  }
+  final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
+  Color _buttonColor = Colors.blue;
 
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.warehouse != null;
     final theme = Theme.of(context);
+    _buttonColor = widget.warehouse?.iconColor ?? Colors.blue;
 
     return Scaffold(
       body: SafeArea(
@@ -254,152 +67,107 @@ class _WarehouseFormState extends State<WarehouseForm> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 32),
-                    // Icon Display
-                    GestureDetector(
-                      onTap: _pickIcon,
-                      child: Container(
-                        width: 96,
-                        height: 96,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _selectedColor.withValues(alpha: 0.1),
-                        ),
-                        child: Icon(
-                          _selectedIcon,
-                          size: 48,
-                          color: _selectedColor,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Actions Trigger
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TextButton(
-                          onPressed: _pickIcon,
-                          child: Text(
-                            '选择图标', // TODO: Localize
-                            style: TextStyle(
-                              color: _selectedColor,
-                              fontWeight: FontWeight.w600,
-                            ),
+                    FormBuilderWrapper(
+                      formKey: _formKey,
+                      config: FormConfig(
+                        fields: [
+                          // 标题字段
+                          FormFieldConfig(
+                            name: 'title',
+                            type: FormFieldType.text,
+                            labelText: 'goods_warehouseName'.tr,
+                            hintText: 'goods_warehouseNameHint'.tr,
+                            initialValue: widget.warehouse?.title ?? '',
+                            required: true,
+                            validationMessage: 'goods_warehouseName'.tr,
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: _pickColor,
-                          child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _selectedColor,
-                              border: Border.all(
-                                color: theme.dividerColor,
-                                width: 1,
-                              ),
-                            ),
+                          // 图标选择器
+                          FormFieldConfig(
+                            name: 'icon',
+                            type: FormFieldType.iconPicker,
+                            labelText: '选择图标',
+                            initialValue: widget.warehouse?.icon ?? Icons.inventory_2,
+                            extra: {'enableIconToImage': false},
+                            onChanged: (value) {
+                              // 图标变化时可能需要更新按钮颜色
+                            },
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Image Picker Trigger
-                        GestureDetector(
-                          onTap: _pickImage,
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: theme.dividerColor),
-                            ),
-                            child: _buildWarehouseImage(),
+                          // 颜色选择器
+                          FormFieldConfig(
+                            name: 'color',
+                            type: FormFieldType.color,
+                            labelText: '选择颜色',
+                            initialValue: widget.warehouse?.iconColor ?? Colors.blue,
+                            onChanged: (value) {
+                              if (value is Color) {
+                                setState(() => _buttonColor = value);
+                              }
+                            },
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 48),
-                    // Input Field
-                    SizedBox(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 4, bottom: 8),
-                            child: Text(
-                              'goods_warehouseName'.tr,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.hintColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          TextField(
-                            controller: _titleController,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 18),
-                            decoration: InputDecoration(
-                              hintText: 'goods_warehouseNameHint'.tr,
-                              filled: true,
-                              fillColor: theme.cardColor,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(
-                                  color: _selectedColor,
-                                  width: 2,
-                                ),
-                              ),
-                              contentPadding: const EdgeInsets.all(20),
-                            ),
+                          // 图片选择器
+                          FormFieldConfig(
+                            name: 'image',
+                            type: FormFieldType.imagePicker,
+                            labelText: '仓库图片',
+                            hintText: '选择图片',
+                            initialValue: widget.warehouse?.imageUrl,
+                            extra: {
+                              'enableCrop': true,
+                              'cropAspectRatio': 1.0,
+                              'saveDirectory': 'goods/warehouse_images',
+                            },
                           ),
                         ],
+                        submitButtonText: isEdit ? 'goods_save'.tr : 'goods_confirm'.tr,
+                        showResetButton: false,
+                        onSubmit: (values) => _handleSubmit(context, values),
+                        onValidationFailed: (errors) {
+                          toastService.showToast(errors.values.join(', '));
+                        },
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        fieldSpacing: 16,
                       ),
+                      buttonBuilder: (context, onSubmit, onReset) {
+                        return Column(
+                          children: [
+                            const SizedBox(height: 24),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: onSubmit,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _buttonColor,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: const StadiumBorder(),
+                                  elevation: 4,
+                                  shadowColor: _buttonColor.withValues(alpha: 0.4),
+                                ),
+                                child: Text(
+                                  isEdit ? ('goods_save'.tr) : ('goods_confirm'.tr),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (isEdit && widget.onDelete != null) ...[
+                              const SizedBox(height: 16),
+                              TextButton.icon(
+                                style: TextButton.styleFrom(
+                                  foregroundColor: theme.colorScheme.error,
+                                ),
+                                icon: const Icon(Icons.delete_outline),
+                                label: Text('goods_deleteWarehouse'.tr),
+                                onPressed: () => _handleDelete(context),
+                              ),
+                            ],
+                          ],
+                        );
+                      },
                     ),
-                    if (isEdit && widget.onDelete != null) ...[
-                      const SizedBox(height: 32),
-                      TextButton.icon(
-                        style: TextButton.styleFrom(
-                          foregroundColor: theme.colorScheme.error,
-                        ),
-                        icon: const Icon(Icons.delete_outline),
-                        label: Text('goods_deleteWarehouse'.tr),
-                        onPressed: _delete,
-                      ),
-                    ],
                   ],
-                ),
-              ),
-            ),
-            // Bottom Button
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _save,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _selectedColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: const StadiumBorder(),
-                    elevation: 4,
-                    shadowColor: _selectedColor.withValues(alpha: 0.4),
-                  ),
-                  child: Text(
-                    isEdit ? ('goods_save'.tr) : ('goods_confirm'.tr),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                 ),
               ),
             ),
@@ -407,5 +175,66 @@ class _WarehouseFormState extends State<WarehouseForm> {
         ),
       ),
     );
+  }
+
+  void _handleSubmit(BuildContext context, Map<String, dynamic> values) async {
+    final title = values['title'] as String? ?? '';
+    if (title.isEmpty) {
+      toastService.showToast('goods_warehouseName'.tr);
+      return;
+    }
+
+    final icon = values['icon'] as IconData;
+    final color = values['color'] as Color;
+    final image = values['image'] as String?;
+
+    final warehouseData = Warehouse(
+      id: widget.warehouse?.id ?? const Uuid().v4(),
+      title: title,
+      icon: icon,
+      iconColor: color,
+      imageUrl: image,
+    );
+
+    await widget.onSave(warehouseData);
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _handleDelete(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('goods_confirmDelete'.tr),
+            content: Text(
+              'goods_confirmDeleteWarehouseMessage'.tr.replaceFirst(
+                '%s',
+                widget.warehouse!.title,
+              ),
+            ),
+            actions: [
+              TextButton(
+                child: Text('app_cancel'.tr),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: Text('app_delete'.tr),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true && widget.onDelete != null) {
+      await widget.onDelete!();
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+    }
   }
 }
