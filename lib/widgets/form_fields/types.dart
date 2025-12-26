@@ -61,6 +61,9 @@ enum FormFieldType {
 
   // 订阅专用字段
   subscriptionCycle,
+
+  // 提醒日期选择器
+  reminderDate,
 }
 
 /// 输入框组按钮

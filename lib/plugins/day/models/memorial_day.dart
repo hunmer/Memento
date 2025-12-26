@@ -11,6 +11,9 @@ class MemorialDay {
   final Color backgroundColor;
   final String? backgroundImageUrl;
   final int sortIndex;
+  final IconData? icon;
+  final Color? iconColor;
+  final String? avatarUrl;
 
   MemorialDay({
     String? id,
@@ -21,6 +24,9 @@ class MemorialDay {
     Color? backgroundColor,
     this.backgroundImageUrl,
     int? sortIndex,
+    this.icon,
+    this.iconColor,
+    this.avatarUrl,
   }) : id = id ?? const Uuid().v4(),
        creationDate = creationDate ?? DateTime.now(),
        notes = notes ?? [],
@@ -60,6 +66,9 @@ class MemorialDay {
       backgroundColor: Color(json['backgroundColor']),
       backgroundImageUrl: json['backgroundImageUrl'],
       sortIndex: json['sortIndex'] ?? 0,
+      icon: json['icon'] != null ? IconData(json['icon'], fontFamily: 'MaterialIcons') : null,
+      iconColor: json['iconColor'] != null ? Color(json['iconColor']) : null,
+      avatarUrl: json['avatarUrl'],
     );
   }
 
@@ -75,6 +84,9 @@ class MemorialDay {
       'backgroundColor': backgroundColor.value,
       'backgroundImageUrl': backgroundImageUrl,
       'sortIndex': sortIndex,
+      'icon': icon?.codePoint,
+      'iconColor': iconColor?.value,
+      'avatarUrl': avatarUrl,
     };
   }
 
@@ -101,15 +113,19 @@ class MemorialDay {
 
   // 创建带有修改的副本
   MemorialDay copyWith({
+    String? id,
     String? title,
     DateTime? targetDate,
     List<String>? notes,
     Color? backgroundColor,
     String? backgroundImageUrl,
     int? sortIndex,
+    IconData? icon,
+    Color? iconColor,
+    String? avatarUrl,
   }) {
     return MemorialDay(
-      id: id,
+      id: id ?? this.id,
       title: title ?? this.title,
       creationDate: creationDate,
       targetDate: targetDate ?? this.targetDate,
@@ -117,6 +133,9 @@ class MemorialDay {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       backgroundImageUrl: backgroundImageUrl ?? this.backgroundImageUrl,
       sortIndex: sortIndex ?? this.sortIndex,
+      icon: icon ?? this.icon,
+      iconColor: iconColor ?? this.iconColor,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
     );
   }
 

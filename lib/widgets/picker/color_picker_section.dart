@@ -39,36 +39,41 @@ class ColorPickerSection extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children:
-              commonColors.map((color) {
-                final isSelected = selectedColor.value == color.value;
-                return GestureDetector(
-                  onTap: () => onColorChanged(color),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border:
-                          isSelected
-                              ? Border.all(color: Colors.black, width: 2)
-                              : null,
-                    ),
-                    child:
+        // 使用单行水平滚动替代 Wrap
+        SizedBox(
+          height: 48,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: commonColors.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final color = commonColors[index];
+              final isSelected = selectedColor.value == color.value;
+              return GestureDetector(
+                onTap: () => onColorChanged(color),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border:
                         isSelected
-                            ? const Icon(
-                              Icons.check,
-                              color: Colors.white,
-                              size: 20,
-                            )
+                            ? Border.all(color: Colors.black, width: 2)
                             : null,
                   ),
-                );
-              }).toList(),
+                  child:
+                      isSelected
+                          ? const Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 20,
+                          )
+                          : null,
+                ),
+              );
+            },
+          ),
         ),
       ],
     );
