@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:Memento/plugins/timer/views/add_timer_item_dialog.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
+import 'builders/index.dart' show createRoundedContainerDecoration;
 
 /// 计时器列表字段组件
 ///
@@ -42,7 +43,7 @@ class TimerItemsField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,7 +54,7 @@ class TimerItemsField extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: isDark ? Colors.grey[400] : Colors.grey[600],
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 12),
@@ -65,7 +66,7 @@ class TimerItemsField extends StatelessWidget {
             child: Center(
               child: Text(
                 '暂无子计时器',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
               ),
             ),
           ),
@@ -74,7 +75,7 @@ class TimerItemsField extends StatelessWidget {
         ...timerItems.asMap().entries.map((entry) {
           final index = entry.key;
           final timer = entry.value;
-          return _buildSubTimerItem(context, timer, index, isDark);
+          return _buildSubTimerItem(context, timer, index);
         }),
 
         const SizedBox(height: 12),
@@ -82,28 +83,25 @@ class TimerItemsField extends StatelessWidget {
         // 添加按钮
         InkWell(
           onTap: enabled ? onAdd : null,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.grey[800] : Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
-            ),
+            decoration: createRoundedContainerDecoration(context),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.add,
                   size: 20,
-                  color: isDark ? Colors.white : Colors.grey[700],
+                  color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   addButtonText.tr,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : Colors.grey[700],
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ],
@@ -114,7 +112,9 @@ class TimerItemsField extends StatelessWidget {
     );
   }
 
-  Widget _buildSubTimerItem(BuildContext context, TimerItem timer, int index, bool isDark) {
+  Widget _buildSubTimerItem(BuildContext context, TimerItem timer, int index) {
+    final theme = Theme.of(context);
+
     String typeText;
     switch (timer.type) {
       case TimerType.countUp:
@@ -131,15 +131,12 @@ class TimerItemsField extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey[800]!.withValues(alpha: 0.5) : Colors.grey[50],
-        borderRadius: BorderRadius.circular(8),
-      ),
+      decoration: createRoundedContainerDecoration(context),
       child: Row(
         children: [
           Icon(
             Icons.drag_indicator,
-            color: isDark ? Colors.grey[600] : Colors.grey[400],
+            color: theme.colorScheme.onSurfaceVariant,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -150,14 +147,14 @@ class TimerItemsField extends StatelessWidget {
                   timer.name.isEmpty ? typeText : timer.name,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : const Color(0xFF1E293B),
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 Text(
                   _formatDuration(timer.duration),
                   style: TextStyle(
                     fontSize: 12,
-                    color: isDark ? Colors.grey[500] : Colors.grey[500],
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -166,7 +163,7 @@ class TimerItemsField extends StatelessWidget {
           if (enabled) ...[
             IconButton(
               icon: const Icon(Icons.edit, size: 20),
-              color: isDark ? Colors.grey[500] : Colors.grey[500],
+              color: theme.colorScheme.onSurfaceVariant,
               onPressed: () async {
                 final result = await showDialog<TimerItem>(
                   context: context,
@@ -179,7 +176,7 @@ class TimerItemsField extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.delete, size: 20),
-              color: isDark ? Colors.grey[500] : Colors.grey[500],
+              color: theme.colorScheme.onSurfaceVariant,
               onPressed: () => onRemove(index),
             ),
           ],

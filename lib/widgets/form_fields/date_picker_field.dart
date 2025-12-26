@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'builders/index.dart' show createRoundedContainerDecoration;
 
 /// 日期选择组件
 ///
@@ -93,13 +94,7 @@ class DatePickerField extends StatelessWidget {
       child: Container(
         height: 50,
         padding: const EdgeInsets.only(left: 10, right: 12),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: theme.colorScheme.outline.withOpacity(0.2),
-          ),
-        ),
+        decoration: createRoundedContainerDecoration(context),
         child: Row(
           children: [
             Icon(icon,

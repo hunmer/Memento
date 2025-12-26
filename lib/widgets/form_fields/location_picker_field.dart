@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../picker/location_picker.dart';
+import 'builders/index.dart' show createRoundedContainerDecoration;
 
 /// 位置选择器字段组件
 ///
@@ -35,6 +36,8 @@ class LocationPickerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return GestureDetector(
       onTap:
           enabled
@@ -56,21 +59,18 @@ class LocationPickerField extends StatelessWidget {
               : null,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).colorScheme.outline),
-          borderRadius: BorderRadius.circular(8),
-        ),
+        decoration: createRoundedContainerDecoration(context),
         child: Row(
           children: [
             Icon(
               Icons.location_on,
-              color: Theme.of(context).colorScheme.primary,
+              color: theme.colorScheme.primary,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 currentLocation ?? labelText ?? hintText ?? '选择位置',
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: theme.textTheme.bodyMedium,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

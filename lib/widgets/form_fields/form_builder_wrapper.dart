@@ -251,10 +251,10 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
         return buildTextField(config, fieldKey, context);
 
       case FormFieldType.textArea:
-        return buildTextAreaField(config, fieldKey);
+        return buildTextAreaField(config, fieldKey, context);
 
       case FormFieldType.select:
-        return buildSelectField(config, fieldKey);
+        return buildSelectField(config, fieldKey, context);
 
       case FormFieldType.date:
         return buildDateField(config, fieldKey, context);

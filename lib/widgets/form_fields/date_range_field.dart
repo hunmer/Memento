@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'builders/index.dart' show createRoundedContainerDecoration;
 
 /// 日期范围选择器字段组件
 ///
@@ -57,23 +58,19 @@ class DateRangeField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return GestureDetector(
       onTap: enabled ? _selectDateRange : null,
       child: Container(
         height: 50,
         padding: const EdgeInsets.only(left: 10, right: 12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-          ),
-        ),
+        decoration: createRoundedContainerDecoration(context),
         child: Row(
           children: [
             Icon(
               Icons.calendar_today_outlined,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: theme.colorScheme.onSurfaceVariant,
               size: 20,
             ),
             const SizedBox(width: 8),
@@ -82,7 +79,7 @@ class DateRangeField extends StatelessWidget {
                 _buildDisplayText(),
                 style: TextStyle(
                   fontSize: 16,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: theme.colorScheme.onSurface,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -92,7 +89,7 @@ class DateRangeField extends StatelessWidget {
                 rangeLabelText!,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
           ],

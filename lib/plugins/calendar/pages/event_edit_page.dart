@@ -250,14 +250,10 @@ class _EventEditPageState extends State<EventEditPage> {
               children: [
                 // 图标和颜色
                 fields[0],
+                SizedBox(height: 8),
                 // 标题
                 fields[1],
-                // 描述
-                fields[2],
-                // 日期范围
-                fields[3],
-                // 提醒设置
-                fields[4],
+                SizedBox(height: 8),
                 // 时间选择器（并排显示）
                 Row(
                   children: [
@@ -291,6 +287,16 @@ class _EventEditPageState extends State<EventEditPage> {
                     ),
                   ],
                 ),
+                SizedBox(height: 8),
+                // 日期范围
+                fields[3],
+                SizedBox(height: 8),
+                // 描述
+                fields[2],
+                SizedBox(height: 8),
+                // 提醒设置
+                fields[4],
+                
               ],
             );
           },
