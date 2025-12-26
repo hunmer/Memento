@@ -35,8 +35,6 @@ class _GoalEditPageState extends State<GoalEditPage> {
   late String _initialUnitType;
   late double _initialTargetValue;
   late String _initialDateType;
-  late DateTime? _initialStartDate;
-  late DateTime? _initialEndDate;
   late TimeOfDay? _initialReminderTime;
 
   // 分组列表
@@ -76,8 +74,6 @@ class _GoalEditPageState extends State<GoalEditPage> {
           .contains(widget.goal!.dateSettings.type)
           ? widget.goal!.dateSettings.type
           : 'daily';
-      _initialStartDate = widget.goal!.dateSettings.startDate;
-      _initialEndDate = widget.goal!.dateSettings.endDate;
       _initialReminderTime = widget.goal!.reminderTime != null
           ? TimeOfDay.fromDateTime(
             DateTime.parse('1970-01-01 ${widget.goal!.reminderTime!}'),
@@ -93,8 +89,6 @@ class _GoalEditPageState extends State<GoalEditPage> {
       _initialTargetValue = 0;
       _initialName = '';
       _initialDateType = 'daily';
-      _initialStartDate = null;
-      _initialEndDate = null;
       _initialReminderTime = null;
     }
   }
@@ -291,7 +285,6 @@ class _GoalEditPageState extends State<GoalEditPage> {
             FormFieldConfig(
               name: 'group',
               type: FormFieldType.select,
-              labelText: 'tracker_selectGroup'.tr,
               initialValue: _initialGroup,
               items: [
                 ..._groups.map(
@@ -348,62 +341,67 @@ class _GoalEditPageState extends State<GoalEditPage> {
               validationMessage: '请输入目标值',
             ),
 
-            // 提醒时间
+            // 提醒日期选择器
             FormFieldConfig(
-              name: 'reminderTime',
-              type: FormFieldType.time,
-              initialValue: _initialReminderTime,
-            ),
-
-            // 日期类型
-            FormFieldConfig(
-              name: 'dateType',
-              type: FormFieldType.select,
-              labelText: 'tracker_dateSettings'.tr,
-              initialValue: _initialDateType,
-              items: ['none', 'daily', 'weekly', 'monthly', 'custom']
-                  .map(
-                    (type) => DropdownMenuItem(
-                      value: type,
-                      child: Text(_getDateTypeName(type)),
-                    ),
-                  )
-                  .toList(),
-            ),
-
-            // 开始日期（条件显示）
-            FormFieldConfig(
-              name: 'startDate',
-              type: FormFieldType.date,
-              hintText: '选择开始日期',
-              initialValue: _initialStartDate,
-              visible: (values) => values['dateType'] == 'custom',
-            ),
-
-            // 结束日期（条件显示）
-            FormFieldConfig(
-              name: 'endDate',
-              type: FormFieldType.date,
-              hintText: '选择结束日期',
-              initialValue: _initialEndDate,
-              visible: (values) => values['dateType'] == 'custom',
+              name: 'reminderDate',
+              type: FormFieldType.reminderDate,
+              initialValue: _initialReminderTime != null
+                  ? ReminderDateData(
+                      type: ReminderDateType.daily,
+                      selectedDays: [1, 2, 3, 4, 5, 6, 7],
+                      time: _initialReminderTime,
+                    )
+                  : const ReminderDateData(type: ReminderDateType.none),
             ),
           ],
           onSubmit: (values) => _handleSubmit(values),
         ),
-        // 使用 contentBuilder 添加顶部自定义区域
-        contentBuilder: (context, fields) {
+        // 使用 contentBuilder 添加顶部自定义区域和自定义布局
+        contentBuilder: (context, allFields) {
           return ValueListenableBuilder(
             valueListenable: _formChangeNotifier,
             builder: (context, _,__) {
               final formValues = _currentValues;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTopSection(formValues),
-                  const SizedBox(height: 24),
-                  ...fields,
-                ],
+
+              // 字段顺序：0: group, 1: name, 2: unitType, 3: targetValue, 4: reminderDate
+              final groupField = allFields[0];
+              final nameField = allFields[1];
+              final unitTypeField = allFields[2];
+              final targetValueField = allFields[3];
+              final reminderDateField = allFields[4];
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTopSection(formValues),
+                    const SizedBox(height: 24),
+
+                    // 第一行：名称和分组平分宽度
+                    Row(
+                      children: [
+                        Expanded(child: nameField),
+                        const SizedBox(width: 12),
+                        Expanded(child: groupField),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 第二行：目标值和单位平分宽度
+                    Row(
+                      children: [
+                        Expanded(child: targetValueField),
+                        const SizedBox(width: 12),
+                        Expanded(child: unitTypeField),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 提醒日期选择器
+                    reminderDateField,
+                  ],
+                ),
               );
             },
           );
@@ -412,22 +410,6 @@ class _GoalEditPageState extends State<GoalEditPage> {
     );
   }
 
-  String _getDateTypeName(String type) {
-    switch (type) {
-      case 'none':
-        return '无';
-      case 'daily':
-        return '每日';
-      case 'weekly':
-        return '每周';
-      case 'monthly':
-        return '每月';
-      case 'custom':
-        return '自定义';
-      default:
-        return type;
-    }
-  }
 
   void _handleSubmit(Map<String, dynamic> values) {
     // 处理逻辑由 _saveGoal 直接调用
@@ -453,10 +435,22 @@ class _GoalEditPageState extends State<GoalEditPage> {
       final name = values['name'] as String? ?? _initialName;
       final unitType = values['unitType'] as String? ?? _initialUnitType;
       final targetValue = double.tryParse(values['targetValue']?.toString() ?? '') ?? _initialTargetValue;
-      final dateType = values['dateType'] as String? ?? _initialDateType;
       final group = values['group'] as String? ?? _initialGroup;
       final progressColor = values['progressColor'] as Color?;
-      final reminderTime = values['reminderTime'] as TimeOfDay?;
+
+      // 获取提醒时间（从 reminderDate 字段解析）
+      String? reminderTime;
+      final reminderDateMap = values['reminderDate'] as Map<String, dynamic>?;
+      if (reminderDateMap != null) {
+        final typeIndex = reminderDateMap['type'] as int?;
+        // 仅在非 none 模式（type != 0）时获取时间
+        if (typeIndex != null && typeIndex != 0) {
+          final timeStr = reminderDateMap['time'] as String?;
+          if (timeStr != null && timeStr.isNotEmpty) {
+            reminderTime = timeStr;
+          }
+        }
+      }
 
       final newGoal = Goal(
         id: widget.goal?.id ?? const Uuid().v4(),
@@ -470,11 +464,11 @@ class _GoalEditPageState extends State<GoalEditPage> {
         targetValue: targetValue,
         currentValue: widget.goal?.currentValue ?? 0,
         dateSettings: DateSettings(
-          type: dateType,
-          startDate: values['startDate'] as DateTime?,
-          endDate: values['endDate'] as DateTime?,
+          type: _initialDateType,
+          startDate: null,
+          endDate: null,
         ),
-        reminderTime: reminderTime?.format(context),
+        reminderTime: reminderTime,
         isLoopReset: false,
         createdAt: widget.goal?.createdAt ?? DateTime.now(),
       );

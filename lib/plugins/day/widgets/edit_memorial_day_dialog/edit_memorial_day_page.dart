@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
-import 'package:Memento/widgets/picker/image_picker_dialog.dart';
 import 'package:Memento/plugins/day/models/memorial_day.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
+
+/// 笔记项（包装类，用于 ListAddField）
+class _NoteItem {
+  final String content;
+
+  _NoteItem({required this.content});
+}
 
 class EditMemorialDayPage extends StatefulWidget {
   final MemorialDay? memorialDay;
@@ -19,12 +25,12 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
   late TextEditingController _titleController;
   late TextEditingController _noteController;
   late DateTime _selectedDate;
-  late List<String> _notes;
+  late List<_NoteItem> _noteItems;
   late Color _selectedColor;
   String? _backgroundImageUrl;
-  final List<String> _predefinedBackgroundImages = [
-    'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-  ];
+  IconData? _selectedIcon;
+  Color? _selectedIconColor;
+  String? _avatarUrl;
 
   @override
   void initState() {
@@ -32,11 +38,15 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
     _titleController = TextEditingController(text: widget.memorialDay?.title);
     _noteController = TextEditingController();
     _selectedDate = widget.memorialDay?.targetDate ?? DateTime.now();
-    _notes = List.from(widget.memorialDay?.notes ?? []);
+    _noteItems = (widget.memorialDay?.notes ?? [])
+        .map((note) => _NoteItem(content: note))
+        .toList();
     _selectedColor = widget.memorialDay?.backgroundColor ?? Colors.blue[300]!;
     _backgroundImageUrl = widget.memorialDay?.backgroundImageUrl;
+    _selectedIcon = widget.memorialDay?.icon;
+    _selectedIconColor = widget.memorialDay?.iconColor;
+    _avatarUrl = widget.memorialDay?.avatarUrl;
 
-    // 设置路由上下文
     _updateRouteContext();
   }
 
@@ -94,33 +104,20 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
     if (note.isEmpty) return;
 
     setState(() {
-      _notes.add(note);
+      _noteItems.add(_NoteItem(content: note));
       _noteController.clear();
     });
   }
 
   void _removeNote(int index) {
     setState(() {
-      _notes.removeAt(index);
+      _noteItems.removeAt(index);
     });
   }
 
-  void _updateNote(int index, String newContent) {
-    setState(() {
-      _notes[index] = newContent;
-    });
-  }
-
-  void _selectColor(Color color) {
-    setState(() {
-      _selectedColor = color;
-    });
-  }
-
-  void _selectBackgroundImage(String? imageUrl) {
-    setState(() {
-      _backgroundImageUrl = imageUrl;
-    });
+  /// 获取笔记字符串列表（保存时使用）
+  List<String> _getNotes() {
+    return _noteItems.map((item) => item.content).toList();
   }
 
   void _save() {
@@ -131,8 +128,9 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
       return;
     }
 
-    // 移除空笔记
-    final filteredNotes = _notes.where((note) => note.trim().isNotEmpty).toList();
+    debugPrint('Saving memorial day - icon: $_selectedIcon, iconColor: $_selectedIconColor, avatarUrl: $_avatarUrl');
+
+    final filteredNotes = _getNotes().where((note) => note.trim().isNotEmpty).toList();
 
     final memorialDay = MemorialDay(
       id: widget.memorialDay?.id ?? const Uuid().v4(),
@@ -142,7 +140,13 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
       backgroundColor: _selectedColor,
       backgroundImageUrl: _backgroundImageUrl,
       creationDate: widget.memorialDay?.creationDate ?? DateTime.now(),
+      icon: _selectedIcon,
+      iconColor: _selectedIconColor,
+      avatarUrl: _avatarUrl,
     );
+
+    debugPrint('MemorialDay created - icon: ${memorialDay.icon}, iconColor: ${memorialDay.iconColor}, avatarUrl: ${memorialDay.avatarUrl}');
+    debugPrint('MemorialDay toJson - icon: ${memorialDay.toJson()['icon']}, iconColor: ${memorialDay.toJson()['iconColor']}, avatarUrl: ${memorialDay.toJson()['avatarUrl']}');
 
     Navigator.of(context).pop(DialogResult(action: DialogAction.save, memorialDay: memorialDay));
   }
@@ -163,37 +167,6 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
               : 'day_editMemorialDay'.tr,
         ),
         actions: [
-          if (widget.memorialDay != null)
-            IconButton(
-              onPressed: () async {
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text('day_deleteMemorialDay'.tr),
-                    content: Text('day_deleteConfirmation'.tr),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: Text('day_cancel'.tr),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: Text(
-                          'day_delete'.tr,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-
-                if (confirmed == true) {
-                  _confirmDelete();
-                }
-              },
-              icon: const Icon(Icons.delete_outline),
-              tooltip: 'day_delete'.tr,
-            ),
           TextButton(
             onPressed: _save,
             child: Text(
@@ -208,175 +181,103 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 信息区域
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'day_information'.tr,
-                      style: theme.textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    TextInputField(
-                      controller: _titleController,
-                      labelText: 'day_title'.tr,
-                      hintText: 'day_enterTitle'.tr,
-                      autofocus: widget.memorialDay == null,
-                    ),
-                    const SizedBox(height: 16),
-                    DatePickerField(
-                      date: _selectedDate,
-                      onTap: _selectDate,
-                      formattedDate: _formatDate(_selectedDate),
-                      placeholder: 'day_selectDate'.tr,
-                      labelText: 'day_targetDate'.tr,
-                      inline: true,
-                    ),
-                  ],
-                ),
-              ),
+            IconAvatarRowField(
+              name: 'memorial_icon',
+              initialIcon: _selectedIcon,
+              initialIconColor: _selectedIconColor,
+              initialAvatarUrl: _avatarUrl,
+              onChanged: (value) {
+                setState(() {
+                  _selectedIcon = value['icon'] as IconData?;
+                  _selectedIconColor = value['iconColor'] as Color?;
+                  _avatarUrl = value['avatarUrl'] as String?;
+                  debugPrint('Icon changed: $_selectedIcon, Color: $_selectedIconColor, Avatar: $_avatarUrl');
+                });
+              },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+
+            TextInputField(
+              controller: _titleController,
+              labelText: 'day_title'.tr,
+              hintText: 'day_enterTitle'.tr,
+              autofocus: widget.memorialDay == null,
+            ),
+            const SizedBox(height: 24),
+
+            // 目标日期
+            DatePickerField(
+              date: _selectedDate,
+              onTap: _selectDate,
+              formattedDate: _formatDate(_selectedDate),
+              placeholder: 'day_selectDate'.tr,
+              labelText: 'day_targetDate'.tr,
+            ),
+            const SizedBox(height: 24),
 
             // 笔记区域
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: EditableListField(
-                  items: _notes,
-                  controller: _noteController,
-                  onAdd: _addNote,
-                  onRemove: _removeNote,
-                  onUpdate: _updateNote,
-                  addButtonText: 'day_addNote'.tr,
-                  inputLabel: 'day_note'.tr,
-                  inputHint: 'day_enterNote'.tr,
-                  titleText: 'day_notes'.tr,
-                ),
-              ),
+            Text(
+              'day_notes'.tr,
+              style: theme.textTheme.titleMedium,
             ),
-            const SizedBox(height: 16),
-
-            // 外观区域
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'day_appearance'.tr,
-                      style: theme.textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    ColorSelectorField(
-                      selectedColor: _selectedColor,
-                      onColorChanged: _selectColor,
-                      labelText: 'day_backgroundColor'.tr,
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'day_backgroundImage'.tr,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      height: 120,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          // 清除背景图片选项
-                          GestureDetector(
-                            onTap: () => _selectBackgroundImage(null),
-                            child: Container(
-                              width: 120,
-                              height: 120,
-                              margin: const EdgeInsets.only(right: 8),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: _backgroundImageUrl == null
-                                      ? theme.primaryColor
-                                      : Colors.grey,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Center(child: Icon(Icons.clear)),
-                            ),
-                          ),
-                          ..._predefinedBackgroundImages.map(
-                            (imageUrl) => Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: GestureDetector(
-                                onTap: () => _selectBackgroundImage(imageUrl),
-                                child: Container(
-                                  width: 120,
-                                  height: 120,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: _backgroundImageUrl == imageUrl
-                                          ? theme.primaryColor
-                                          : Colors.grey,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                    image: DecorationImage(
-                                      image: NetworkImage(imageUrl),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          // 添加本地图片按钮
-                          GestureDetector(
-                            onTap: () async {
-                              final result = await showDialog(
-                                context: context,
-                                builder: (context) => ImagePickerDialog(
-                                  initialUrl: _backgroundImageUrl,
-                                  enableCrop: true,
-                                  cropAspectRatio: 1.0,
-                                  saveDirectory: 'day/backgrounds',
-                                ),
-                              );
-
-                              if (result != null && result is Map<String, dynamic>) {
-                                final url = result['url'] as String;
-                                _selectBackgroundImage(url);
-                              }
-                            },
-                            child: Container(
-                              width: 120,
-                              height: 120,
-                              margin: const EdgeInsets.only(right: 8),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.add_photo_alternate, size: 32),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'day_localImage'.tr,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            const SizedBox(height: 8),
+            ListAddField<String>(
+              items: _noteItems.map((item) => item.content).toList(),
+              controller: _noteController,
+              onAdd: _addNote,
+              onToggle: (_) {}, // 笔记不需要勾选功能
+              onRemove: _removeNote,
+              getTitle: (item) => item,
+              getIsCompleted: (_) => false,
+              addButtonText: 'day_addNote'.tr,
             ),
             const SizedBox(height: 32),
+
+            // 删除按钮（仅编辑模式显示）
+            if (widget.memorialDay != null)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder:
+                          (context) => AlertDialog(
+                            title: Text('day_deleteMemorialDay'.tr),
+                            content: Text('day_deleteConfirmation'.tr),
+                            actions: [
+                              TextButton(
+                                onPressed:
+                                    () => Navigator.of(context).pop(false),
+                                child: Text('day_cancel'.tr),
+                              ),
+                              TextButton(
+                                onPressed:
+                                    () => Navigator.of(context).pop(true),
+                                child: Text(
+                                  'day_delete'.tr,
+                                  style: const TextStyle(color: Colors.red),
+                            ),
+                          ),
+                            ],
+                          ),
+                    );
+
+                    if (confirmed == true) {
+                      _confirmDelete();
+                    }
+                  },
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  label: Text(
+                    'day_delete'.tr,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red),
+                  ),
+                ),
+              ),
+            const SizedBox(height: 16),
           ],
         ),
       ),

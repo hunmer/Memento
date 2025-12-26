@@ -20,4 +20,4 @@ export 'plugin_builder.dart' show buildPromptEditorField, buildIconAvatarRowFiel
     buildExpenseTypeSelectorField, buildAmountInputField, buildRemindersField,
     buildTimerItemsField, buildTimerIconGridField, buildGenderSelectorField,
     buildCustomEventsField, buildAvatarNameSectionField, buildChipSelectorField,
-    buildSubscriptionCycleField;
+    buildSubscriptionCycleField, buildReminderDateField;

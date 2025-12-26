@@ -21,6 +21,11 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
   // 搜索查询状态
   String _searchQuery = '';
 
+  /// 删除纪念日（直接调用控制器删除，不弹出编辑对话框）
+  Future<void> _deleteMemorialDay(String id) async {
+    await _controller.deleteMemorialDay(id);
+  }
+
   Future<void> _showEditDialog(
     BuildContext context, [
     MemorialDay? memorialDay,
@@ -205,6 +210,8 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
             memorialDay: days[index],
             isDraggable: false,
             onTap: () => _showEditDialog(context, days[index]),
+            onEdit: () => _showEditDialog(context, days[index]),
+            onDelete: () => _showEditDialog(context, days[index]),
           );
         },
       );
@@ -226,6 +233,8 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
           memorialDay: days[index],
           isDraggable: true,
           onTap: () => _showEditDialog(context, days[index]),
+          onEdit: () => _showEditDialog(context, days[index]),
+          onDelete: () => _showEditDialog(context, days[index]),
         );
       },
       onReorder: (oldIndex, newIndex) async {
@@ -254,6 +263,8 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
             memorialDay: days[index],
             isDraggable: false,
             onTap: () => _showEditDialog(context, days[index]),
+            onEdit: () => _showEditDialog(context, days[index]),
+            onDelete: () => _deleteMemorialDay(days[index].id),
           );
         },
       );
@@ -269,6 +280,8 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
           memorialDay: days[index],
           isDraggable: true,
           onTap: () => _showEditDialog(context, days[index]),
+          onEdit: () => _showEditDialog(context, days[index]),
+          onDelete: () => _deleteMemorialDay(days[index].id),
         );
       },
       onReorder: (oldIndex, newIndex) async {
@@ -397,6 +410,8 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
           memorialDay: filteredDays[index],
           isDraggable: false,
           onTap: () => _showEditDialog(context, filteredDays[index]),
+          onEdit: () => _showEditDialog(context, filteredDays[index]),
+          onDelete: () => _showEditDialog(context, filteredDays[index]),
         );
       },
     );
@@ -413,6 +428,8 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
           memorialDay: filteredDays[index],
           isDraggable: false,
           onTap: () => _showEditDialog(context, filteredDays[index]),
+          onEdit: () => _showEditDialog(context, filteredDays[index]),
+          onDelete: () => _deleteMemorialDay(filteredDays[index].id),
         );
       },
     );

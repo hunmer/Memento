@@ -345,6 +345,9 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
 
       case FormFieldType.subscriptionCycle:
         return buildSubscriptionCycleField(config, fieldKey);
+
+      case FormFieldType.reminderDate:
+        return buildReminderDateField(config, fieldKey);
     }
   }
 

@@ -3,16 +3,21 @@ import 'package:get/get.dart';
 import 'dart:io';
 import 'package:Memento/plugins/day/models/memorial_day.dart';
 import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 class MemorialDayCard extends StatefulWidget {
   final MemorialDay memorialDay;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
   final bool isDraggable;
 
   const MemorialDayCard({
     super.key,
     required this.memorialDay,
     this.onTap,
+    this.onEdit,
+    this.onDelete,
     this.isDraggable = false,
   });
 
@@ -32,28 +37,31 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
   @override
   void didUpdateWidget(covariant MemorialDayCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.memorialDay.backgroundImageUrl !=
-        widget.memorialDay.backgroundImageUrl) {
+    // 比较 avatarUrl 或 backgroundImageUrl 的变化
+    final oldUrl = oldWidget.memorialDay.avatarUrl ?? oldWidget.memorialDay.backgroundImageUrl;
+    final newUrl = widget.memorialDay.avatarUrl ?? widget.memorialDay.backgroundImageUrl;
+    if (oldUrl != newUrl) {
       _loadImage();
     }
   }
 
   Future<void> _loadImage() async {
-    if (widget.memorialDay.backgroundImageUrl == null) {
+    // 优先使用 avatarUrl，其次使用 backgroundImageUrl
+    final imageUrl = widget.memorialDay.avatarUrl ?? widget.memorialDay.backgroundImageUrl;
+    if (imageUrl == null) {
       setState(() {
         _imageProvider = null;
       });
       return;
     }
 
-    final url = widget.memorialDay.backgroundImageUrl!;
-    if (url.startsWith('http://') || url.startsWith('https://')) {
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       setState(() {
-        _imageProvider = NetworkImage(url);
+        _imageProvider = NetworkImage(imageUrl);
       });
     } else {
       try {
-        final absolutePath = await ImageUtils.getAbsolutePath(url);
+        final absolutePath = await ImageUtils.getAbsolutePath(imageUrl);
         setState(() {
           _imageProvider = FileImage(File(absolutePath));
         });
@@ -66,6 +74,37 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
     }
   }
 
+  /// 显示底部操作菜单
+  void _showBottomSheetMenu(BuildContext context) {
+    SmoothBottomSheet.showWithTitle(
+      context: context,
+      title: widget.memorialDay.title,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 编辑按钮
+          ListTile(
+            leading: const Icon(Icons.edit, color: Colors.blue),
+            title: Text('day_editMemorialDay'.tr),
+            onTap: () {
+              Navigator.pop(context);
+              widget.onEdit?.call();
+            },
+          ),
+          // 删除按钮
+          ListTile(
+            leading: const Icon(Icons.delete, color: Colors.red),
+            title: Text('day_deleteMemorialDay'.tr),
+            onTap: () {
+              Navigator.pop(context);
+              widget.onDelete?.call();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -75,6 +114,9 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
       elevation: 4,
       child: InkWell(
         onTap: widget.onTap,
+        onLongPress: widget.onEdit != null || widget.onDelete != null
+            ? () => _showBottomSheetMenu(context)
+            : null,
         child: Container(
           decoration: BoxDecoration(
             color: widget.memorialDay.backgroundColor,
@@ -90,20 +132,42 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      widget.memorialDay.title,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        shadows: [
-                          const Shadow(
-                            offset: Offset(1, 1),
-                            blurRadius: 3.0,
-                            color: Colors.black45,
+                    // 标题行：图标 + 标题
+                    Row(
+                      children: [
+                        if (widget.memorialDay.icon != null)
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: widget.memorialDay.iconColor ?? Colors.white.withOpacity(0.3),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              widget.memorialDay.icon,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
-                        ],
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                        if (widget.memorialDay.icon != null) const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            widget.memorialDay.title,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: Colors.white,
+                              shadows: [
+                                const Shadow(
+                                  offset: Offset(1, 1),
+                                  blurRadius: 3.0,
+                                  color: Colors.black45,
+                                ),
+                              ],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                     const Spacer(),
                     Text(

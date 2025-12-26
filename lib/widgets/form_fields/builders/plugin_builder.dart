@@ -18,6 +18,7 @@ import '../custom_events_field.dart';
 import '../avatar_name_section.dart';
 import '../chip_selector_field.dart';
 import '../subscription_cycle_field.dart';
+import '../reminder_date_selector_field.dart';
 
 /// 构建提示词编辑器字段
 Widget buildPromptEditorField(FormFieldConfig config, GlobalKey fieldKey) {
@@ -386,6 +387,34 @@ Widget buildSubscriptionCycleField(FormFieldConfig config, GlobalKey fieldKey) {
         onDaysChanged: (days) {
           fieldState.didChange(days);
           config.onChanged?.call(days);
+        },
+      );
+    },
+  );
+}
+
+/// 构建提醒日期选择器字段
+Widget buildReminderDateField(FormFieldConfig config, GlobalKey fieldKey) {
+  return FormBuilderField<Map<String, dynamic>>(
+    key: fieldKey,
+    name: config.name,
+    initialValue: config.initialValue != null
+        ? (config.initialValue as ReminderDateData).toMap()
+        : null,
+    enabled: config.enabled,
+    builder: (fieldState) {
+      final initialData = fieldState.value != null
+          ? ReminderDateData.fromMap(fieldState.value!)
+          : const ReminderDateData(type: ReminderDateType.daily);
+
+      return ReminderDateSelectorField(
+        name: config.name,
+        initialValue: initialData,
+        required: config.required,
+        validationMessage: config.validationMessage,
+        onChanged: (value) {
+          fieldState.didChange(value.toMap());
+          config.onChanged?.call(value.toMap());
         },
       );
     },
