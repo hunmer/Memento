@@ -90,41 +90,51 @@ class _IconAvatarRowFieldState extends State<IconAvatarRowField> {
           child: CircleIconPicker(
             currentIcon: _selectedIcon,
             backgroundColor: _selectedIconColor,
-            onIconSelected: widget.enabled ? (icon) {
-              setState(() {
-                _selectedIcon = icon;
-              });
-              _notifyChanged();
-            } : (_) {},
-            onColorSelected: widget.enabled ? (color) {
-              setState(() {
-                _selectedIconColor = color;
-              });
-              _notifyChanged();
-            } : (_) {},
+            onIconSelected:
+                widget.enabled
+                    ? (icon) {
+                      setState(() {
+                        _selectedIcon = icon;
+                      });
+                      _notifyChanged();
+                    }
+                    : (_) {},
+            onColorSelected:
+                widget.enabled
+                    ? (color) {
+                      setState(() {
+                        _selectedIconColor = color;
+                      });
+                      _notifyChanged();
+                    }
+                    : (_) {},
           ),
         ),
         const SizedBox(width: 16),
         // 头像选择器
         Expanded(
           child: GestureDetector(
-            onTap: widget.enabled ? () async {
-              final result = await showDialog<Map<String, dynamic>>(
-                context: context,
-                builder: (context) => ImagePickerDialog(
-                  initialUrl: _avatarUrl,
-                  saveDirectory: widget.avatarSaveDirectory,
-                  enableCrop: true,
-                  cropAspectRatio: 1.0,
-                ),
-              );
-              if (result != null && result['url'] != null) {
-                setState(() {
-                  _avatarUrl = result['url'] as String;
-                });
-                _notifyChanged();
-              }
-            } : null,
+            onTap:
+                widget.enabled
+                    ? () async {
+                      final result = await showDialog<Map<String, dynamic>>(
+                        context: context,
+                        builder:
+                            (context) => ImagePickerDialog(
+                              initialUrl: _avatarUrl,
+                              saveDirectory: widget.avatarSaveDirectory,
+                              enableCrop: true,
+                              cropAspectRatio: 1.0,
+                            ),
+                      );
+                      if (result != null && result['url'] != null) {
+                        setState(() {
+                          _avatarUrl = result['url'] as String;
+                        });
+                        _notifyChanged();
+                      }
+                    }
+                    : null,
             child: SizedBox(
               width: 64,
               height: 64,
@@ -132,58 +142,78 @@ class _IconAvatarRowFieldState extends State<IconAvatarRowField> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.5),
                     width: 2,
                   ),
                 ),
-                child: _avatarUrl != null && _avatarUrl!.isNotEmpty
-                    ? FutureBuilder<String>(
-                        future: _avatarUrl!.startsWith('http')
-                            ? Future.value(_avatarUrl!)
-                            : ImageUtils.getAbsolutePath(_avatarUrl),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            return Center(
-                              child: AspectRatio(
-                                aspectRatio: 1.0,
-                                child: ClipOval(
-                                  child: _avatarUrl!.startsWith('http')
-                                      ? Image.network(
-                                          snapshot.data!,
-                                          width: 64,
-                                          height: 64,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) =>
-                                              const Icon(Icons.broken_image),
-                                        )
-                                      : Image.file(
-                                          File(snapshot.data!),
-                                          width: 64,
-                                          height: 64,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) =>
-                                              const Icon(Icons.broken_image),
-                                        ),
+                child:
+                    _avatarUrl != null && _avatarUrl!.isNotEmpty
+                        ? FutureBuilder<String>(
+                          future:
+                              _avatarUrl!.startsWith('http')
+                                  ? Future.value(_avatarUrl!)
+                                  : ImageUtils.getAbsolutePath(_avatarUrl),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return Center(
+                                child: AspectRatio(
+                                  aspectRatio: 1.0,
+                                  child: ClipOval(
+                                    child:
+                                        _avatarUrl!.startsWith('http')
+                                            ? Image.network(
+                                              snapshot.data!,
+                                              width: 64,
+                                              height: 64,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => const Icon(
+                                                    Icons.broken_image,
+                                                  ),
+                                            )
+                                            : Image.file(
+                                              File(snapshot.data!),
+                                              width: 64,
+                                              height: 64,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => const Icon(
+                                                    Icons.broken_image,
+                                                  ),
+                                            ),
+                                  ),
                                 ),
+                              );
+                            } else if (snapshot.hasError) {
+                              return const Icon(Icons.broken_image);
+                            } else {
+                              return const CircularProgressIndicator();
+                            }
+                          },
+                        )
+                        : Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.add_photo_alternate_outlined,
+                                size: 24,
                               ),
-                            );
-                          } else if (snapshot.hasError) {
-                            return const Icon(Icons.broken_image);
-                          } else {
-                            return const CircularProgressIndicator();
-                          }
-                        },
-                      )
-                    : Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.add_photo_alternate_outlined, size: 24),
-                            const SizedBox(height: 2),
-                            Text('头像', style: const TextStyle(fontSize: 12)),
-                          ],
+                              const SizedBox(height: 2),
+                              Text('头像', style: const TextStyle(fontSize: 12)),
+                            ],
+                          ),
                         ),
-                      ),
               ),
             ),
           ),
@@ -220,24 +250,25 @@ class WrappedIconAvatarRowField extends StatefulWidget {
   });
 
   @override
-  State<WrappedIconAvatarRowField> createState() => _WrappedIconAvatarRowFieldState();
+  State<WrappedIconAvatarRowField> createState() =>
+      _WrappedIconAvatarRowFieldState();
 }
 
 class _WrappedIconAvatarRowFieldState extends State<WrappedIconAvatarRowField> {
-  final GlobalKey<_IconAvatarRowFieldState> _fieldKey = GlobalKey<_IconAvatarRowFieldState>();
+  final GlobalKey<_IconAvatarRowFieldState> _fieldKey =
+      GlobalKey<_IconAvatarRowFieldState>();
 
   @override
   Widget build(BuildContext context) {
-    final initialValue = widget.initialValue ?? {
-      'icon': Icons.smart_toy,
-      'iconColor': Colors.blue,
-      'avatarUrl': null,
-    };
+    final initialValue =
+        widget.initialValue ??
+        {'icon': Icons.smart_toy, 'iconColor': Colors.blue, 'avatarUrl': null};
 
     return WrappedFormField(
       name: widget.name,
       initialValue: initialValue,
       enabled: widget.enabled,
+      onReset: () => _fieldKey.currentState?.reset(),
       onChanged: (v) => widget.onChanged?.call(v as Map<String, dynamic>),
       builder: (context, value, setValue) {
         return IconAvatarRowField(
@@ -251,8 +282,6 @@ class _WrappedIconAvatarRowFieldState extends State<WrappedIconAvatarRowField> {
           onChanged: (v) => setValue(v),
         );
       },
-      getValue: () => _fieldKey.currentState?.getValue() ?? initialValue,
-      onReset: () => _fieldKey.currentState?.reset(),
     );
   }
 }

@@ -91,15 +91,28 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
 
     // 先保存表单，确保所有字段值同步
     fbState?.save();
+    for (final fieldKey in _fieldKeys.values) {
+      fieldKey.currentState?.save();
+    }
 
-    // 直接使用 FormBuilder 的值（对所有字段类型都有效）
-    final values = fbState?.value ?? {};
+    // 从 FormBuilder 获取值
+    final formValues = fbState?.value ?? {};
+
+    // 合并 WrappedFormField 的值（这些字段不会自动注册到 FormBuilder）
+    final values = Map<String, dynamic>.from(formValues);
+    for (final entry in _fieldKeys.entries) {
+      final fieldState = entry.value.currentState;
+      if (fieldState != null) {
+        values[entry.key] = fieldState.getValue();
+      }
+    }
 
     bool isValid = true;
     final errors = <String, dynamic>{};
 
     for (final field in widget.config.fields) {
-      if (field.required && (values[field.name] == null || values[field.name].toString().isEmpty)) {
+      final value = values[field.name];
+      if (field.required && (value == null || value.toString().isEmpty)) {
         isValid = false;
         errors[field.name] = field.validationMessage ?? '${field.labelText ?? field.name}不能为空';
       }
@@ -109,7 +122,28 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
       widget.config.onSubmit(values);
     } else if (widget.config.onValidationFailed != null) {
       widget.config.onValidationFailed!(errors);
+    } else {
+      // 默认验证失败行为：显示错误消息
+      final errorMessages = errors.values.join('\n');
+      _showValidationError(errorMessages);
     }
+  }
+
+  /// 显示验证错误提示
+  void _showValidationError(String message) {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    scaffoldMessenger.showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: '知道了',
+          textColor: Theme.of(context).colorScheme.onError,
+          onPressed: () => scaffoldMessenger.hideCurrentSnackBar(),
+        ),
+      ),
+    );
   }
 
   void _resetForm() {
