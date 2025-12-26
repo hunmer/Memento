@@ -3,6 +3,11 @@
 /// 提供一组可复用的表单字段组件,用于构建统一风格的表单界面
 library;
 
+// 类型定义和配置类
+export 'types.dart';
+export 'config.dart';
+
+// 主表单包装器
 export 'form_builder_wrapper.dart';
 export 'form_field_group.dart';
 export 'tags_field.dart';

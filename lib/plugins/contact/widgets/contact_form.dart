@@ -1,3 +1,5 @@
+import 'package:Memento/widgets/form_fields/config.dart';
+import 'package:Memento/widgets/form_fields/types.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';

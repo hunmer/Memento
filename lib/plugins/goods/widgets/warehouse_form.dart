@@ -1,3 +1,5 @@
+import 'package:Memento/widgets/form_fields/config.dart';
+import 'package:Memento/widgets/form_fields/types.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:get/get.dart';
@@ -24,13 +26,11 @@ class WarehouseForm extends StatefulWidget {
 
 class _WarehouseFormState extends State<WarehouseForm> {
   final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
-  Color _buttonColor = Colors.blue;
 
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.warehouse != null;
     final theme = Theme.of(context);
-    _buttonColor = widget.warehouse?.iconColor ?? Colors.blue;
 
     return Scaffold(
       body: SafeArea(
@@ -71,6 +71,21 @@ class _WarehouseFormState extends State<WarehouseForm> {
                       formKey: _formKey,
                       config: FormConfig(
                         fields: [
+                          // 图标和颜色选择器
+                          FormFieldConfig(
+                            name: 'iconAvatar',
+                            type: FormFieldType.iconAvatarRow,
+                            labelText: '选择图标和颜色',
+                            initialValue: {
+                              'icon':
+                                  widget.warehouse?.icon ?? Icons.inventory_2,
+                              'iconColor':
+                                  widget.warehouse?.iconColor ?? Colors.blue,
+                            },
+                            extra: {
+                              'avatarSaveDirectory': 'goods/warehouse_avatars',
+                            },
+                          ),
                           // 标题字段
                           FormFieldConfig(
                             name: 'title',
@@ -80,42 +95,6 @@ class _WarehouseFormState extends State<WarehouseForm> {
                             initialValue: widget.warehouse?.title ?? '',
                             required: true,
                             validationMessage: 'goods_warehouseName'.tr,
-                          ),
-                          // 图标选择器
-                          FormFieldConfig(
-                            name: 'icon',
-                            type: FormFieldType.iconPicker,
-                            labelText: '选择图标',
-                            initialValue: widget.warehouse?.icon ?? Icons.inventory_2,
-                            extra: {'enableIconToImage': false},
-                            onChanged: (value) {
-                              // 图标变化时可能需要更新按钮颜色
-                            },
-                          ),
-                          // 颜色选择器
-                          FormFieldConfig(
-                            name: 'color',
-                            type: FormFieldType.color,
-                            labelText: '选择颜色',
-                            initialValue: widget.warehouse?.iconColor ?? Colors.blue,
-                            onChanged: (value) {
-                              if (value is Color) {
-                                setState(() => _buttonColor = value);
-                              }
-                            },
-                          ),
-                          // 图片选择器
-                          FormFieldConfig(
-                            name: 'image',
-                            type: FormFieldType.imagePicker,
-                            labelText: '仓库图片',
-                            hintText: '选择图片',
-                            initialValue: widget.warehouse?.imageUrl,
-                            extra: {
-                              'enableCrop': true,
-                              'cropAspectRatio': 1.0,
-                              'saveDirectory': 'goods/warehouse_images',
-                            },
                           ),
                         ],
                         submitButtonText: isEdit ? 'goods_save'.tr : 'goods_confirm'.tr,
@@ -136,12 +115,13 @@ class _WarehouseFormState extends State<WarehouseForm> {
                               child: ElevatedButton(
                                 onPressed: onSubmit,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: _buttonColor,
+                                  backgroundColor: theme.colorScheme.primary,
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(vertical: 16),
                                   shape: const StadiumBorder(),
                                   elevation: 4,
-                                  shadowColor: _buttonColor.withValues(alpha: 0.4),
+                                  shadowColor: theme.colorScheme.primary
+                                      .withValues(alpha: 0.4),
                                 ),
                                 child: Text(
                                   isEdit ? ('goods_save'.tr) : ('goods_confirm'.tr),
@@ -184,16 +164,15 @@ class _WarehouseFormState extends State<WarehouseForm> {
       return;
     }
 
-    final icon = values['icon'] as IconData;
-    final color = values['color'] as Color;
-    final image = values['image'] as String?;
+    final iconAvatar = values['iconAvatar'] as Map<String, dynamic>? ?? {};
+    final icon = iconAvatar['icon'] as IconData? ?? Icons.inventory_2;
+    final color = iconAvatar['iconColor'] as Color? ?? Colors.blue;
 
     final warehouseData = Warehouse(
       id: widget.warehouse?.id ?? const Uuid().v4(),
       title: title,
       icon: icon,
       iconColor: color,
-      imageUrl: image,
     );
 
     await widget.onSave(warehouseData);

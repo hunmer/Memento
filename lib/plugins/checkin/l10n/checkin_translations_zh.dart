@@ -106,5 +106,6 @@ class CheckinTranslationsZh {
     'checkin_widgetDescription': '快速打开签到',
     'checkin_overviewName': '签到概览',
     'checkin_overviewDescription': '显示签到统计信息',
+    'checkin_statsTitle': '打卡统计',
   };
 }

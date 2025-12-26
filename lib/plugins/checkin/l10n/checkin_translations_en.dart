@@ -106,5 +106,6 @@ class CheckinTranslationsEn {
     'checkin_widgetDescription': 'Quick access to check-in',
     'checkin_overviewName': 'Check-in Overview',
     'checkin_overviewDescription': 'Display check-in statistics',
+    'checkin_statsTitle': 'Check-in Statistics',
   };
 }
