@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 /// 金额输入框组件
@@ -49,6 +50,9 @@ class _AmountInputFieldState extends State<AmountInputField> {
   late TextEditingController _controller;
   final GlobalKey<FormFieldState<String>> _fieldKey = GlobalKey();
 
+  /// 标记是否为用户输入导致的更新，避免在输入时被子组件的值覆盖
+  bool _isUserInput = false;
+
   @override
   void initState() {
     super.initState();
@@ -59,13 +63,30 @@ class _AmountInputFieldState extends State<AmountInputField> {
   @override
   void didUpdateWidget(AmountInputField oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // 如果是用户输入导致的更新，跳过子组件的更新
+    if (_isUserInput) {
+      _isUserInput = false;
+      return;
+    }
     if (widget.amount != oldWidget.amount && _controller.text != _formatAmount(widget.amount)) {
-      _updateText();
+      // 延迟到下一帧执行，避免在 build 过程中 setState
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _updateText();
+        }
+      });
     }
   }
 
   void _updateText() {
-    _controller.text = _formatAmount(widget.amount);
+    final newText = _formatAmount(widget.amount);
+    // 只有文本变化时才更新，避免不必要的重绘和光标重置
+    if (_controller.text != newText) {
+      _controller.value = _controller.value.copyWith(
+        text: newText,
+        selection: TextSelection.collapsed(offset: newText.length),
+      );
+    }
   }
 
   String _formatAmount(double? amount) {
@@ -138,6 +159,7 @@ class _AmountInputFieldState extends State<AmountInputField> {
                     ],
                     enabled: widget.enabled,
                     onChanged: (value) {
+                      _isUserInput = true;
                       final amount = double.tryParse(value);
                       widget.onAmountChanged(amount);
                       fieldState.didChange(value);

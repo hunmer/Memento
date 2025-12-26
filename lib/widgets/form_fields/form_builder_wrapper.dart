@@ -62,8 +62,11 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
     _formChangeNotifier.dispose();
   }
 
+  /// 获取实际使用的 FormBuilder key
+  GlobalKey<FormBuilderState> get _actualFormKey => widget.formKey ?? _fbKey;
+
   Map<String, dynamic> get _currentValues {
-    return _fbKey.currentState?.value ?? {};
+    return _actualFormKey.currentState?.value ?? {};
   }
 
   void submitForm() => _submitFormInternal();
@@ -71,7 +74,7 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
   Map<String, dynamic> get currentValues => _currentValues;
 
   bool saveAndValidate() {
-    final fbState = _fbKey.currentState;
+    final fbState = _actualFormKey.currentState;
     if (fbState != null) {
       fbState.save();
       for (final fieldKey in _fieldKeys.values) {
@@ -83,11 +86,11 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
   }
 
   void patchValue(Map<String, dynamic> values) {
-    _fbKey.currentState?.patchValue(values);
+    _actualFormKey.currentState?.patchValue(values);
   }
 
   void _submitFormInternal() {
-    final fbState = _fbKey.currentState;
+    final fbState = _actualFormKey.currentState;
 
     // 先保存表单，确保所有字段值同步
     fbState?.save();
@@ -156,7 +159,7 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
   @override
   Widget build(BuildContext context) {
     return FormBuilder(
-      key: widget.formKey ?? _fbKey,
+      key: _actualFormKey,
       child: Column(
         crossAxisAlignment: widget.config.crossAxisAlignment,
         children: [
@@ -307,7 +310,7 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
         padding: const EdgeInsets.only(top: 16),
         child: InkWell(
           onTap: () async {
-            final fbState = widget.formKey?.currentState;
+            final fbState = _actualFormKey.currentState;
             if (fbState != null) {
               final isValid = fbState.saveAndValidate();
               if (isValid) {
@@ -338,7 +341,7 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
           if (widget.config.showSubmitButton)
             FilledButton(
               onPressed: () async {
-                final fbState = widget.formKey?.currentState;
+                final fbState = _actualFormKey.currentState;
                 if (fbState != null) {
                   final isValid = fbState.saveAndValidate();
                   if (isValid) {

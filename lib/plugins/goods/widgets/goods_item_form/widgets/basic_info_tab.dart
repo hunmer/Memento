@@ -15,15 +15,11 @@ import 'package:Memento/core/services/toast_service.dart';
 class BasicInfoTab extends StatelessWidget {
   final GoodsItemFormController controller;
   final Function() onStateChanged;
-  final Function()? onDelete;
-  final bool showDeleteButton;
 
   const BasicInfoTab({
     super.key,
     required this.controller,
     required this.onStateChanged,
-    this.onDelete,
-    this.showDeleteButton = false,
   });
 
   @override
@@ -211,12 +207,6 @@ class BasicInfoTab extends StatelessWidget {
           },
         ),
 
-        // 删除按钮
-        if (showDeleteButton && onDelete != null) ...[
-          const SizedBox(height: 24),
-          _buildDeleteButton(context),
-        ],
-
         const SizedBox(height: 80), // Space for FAB/Bottom Bar
       ],
     );
@@ -301,51 +291,6 @@ class BasicInfoTab extends StatelessWidget {
     if (picked != null) {
       onDateSelected(picked);
     }
-  }
-
-  Widget _buildDeleteButton(BuildContext context) {
-    final theme = Theme.of(context);
-    return OutlinedButton(
-      onPressed: () {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            backgroundColor: theme.colorScheme.surface,
-            title: Text(
-              'goods_confirmDelete'.tr,
-              style: TextStyle(color: theme.colorScheme.onSurface),
-            ),
-            content: Text(
-              'goods_confirmDeleteItem'.tr,
-              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-            ),
-            actions: [
-              TextButton(
-                child: Text('goods_cancel'.tr),
-                onPressed: () => Navigator.pop(context),
-              ),
-              TextButton(
-                child: Text(
-                  'goods_delete'.tr,
-                  style: TextStyle(color: theme.colorScheme.error),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  onDelete?.call();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size.fromHeight(48),
-        foregroundColor: theme.colorScheme.error,
-        side: BorderSide(color: theme.colorScheme.error),
-      ),
-      child: Text('goods_deleteProduct'.tr),
-    );
   }
 
   Widget _buildImage() {

@@ -103,6 +103,8 @@ class WrappedFormFieldState extends FormFieldWrapperState<WrappedFormField> {
           _value = value;
         });
         widget.onChanged?.call(value);
+        // 通知值变化，用于触发条件字段更新
+        widget.onValueChanged?.call();
       } finally {
         _isSaving = wasSaving;
       }
@@ -134,6 +136,9 @@ class WrappedFormField extends FormFieldWrapper {
   /// 重置回调
   final VoidCallback? onReset;
 
+  /// 值变化时通知（用于触发条件字段更新）
+  final VoidCallback? onValueChanged;
+
   const WrappedFormField({
     super.key,
     required super.name,
@@ -144,6 +149,7 @@ class WrappedFormField extends FormFieldWrapper {
     this.getValue,
     this.onSaved,
     this.onReset,
+    this.onValueChanged,
   });
 
   @override

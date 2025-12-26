@@ -25,6 +25,8 @@ Widget buildSwitchField(FormFieldConfig config, GlobalKey fieldKey) {
           ? (v) {
               fieldState.didChange(v);
               config.onChanged?.call(v);
+              // 触发条件字段更新
+              config.onValueChanged?.call();
             }
           : null,
     ),

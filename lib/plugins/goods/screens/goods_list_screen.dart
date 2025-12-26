@@ -440,34 +440,23 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
   }
 
   void _showEditItemDialog(GoodsItem item, Warehouse warehouse) {
-    showDialog(
+    GoodsItemForm.show(
       context: context,
-      builder:
-          (context) => Dialog(
-            child: GoodsItemForm(
-              initialData: item,
-              onSubmit: (updatedItem) async {
-                await GoodsPlugin.instance.saveGoodsItem(
-                  warehouse.id,
-                  updatedItem,
-                );
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  setState(() {});
-                }
-              },
-              onDelete: (itemToDelete) async {
-                await GoodsPlugin.instance.deleteGoodsItem(
-                  warehouse.id,
-                  itemToDelete.id,
-                );
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  setState(() {});
-                }
-              },
-            ),
-          ),
+      initialData: item,
+      onSubmit: (updatedItem) async {
+        await GoodsPlugin.instance.saveGoodsItem(
+          warehouse.id,
+          updatedItem,
+        );
+        setState(() {});
+      },
+      onDelete: (itemToDelete) async {
+        await GoodsPlugin.instance.deleteGoodsItem(
+          warehouse.id,
+          itemToDelete.id,
+        );
+        setState(() {});
+      },
     );
   }
 

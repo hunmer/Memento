@@ -158,7 +158,10 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
                       color: colorScheme.error.withOpacity(0.7),
                       size: 20,
                     ),
-                    onPressed: () => _showDeleteConfirmation(context, task),
+                    onPressed: () async {
+                      await widget.taskController.removeFromHistory(task.id);
+                      setState(() {});
+                    },
                     tooltip: 'todo_delete'.tr,
                     visualDensity: VisualDensity.compact,
                   ),
@@ -333,33 +336,4 @@ class _HistoryCompletedViewState extends State<HistoryCompletedView> {
     }
   }
 
-  Future<void> _showDeleteConfirmation(BuildContext context, Task task) async {
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        icon: const Icon(Icons.delete_forever, color: Colors.red),
-        title: Text('todo_deleteTaskTitle'.tr),
-        content: Text('todo_deleteTaskMessage'.tr),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('todo_cancel'.tr),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: Text('todo_delete'.tr),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      await widget.taskController.removeFromHistory(task.id);
-      setState(() {});
-    }
-  }
 }

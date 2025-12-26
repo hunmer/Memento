@@ -231,6 +231,12 @@ class _TaskFormState extends State<TaskForm> {
             // 切换子任务状态需要在提交时处理
             // 这里暂时不做实时处理
           },
+          'onCreate':
+              (String text) => Subtask(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                title: text,
+                isCompleted: false,
+              ),
         },
       ),
 
