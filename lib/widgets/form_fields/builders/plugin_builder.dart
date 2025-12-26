@@ -120,8 +120,12 @@ Widget buildAmountInputField(FormFieldConfig config, GlobalKey fieldKey) {
               if (value == null || value.isEmpty) {
                 return config.validationMessage ?? '请输入金额';
               }
-              if (double.tryParse(value) == null) {
+              final amount = double.tryParse(value);
+              if (amount == null) {
                 return '请输入有效的金额';
+              }
+              if (amount <= 0) {
+                return config.validationMessage ?? '金额必须大于0';
               }
               return null;
             }

@@ -92,22 +92,22 @@ class _GoodsBottomBarState extends State<GoodsBottomBar>
     }
 
     // 跳转到物品创建表单
-    NavigationHelper.push(context, GoodsItemForm(
-              onSubmit: (item) async {
-                try {
-                  // 选择第一个仓库（实际应用中应该让用户选择）
-                  final warehouseId = widget.plugin.warehouses.first.id;
-                  await widget.plugin.saveGoodsItem(warehouseId, item);
-                  if (mounted) {
-              Toast.success('goods_itemCreated'.tr);
-                  }
-                } catch (e) {
-                  if (mounted) {
-              Toast.error('${'goods_createItemFailed'.tr}: $e');
-                  }
-                }
-              },
-      ),
+    GoodsItemForm.show(
+      context: context,
+      onSubmit: (item) async {
+        try {
+          // 选择第一个仓库（实际应用中应该让用户选择）
+          final warehouseId = widget.plugin.warehouses.first.id;
+          await widget.plugin.saveGoodsItem(warehouseId, item);
+          if (mounted) {
+            Toast.success('goods_itemCreated'.tr);
+          }
+        } catch (e) {
+          if (mounted) {
+            Toast.error('${'goods_createItemFailed'.tr}: $e');
+          }
+        }
+      },
     );
   }
 

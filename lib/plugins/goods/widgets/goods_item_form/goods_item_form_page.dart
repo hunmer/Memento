@@ -183,10 +183,13 @@ class _GoodsItemFormPageState extends State<GoodsItemFormPage> {
       );
     }
 
-    return GoodsItemForm(
-      initialData: _item,
-      onSubmit: _handleSubmit,
-      onDelete: _handleDelete,
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      body: GoodsItemForm(
+        initialData: _item,
+        onSubmit: _handleSubmit,
+        onDelete: _handleDelete,
+      ),
     );
   }
 }

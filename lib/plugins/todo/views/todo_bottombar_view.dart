@@ -317,7 +317,12 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
       _plugin.taskController.applyFilter(filterParams);
     }
 
-    setState(() {});
+    // 延迟setState到当前帧结束后,避免在构建期间调用setState
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   // 构建任务列表视图（第一个tab）
@@ -475,6 +480,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
             if (confirmed == true) {
               _plugin.taskController.clearHistory();
+              setState(() {});
             }
           },
         ),

@@ -25,8 +25,6 @@ class WarehouseForm extends StatefulWidget {
 }
 
 class _WarehouseFormState extends State<WarehouseForm> {
-  final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
-
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.warehouse != null;
@@ -68,7 +66,6 @@ class _WarehouseFormState extends State<WarehouseForm> {
                   children: [
                     const SizedBox(height: 32),
                     FormBuilderWrapper(
-                      formKey: _formKey,
                       config: FormConfig(
                         fields: [
                           // 图标和颜色选择器
@@ -81,6 +78,7 @@ class _WarehouseFormState extends State<WarehouseForm> {
                                   widget.warehouse?.icon ?? Icons.inventory_2,
                               'iconColor':
                                   widget.warehouse?.iconColor ?? Colors.blue,
+                              'avatarUrl': widget.warehouse?.imageUrl,
                             },
                             extra: {
                               'avatarSaveDirectory': 'goods/warehouse_avatars',
@@ -167,12 +165,14 @@ class _WarehouseFormState extends State<WarehouseForm> {
     final iconAvatar = values['iconAvatar'] as Map<String, dynamic>? ?? {};
     final icon = iconAvatar['icon'] as IconData? ?? Icons.inventory_2;
     final color = iconAvatar['iconColor'] as Color? ?? Colors.blue;
+    final imageUrl = iconAvatar['avatarUrl'] as String?;
 
     final warehouseData = Warehouse(
       id: widget.warehouse?.id ?? const Uuid().v4(),
       title: title,
       icon: icon,
       iconColor: color,
+      imageUrl: imageUrl,
     );
 
     await widget.onSave(warehouseData);

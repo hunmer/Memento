@@ -43,11 +43,17 @@ class _BillEditScreenState extends State<BillEditScreen> {
   // 表单 key
   final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
 
+  // FormBuilderWrapper 的状态引用
+  FormBuilderWrapperState? _wrapperState;
+
   // 分类相关数据
   String? _tag;
   IconData _selectedIcon = Icons.category;
   Color _selectedColor = Colors.blue;
   DateTime _selectedDate = DateTime.now();
+
+  // 订阅服务状态
+  bool _isSubscriptionEnabled = false;
 
   // 可用的分类标签
   final List<String> _availableTags = <String>[
@@ -137,16 +143,42 @@ class _BillEditScreenState extends State<BillEditScreen> {
   /// 保存账单
   Future<void> _handleSave(Map<String, dynamic> values) async {
     try {
-      final amount = values['amount'] as double;
-      final isExpense = values['isExpense'] as bool;
+      final amount = (values['amount'] as num?)?.toDouble() ?? 0.0;
+      final isExpense = values['isExpense'] as bool? ?? false;
       final isSubscription = values['isSubscription'] as bool?;
 
+      // 验证金额必须大于0
+      if (amount <= 0) {
+        Toast.error('请输入有效金额（需大于0）');
+        return;
+      }
+
       if (isSubscription == true) {
+        // 验证订阅服务字段
+        final subscriptionName = values['subscriptionName'] as String?;
+        final subscriptionDaysValue = values['subscriptionDays'];
+
+        if (subscriptionName == null || subscriptionName.isEmpty) {
+          Toast.error('请输入订阅服务名称');
+          return;
+        }
+
+        if (subscriptionDaysValue == null) {
+          Toast.error('请输入订阅天数');
+          return;
+        }
+
+        final days = int.tryParse(subscriptionDaysValue.toString());
+        if (days == null || days <= 0) {
+          Toast.error('请输入有效的订阅天数');
+          return;
+        }
+
         // 保存为订阅服务
         final subscription = Subscription(
-          name: values['subscriptionName'] as String,
+          name: subscriptionName,
           totalAmount: amount,
-          days: int.parse(values['subscriptionDays'] as String),
+          days: days,
           category: _tag ?? '订阅',
           startDate: _selectedDate,
           note: values['note'] as String?,
@@ -231,6 +263,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
               padding: const EdgeInsets.all(16.0),
               child: FormBuilderWrapper(
                 formKey: _formKey,
+                onStateReady: (state) => _wrapperState = state,
                 config: FormConfig(
                   fields: _buildFormFields(primaryColor),
                   showSubmitButton: false,
@@ -243,6 +276,15 @@ class _BillEditScreenState extends State<BillEditScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      
+                      // 标题字段
+                      FormFieldGroup(
+                        showDividers: false,
+                        showBackground: false,
+                        children: [fields[2]], // title字段
+                      ),
+                      const SizedBox(height: 16),
+                      
                       // 类型和金额卡片
                       _buildTypeAndAmountCard(fields, cardColor, primaryColor, isDark),
                       const SizedBox(height: 16),
@@ -250,6 +292,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
                       // 分类选择卡片
                       _buildCategoryCard(fields, cardColor, primaryColor, isDark),
                       const SizedBox(height: 16),
+
 
                       // 日期和备注
                       _buildDateAndNoteSection(fields),
@@ -295,6 +338,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
             ? widget.bill!.absoluteAmount
             : widget.initialAmount,
         required: true,
+        validationMessage: '请输入有效金额（需大于0）',
         extra: {
           'currencySymbol': '¥',
           'fontSize': 40.0,
@@ -326,8 +370,7 @@ class _BillEditScreenState extends State<BillEditScreen> {
         name: 'note',
         type: FormFieldType.textArea,
         initialValue: widget.bill?.note ?? '',
-        labelText: '备注',
-        hintText: '添加笔记...',
+        hintText: '添加备注...',
         extra: {
           'minLines': 3,
           'maxLines': 5,
@@ -342,28 +385,27 @@ class _BillEditScreenState extends State<BillEditScreen> {
         labelText: '启用订阅服务',
         hintText: '启用后将自动生成每日账单',
         prefixIcon: Icons.autorenew,
+        onChanged: (value) {
+          setState(() {
+            _isSubscriptionEnabled = value as bool;
+          });
+        },
       ),
 
-      // 订阅服务名称（条件显示）
+      // 订阅服务名称
       FormFieldConfig(
         name: 'subscriptionName',
         type: FormFieldType.text,
-        labelText: '订阅服务名称 *',
+        labelText: '订阅服务名称',
         hintText: '例如：Netflix会员',
-        required: true,
-        validationMessage: '请输入订阅服务名称',
-        visible: (values) => values['isSubscription'] == true,
       ),
 
-      // 订阅天数（条件显示）
+      // 订阅天数
       FormFieldConfig(
         name: 'subscriptionDays',
         type: FormFieldType.number,
-        labelText: '订阅天数 *',
+        labelText: '订阅天数',
         hintText: '例如：30',
-        required: true,
-        validationMessage: '请输入有效的订阅天数',
-        visible: (values) => values['isSubscription'] == true,
       ),
     ];
   }
@@ -373,9 +415,6 @@ class _BillEditScreenState extends State<BillEditScreen> {
     // 获取类型选择器和金额输入框的字段
     final typeField = fields[0];
     final amountField = fields[1];
-
-    final expenseColor = const Color(0xFFE74C3C);
-    final incomeColor = const Color(0xFF2ECC71);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -387,40 +426,14 @@ class _BillEditScreenState extends State<BillEditScreen> {
         children: [
           typeField,
           const SizedBox(height: 24),
-          _buildAmountDisplay(amountField, expenseColor, incomeColor, isDark),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(width: 16),
+              Expanded(child: amountField)],
+          ),
         ],
       ),
-    );
-  }
-
-  /// 构建金额显示区域
-  Widget _buildAmountDisplay(Widget amountField, Color expenseColor, Color incomeColor, bool isDark) {
-    // 监听表单值变化以获取当前类型
-    return FormBuilderField(
-      name: '_amountDisplay',
-      builder: (fieldState) {
-        final formState = _formKey.currentState;
-        final isExpense = formState?.value['isExpense'] as bool? ?? true;
-        final activeColor = isExpense ? expenseColor : incomeColor;
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              '¥',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: activeColor,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: amountField,
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -465,8 +478,11 @@ class _BillEditScreenState extends State<BillEditScreen> {
   Widget _buildDateAndNoteSection(List<Widget> fields) {
     final dateField = fields[3];
     final noteField = fields[4];
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FormFieldGroup(
           showDividers: true,
@@ -475,7 +491,21 @@ class _BillEditScreenState extends State<BillEditScreen> {
         const SizedBox(height: 16),
         FormFieldGroup(
           showDividers: false,
-          children: [noteField],
+          children: [
+            // 备注标题
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Text(
+                '备注',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.grey[400] : Colors.grey[700],
+                ),
+              ),
+            ),
+            noteField,
+          ],
         ),
       ],
     );
@@ -506,10 +536,14 @@ class _BillEditScreenState extends State<BillEditScreen> {
           ),
           const SizedBox(height: 16),
           switchField,
-          nameField,
-          if (nameField is! SizedBox) const SizedBox(height: 16),
-          daysField,
-          _buildDailyAmountCalculation(cardColor, primaryColor, isDark),
+          // 根据订阅服务状态显示额外字段
+          if (_isSubscriptionEnabled) ...[
+            const SizedBox(height: 16),
+            nameField,
+            const SizedBox(height: 16),
+            daysField,
+            _buildDailyAmountCalculation(cardColor, primaryColor, isDark),
+          ],
         ],
       ),
     );
@@ -517,9 +551,8 @@ class _BillEditScreenState extends State<BillEditScreen> {
 
   /// 构建单日金额计算显示
   Widget _buildDailyAmountCalculation(Color cardColor, Color primaryColor, bool isDark) {
-    return FormBuilderField(
-      name: '_dailyAmount',
-      builder: (fieldState) {
+    return Builder(
+      builder: (context) {
         final formState = _formKey.currentState;
         final amountValue = formState?.value['amount'];
         final daysValue = formState?.value['subscriptionDays'];
@@ -581,10 +614,8 @@ class _BillEditScreenState extends State<BillEditScreen> {
         height: 56,
         child: ElevatedButton(
           onPressed: () {
-            // 触发表单验证和提交
-            if (_formKey.currentState?.saveAndValidate() ?? false) {
-              _handleSave(_formKey.currentState!.value);
-            }
+            // 使用 wrapper 的提交方法，确保所有字段值正确收集
+            _wrapperState?.submitForm();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: primaryColor,

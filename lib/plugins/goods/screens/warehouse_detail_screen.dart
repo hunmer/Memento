@@ -77,20 +77,12 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
   }
 
   void _showAddItemDialog() {
-    showDialog(
+    GoodsItemForm.show(
       context: context,
-      builder:
-          (context) => Dialog(
-            child: GoodsItemForm(
-              onSubmit: (GoodsItem item) async {
-                await GoodsPlugin.instance.saveGoodsItem(_warehouse.id, item);
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                  await _refreshWarehouse();
-                }
-              },
-            ),
-          ),
+      onSubmit: (GoodsItem item) async {
+        await GoodsPlugin.instance.saveGoodsItem(_warehouse.id, item);
+        await _refreshWarehouse();
+      },
     );
   }
 
@@ -231,31 +223,20 @@ class _WarehouseDetailScreenState extends State<WarehouseDetailScreen> {
   }
 
   void _showEditItemDialog(GoodsItem item) {
-    showDialog(
+    GoodsItemForm.show(
       context: context,
-      builder:
-          (context) => Dialog(
-            child: GoodsItemForm(
-              initialData: item,
-              onSubmit: (item) async {
-                await GoodsPlugin.instance.saveGoodsItem(_warehouse.id, item);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  await _refreshWarehouse();
-                }
-              },
-              onDelete: (item) async {
-                await GoodsPlugin.instance.deleteGoodsItem(
-                  _warehouse.id,
-                  item.id,
-                );
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  await _refreshWarehouse();
-                }
-              },
-            ),
-          ),
+      initialData: item,
+      onSubmit: (item) async {
+        await GoodsPlugin.instance.saveGoodsItem(_warehouse.id, item);
+        await _refreshWarehouse();
+      },
+      onDelete: (item) async {
+        await GoodsPlugin.instance.deleteGoodsItem(
+          _warehouse.id,
+          item.id,
+        );
+        await _refreshWarehouse();
+      },
     );
   }
 

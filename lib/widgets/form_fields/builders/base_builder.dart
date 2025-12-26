@@ -101,7 +101,10 @@ Widget buildTextAreaField(FormFieldConfig config, GlobalKey fieldKey) {
     decoration: InputDecoration(
       labelText: config.labelText,
       hintText: config.hintText,
-      border: const OutlineInputBorder(),
+      border: InputBorder.none,
+      enabledBorder: InputBorder.none,
+      focusedBorder: InputBorder.none,
+      contentPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
     ),
     minLines: (extra['minLines'] as int?) ?? 3,
     maxLines: (extra['maxLines'] as int?) ?? 6,

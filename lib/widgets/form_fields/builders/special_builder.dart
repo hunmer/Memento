@@ -285,7 +285,12 @@ Widget buildListAddField(FormFieldConfig config, GlobalKey fieldKey) {
         addButtonText: config.hintText ?? '添加',
         onAdd: () {
           if (controller.text.isNotEmpty) {
-            final newItems = [...items, controller.text];
+            // 如果提供了 onCreate 回调，使用它创建对象；否则直接添加字符串
+            final onCreateRaw = extra['onCreate'];
+            final newItem = onCreateRaw != null
+                ? onCreateRaw(controller.text)
+                : controller.text;
+            final newItems = [...items, newItem];
             fieldState.didChange(newItems);
             config.onChanged?.call(newItems);
             controller.clear();

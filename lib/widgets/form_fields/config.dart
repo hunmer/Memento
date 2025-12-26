@@ -79,6 +79,9 @@ class FormFieldConfig {
   /// 值变化回调
   final ValueChanged? onChanged;
 
+  /// 值变化时通知（用于触发条件字段更新）
+  final VoidCallback? onValueChanged;
+
   /// 自定义属性（用于扩展）
   final Map<String, dynamic>? extra;
 
@@ -117,6 +120,7 @@ class FormFieldConfig {
     this.initialTags,
     this.initialCustomFields,
     this.onChanged,
+    this.onValueChanged,
     this.extra,
     this.visible,
     this.prefixButtons,

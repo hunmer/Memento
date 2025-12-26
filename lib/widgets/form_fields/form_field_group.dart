@@ -25,6 +25,9 @@ class FormFieldGroup extends StatelessWidget {
   /// 圆角半径
   final double borderRadius;
 
+  /// 是否显示背景色
+  final bool showBackground;
+
   const FormFieldGroup({
     super.key,
     required this.children,
@@ -33,6 +36,7 @@ class FormFieldGroup extends StatelessWidget {
     this.dividerEndIndent = 0,
     this.padding,
     this.borderRadius = 12,
+    this.showBackground = true,
   });
 
   @override
@@ -58,17 +62,24 @@ class FormFieldGroup extends StatelessWidget {
     }
 
     return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(borderRadius),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: childrenWithDividers,
-        ),
-      ),
+      decoration: showBackground
+          ? BoxDecoration(
+              color: theme.colorScheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(borderRadius),
+            )
+          : null,
+      child: showBackground
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(borderRadius),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: childrenWithDividers,
+              ),
+            )
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: childrenWithDividers,
+            ),
     );
   }
 }
