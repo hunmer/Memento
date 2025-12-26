@@ -90,10 +90,6 @@ class WrappedFormFieldState extends FormFieldWrapperState<WrappedFormField> {
 
   @override
   dynamic getValue() {
-    // 优先使用自定义的 getValue 回调
-    if (widget.getValue != null) {
-      return widget.getValue!();
-    }
     return _value;
   }
 

@@ -173,7 +173,6 @@ class _WrappedPromptEditorFieldState extends State<WrappedPromptEditorField> {
           labelText: widget.labelText,
         );
       },
-      getValue: () => _fieldKey.currentState?.getValue() ?? widget.initialValue,
       onReset: () => _fieldKey.currentState?.reset(),
     );
   }

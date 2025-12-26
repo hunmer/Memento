@@ -73,13 +73,6 @@ Widget buildIconTitleField(FormFieldConfig config, GlobalKey fieldKey) {
     initialValue: config.initialValue,
     enabled: config.enabled,
     onChanged: config.onChanged,
-    onSaved: (value) {
-      final state = (fieldKey as GlobalKey<WrappedFormFieldState>).currentState;
-      if (state != null) {
-        final currentValue = state.getValue();
-        state.setValue(currentValue);
-      }
-    },
     builder: (context, value, setValue) {
       String currentTitle = '';
       IconData? currentIcon;
@@ -97,9 +90,6 @@ Widget buildIconTitleField(FormFieldConfig config, GlobalKey fieldKey) {
         hintText: config.hintText ?? '输入标题',
         onValueChanged: setValue,
       );
-    },
-    getValue: () {
-      return (fieldKey as GlobalKey<WrappedFormFieldState>).currentState?.getValue();
     },
     onReset: () {
       (fieldKey as GlobalKey<WrappedFormFieldState>).currentState?.reset();
