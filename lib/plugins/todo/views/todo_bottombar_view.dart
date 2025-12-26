@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 import 'dart:async';
-import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/plugins/todo/models/task.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/widgets/custom_bottom_bar.dart';
@@ -37,9 +37,8 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
   // 搜索查询变量
   String _searchQuery = '';
 
-  // 事件订阅列表
-  final List<(String eventName, void Function(EventArgs) handler)>
-      _eventSubscriptions = [];
+  // 过滤条件状态（由 View 自己管理）
+  Map<String, dynamic>? _currentFilter;
 
   // 获取页面颜色
   List<Color> get _colors => [
@@ -52,9 +51,6 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
     super.initState();
     _plugin = TodoPlugin.instance;
     _tabController = TabController(length: 2, vsync: this);
-
-    // 注册任务事件监听
-    _registerTaskEventListeners();
 
     // 监听tab切换
     _tabController.addListener(() {
@@ -90,36 +86,9 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   @override
   void dispose() {
-    // 取消所有事件监听
-    for (final (eventName, handler) in _eventSubscriptions) {
-      EventManager.instance.unsubscribe(eventName, handler);
-    }
-    _eventSubscriptions.clear();
     _timer?.cancel();
     _tabController.dispose();
     super.dispose();
-  }
-
-  /// 注册任务事件监听器
-  void _registerTaskEventListeners() {
-    final events = [
-      'task_added',
-      'task_updated',
-      'task_deleted',
-      'task_completed',
-    ];
-    for (final event in events) {
-      void handler(EventArgs args) {
-        print('[TodoBottomBarView] received event: "$event"');
-        if (mounted) {
-          setState(() {});
-        }
-      }
-
-      EventManager.instance.subscribe(event, handler);
-      _eventSubscriptions.add((event, handler));
-      print('[TodoBottomBarView] subscribed to: "$event"');
-    }
   }
 
   /// 更新路由上下文，使"询问当前上下文"功能能获取到当前页面状态
@@ -218,7 +187,18 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
   Widget _buildTabPage(int index) {
     switch (index) {
       case 0:
-        return _buildTaskListView();
+        // 使用 EventListenerContainer 监听任务事件来触发 UI 更新
+        // AnimatedBuilder 会监听 taskController 的变化并重建 UI
+        return EventListenerContainer(
+          events: [
+            'task_added',
+            'task_updated',
+            'task_deleted',
+            'task_completed',
+          ],
+          onEvent: () {}, // AnimatedBuilder 会处理更新
+          child: _buildTaskListView(),
+        );
       case 1:
         return _buildHistoryView();
       default:
@@ -345,12 +325,8 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
       filterParams['showIncomplete'] = status['showIncomplete'] ?? true;
     }
 
-    // 应用过滤
-    if (filterParams.isEmpty) {
-      _plugin.taskController.clearFilter();
-    } else {
-      _plugin.taskController.applyFilter(filterParams);
-    }
+    // 保存过滤状态到 View 层
+    _currentFilter = filterParams.isEmpty ? null : filterParams;
 
     // 延迟setState到当前帧结束后,避免在构建期间调用setState
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -380,9 +356,9 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
         setState(() {
           _searchQuery = query;
           if (query.isEmpty) {
-            _plugin.taskController.clearFilter();
+            _currentFilter = null;
           } else {
-            _plugin.taskController.applyFilter({'keyword': query});
+            _currentFilter = {'keyword': query};
           }
         });
         // 更新路由上下文
@@ -393,11 +369,11 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
         setState(() {
           final currentQuery = _searchQuery;
           if (currentQuery.isNotEmpty) {
-            // 重新应用搜索，使用当前过滤设置
-            _plugin.taskController.applyFilter({
+            // 保存搜索过滤设置
+            _currentFilter = {
               'keyword': currentQuery,
               'searchFilters': filters,
-            });
+            };
           }
         });
       },
@@ -441,16 +417,21 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
       body: AnimatedBuilder(
         animation: _plugin.taskController,
         builder: (context, _) {
+          // 根据 View 的过滤状态决定使用过滤后的结果还是原始数据
+          final tasks = _currentFilter != null
+              ? _plugin.taskController.filterTasks(_currentFilter!)
+              : _plugin.taskController.tasks;
+
           return _plugin.taskController.isGridView
               ? TodoFourQuadrantView(
-                tasks: _plugin.taskController.tasks,
+                tasks: tasks,
                 onTaskTap: (task) => _showTaskDetailDialog(context, task),
                 onTaskStatusChanged: (task, status) {
                   _plugin.taskController.updateTaskStatus(task.id, status);
                 },
               )
               : TaskListView(
-                tasks: _plugin.taskController.tasks,
+                tasks: tasks,
                 onTaskTap: (task) => _showTaskDetailDialog(context, task),
                 onTaskStatusChanged: (task, status) {
                   _plugin.taskController.updateTaskStatus(task.id, status);
@@ -545,7 +526,10 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
     return AnimatedBuilder(
       animation: _plugin.taskController,
       builder: (context, _) {
-        final searchTasks = _plugin.taskController.tasks;
+        // 搜索结果使用 View 的过滤状态
+        final searchTasks = _currentFilter != null
+            ? _plugin.taskController.filterTasks(_currentFilter!)
+            : _plugin.taskController.tasks;
 
         if (_searchQuery.isEmpty) {
           return Center(

@@ -38,12 +38,8 @@ class TaskController extends ChangeNotifier {
     _loadTasks();
   }
 
-  // 过滤状态
-  List<Task> _filteredTasks = [];
-  Map<String, dynamic>? _currentFilter;
-
   // Getters
-  List<Task> get tasks => _currentFilter != null ? _filteredTasks : _tasks;
+  List<Task> get tasks => _tasks;
   bool get isGridView => _isGridView;
   SortBy get sortBy => _sortBy;
 
@@ -57,32 +53,22 @@ class TaskController extends ChangeNotifier {
   void setSortBy(SortBy sortBy) {
     _sortBy = sortBy;
     _sortTasks();
-    if (_currentFilter != null) {
-      _applyFilter(_currentFilter!);
-    }
     notifyListeners();
   }
 
-  // 应用过滤
-  void applyFilter(Map<String, dynamic> filter) {
-    _currentFilter = filter;
-    _applyFilter(filter);
-
-    // 确保在UI线程安全地通知监听器
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
-    });
+  // 纯过滤方法（返回过滤后的结果，不保存状态）
+  List<Task> filterTasks(Map<String, dynamic> filter) {
+    return _applyFilterInternal(filter);
   }
 
-  // 清除过滤
+  // 清除过滤（无操作，View 自行管理过滤状态）
   void clearFilter() {
-    _currentFilter = null;
     notifyListeners();
   }
 
-  // 实际执行过滤逻辑
-  void _applyFilter(Map<String, dynamic> filter) {
-    _filteredTasks =
+  // 实际执行过滤逻辑（纯方法，返回过滤结果）
+  List<Task> _applyFilterInternal(Map<String, dynamic> filter) {
+    final filtered =
         _tasks.where((task) {
           // 关键词过滤
           final keyword = filter['keyword'] as String?;
@@ -99,18 +85,28 @@ class TaskController extends ChangeNotifier {
             } else {
               // 根据过滤器设置逐个检查字段
               if (searchFilters['title'] == true) {
-                keywordMatch = keywordMatch || task.title.toLowerCase().contains(keyword.toLowerCase());
+                keywordMatch =
+                    keywordMatch ||
+                    task.title.toLowerCase().contains(keyword.toLowerCase());
               }
               if (searchFilters['description'] == true && !keywordMatch) {
-                keywordMatch = task.description != null &&
-                    task.description!.toLowerCase().contains(keyword.toLowerCase());
+                keywordMatch =
+                    task.description != null &&
+                    task.description!.toLowerCase().contains(
+                      keyword.toLowerCase(),
+                    );
               }
               if (searchFilters['tag'] == true && !keywordMatch) {
-                keywordMatch = task.tags.any((tag) => tag.toLowerCase().contains(keyword.toLowerCase()));
+                keywordMatch = task.tags.any(
+                  (tag) => tag.toLowerCase().contains(keyword.toLowerCase()),
+                );
               }
               if (searchFilters['subtask'] == true && !keywordMatch) {
-                keywordMatch = task.subtasks.any((subtask) =>
-                    subtask.title.toLowerCase().contains(keyword.toLowerCase()));
+                keywordMatch = task.subtasks.any(
+                  (subtask) => subtask.title.toLowerCase().contains(
+                    keyword.toLowerCase(),
+                  ),
+                );
               }
             }
 
@@ -179,7 +175,11 @@ class TaskController extends ChangeNotifier {
 
           return true;
         }).toList();
-    _sortTasks();
+
+    // 排序
+    final sorted = List<Task>.from(filtered);
+    _sortTasksList(sorted);
+    return sorted;
   }
 
   // 检查任务是否匹配关键词（默认搜索所有字段）
@@ -194,16 +194,21 @@ class TaskController extends ChangeNotifier {
 
   // 根据当前排序方式对任务进行排序
   void _sortTasks() {
+    _sortTasksList(_tasks);
+  }
+
+  // 对任务列表进行排序（纯方法）
+  void _sortTasksList(List<Task> list) {
     switch (_sortBy) {
       case SortBy.dueDate:
-        _tasks.sort((a, b) {
+        list.sort((a, b) {
           if (a.dueDate == null) return 1;
           if (b.dueDate == null) return -1;
           return a.dueDate!.compareTo(b.dueDate!);
         });
         break;
       case SortBy.priority:
-        _tasks.sort((a, b) => b.priority.index.compareTo(a.priority.index));
+        list.sort((a, b) => b.priority.index.compareTo(a.priority.index));
         break;
       case SortBy.custom:
         // 自定义排序逻辑，这里可以根据需要实现
@@ -228,90 +233,7 @@ class TaskController extends ChangeNotifier {
 
       _sortTasks();
       notifyListeners();
-    } else {
-      // 首次初始化，创建默认任务
-      await _createDefaultTasks();
-    }
-  }
-
-  // 创建默认任务
-  Future<void> _createDefaultTasks() async {
-    final now = DateTime.now();
-
-    // 任务1：欢迎任务
-    final welcomeTask = Task(
-      id: const Uuid().v4(),
-      title: '欢迎使用待办事项',
-      description: '这是你的第一个任务！点击任务可以查看详情、编辑或标记完成。',
-      createdAt: now,
-      dueDate: now.add(const Duration(days: 1)),
-      priority: TaskPriority.high,
-      status: TaskStatus.todo,
-      tags: ['入门'],
-    );
-
-    // 任务2：带子任务的示例
-    final projectTask = Task(
-      id: const Uuid().v4(),
-      title: '完成项目计划',
-      description: '制定本周的工作计划，包含多个子任务',
-      createdAt: now,
-      startDate: now,
-      dueDate: now.add(const Duration(days: 3)),
-      priority: TaskPriority.medium,
-      status: TaskStatus.todo,
-      tags: ['工作', '计划'],
-      subtasks: [
-        Subtask(
-          id: const Uuid().v4(),
-          title: '收集需求',
-          isCompleted: false,
-        ),
-        Subtask(
-          id: const Uuid().v4(),
-          title: '设计方案',
-          isCompleted: false,
-        ),
-        Subtask(
-          id: const Uuid().v4(),
-          title: '评审确认',
-          isCompleted: false,
-        ),
-      ],
-    );
-
-    // 任务3：日常任务
-    final dailyTask = Task(
-      id: const Uuid().v4(),
-      title: '每日锻炼30分钟',
-      description: '保持健康的生活习惯',
-      createdAt: now,
-      dueDate: now,
-      priority: TaskPriority.medium,
-      status: TaskStatus.todo,
-      tags: ['健康', '日常'],
-    );
-
-    // 任务4：低优先级任务
-    final readingTask = Task(
-      id: const Uuid().v4(),
-      title: '阅读《Flutter实战》',
-      description: '学习Flutter高级特性',
-      createdAt: now,
-      startDate: now,
-      dueDate: now.add(const Duration(days: 7)),
-      priority: TaskPriority.low,
-      status: TaskStatus.todo,
-      tags: ['学习', '阅读'],
-    );
-
-    // 添加所有默认任务
-    _tasks.addAll([welcomeTask, projectTask, dailyTask, readingTask]);
-
-    // 排序并保存
-    _sortTasks();
-    await _saveTasks();
-    notifyListeners();
+    } 
   }
 
   // 保存任务
@@ -327,11 +249,6 @@ class TaskController extends ChangeNotifier {
   Future<void> addTask(Task task) async {
     _tasks.add(task);
     _sortTasks();
-
-    // 如果有活动的过滤器，需要重新应用以包含新任务
-    if (_currentFilter != null) {
-      _applyFilter(_currentFilter!);
-    }
 
     notifyListeners();
     await _saveTasks();
