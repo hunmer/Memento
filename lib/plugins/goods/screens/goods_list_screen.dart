@@ -1,3 +1,4 @@
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
@@ -537,15 +538,12 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
               : _isGridView
               ? LayoutBuilder(
                 builder: (context, constraints) {
-                  return GridView.builder(
+                  return MasonryGridView.count(
                     padding: const EdgeInsets.all(16),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount:
-                          constraints.maxWidth > 600 ? 3 : 2, // 响应式列数
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.75, // 调整卡片比例
-                    ),
+                    crossAxisCount:
+                        constraints.maxWidth > 600 ? 3 : 2, // 响应式列数
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
                     itemCount: allItems.length,
                     itemBuilder: (context, index) {
                       final item = allItems[index]['item'] as GoodsItem;

@@ -103,7 +103,7 @@ Future<StatisticsData> loadStatisticsData(
   );
 
   return StatisticsData(
-    title: 'Checkin Statistics',
+    title: 'checkin_statsTitle'.tr,
     startDate: startDate,
     endDate: endDate,
     totalValue: totalCheckins.toDouble(),
@@ -152,9 +152,9 @@ class _CheckinStatsScreenState extends State<CheckinStatsScreen> {
   @override
   Widget build(BuildContext context) {
     return StatisticsScreen(
-      config: const StatisticsConfig(
+      config: StatisticsConfig(
         type: StatisticsType.checkins,
-        title: 'Checkin Statistics',
+        title: 'checkin_statsTitle'.tr,
         show24hDistribution: false,
         availableRanges: [
           DateRangeOption.today,
