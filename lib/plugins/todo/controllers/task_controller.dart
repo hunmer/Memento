@@ -326,11 +326,17 @@ class TaskController extends ChangeNotifier {
   // 添加任务
   Future<void> addTask(Task task) async {
     _tasks.add(task);
-    // 发送添加事件
-    _notifyEvent('added', task);
     _sortTasks();
+
+    // 如果有活动的过滤器，需要重新应用以包含新任务
+    if (_currentFilter != null) {
+      _applyFilter(_currentFilter!);
+    }
+
     notifyListeners();
     await _saveTasks();
+    // 发送添加事件（通知Listeners之后发送，确保UI已更新）
+    _notifyEvent('added', task);
     await _syncWidget();
 
     // 同步任务到系统日历（如果有开始日期）
@@ -376,10 +382,11 @@ class TaskController extends ChangeNotifier {
     if (index != -1) {
       final oldTask = _tasks[index];
       _tasks[index] = task;
-      _notifyEvent('updated', task);
       _sortTasks();
       notifyListeners();
       await _saveTasks();
+      // 发送更新事件（通知Listeners之后发送，确保UI已更新）
+      _notifyEvent('updated', task);
       await _syncWidget();
 
       // 同步更新到系统日历
@@ -395,16 +402,19 @@ class TaskController extends ChangeNotifier {
   // 删除任务
   Future<void> deleteTask(String taskId) async {
     final task = _tasks.firstWhere((t) => t.id == taskId);
-    if (task.status == TaskStatus.done) {
+    bool wasCompleted = task.status == TaskStatus.done;
+    if (wasCompleted) {
       // 如果是已完成任务，添加到历史记录
       _completedTasks.add(task.copyWith(completedDate: DateTime.now()));
-      _notifyEvent('completed', task);
     }
     _tasks.removeWhere((task) => task.id == taskId);
-    // 发送删除事件
-    _notifyEvent('deleted', task);
     notifyListeners();
     await _saveTasks();
+    // 发送事件（通知Listeners之后发送，确保UI已更新）
+    if (wasCompleted) {
+      _notifyEvent('completed', task);
+    }
+    _notifyEvent('deleted', task);
     await _syncWidget();
 
     // 从系统日历删除

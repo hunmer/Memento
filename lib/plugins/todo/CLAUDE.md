@@ -57,13 +57,7 @@ class TodoPlugin extends BasePlugin {
 }
 ```
 
-### 主界面入口
-
-**文件**: `views/todo_main_view.dart`
-
-**路由**: 通过 `TodoPlugin.buildMainView()` 返回 `TodoMainView`,内部支持:
-- **列表视图** (`TaskListView`): 线性展示任务,支持滑动删除
-- **四象限视图** (`TodoFourQuadrantView`): 按紧急重要程度将任务划分为四个象限
+```
 
 ---
 
@@ -335,7 +329,6 @@ class Category {
 
 | 组件 | 文件 | 职责 |
 |------|------|------|
-| `TodoMainView` | `views/todo_main_view.dart` | 插件主视图容器 |
 | `TaskListView` | `widgets/task_list_view.dart` | 任务列表视图 |
 | `TodoFourQuadrantView` | `views/todo_four_quadrant_view.dart` | 任务四象限视图 |
 | `TaskListItem` | `widgets/task_list_item.dart` | 列表项组件 |
@@ -345,33 +338,6 @@ class Category {
 | `AddTaskButton` | `widgets/add_task_button.dart` | 浮动添加按钮 |
 | `HistoryCompletedView` | `widgets/history_completed_view.dart` | 已完成任务历史视图 |
 | `HistoryTaskDetailView` | `widgets/history_task_detail_view.dart` | 历史任务详情页 |
-
-### TodoMainView 布局
-
-**布局结构**:
-```
-Scaffold
-├── AppBar
-│   ├── 标题 (待办事项)
-│   ├── 过滤按钮 (filter_alt)
-│   ├── 视图切换按钮 (view_list/dashboard)
-│   ├── 历史记录按钮 (history)
-│   └── 排序菜单 (sort)
-│       ├── 按截止日期排序
-│       ├── 按优先级排序
-│       └── 自定义排序
-├── AnimatedBuilder (监听 TaskController)
-│   └── TaskListView / TodoFourQuadrantView (动态切换)
-└── FloatingActionButton (AddTaskButton)
-```
-
-**关键特性**:
-- 实时计时器更新(每秒刷新正在进行的任务)
-- 双视图模式切换(列表/网格)
-- 多维度过滤(关键词、优先级、标签、日期范围、完成状态)
-- 三种排序方式(截止日期、优先级、自定义)
-- 点击任务进入详情页
-- 列表模式支持滑动删除
 
 ### TaskForm 表单
 
@@ -773,7 +739,7 @@ void _sortTasks() {
 }
 ```
 
-3. 在 `todo_main_view.dart` 的 AppBar 中添加菜单项:
+3. 在对应视图的 AppBar 中添加菜单项:
 ```dart
 PopupMenuItem(
   value: SortBy.createdDate,
@@ -882,7 +848,6 @@ todo/
 │   ├── task_controller.dart                      # 任务控制器(核心业务逻辑)
 │   └── reminder_controller.dart                  # 提醒控制器
 ├── views/
-│   └── todo_main_view.dart                       # 主视图(双视图切换)
 │   └── todo_four_quadrant_view.dart              # 四象限视图
 ├── widgets/
 │   ├── task_list_view.dart                       # 列表视图

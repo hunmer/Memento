@@ -4,7 +4,6 @@ import 'package:Memento/core/routing/plugin_route_handler.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/todo/screens/todo_list_selector_screen.dart';
 import 'package:Memento/plugins/todo/widgets/task_form.dart';
-import 'package:Memento/plugins/todo/views/todo_main_view.dart';
 import 'package:Memento/plugins/todo/models/task.dart';
 
 /// 待办插件路由处理器
@@ -72,37 +71,6 @@ class TodoRouteHandler extends PluginRouteHandler {
     return createRoute(TodoListSelectorScreen(widgetId: widgetId));
   }
 
-  /// 处理任务详情路由
-  Route<dynamic> _handleTaskDetailRoute(String routeName, Object? arguments) {
-    String? taskId;
-
-    if (arguments is Map<String, String>) {
-      taskId = arguments['taskId'];
-    } else {
-      final uri = Uri.parse(routeName);
-      taskId = uri.queryParameters['taskId'];
-    }
-
-    debugPrint('打开任务详情: taskId=$taskId');
-
-    if (taskId != null) {
-      // 查找任务
-      final plugin = TodoPlugin.instance;
-      final tasks = plugin.taskController.tasks.where((t) => t.id == taskId);
-
-      if (tasks.isNotEmpty) {
-        // 打开主界面并显示任务详情对话框
-        final task = tasks.first;
-        return createRoute(
-          TodoMainViewWithTaskDetail(task: task),
-        );
-      }
-    }
-
-    // 没有找到任务，打开待办列表
-    return createRoute(const TodoMainView());
-  }
-
   /// 处理添加任务路由
   Route<dynamic> _handleAddTaskRoute() {
     debugPrint('打开添加任务界面');
@@ -116,209 +84,24 @@ class TodoRouteHandler extends PluginRouteHandler {
     );
   }
 
+  /// 处理任务详情路由
+  Route<dynamic>? _handleTaskDetailRoute(String routeName, Object? arguments) {
+    String? taskId;
+
+    if (arguments is Map<String, String>) {
+      taskId = arguments['taskId'];
+    } else {
+      final uri = Uri.parse(routeName);
+      taskId = uri.queryParameters['taskId'];
+    }
+
+    debugPrint('打开任务详情: taskId=$taskId');
+    return null;
+  }
+
   /// 处理列表点击路由
-  Route<dynamic> _handleListClickRoute() {
+  Route<dynamic>? _handleListClickRoute() {
     debugPrint('打开待办列表界面');
-
-    // 打开待办插件主界面
-    return createRoute(const TodoMainView());
+    return null;
   }
 }
-
-/// 带任务详情对话框的 TodoMainView
-class TodoMainViewWithTaskDetail extends StatefulWidget {
-  final Task task;
-
-  const TodoMainViewWithTaskDetail({
-    super.key,
-    required this.task,
-  });
-
-  @override
-  State<TodoMainViewWithTaskDetail> createState() =>
-      _TodoMainViewWithTaskDetailState();
-}
-
-class _TodoMainViewWithTaskDetailState extends State<TodoMainViewWithTaskDetail> {
-  late TodoPlugin _plugin;
-
-  @override
-  void initState() {
-    super.initState();
-    _plugin = TodoPlugin.instance;
-
-    // 延迟显示对话框，确保页面已加载
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showTaskDetailDialog(context, widget.task);
-    });
-  }
-
-  void _showTaskDetailDialog(BuildContext context, Task task) {
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(task.title),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (task.description != null && task.description!.isNotEmpty) ...[
-                Text(
-                  'todo_description'.tr,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(task.description!),
-                const SizedBox(height: 16),
-              ],
-              if (task.tags.isNotEmpty) ...[
-                Text(
-                  'todo_tags'.tr,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 4.0,
-                  children: task.tags
-                      .map((tag) => Chip(
-                            label: Text(tag),
-                            backgroundColor: Colors.blue.shade100,
-                          ))
-                      .toList(),
-                ),
-                const SizedBox(height: 16),
-              ],
-              Text(
-                'todo_timer'.tr,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                task.formattedDuration,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: task.status == TaskStatus.inProgress
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.play_arrow),
-                    label: Text('todo_start'.tr),
-                    onPressed: task.status != TaskStatus.inProgress
-                        ? () {
-                            _plugin.taskController.updateTaskStatus(
-                              task.id,
-                              TaskStatus.inProgress,
-                            );
-                            Navigator.of(context).pop();
-                          }
-                        : null,
-                  ),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.pause),
-                    label: Text('todo_pause'.tr),
-                    onPressed: task.status == TaskStatus.inProgress
-                        ? () {
-                            _plugin.taskController.updateTaskStatus(
-                              task.id,
-                              TaskStatus.todo,
-                            );
-                            Navigator.of(context).pop();
-                          }
-                        : null,
-                  ),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.check),
-                    label: Text('todo_complete'.tr),
-                    onPressed: task.status != TaskStatus.done
-                        ? () {
-                            _plugin.taskController.updateTaskStatus(
-                              task.id,
-                              TaskStatus.done,
-                            );
-                            Navigator.of(context).pop();
-                          }
-                        : null,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('todo_close'.tr),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // 导航到编辑页面
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => TaskForm(
-                    task: task,
-                    taskController: _plugin.taskController,
-                    reminderController: _plugin.reminderController,
-                  ),
-                ),
-              );
-            },
-            child: Text('todo_edit'.tr),
-          ),
-          TextButton(
-            onPressed: () async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('todo_deleteTask'.tr),
-                  content: Text('todo_confirmDeleteThisTask'.tr),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text('todo_cancel'.tr),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: Text('todo_delete'.tr),
-                    ),
-                  ],
-                ),
-              );
-
-              if (confirmed == true) {
-                await _plugin.taskController.deleteTask(task.id);
-                Navigator.of(context).pop();
-              }
-            },
-            child: Text(
-              'todo_delete'.tr,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const TodoMainView();
-  }
-}
-

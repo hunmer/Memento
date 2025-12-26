@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'dart:async';
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/plugins/todo/models/task.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:flutter/gestures.dart';
@@ -36,6 +37,10 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
   // 搜索查询变量
   String _searchQuery = '';
 
+  // 事件订阅列表
+  final List<(String eventName, void Function(EventArgs) handler)>
+      _eventSubscriptions = [];
+
   // 获取页面颜色
   List<Color> get _colors => [
     Colors.blue, // 第一个tab的颜色
@@ -47,6 +52,9 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
     super.initState();
     _plugin = TodoPlugin.instance;
     _tabController = TabController(length: 2, vsync: this);
+
+    // 注册任务事件监听
+    _registerTaskEventListeners();
 
     // 监听tab切换
     _tabController.addListener(() {
@@ -82,9 +90,36 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
 
   @override
   void dispose() {
+    // 取消所有事件监听
+    for (final (eventName, handler) in _eventSubscriptions) {
+      EventManager.instance.unsubscribe(eventName, handler);
+    }
+    _eventSubscriptions.clear();
     _timer?.cancel();
     _tabController.dispose();
     super.dispose();
+  }
+
+  /// 注册任务事件监听器
+  void _registerTaskEventListeners() {
+    final events = [
+      'task_added',
+      'task_updated',
+      'task_deleted',
+      'task_completed',
+    ];
+    for (final event in events) {
+      void handler(EventArgs args) {
+        print('[TodoBottomBarView] received event: "$event"');
+        if (mounted) {
+          setState(() {});
+        }
+      }
+
+      EventManager.instance.subscribe(event, handler);
+      _eventSubscriptions.add((event, handler));
+      print('[TodoBottomBarView] subscribed to: "$event"');
+    }
   }
 
   /// 更新路由上下文，使"询问当前上下文"功能能获取到当前页面状态
