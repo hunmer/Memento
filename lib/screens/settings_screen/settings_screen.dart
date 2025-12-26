@@ -19,6 +19,7 @@ import 'package:get/get.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:Memento/core/plugin_base.dart';
+import 'package:Memento/widgets/route_viewer_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -558,6 +559,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/data_selector_test');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.route),
+            title: const Text('路由查看器'),
+            subtitle: const Text('查看所有可用路由'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              RouteViewerDialog.show(context);
             },
           ),
           ListTile(

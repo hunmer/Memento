@@ -7,6 +7,65 @@ description: 将传统表单页面重构为使用 FormBuilderWrapper 的声明�
 
 将传统表单页面重构为使用 `FormBuilderWrapper` 的声明式表单系统，减少重复代码并提高可维护性。
 
+## ⚠️ 重要：提交按钮的最佳实践
+
+**强烈建议将提交按钮放在 `FormBuilderWrapper` 内部**，使用 `buttonBuilder` 或直接设置 `showSubmitButton: true`。
+
+如果因为 UI 需求必须将按钮放在外部（如 AppBar），**必须**按以下方式操作：
+
+```dart
+// ✅ 正确做法
+class MyFormScreen extends StatefulWidget {
+  @override
+  State<MyFormScreen> createState() => _MyFormScreenState();
+}
+
+class _MyFormScreenState extends State<MyFormScreen> {
+  final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
+  FormBuilderWrapperState? _wrapperState;  // 关键：存储 wrapper 状态
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          TextButton(
+            onPressed: _handleSave,  // 使用这个方法
+            child: Text('保存'),
+          ),
+        ],
+      ),
+      body: FormBuilderWrapper(
+        formKey: _formKey,
+        onStateReady: (state) => _wrapperState = state,  // 关键：获取状态
+        config: FormConfig(
+          fields: [...],
+          onSubmit: _handleSubmit,  // 表单值在这里处理
+        ),
+      ),
+    );
+  }
+
+  void _handleSave() {
+    // 验证逻辑...
+    // 使用 wrapperState 提交表单
+    _wrapperState?.submitForm();  // 关键：调用 submitForm
+  }
+
+  void _handleSubmit(Map<String, dynamic> values) {
+    // 处理表单数据
+  }
+}
+```
+
+```dart
+// ❌ 错误做法：直接使用 _formKey.currentState?.value
+void _handleSave() {
+  final values = _formKey.currentState?.value ?? {};  // WrappedFormField 值不会被收集！
+  _handleSubmit(values);
+}
+```
+
 ## Usage
 
 ```bash
@@ -987,12 +1046,70 @@ onValidationFailed: (errors) {
 - [ ] 所有字段都能正确显示
 - [ ] 值变化能正确触发 `onChanged`
 - [ ] 必填字段验证正常工作
-- [ ] 提交按钮能收集所有字段值
+- [ ] 提交按钮能收集所有字段值（包括 WrappedFormField）
+- [ ] **如果使用外部提交按钮**：验证 `onStateReady` 被调用且 `submitForm()` 正确触发
 - [ ] 重置按钮能恢复初始值
 - [ ] 国际化文本正确显示
 - [ ] Picker 字段对话框能正常打开
 
+## 最佳实践总结
+
+### 1. 提交按钮位置选择
+
+| 场景 | 推荐做法 |
+|-----|---------|
+| 表单在页面主体 | 使用 `FormBuilderWrapper` 的 `buttonBuilder` 或 `showSubmitButton: true` |
+| 表单在弹窗/底部抽屉 | 同上 |
+| 表单在复杂页面（按钮在 AppBar） | 使用 `onStateReady` + `_wrapperState.submitForm()` |
+| 按钮在多个位置 | 使用 `FormBuilderWrapperState` 的 `submitForm()` 方法 |
+
+### 2. 为什么不能直接用 `formKey.value`？
+
+- `FormBuilder.value` 只包含通过 `FormBuilderField` 注册的字段
+- `WrappedFormField` 使用自己的状态管理，不注册到 `FormBuilder`
+- `FormBuilderWrapperState.submitForm()` 会正确保存并合并所有字段值
+
+### 3. 必须记住的三件事
+
+```
+1. 声明状态变量：FormBuilderWrapperState? _wrapperState;
+2. 获取状态：onStateReady: (state) => _wrapperState = state,
+3. 触发提交：_wrapperState?.submitForm();
+```
+
 ## Troubleshooting
+
+### AppBar 按钮无法收集表单值
+
+**症状**: 点击 AppBar 保存按钮后，`onSubmit` 接收到的 `values` 为空或只有部分字段
+
+**原因**: 使用外部按钮直接调用 `_formKey.currentState?.value`，但 `WrappedFormField` 不会自动注册到 `FormBuilder`
+
+```dart
+// ❌ 错误：直接在外部按钮中使用 formKey.value
+TextButton(
+  onPressed: () {
+    final values = _formKey.currentState?.value ?? {};
+    _handleSubmit(values);  // values 可能是空的！
+  },
+  child: Text('保存'),
+)
+
+// ✅ 正确：使用 onStateReady + submitForm
+class _MyFormScreenState extends State<MyFormScreen> {
+  FormBuilderWrapperState? _wrapperState;
+
+  FormBuilderWrapper(
+    onStateReady: (state) => _wrapperState = state,
+    ...
+  );
+
+  TextButton(
+    onPressed: () => _wrapperState?.submitForm(),
+    child: Text('保存'),
+  )
+}
+```
 
 ### formKey 参数错误
 

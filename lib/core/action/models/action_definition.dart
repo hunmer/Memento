@@ -317,6 +317,7 @@ class BuiltInActions {
   static const String reopenLastRoute = 'reopenLastRoute';
   static const String openLastPlugin = 'openLastPlugin';
   static const String selectPlugin = 'selectPlugin';
+  static const String routeViewer = 'routeViewer';
 
   // 插件类
   static const String executePluginAction = 'executePluginAction';

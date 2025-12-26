@@ -210,6 +210,19 @@ class ActionManager {
         isBuiltIn: true,
       ),
     );
+
+    // 路由查看器
+    registerAction(
+      ActionDefinition(
+        id: BuiltInActions.routeViewer,
+        title: '路由查看器',
+        description: '查看所有可用路由',
+        icon: Icons.route,
+        category: ActionCategory.navigation,
+        executor: BuiltInActionExecutor(BuiltInActions.routeViewer),
+        isBuiltIn: true,
+      ),
+    );
   }
 
   /// 注册动作

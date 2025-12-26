@@ -127,6 +127,9 @@ class EventManager {
   /// [args] 事件参数
   void broadcast(String eventName, EventArgs args) {
     final subscriptions = _eventSubscriptions[eventName];
+    if (kDebugMode) {
+      print('EventManager.broadcast: "$eventName" (subscriptions: ${subscriptions?.length ?? 0})');
+    }
     if (subscriptions == null) return;
 
     // 创建订阅列表的副本，以防在处理过程中列表被修改
@@ -135,6 +138,9 @@ class EventManager {
 
     for (var subscription in activeSubscriptions) {
       try {
+        if (kDebugMode) {
+          print('  -> invoking handler');
+        }
         subscription.handler(args);
       } catch (e) {
         if (kDebugMode) {

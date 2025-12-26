@@ -89,7 +89,7 @@ class _TaskFormState extends State<TaskForm> {
     final dueDate = values['dueDate'] as DateTime?;
     final priority = values['priority'] as TaskPriority? ?? TaskPriority.medium;
     final tags = values['tags'] as List<String>? ?? [];
-    final subtasks = values['subtasks'] as List<Subtask>? ?? [];
+    final subtasks = (values['subtasks'] as List?)?.cast<Subtask>() ?? [];
     final reminders = values['reminders'] as List<DateTime>? ?? [];
 
     // 确保截止日期不早于开始日期

@@ -11,6 +11,7 @@ import '../option_selector_field.dart';
 import '../form_field_group.dart';
 import '../custom_fields_field.dart';
 import '../list_add_field.dart';
+import 'package:Memento/plugins/todo/models/models.dart';
 
 /// 构建标签字段
 Widget buildTagsField(FormFieldConfig config, GlobalKey fieldKey, BuildContext context) {
@@ -265,6 +266,13 @@ Widget buildListAddField(FormFieldConfig config, GlobalKey fieldKey) {
       }
 
       void wrappedOnToggle(int index, dynamic item) {
+        // 切换 item 的完成状态
+        if (item is Subtask) {
+          item.isCompleted = !item.isCompleted;
+          // 通知状态变化（使用相同列表引用，FormBuilder 会检测变化）
+          fieldState.didChange(List<dynamic>.from(items));
+          config.onChanged?.call(items);
+        }
         if (onToggleRaw != null) {
           onToggleRaw(index, item);
         }

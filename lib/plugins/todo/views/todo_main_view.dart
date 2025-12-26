@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'dart:io';
 
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:flutter/material.dart';
@@ -26,11 +28,18 @@ class TodoMainView extends StatefulWidget {
 class _TodoMainViewState extends State<TodoMainView> {
   late TodoPlugin _plugin;
   Timer? _timer;
+  // 在 initState 中直接注册事件监听，确保在 build 之前就准备好
+  final List<(String eventName, void Function(EventArgs) handler)>
+  _eventSubscriptions = [];
 
   @override
   void initState() {
     super.initState();
     _plugin = TodoPlugin.instance;
+
+    // 在 initState 中注册事件监听，确保在 build 之前就准备好
+    _registerTaskEventListeners();
+
     // 创建一个定时器，每秒更新一次UI，以刷新计时器显示
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       // 检查是否有正在计时的任务
@@ -49,8 +58,39 @@ class _TodoMainViewState extends State<TodoMainView> {
     });
   }
 
+  /// 在 initState 中注册任务事件监听器，确保在 build 之前就订阅
+  void _registerTaskEventListeners() {
+    final events = [
+      'task_added',
+      'task_updated',
+      'task_deleted',
+      'task_completed',
+    ];
+    for (final event in events) {
+      void handler(EventArgs args) {
+        if (kDebugMode) {
+          print('[TodoMainView] received event: "$event"');
+        }
+        if (mounted) {
+          setState(() {});
+        }
+      }
+
+      EventManager.instance.subscribe(event, handler);
+      _eventSubscriptions.add((event, handler));
+      if (kDebugMode) {
+        print('[TodoMainView] subscribed to: "$event"');
+      }
+    }
+  }
+
   @override
   void dispose() {
+    // 取消所有事件监听
+    for (final (eventName, handler) in _eventSubscriptions) {
+      EventManager.instance.unsubscribe(eventName, handler);
+    }
+    _eventSubscriptions.clear();
     _timer?.cancel();
     super.dispose();
   }
