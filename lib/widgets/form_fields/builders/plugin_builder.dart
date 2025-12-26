@@ -189,6 +189,7 @@ Widget buildTimerItemsField(FormFieldConfig config, GlobalKey fieldKey, BuildCon
               final currentItems = fieldState.value ?? [];
               final newItems = List<dynamic>.from(currentItems)..add(newTimer);
               fieldState.didChange(newItems);
+              config.onChanged?.call(newItems);
             }
           });
         },

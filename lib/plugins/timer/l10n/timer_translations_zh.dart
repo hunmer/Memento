@@ -33,6 +33,11 @@ class TimerTranslationsZh {
     'timer_confirmComplete': '确认完成',
     'timer_searchPlaceholder': '搜索计时器任务...',
 
+    // Timer Task Details Page
+    'timer_remainingTime': '剩余',
+    'timer_pause': '暂停',
+    'timer_play': '开始',
+
     // Widget Home Strings
     'timer_widgetName': '计时器',
     'timer_widgetDescription': '快速打开计时器',

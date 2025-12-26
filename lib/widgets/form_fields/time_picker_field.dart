@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'builders/index.dart' show createRoundedContainerDecoration;
 
 /// 时间选择组件
 ///
@@ -59,13 +60,7 @@ class TimePickerField extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: colorScheme.outlineVariant,
-          ),
-        ),
+        decoration: createRoundedContainerDecoration(context),
         child: Column(
           children: [
             Text(

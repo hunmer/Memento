@@ -7,6 +7,7 @@ import 'package:Memento/plugins/timer/views/timer_task_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/swipe_action/index.dart';
 import 'package:Memento/plugins/timer/timer_plugin.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:Memento/plugins/timer/models/timer_task.dart';
@@ -326,33 +327,10 @@ class _TimerMainViewState extends State<TimerMainView> {
   }
 
   void _deleteTask(TimerTask task) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('timer_deleteTimer'.tr),
-            content: Text(
-              '${'timer_deleteTimerConfirmation'.tr} "${task.name}"',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text('app_cancel'.tr),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text('app_delete'.tr),
-              ),
-            ],
-          ),
-    );
-
-    if (confirm == true) {
-      await _plugin.removeTask(task.id);
-      setState(() {
-        _updateTasksAndGroups();
-      });
-    }
+    await _plugin.removeTask(task.id);
+    setState(() {
+      _updateTasksAndGroups();
+    });
   }
 }
 
@@ -397,78 +375,97 @@ class _TimerTaskCardState extends State<_TimerTaskCard> {
     final task = widget.task;
     final bool useGridLayout = task.timerItems.length >= 3;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () => widget.onTap(task),
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: task.color.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(task.icon, color: task.color, size: 28),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          task.name,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          task.group,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  _buildActionButton(task),
-                ],
-              ),
-            ),
-            // Body
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child:
-                  useGridLayout
-                      ? _buildGridLayout(task)
-                      : _buildListLayout(task),
+    return SwipeActionWrapper(
+      key: ValueKey(task.id),
+      trailingActions: [
+        SwipeActionPresets.edit(
+          onTap: () => widget.onEdit(task),
+        ),
+        SwipeActionOption(
+          label: '重置',
+          icon: Icons.replay,
+          backgroundColor: Colors.orange,
+          textColor: Colors.white,
+          onTap: () => widget.onReset(task),
+        ),
+        SwipeActionPresets.delete(
+          onTap: () => widget.onDelete(task),
+          showConfirm: false,
+        ),
+      ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
             ),
           ],
+        ),
+        child: InkWell(
+          onTap: () => widget.onTap(task),
+          borderRadius: BorderRadius.circular(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: task.color.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(task.icon, color: task.color, size: 28),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            task.name,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            task.group,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color:
+                                  Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildActionButton(task),
+                  ],
+                ),
+              ),
+              // Body
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                child:
+                    useGridLayout
+                        ? _buildGridLayout(task)
+                        : _buildListLayout(task),
+              ),
+            ],
+          ),
         ),
       ),
     );

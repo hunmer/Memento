@@ -1,5 +1,6 @@
 // 基础输入类字段构建器
-export 'base_builder.dart' show buildTextField, buildTextAreaField, buildSelectField;
+export 'base_builder.dart' show buildTextField, buildTextAreaField, buildSelectField,
+    createRoundedInputDecoration, createRoundedContainerDecoration;
 
 // 选择器类字段构建器
 export 'picker_builder.dart' show buildDateField, buildTimeField, buildDateRangeField,

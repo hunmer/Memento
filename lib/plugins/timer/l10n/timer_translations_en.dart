@@ -33,6 +33,11 @@ class TimerTranslationsEn {
     'timer_confirmComplete': 'Confirm Complete',
     'timer_searchPlaceholder': 'Search timer tasks...',
 
+    // Timer Task Details Page
+    'timer_remainingTime': 'remaining',
+    'timer_pause': 'Pause',
+    'timer_play': 'Play',
+
     // Widget Home Strings
     'timer_widgetName': 'Timer',
     'timer_widgetDescription': 'Quick access to Timer',

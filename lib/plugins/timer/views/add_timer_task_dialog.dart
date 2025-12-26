@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
+import 'package:Memento/widgets/form_fields/circle_icon_picker_field.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -26,16 +27,6 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
 
   // 当前表单值的缓存（用于提交前检查）
   Map<String, dynamic> _currentValues = {};
-
-  /// 预设图标列表
-  static const List<IconData> _presetIcons = [
-    Icons.psychology,
-    Icons.auto_stories,
-    Icons.code,
-    Icons.fitness_center,
-    Icons.edit,
-    Icons.more_horiz,
-  ];
 
   @override
   void initState() {
@@ -127,10 +118,11 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
             config: FormConfig(
               showSubmitButton: false,
               showResetButton: false,
-              fieldSpacing: 0,
-              fields: _buildFormFields(primaryColor),
+              fieldSpacing: 16,
+              fields: _buildFormFields(),
               onSubmit: _handleSubmit,
             ),
+            contentBuilder: _buildFormContent,
           ),
         ),
         bottomNavigationBar: Container(
@@ -163,26 +155,59 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
     );
   }
 
+  /// 构建表单内容（使用分组布局）
+  Widget _buildFormContent(BuildContext context, List<Widget> fields) {
+    // 提取各字段（图标字段已被移除）
+    final nameField = fields[0];
+    final repeatCountField = fields[1];
+    final groupField = fields[2];
+    final timerItemsField = fields[3];
+    final notificationField = fields[4];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 图标选择器
+        CircleIconPickerField(
+          currentIcon: _currentValues['icon'] as IconData? ?? Icons.psychology,
+          currentBackgroundColor: _selectedColor,
+          onValueChanged: (value) {
+            setState(() {
+              _currentValues['icon'] = value['icon'];
+              _selectedColor = value['color'];
+            });
+            _updateRouteContext();
+          },
+        ),
+        const SizedBox(height: 16),
+
+        // 任务名称
+        nameField,
+        const SizedBox(height: 16),
+
+        // 重复次数
+        repeatCountField,
+        const SizedBox(height: 16),
+
+        // 分组选择
+        groupField,
+        const SizedBox(height: 24),
+
+        // 计时器列表
+        timerItemsField,
+        const SizedBox(height: 24),
+
+        // 通知设置
+        notificationField,
+      ],
+    );
+  }
+
   /// 构建表单字段配置
-  List<FormFieldConfig> _buildFormFields(Color primaryColor) {
+  List<FormFieldConfig> _buildFormFields() {
     final initialTask = widget.initialTask;
 
     return [
-      // Section 1: 基本信息（图标、名称、重复次数、分组）
-      FormFieldConfig(
-        type: FormFieldType.timerIconGrid,
-        name: 'icon',
-        initialValue: initialTask?.icon ?? Icons.psychology,
-        extra: {
-          'presetIcons': _presetIcons,
-        },
-        primaryColor: primaryColor,
-        onChanged: (value) {
-          setState(() => _currentValues['icon'] = value);
-          _updateRouteContext();
-        },
-      ),
-
       // 任务名称
       FormFieldConfig(
         name: 'name',
@@ -237,7 +262,7 @@ class _AddTimerTaskDialogState extends State<AddTimerTaskDialog> {
         labelText: 'timer_enableNotification'.tr,
         initialValue: initialTask?.enableNotification ?? true,
         prefixIcon: Icons.notifications,
-        extra: {'inline': true},
+        extra: {'inline': false},
         onChanged: (value) => setState(() => _currentValues['enableNotification'] = value),
       ),
     ];

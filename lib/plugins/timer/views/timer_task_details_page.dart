@@ -1,5 +1,6 @@
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/plugins/timer/models/timer_task.dart';
 import '../../../../core/event/event_manager.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
@@ -102,7 +103,7 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
   String _formatRemainingTime(Duration duration) {
     final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return "$minutes:$seconds remaining";
+    return "$minutes:$seconds ${'timer_remainingTime'.tr}";
   }
 
   @override
@@ -116,6 +117,19 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
     final primaryColor = Color(0xFF607AFB);
 
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.restore),
+            onPressed: widget.onReset,
+            tooltip: 'timer_reset'.tr,
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           Center(
@@ -152,23 +166,6 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
               child: _buildControlButton(primaryColor),
             ),
           ),
-          Positioned(
-            top: 40,
-            left: 16,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-          Positioned(
-            top: 40,
-            right: 16,
-            child: IconButton(
-              icon: const Icon(Icons.restore),
-              onPressed: widget.onReset,
-              tooltip: 'Reset',
-            ),
-          )
         ],
       ),
     );
@@ -254,7 +251,7 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
         size: 36,
       ),
       label: Text(
-        _isRunning ? 'Pause' : 'Play',
+        _isRunning ? 'timer_pause'.tr : 'timer_play'.tr,
         style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.bold,
