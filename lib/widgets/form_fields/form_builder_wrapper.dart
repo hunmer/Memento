@@ -66,7 +66,16 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
   GlobalKey<FormBuilderState> get _actualFormKey => widget.formKey ?? _fbKey;
 
   Map<String, dynamic> get _currentValues {
-    return _actualFormKey.currentState?.value ?? {};
+    final formValues = _actualFormKey.currentState?.value ?? {};
+    final values = Map<String, dynamic>.from(formValues);
+    // 合并 WrappedFormField 的值（这些字段不会自动注册到 FormBuilder）
+    for (final entry in _fieldKeys.entries) {
+      final fieldState = entry.value.currentState;
+      if (fieldState != null) {
+        values[entry.key] = fieldState.getValue();
+      }
+    }
+    return values;
   }
 
   void submitForm() => _submitFormInternal();
@@ -80,9 +89,48 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
       for (final fieldKey in _fieldKeys.values) {
         fieldKey.currentState?.save();
       }
-      return fbState.validate();
+      // 执行自定义验证逻辑
+      return _validateAllFields();
     }
     return false;
+  }
+
+  /// 验证所有字段（包括自定义验证规则）
+  bool _validateAllFields() {
+    // 获取当前值
+    final formValues = _actualFormKey.currentState?.value ?? {};
+    final values = Map<String, dynamic>.from(formValues);
+    for (final entry in _fieldKeys.entries) {
+      final fieldState = entry.value.currentState;
+      if (fieldState != null) {
+        values[entry.key] = fieldState.getValue();
+      }
+    }
+
+    // 验证所有必填字段
+    for (final field in widget.config.fields) {
+      if (field.required) {
+        final value = values[field.name];
+        bool isEmpty = false;
+
+        if (value == null) {
+          isEmpty = true;
+        } else if (value is Map) {
+          // 对于 iconTitle 等 Map 类型字段，检查 'title' 键
+          isEmpty = (value['title']?.toString().trim() ?? '').isEmpty;
+        } else if (value is String) {
+          isEmpty = value.trim().isEmpty;
+        } else if (value is List && value.isEmpty) {
+          isEmpty = true;
+        }
+
+        if (isEmpty) {
+          _showValidationError(field.validationMessage ?? '${field.labelText ?? field.name}不能为空');
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   void patchValue(Map<String, dynamic> values) {

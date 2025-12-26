@@ -21,6 +21,7 @@ import 'models/action_group.dart';
 import 'built_in/ask_context_action/route_parser.dart';
 import 'built_in/ask_context_action/widgets/context_query_drawer.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/widgets/route_viewer_dialog.dart';
 
 /// 执行结果
 class ExecutionResult {
@@ -137,6 +138,9 @@ class BuiltInActionExecutor implements ActionExecutor {
 
         case BuiltInActions.selectPlugin:
           return await _executeSelectPlugin(context, data);
+
+        case BuiltInActions.routeViewer:
+          return await _executeRouteViewer(context, data);
 
         case BuiltInActions.askContext:
           return await _executeAskContext(context, data);
@@ -351,6 +355,20 @@ class BuiltInActionExecutor implements ActionExecutor {
     showPluginListDialog(context);
 
     return ExecutionResult.success(data: {'action': 'selectPlugin'});
+  }
+
+  /// 执行路由查看器
+  Future<ExecutionResult> _executeRouteViewer(
+    BuildContext context,
+    Map<String, dynamic>? data,
+  ) async {
+    if (!context.mounted) {
+      return ExecutionResult.failure(error: 'Context not mounted');
+    }
+
+    RouteViewerDialog.show(context);
+
+    return ExecutionResult.success(data: {'action': 'routeViewer'});
   }
 
   /// 执行询问当前上下文

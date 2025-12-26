@@ -5,6 +5,7 @@ import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
+import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
 
 /// 打卡项目表单屏幕
 ///
@@ -20,8 +21,11 @@ class CheckinFormScreen extends StatefulWidget {
 }
 
 class _CheckinFormScreenState extends State<CheckinFormScreen> {
-  /// 表单 key
+  /// 表单 key（用于名称验证）
   final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
+
+  /// FormBuilderWrapper 的状态（用于触发提交）
+  FormBuilderWrapperState? _wrapperState;
 
   /// 现有分组集合
   Set<String> _existingGroups = <String>{};
@@ -97,9 +101,23 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
   /// 提交表单
   void _handleSubmit(Map<String, dynamic> values) {
     // 图标颜色数据
-    final iconColorData = values['iconColor'] as Map<String, dynamic>;
-    final icon = iconColorData['icon'] as IconData;
-    final color = iconColorData['color'] as Color;
+    final iconColorData = values['iconColor'] as Map<String, dynamic>?;
+    if (iconColorData == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请选择图标')),
+      );
+      return;
+    }
+    final icon = iconColorData['icon'] as IconData?;
+    final color = iconColorData['color'] as Color?;
+
+    // 验证必要字段
+    if (icon == null || color == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请选择图标')),
+      );
+      return;
+    }
 
     // 提醒设置
     ReminderSettings? reminderSettings;
@@ -178,6 +196,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
         padding: const EdgeInsets.all(16),
         child: FormBuilderWrapper(
           formKey: _formKey,
+          onStateReady: (state) => _wrapperState = state,
           config: FormConfig(
             submitButtonText: 'checkin_save'.tr,
             showSubmitButton: false,
@@ -313,6 +332,7 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
 
   /// 保存按钮点击处理
   void _handleSave() {
+    // 先验证名称
     final nameValue = _formKey.currentState?.fields['name']?.value as String?;
     final nameError = _validateName(nameValue);
     if (nameError != null) {
@@ -321,9 +341,8 @@ class _CheckinFormScreenState extends State<CheckinFormScreen> {
       );
       return;
     }
-    _formKey.currentState?.save();
-    final values = _formKey.currentState?.value ?? {};
-    _handleSubmit(values);
+    // 使用 wrapperState 提交表单
+    _wrapperState?.submitForm();
   }
 
   /// 构建星期选择器

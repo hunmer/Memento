@@ -376,6 +376,7 @@ class TaskController extends ChangeNotifier {
     if (index != -1) {
       final oldTask = _tasks[index];
       _tasks[index] = task;
+      _notifyEvent('updated', task);
       _sortTasks();
       notifyListeners();
       await _saveTasks();
