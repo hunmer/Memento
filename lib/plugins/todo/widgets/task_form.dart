@@ -144,7 +144,7 @@ class _TaskFormState extends State<TaskForm> {
             _buildHeader(isDark),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 80),
+                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80),
                 child: FormBuilderWrapper(
                   formKey: _formKey,
                   onStateReady: (state) => _wrapperState = state,
@@ -457,8 +457,14 @@ class _TaskFormState extends State<TaskForm> {
   Widget _buildDateGroup(List<Widget> fields) {
     return FormFieldGroup(
       children: [
-        fields[4], // startDate field
-        fields[5], // dueDate field
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: fields[4], // startDate field
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: fields[5], // dueDate field
+        ),
       ],
     );
   }
@@ -467,8 +473,14 @@ class _TaskFormState extends State<TaskForm> {
   Widget _buildSettingsGroup(List<Widget> fields) {
     return FormFieldGroup(
       children: [
-        fields[6], // priority field
-        fields[7], // reminders field
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: fields[6], // priority field
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: fields[7], // reminders field
+        ),
       ],
     );
   }
