@@ -94,5 +94,10 @@
 		<string>NDEF</string>
 		<string>TAG</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>本应用需要访问您的位置信息，用于记录纪念位置。我们仅在您使用相关功能时获取位置。</string>
+
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>本应用需要始终访问您的位置信息，用于纪念位置。我们会保护您的隐私，仅在必要时使用。</string>
 </dict>
 </plist>
