@@ -7,8 +7,6 @@ import 'dart:convert';
 import 'package:Memento/plugins/nodes/controllers/nodes_controller.dart';
 import 'package:Memento/plugins/nodes/models/node.dart';
 import 'components/breadcrumbs.dart';
-import 'components/custom_fields_section.dart';
-import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 
 class NodeEditScreen extends StatefulWidget {
@@ -28,12 +26,15 @@ class NodeEditScreen extends StatefulWidget {
 }
 
 class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProviderStateMixin {
-  // 两个 FormBuilderWrapper 的 key，用于访问表单状态
+  // FormBuilderWrapper 的 key，用于访问表单状态
   final GlobalKey<FormBuilderState> _basicInfoFormKey = GlobalKey<FormBuilderState>();
-  final GlobalKey<FormBuilderState> _dateFieldsFormKey = GlobalKey<FormBuilderState>();
 
-  // 自定义字段列表（CustomFieldsSection 使用 nodes.CustomField 类型）
-  late List<CustomField> _customFields;
+  // 自定义字段列表
+  late List<NodeCustomField> _customFields;
+
+  // 日期范围状态
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   // Quill 编辑器控制器（保留）
   late quill.QuillController _quillController;
@@ -46,6 +47,9 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
     super.initState();
     // 初始化自定义字段列表
     _customFields = List.from(widget.node.customFields);
+    // 初始化日期范围
+    _startDate = widget.node.startDate;
+    _endDate = widget.node.endDate;
     // 初始化 Quill 编辑器
     _quillController = _initializeQuillController();
     // 初始化 TabController
@@ -166,12 +170,13 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
                   initialTags: widget.node.tags,
                 ),
 
-                // 颜色选择器
+                // 颜色选择器（单行 inline 模式 + 水平滚动）
                 FormFieldConfig(
                   name: 'color',
                   type: FormFieldType.color,
                   labelText: 'nodes_nodeColor'.tr,
                   initialValue: widget.node.color,
+                  extra: {'inline': true, 'scrollable': true, 'labelWidth': 80},
                 ),
 
                 // 状态下拉框
@@ -221,60 +226,34 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 日期部分标题
-          Text(
-            'nodes_dateRange'.tr,
-            style: Theme.of(context).textTheme.titleMedium,
+          // 日期范围选择器
+          DateRangeField(
+            startDate: _startDate,
+            endDate: _endDate,
+            rangeLabelText: 'nodes_dateRange'.tr,
+            onDateRangeChanged: (range) {
+              setState(() {
+                _startDate = range?.start;
+                _endDate = range?.end;
+              });
+            },
           ),
           const SizedBox(height: 16),
-
-          // 使用 FormBuilderWrapper，并通过 contentBuilder 添加自定义字段部分
-          FormBuilderWrapper(
-            formKey: _dateFieldsFormKey,
-            config: FormConfig(
-              showSubmitButton: false,
-              showResetButton: false,
-              fieldSpacing: 16,
-              fields: [
-                // 开始日期
-                FormFieldConfig(
-                  name: 'startDate',
-                  type: FormFieldType.date,
-                  labelText: 'nodes_startDate'.tr,
-                  hintText: '选择开始日期',
-                  initialValue: widget.node.startDate,
-                ),
-
-                // 结束日期
-                FormFieldConfig(
-                  name: 'endDate',
-                  type: FormFieldType.date,
-                  labelText: 'nodes_endDate'.tr,
-                  hintText: '选择结束日期',
-                  initialValue: widget.node.endDate,
-                ),
-              ],
-              onSubmit: (values) {
-                // 提交处理在外部统一处理
-              },
-            ),
-            // 使用 contentBuilder 添加自定义字段部分（避免类型冲突）
-            contentBuilder: (context, fields) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...fields,
-                  const SizedBox(height: 16),
-                  // 自定义字段部分
-                  CustomFieldsSection(
-                    initialFields: _customFields,
-                    onFieldsChanged: (fields) {
-                      setState(() => _customFields = fields);
-                    },
-                  ),
-                ],
-              );
+          CustomFieldsField(
+            fields: _customFields,
+            onFieldsChanged: (fields) {
+              setState(() => _customFields = fields);
             },
+            labelText: 'nodes_customFields'.tr,
+            addDialogTitle: 'nodes_addCustomField'.tr,
+            editDialogTitle: 'nodes_editCustomField'.tr,
+            deleteConfirmTitle: 'nodes_deleteCustomField'.tr,
+            deleteConfirmContent: 'nodes_deleteCustomFieldConfirm'.tr,
+            addButtonText: 'nodes_addCustomField'.tr,
+            fieldNameLabel: 'nodes_fieldName'.tr,
+            fieldNameHint: 'nodes_fieldNameHint'.tr,
+            fieldValueLabel: 'nodes_fieldValue'.tr,
+            fieldValueHint: 'nodes_fieldValueHint'.tr,
           ),
         ],
       ),
@@ -424,10 +403,6 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
     }
     final basicInfoValues = basicInfoState.value;
 
-    // 获取时间与字段表单的值
-    final dateFieldsState = _dateFieldsFormKey.currentState;
-    final dateFieldsValues = dateFieldsState?.value ?? {};
-
     // 从表单值中提取数据
     final title = basicInfoValues['title'] as String? ?? '';
     final tags = (basicInfoValues['tags'] as List<dynamic>?)
@@ -437,9 +412,9 @@ class NodeEditScreenState extends State<NodeEditScreen> with SingleTickerProvide
         widget.node.status;
     final color = basicInfoValues['color'] as Color? ?? Colors.grey;
 
-    final startDate = dateFieldsValues['startDate'] as DateTime?;
-    final endDate = dateFieldsValues['endDate'] as DateTime?;
-    // 使用状态变量中的 customFields（nodes.CustomField 类型）
+    // 使用状态变量中的日期和自定义字段
+    final startDate = _startDate;
+    final endDate = _endDate;
     final customFields = _customFields;
 
     // 计算节点的完整路径值

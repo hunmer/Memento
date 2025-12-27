@@ -20,15 +20,24 @@ import 'package:Memento/widgets/picker/image_picker_dialog.dart';
 class HabitForm extends StatefulWidget {
   final Habit? initialHabit;
   final Function(Habit) onSave;
+  final bool showSubmitButton;
+  final void Function(FormBuilderWrapperState)? onStateReady;
 
-  const HabitForm({super.key, this.initialHabit, required this.onSave});
+  const HabitForm({
+    super.key,
+    this.initialHabit,
+    required this.onSave,
+    this.showSubmitButton = true,
+    this.onStateReady,
+  });
 
   @override
   State<HabitForm> createState() => _HabitFormState();
 }
 
 class _HabitFormState extends State<HabitForm> {
-  final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
+  GlobalKey<FormBuilderState> get _formKey => _internalFormKey;
+  final GlobalKey<FormBuilderState> _internalFormKey = GlobalKey<FormBuilderState>();
   List<Skill> _skills = [];
 
   @override
@@ -45,6 +54,7 @@ class _HabitFormState extends State<HabitForm> {
 
     return FormBuilderWrapper(
       formKey: _formKey,
+      onStateReady: (state) => widget.onStateReady?.call(state),
       config: FormConfig(
         fields: [
           // 图片选择器
@@ -121,9 +131,9 @@ class _HabitFormState extends State<HabitForm> {
           ),
         ],
         submitButtonText: 'habits_save'.tr,
-        showSubmitButton: true,
+        showSubmitButton: widget.showSubmitButton,
         showResetButton: false,
-        fieldSpacing: 16,
+        fieldSpacing: 20,
         onSubmit: _handleSubmit,
         onValidationFailed: (errors) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -148,8 +158,13 @@ class _HabitFormState extends State<HabitForm> {
                 ],
               ),
               const SizedBox(height: 24),
-              // 其他字段
-              ...fields.skip(2), // 跳过图片和图标选择器字段
+              // 图片/图标与标题之间的间距
+              ...fields.skip(2).map((field) => Column(
+                children: [
+                  field,
+                  const SizedBox(height: 20),
+                ],
+              )),
             ],
           ),
         );

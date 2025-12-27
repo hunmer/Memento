@@ -28,6 +28,9 @@ class ColorSelectorField extends StatelessWidget {
   /// 是否使用inline模式（label在左，颜色选择器在右）
   final bool inline;
 
+  /// inline模式下是否允许水平滚动（单行滚动展示）
+  final bool scrollable;
+
   /// inline模式下label的宽度
   final double labelWidth;
 
@@ -54,6 +57,7 @@ class ColorSelectorField extends StatelessWidget {
     this.colorSize = 36,
     this.spacing = 8,
     this.inline = false,
+    this.scrollable = false,
     this.labelWidth = 100,
   });
 
@@ -80,36 +84,74 @@ class ColorSelectorField extends StatelessWidget {
             ),
             const SizedBox(height: 8),
           ],
-          Wrap(
-            spacing: spacing,
-            runSpacing: spacing,
-            children: colors.map((color) {
-              final isSelected = selectedColor.value == color.value;
-              return GestureDetector(
-                onTap: () => onColorChanged(color),
-                child: Container(
-                  width: colorSize,
-                  height: colorSize,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                    border: isSelected
-                        ? Border.all(color: Colors.black, width: 2)
+          // 单行滚动模式
+          if (scrollable)
+            SizedBox(
+              height: colorSize + 4,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  spacing: spacing,
+                  children: colors.map((color) {
+                    final isSelected = selectedColor.value == color.value;
+                    return GestureDetector(
+                      onTap: () => onColorChanged(color),
+                      child: Container(
+                        width: colorSize,
+                        height: colorSize,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                          border: isSelected
+                              ? Border.all(color: Colors.black, width: 2)
+                              : null,
+                        ),
+                        child: isSelected
+                            ? Icon(
+                                Icons.check,
+                                color: color == Colors.white || color == Colors.yellow
+                                    ? Colors.black
+                                    : Colors.white,
+                                size: colorSize * 0.55,
+                              )
+                            : null,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            )
+          else
+            Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: colors.map((color) {
+                final isSelected = selectedColor.value == color.value;
+                return GestureDetector(
+                  onTap: () => onColorChanged(color),
+                  child: Container(
+                    width: colorSize,
+                    height: colorSize,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: isSelected
+                          ? Border.all(color: Colors.black, width: 2)
+                          : null,
+                    ),
+                    child: isSelected
+                        ? Icon(
+                            Icons.check,
+                            color: color == Colors.white || color == Colors.yellow
+                                ? Colors.black
+                                : Colors.white,
+                            size: colorSize * 0.55,
+                          )
                         : null,
                   ),
-                  child: isSelected
-                      ? Icon(
-                          Icons.check,
-                          color: color == Colors.white || color == Colors.yellow
-                              ? Colors.black
-                              : Colors.white,
-                          size: colorSize * 0.55,
-                        )
-                      : null,
-                ),
-              );
-            }).toList(),
-          ),
+                );
+              }).toList(),
+            ),
         ],
       );
     }

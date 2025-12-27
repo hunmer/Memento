@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/widgets/habit_form.dart';
+import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
@@ -37,11 +38,16 @@ class _HabitsListState extends State<HabitsList> {
   }
 
   Future<void> _showHabitForm(BuildContext context, [Habit? habit]) async {
+    FormBuilderWrapperState? wrapperState;
 
     await NavigationHelper.push(context, Scaffold(
               appBar: AppBar(
                 title: Text(habit == null ? 'habits_createHabit'.tr : 'habits_editHabit'.tr),
                 actions: [
+                  IconButton(
+                    icon: const Icon(Icons.check),
+                    onPressed: () => wrapperState?.submitForm(),
+                  ),
                   if (habit != null)
                     IconButton(
                       icon: const Icon(Icons.delete),
@@ -56,11 +62,14 @@ class _HabitsListState extends State<HabitsList> {
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               body: HabitForm(
                 initialHabit: habit,
+                showSubmitButton: false,
                 onSave: (habit) async {
                   await widget.controller.saveHabit(habit);
                   Navigator.pop(context);
                   _loadHabits();
-                },),
+                },
+                onStateReady: (state) => wrapperState = state,
+              ),
       ),
     );
   }

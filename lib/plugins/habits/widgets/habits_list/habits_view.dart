@@ -6,6 +6,7 @@ import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/widgets/habit_form.dart';
+import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
@@ -214,6 +215,8 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
   }
 
   Future<void> _showHabitForm(BuildContext context, [Habit? habit]) async {
+    FormBuilderWrapperState? wrapperState;
+
     await NavigationHelper.push(
       context,
       Scaffold(
@@ -222,6 +225,10 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
             habit == null ? 'habits_createHabit'.tr : 'habits_editHabit'.tr,
           ),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.check),
+              onPressed: () => wrapperState?.submitForm(),
+            ),
             if (habit != null)
               IconButton(
                 icon: const Icon(Icons.delete),
@@ -236,11 +243,13 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: HabitForm(
           initialHabit: habit,
+          showSubmitButton: false,
           onSave: (habit) async {
             await widget.controller.saveHabit(habit);
             Navigator.pop(context);
             _loadHabits();
           },
+          onStateReady: (state) => wrapperState = state,
         ),
       ),
     );

@@ -1,18 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/plugins/goods/models/custom_field.dart' as goods_custom_field;
 
 enum NodeStatus { todo, doing, done, none }
 
-class CustomField {
-  final String key;
-  final String value;
-
-  CustomField({required this.key, required this.value});
-
-  Map<String, dynamic> toJson() => {'key': key, 'value': value};
-
-  factory CustomField.fromJson(Map<String, dynamic> json) =>
-      CustomField(key: json['key'] as String, value: json['value'] as String);
-}
+/// 节点自定义字段类型（使用 goods 插件的 CustomField）
+typedef NodeCustomField = goods_custom_field.CustomField;
 
 class Node {
   String id;
@@ -22,7 +14,7 @@ class Node {
   NodeStatus status;
   DateTime? startDate;
   DateTime? endDate;
-  List<CustomField> customFields;
+  List<NodeCustomField> customFields;
   String notes;
   String parentId;
   List<Node> children;
@@ -38,39 +30,39 @@ class Node {
     this.status = NodeStatus.todo,
     this.startDate,
     this.endDate,
-    List<CustomField>? customFields,
+    List<NodeCustomField>? customFields,
     this.notes = '',
     this.parentId = '',
     List<Node>? children,
     this.isExpanded = true,
     this.pathValue = '',
     this.color = Colors.grey,
-  }) : tags = tags ?? [],
-       customFields = customFields ?? [],
-       children = children ?? [];
+  })  : tags = tags ?? [],
+        customFields = customFields ?? [],
+        children = children ?? [];
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'title': title,
-    'createdAt': createdAt.toIso8601String(),
-    'tags': tags,
-    'status': status.index,
-    'startDate': startDate?.toIso8601String(),
-    'endDate': endDate?.toIso8601String(),
-    'customFields': customFields.map((field) => field.toJson()).toList(),
-    'notes': notes,
-    'parentId': parentId,
-    'children': children.map((child) => child.toJson()).toList(),
-    'pathValue': pathValue,
-    'color': color.value,
-  };
+        'id': id,
+        'title': title,
+        'createdAt': createdAt.toIso8601String(),
+        'tags': tags,
+        'status': status.index,
+        'startDate': startDate?.toIso8601String(),
+        'endDate': endDate?.toIso8601String(),
+        'customFields': customFields.map((field) => field.toJson()).toList(),
+        'notes': notes,
+        'parentId': parentId,
+        'children': children.map((child) => child.toJson()).toList(),
+        'pathValue': pathValue,
+        'color': color.value,
+      };
 
   factory Node.fromJson(Map<String, dynamic> json) {
     final tagsList =
         (json['tags'] as List<dynamic>).map((e) => e as String).toList();
     final customFieldsList =
         (json['customFields'] as List<dynamic>)
-            .map((e) => CustomField.fromJson(e as Map<String, dynamic>))
+            .map((e) => NodeCustomField.fromJson(e as Map<String, dynamic>))
             .toList();
     final childrenList =
         (json['children'] as List<dynamic>)
