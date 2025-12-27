@@ -166,14 +166,17 @@ Future<void> initializeApp() async {
     }
 
     // 停止前台服务（防止系统重启后自动启动）
-    try {
-      final foregroundService = MementoForegroundService.instance;
-      if (await foregroundService.isRunning) {
-        await foregroundService.stopService();
-        debugPrint('[AppInitializer] 已停止前台服务');
+    // 仅在移动端执行此操作
+    if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS) {
+      try {
+        final foregroundService = MementoForegroundService.instance;
+        if (await foregroundService.isRunning) {
+          await foregroundService.stopService();
+          debugPrint('[AppInitializer] 已停止前台服务');
+        }
+      } catch (e) {
+        debugPrint('[AppInitializer] 停止前台服务失败: $e');
       }
-    } catch (e) {
-      debugPrint('[AppInitializer] 停止前台服务失败: $e');
     }
 
     debugPrint('[AppInitializer] 已清理所有历史通知、计时器状态和前台服务');
