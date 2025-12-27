@@ -59,6 +59,24 @@ BoxDecoration createRoundedContainerDecoration(BuildContext context, {double rad
 
 /// 构建文本输入框 - 使用圆角背景色卡片样式
 Widget buildTextField(FormFieldConfig config, GlobalKey fieldKey, BuildContext context) {
+  // 构建后缀按钮行
+  Widget? suffixButtonRow;
+  if (config.suffixButtons != null && config.suffixButtons!.isNotEmpty) {
+    suffixButtonRow = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: config.suffixButtons!.map((btn) {
+        return IconButton(
+          icon: Icon(btn.icon),
+          tooltip: btn.tooltip,
+          onPressed: btn.onPressed,
+          visualDensity: VisualDensity.compact,
+          iconSize: 20,
+          color: Colors.blue,
+        );
+      }).toList(),
+    );
+  }
+
   return FormBuilderTextField(
     key: fieldKey,
     name: config.name,
@@ -76,6 +94,8 @@ Widget buildTextField(FormFieldConfig config, GlobalKey fieldKey, BuildContext c
       labelText: config.labelText,
       hintText: config.hintText,
       prefixIcon: config.prefixIcon,
+    ).copyWith(
+      suffixIcon: suffixButtonRow,
     ),
     style: TextStyle(
       color: Theme.of(context).colorScheme.onSurface,

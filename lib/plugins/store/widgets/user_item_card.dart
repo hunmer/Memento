@@ -59,7 +59,10 @@ class UserItemCard extends StatelessWidget {
                   title: Text('store_confirmUse'.tr),
                   content: Text(
                     'store_confirmUseMessage'.tr
-                        .replaceFirst('%s', item.productName),
+                        .replaceFirst(
+                          '@productName',
+                          item.productName,
+                        ),
                   ),
                   actions: [
                     TextButton(
