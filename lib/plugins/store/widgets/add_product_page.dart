@@ -1,8 +1,9 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:uuid/uuid.dart';
-import 'package:Memento/widgets/form_fields/index.dart';
+import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
+import 'package:Memento/widgets/form_fields/config.dart';
+import 'package:Memento/widgets/form_fields/types.dart';
 import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 
@@ -17,11 +18,10 @@ class AddProductPage extends StatefulWidget {
 }
 
 class _AddProductPageState extends State<AddProductPage> {
-  final _formKey = GlobalKey<FormBuilderState>();
-  final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _stockController = TextEditingController();
+  final _formKey = GlobalKey<FormBuilderWrapperState>();
   final TextEditingController _pointsRatioController = TextEditingController();
   final TextEditingController _targetPriceController = TextEditingController();
+  FormBuilderWrapperState? _formWrapperState;
 
   // 获取积分比率配置
   double _getPointsRatio() {
@@ -42,16 +42,11 @@ class _AddProductPageState extends State<AddProductPage> {
   @override
   void initState() {
     super.initState();
-    // 初始化控制器值
-    _priceController.text = widget.product?.price.toString() ?? '0';
-    _stockController.text = widget.product?.stock.toString() ?? '0';
     _pointsRatioController.text = _getPointsRatio().toString();
   }
 
   @override
   void dispose() {
-    _priceController.dispose();
-    _stockController.dispose();
     _pointsRatioController.dispose();
     _targetPriceController.dispose();
     super.dispose();
@@ -118,6 +113,8 @@ class _AddProductPageState extends State<AddProductPage> {
   Future<void> _submit(Map<String, dynamic> values) async {
     final imageValue = values['image'];
     final imageUrl = imageValue is Map ? (imageValue['url'] as String?) ?? '' : (imageValue as String? ?? '');
+    final priceValue = values['price'];
+    final stockValue = values['stock'];
 
     final product =
         widget.product != null
@@ -126,8 +123,8 @@ class _AddProductPageState extends State<AddProductPage> {
               name: values['name'] as String,
               description: values['description'] as String? ?? '',
               image: imageUrl.isEmpty ? widget.product!.image : imageUrl,
-              stock: int.parse(values['stock'] as String),
-              price: int.parse(values['price'] as String),
+              stock: int.tryParse(stockValue?.toString() ?? '0') ?? 0,
+              price: int.tryParse(priceValue?.toString() ?? '0') ?? 0,
               exchangeStart: widget.product!.exchangeStart,
               exchangeEnd: widget.product!.exchangeEnd,
               useDuration: widget.product!.useDuration,
@@ -137,8 +134,8 @@ class _AddProductPageState extends State<AddProductPage> {
               name: values['name'] as String,
               description: values['description'] as String? ?? '',
               image: imageUrl,
-              stock: int.parse(values['stock'] as String),
-              price: int.parse(values['price'] as String),
+              stock: int.tryParse(stockValue?.toString() ?? '0') ?? 0,
+              price: int.tryParse(priceValue?.toString() ?? '0') ?? 0,
               exchangeStart: DateTime.now(),
               exchangeEnd: DateTime.now().add(const Duration(days: 30)),
               useDuration: 30,
@@ -208,13 +205,12 @@ class _AddProductPageState extends State<AddProductPage> {
 
                   // 计算积分 = 价格 * 比率
                   final points = (targetPrice * ratio).round();
-                  _priceController.text = points.toString();
 
                   // 保存比率配置
                   _savePointsRatio(ratio);
 
                   // 更新表单中的 price 字段
-                  _formKey.currentState?.patchValue({'price': points.toString()});
+                  _formWrapperState?.patchValue({'price': points.toString()});
 
                   Navigator.pop(context);
                 },
@@ -245,11 +241,7 @@ class _AddProductPageState extends State<AddProductPage> {
           ],
           IconButton(
             icon: const Icon(Icons.check),
-            onPressed: () {
-              _formKey.currentState?.save();
-              final values = _formKey.currentState?.value ?? {};
-              _submit(values);
-            },
+            onPressed: () => _formWrapperState?.submitForm(),
             tooltip: 'store_saveButton'.tr,
           ),
         ],
@@ -260,101 +252,74 @@ class _AddProductPageState extends State<AddProductPage> {
             padding: const EdgeInsets.all(16),
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
-              child: FormBuilder(
+              child: FormBuilderWrapper(
                 key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 图片选择（占满宽度）
-                    _buildImagePicker(context),
-                    const SizedBox(height: 16),
-                    // 商品名称
-                    FormBuilderTextField(
-                      name: 'name',
-                      initialValue: widget.product?.name ?? '',
-                      decoration: InputDecoration(
-                        labelText: 'store_productNameLabel'.tr,
-                      ),
-                      validator:
-                          (value) =>
-                              value == null || value.isEmpty ? 'store_productNameRequired'.tr : null,
+                config: FormConfig(
+                  fields: [
+                    // 图片选择
+                    FormFieldConfig(
+                      name: 'image',
+                      type: FormFieldType.imagePicker,
+                      initialValue: widget.product?.image,
+                      extra: {
+                        'previewWidth': double.infinity,
+                        'previewHeight': 200.0,
+                        'borderRadius': 12.0,
+                        'showShadow': true,
+                        'showLabel': false,
+                      },
                     ),
-                    const SizedBox(height: 16),
-                    // 价格和库存（平分宽度）
-                    Row(
-                      children: [
-                        // 积分输入框
-                        Expanded(
-                          child: FormBuilderTextField(
-                            name: 'price',
-                            initialValue: _priceController.text,
-                            decoration: InputDecoration(
-                              labelText: 'store_priceLabel'.tr,
-                              prefixIcon: const Icon(Icons.stars),
-                            ),
-                            keyboardType: TextInputType.number,
-                            valueTransformer: (value) => int.tryParse(value ?? '0'),
-                          ),
-                        ),
-                        // 计算器图标按钮
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: IconButton(
-                            icon: const Icon(Icons.calculate, color: Colors.blue),
-                            onPressed: _showPointsCalculator,
-                            tooltip: '积分计算器',
-                          ),
-                        ),
-                        // 库存输入框
-                        Expanded(
-                          child: FormBuilderTextField(
-                            name: 'stock',
-                            initialValue: _stockController.text,
-                            decoration: InputDecoration(
-                              labelText: 'store_stockLabel'.tr,
-                              prefixIcon: const Icon(Icons.inventory_2),
-                            ),
-                            keyboardType: TextInputType.number,
-                            valueTransformer: (value) => int.tryParse(value ?? '0'),
-                          ),
+                    // 商品名称
+                    FormFieldConfig(
+                      name: 'name',
+                      type: FormFieldType.text,
+                      labelText: 'store_productNameLabel'.tr,
+                      initialValue: widget.product?.name ?? '',
+                      required: true,
+                      validationMessage: 'store_productNameRequired'.tr,
+                    ),
+                    // 价格（带计算器按钮）
+                    FormFieldConfig(
+                      name: 'price',
+                      type: FormFieldType.number,
+                      labelText: 'store_priceLabel'.tr,
+                      initialValue: widget.product?.price.toString() ?? '0',
+                      prefixIcon: Icons.stars,
+                      suffixButtons: [
+                        InputGroupButton(
+                          icon: Icons.calculate,
+                          tooltip: '积分计算器',
+                          onPressed: _showPointsCalculator,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    // 库存
+                    FormFieldConfig(
+                      name: 'stock',
+                      type: FormFieldType.number,
+                      labelText: 'store_stockLabel'.tr,
+                      initialValue: widget.product?.stock.toString() ?? '0',
+                      prefixIcon: Icons.inventory_2,
+                    ),
                     // 描述
-                    FormBuilderTextField(
+                    FormFieldConfig(
                       name: 'description',
+                      type: FormFieldType.textArea,
+                      labelText: 'store_descriptionLabel'.tr,
                       initialValue: widget.product?.description ?? '',
-                      decoration: InputDecoration(
-                        labelText: 'store_descriptionLabel'.tr,
-                        alignLabelWithHint: true,
-                      ),
-                      maxLines: 5,
-                      minLines: 3,
                     ),
                   ],
+                  onSubmit: _submit,
+                  fieldSpacing: 16,
+                  showSubmitButton: false,
+                  showResetButton: false,
                 ),
+                onStateReady: (state) => _formWrapperState = state,
               ),
             ),
           );
         },
       ),
-    );
-  }
-
-  /// 构建图片选择器（使用 ImagePickerField）
-  Widget _buildImagePicker(BuildContext context) {
-    return ImagePickerField(
-      labelText: null,
-      currentImage: widget.product?.image,
-      previewWidth: double.infinity,
-      previewHeight: 200.0,
-      borderRadius: 12.0,
-      showShadow: true,
-      onImageChanged: (result) {
-        // 图片选择后的处理
-        _formKey.currentState?.patchValue({'image': result});
-      },
     );
   }
 }
