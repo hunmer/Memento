@@ -166,11 +166,16 @@ Future<String> getNotes(Map<String, dynamic> params);
 
 **根目录**: `notes/`
 
-**存储结构**:
+**存储结构** (v2.0+ 按 ID 分文件存储):
 ```
 notes/
 ├── folders.json              # 所有文件夹数据
-└── notes.json                # 所有笔记数据
+├── notes.json                # 兼容旧格式（迁移后仍生成）
+└── notes/                    # 笔记存储目录
+    ├── index.json            # 笔记ID索引
+    ├── <note_id1>.json       # 笔记1数据
+    ├── <note_id2>.json       # 笔记2数据
+    └── ...
 ```
 
 **folders.json 格式**:
@@ -197,20 +202,28 @@ notes/
 ]
 ```
 
-**notes.json 格式**:
+**notes/index.json 格式**:
 ```json
-[
-  {
-    "id": "1234567890123",
-    "title": "项目计划",
-    "content": "# 项目计划\n\n本周目标:\n- 完成设计稿\n- 开发核心功能",
-    "folderId": "1234567890",
-    "createdAt": "2025-01-15T08:30:00.000Z",
-    "updatedAt": "2025-01-15T20:15:00.000Z",
-    "tags": ["工作", "计划"]
-  }
-]
+["1234567890123", "1234567890124", "1234567890125"]
 ```
+
+**notes/<note_id>.json 格式**:
+```json
+{
+  "id": "1234567890123",
+  "title": "项目计划",
+  "content": "# 项目计划\n\n本周目标:\n- 完成设计稿\n- 开发核心功能",
+  "folderId": "1234567890",
+  "createdAt": "2025-01-15T08:30:00.000Z",
+  "updatedAt": "2025-01-15T20:15:00.000Z",
+  "tags": ["工作", "计划"]
+}
+```
+
+**存储优化说明**:
+- **单文件存储 (v1.0)**: 所有笔记保存在 `notes.json`，适合小数据量
+- **分文件存储 (v2.0+)**: 每个笔记单独文件，提升读写性能，支持增量更新
+- **自动迁移**: 首次启动时自动检测旧格式并迁移到新格式
 
 ---
 
@@ -776,32 +789,37 @@ void navigateBack() {
 
 ### 2. 数据持久化机制
 
-**单文件存储**:
+**分文件存储 (v2.0+)**:
 - `folders.json`: 所有文件夹数据的 JSON 数组
-- `notes.json`: 所有笔记数据的 JSON 数组
+- `notes/index.json`: 笔记 ID 索引（数组）
+- `notes/<note_id>.json`: 单个笔记数据
+
+**实现方式** (`controllers/notes_controller.dart`):
+```dart
+// 保存单个笔记
+Future<void> _saveNoteToFile(Note note) async {
+  final jsonString = json.encode(note.toJson());
+  await _storage.writePluginFile('notes', 'notes/${note.id}.json', jsonString);
+}
+
+// 加载笔记时读取索引文件
+final indexData = await _storage.readPluginFile('notes', 'notes/index.json');
+final noteIds = json.decode(indexData) as List<String>;
+for (var id in noteIds) {
+  final noteData = await _storage.readPluginFile('notes', 'notes/$id.json');
+  // ...
+}
+```
 
 **优点**:
-- 简单易维护
-- 一次读取所有数据,内存操作快速
-- 适合中小规模数据(<1000条)
+- 单个笔记读写无需序列化全部数据
+- 支持增量更新，更新笔记只保存改动的那个
+- 大数据量下性能更优
 
-**缺点**:
-- 每次保存需要序列化全部数据
-- 大数据量下性能下降
-
-**优化建议**(数据量>5000):
-```dart
-// 改为分文件存储
-notes/
-├── folders/
-│   ├── root.json
-│   ├── 123.json
-│   └── 456.json
-└── notes/
-    ├── 001.json
-    ├── 002.json
-    └── 003.json
-```
+**兼容旧格式**:
+- 首次启动时自动检测 `notes.json`（旧格式）
+- 检测到旧格式时自动迁移到新格式
+- 迁移后删除旧文件
 
 ### 3. 延迟注册到 OpenAI
 

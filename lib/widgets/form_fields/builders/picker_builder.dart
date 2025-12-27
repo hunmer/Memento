@@ -231,6 +231,31 @@ Widget buildImagePickerField(FormFieldConfig config, GlobalKey fieldKey) {
   final multiple = extra['multiple'] as bool? ?? false;
   final saveDirectory = extra['saveDirectory'] as String? ?? 'app_images';
   final enableCompression = extra['enableCompression'] as bool? ?? false;
+  final flex = extra['flex'] as int? ?? 1;
+  final previewWidth = extra['previewWidth'] as double?;
+  final previewHeight = extra['previewHeight'] as double?;
+  final defaultImagePath = extra['defaultImagePath'] as String?;
+  final showShadow = extra['showShadow'] as bool? ?? false;
+  final borderRadius = extra['borderRadius'] as double? ?? 12;
+  final showLabel = extra['showLabel'] as bool? ?? true;
+  final showSelectButton = extra['showSelectButton'] as bool? ?? true;
+
+  // 获取初始图片路径（单图模式）
+  dynamic _getInitialImagePath(dynamic value) {
+    if (value == null) return null;
+    if (multiple && value is List && value.isNotEmpty) {
+      // 多图模式返回第一张图的 URL
+      final firstItem = value.first;
+      if (firstItem is Map) {
+        return firstItem['url'] as String?;
+      }
+      return null;
+    }
+    if (value is Map) {
+      return value['url'] as String?;
+    }
+    return value as String?;
+  }
 
   return WrappedFormField(
     key: fieldKey,
@@ -239,7 +264,7 @@ Widget buildImagePickerField(FormFieldConfig config, GlobalKey fieldKey) {
     enabled: config.enabled,
     onChanged: config.onChanged,
     builder: (context, value, setValue) => ImagePickerField(
-      currentImage: value,
+      currentImage: _getInitialImagePath(value),
       labelText: config.labelText,
       hintText: config.hintText,
       enabled: config.enabled,
@@ -248,6 +273,14 @@ Widget buildImagePickerField(FormFieldConfig config, GlobalKey fieldKey) {
       cropAspectRatio: cropAspectRatio,
       multiple: multiple,
       enableCompression: enableCompression,
+      flex: flex,
+      previewWidth: previewWidth,
+      previewHeight: previewHeight,
+      defaultImagePath: defaultImagePath,
+      showShadow: showShadow,
+      borderRadius: borderRadius,
+      showLabel: showLabel,
+      showSelectButton: showSelectButton,
       onImageChanged: setValue,
     ),
   );

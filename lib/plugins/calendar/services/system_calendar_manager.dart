@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:device_calendar/device_calendar.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:universal_platform/universal_platform.dart';
 import '../models/event.dart';
 
 /// 系统日历管理器
@@ -19,7 +20,14 @@ class SystemCalendarManager {
 
   /// 初始化系统日历管理器
   /// 注意: 此方法不会主动请求权限,需要在调用前确保已获得日历权限
+  /// 仅在移动端 (Android/iOS) 执行
   Future<bool> initialize() async {
+    // 仅在移动端执行日历初始化
+    if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
+      debugPrint('SystemCalendarManager: 非移动端平台，跳过初始化');
+      return false;
+    }
+
     try {
       _deviceCalendar = DeviceCalendarPlugin();
       debugPrint('SystemCalendarManager: 开始初始化...');
@@ -200,7 +208,13 @@ class SystemCalendarManager {
   String? get calendarId => _calendarId;
 
   /// 检查权限状态
+  /// 仅在移动端 (Android/iOS) 执行
   Future<bool> checkPermissions() async {
+    // 非移动端平台直接返回 false
+    if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
+      return false;
+    }
+
     try {
       final permissionsGranted = await _deviceCalendar.hasPermissions();
       if (permissionsGranted == null) {
@@ -216,10 +230,16 @@ class SystemCalendarManager {
 
   /// 获取系统日历中的所有事件（包括 Memento 日历）
   /// 注意：调用方需要自行处理去重逻辑，避免与本地事件重复
+  /// 仅在移动端 (Android/iOS) 执行
   Future<List<CalendarEvent>> getSystemEvents({
     DateTime? startDate,
     DateTime? endDate,
   }) async {
+    // 非移动端平台直接返回空列表
+    if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
+      return [];
+    }
+
     if (!_isInitialized) {
       final initialized = await initialize();
       if (!initialized) {

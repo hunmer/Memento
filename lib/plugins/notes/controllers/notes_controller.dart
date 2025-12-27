@@ -13,6 +13,7 @@ class NotesController {
   final StorageManager _storage;
   final Map<String, Folder> _folders = {};
   final Map<String, List<Note>> _notes = {};
+  final Set<String> _noteIds = {}; // 内存中的笔记ID集合，用于快速访问
 
   // 发送事件通知
   void _notifyEvent(String action, Note note) {
@@ -63,29 +64,83 @@ class NotesController {
 
   Future<void> _loadNotes() async {
     try {
-      // 读取文件内容为字符串
-      final data = await _storage
-          .readPluginFile('notes', 'notes.json')
+      // 确保 notes 子目录存在
+      await _storage.ensurePluginDirectoryExists('notes/notes');
+
+      // 尝试读取笔记索引文件
+      final indexData = await _storage
+          .readPluginFile('notes', 'notes/index.json')
           .catchError((_) => '');
 
-      if (data.isNotEmpty) {
-        final List<dynamic> jsonList = json.decode(data);
-        for (var item in jsonList) {
-          final note = Note.fromJson(item);
-          _notes.putIfAbsent(note.folderId, () => []).add(note);
+      if (indexData.isNotEmpty) {
+        // 新格式：按 ID 分文件存储
+        final List<dynamic> noteIds = json.decode(indexData);
+        for (var id in noteIds) {
+          _noteIds.add(id.toString());
+          final noteData = await _storage
+              .readPluginFile('notes', 'notes/$id.json')
+              .catchError((_) => '');
+          if (noteData.isNotEmpty) {
+            final note = Note.fromJson(json.decode(noteData));
+            _notes.putIfAbsent(note.folderId, () => []).add(note);
+          }
         }
       } else {
-        // 加载示例笔记数据
-        final sampleNotes = NotesSampleData.getSampleNotes();
-        for (var note in sampleNotes) {
-          _notes.putIfAbsent(note.folderId, () => []).add(note);
+        // 兼容旧格式：尝试读取 notes.json
+        final legacyData = await _storage
+            .readPluginFile('notes', 'notes.json')
+            .catchError((_) => '');
+
+        if (legacyData.isNotEmpty) {
+          // 迁移旧数据到新格式
+          final List<dynamic> jsonList = json.decode(legacyData);
+          final noteIds = <String>[];
+          for (var item in jsonList) {
+            final note = Note.fromJson(item);
+            _notes.putIfAbsent(note.folderId, () => []).add(note);
+            noteIds.add(note.id);
+            _noteIds.add(note.id);
+            // 保存每个笔记到单独文件
+            await _saveNoteToFile(note);
+          }
+          // 保存索引文件
+          await _saveNoteIndex(noteIds);
+          // 删除旧文件
+          await _storage.deleteFile('notes/notes.json');
+        } else {
+          // 加载示例笔记数据
+          final sampleNotes = NotesSampleData.getSampleNotes();
+          final noteIds = <String>[];
+          for (var note in sampleNotes) {
+            _notes.putIfAbsent(note.folderId, () => []).add(note);
+            noteIds.add(note.id);
+            _noteIds.add(note.id);
+            await _saveNoteToFile(note);
+          }
+          await _saveNoteIndex(noteIds);
         }
-        await _saveNotes();
       }
     } catch (e) {
       debugPrint('Error loading notes: $e');
       rethrow;
     }
+  }
+
+  /// 保存笔记索引
+  Future<void> _saveNoteIndex(List<String> noteIds) async {
+    final jsonString = json.encode(noteIds);
+    await _storage.writePluginFile('notes', 'notes/index.json', jsonString);
+  }
+
+  /// 保存单个笔记到文件
+  Future<void> _saveNoteToFile(Note note) async {
+    final jsonString = json.encode(note.toJson());
+    await _storage.writePluginFile('notes', 'notes/${note.id}.json', jsonString);
+  }
+
+  /// 从文件删除笔记
+  Future<void> _deleteNoteFile(String noteId) async {
+    await _storage.deleteFile('notes/notes/$noteId.json');
   }
 
   Future<void> _saveFolders() async {
@@ -95,18 +150,6 @@ class NotesController {
       await _storage.writePluginFile('notes', 'folders.json', jsonString);
     } catch (e) {
       debugPrint('Error saving folders: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> _saveNotes() async {
-    try {
-      final allNotes = _notes.values.expand((notes) => notes).toList();
-      final jsonList = allNotes.map((n) => n.toJson()).toList();
-      final jsonString = json.encode(jsonList);
-      await _storage.writePluginFile('notes', 'notes.json', jsonString);
-    } catch (e) {
-      debugPrint('Error saving notes: $e');
       rethrow;
     }
   }
@@ -205,7 +248,10 @@ class NotesController {
       updatedAt: DateTime.now(),
     );
     _notes.putIfAbsent(folderId, () => []).add(note);
-    await _saveNotes();
+    _noteIds.add(note.id);
+    // 保存到单独文件
+    await _saveNoteToFile(note);
+    await _saveNoteIndex(_noteIds.toList());
     _notifyEvent('added', note);
 
     // 同步小组件数据
@@ -221,7 +267,8 @@ class NotesController {
       final index = notes.indexWhere((n) => n.id == note.id);
       if (index != -1) {
         notes[index] = note;
-        await _saveNotes();
+        // 只保存单个笔记到文件
+        await _saveNoteToFile(note);
 
         // 同步小组件数据
         await _syncWidget();
@@ -238,9 +285,12 @@ class NotesController {
       if (noteIndex != -1) {
         final note = notes[noteIndex];
         notes.removeAt(noteIndex);
+        // 删除单独的文件
+        await _deleteNoteFile(noteId);
+        _noteIds.remove(noteId);
+        await _saveNoteIndex(_noteIds.toList());
         // 发送删除事件
         _notifyEvent('deleted', note);
-        await _saveNotes();
 
         // 同步小组件数据
         await _syncWidget();
@@ -287,8 +337,9 @@ class NotesController {
       // 添加到新文件夹
       _notes.putIfAbsent(targetFolderId, () => []).add(movedNote);
 
-      // 保存更改
-      await _saveNotes();
+      // 保存更改（更新单独的文件）
+      await _saveNoteToFile(movedNote);
+      await _saveNoteIndex(_noteIds.toList());
     }
   }
 
@@ -354,12 +405,17 @@ class NotesController {
       await deleteFolder(child.id);
     }
 
-    // 删除文件夹中的笔记
+    // 删除文件夹中的笔记（同时删除文件）
+    final folderNotes = _notes[folderId] ?? [];
+    for (final note in folderNotes) {
+      await _deleteNoteFile(note.id);
+      _noteIds.remove(note.id);
+    }
     _notes.remove(folderId);
     _folders.remove(folderId);
 
     await _saveFolders();
-    await _saveNotes();
+    await _saveNoteIndex(_noteIds.toList());
 
     // 同步小组件数据
     await _syncWidget();
