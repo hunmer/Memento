@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/nodes/models/node.dart';
 
 class AddCustomFieldDialog extends StatefulWidget {
-  final Function(CustomField) onCustomFieldAdded;
+  final Function(NodeCustomField) onCustomFieldAdded;
 
   const AddCustomFieldDialog({
     super.key,
@@ -68,7 +68,7 @@ class AddCustomFieldDialogState extends State<AddCustomFieldDialog> {
     final name = _nameController.text.trim();
     final value = _valueController.text.trim();
     if (name.isNotEmpty) {
-      widget.onCustomFieldAdded(CustomField(key: name, value: value));
+      widget.onCustomFieldAdded(NodeCustomField(key: name, value: value));
       Navigator.pop(context);
     }
   }

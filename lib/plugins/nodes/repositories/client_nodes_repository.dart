@@ -462,7 +462,7 @@ class ClientNodesRepository extends INodesRepository {
           dto.customFields
               .map(
                 (field) =>
-                    local.CustomField(key: field.key, value: field.value),
+                    local.NodeCustomField(key: field.key, value: field.value),
               )
               .toList(),
       notes: dto.notes,

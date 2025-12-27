@@ -25,7 +25,7 @@ class NodeBreadcrumbs extends StatelessWidget {
     debugPrint('【Breadcrumbs】build方法被调用');
     List<String> path = [];
     List<String> nodeIds = [];
-    
+
     debugPrint('【Breadcrumbs】isNew: $isNew, parentId: ${node.parentId}');
     if (isNew && node.parentId.isNotEmpty) {
       // 如果是新节点且有父节点，显示父节点的路径
@@ -37,6 +37,12 @@ class NodeBreadcrumbs extends StatelessWidget {
         debugPrint('【Breadcrumbs】父节点路径: $path');
         // 添加"新节点"作为路径的最后一个元素
         path.add('nodes_addNode'.tr);
+      }
+    } else if (isNew && node.parentId.isEmpty) {
+      // 如果是新节点且是根节点，显示笔记本名称 + "添加节点"
+      final notebook = controller.getNotebook(notebookId);
+      if (notebook != null) {
+        path = [notebook.title, 'nodes_addNode'.tr];
       }
     } else if (!isNew) {
       // 如果是编辑现有节点，显示节点自身的路径
