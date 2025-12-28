@@ -144,6 +144,18 @@ const Map<String, String> agentChatTranslationsZh = {
   'agent_chat_totalGroups': '分组总数',
   'agent_chat_loadFailed': '加载失败',
 
+  // 选择器小组件
+  'agent_chat_conversationSelectorName': '会话选择',
+  'agent_chat_conversationSelectorDesc': '选择一个会话频道',
+  'agent_chat_selectConversation': '选择会话',
+  'agent_chat_conversationQuickAccess': 'AI 频道快捷入口',
+  'agent_chat_conversationQuickAccessDesc': '快速进入指定的 AI 会话频道',
+  'agent_chat_clickToEnter': '点击进入',
+  'agent_chat_justNow': '刚刚',
+  'agent_chat_minutesAgo': '@count 分钟前',
+  'agent_chat_hoursAgo': '@count 小时前',
+  'agent_chat_daysAgo': '@count 天前',
+
   // 界面搜索
   'agent_chat_searchPlaceholder': '搜索会话...',
 };

@@ -322,16 +322,20 @@ class _OpenContainerPageState<T> extends State<_OpenContainerPage<T>>
                 ),
               ),
             ),
-            // 容器
+            // 容器 - 使用 ClipPath 确保圆角在整个动画过程中清晰可见
             Positioned(
               left: currentRect.left,
               top: currentRect.top,
               width: currentRect.width,
               height: currentRect.height,
-              child: Material(
+              child: PhysicalShape(
                 color: currentColor,
                 elevation: currentElevation ?? 0,
-                shape: currentShape,
+                shadowColor: Colors.black,
+                clipper: ShapeBorderClipper(
+                  shape: currentShape,
+                  textDirection: Directionality.of(context),
+                ),
                 clipBehavior: Clip.antiAlias,
                 child: Stack(
                   fit: StackFit.expand,

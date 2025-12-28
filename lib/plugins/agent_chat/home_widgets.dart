@@ -3,9 +3,12 @@ import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'agent_chat_plugin.dart';
 import 'controllers/conversation_controller.dart';
 
@@ -47,6 +50,172 @@ class AgentChatHomeWidgets {
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
+
+    // 选择器小组件 - 快速进入指定频道
+    registry.register(HomeWidget(
+      id: 'agent_chat_conversation_selector',
+      pluginId: 'agent_chat',
+      name: 'agent_chat_conversationQuickAccess'.tr,
+      description: 'agent_chat_conversationQuickAccessDesc'.tr,
+      icon: Icons.chat,
+      color: const Color(0xFF2196F3),
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      category: 'home_categoryTools'.tr,
+
+      selectorId: 'agent_chat.conversation',
+      dataRenderer: _renderConversationData,
+      navigationHandler: _navigateToConversation,
+
+      builder: (context, config) {
+        return GenericSelectorWidget(
+          widgetDefinition: registry.getWidget('agent_chat_conversation_selector')!,
+          config: config,
+        );
+      },
+    ));
+  }
+
+  /// 渲染选中的会话数据
+  static Widget _renderConversationData(
+    BuildContext context,
+    SelectorResult result,
+    Map<String, dynamic> config,
+  ) {
+    final convData = result.data as Map<String, dynamic>;
+    final title = convData['title'] as String? ?? 'Untitled';
+    final lastMessagePreview = convData['lastMessagePreview'] as String? ?? '';
+    final isPinned = convData['isPinned'] as bool? ?? false;
+    final lastMessageAtStr = convData['lastMessageAt'] as String?;
+
+    final lastMessageAt = lastMessageAtStr != null
+        ? DateTime.parse(lastMessageAtStr)
+        : DateTime.now();
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 标题行
+              Row(
+                children: [
+                  Icon(
+                    Icons.chat_bubble,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (isPinned)
+                    Icon(
+                      Icons.push_pin,
+                      size: 16,
+                      color: Colors.amber,
+                    ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // 最后一条消息预览
+              if (lastMessagePreview.isNotEmpty)
+                Expanded(
+                  child: Text(
+                    lastMessagePreview,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+
+              const Spacer(),
+
+              // 时间和提示
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _formatDateTime(lastMessageAt),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.6),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        'agent_chat_clickToEnter'.tr,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_forward,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 导航到选中的会话
+  static void _navigateToConversation(
+    BuildContext context,
+    SelectorResult result,
+  ) {
+    final convData = result.data as Map<String, dynamic>;
+    final conversationId = convData['id'] as String;
+
+    NavigationHelper.pushNamed(
+      context,
+      '/agent_chat/chat',
+      arguments: {'conversationId': conversationId},
+    );
+  }
+
+  /// 格式化时间显示
+  static String _formatDateTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inMinutes < 1) {
+      return 'agent_chat_justNow'.tr;
+    } else if (difference.inHours < 1) {
+      return 'agent_chat_minutesAgo'.trParams({'count': '${difference.inMinutes}'});
+    } else if (difference.inDays < 1) {
+      return 'agent_chat_hoursAgo'.trParams({'count': '${difference.inHours}'});
+    } else if (difference.inDays < 7) {
+      return 'agent_chat_daysAgo'.trParams({'count': '${difference.inDays}'});
+    } else {
+      return '${dateTime.month}/${dateTime.day}';
+    }
   }
 
   /// 获取可用的统计项

@@ -3,6 +3,7 @@ import 'package:Memento/plugins/notes/screens/notes_screen.dart';
 import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
 import 'package:Memento/plugins/todo/views/todo_bottombar_view.dart';
 import 'package:Memento/plugins/tts/screens/tts_services_screen.dart';
+import 'package:Memento/plugins/webview/screens/webview_browser_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/home_screen.dart';
 import 'package:Memento/screens/settings_screen/settings_screen.dart';
@@ -47,6 +48,7 @@ import 'package:Memento/plugins/activity/screens/activity_weekly_config_screen.d
 import 'package:Memento/plugins/activity/screens/activity_daily_config_screen.dart';
 import 'package:Memento/plugins/activity/screens/tag_statistics_screen.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
+import 'package:Memento/plugins/agent_chat/screens/chat_screen/chat_screen.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/screens/bill_edit_screen.dart';
 import 'package:Memento/plugins/bill/screens/bill_shortcuts_selector_screen.dart';
@@ -313,6 +315,51 @@ class AppRoutes extends NavigatorObserver {
           conversationId = settings.arguments as String;
         }
         return _createRoute(AgentChatMainView(conversationId: conversationId));
+
+      case '/agent_chat/chat':
+      case 'agent_chat/chat':
+        String? chatConversationId;
+
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          chatConversationId = args['conversationId'] as String?;
+        }
+
+        if (chatConversationId == null) {
+          debugPrint('错误: 缺少必需参数 conversationId');
+          return _createRoute(const AgentChatMainView());
+        }
+
+        debugPrint('打开 Agent Chat 聊天页: conversationId=$chatConversationId');
+
+        // 获取插件实例
+        final agentChatPlugin = AgentChatPlugin.instance;
+        final controller = agentChatPlugin.conversationController;
+
+        if (controller == null) {
+          debugPrint('错误: conversationController 未初始化');
+          return _createRoute(const AgentChatMainView());
+        }
+
+        // 查找指定的会话
+        try {
+          final conversation = controller.conversations.firstWhere(
+            (c) => c.id == chatConversationId,
+          );
+
+          return _createRoute(
+            ChatScreen(
+              conversation: conversation,
+              storage: controller.storage,
+              conversationService: controller.conversationService,
+              getSettings: () => agentChatPlugin.settings,
+            ),
+          );
+        } catch (e) {
+          debugPrint('错误: 找不到会话 $chatConversationId');
+          return _createRoute(const AgentChatMainView());
+        }
+
       case '/bill':
       case 'bill':
         // 检查是否来自快捷记账小组件（带有预填充参数）
@@ -939,6 +986,30 @@ class AppRoutes extends NavigatorObserver {
           TagStatisticsScreen(
             tagName: tagName,
             activityService: activityPlugin.activityService,
+          ),
+        );
+      case '/webview/browser':
+      case 'webview/browser':
+        // WebView 浏览器页面
+        String? url;
+        String? title;
+        String? cardId;
+
+        // 从 arguments 中解析参数
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          url = args['url'] as String?;
+          title = args['title'] as String?;
+          cardId = args['cardId'] as String?;
+        }
+
+        debugPrint('打开 WebView 浏览器: url=$url, cardId=$cardId');
+
+        return _createRoute(
+          WebViewBrowserScreen(
+            initialUrl: url,
+            initialTitle: title,
+            cardId: cardId,
           ),
         );
       default:
