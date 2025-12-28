@@ -144,6 +144,18 @@ const Map<String, String> agentChatTranslationsEn = {
   'agent_chat_totalGroups': 'Total Groups',
   'agent_chat_loadFailed': 'Load Failed',
 
+  // Selector Widget
+  'agent_chat_conversationSelectorName': 'Conversation Selector',
+  'agent_chat_conversationSelectorDesc': 'Select a conversation channel',
+  'agent_chat_selectConversation': 'Select Conversation',
+  'agent_chat_conversationQuickAccess': 'AI Channel Quick Access',
+  'agent_chat_conversationQuickAccessDesc': 'Quick access to a specific AI conversation channel',
+  'agent_chat_clickToEnter': 'Click to enter',
+  'agent_chat_justNow': 'Just now',
+  'agent_chat_minutesAgo': '@count minutes ago',
+  'agent_chat_hoursAgo': '@count hours ago',
+  'agent_chat_daysAgo': '@count days ago',
+
   // Interface search
   'agent_chat_searchPlaceholder': 'Search conversations...',
 };

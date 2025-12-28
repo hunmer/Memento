@@ -1,12 +1,16 @@
 import 'dart:io';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/plugin_data_selector/index.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
+import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
+import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'folder_dialog.dart';
 
 /// 主页卡片组件
@@ -333,26 +337,118 @@ class _HomeCardState extends State<HomeCard> {
   }
 
   /// 打开小组件对应的插件（使用 OpenContainer 风格动画，iOS 支持左滑返回）
-  void _openWidgetPlugin(BuildContext context) {
+  void _openWidgetPlugin(BuildContext context) async {
     final widgetItem = item as HomeWidgetItem;
     final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
-    if (widgetDef != null) {
-      final plugin = globalPluginManager.getPlugin(widgetDef.pluginId);
-      if (plugin != null) {
-        // 记录插件打开历史
-        globalPluginManager.recordPluginOpen(plugin);
-        // 使用 OpenContainer 风格导航，从卡片位置展开到全屏（iOS 支持左滑返回）
-        NavigationHelper.openContainerWithHero(
-          context,
-          (_) => plugin.buildMainView(context),
-          heroTag: 'widget_${widgetItem.id}',
-          sourceKey: _cardKey,
-          transitionDuration: const Duration(milliseconds: 300),
-          closedShape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12.0)),
-          ),
+
+    if (widgetDef == null) return;
+
+    // 检查是否为选择器小组件
+    if (widgetDef.isSelectorWidget) {
+      await _handleSelectorWidgetTap(context, widgetItem, widgetDef);
+      return;
+    }
+
+    // 普通小组件：打开插件主视图
+    final plugin = globalPluginManager.getPlugin(widgetDef.pluginId);
+    if (plugin != null) {
+      // 记录插件打开历史
+      globalPluginManager.recordPluginOpen(plugin);
+      // 使用 OpenContainer 风格导航，从卡片位置展开到全屏（iOS 支持左滑返回）
+      NavigationHelper.openContainerWithHero(
+        context,
+        (_) => plugin.buildMainView(context),
+        heroTag: 'widget_${widgetItem.id}',
+        sourceKey: _cardKey,
+        transitionDuration: const Duration(milliseconds: 300),
+        closedShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12.0)),
+        ),
+      );
+    }
+  }
+
+  /// 处理选择器小组件的点击事件
+  Future<void> _handleSelectorWidgetTap(
+    BuildContext context,
+    HomeWidgetItem widgetItem,
+    HomeWidget widgetDef,
+  ) async {
+    // 解析选择器配置
+    SelectorWidgetConfig? selectorConfig;
+    try {
+      if (widgetItem.config.containsKey('selectorWidgetConfig')) {
+        selectorConfig = SelectorWidgetConfig.fromJson(
+          widgetItem.config['selectorWidgetConfig'] as Map<String, dynamic>,
         );
       }
+    } catch (e) {
+      debugPrint('[HomeCard] 解析选择器配置失败: $e');
+    }
+
+    // 判断是否已配置
+    if (selectorConfig == null || !selectorConfig.isConfigured) {
+      // 未配置：打开数据选择器
+      await _showDataSelector(context, widgetItem, widgetDef);
+    } else {
+      // 已配置：执行导航处理器
+      final result = selectorConfig.toSelectorResult();
+      if (result != null && widgetDef.navigationHandler != null) {
+        try {
+          widgetDef.navigationHandler!(context, result);
+        } catch (e) {
+          debugPrint('[HomeCard] 导航处理器执行失败: $e');
+          Toast.error('打开失败: $e');
+        }
+      } else {
+        Toast.warning('未配置导航处理器');
+      }
+    }
+  }
+
+  /// 显示数据选择器并保存选择结果
+  Future<void> _showDataSelector(
+    BuildContext context,
+    HomeWidgetItem widgetItem,
+    HomeWidget widgetDef,
+  ) async {
+    if (widgetDef.selectorId == null) {
+      Toast.error('选择器ID未配置');
+      return;
+    }
+
+    try {
+      // 打开数据选择器
+      final result = await pluginDataSelectorService.showSelector(
+        context,
+        widgetDef.selectorId!,
+      );
+
+      // 检查结果
+      if (result == null || result.cancelled) {
+        return;
+      }
+
+      // 保存选择结果到配置
+      final selectorConfig = SelectorWidgetConfig.fromSelectorResult(result);
+      final updatedConfig = Map<String, dynamic>.from(widgetItem.config);
+      updatedConfig['selectorWidgetConfig'] = selectorConfig.toJson();
+
+      // 更新小组件
+      final updatedItem = widgetItem.copyWith(config: updatedConfig);
+      final layoutManager = HomeLayoutManager();
+      layoutManager.updateItem(widgetItem.id, updatedItem);
+      await layoutManager.saveLayout();
+
+      Toast.success('配置已保存');
+
+      // 刷新界面
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      debugPrint('[HomeCard] 显示选择器失败: $e');
+      Toast.error('选择器打开失败: $e');
     }
   }
 

@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 
 /// 小组件构建器函数类型
 typedef HomeWidgetBuilder = Widget Function(BuildContext context, Map<String, dynamic> config);
 
 /// 可用统计项提供者函数类型
 typedef AvailableStatsProvider = List<StatItemData> Function(BuildContext context);
+
+/// 数据渲染器：将选择器结果渲染为Widget
+typedef SelectorDataRenderer = Widget Function(
+  BuildContext context,
+  SelectorResult result,
+  Map<String, dynamic> config,
+);
+
+/// 导航处理器：处理点击后的跳转逻辑
+typedef SelectorNavigationHandler = void Function(
+  BuildContext context,
+  SelectorResult result,
+);
 
 /// 主页小组件定义
 ///
@@ -52,6 +66,26 @@ class HomeWidget {
   /// 用于小组件设置对话框，提供可选择的统计项列表
   final AvailableStatsProvider? availableStatsProvider;
 
+  // ===== 数据选择器相关字段（可选） =====
+
+  /// 关联的数据选择器ID（可选）
+  ///
+  /// 如果提供，则该小组件支持通过数据选择器选择数据
+  /// 格式：pluginId.selectorName（如 'webview.card'）
+  final String? selectorId;
+
+  /// 数据渲染器（可选）
+  ///
+  /// 将选择器返回的 SelectorResult 渲染为 Widget
+  /// 仅在 selectorId 不为 null 时有效
+  final SelectorDataRenderer? dataRenderer;
+
+  /// 导航处理器（可选）
+  ///
+  /// 处理用户点击已配置小组件时的跳转逻辑
+  /// 仅在 selectorId 不为 null 时有效
+  final SelectorNavigationHandler? navigationHandler;
+
   const HomeWidget({
     required this.id,
     required this.pluginId,
@@ -64,6 +98,10 @@ class HomeWidget {
     required this.category,
     required this.builder,
     this.availableStatsProvider,
+    // 选择器相关
+    this.selectorId,
+    this.dataRenderer,
+    this.navigationHandler,
   });
 
   /// 构建小组件
@@ -75,4 +113,7 @@ class HomeWidget {
   bool supportsSize(HomeWidgetSize size) {
     return supportedSizes.contains(size);
   }
+
+  /// 是否为选择器小组件
+  bool get isSelectorWidget => selectorId != null;
 }
