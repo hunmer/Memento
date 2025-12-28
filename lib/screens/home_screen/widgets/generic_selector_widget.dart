@@ -82,9 +82,13 @@ class GenericSelectorWidget extends StatelessWidget {
   /// 转换 SelectorResult，使用 dataSelector 处理数据
   SelectorResult _transformResult(SelectorResult original) {
     // 如果有 dataSelector 函数，使用它转换数据数组
+    debugPrint('[GenericSelectorWidget] dataSelector: ${widgetDefinition.dataSelector}');
+    debugPrint('[GenericSelectorWidget] original.data: ${original.data} (isList: ${original.data is List})');
+
     if (widgetDefinition.dataSelector != null && original.data is List) {
       final dataArray = original.data as List<dynamic>;
       final transformedData = widgetDefinition.dataSelector!(dataArray);
+      debugPrint('[GenericSelectorWidget] transformedData: $transformedData (isMap: ${transformedData is Map<String, dynamic>})');
 
       return SelectorResult(
         pluginId: original.pluginId,

@@ -445,10 +445,24 @@ class _HomeCardState extends State<HomeCard> {
     } else {
       debugPrint('[HomeCard] 已配置，执行导航处理器');
       // 已配置：执行导航处理器
-      final result = selectorConfig.toSelectorResult();
+      SelectorResult result = selectorConfig.toSelectorResult()!;
+
+      // 如果有 dataSelector，需要转换数据
+      if (widgetDef.dataSelector != null && result.data is List) {
+        final dataArray = result.data as List<dynamic>;
+        final transformedData = widgetDef.dataSelector!(dataArray);
+        result = SelectorResult(
+          pluginId: result.pluginId,
+          selectorId: result.selectorId,
+          path: result.path,
+          data: transformedData,
+        );
+        debugPrint('[HomeCard] 转换后的 result.data: ${result.data}');
+      }
+
       debugPrint('[HomeCard] result: $result');
-      debugPrint('[HomeCard] result.data: ${result?.data}');
-      if (result != null && widgetDef.navigationHandler != null) {
+      debugPrint('[HomeCard] result.data: ${result.data}');
+      if (result.data != null && widgetDef.navigationHandler != null) {
         try {
           debugPrint('[HomeCard] 调用 navigationHandler...');
           widgetDef.navigationHandler!(context, result);

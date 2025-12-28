@@ -207,29 +207,31 @@ class _AutoCheckinScreenState extends State<_AutoCheckinScreen> {
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: _isProcessing
-                      ? Colors.teal.withOpacity(0.1)
-                      : (_success
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.red.withOpacity(0.1)),
+                  color:
+                      _isProcessing
+                          ? Colors.teal.withOpacity(0.1)
+                          : (_success
+                              ? Colors.green.withOpacity(0.1)
+                              : Colors.red.withOpacity(0.1)),
                   shape: BoxShape.circle,
                 ),
-                child: _isProcessing
-                    ? const Center(
-                        child: SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 4,
-                            color: Colors.teal,
+                child:
+                    _isProcessing
+                        ? const Center(
+                          child: SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 4,
+                              color: Colors.teal,
+                            ),
                           ),
+                        )
+                        : Icon(
+                          _success ? Icons.check_circle : Icons.error,
+                          size: 64,
+                          color: _success ? Colors.green : Colors.red,
                         ),
-                      )
-                    : Icon(
-                        _success ? Icons.check_circle : Icons.error,
-                        size: 64,
-                        color: _success ? Colors.green : Colors.red,
-                      ),
               ),
               const SizedBox(height: 32),
 
@@ -261,9 +263,10 @@ class _AutoCheckinScreenState extends State<_AutoCheckinScreen> {
                 _message,
                 style: TextStyle(
                   fontSize: 18,
-                  color: _isProcessing
-                      ? Colors.grey[700]
-                      : (_success ? Colors.green[700] : Colors.red[700]),
+                  color:
+                      _isProcessing
+                          ? Colors.grey[700]
+                          : (_success ? Colors.green[700] : Colors.red[700]),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -279,9 +282,7 @@ class _AutoCheckinScreenState extends State<_AutoCheckinScreen> {
                   decoration: BoxDecoration(
                     color: Colors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Colors.orange.withOpacity(0.3),
-                    ),
+                    border: Border.all(color: Colors.orange.withOpacity(0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -312,9 +313,8 @@ class _AutoCheckinScreenState extends State<_AutoCheckinScreen> {
                   onPressed: () {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
-                        builder: (context) => CheckinMainView(
-                          itemId: widget.itemId,
-                        ),
+                        builder:
+                            (context) => CheckinMainView(itemId: widget.itemId),
                       ),
                     );
                   },

@@ -244,7 +244,7 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
       orElse: () => throw Exception('未找到ID为 $itemId 的打卡项目'),
     );
 
-    // 解析目标日期
+    // 解析目标日期，如果未提供则使用当前日期
     DateTime? selectedDate;
     if (targetDate != null && targetDate.isNotEmpty) {
       try {
@@ -260,6 +260,8 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
         debugPrint('解析日期失败: $targetDate, 错误: $e');
       }
     }
+    // 如果没有指定日期，使用当前日期
+    selectedDate ??= DateTime.now();
 
     // 延迟一帧以确保界面完全加载
     Future.delayed(const Duration(milliseconds: 300), () {
