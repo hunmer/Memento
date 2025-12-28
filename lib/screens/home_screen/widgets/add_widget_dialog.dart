@@ -6,8 +6,10 @@ import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/filter_models.dart';
 
-/// 添加小组件对话框
+/// 添加小组件对话框 - 使用 SuperCupertinoNavigationWrapper 重构版本
 class AddWidgetDialog extends StatefulWidget {
   /// 可选的文件夹ID，如果提供则将组件添加到该文件夹
   final String? folderId;
@@ -18,16 +20,15 @@ class AddWidgetDialog extends StatefulWidget {
   State<AddWidgetDialog> createState() => _AddWidgetDialogState();
 }
 
-class _AddWidgetDialogState extends State<AddWidgetDialog>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _AddWidgetDialogState extends State<AddWidgetDialog> {
   Map<String, List<HomeWidget>> _widgetsByCategory = {};
   List<String> _categories = [];
 
-  // 搜索和筛选状态
+  // 搜索查询状态
   String _searchQuery = '';
-  final Set<HomeWidgetSize> _selectedSizes = {};
-  final TextEditingController _searchController = TextEditingController();
+
+  // 过滤条件值（从 onMultiFilterChanged 回调获取）
+  Map<String, dynamic> _filterValues = {};
 
   @override
   void initState() {
@@ -36,20 +37,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
     // 获取所有小组件并按分类分组
     _widgetsByCategory = HomeWidgetRegistry().getWidgetsByCategory();
     _categories = _widgetsByCategory.keys.toList()..sort();
-
-    _tabController = TabController(length: _categories.length, vsync: this);
   }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  /// 检查是否有活动的筛选条件
-  bool get _hasActiveFilters =>
-      _searchQuery.isNotEmpty || _selectedSizes.isNotEmpty;
 
   /// 获取所有组件的扁平列表
   List<HomeWidget> get _allWidgets {
@@ -57,218 +45,187 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
   }
 
   /// 获取过滤后的组件列表
-  List<HomeWidget> get _filteredWidgets {
-    if (!_hasActiveFilters) return _allWidgets;
+  List<HomeWidget> _getFilteredWidgets() {
+    var widgets = _allWidgets;
 
-    return _allWidgets.where((widget) {
-      // 搜索过滤
-      if (_searchQuery.isNotEmpty) {
-        final query = _searchQuery.toLowerCase();
+    // 应用搜索过滤
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      widgets = widgets.where((widget) {
         final matchesName = widget.name.toLowerCase().contains(query);
         final matchesDescription =
             widget.description?.toLowerCase().contains(query) ?? false;
-        if (!matchesName && !matchesDescription) return false;
-      }
+        return matchesName || matchesDescription;
+      }).toList();
+    }
 
-      // 尺寸过滤
-      if (_selectedSizes.isNotEmpty) {
-        final hasMatchingSize = widget.supportedSizes.any(
-          (size) => _selectedSizes.contains(size),
+    // 应用分类过滤（从 _filterValues 中获取）
+    final selectedCategory = _filterValues['category'] as String?;
+    if (selectedCategory != null &&
+        selectedCategory.isNotEmpty &&
+        selectedCategory != '全部分类') {
+      widgets = widgets.where((w) => w.category == selectedCategory).toList();
+    }
+
+    // 应用尺寸过滤（从 _filterValues 中获取）
+    final selectedSizes = _filterValues['sizes'] as List<String>?;
+    if (selectedSizes != null && selectedSizes.isNotEmpty) {
+      widgets = widgets.where((widget) {
+        return widget.supportedSizes.any((size) {
+          final sizeKey = '${size.width}×${size.height}';
+          return selectedSizes.contains(sizeKey);
+        });
+      }).toList();
+    }
+
+    return widgets;
+  }
+
+  /// 构建分类过滤器
+  List<FilterItem> _buildFilterItems() {
+    return [
+      // 分类过滤器
+      FilterItem(
+        id: 'category',
+        title: '分类',
+        type: FilterType.tagsSingle,
+        builder: (context, currentValue, onChanged) {
+          return _buildCategoryFilter(
+            currentValue as String?,
+            (value) => onChanged(value),
+          );
+        },
+        getBadge: (value) {
+          if (value == null || value == '全部分类') return null;
+          return value as String;
+        },
+      ),
+      // 尺寸过滤器
+      FilterItem(
+        id: 'sizes',
+        title: '尺寸',
+        type: FilterType.tagsMultiple,
+        builder: (context, currentValue, onChanged) {
+          return _buildSizeFilter(
+            currentValue as List<String>?,
+            (value) => onChanged(value),
+          );
+        },
+        getBadge: (value) {
+          if (value == null) return null;
+          final list = value as List;
+          if (list.isEmpty) return null;
+          return '${list.length}';
+        },
+      ),
+    ];
+  }
+
+  /// 构建分类过滤器内容
+  Widget _buildCategoryFilter(
+    String? selectedCategory,
+    ValueChanged<String?> onChanged,
+  ) {
+    final allCategories = ['全部分类', ..._categories];
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: allCategories.map((category) {
+        final isSelected =
+            (selectedCategory ?? '全部分类') == category ||
+            (category == '全部分类' && selectedCategory == null);
+
+        return ChoiceChip(
+          label: Text(category),
+          selected: isSelected,
+          onSelected: (_) {
+            onChanged(category == '全部分类' ? null : category);
+          },
+          showCheckmark: false,
+          selectedColor: Theme.of(context).colorScheme.primaryContainer,
+          labelStyle: TextStyle(
+            color: isSelected
+                ? Theme.of(context).colorScheme.onPrimaryContainer
+                : Theme.of(context).colorScheme.onSurface,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
         );
-        if (!hasMatchingSize) return false;
-      }
-
-      return true;
-    }).toList();
-  }
-
-  /// 切换尺寸筛选
-  void _toggleSizeFilter(HomeWidgetSize size) {
-    setState(() {
-      if (_selectedSizes.contains(size)) {
-        _selectedSizes.remove(size);
-      } else {
-        _selectedSizes.add(size);
-      }
-    });
-  }
-
-  /// 清除所有筛选
-  void _clearFilters() {
-    setState(() {
-      _searchQuery = '';
-      _searchController.clear();
-      _selectedSizes.clear();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final dialogHeight = screenSize.height * 0.8;
-    // 在小屏幕下使用全宽，否则限制为500
-    final dialogWidth = screenSize.width < 600 ? screenSize.width * 0.9 : 500.0;
-
-    return Dialog(
-      child: SizedBox(
-        width: dialogWidth,
-        height: dialogHeight,
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text('screens_addWidget'.tr),
-
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-            bottom:
-                _categories.isNotEmpty && !_hasActiveFilters
-                    ? TabBar(
-                      controller: _tabController,
-                      isScrollable: true,
-                      tabs:
-                          _categories
-                              .map((category) => Tab(text: category))
-                              .toList(),
-                    )
-                    : null,
-          ),
-          body:
-              _categories.isEmpty
-                  ? _buildEmptyState()
-                  : Column(
-                    children: [
-                      // 搜索框和筛选器
-                      _buildFilterBar(),
-
-                      // 内容区域
-                      Expanded(
-                        child:
-                            _hasActiveFilters
-                                ? _buildFilteredView()
-                                : TabBarView(
-                                  controller: _tabController,
-                                  children:
-                                      _categories
-                                          .map(
-                                            (category) => _buildCategoryView(
-                                              _widgetsByCategory[category]!,
-                                            ),
-                                          )
-                                          .toList(),
-                                ),
-                      ),
-                    ],
-                  ),
-        ),
-      ),
+      }).toList(),
     );
   }
 
-  /// 构建筛选栏（搜索框 + 尺寸筛选）
-  Widget _buildFilterBar() {
-    final theme = Theme.of(context);
+  /// 构建尺寸过滤器内容
+  Widget _buildSizeFilter(
+    List<String>? selectedSizes,
+    ValueChanged<List<String>> onChanged,
+  ) {
+    final sizes = [
+      {'label': '1×1', 'size': HomeWidgetSize.small},
+      {'label': '2×1', 'size': HomeWidgetSize.medium},
+      {'label': '2×2', 'size': HomeWidgetSize.large},
+    ];
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(bottom: BorderSide(color: theme.dividerColor, width: 1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 搜索框
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: '搜索组件...',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon:
-                  _searchQuery.isNotEmpty
-                      ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          setState(() {
-                            _searchQuery = '';
-                            _searchController.clear();
-                          });
-                        },
-                      )
-                      : null,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-            ),
-            onChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-              });
-            },
-          ),
+    final selected = selectedSizes ?? [];
 
-          const SizedBox(height: 12),
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: sizes.map((item) {
+        final label = item['label'] as String;
+        final isSelected = selected.contains(label);
 
-          // 尺寸筛选器
-          Row(
-            children: [
-              Text(
-                '尺寸：',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _buildSizeFilterChip(HomeWidgetSize.small, '1×1'),
-                    _buildSizeFilterChip(HomeWidgetSize.medium, '2×1'),
-                    _buildSizeFilterChip(HomeWidgetSize.large, '2×2'),
-                  ],
-                ),
-              ),
-              if (_hasActiveFilters)
-                TextButton.icon(
-                  onPressed: _clearFilters,
-                  icon: const Icon(Icons.clear_all, size: 18),
-                  label: Text('screens_clear'.tr),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
+        return FilterChip(
+          label: Text(label),
+          selected: isSelected,
+          onSelected: (value) {
+            final newSelected = List<String>.from(selected);
+            if (value) {
+              newSelected.add(label);
+            } else {
+              newSelected.remove(label);
+            }
+            onChanged(newSelected);
+          },
+          showCheckmark: true,
+          selectedColor: Theme.of(context).colorScheme.primaryContainer,
+          checkmarkColor: Theme.of(context).colorScheme.onPrimaryContainer,
+        );
+      }).toList(),
     );
   }
 
-  /// 构建尺寸筛选芯片
-  Widget _buildSizeFilterChip(HomeWidgetSize size, String label) {
-    final isSelected = _selectedSizes.contains(size);
+  /// 添加小组件
+  void _addWidget(HomeWidget widget) {
+    final layoutManager = HomeLayoutManager();
 
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) => _toggleSizeFilter(size),
-      showCheckmark: true,
+    // 创建小组件实例
+    final widgetItem = HomeWidgetItem(
+      id: layoutManager.generateId(),
+      widgetId: widget.id,
+      size: widget.defaultSize,
     );
+
+    // 添加到布局或文件夹
+    if (this.widget.folderId != null) {
+      // 添加到文件夹
+      layoutManager.addItemToFolder(widgetItem, this.widget.folderId!);
+    } else {
+      // 添加到主页
+      layoutManager.addItem(widgetItem);
+    }
+
+    // 关闭对话框
+    Navigator.of(context).pop();
+
+    // 显示提示
+    final location = this.widget.folderId != null ? '文件夹' : '主页';
+    Toast.success('已添加 ${widget.name} 到$location');
   }
 
-  /// 构建过滤后的视图
-  Widget _buildFilteredView() {
-    final filteredWidgets = _filteredWidgets;
-
-    if (filteredWidgets.isEmpty) {
+  /// 构建组件网格视图
+  Widget _buildWidgetGrid(List<HomeWidget> widgets) {
+    if (widgets.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -287,7 +244,12 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
             ),
             const SizedBox(height: 8),
             TextButton.icon(
-              onPressed: _clearFilters,
+              onPressed: () {
+                setState(() {
+                  _searchQuery = '';
+                  _filterValues.clear();
+                });
+              },
               icon: const Icon(Icons.clear_all),
               label: Text('screens_clearFilterConditions'.tr),
             ),
@@ -296,11 +258,6 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
       );
     }
 
-    return _buildCategoryView(filteredWidgets);
-  }
-
-  /// 构建分类视图
-  Widget _buildCategoryView(List<HomeWidget> widgets) {
     // 根据屏幕宽度动态调整列数和宽高比
     final screenWidth = MediaQuery.of(context).size.width;
     final crossAxisCount = screenWidth < 400 ? 1 : 2;
@@ -409,53 +366,63 @@ class _AddWidgetDialogState extends State<AddWidgetDialog>
     );
   }
 
-  /// 添加小组件
-  void _addWidget(HomeWidget widget) {
-    final layoutManager = HomeLayoutManager();
+  @override
+  Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final dialogHeight = screenSize.height * 0.8;
+    // 在小屏幕下使用全宽，否则限制为600
+    final dialogWidth = screenSize.width < 600 ? screenSize.width * 0.95 : 600.0;
 
-    // 创建小组件实例
-    final widgetItem = HomeWidgetItem(
-      id: layoutManager.generateId(),
-      widgetId: widget.id,
-      size: widget.defaultSize,
-    );
+    final filteredWidgets = _getFilteredWidgets();
 
-    // 添加到布局或文件夹
-    if (this.widget.folderId != null) {
-      // 添加到文件夹
-      layoutManager.addItemToFolder(widgetItem, this.widget.folderId!);
-    } else {
-      // 添加到主页
-      layoutManager.addItem(widgetItem);
-    }
+    return Dialog(
+      child: SizedBox(
+        width: dialogWidth,
+        height: dialogHeight,
+        child: SuperCupertinoNavigationWrapper(
+          // 基本配置
+          title: Text('screens_addWidget'.tr),
+          largeTitle: 'screens_addWidget'.tr,
+          enableLargeTitle: true,
 
-    // 关闭对话框
-    Navigator.of(context).pop();
+          // 主体内容 - 使用相同的过滤后的组件列表
+          body: _buildWidgetGrid(filteredWidgets),
 
-    // 显示提示
-    final location = this.widget.folderId != null ? '文件夹' : '主页';
-    Toast.success('已添加 ${widget.name} 到$location');
-  }
+          // 搜索配置
+          enableSearchBar: true,
+          searchPlaceholder: '搜索组件名称、描述...',
+          onSearchChanged: (query) {
+            setState(() {
+              _searchQuery = query;
+            });
+          },
+          // 搜索结果页面 - 使用相同的过滤逻辑
+          searchBody: _buildWidgetGrid(filteredWidgets),
 
-  /// 构建空状态
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.info_outline,
-            size: 64,
-            color: Theme.of(context).disabledColor,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '没有可用的小组件',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).disabledColor,
+          // 多条件过滤配置
+          enableMultiFilter: true,
+          multiFilterItems: _buildFilterItems(),
+          multiFilterBarHeight: 50,
+          multiFilterToggleable: true,
+          onMultiFilterChanged: (filters) {
+            // 保存过滤值并刷新UI
+            setState(() {
+              _filterValues = filters;
+            });
+          },
+
+          // 操作按钮
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(),
+              tooltip: '关闭',
             ),
-          ),
-        ],
+          ],
+
+          // 禁用自动返回按钮
+          automaticallyImplyLeading: false,
+        ),
       ),
     );
   }
