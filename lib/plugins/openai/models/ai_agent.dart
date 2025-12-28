@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Prompt {
-  String type;
+  String type; // system, user, assistant
   String content;
 
   Prompt({required this.type, required this.content});
@@ -16,7 +16,7 @@ class AIAgent {
   final String id;
   final String name;
   final String description;
-  final String systemPrompt;
+  final String systemPrompt; // 保留字段用于兼容，但不推荐使用
   final List<String> tags;
   final String serviceProviderId;
   final String baseUrl;
@@ -37,7 +37,18 @@ class AIAgent {
   final String? promptPresetId;
   final bool enableOpeningQuestions; // 是否开启猜你想问功能
   final List<String> openingQuestions; // 预设的开场白问题列表
-  final List<Prompt>? messages; // 预设消息列表（assistant, user）
+  final List<Prompt>? messages; // 预设消息列表（system, user, assistant）
+
+  /// 从 messages 中获取 system 类型的提示词
+  /// 优先级：messages 中 type="system" 的第一条 > systemPrompt（兼容旧数据）
+  String get effectiveSystemPrompt {
+    try {
+      final systemMessage = messages?.firstWhere((msg) => msg.type == 'system');
+      return systemMessage?.content ?? systemPrompt;
+    } catch (_) {
+      return systemPrompt;
+    }
+  }
 
   const AIAgent({
     required this.id,
@@ -71,7 +82,7 @@ class AIAgent {
     'id': id,
     'name': name,
     'description': description,
-    'systemPrompt': systemPrompt,
+    // systemPrompt 不再保存到 JSON，从 messages 中获取
     'tags': tags,
     'serviceProviderId': serviceProviderId,
     'baseUrl': baseUrl,
@@ -95,47 +106,74 @@ class AIAgent {
     'messages': messages?.map((msg) => msg.toJson()).toList(),
   };
 
-  factory AIAgent.fromJson(Map<String, dynamic> json) => AIAgent(
-    id: json['id'] as String,
-    name: json['name'] as String,
-    description: json['description'] as String,
-    systemPrompt: json['systemPrompt'] as String,
-    tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? const [],
-    serviceProviderId: json['serviceProviderId'] as String,
-    baseUrl: json['baseUrl'] as String,
-    headers: (json['headers'] as Map<dynamic, dynamic>?)
-        ?.map((key, value) => MapEntry(key.toString(), value.toString())) ?? {},
-    createdAt: json['createdAt'] != null
-        ? DateTime.parse(json['createdAt'] as String)
-        : DateTime.now(),
-    temperature: (json['temperature'] as num?)?.toDouble() ?? 0.7,
-    maxLength: json['maxLength'] as int? ?? 2000,
-    topP: (json['topP'] as num?)?.toDouble() ?? 1.0,
-    frequencyPenalty: (json['frequencyPenalty'] as num?)?.toDouble() ?? 0.0,
-    presencePenalty: (json['presencePenalty'] as num?)?.toDouble() ?? 0.0,
-    stop: (json['stop'] as List<dynamic>?)?.cast<String>(),
-    updatedAt: json['updatedAt'] != null
-        ? DateTime.parse(json['updatedAt'] as String)
-        : DateTime.now(),
-    model: json['model'] as String? ?? 'gpt-3.5-turbo',
-    icon: json['icon'] != null ? IconData(json['icon'] as int, fontFamily: 'MaterialIcons') : null,
-    iconColor: json['iconColor'] != null ? Color(json['iconColor'] as int) : null,
-    avatarUrl: json['avatarUrl'] as String?,
-    enableFunctionCalling: json['enableFunctionCalling'] as bool? ?? false,
-    promptPresetId: json['promptPresetId'] as String?,
-    enableOpeningQuestions: json['enableOpeningQuestions'] as bool? ?? false,
-    openingQuestions: (json['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? const [],
-    messages: (json['messages'] as List<dynamic>?)
-        ?.map((msgJson) => Prompt.fromJson(msgJson as Map<String, dynamic>))
-        .toList(),
-  );
+  factory AIAgent.fromJson(Map<String, dynamic> json) {
+    // 兼容旧数据：将 systemPrompt 转换为 messages 中的 system 类型
+    final legacySystemPrompt = json['systemPrompt'] as String?;
+    List<Prompt>? messages =
+        (json['messages'] as List<dynamic>?)
+            ?.map((msgJson) => Prompt.fromJson(msgJson as Map<String, dynamic>))
+            .toList();
+
+    // 如果旧数据有 systemPrompt 且 messages 中没有 system 类型，则添加
+    if (legacySystemPrompt != null && legacySystemPrompt.isNotEmpty) {
+      final hasSystemMessage =
+          messages?.any((msg) => msg.type == 'system') ?? false;
+      if (!hasSystemMessage) {
+        messages ??= [];
+        messages.insert(0, Prompt(type: 'system', content: legacySystemPrompt));
+      }
+    }
+
+    return AIAgent(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      systemPrompt: legacySystemPrompt ?? '', // 保留字段但不推荐使用
+      tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? const [],
+      serviceProviderId: json['serviceProviderId'] as String,
+      baseUrl: json['baseUrl'] as String,
+      headers:
+          (json['headers'] as Map<dynamic, dynamic>?)?.map(
+            (key, value) => MapEntry(key.toString(), value.toString()),
+          ) ??
+          {},
+      createdAt:
+          json['createdAt'] != null
+              ? DateTime.parse(json['createdAt'] as String)
+              : DateTime.now(),
+      temperature: (json['temperature'] as num?)?.toDouble() ?? 0.7,
+      maxLength: json['maxLength'] as int? ?? 2000,
+      topP: (json['topP'] as num?)?.toDouble() ?? 1.0,
+      frequencyPenalty: (json['frequencyPenalty'] as num?)?.toDouble() ?? 0.0,
+      presencePenalty: (json['presencePenalty'] as num?)?.toDouble() ?? 0.0,
+      stop: (json['stop'] as List<dynamic>?)?.cast<String>(),
+      updatedAt:
+          json['updatedAt'] != null
+              ? DateTime.parse(json['updatedAt'] as String)
+              : DateTime.now(),
+      model: json['model'] as String? ?? 'gpt-3.5-turbo',
+      icon:
+          json['icon'] != null
+              ? IconData(json['icon'] as int, fontFamily: 'MaterialIcons')
+              : null,
+      iconColor:
+          json['iconColor'] != null ? Color(json['iconColor'] as int) : null,
+      avatarUrl: json['avatarUrl'] as String?,
+      enableFunctionCalling: json['enableFunctionCalling'] as bool? ?? false,
+      promptPresetId: json['promptPresetId'] as String?,
+      enableOpeningQuestions: json['enableOpeningQuestions'] as bool? ?? false,
+      openingQuestions:
+          (json['openingQuestions'] as List<dynamic>?)?.cast<String>() ??
+          const [],
+      messages: messages,
+    );
+  }
 
   /// 创建一个新的 AIAgent 实例，可以选择性地更新某些字段
   AIAgent copyWith({
     String? id,
     String? name,
     String? description,
-    String? systemPrompt,
     List<String>? tags,
     String? serviceProviderId,
     String? baseUrl,
@@ -162,7 +200,7 @@ class AIAgent {
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
-      systemPrompt: systemPrompt ?? this.systemPrompt,
+      systemPrompt: '', // 保留字段但不推荐使用
       tags: tags ?? this.tags,
       serviceProviderId: serviceProviderId ?? this.serviceProviderId,
       baseUrl: baseUrl ?? this.baseUrl,
@@ -179,9 +217,11 @@ class AIAgent {
       frequencyPenalty: frequencyPenalty ?? this.frequencyPenalty,
       presencePenalty: presencePenalty ?? this.presencePenalty,
       stop: stop ?? this.stop,
-      enableFunctionCalling: enableFunctionCalling ?? this.enableFunctionCalling,
+      enableFunctionCalling:
+          enableFunctionCalling ?? this.enableFunctionCalling,
       promptPresetId: promptPresetId ?? this.promptPresetId,
-      enableOpeningQuestions: enableOpeningQuestions ?? this.enableOpeningQuestions,
+      enableOpeningQuestions:
+          enableOpeningQuestions ?? this.enableOpeningQuestions,
       openingQuestions: openingQuestions ?? this.openingQuestions,
       messages: messages ?? this.messages,
     );

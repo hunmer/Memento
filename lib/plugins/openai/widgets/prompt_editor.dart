@@ -70,56 +70,52 @@ class _PromptEditorState extends State<PromptEditor> {
   Widget build(BuildContext context) {
     // 如果是分离模式，使用新的布局
     if (widget.separateSystemPrompt) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // System Prompt 单独显示
-          Text(
-            'System Prompt',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: widget.systemPromptController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // System Prompt 单独显示
+            Text('System Prompt', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: widget.systemPromptController,
+              decoration: const InputDecoration(border: OutlineInputBorder()),
+              minLines: 4,
+              maxLines: 4,
+              onChanged: (value) {
+                // 找到或创建 system prompt
+                final systemIndex = _prompts.indexWhere(
+                  (p) => p.type == 'system',
+                );
+                if (systemIndex >= 0) {
+                  _updatePromptContent(systemIndex, value);
+                } else if (value.isNotEmpty) {
+                  setState(() {
+                    _prompts.insert(0, Prompt(type: 'system', content: value));
+                    widget.onPromptsChanged(_prompts);
+                  });
+                }
+              },
             ),
-            minLines: 4,
-            maxLines: 4,
-            onChanged: (value) {
-              // 找到或创建 system prompt
-              final systemIndex = _prompts.indexWhere((p) => p.type == 'system');
-              if (systemIndex >= 0) {
-                _updatePromptContent(systemIndex, value);
-              } else if (value.isNotEmpty) {
-                setState(() {
-                  _prompts.insert(0, Prompt(type: 'system', content: value));
-                  widget.onPromptsChanged(_prompts);
-                });
-              }
-            },
-          ),
-          const SizedBox(height: 16),
-          // 预设消息
-          Row(
-            children: [
-              Text(
-                '预设消息',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const Spacer(),
-              ElevatedButton.icon(
-                onPressed: widget.onAddMessage ?? _addPrompt,
-                icon: const Icon(Icons.add, size: 16),
-                label: const Text('添加', style: TextStyle(fontSize: 12)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _filteredMessages.length,
-              itemBuilder: (context, index) {
+            const SizedBox(height: 16),
+            // 预设消息
+            Row(
+              children: [
+                Text('预设消息', style: Theme.of(context).textTheme.titleSmall),
+                const Spacer(),
+                ElevatedButton.icon(
+                  onPressed: widget.onAddMessage ?? _addPrompt,
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('添加', style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
+            // 预设消息列表（自适应高度）
+            if (_filteredMessages.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              ..._filteredMessages.asMap().entries.map((entry) {
+                final index = entry.key;
                 final originalIndex = _prompts.indexOf(_filteredMessages[index]);
                 final prompt = _filteredMessages[index];
                 return Card(
@@ -173,110 +169,105 @@ class _PromptEditorState extends State<PromptEditor> {
                               alignLabelWithHint: true,
                             ),
                             maxLines: null,
-                            onChanged: (value) =>
-                                _updatePromptContent(originalIndex, value),
+                            onChanged:
+                                (value) =>
+                                    _updatePromptContent(originalIndex, value),
                           ),
                         ),
                       ],
                     ),
                   ),
                 );
-              },
-            ),
-          ),
-        ],
+              }),
+            ],
+          ],
+        ),
       );
     }
 
     // 传统模式：所有提示混合显示
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ..._prompts.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final prompt = entry.value;
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: DropdownButtonFormField<String>(
-                                  initialValue: prompt.type,
-                                  decoration: InputDecoration(
-                                    labelText: 'openai_promptTypeLabel'.tr,
-                                    border: const OutlineInputBorder(),
-                                  ),
-                                  items: [
-                                    DropdownMenuItem(
-                                      value: 'system',
-                                      child: Text('openai_systemRole'.tr),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: 'user',
-                                      child: Text('openai_userRole'.tr),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: 'assistant',
-                                      child: Text('openai_assistantRole'.tr),
-                                    ),
-                                  ],
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      _updatePromptType(index, value);
-                                    }
-                                  },
-                                ),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ..._prompts.asMap().entries.map((entry) {
+            final index = entry.key;
+            final prompt = entry.value;
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            initialValue: prompt.type,
+                            decoration: InputDecoration(
+                              labelText: 'openai_promptTypeLabel'.tr,
+                              border: const OutlineInputBorder(),
+                            ),
+                            items: [
+                              DropdownMenuItem(
+                                value: 'system',
+                                child: Text('openai_systemRole'.tr),
                               ),
-                              if (_prompts.length > 1)
-                                IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () => _removePrompt(index),
-                                ),
+                              DropdownMenuItem(
+                                value: 'user',
+                                child: Text('openai_userRole'.tr),
+                              ),
+                              DropdownMenuItem(
+                                value: 'assistant',
+                                child: Text('openai_assistantRole'.tr),
+                              ),
                             ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                _updatePromptType(index, value);
+                              }
+                            },
                           ),
-                          const SizedBox(height: 8),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(
-                              minHeight: 120,
-                              maxHeight: 200,
-                            ),
-                            child: TextFormField(
-                              initialValue: prompt.content,
-                              decoration: InputDecoration(
-                                labelText: 'openai_contentLabel'.tr,
-                                border: const OutlineInputBorder(),
-                                alignLabelWithHint: true,
-                              ),
-                              maxLines: null,
-                              onChanged: (value) => _updatePromptContent(index, value),
-                            ),
+                        ),
+                        if (_prompts.length > 1)
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () => _removePrompt(index),
                           ),
-                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: 120,
+                        maxHeight: 200,
+                      ),
+                      child: TextFormField(
+                        initialValue: prompt.content,
+                        decoration: InputDecoration(
+                          labelText: 'openai_contentLabel'.tr,
+                          border: const OutlineInputBorder(),
+                          alignLabelWithHint: true,
+                        ),
+                        maxLines: null,
+                        onChanged:
+                            (value) => _updatePromptContent(index, value),
                       ),
                     ),
-                  );
-                }),
-              ],
-            ),
+                  ],
+                ),
+              ),
+            );
+          }),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: _addPrompt,
+            icon: const Icon(Icons.add),
+            label: Text('openai_addPrompt'.tr),
           ),
-        ),
-        const SizedBox(height: 8),
-        OutlinedButton.icon(
-          onPressed: _addPrompt,
-          icon: const Icon(Icons.add),
-          label: Text('openai_addPrompt'.tr),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
