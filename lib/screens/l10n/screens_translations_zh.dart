@@ -182,6 +182,7 @@ final Map<String, String> screensTranslationsZh = {
   'screens_notificationSent': '通知已发送',
   'screens_noTestSchemeAvailable': '没有可用的测试方案',
   'screens_widgetSettings': '小组件设置',
+  'screens_reselectData': '重新选择数据',
   'screens_itemCount': '@count 个项目',
   'screens_layoutBackgroundSettings': '@layoutName - 背景设置',
   'screens_layoutBackgroundSettingsTitle': '布局背景设置',

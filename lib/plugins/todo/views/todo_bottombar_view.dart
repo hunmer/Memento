@@ -81,6 +81,12 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
     // 初始化时设置路由上下文
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateRouteContext();
+
+      // 检查是否有 action: create 参数，用于从小组件打开新建任务表单
+      final args = ModalRoute.of(context)?.settings.arguments as Map?;
+      if (args != null && args['action'] == 'create') {
+        _openTaskForm();
+      }
     });
   }
 
@@ -125,6 +131,18 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
       pageId: pageId,
       title: title,
       params: params,
+    );
+  }
+
+  /// 打开新建任务表单
+  void _openTaskForm() {
+    NavigationHelper.openContainerWithHero(
+      context,
+      (context) => TaskForm(
+        taskController: _plugin.taskController,
+        reminderController: _plugin.reminderController,
+      ),
+      transitionDuration: const Duration(milliseconds: 300),
     );
   }
 

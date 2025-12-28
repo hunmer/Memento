@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:Memento/core/app_initializer.dart';
 
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
+import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
@@ -14,6 +16,7 @@ import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/plugin_data_selector/plugin_data_selector_service.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/widgets/app_drawer.dart';
 import 'package:Memento/core/floating_ball/floating_ball_service.dart';
@@ -740,6 +743,15 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                     _showSizeAdjuster(item);
                   },
                 ),
+              if (item is HomeWidgetItem && _isSelectorWidget(item))
+                ListTile(
+                  leading: const Icon(Icons.refresh),
+                  title: Text('screens_reselectData'.tr),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _reselectWidgetData(item);
+                  },
+                ),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
@@ -755,6 +767,85 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             ],
           ),
     );
+  }
+
+  /// 检查小组件是否为选择器小组件
+  bool _isSelectorWidget(HomeWidgetItem item) {
+    final registry = HomeWidgetRegistry();
+    final widget = registry.getWidget(item.widgetId);
+    return widget?.selectorId != null;
+  }
+
+  /// 重新选择小组件数据
+  void _reselectWidgetData(HomeWidgetItem item) async {
+    final registry = HomeWidgetRegistry();
+    final widget = registry.getWidget(item.widgetId);
+
+    if (widget == null || widget.selectorId == null) {
+      Toast.error('未找到小组件定义');
+      return;
+    }
+
+    // 先删除已有的选择器配置，让组件变为"未配置"状态
+    final updatedConfig = Map<String, dynamic>.from(item.config);
+    updatedConfig.remove('selectorWidgetConfig');
+    // 删除选择器可能产生的其他配置字段（如 bill 插件的 accountId、periodLabel 等）
+    final keysToRemove = widget.dataSelector != null ? _getSelectorDataKeys(widget) : [];
+    for (final key in keysToRemove) {
+      updatedConfig.remove(key);
+    }
+    final clearedItem = item.copyWith(config: updatedConfig);
+    _layoutManager.updateItem(item.id, clearedItem);
+
+    // 显示数据选择器
+    final result = await pluginDataSelectorService.showSelector(
+      context,
+      widget.selectorId!,
+    );
+
+    if (result == null || result.cancelled) {
+      // 如果取消，恢复原来的配置
+      _layoutManager.updateItem(item.id, item);
+      return;
+    }
+
+    // 处理选择结果并保存
+    final newConfig = _processSelectorResult(widget, result);
+    final finalConfig = Map<String, dynamic>.from(item.config);
+    finalConfig.addAll(newConfig);
+
+    final finalItem = item.copyWith(config: finalConfig);
+    _layoutManager.updateItem(item.id, finalItem);
+    await _layoutManager.saveLayout();
+    setState(() {});
+
+    Toast.success('数据已更新');
+  }
+
+  /// 获取选择器可能产生的配置字段名
+  List<String> _getSelectorDataKeys(HomeWidget widget) {
+    // 这些是常见的选择器数据字段，具体取决于 dataSelector 的实现
+    // bill 插件: accountId, accountTitle, accountIcon, periodId, periodLabel, periodStart, periodEnd
+    return ['accountId', 'accountTitle', 'accountIcon', 'periodId', 'periodLabel', 'periodStart', 'periodEnd'];
+  }
+
+  /// 处理选择器结果，生成新的配置
+  Map<String, dynamic> _processSelectorResult(HomeWidget widget, SelectorResult result) {
+    // 将 SelectorResult 保存为 SelectorWidgetConfig
+    final selectorConfig = SelectorWidgetConfig.fromSelectorResult(result);
+
+    final newConfig = <String, dynamic>{
+      'selectorWidgetConfig': selectorConfig.toJson(),
+    };
+
+    // 如果有 dataSelector，也执行它来处理数据
+    if (widget.dataSelector != null && result.data is List) {
+      final dataArray = result.data as List<dynamic>;
+      final extractedData = widget.dataSelector!(dataArray);
+      newConfig.addAll(extractedData);
+    }
+
+    return newConfig;
   }
 
   /// 显示小组件设置对话框

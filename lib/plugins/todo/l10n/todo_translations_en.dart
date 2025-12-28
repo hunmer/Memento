@@ -131,4 +131,6 @@ const Map<String, String> todoTranslationsEn = {
   'todo_overviewDescription': 'Display todo task statistics',
   'todo_quickAdd': 'Quick Add',
   'todo_quickAddDesc': 'Tap to create a new task',
+  'todo_listWidgetName': 'Todo List',
+  'todo_listWidgetDesc': 'Display todo task list',
 };

@@ -130,4 +130,6 @@ const Map<String, String> todoTranslationsZh = {
   'todo_overviewDescription': '显示待办任务统计信息',
   'todo_quickAdd': '快速添加',
   'todo_quickAddDesc': '点击跳转到新建任务页面',
+  'todo_listWidgetName': '待办列表',
+  'todo_listWidgetDesc': '显示待办任务列表',
 };

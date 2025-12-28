@@ -24,6 +24,17 @@ class GenericSelectorWidget extends StatelessWidget {
     required this.config,
   });
 
+  /// 获取包含widgetSize的有效配置
+  Map<String, dynamic> _getEffectiveConfig(Map<String, dynamic> baseConfig) {
+    // 如果config中已有widgetSize，直接返回
+    if (baseConfig.containsKey('widgetSize')) {
+      return baseConfig;
+    }
+
+    // 使用默认尺寸
+    return {...baseConfig, 'widgetSize': widgetDefinition.defaultSize};
+  }
+
   @override
   Widget build(BuildContext context) {
     // 解析选择器配置
@@ -55,7 +66,9 @@ class GenericSelectorWidget extends StatelessWidget {
     // 使用 dataRenderer 渲染数据
     if (widgetDefinition.dataRenderer != null) {
       try {
-        return widgetDefinition.dataRenderer!(context, result, config);
+        // 将widgetSize注入config
+        final effectiveConfig = _getEffectiveConfig(config);
+        return widgetDefinition.dataRenderer!(context, result, effectiveConfig);
       } catch (e) {
         debugPrint('[GenericSelectorWidget] dataRenderer 失败: $e');
         return _buildErrorWidget(context, '渲染失败');

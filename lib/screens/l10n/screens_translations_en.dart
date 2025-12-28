@@ -182,6 +182,7 @@ final Map<String, String> screensTranslationsEn = {
   'screens_notificationSent': 'Notification sent',
   'screens_noTestSchemeAvailable': 'No test scheme available',
   'screens_widgetSettings': 'Widget Settings',
+  'screens_reselectData': 'Reselect Data',
   'screens_itemCount': '@count items',
   'screens_layoutBackgroundSettings': '@layoutName - Background Settings',
   'screens_layoutBackgroundSettingsTitle': 'Layout Background Settings',
