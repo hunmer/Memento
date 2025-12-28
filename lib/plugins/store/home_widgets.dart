@@ -76,6 +76,33 @@ class StoreHomeWidgets {
         },
       ),
     );
+
+    // 用户物品选择器小组件 - 快速访问指定物品信息
+    registry.register(
+      HomeWidget(
+        id: 'store_user_item_selector',
+        pluginId: 'store',
+        name: 'store_userItemQuickAccess'.tr,
+        description: 'store_userItemQuickAccessDesc'.tr,
+        icon: Icons.inventory_2,
+        color: Colors.pinkAccent,
+        defaultSize: HomeWidgetSize.medium,
+        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        category: 'home_categoryTool'.tr,
+
+        // 选择器配置
+        selectorId: 'store.userItem',
+        dataRenderer: _renderUserItemData,
+        navigationHandler: _navigateToUserItemDetail,
+
+        builder: (context, config) {
+          return GenericSelectorWidget(
+            widgetDefinition: registry.getWidget('store_user_item_selector')!,
+            config: config,
+          );
+        },
+      ),
+    );
   }
 
   /// 获取可用的统计项
@@ -248,7 +275,7 @@ class StoreHomeWidgets {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    stock > 0 ? 'store_stockLabel'.tr + ': $stock' : 'store_outOfStock'.tr,
+                    stock > 0 ? '${'store_stockLabel'.tr}: $stock' : 'store_outOfStock'.tr,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: stock > 0 ? Colors.green : Colors.grey,
                       fontSize: 10,
@@ -337,5 +364,182 @@ class StoreHomeWidgets {
         'productName': productName,
       },
     );
+  }
+
+  // ===== 用户物品选择器小组件相关方法 =====
+
+  /// 渲染用户物品数据
+  static Widget _renderUserItemData(
+    BuildContext context,
+    SelectorResult result,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
+
+    if (result.data == null) {
+      return _buildErrorWidget(context, '数据不存在');
+    }
+
+    final itemData = result.data as Map<String, dynamic>;
+    final productSnapshot = itemData['productSnapshot'] as Map<String, dynamic>? ?? {};
+    final productName = productSnapshot['name'] as String? ?? '未知物品';
+    final purchasePrice = itemData['purchasePrice'] as int? ?? 0;
+    final remaining = itemData['remaining'] as int? ?? 0;
+    final expireDateStr = itemData['expireDate'] as String?;
+
+    // 解析过期日期
+    DateTime? expireDate;
+    if (expireDateStr != null) {
+      try {
+        expireDate = DateTime.parse(expireDateStr);
+      } catch (e) {
+        expireDate = null;
+      }
+    }
+
+    // 计算剩余天数
+    int? remainingDays;
+    if (expireDate != null) {
+      remainingDays = expireDate.difference(DateTime.now()).inDays;
+    }
+
+    // 检查是否已过期
+    final isExpired = remainingDays != null && remainingDays < 0;
+    final isExpiringSoon = remainingDays != null && remainingDays >= 0 && remainingDays <= 7;
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.inventory_2,
+                  size: 20,
+                  color: Colors.pinkAccent,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'store_myItems'.tr,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isExpired
+                        ? Colors.red.withOpacity(0.2)
+                        : (isExpiringSoon ? Colors.orange.withOpacity(0.2) : Colors.green.withOpacity(0.2)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    isExpired
+                        ? '已过期'
+                        : (isExpiringSoon ? '即将过期' : '有效'),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: isExpired ? Colors.red : (isExpiringSoon ? Colors.orange : Colors.green),
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Text(
+              productName,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            // 剩余次数和过期信息
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.pinkAccent.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '$remaining ${'store_times'.tr}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.pinkAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (remainingDays != null)
+                  Text(
+                    isExpired
+                        ? 'store_itemExpired'.tr
+                        : '${'store_expireIn'.tr} $remainingDays ${'store_days'.tr}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: isExpired ? Colors.red : (isExpiringSoon ? Colors.orange : Colors.green),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // 价格信息
+            Row(
+              children: [
+                Icon(
+                  Icons.monetization_on,
+                  size: 16,
+                  color: Colors.orange,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '$purchasePrice ${'store_points'.tr}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.orange,
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: theme.colorScheme.outline,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 导航到用户物品详情
+  static void _navigateToUserItemDetail(
+    BuildContext context,
+    SelectorResult result,
+  ) {
+    final itemData = result.data as Map<String, dynamic>;
+    final itemId = itemData['id'] as String?;
+    final productSnapshot = itemData['productSnapshot'] as Map<String, dynamic>? ?? {};
+    final productName = productSnapshot['name'] as String? ?? '未知物品';
+
+    if (itemId != null) {
+      NavigationHelper.pushNamed(
+        context,
+        '/store',
+        arguments: {
+          'itemId': itemId,
+          'productName': productName,
+        },
+      );
+    }
   }
 }

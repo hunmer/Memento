@@ -85,5 +85,10 @@ class TrackerTranslationsEn {
     'tracker_configured': 'Configured',
     'tracker_configurationFailed': 'Configuration failed',
     'tracker_searchPlaceholder': 'Search goals...',
+
+    // Selector Widget Strings
+    'tracker_quickAccess': 'Quick Access',
+    'tracker_quickAccessDesc': 'Tap to go to goal detail',
+    'viewDetail': 'View Detail',
   };
 }

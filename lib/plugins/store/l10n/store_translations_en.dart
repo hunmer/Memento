@@ -167,4 +167,12 @@ const Map<String, String> storeTranslationsEn = {
   'store_productQuickAccess': 'Product Quick Access',
   'store_productQuickAccessDesc': 'Quick access to specific product items list',
   'store_outOfStock': 'Out of Stock',
+  'store_userItemSelectorName': 'Select Item',
+  'store_userItemSelectorDesc': 'Select an item to view details',
+  'store_selectUserItem': 'Select Item',
+  'store_userItemQuickAccess': 'Item Quick Access',
+  'store_userItemQuickAccessDesc': 'Quick access to item details',
+  'store_times': 'times',
+  'store_expireIn': 'Expires in',
+  'store_days': 'days',
 };

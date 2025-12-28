@@ -107,5 +107,8 @@ class CheckinTranslationsEn {
     'checkin_overviewName': 'Check-in Overview',
     'checkin_overviewDescription': 'Display check-in statistics',
     'checkin_statsTitle': 'Check-in Statistics',
+    'checkin_quickAccess': 'Quick Access',
+    'checkin_quickAccessDesc': 'Tap to go to check-in item',
+    'tapToCheckin': 'Tap to check in',
   };
 }

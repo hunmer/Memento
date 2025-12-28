@@ -3,9 +3,12 @@ import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'checkin_plugin.dart';
 
 /// 打卡插件的主页小组件注册
@@ -45,6 +48,26 @@ class CheckinHomeWidgets {
       category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
+    ));
+
+    // 签到项目选择器小组件 - 快速访问指定签到项目
+    registry.register(HomeWidget(
+      id: 'checkin_item_selector',
+      pluginId: 'checkin',
+      name: 'checkin_quickAccess'.tr,
+      description: 'checkin_quickAccessDesc'.tr,
+      icon: Icons.access_time,
+      color: Colors.teal,
+      defaultSize: HomeWidgetSize.medium,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      category: 'home_categoryRecord'.tr,
+      selectorId: 'checkin.item',
+      dataRenderer: _renderCheckinItemData,
+      navigationHandler: _navigateToCheckinItem,
+      builder: (context, config) => GenericSelectorWidget(
+        widgetDefinition: registry.getWidget('checkin_item_selector')!,
+        config: config,
+      ),
     ));
   }
 
@@ -129,5 +152,155 @@ class CheckinHomeWidgets {
         ],
       ),
     );
+  }
+
+  // ===== 签到项目选择器小组件相关方法 =====
+
+  /// 渲染签到项目数据
+  static Widget _renderCheckinItemData(
+    BuildContext context,
+    SelectorResult result,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
+
+    if (result.data == null) {
+      return _buildErrorWidget(context, '数据不存在');
+    }
+
+    final itemData = result.data as Map<String, dynamic>;
+    final name = itemData['name'] as String? ?? '未知项目';
+    final group = itemData['group'] as String?;
+    final iconCode = itemData['icon'] as int? ?? 57455;
+    final colorValue = itemData['color'] as int? ?? 4280391411;
+
+    // 获取今日打卡状态
+    bool isCheckedToday = false;
+    try {
+      final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
+      if (plugin != null) {
+        final items = plugin.checkinItems;
+        final item = items.firstWhere(
+          (i) => i.id == itemData['id'],
+          orElse: () => throw Exception('not found'),
+        );
+        isCheckedToday = item.isCheckedToday();
+      }
+    } catch (e) {
+      isCheckedToday = false;
+    }
+
+    final itemColor = Color(colorValue);
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.access_time,
+                  size: 20,
+                  color: itemColor,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    group ?? '未分类',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isCheckedToday
+                        ? Colors.green.withOpacity(0.2)
+                        : Colors.grey.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    isCheckedToday ? '已打卡' : '未打卡',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: isCheckedToday ? Colors.green : Colors.grey,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: itemColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    IconData(iconCode, fontFamily: 'MaterialIcons'),
+                    color: itemColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    name,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: theme.colorScheme.outline,
+                ),
+                const Spacer(),
+                Text(
+                  'tapToCheckin'.tr,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 导航到签到项目详情
+  static void _navigateToCheckinItem(
+    BuildContext context,
+    SelectorResult result,
+  ) {
+    final itemData = result.data as Map<String, dynamic>;
+    final itemId = itemData['id'] as String?;
+
+    if (itemId != null) {
+      NavigationHelper.pushNamed(
+        context,
+        '/checkin',
+        arguments: {'itemId': itemId},
+      );
+    }
   }
 }

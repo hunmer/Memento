@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'tracker_plugin.dart';
 
 /// 目标追踪插件的主页小组件注册
@@ -45,6 +48,26 @@ class TrackerHomeWidgets {
       category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
+    ));
+
+    // 目标选择器小组件 - 快速访问指定目标详情
+    registry.register(HomeWidget(
+      id: 'tracker_goal_selector',
+      pluginId: 'tracker',
+      name: 'tracker_quickAccess'.tr,
+      description: 'tracker_quickAccessDesc'.tr,
+      icon: Icons.track_changes,
+      color: Colors.red,
+      defaultSize: HomeWidgetSize.medium,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      category: 'home_categoryRecord'.tr,
+      selectorId: 'tracker.goal',
+      dataRenderer: _renderGoalData,
+      navigationHandler: _navigateToGoalDetail,
+      builder: (context, config) => GenericSelectorWidget(
+        widgetDefinition: registry.getWidget('tracker_goal_selector')!,
+        config: config,
+      ),
     ));
   }
 
@@ -129,5 +152,166 @@ class TrackerHomeWidgets {
         ],
       ),
     );
+  }
+
+  // ===== 目标选择器小组件相关方法 =====
+
+  /// 渲染目标数据
+  static Widget _renderGoalData(
+    BuildContext context,
+    SelectorResult result,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
+
+    if (result.data == null) {
+      return _buildErrorWidget(context, '数据不存在');
+    }
+
+    final goalData = result.data as Map<String, dynamic>;
+    final name = goalData['name'] as String? ?? '未知目标';
+    final group = goalData['group'] as String? ?? '未分类';
+    final currentValue = (goalData['currentValue'] as num?)?.toDouble() ?? 0.0;
+    final targetValue = (goalData['targetValue'] as num?)?.toDouble() ?? 1.0;
+    final unitType = goalData['unitType'] as String? ?? '次';
+    final iconCode = goalData['icon'] as String? ?? '57455';
+    final iconColorValue = goalData['iconColor'] as int? ?? 4283215696;
+
+    final progress = (targetValue > 0 ? (currentValue / targetValue) : 0).clamp(0.0, 1.0);
+    final goalColor = Color(iconColorValue);
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.track_changes,
+                  size: 20,
+                  color: goalColor,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    group,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: progress >= 1.0
+                        ? Colors.green.withOpacity(0.2)
+                        : Colors.blue.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '${(progress * 100).toStringAsFixed(0)}%',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: progress >= 1.0 ? Colors.green : Colors.blue,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: goalColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    IconData(int.tryParse(iconCode) ?? 57455, fontFamily: 'MaterialIcons'),
+                    color: goalColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        '$currentValue / $targetValue $unitType',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // 进度条
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress.toDouble(),
+                minHeight: 6,
+                backgroundColor: goalColor.withOpacity(0.2),
+                valueColor: AlwaysStoppedAnimation<Color>(goalColor),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: theme.colorScheme.outline,
+                ),
+                const Spacer(),
+                Text(
+                  'viewDetail'.tr,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 导航到目标详情页面
+  static void _navigateToGoalDetail(
+    BuildContext context,
+    SelectorResult result,
+  ) {
+    final goalData = result.data as Map<String, dynamic>;
+    final goalId = goalData['id'] as String?;
+
+    if (goalId != null) {
+      NavigationHelper.pushNamed(
+        context,
+        '/tracker',
+        arguments: {'goalId': goalId},
+      );
+    }
   }
 }

@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'timer_plugin.dart';
 
 /// 计时器插件的主页小组件注册
@@ -45,6 +48,26 @@ class TimerHomeWidgets {
       category: 'home_categoryTools'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
+    ));
+
+    // 计时器选择器小组件 - 快速访问指定计时器详情
+    registry.register(HomeWidget(
+      id: 'timer_task_selector',
+      pluginId: 'timer',
+      name: 'timer_quickAccess'.tr,
+      description: 'timer_quickAccessDesc'.tr,
+      icon: Icons.timer,
+      color: Colors.blueGrey,
+      defaultSize: HomeWidgetSize.medium,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      category: 'home_categoryTools'.tr,
+      selectorId: 'timer.task',
+      dataRenderer: _renderTimerData,
+      navigationHandler: _navigateToTimerDetail,
+      builder: (context, config) => GenericSelectorWidget(
+        widgetDefinition: registry.getWidget('timer_task_selector')!,
+        config: config,
+      ),
     ));
   }
 
@@ -128,5 +151,172 @@ class TimerHomeWidgets {
         ],
       ),
     );
+  }
+
+  // ===== 计时器选择器小组件相关方法 =====
+
+  /// 渲染计时器数据
+  static Widget _renderTimerData(
+    BuildContext context,
+    SelectorResult result,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
+
+    if (result.data == null) {
+      return _buildErrorWidget(context, '数据不存在');
+    }
+
+    final taskData = result.data as Map<String, dynamic>;
+    final name = taskData['name'] as String? ?? '未知计时器';
+    final group = taskData['group'] as String? ?? '默认';
+    final colorValue = taskData['color'] as int? ?? 4284513675;
+    final isRunning = taskData['isRunning'] as bool? ?? false;
+
+    final taskColor = Color(colorValue);
+
+    // 获取计时器信息
+    final timerItems = taskData['timerItems'] as List? ?? [];
+    String timerInfo = '';
+    if (timerItems.isNotEmpty) {
+      final firstTimer = timerItems.first;
+      final type = firstTimer['type'] as int? ?? 0;
+      final duration = firstTimer['duration'] as int? ?? 0;
+
+      switch (type) {
+        case 0: // 正计时
+          timerInfo = '正计时';
+          break;
+        case 1: // 倒计时
+          timerInfo = '倒计时 ${duration}s';
+          break;
+        case 2: // 番茄钟
+          timerInfo = '番茄钟';
+          break;
+      }
+    }
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.timer,
+                  size: 20,
+                  color: taskColor,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    group,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isRunning
+                        ? Colors.green.withOpacity(0.2)
+                        : Colors.grey.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    isRunning ? '运行中' : '已停止',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: isRunning ? Colors.green : Colors.grey,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: taskColor.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.hourglass_empty,
+                    color: taskColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (timerInfo.isNotEmpty)
+                        Text(
+                          timerInfo,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: theme.colorScheme.outline,
+                ),
+                const Spacer(),
+                Text(
+                  'viewDetail'.tr,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 导航到计时器详情页面
+  static void _navigateToTimerDetail(
+    BuildContext context,
+    SelectorResult result,
+  ) {
+    final taskData = result.data as Map<String, dynamic>;
+    final taskId = taskData['id'] as String?;
+
+    if (taskId != null) {
+      NavigationHelper.pushNamed(
+        context,
+        '/timer',
+        arguments: {'taskId': taskId},
+      );
+    }
   }
 }

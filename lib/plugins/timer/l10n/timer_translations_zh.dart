@@ -37,11 +37,15 @@ class TimerTranslationsZh {
     'timer_remainingTime': '剩余',
     'timer_pause': '暂停',
     'timer_play': '开始',
+    'timer_running': '运行中',
 
     // Widget Home Strings
     'timer_widgetName': '计时器',
     'timer_widgetDescription': '快速打开计时器',
     'timer_overviewName': '计时器概览',
     'timer_overviewDescription': '显示计时器统计信息',
+    'timer_quickAccess': '快速访问',
+    'timer_quickAccessDesc': '点击跳转到指定计时器详情',
+    'viewDetail': '查看详情',
   };
 }

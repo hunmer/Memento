@@ -37,11 +37,15 @@ class TimerTranslationsEn {
     'timer_remainingTime': 'remaining',
     'timer_pause': 'Pause',
     'timer_play': 'Play',
+    'timer_running': 'Running',
 
     // Widget Home Strings
     'timer_widgetName': 'Timer',
     'timer_widgetDescription': 'Quick access to Timer',
     'timer_overviewName': 'Timer Overview',
     'timer_overviewDescription': 'Display timer statistics',
+    'timer_quickAccess': 'Quick Access',
+    'timer_quickAccessDesc': 'Tap to go to timer detail',
+    'viewDetail': 'View Detail',
   };
 }
