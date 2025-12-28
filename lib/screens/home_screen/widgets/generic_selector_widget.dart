@@ -66,8 +66,6 @@ class GenericSelectorWidget extends StatelessWidget {
   /// 构建未配置状态的占位小组件
   Widget _buildUnconfiguredWidget(BuildContext context) {
     final theme = Theme.of(context);
-    final color = widgetDefinition.color ?? theme.colorScheme.primary;
-
     return SizedBox.expand(
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -78,12 +76,6 @@ class GenericSelectorWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              widgetDefinition.icon,
-              size: 48,
-              color: color.withOpacity(0.6),
-            ),
-            const SizedBox(height: 12),
             Text(
               '点击配置',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -137,11 +129,7 @@ class GenericSelectorWidget extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  widgetDefinition.icon,
-                  size: 24,
-                  color: color,
-                ),
+                Icon(widgetDefinition.icon, size: 24, color: color),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -194,11 +182,7 @@ class GenericSelectorWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 32,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 32, color: theme.colorScheme.error),
             const SizedBox(height: 8),
             Text(
               message,
