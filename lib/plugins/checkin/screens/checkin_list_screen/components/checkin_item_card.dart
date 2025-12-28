@@ -26,7 +26,7 @@ class CheckinItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     Widget content;
     switch (item.cardStyle) {
       case CheckinCardStyle.small:
@@ -76,10 +76,7 @@ class CheckinItemCard extends StatelessWidget {
             controller.showItemOptionsDialog(item);
           },
           borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: content,
-          ),
+          child: Padding(padding: const EdgeInsets.all(16.0), child: content),
         ),
       ),
     );
@@ -144,11 +141,7 @@ class CheckinItemCard extends StatelessWidget {
                         style: TextStyle(fontSize: 10, color: theme.hintColor),
                       ),
                       const SizedBox(width: 2),
-                      Icon(
-                        Icons.access_time,
-                        size: 12,
-                        color: theme.hintColor,
-                      ),
+                      Icon(Icons.access_time, size: 12, color: theme.hintColor),
                     ],
                   ),
               ],
@@ -218,19 +211,33 @@ class CheckinItemCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        
+
         // Stats Box
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.5,
+            ),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildSmallStatItem(context, Icons.checklist_rtl, stats['count']!.toString(), '本次次数', Colors.blue),
-              _buildSmallStatItem(context, Icons.calendar_today, stats['days']!.toString(), '本次天数', Colors.purple),
+              _buildSmallStatItem(
+                context,
+                Icons.checklist_rtl,
+                stats['count']!.toString(),
+                '本次次数',
+                Colors.blue,
+              ),
+              _buildSmallStatItem(
+                context,
+                Icons.calendar_today,
+                stats['days']!.toString(),
+                '本次天数',
+                Colors.purple,
+              ),
             ],
           ),
         ),
@@ -249,7 +256,10 @@ class CheckinItemCard extends StatelessWidget {
               children: [
                 // Progress Bar
                 FractionallySizedBox(
-                  widthFactor: (stats['count']! / 30).clamp(0.0, 1.0), // Example target 30
+                  widthFactor: (stats['count']! / 30).clamp(
+                    0.0,
+                    1.0,
+                  ), // Example target 30
                   child: Container(
                     decoration: BoxDecoration(
                       color: item.color.withValues(alpha: 0.3),
@@ -277,7 +287,7 @@ class CheckinItemCard extends StatelessWidget {
 
   // --- Calendar Style ---
   Widget _buildCalendarStyle(BuildContext context, ThemeData theme) {
-     final stats = _calculateMonthlyStats();
+    final stats = _calculateMonthlyStats();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,17 +323,15 @@ class CheckinItemCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        
+
         // Body
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             // Calendar Grid
-            Expanded(
-              child: _buildMonthCalendar(context, theme),
-            ),
+            Expanded(child: _buildMonthCalendar(context, theme)),
             const SizedBox(width: 16),
-            
+
             // Right Side Stats & Button
             SizedBox(
               width: 80, // Fixed width for right column
@@ -333,14 +341,23 @@ class CheckinItemCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      color: theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
-                       mainAxisAlignment: MainAxisAlignment.spaceAround,
-                       children: [
-                         Expanded(child: _buildSmallStatItem(context, Icons.checklist_rtl, stats['count']!.toString(), '次数', Colors.blue)),
-                       ],
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Expanded(
+                          child: _buildSmallStatItem(
+                            context,
+                            Icons.checklist_rtl,
+                            stats['count']!.toString(),
+                            '次数',
+                            Colors.blue,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -392,7 +409,13 @@ class CheckinItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSmallStatItem(BuildContext context, IconData icon, String value, String label, Color color) {
+  Widget _buildSmallStatItem(
+    BuildContext context,
+    IconData icon,
+    String value,
+    String label,
+    Color color,
+  ) {
     return Column(
       children: [
         Icon(icon, size: 16, color: color.withValues(alpha: 0.7)),
@@ -411,12 +434,12 @@ class CheckinItemCard extends StatelessWidget {
   Widget _buildMonthCalendar(BuildContext context, ThemeData theme) {
     final now = DateTime.now();
     final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
-    // Adjust weekday to start from 0 (Monday) to 6 (Sunday) if needed, 
+    // Adjust weekday to start from 0 (Monday) to 6 (Sunday) if needed,
     // or just use grid indices. Text '1' should correspond to day 1.
-    
-    // Reference HTML just lists numbers 1 to 31. Let's do that for simplicity 
+
+    // Reference HTML just lists numbers 1 to 31. Let's do that for simplicity
     // to match the visual. It's a simple grid of numbers.
-    
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -429,15 +452,24 @@ class CheckinItemCard extends StatelessWidget {
       itemCount: daysInMonth,
       itemBuilder: (context, index) {
         final day = index + 1;
-        final dateStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
-        final hasCheckin = item.checkInRecords.containsKey(dateStr) && item.checkInRecords[dateStr]!.isNotEmpty;
+        final dateStr =
+            '${now.year}-${now.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+        final hasCheckin =
+            item.checkInRecords.containsKey(dateStr) &&
+            item.checkInRecords[dateStr]!.isNotEmpty;
         final isToday = day == now.day;
 
         return Container(
           decoration: BoxDecoration(
-            color: hasCheckin ? item.color.withValues(alpha: 0.2) : Colors.transparent,
+            color:
+                hasCheckin
+                    ? item.color.withValues(alpha: 0.2)
+                    : Colors.transparent,
             borderRadius: BorderRadius.circular(4),
-            border: isToday && !hasCheckin ? Border.all(color: item.color, width: 1) : null,
+            border:
+                isToday && !hasCheckin
+                    ? Border.all(color: item.color, width: 1)
+                    : null,
           ),
           alignment: Alignment.center,
           child: Text(
@@ -445,7 +477,8 @@ class CheckinItemCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 10,
               color: hasCheckin ? item.color : theme.hintColor,
-              fontWeight: hasCheckin || isToday ? FontWeight.bold : FontWeight.normal,
+              fontWeight:
+                  hasCheckin || isToday ? FontWeight.bold : FontWeight.normal,
             ),
           ),
         );
